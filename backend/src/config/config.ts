@@ -1,0 +1,36 @@
+import argon2d from "argon2";
+
+function getEnvVar(key: string, devDefault?: string): string {
+    const value = process.env[key];
+    if (value) return value;
+    if ((process.env.MODE || "DEVELOPMENT") === "DEVELOPMENT" && devDefault !== undefined) return devDefault;
+    throw new Error(`Missing required environment variable: ${key}`);
+}
+
+export const config = {
+    hostUrl: getEnvVar("HOST_URL", "http://localhost:3000"),
+    storageUrl: getEnvVar("STORAGE_URL", "http://localhost:3000"),
+    jwtSecret: getEnvVar("JWT_SECRET", "your_jwt_secret"),
+    port: parseInt(getEnvVar("PORT", "3000")),
+    mode: (process.env.MODE || "DEVELOPMENT") as "DEVELOPMENT" | "PRODUCTION",
+    smtp: {
+        host: getEnvVar("SMTP_HOST", "smtp.ethereal.email"),
+        port: parseInt(getEnvVar("SMTP_PORT", "587")),
+        user: getEnvVar("SMTP_USER", "maddison53@ethereal.email"),
+        pass: getEnvVar("SMTP_PASS", "jn7jnAPss4f63QBp6D"),
+        secure: getEnvVar("SMTP_PORT", "587") === '465' // true for 465, false for other ports
+    },
+    hashing: {
+        argon2: {
+            name: "argon2id",
+            type: argon2d.argon2id,       // Use Argon2id variant
+            memoryCost: 65536, // 64 MiB
+            timeCost: 3,      // iterations
+            parallelism: 1,
+        }
+    },
+    monitoring: {
+        jobName: "Backend",
+        lokiUrl: "http://localhost:3100",
+    }
+};
