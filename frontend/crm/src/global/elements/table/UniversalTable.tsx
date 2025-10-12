@@ -75,7 +75,7 @@ export function UniversalTable<T>({
         [fields]
     );
 
-    const columns = React.useMemo<ColumnDef<T, unknown>[]>(() => {
+    const columns = React.useMemo<ColumnDef<T>[]>(() => {
         return fields
             .filter((f) => !f.hidden)
             .map((f) => {
@@ -95,7 +95,7 @@ export function UniversalTable<T>({
                         cell: ({row}) => (
                             <div className={stickyClass}>{f.cell!(row.original)}</div>
                         ),
-                    } satisfies ColumnDef<T, unknown>;
+                    } satisfies ColumnDef<T>;
                 }
 
                 // Normal data-backed column
@@ -113,7 +113,7 @@ export function UniversalTable<T>({
                             </div>
                         );
                     },
-                } satisfies ColumnDef<T, unknown>;
+                } satisfies ColumnDef<T>;
             });
     }, [fields, data]);
 

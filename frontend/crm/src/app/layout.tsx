@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import Client from "./client";
 import "./globals.css";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "MeraDhan CRM - Portal",

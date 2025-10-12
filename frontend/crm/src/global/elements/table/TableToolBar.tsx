@@ -55,7 +55,7 @@ export function TableToolbar<TData>({
                 key={c.id}
                 className="capitalize"
                 checked={c.getIsVisible()}
-                onCheckedChange={(v) => c.toggleVisibility(!!v)}
+                onCheckedChange={(v) => c.toggleVisibility(v)}
               >
                 {(c.columnDef.header as React.ReactNode) ?? c.id}
               </DropdownMenuCheckboxItem>

@@ -14,6 +14,7 @@ import {
     Users
 } from 'lucide-react';
 import { ModuleName, Permission } from './role.constants';
+import React from "react";
 
 /**
  * Define the structure of nested navigation items (up to 4 levels)
