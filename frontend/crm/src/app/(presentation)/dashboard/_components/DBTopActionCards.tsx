@@ -1,25 +1,43 @@
-import React from 'react';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {Button} from "@/components/ui/button";
-import {LucideDownload} from "lucide-react";
+"use client";
+import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { LucideDownload } from "lucide-react";
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
 const DbTopActionCards = () => {
-    return (  <div className={`flex items-center gap-3`} >
-            <Select>
-                <SelectTrigger className="w-[150px] bg-white">
-                    <SelectValue placeholder="Last 30 Days"/>
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="light">Last 7 Days</SelectItem>
-                    <SelectItem value="dark">Last Month</SelectItem>
-                    <SelectItem value="system">Last 6 Month</SelectItem>
-                </SelectContent>
-            </Select>
-            <Button variant={`default`}>
-                <LucideDownload/> Export Data
-            </Button>
-        </div>
-    );
+  const { trackActivity } = useUserTracking();
+  return (
+    <div className={`flex items-center md:w-auto w-full gap-3`}>
+      <Select>
+        <SelectTrigger className="md:w-[150px] w-full bg-white">
+          <SelectValue placeholder="Last 30 Days" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="light">Last 7 Days</SelectItem>
+          <SelectItem value="dark">Last Month</SelectItem>
+          <SelectItem value="system">Last 6 Month</SelectItem>
+        </SelectContent>
+      </Select>
+      <Button
+        variant={`default`}
+        onClick={() =>
+          trackActivity("click", {
+            name: "sourav Bapari",
+            type: "export data",
+          })
+        }
+      >
+        <LucideDownload /> Export Data
+      </Button>
+    </div>
+  );
 };
 
 export default DbTopActionCards;

@@ -18,7 +18,7 @@ interface InputFieldProps {
   /** Callback when input value changes */
   onChangeAction?: (value: string) => void;
   /** Optional container class */
-  containerClass?: string;
+  className?: string;
   error?: string;
 }
 
@@ -32,7 +32,7 @@ export function InputField({
   value,
   defaultValue,
   onChangeAction,
-  containerClass,
+  className,
   error,
 }: InputFieldProps) {
   const [internalValue, setInternalValue] = React.useState(defaultValue || "");
@@ -45,7 +45,7 @@ export function InputField({
   };
 
   return (
-    <div className={containerClass}>
+    <div className={className}>
       <Label htmlFor={id}>
         {label} {required && <span className="text-destructive">*</span>}
       </Label>

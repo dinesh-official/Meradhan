@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ZodError } from "zod";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { BOND_TYPES, leadFormDataSchema } from "./leadfFormData.schema"; // ensure path/name matches your file
@@ -26,42 +26,42 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
   >({});
 
   /** Update a single field and clear its error (if any) */
-  const setLeadData = <K extends keyof LeadFormData>(
-    key: K,
-    value: LeadFormData[K]
-  ) => {
-    setData((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => {
-      if (!prev[key]) return prev;
-      const copy = { ...prev };
-      delete copy[key];
-      return copy;
-    });
-  };
-
-  /** Validate a single field against the Zod schema */
-  const validateField = <K extends keyof LeadFormData>(
-    key: K,
-    value: LeadFormData[K]
-  ) => {
-    const fieldSchema = leadFormDataSchema.pick({ [key]: true });
-    try {
-      fieldSchema.parse({ [key]: value });
+  const setLeadData = useCallback(
+    <K extends keyof LeadFormData>(key: K, value: LeadFormData[K]) => {
+      setData((prev) => ({ ...prev, [key]: value }));
       setErrors((prev) => {
+        if (!prev[key]) return prev;
         const copy = { ...prev };
         delete copy[key];
         return copy;
       });
-    } catch (err) {
-      if (err instanceof ZodError) {
-        const messages = err.issues.map((e) => e.message);
-        setErrors((prev) => ({ ...prev, [key]: messages }));
+    },
+    []
+  );
+
+  /** Validate a single field against the Zod schema */
+  const validateField = useCallback(
+    <K extends keyof LeadFormData>(key: K, value: LeadFormData[K]) => {
+      const fieldSchema = leadFormDataSchema.pick({ [key]: true });
+      try {
+        fieldSchema.parse({ [key]: value });
+        setErrors((prev) => {
+          const copy = { ...prev };
+          delete copy[key];
+          return copy;
+        });
+      } catch (err) {
+        if (err instanceof ZodError) {
+          const messages = err.issues.map((e) => e.message);
+          setErrors((prev) => ({ ...prev, [key]: messages }));
+        }
       }
-    }
-  };
+    },
+    []
+  );
 
   /** Validate entire form; map errors for UI */
-  const validateLeadData = (): boolean => {
+  const validateLeadData = useCallback((): boolean => {
     console.log("Validating lead data:", data);
     try {
       leadFormDataSchema.parse(data);
@@ -73,13 +73,13 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
       }
       return false;
     }
-  };
+  }, [data]);
 
   /** Reset state and errors */
-  const resetLeadData = () => {
+  const resetLeadData = useCallback(() => {
     setData(initial ?? initLeadData);
     setErrors({});
-  };
+  }, [initial]);
 
   return {
     state: data,

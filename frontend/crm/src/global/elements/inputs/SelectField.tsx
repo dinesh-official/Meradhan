@@ -24,7 +24,7 @@ type Props = {
   onChangeAction?: (value: string) => void;
   options: SelectOption[];
   required?: boolean;
-  containerClass?: string;
+  className?: string;
   error?: string;
 };
 
@@ -36,7 +36,7 @@ export function SelectField({
   onChangeAction,
   options,
   required,
-  containerClass,
+  className,
   error,
 }: Props) {
   // Determine if controlled or uncontrolled
@@ -50,7 +50,7 @@ export function SelectField({
   };
 
   return (
-    <div className={cn(containerClass)}>
+    <div className={cn(className)}>
       <Label>
         {label} {required && <span className="text-destructive">*</span>}
       </Label>

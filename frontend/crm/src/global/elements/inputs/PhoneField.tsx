@@ -44,16 +44,16 @@ PhoneInput.displayName = "PhoneInput";
 const CountrySelect = ({
   disabled,
   value,
-  onChangeAction,
+  onChange,
   options,
 }: {
   disabled?: boolean;
   value: RPNInput.Country;
-  onChangeAction: (value: RPNInput.Country) => void;
+  onChange: (value: RPNInput.Country) => void;
   options: { label: string; value: RPNInput.Country | undefined }[];
 }) => {
   return (
-    <div className="relative inline-flex items-center self-stretch rounded-s-md border border-gray-100 bg-background py-2 ps-3 pe-2 text-muted-foreground transition-[color,box-shadow] outline-none focus-within:z-10 focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 hover:bg-accent hover:text-foreground has-disabled:pointer-events-none has-disabled:opacity-50 has-aria-invalid:border-destructive/60 has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40">
+    <div className="relative inline-flex items-center self-stretch rounded-s-md border border-gray-200 bg-background py-2 ps-3 pe-2 text-muted-foreground transition-[color,box-shadow] outline-none focus-within:z-10   hover:bg-accent hover:text-foreground has-disabled:pointer-events-none has-disabled:opacity-50 has-aria-invalid:border-destructive/60 has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40">
       <div className="inline-flex items-center gap-1" aria-hidden="true">
         <FlagComponent country={value} countryName={value} aria-hidden="true" />
         <span className="text-muted-foreground/80">
@@ -63,7 +63,7 @@ const CountrySelect = ({
       <select
         disabled={disabled}
         value={value ?? ""}
-        onChange={(e) => onChangeAction(e.target.value as RPNInput.Country)}
+        onChange={(e) => onChange?.(e.target.value as RPNInput.Country)}
         className="absolute inset-0 text-sm opacity-0"
         aria-label="Select country"
       >

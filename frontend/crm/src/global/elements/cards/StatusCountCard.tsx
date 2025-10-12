@@ -122,7 +122,7 @@ function StatusCountCard({
   }
 
   return (
-    <Card className="relative overflow-hidden border-none rounded-2xl">
+    <Card className="relative overflow-hidden border-none rounded-xl">
       {/* Dynamic Gradient Background */}
       <div
         className={cn(
@@ -140,7 +140,7 @@ function StatusCountCard({
       </div>
 
       {/* Content */}
-      <div className="relative p-4 text-white">
+      <div className="relative p-0 px-3 text-white">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-semibold tracking-wide flex items-center gap-2">
             {title}

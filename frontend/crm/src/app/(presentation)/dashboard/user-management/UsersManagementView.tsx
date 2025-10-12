@@ -7,6 +7,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Briefcase, Heart, Layers, Plus, Users } from "lucide-react";
 import Table from "../Table";
 import UsersSearchFilterBar from "./_components/UsersSearchFilterBar";
+import CreateNewUserPopup from "./_components/newUser/CreateNewUserPopup";
 
 function UsersManagementView() {
   return (
@@ -15,9 +16,11 @@ function UsersManagementView() {
         title="User Management"
         description="Manage system users and their permissions"
         actions={
-          <Button>
-            <Plus /> Add New User
-          </Button>
+          <CreateNewUserPopup>
+            <Button>
+              <Plus /> Add New User
+            </Button>
+          </CreateNewUserPopup>
         }
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">

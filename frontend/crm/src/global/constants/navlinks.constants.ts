@@ -100,13 +100,13 @@ export const NAV_ITEMS: NavItem[] = [
                 children: [
                     {
                         label: 'Manage RFQs',
-                        path: '/dashboard/rfq/overview',
+                        path: '/dashboard/rfqs/nse',
                         module: 'rfq',
                         allowOnly: ['edit:rfq'],
                     },
                     {
                         label: 'Add Participant',
-                        path: '/dashboard/rfq/overview',
+                        path: '/dashboard/rfqs/nse/create',
                         module: 'rfq',
                         allowOnly: ['create:rfq'],
                     },
@@ -184,15 +184,41 @@ export const NAV_ITEMS: NavItem[] = [
         children: [
             {
                 label: 'CRM Logs',
-                path: '/dashboard/audit-logs/crm',
                 module: 'crmauditlogs',
                 allowOnly: ['view:crmauditlogs'],
+                children: [
+                    {
+                        label: 'Activity Logs',
+                        path: '/dashboard/audit-logs/crm/activity',
+                        module: 'crmauditlogs',
+                        allowOnly: ['view:crmauditlogs'],
+                    },
+                    {
+                        label: 'Session Logs',
+                        path: '/dashboard/audit-logs/crm/session',
+                        module: 'crmauditlogs',
+                        allowOnly: ['view:crmauditlogs'],
+                    }
+                ]
             },
             {
                 label: 'Website Logs',
-                path: '/dashboard/audit-logs/website',
                 module: 'webauditlogs',
                 allowOnly: ['view:webauditlogs'],
+                children: [
+                    {
+                        label: 'Activity Logs',
+                        path: '/dashboard/audit-logs/web/activity',
+                        module: 'webauditlogs',
+                        allowOnly: ['view:webauditlogs'],
+                    },
+                    {
+                        label: 'Session Logs',
+                        path: '/dashboard/audit-logs/web/session',
+                        module: 'webauditlogs',
+                        allowOnly: ['view:webauditlogs'],
+                    }
+                ]
             },
         ]
     },

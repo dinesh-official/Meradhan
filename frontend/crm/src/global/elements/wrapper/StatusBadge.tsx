@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 type Props = {
   value: string;
@@ -11,13 +11,21 @@ type Props = {
 function getStatusClass(value: string) {
   switch (value.toLowerCase()) {
     case "verified":
-      return "bg-green-100 text-green-800";
-    case "pending":
-      return "bg-yellow-100 text-yellow-800";
+    case "yes":
+    case "enabled":
     case "active":
       return "bg-green-100 text-green-800";
+
+    case "pending":
+      return "bg-yellow-100 text-yellow-800";
+
     case "suspended":
       return "bg-gray-200 text-gray-700";
+
+    case "yes":
+    case "enabled":
+      return "bg-red-100 text-red-800";
+
     default:
       return "bg-red-100 text-red-800";
   }

@@ -17,7 +17,7 @@ function PageInfoBar({
 }) {
   const router = useRouter();
   return (
-    <div className="flex justify-between items-start">
+    <div className="flex md:flex-row flex-col gap-5 justify-between items-start">
       <div className="flex flex-row items-center gap-5">
         {showBack && (
           <Button
