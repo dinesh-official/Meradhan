@@ -27,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Spinner } from "@/components/ui/spinner";
 
 // import { MixerHorizontalIcon } from "@radix-ui/react-icons";
 
@@ -150,7 +151,9 @@ export function DataTable<TData, TValue>({
                   colSpan={table.getAllLeafColumns().length}
                   className="h-24 text-center"
                 >
-                  Loading...
+                  <div className="flex justify-center items-center h-80">
+                    <Spinner />
+                  </div>
                 </TableCell>
               </TableRow>
             ) : noRows ? (
