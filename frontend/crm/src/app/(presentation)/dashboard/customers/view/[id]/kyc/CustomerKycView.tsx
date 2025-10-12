@@ -1,11 +1,17 @@
 "use client";
-import QuickBackBtn from "@/global/elements/wrapper/QuickBackBtn";
-import React from "react";
+import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
+import ViewKycDataComponent from "./_components/ViewKycDataComponent";
 
 function CustomerKycView() {
   return (
-    <div>
-      <QuickBackBtn title="Back to Customers" />
+    <div className="flex flex-col gap-5">
+      <PageInfoBar
+        title="KYC Data - Vikas Kukreja"
+        description="Comprehensive KYC information and document verification status"
+        showBack
+      />
+
+      <ViewKycDataComponent />
     </div>
   );
 }

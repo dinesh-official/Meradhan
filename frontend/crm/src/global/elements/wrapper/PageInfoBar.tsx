@@ -22,7 +22,7 @@ function PageInfoBar({
         {showBack && (
           <Button
             onClick={() => router.back()}
-            className="p-0 overflow-hidden w-10 h-10 rounded-full"
+            className="p-0 overflow-hidden w-10 h-10 rounded-full border-gray-200"
             variant={"outline"}
           >
             <ChevronLeft />
