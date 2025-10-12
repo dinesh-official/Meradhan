@@ -1,5 +1,5 @@
 
-# ProjectStarterKit
+# MeraDhan
 
 A monorepo starter kit for building scalable full-stack TypeScript projects with Bun, Node.js, Next.js, and Prisma.
 
@@ -25,7 +25,7 @@ A monorepo starter kit for building scalable full-stack TypeScript projects with
 
 - Modular monorepo: backend, frontend, API gateway, shared schema
 - Bun and Node.js support for fast builds and development
-- Prisma ORM for PostgreSQL integration
+- Prisma ORM for PostgresSQL integration
 - Next.js frontend with TypeScript
 - Automated setup and dev scripts
 - Dockerfile for easy containerization
@@ -55,7 +55,7 @@ ProjectStarterKit/
 - **Bun** (https://bun.sh/)  
 - **Node.js** (v20+)  
 - **npm**  
-- **PostgreSQL** (local or remote instance)  
+- **PostgresSQL** (local or remote instance)  
 - **gnome-terminal** (for start-dev.sh, or adapt for your terminal)
 
 ---
@@ -121,7 +121,7 @@ npm run dev
 
 - **Prisma schema**: `backend/databases/postgress/prisma/schema.prisma`
 - **Migrations**: `backend/databases/postgress/prisma/migrations/`
-- **Local DB file**: `dev.db` (for SQLite) or configure for PostgreSQL
+- **Local DB file**: `dev.db` (for SQLite) or configure for PostgresSQL
 
 To update or generate Prisma client:
 
@@ -174,7 +174,7 @@ docker run -p 4000:4000 projectstarterkit
 ## Troubleshooting
 
 - **Missing dependencies**: Rerun `setup.sh`
-- **Database errors**: Check `.env` config and ensure PostgreSQL is running
+- **Database errors**: Check `.env` config and ensure PostgresSQL is running
 - **Terminal issues**: Adapt `start-dev.sh` for your terminal if not using GNOME
 
 ---

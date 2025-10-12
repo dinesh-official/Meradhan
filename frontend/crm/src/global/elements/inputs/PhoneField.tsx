@@ -16,7 +16,7 @@ type PhoneFieldProps = {
   label?: string;
   name?: string;
   value?: string;
-  onChange?: (value: string) => void;
+  onChangeAction?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -44,12 +44,12 @@ PhoneInput.displayName = "PhoneInput";
 const CountrySelect = ({
   disabled,
   value,
-  onChange,
+  onChangeAction,
   options,
 }: {
   disabled?: boolean;
   value: RPNInput.Country;
-  onChange: (value: RPNInput.Country) => void;
+  onChangeAction: (value: RPNInput.Country) => void;
   options: { label: string; value: RPNInput.Country | undefined }[];
 }) => {
   return (
@@ -63,7 +63,7 @@ const CountrySelect = ({
       <select
         disabled={disabled}
         value={value ?? ""}
-        onChange={(e) => onChange(e.target.value as RPNInput.Country)}
+        onChange={(e) => onChangeAction(e.target.value as RPNInput.Country)}
         className="absolute inset-0 text-sm opacity-0"
         aria-label="Select country"
       >
@@ -101,7 +101,7 @@ export const PhoneField = ({
   label,
   name,
   value,
-  onChange,
+  onChangeAction,
   placeholder = "Enter phone number",
   disabled,
   required,
@@ -132,7 +132,7 @@ export const PhoneField = ({
           inputComponent={PhoneInput as React.ElementType}
           // value
           value={value}
-          onChange={(v) => onChange?.(v ?? "")}
+          onChange={(v) => onChangeAction?.(v ?? "")}
           placeholder={placeholder}
           disabled={disabled}
         />

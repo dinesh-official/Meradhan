@@ -13,7 +13,7 @@ interface RadioYesNoFieldProps {
   required?: boolean;
   defaultValue?: YesNo;
   value?: YesNo;
-  onChange?: (v: YesNo) => void;
+  onChangeAction?: (v: YesNo) => void;
   className?: string;
 }
 
@@ -23,7 +23,7 @@ export function RadioYesNoField({
   required,
   defaultValue = "no",
   value,
-  onChange,
+  onChangeAction,
   className,
 }: RadioYesNoFieldProps) {
   const yesId = `${id}-yes`;
@@ -35,7 +35,7 @@ export function RadioYesNoField({
   const handleChange = (v: string) => {
     const val = v as YesNo;
     if (!isControlled) setInternalValue(val);
-    if (onChange) onChange(val);
+    if (onChangeAction) onChangeAction(val);
   };
 
   return (

@@ -26,7 +26,7 @@ function LoginPage() {
           </div>
           {state.step.value == "EMAIL" && (
             <EmailInputStep
-              onChange={state.email.setEmail}
+              onChangeAction={state.email.setEmail}
               value={state.email.value}
               onSubmit={actions.handelEmailSubmit}
               // isLoading={}
@@ -36,7 +36,7 @@ function LoginPage() {
             <OtpInputStep
               email={state.email.value}
               onBack={() => state.step.setStep("EMAIL")}
-              onChange={state.otp.setOtp}
+              onChangeAction={state.otp.setOtp}
               value={state.otp.value}
               onSubmit={actions.handelOtpSubmit}
               // isLoading={}

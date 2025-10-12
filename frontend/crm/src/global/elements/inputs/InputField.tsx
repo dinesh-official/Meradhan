@@ -16,7 +16,7 @@ interface InputFieldProps {
   /** Uncontrolled default value */
   defaultValue?: string;
   /** Callback when input value changes */
-  onChange?: (value: string) => void;
+  onChangeAction?: (value: string) => void;
   /** Optional container class */
   containerClass?: string;
   error?: string;
@@ -31,7 +31,7 @@ export function InputField({
   disabled = false,
   value,
   defaultValue,
-  onChange,
+  onChangeAction,
   containerClass,
   error,
 }: InputFieldProps) {
@@ -41,7 +41,7 @@ export function InputField({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     if (!isControlled) setInternalValue(newValue);
-    if (onChange) onChange(newValue);
+    if (onChangeAction) onChangeAction(newValue);
   };
 
   return (

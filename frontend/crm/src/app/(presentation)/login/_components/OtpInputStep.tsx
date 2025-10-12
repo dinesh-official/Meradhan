@@ -9,14 +9,14 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 function OtpInputStep({
   isLoading,
-  onChange,
+  onChangeAction,
   onSubmit,
   value,
   email,
   onBack,
 }: {
   value?: string;
-  onChange?: (val: string) => void;
+  onChangeAction?: (val: string) => void;
   onSubmit?: () => void;
   isLoading?: boolean;
   onBack?: () => void;
@@ -32,7 +32,7 @@ function OtpInputStep({
           value={value}
           className="w-full overflow-hidden"
           onChange={(e) => {
-            onChange?.(e);
+            onChangeAction?.(e);
           }}
         >
           <InputOTPGroup className="w-full">

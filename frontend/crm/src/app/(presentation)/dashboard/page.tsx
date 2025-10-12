@@ -1,10 +1,10 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
-import Table from "./Table";
+import DashBoardView from "@/app/(presentation)/dashboard/_componets/DashBoardView";
 
 function page() {
   return (
     <Workspace>
-      <Table />
+      <DashBoardView/>
     </Workspace>
   );
 }

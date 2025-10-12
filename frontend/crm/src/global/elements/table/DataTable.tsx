@@ -33,7 +33,7 @@ import {
 export type DataTableProps<TData, TValue> = {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
-  getRowId?:
+  getRowIdAction?:
     | ((
         originalRow: TData,
         index: number,
@@ -47,22 +47,21 @@ export type DataTableProps<TData, TValue> = {
   isLoading?: boolean;
   renderEmpty?: React.ReactNode; // custom empty state
   className?: string;
-  onRowClick?: (row: TData) => void;
+  onRowClickAction?: (row: TData) => void;
 };
 
 export function DataTable<TData, TValue>({
   data,
   columns,
-  getRowId,
+  getRowIdAction,
   stickyRightColumnId,
   enableRowSelection,
   initialPageSize = 10,
   visibilityStorageKey,
   isLoading,
-
   renderEmpty,
   className,
-  onRowClick,
+  onRowClickAction,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -103,7 +102,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: !!enableRowSelection,
-    getRowId,
+    getRowId: getRowIdAction,
     initialState: {
       pagination: { pageIndex: 0, pageSize: initialPageSize },
     },
@@ -168,9 +167,11 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={onRowClick ? "cursor-pointer" : undefined}
+                  className={onRowClickAction ? "cursor-pointer" : undefined}
                   onClick={
-                    onRowClick ? () => onRowClick(row.original) : undefined
+                    onRowClickAction
+                      ? () => onRowClickAction(row.original)
+                      : undefined
                   }
                 >
                   {row.getVisibleCells().map((cell) => {

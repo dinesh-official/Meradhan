@@ -6,12 +6,12 @@ import React from "react";
 
 function EmailInputStep({
   isLoading,
-  onChange,
+  onChangeAction,
   onSubmit,
   value,
 }: {
   value?: string;
-  onChange?: (val: string) => void;
+  onChangeAction?: (val: string) => void;
   onSubmit?: () => void;
   isLoading?: boolean;
 }) {
@@ -26,7 +26,7 @@ function EmailInputStep({
             type="email"
             value={value}
             disabled={isLoading}
-            onChange={(e) => onChange?.(e.target.value)}
+            onChange={(e) => onChangeAction?.(e.target.value)}
           />
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
             <AtSignIcon size={16} aria-hidden="true" />

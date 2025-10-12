@@ -20,7 +20,7 @@ function CustomerManagementForm({
           placeholder="Enter first name"
           required
           value={manager.state.firstName}
-          onChange={(e) => manager.setCustomerData("firstName", e)}
+          onChangeAction={(e) => manager.setCustomerData("firstName", e)}
           error={manager?.errors?.firstName?.[0]}
         />
 
@@ -29,7 +29,7 @@ function CustomerManagementForm({
           label="Middle Name"
           placeholder="Enter middle name"
           value={manager.state.middleName}
-          onChange={(e) => manager.setCustomerData("middleName", e)}
+          onChangeAction={(e) => manager.setCustomerData("middleName", e)}
           error={manager?.errors?.middleName?.[0]}
         />
 
@@ -39,7 +39,7 @@ function CustomerManagementForm({
           placeholder="Enter last name"
           required
           value={manager.state.lastName}
-          onChange={(e) => manager.setCustomerData("lastName", e)}
+          onChangeAction={(e) => manager.setCustomerData("lastName", e)}
           error={manager?.errors?.lastName?.[0]}
         />
       </div>
@@ -65,7 +65,7 @@ function CustomerManagementForm({
           type="email"
           required
           value={manager.state.emailId}
-          onChange={(e) => manager.setCustomerData("emailId", e)}
+          onChangeAction={(e) => manager.setCustomerData("emailId", e)}
           error={manager?.errors?.emailId?.[0]}
         />
 
@@ -75,7 +75,7 @@ function CustomerManagementForm({
           placeholder="mobile number"
           required
           value={manager.state.mobileNo}
-          onChange={(e) => manager.setCustomerData("mobileNo", e)}
+          onChangeAction={(e) => manager.setCustomerData("mobileNo", e)}
           error={manager?.errors?.mobileNo?.[0]}
         />
       </div>
@@ -86,7 +86,7 @@ function CustomerManagementForm({
         placeholder="WhatsApp number"
         required
         value={manager.state.whatsAppNumber?.toString()}
-        onChange={(e) => manager.setCustomerData("whatsAppNumber", e)}
+        onChangeAction={(e) => manager.setCustomerData("whatsAppNumber", e)}
         error={manager?.errors?.whatsAppNumber?.[0]}
       />
 
@@ -101,7 +101,7 @@ function CustomerManagementForm({
           ]}
           required
           value={manager.state.userType}
-          onChange={(e) => manager.setCustomerData("userType", e)}
+          onChangeAction={(e) => manager.setCustomerData("userType", e)}
           error={manager?.errors?.userType?.[0]}
         />
         <InputField
@@ -110,7 +110,7 @@ function CustomerManagementForm({
           placeholder="Enter username"
           required
           value={manager.state.userName}
-          onChange={(e) => manager.setCustomerData("userName", e)}
+          onChangeAction={(e) => manager.setCustomerData("userName", e)}
           error={manager?.errors?.userName?.[0]}
         />
       </div>
@@ -122,14 +122,14 @@ function CustomerManagementForm({
           required
           defaultValue="no"
           value={manager.state.termsAccept ? "yes" : "no"}
-          onChange={(e) => manager.setCustomerData("termsAccept", e == "yes")}
+          onChangeAction={(e) => manager.setCustomerData("termsAccept", e == "yes")}
         />
         <RadioYesNoField
           id="wa"
           label="WhatsApp Notification Accepted"
           defaultValue="no"
           value={manager.state.whatsAppNotificationAccept ? "yes" : "no"}
-          onChange={(e) =>
+          onChangeAction={(e) =>
             manager.setCustomerData("whatsAppNotificationAccept", e == "yes")
           }
         />
@@ -138,7 +138,7 @@ function CustomerManagementForm({
           label="Email Confirmed"
           defaultValue="no"
           value={manager.state.emailConfirmed ? "yes" : "no"}
-          onChange={(e) =>
+          onChangeAction={(e) =>
             manager.setCustomerData("emailConfirmed", e == "yes")
           }
         />
@@ -147,7 +147,7 @@ function CustomerManagementForm({
           label="Mobile Confirmed"
           defaultValue="no"
           value={manager.state.mobileConfirm ? "yes" : "no"}
-          onChange={(e) => manager.setCustomerData("mobileConfirm", e == "yes")}
+          onChangeAction={(e) => manager.setCustomerData("mobileConfirm", e == "yes")}
         />
       </div>
 
@@ -163,7 +163,7 @@ function CustomerManagementForm({
           ]}
           required
           value={manager.state.kycStatus}
-          onChange={(e) =>
+          onChangeAction={(e) =>
             manager.setCustomerData(
               "kycStatus",
               e as CustomerFormData["kycStatus"]
@@ -180,7 +180,7 @@ function CustomerManagementForm({
             { label: "Inactive", value: "SUSPENDED" },
           ]}
           value={manager.state.status}
-          onChange={(e) =>
+          onChangeAction={(e) =>
             manager.setCustomerData("status", e as CustomerFormData["status"])
           }
           required
@@ -199,7 +199,7 @@ function CustomerManagementForm({
           { label: "Manager 2", value: "2" },
         ]}
         value={manager.state.relationshipManagerId?.toString()}
-        onChange={(e) =>
+        onChangeAction={(e) =>
           manager.setCustomerData("relationshipManagerId", Number(e))
         }
         error={manager?.errors?.relationshipManagerId?.[0]}
@@ -210,7 +210,7 @@ function CustomerManagementForm({
         label="Total Investment"
         placeholder="Enter total investment amount"
         value={manager.state.totalInvestment?.toString()}
-        onChange={(e) => manager.setCustomerData("totalInvestment", Number(e))}
+        onChangeAction={(e) => manager.setCustomerData("totalInvestment", Number(e))}
         error={manager?.errors?.totalInvestment?.[0]}
       />
 
@@ -222,7 +222,7 @@ function CustomerManagementForm({
         placeholder="Enter Password"
         type="password"
         value={manager.state.password}
-        onChange={(e) => manager.setCustomerData("password", e)}
+        onChangeAction={(e) => manager.setCustomerData("password", e)}
         error={manager?.errors?.password?.[0]}
       />
     </div>

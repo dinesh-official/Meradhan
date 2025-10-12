@@ -21,7 +21,7 @@ type Props = {
   /** The default value if uncontrolled */
   defaultValue?: string;
   /** Callback when value changes */
-  onChange?: (value: string) => void;
+  onChangeAction?: (value: string) => void;
   options: Option[];
   required?: boolean;
   containerClass?: string;
@@ -33,7 +33,7 @@ export function SelectField({
   placeholder,
   value,
   defaultValue,
-  onChange,
+  onChangeAction,
   options,
   required,
   containerClass,
@@ -46,7 +46,7 @@ export function SelectField({
 
   const handleChange = (val: string) => {
     if (!isControlled) setInternalValue(val);
-    if (onChange) onChange(val);
+    if (onChangeAction) onChangeAction(val);
   };
 
   return (
