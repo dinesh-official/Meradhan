@@ -1,0 +1,83 @@
+import React from "react";
+import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
+import DbTopActionCards from "@/app/(presentation)/dashboard/_components/DBTopActionCards";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import StatusCountCard from "@/global/elements/cards/StatusCountCard";
+import { SalesPerformanceChart } from "./_components/chart/SalesPerformanceChart";
+import { LeadSourcesPiChart } from "./_components/chart/LeadSourcesPiChart";
+
+const DashBoardView = () => {
+  return (
+    <div className="flex flex-col gap-5">
+      <PageInfoBar
+        title="Dashboard Overview"
+        description="Welcome back! Here's what's happening with your bond platform today."
+        actions={<DbTopActionCards />}
+      />
+
+      <div className="grid grid-cols-4 gap-5">
+        <StatusCountCard
+          title="Active Leads"
+          value="10K+"
+          changeText="+12.5% from last month"
+          arrowType="up"
+          variant="pinkGradient"
+        />
+
+        <StatusCountCard
+          title="Completed Projects"
+          value="234"
+          changeText="+8% this quarter"
+          arrowType="down"
+          variant="greenGradient"
+        />
+
+        <StatusCountCard
+          title="User Drop Rate"
+          value="5%"
+          changeText="-2% from last month"
+          arrowType="down"
+          variant="redGradient"
+        />
+
+        <StatusCountCard
+          title="User Gain Rate"
+          value="1%"
+          changeText="-2% from last month"
+          arrowType="down"
+          variant="grayGradient"
+        />
+      </div>
+      <div className="grid grid-cols-7 gap-5">
+        <Card className="col-span-5">
+          <CardHeader>
+            <CardTitle>Sales Performance</CardTitle>
+            <CardDescription></CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-end items-end  h-full">
+            <SalesPerformanceChart />
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Lead Sources</CardTitle>
+            <CardDescription></CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LeadSourcesPiChart />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default DashBoardView;

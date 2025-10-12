@@ -54,7 +54,7 @@ export const NAV_ITEMS: NavItem[] = [
             },
             {
                 label: 'New Lead',
-                path: '/dashboard/leads/new',
+                path: '/dashboard/leads/create',
                 module: 'leads',
                 allowOnly: ['create:leads', 'edit:leads', 'delete:leads']
             },

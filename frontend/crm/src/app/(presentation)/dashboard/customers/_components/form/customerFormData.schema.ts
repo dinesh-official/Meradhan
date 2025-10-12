@@ -1,4 +1,8 @@
 import z from 'zod'
+
+const customerKycStatus = ["PENDING", "APPROVED", "REJECTED"];
+const customerStatus = ["ACTIVE", "SUSPENDED"];
+
 export const customerFormDataSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     middleName: z.string().optional().or(z.literal("")),
@@ -11,24 +15,17 @@ export const customerFormDataSchema = z.object({
     whatsAppNumber: z
         .string()
         .optional()
-        .refine(
-            (v) => v === undefined || /^\+\d{7,15}$/.test(v),
-            { message: "WhatsApp number must include country code (e.g., +1234567890)" }
-        ),
+        .refine((v) => v === undefined || /^\+\d{7,15}$/.test(v), { message: "WhatsApp number must include country code (e.g., +1234567890)" }),
     userType: z.string().min(1, "User type is required"),
     userName: z.string().min(3, "Username must be at least 3 characters"),
     termsAccept: z.boolean().refine((v) => v === true, { message: "You must accept terms" }),
     whatsAppNotificationAccept: z.boolean(),
     emailConfirmed: z.boolean(),
     mobileConfirm: z.boolean(),
-    kycStatus: z.enum(["PENDING", "APPROVED", "REJECTED"]),
-    status: z.enum(["ACTIVE", "SUSPENDED"]),
+    kycStatus: z.enum(customerKycStatus),
+    status: z.enum(customerStatus),
     relationshipManagerId: z.union([z.string(), z.number()]).optional(),
-    totalInvestment: z
-        .number({
-            error: "Total investment is required"
-        })
-        .nonnegative("Total investment cannot be negative"),
+    totalInvestment: z.number({ error: "Total investment is required" }).nonnegative("Total investment cannot be negative"),
     password: z
         .string()
         .min(8, "Password must be at least 8 characters")

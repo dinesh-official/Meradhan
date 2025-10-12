@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
-type Option = { label: string; value: string; disabled?: boolean };
+export type SelectOption<T = string> = { label: string; value: T; disabled?: boolean };
 
 type Props = {
   label: string;
@@ -22,7 +22,7 @@ type Props = {
   defaultValue?: string;
   /** Callback when value changes */
   onChangeAction?: (value: string) => void;
-  options: Option[];
+  options: SelectOption[];
   required?: boolean;
   containerClass?: string;
   error?: string;

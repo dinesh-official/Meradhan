@@ -11,7 +11,7 @@ import { CardAction, CardHeader } from "@/components/ui/card";
 import { Search } from "lucide-react";
 import { SelectOption } from "@/global/elements/inputs/SelectField";
 
-interface CustomerSearchFilterBarProps {
+interface LeadsSearchFilterBarProps {
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   statusValue?: string;
@@ -22,6 +22,7 @@ interface CustomerSearchFilterBarProps {
   kycOptions?: SelectOption[];
   placeholder?: string;
 }
+
 const filterKycStatus: SelectOption[] = [
   { label: "All Kyc Status", value: "ALL" },
   { label: "Pending", value: "PENDING" },
@@ -34,15 +35,16 @@ const filterStatusOptions: SelectOption[] = [
   { label: "New", value: "New" },
   { label: "Suspended", value: "SUSPENDED" },
 ];
-const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
+
+const LeadsSearchFilterBar: React.FC<LeadsSearchFilterBarProps> = ({
   searchValue,
   onSearchChange,
   statusValue,
   onStatusChange,
   kycValue,
   onKycChange,
-  statusOptions =filterKycStatus,
-  kycOptions =filterStatusOptions,
+  statusOptions = filterStatusOptions,
+  kycOptions = filterKycStatus,
   placeholder = "Search...",
 }) => {
   return (
@@ -74,7 +76,7 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
         </Select>
         <Select value={kycValue} onValueChange={onKycChange}>
           <SelectTrigger className="w-[160px] bg-secondary border-none">
-            <SelectValue placeholder="Kyc Status" />
+            <SelectValue placeholder="Apply Source" />
           </SelectTrigger>
           <SelectContent>
             {kycOptions.map((option) => (
@@ -89,4 +91,4 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
   );
 };
 
-export default CustomerSearchFilterBar;
+export default LeadsSearchFilterBar;
