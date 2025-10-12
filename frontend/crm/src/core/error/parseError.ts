@@ -1,6 +1,6 @@
-export const parseError = <T = Error>(error: any): T  => {
+export const parseError = <T = Error>(error: unknown): T  => {
     if (error) {
         return error as T;
     }
-   return error;
+   return error as T;
 }

@@ -163,7 +163,7 @@ main() {
     install_dependencies_prisma_backend "backend/databases/postgress" "npm" "Backend"
     
     # Install frontend dependencies
-    install_dependencies "frontend/client" "npm" "Frontend (Next.js)" "force"
+    install_dependencies "frontend/crm" "npm" "Frontend (Next.js)" "force"
     
     echo ""
     print_success "🎉 All packages installed successfully!"

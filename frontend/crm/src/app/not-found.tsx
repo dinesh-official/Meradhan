@@ -1,7 +1,9 @@
-
-import Link from "next/link";
+"use client"
+import { Button } from "@/components/ui/button";
+import { useRouter } from "nextjs-toploader/app";
 
 export default function NotFound() {
+  const router = useRouter();
 
   return (
     <div
@@ -11,9 +13,9 @@ export default function NotFound() {
       <p className="text-gray-600 mb-8 max-w-md">
         Oops! The page you’re looking for doesn’t exist or has been moved.
       </p>
-      <Link className="px-6 py-3 rounded-xl" href={"/"}>
-        Go Back Home
-      </Link>
+      <Button variant={"link"} className="px-6 py-3 rounded-xl" onClick={router.back}>
+        Go Back
+      </Button>
     </div>
   );
 }

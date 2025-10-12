@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Error({
@@ -13,11 +15,11 @@ export default function Error({
   const [copiedStack, setCopiedStack] = useState(false);
 
   // Only render in development mode
-  if (process.env.NODE_ENV == "development") {
+  if (process.env.NODE_ENV != "development") {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 text-gray-700">
         {/* Error Image */}
-        <img
+        <Image
           src="/icons/warning.png" // replace with your image path
           alt="Error"
           className="w-24 h-24 mb-4"
@@ -41,9 +43,9 @@ export default function Error({
           >
             Retry
           </button>
-          <a href="/" className="px-4 py-2">
+          <Link href="/" className="px-4 py-2">
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -109,13 +111,13 @@ export default function Error({
         <div className="mt-6 flex gap-2 justify-center">
           <button
             onClick={() => reset()}
-            className="bg-gray-800 text-white px-5 py-2"
+            className="bg-gray-800 text-white px-5 py-2 cursor-pointer"
           >
             Try Again
           </button>
-          <a href="/" className="bg-gray-600 text-white px-5 py-2">
+          <Link href="/" className="bg-gray-600 text-white px-5 py-2">
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,0 +1,219 @@
+"use client";
+// navbarConfig.ts
+import {
+    BarChart,
+    Briefcase,
+    ClipboardList,
+    Earth,
+    FileText,
+    HelpCircle,
+    PieChart,
+    Shield,
+    ShoppingCart,
+    Trash2,
+    Users
+} from 'lucide-react';
+import { ModuleName, Permission } from './role.constants';
+
+/**
+ * Define the structure of nested navigation items (up to 4 levels)
+ */
+export interface NavItem {
+    label: string;
+    path?: string;
+    icon?: React.ComponentType<{ className: string, size?: number }>;
+    module?: ModuleName;
+    children?: NavItem[]; // nested submenus
+    allowOnly?: Permission[],
+    section?: boolean
+}
+
+/**
+ * NAV_ITEMS with 4-level nesting
+ */
+export const NAV_ITEMS: NavItem[] = [
+    {
+        label: 'Dashboard',
+        path: '/dashboard',
+        icon: PieChart,
+        module: 'dashboard',
+        allowOnly: ["view:dashboard"]
+    },
+
+    {
+        label: 'Leads',
+        icon: Users,
+        allowOnly: ['create:leads', "edit:leads", "view:leads", "delete:leads"],
+        children: [
+            {
+                label: 'All Leads',
+                path: '/dashboard/leads',
+                module: 'leads',
+                allowOnly: ['view:leads']
+            },
+            {
+                label: 'New Lead',
+                path: '/dashboard/leads/new',
+                module: 'leads',
+                allowOnly: ['create:leads', 'edit:leads', 'delete:leads']
+            },
+        ]
+    },
+
+    {
+        label: 'Customers',
+        icon: FileText,
+        allowOnly: ['view:customer', 'create:customer'],
+        children: [
+            {
+                label: 'Customers List',
+                path: '/dashboard/customers',
+                module: 'customer',
+                allowOnly: ['view:customer']
+            },
+            {
+                label: 'Create Customer',
+                path: '/dashboard/customers/create',
+                module: 'customer',
+                allowOnly: ['create:customer']
+            },
+
+        ]
+    },
+
+    {
+        label: 'RFQ Management',
+        icon: ClipboardList,
+        module: 'rfq',
+        allowOnly: ['view:rfq', 'edit:rfq', 'create:rfq'],
+        children: [
+            {
+                label: 'Overview',
+                path: '/dashboard/support',
+                module: 'rfq',
+                allowOnly: ['view:rfq'],
+            },
+            {
+                label: 'NSE RFQs',
+                allowOnly: ['view:rfq', 'edit:rfq'],
+                children: [
+                    {
+                        label: 'Manage RFQs',
+                        path: '/dashboard/support/faq',
+                        module: 'rfq',
+                        allowOnly: ['edit:rfq'],
+                    },
+                    {
+                        label: 'Add Participant',
+                        path: '/dashboard/support/faq',
+                        module: 'rfq',
+                        allowOnly: ['create:rfq'],
+                    },
+                ]
+            }
+        ]
+    },
+
+    {
+        label: 'Sales',
+        icon: ShoppingCart,
+        path: "/sales",
+        module: 'sales',
+        allowOnly: ['view:sales']
+    },
+
+    {
+        label: 'Support Tickets',
+        icon: HelpCircle,
+        allowOnly: ['view:support', 'edit:support', 'create:support'],
+        children: [
+            {
+                label: 'Manage Tickets',
+                path: '/dashboard/support',
+                module: 'support',
+                allowOnly: ['view:support', 'edit:support', 'create:support']
+            },
+            {
+                label: 'New Ticket',
+                path: '/dashboard/support',
+                module: 'support',
+                allowOnly: ['create:support']
+            },
+        ]
+    },
+
+    {
+        label: 'Reports',
+        icon: BarChart,
+        path: "/reports",
+        module: 'reports',
+        allowOnly: ['view:reports']
+    },
+
+    {
+        label: "Administration",
+        section: true,
+        allowOnly: ['view:user', 'create:user', 'edit:user', 'view:bin', 'view:webanalytics', 'view:webauditlogs']
+    },
+
+    {
+        label: 'User Management',
+        icon: Briefcase,
+        allowOnly: ['view:user', 'create:user', 'edit:user'],
+        children: [
+            {
+                label: 'All Users',
+                path: '/dashboard/user',
+                module: 'user',
+                allowOnly: ['view:user']
+            },
+            {
+                label: 'Create New Users',
+                path: '/dashboard/user/roles',
+                module: 'user',
+                allowOnly: ['create:user']
+
+            },
+            {
+                label: 'Suspended Users',
+                path: '/dashboard/user/roles',
+                module: 'user',
+                allowOnly: ['edit:user']
+            }
+        ]
+    },
+
+    {
+        label: 'Audit Logs',
+        icon: Shield,
+        allowOnly: ['view:webauditlogs', 'view:crmauditlogs'],
+        children: [
+            {
+                label: 'CRM Logs',
+                path: '/dashboard/user',
+                module: 'crmauditlogs',
+                allowOnly: ['view:crmauditlogs'],
+            },
+            {
+                label: 'Website Logs',
+                path: '/dashboard/user/roles',
+                module: 'webauditlogs',
+                allowOnly: ['view:webauditlogs'],
+            },
+        ]
+    },
+    {
+        label: 'Website Analytics',
+        path: '/dashboard/bin',
+        icon: Earth,
+        module: 'bin',
+        allowOnly: ['view:webanalytics']
+    },
+    {
+        label: 'Recycle Bin',
+        path: '/dashboard/bin',
+        icon: Trash2,
+        module: 'bin',
+        allowOnly: ['create:bin', 'view:bin', 'edit:bin', 'delete:bin']
+    },
+];
