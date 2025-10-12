@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   Card,
   CardContent,
@@ -10,43 +9,25 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
-  Users,
+  Activity,
   Briefcase,
   DollarSign,
-  TrendingUp,
-  Activity,
-  Heart,
+  File,
   Flame,
-  Star,
+  Heart,
   Layers,
+  Star,
+  TrendingUp,
+  Users,
   Zap,
 } from "lucide-react";
+import React from "react";
 
+// Arrow type
 type ArrowType = "up" | "down" | "none";
 
-type StatusCountCardProps = {
-  title: string;
-  value: string | number;
-  changeText?: string; // "+12% from last month" or "-2% from last month"
-  arrowType?: ArrowType; // optional: "up", "down", "none"
-  variant?:
-    | "pinkGradient"
-    | "blueGradient"
-    | "greenGradient"
-    | "orangeGradient"
-    | "purpleGradient"
-    | "tealGradient"
-    | "redGradient"
-    | "indigoGradient"
-    | "grayGradient"
-    | "goldGradient";
-};
-
-// Variant Styles
-const variantStyles: Record<
-  NonNullable<StatusCountCardProps["variant"]>,
-  string
-> = {
+// Centralized gradient styles
+export const variantStyles = {
   pinkGradient: "from-pink-500 via-purple-500 to-indigo-500",
   blueGradient: "from-blue-500 via-cyan-500 to-sky-500",
   greenGradient: "from-green-500 via-emerald-500 to-teal-500",
@@ -57,13 +38,23 @@ const variantStyles: Record<
   indigoGradient: "from-indigo-500 via-blue-600 to-purple-700",
   grayGradient: "from-gray-500 via-gray-600 to-gray-700",
   goldGradient: "from-yellow-400 via-amber-500 to-orange-500",
-};
+  fileGradient: "from-indigo-800 via-blue-700 to-teal-600",
+  cyanGradient: "from-cyan-600 via-sky-500 to-indigo-500",
+  limeGradient: "from-lime-500 via-green-400 to-teal-400",
+  magentaGradient: "from-fuchsia-600 via-pink-500 to-rose-500",
+  sunsetGradient: "from-orange-600 via-pink-500 to-purple-600",
+  oceanGradient: "from-blue-800 via-cyan-600 to-teal-500",
+  forestGradient: "from-emerald-800 via-green-700 to-lime-600",
+  violetGradient: "from-purple-700 via-indigo-600 to-fuchsia-500",
+  steelGradient: "from-gray-700 via-gray-600 to-gray-500",
+  fireGradient: "from-red-700 via-orange-600 to-yellow-500",
+} as const;
 
-// Background Icons per Variant
-const variantIcons: Record<
-  NonNullable<StatusCountCardProps["variant"]>,
-  React.ElementType
-> = {
+// Variant type derived automatically
+export type GradientVariant = keyof typeof variantStyles;
+
+// Map icons for each variant
+const variantIcons: Record<GradientVariant, React.ElementType> = {
   pinkGradient: Heart,
   blueGradient: Users,
   greenGradient: TrendingUp,
@@ -74,16 +65,37 @@ const variantIcons: Record<
   indigoGradient: DollarSign,
   grayGradient: Star,
   goldGradient: Zap,
+  fileGradient: File,
+  cyanGradient: Zap,
+  limeGradient: Layers,
+  magentaGradient: Star,
+  sunsetGradient: Flame,
+  oceanGradient: Users,
+  forestGradient: Heart,
+  violetGradient: Activity,
+  steelGradient: Briefcase,
+  fireGradient: DollarSign,
+};
+
+// Props for StatusCountCard
+export type StatusCountCardProps = {
+  title: string;
+  value: string | number;
+  changeText?: string; // "+12% from last month" or "-2% from last month"
+  arrowType?: ArrowType; // optional: "up", "down", "none"
+  variant?: GradientVariant; // all gradient variants supported automatically
+  bgIcon?: React.ElementType;
 };
 
 function StatusCountCard({
   title,
   value,
   changeText = "+0%",
-  arrowType,
+  arrowType = "none",
   variant = "pinkGradient",
+  bgIcon,
 }: StatusCountCardProps) {
-  const Icon = variantIcons[variant];
+  const Icon = bgIcon ?? variantIcons[variant];
 
   // Determine arrow and color
   let arrow = "";
@@ -110,7 +122,7 @@ function StatusCountCard({
   }
 
   return (
-    <Card className="relative overflow-hidden border-none rounded-2xl ">
+    <Card className="relative overflow-hidden border-none rounded-2xl">
       {/* Dynamic Gradient Background */}
       <div
         className={cn(

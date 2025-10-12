@@ -90,7 +90,7 @@ export const NAV_ITEMS: NavItem[] = [
         children: [
             {
                 label: 'Overview',
-                path: '/dashboard/support',
+                path: '/dashboard/rfqs/overview',
                 module: 'rfq',
                 allowOnly: ['view:rfq'],
             },
@@ -100,13 +100,13 @@ export const NAV_ITEMS: NavItem[] = [
                 children: [
                     {
                         label: 'Manage RFQs',
-                        path: '/dashboard/support/faq',
+                        path: '/dashboard/rfq/overview',
                         module: 'rfq',
                         allowOnly: ['edit:rfq'],
                     },
                     {
                         label: 'Add Participant',
-                        path: '/dashboard/support/faq',
+                        path: '/dashboard/rfq/overview',
                         module: 'rfq',
                         allowOnly: ['create:rfq'],
                     },
@@ -164,20 +164,13 @@ export const NAV_ITEMS: NavItem[] = [
         children: [
             {
                 label: 'All Users',
-                path: '/dashboard/user',
+                path: '/dashboard/user-management',
                 module: 'user',
                 allowOnly: ['view:user']
             },
             {
-                label: 'Create New Users',
-                path: '/dashboard/user/roles',
-                module: 'user',
-                allowOnly: ['create:user']
-
-            },
-            {
                 label: 'Suspended Users',
-                path: '/dashboard/user/roles',
+                path: '/dashboard/user-management/roles',
                 module: 'user',
                 allowOnly: ['edit:user']
             }
@@ -191,13 +184,13 @@ export const NAV_ITEMS: NavItem[] = [
         children: [
             {
                 label: 'CRM Logs',
-                path: '/dashboard/user',
+                path: '/dashboard/audit-logs/crm',
                 module: 'crmauditlogs',
                 allowOnly: ['view:crmauditlogs'],
             },
             {
                 label: 'Website Logs',
-                path: '/dashboard/user/roles',
+                path: '/dashboard/audit-logs/website',
                 module: 'webauditlogs',
                 allowOnly: ['view:webauditlogs'],
             },
