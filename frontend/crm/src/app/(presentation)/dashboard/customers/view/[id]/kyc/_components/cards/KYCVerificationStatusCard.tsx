@@ -3,7 +3,15 @@ import LabelView from "@/global/elements/wrapper/LabelView";
 import StatusBadge from "@/global/elements/wrapper/StatusBadge";
 import React from "react";
 
-function KYCVerificationStatusCard() {
+export interface KYCVerificationStatusCardProps {
+  kycLevel: string;
+  overallStatus: string;
+  verifiedBy: string;
+  verifiedDate: string;
+}
+function KYCVerificationStatusCard(
+  KYCVerificationStatusInfo: KYCVerificationStatusCardProps
+) {
   return (
     <Card>
       <CardHeader>
@@ -12,16 +20,28 @@ function KYCVerificationStatusCard() {
       <CardContent>
         <div className="grid md:grid-cols-4 grid-cols-2 gap-5">
           <LabelView title="KYC Level">
-            <p className="font-medium text-sm">Basic</p>
+            <p className="font-medium text-sm">
+              {KYCVerificationStatusInfo.kycLevel}
+            </p>
           </LabelView>
           <LabelView title="Overall Status">
-            <StatusBadge value="Incomplete" />
+            <StatusBadge
+              value={
+                KYCVerificationStatusInfo.overallStatus
+                  ? "completed"
+                  : "Incomplete"
+              }
+            />
           </LabelView>
           <LabelView title="Verified By">
-            <p className="font-medium text-sm">Not verified</p>
+            <p className="font-medium text-sm">
+              {KYCVerificationStatusInfo.verifiedBy}
+            </p>
           </LabelView>
           <LabelView title="Verified Date">
-            <p className="font-medium text-sm">Not verified</p>
+            <p className="font-medium text-sm">
+              {KYCVerificationStatusInfo.verifiedDate}
+            </p>
           </LabelView>
         </div>
       </CardContent>
