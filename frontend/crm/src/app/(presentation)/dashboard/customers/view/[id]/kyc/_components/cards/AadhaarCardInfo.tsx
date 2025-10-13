@@ -14,23 +14,23 @@ function AadhaarCardInfo() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Adhara and Address Information</CardTitle>
+        <CardTitle>Aadhaar and Address Information</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <div className="grid lg:grid-cols-4 grid-cols-2 gap-5">
           <LabelView title="12-digit Aadhaar Number">
-            <p className="font-medium">XXXX XXXX 5868</p>
+            <p className="font-medium text-sm">XXXX XXXX 5868</p>
           </LabelView>
           <LabelView title="Name as per Aadhaar">
-            <p className="font-medium">
+            <p className="font-medium text-sm">
               Vikas Kukreja <StatusBadge value="Verified" />
             </p>
           </LabelView>
           <LabelView title="Date of Birth">
-            <p className="font-medium">30/05/1983</p>
+            <p className="font-medium text-sm">30/05/1983</p>
           </LabelView>
           <LabelView title="Gender">
-            <p className="font-medium">MALE</p>
+            <p className="font-medium text-sm">MALE</p>
           </LabelView>
         </div>
       </CardContent>
@@ -48,7 +48,7 @@ function AadhaarCardInfo() {
         <div className="flex flex-col gap-4">
           <CardTitle>Verification Status</CardTitle>
           <LabelView title="Verification Timestamp">
-            09 Oct 2025, 02:28 PM
+            <p className="font-medium text-sm">09 Oct 2025, 02:28 PM</p>
           </LabelView>
         </div>
       </CardFooter>

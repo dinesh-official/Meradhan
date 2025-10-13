@@ -12,16 +12,16 @@ function KYCVerificationStatusCard() {
       <CardContent>
         <div className="grid md:grid-cols-4 grid-cols-2 gap-5">
           <LabelView title="KYC Level">
-            <p className="font-medium">Basic</p>
+            <p className="font-medium text-sm">Basic</p>
           </LabelView>
           <LabelView title="Overall Status">
             <StatusBadge value="Incomplete" />
           </LabelView>
           <LabelView title="Verified By">
-            <p className="font-medium">Not verified</p>
+            <p className="font-medium text-sm">Not verified</p>
           </LabelView>
           <LabelView title="Verified Date">
-            <p className="font-medium">Not verified</p>
+            <p className="font-medium text-sm">Not verified</p>
           </LabelView>
         </div>
       </CardContent>
