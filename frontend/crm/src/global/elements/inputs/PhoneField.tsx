@@ -74,8 +74,7 @@ const CountrySelect = ({
           .filter((x) => x.value)
           .map((option, i) => (
             <option key={option.value ?? `empty-${i}`} value={option.value}>
-              {option.label}{" "}
-              {option.value &&
+              {option.label} {option.value &&
                 `+${RPNInput.getCountryCallingCode(option.value)}`}
             </option>
           ))}

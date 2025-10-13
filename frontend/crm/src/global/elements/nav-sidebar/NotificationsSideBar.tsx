@@ -12,7 +12,6 @@ function NotificationsSideBar() {
   return (
     <Sheet>
       <SheetTrigger>
-        {" "}
         <div className="relative cursor-pointer">
           <Bell />
           <Badge className="absolute shadow-none p-0 w-4 h-4 rounded-full -top-1 -right-0 text-[10px] flex justify-center items-center leading-2.5">
