@@ -8,9 +8,20 @@ import {
 import LabelView from "@/global/elements/wrapper/LabelView";
 import StatusBadge from "@/global/elements/wrapper/StatusBadge";
 import React from "react";
-import AddressCard from "./AddressCard";
+import AddressCard, { AddressCardDataProp } from "./AddressCard";
 
-function AadhaarCardInfo() {
+export interface AadhaarCardInfoDataProps {
+  aadhaarNumber: string;
+  name: string;
+  nameVerificationStatus: boolean;
+  dateOfBirth: string;
+  gender: string;
+  permanentAddress: AddressCardDataProp;
+  currentAddress: AddressCardDataProp;
+  verificationTimeStamp: string;
+}
+
+function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
   return (
     <Card>
       <CardHeader>
@@ -19,36 +30,49 @@ function AadhaarCardInfo() {
       <CardContent className="flex flex-col gap-5">
         <div className="grid lg:grid-cols-4 grid-cols-2 gap-5">
           <LabelView title="12-digit Aadhaar Number">
-            <p className="font-medium text-sm">XXXX XXXX 5868</p>
+            <p className="font-medium text-sm">
+              {addressCardInfoData.aadhaarNumber}
+            </p>
           </LabelView>
           <LabelView title="Name as per Aadhaar">
             <p className="font-medium text-sm">
-              Vikas Kukreja <StatusBadge value="Verified" />
+              {addressCardInfoData.name}{" "}
+              <StatusBadge
+                value={
+                  addressCardInfoData.nameVerificationStatus
+                    ? "Verified"
+                    : "InCorrect"
+                }
+              />
             </p>
           </LabelView>
           <LabelView title="Date of Birth">
-            <p className="font-medium text-sm">30/05/1983</p>
+            <p className="font-medium text-sm">
+              {addressCardInfoData.dateOfBirth}
+            </p>
           </LabelView>
           <LabelView title="Gender">
-            <p className="font-medium text-sm">MALE</p>
+            <p className="font-medium text-sm">{addressCardInfoData.gender}</p>
           </LabelView>
         </div>
       </CardContent>
       <CardContent className="border-t ">
         <CardTitle className="pt-6 mb-5">Permanent Address</CardTitle>
-        <AddressCard />
+        <AddressCard {...addressCardInfoData.permanentAddress} />
       </CardContent>
       <CardContent className="border-t">
         <CardTitle className="pt-6 mb-5">
           Current Address as per Aadhaar
         </CardTitle>
-        <AddressCard />
+        <AddressCard {...addressCardInfoData.currentAddress} />
       </CardContent>
       <CardFooter className="border-t">
         <div className="flex flex-col gap-4">
           <CardTitle>Verification Status</CardTitle>
           <LabelView title="Verification Timestamp">
-            <p className="font-medium text-sm">09 Oct 2025, 02:28 PM</p>
+            <p className="font-medium text-sm">
+              {addressCardInfoData.verificationTimeStamp}
+            </p>
           </LabelView>
         </div>
       </CardFooter>

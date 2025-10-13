@@ -18,15 +18,39 @@ function ViewKycDataComponent() {
   return (
     <div className="flex flex-col gap-5 relative">
       <div className="grid xl:grid-cols-2 gap-5">
-        <CustomerOverViewCard />
-        <KYCVerificationStatusCard />
+        <CustomerOverViewCard
+          name="Rahul Sharma"
+          customerSince="15 Jul 2020"
+          kycStatus={true}
+        />
+        <KYCVerificationStatusCard
+          kycLevel="Full"
+          overallStatus="Verified"
+          verifiedBy="Rahul Sharma (Compliance Officer)"
+          verifiedDate="13 Oct 2025, 11:45 AM"
+        />{" "}
       </div>
 
       <StickyHeader />
 
       {/* Personal Information */}
       <div className="scroll-mt-16" id="personal-info">
-        <PersonalInformationCard />
+        <PersonalInformationCard
+          photoUrl="/images/user.jpeg"
+          signatureUrl="/images/sign.jpg"
+          fullName="Rahul Sharma"
+          dateOfBirth="1996-07-15"
+          gender="Male"
+          maritalStatus="Single"
+          fatherOrSpouseName="Rajesh Sharma"
+          relationshipWithPerson="Son"
+          motherName="Anita Sharma"
+          qualification="Graduate"
+          occupationType="Salaried"
+          annualGrossIncome="₹6,00,000"
+          nationality="Indian"
+          residentialStatus="Resident Indian"
+        />{" "}
       </div>
 
       {/* Identity Documents */}
@@ -37,24 +61,109 @@ function ViewKycDataComponent() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-8">
-              <PanCard />
-              <AdharaCard />
+              <PanCard
+                panNumber="AADPM2907K"
+                name="Rahul Sharma"
+                fatherName="Rajesh Kumar Sharma"
+                dateOfBirth="21/10/1980"
+                isVerified={true}
+              />
+              <AdharaCard
+                name="Rahul Sharma"
+                dateOfBirth="15/07/1996"
+                gender="Male"
+                aadhaarNumberMasked="xxx-xxx-xxx-1234"
+                isVerified={true}
+              />
             </div>
           </CardContent>
         </Card>
-
-        <PanCardInfoCard />
-        <AadhaarCardInfo />
+        <PanCardInfoCard
+          panCardNumber="AADPM2907K"
+          Name="Rahul Sharma"
+          DateOFBirth="15 Jul 1996"
+          gender="Male"
+          nameVerificationStatus={true}
+          panVerificationStatus={true}
+          verificationTimeStamp="13 Oct 2025, 10:45 AM"
+        />{" "}
+        <AadhaarCardInfo
+          aadhaarNumber="1234-5678-9012"
+          name="Rahul Sharma"
+          nameVerificationStatus={true}
+          dateOfBirth="15 Jul 1996"
+          gender="Male"
+          permanentAddress={{
+            addressLine1: "A-32, Sector 10 Main Road",
+            addressLine2: "Near City Park",
+            postOffice: "Noida Sector 10",
+            district: "Gautam Buddha Nagar",
+            stateName: "Uttar Pradesh",
+            pinCode: "201301",
+            country: "India",
+            fullAddress:
+              "A-32, Sector 10 Main Road, Near City Park, Noida, Gautam Buddha Nagar, Uttar Pradesh, 201301, India",
+          }}
+          currentAddress={{
+            addressLine1: "Flat 205, MG Road",
+            addressLine2: "Opposite Metro Station",
+            postOffice: "Gurugram H.O",
+            district: "Gurugram",
+            stateName: "Haryana",
+            pinCode: "122002",
+            country: "India",
+            fullAddress:
+              "Flat 205, MG Road, Opposite Metro Station, Gurugram, Haryana, 122002, India",
+          }}
+          verificationTimeStamp="13 Oct 2025, 10:30 AM"
+        />
       </div>
 
       {/* PAN Details */}
       <div className="scroll-mt-16" id="pan-details">
-        <PanCardInfoCard />
+        <PanCardInfoCard
+          panCardNumber="AADPM2907K"
+          Name="Rahul Sharma"
+          DateOFBirth="15 Jul 1996"
+          gender="Male"
+          nameVerificationStatus={true}
+          panVerificationStatus={true}
+          verificationTimeStamp="13 Oct 2025, 10:45 AM"
+        />{" "}
       </div>
 
       {/* Aadhaar & Address */}
       <div className="scroll-mt-16" id="aadhaar-address">
-        <AadhaarCardInfo />
+        <AadhaarCardInfo
+          aadhaarNumber="1234-5678-9012"
+          name="Rahul Sharma"
+          nameVerificationStatus={true}
+          dateOfBirth="15 Jul 1996"
+          gender="Male"
+          permanentAddress={{
+            addressLine1: "A-32, Sector 10 Main Road",
+            addressLine2: "Near City Park",
+            postOffice: "Noida Sector 10",
+            district: "Gautam Buddha Nagar",
+            stateName: "Uttar Pradesh",
+            pinCode: "201301",
+            country: "India",
+            fullAddress:
+              "A-32, Sector 10 Main Road, Near City Park, Noida, Gautam Buddha Nagar, Uttar Pradesh, 201301, India",
+          }}
+          currentAddress={{
+            addressLine1: "Flat 205, MG Road",
+            addressLine2: "Opposite Metro Station",
+            postOffice: "Gurugram H.O",
+            district: "Gurugram",
+            stateName: "Haryana",
+            pinCode: "122002",
+            country: "India",
+            fullAddress:
+              "Flat 205, MG Road, Opposite Metro Station, Gurugram, Haryana, 122002, India",
+          }}
+          verificationTimeStamp="13 Oct 2025, 10:30 AM"
+        />
       </div>
 
       {/* Demat Accounts */}
