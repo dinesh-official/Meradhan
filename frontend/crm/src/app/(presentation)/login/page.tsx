@@ -46,7 +46,10 @@ function LoginPage() {
             <div className="mt-7 text-center">
               <p className="text-xs text-gray-500">
                 Need help?{" "}
-                <a href="#" className="text-primary font-medium hover:underline">
+                <a
+                  href="#"
+                  className="text-primary font-medium hover:underline"
+                >
                   Contact Support
                 </a>
               </p>

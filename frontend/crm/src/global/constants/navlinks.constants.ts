@@ -194,7 +194,13 @@ export const NAV_ITEMS: NavItem[] = [
                         allowOnly: ['view:crmauditlogs'],
                     },
                     {
-                        label: 'Session Logs',
+                        label: 'Authentication Logs',
+                        path: '/dashboard/audit-logs/crm/authentication',
+                        module: 'crmauditlogs',
+                        allowOnly: ['view:crmauditlogs'],
+                    },
+                    {
+                        label: 'Session Analytics',
                         path: '/dashboard/audit-logs/crm/session',
                         module: 'crmauditlogs',
                         allowOnly: ['view:crmauditlogs'],

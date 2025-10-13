@@ -27,8 +27,7 @@ export const FormCheckbox = ({
       className={`flex items-start justify-start  flex-col gap-4  ${className}`}
     >
       <Label htmlFor={id}>
-        {label}{" "}
-        {required && <span className="text-gray-500 text-xs">(Mandatory)</span>}
+        {label} {required && <span className="text-gray-500 text-xs">(Mandatory)</span>}
       </Label>
       <div>
         <Switch

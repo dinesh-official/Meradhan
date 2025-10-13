@@ -1,4 +1,10 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import StatusBadge from "@/global/elements/wrapper/StatusBadge";
 import React from "react";
@@ -24,14 +30,14 @@ export default function PanCardInfoCard() {
           </LabelView>
           <LabelView title="Full Name">
             <p className="font-medium text-sm">
-              Vikas Kukreja <StatusBadge value="Verified" />{" "}
+              Vikas Kukreja <StatusBadge value="Verified" />
             </p>
           </LabelView>
         </div>
       </CardContent>
-      <CardFooter className="border-t"  >
-        <LabelView title="Verification Timestamp" >
-          <p className="font-semibold text-sm" >01 Oct 2025, 11:59 AM</p>
+      <CardFooter className="border-t">
+        <LabelView title="Verification Timestamp">
+          <p className="font-semibold text-sm">01 Oct 2025, 11:59 AM</p>
         </LabelView>
       </CardFooter>
     </Card>
