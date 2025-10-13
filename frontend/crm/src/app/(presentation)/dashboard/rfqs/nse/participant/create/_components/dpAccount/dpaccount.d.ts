@@ -5,7 +5,7 @@ export type DPAccountFormData = z.infer<typeof dpAccountSchema>;
 export type DPAccountsFormData = z.infer<typeof dpAccountsSchema>;
 
 export interface IDPAccountFormHook {
-state: DPAccountsFormData;
+  state: DPAccountsFormData;
   errors: Record<string, Partial<Record<keyof DPAccountFormData, string[]>>>;
 
   addDPAccount: () => void;

@@ -160,7 +160,7 @@ main() {
     cd ../
     # Install backend dependencies
     install_dependencies "backend" "npm" "Backend"
-    install_dependencies_prisma_backend "backend/databases/postgress" "npm" "Backend"
+    install_dependencies_prisma_backend "backend/databases/supabase" "npm" "Backend"
     
     # Install frontend dependencies
     install_dependencies "frontend/crm" "npm" "Frontend (Next.js)" "force"

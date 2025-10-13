@@ -10,6 +10,7 @@ import responseTime from "response-time";
 import { errorHandler } from "./error.handler";
 import { responseHandler } from "./response.handler";
 import type { IExpressRoute, IServer } from "./server.interface";
+import logger from "@utils/logger/logger";
 
 type TMonitor = { serverMonitor?: ServerMonitorInterface, responseTimeHandler?: (data: { method: string, url: string, duration: number, statusCode: string }) => void }
 
@@ -86,7 +87,7 @@ export class ExpressServer implements IServer, IExpressRoute {
 
         // start server  -
         this.server.listen(this.port, () => {
-            console.log(`✅ Server is running in ${process.env.MODE || "DEVELOPMENT"} mode at http://localhost:${this.port}`);
+            logger.logError(`✅ Server is running in ${process.env.MODE || "DEVELOPMENT"} mode at http://localhost:${this.port}`);
             cb?.();
         });
     }

@@ -6,6 +6,11 @@ export const hasPermission = (role: Role, permission: Permission): boolean => {
     return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
 };
 
+export const hasOneOfPermission = (role: Role, permissions: Permission[]): boolean => {
+  const allowed = ROLE_PERMISSIONS[role] ?? [];
+  return permissions.some(p => allowed.includes(p));
+};
+
 /**
  * Filters navigation items based on user permissions
  */

@@ -1,14 +1,16 @@
-import { bankAccountSchema, } from "./backAccount.schema";
-
-
+// @ts-check
+import z from "zod";
+import { bankAccountSchema } from "./backAccount.schema";
 
 export type BankAccountFormData = z.infer<typeof bankAccountSchema>;
 export type BankAccountsFormData = BankAccountFormData[];
 
+
+
 export interface IBankAccountFormHook {
   state: BankAccountsFormData;
 
-  errors: Record<string, Partial<Record<keyof BankAccountFormData, string[]>>>;
+  errors: Partial<Record<keyof BankAccountFormData, string[]>>[];
 
   addBankAccount: () => void;
   removeBankAccount: (id: string) => void;

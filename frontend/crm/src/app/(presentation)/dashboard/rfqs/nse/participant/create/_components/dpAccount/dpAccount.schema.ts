@@ -11,7 +11,7 @@ export const BENEFICIARY = [
 export const DEFAULT_ACCOUNT = ["Yes", "No"] as const;
 
 export const dpAccountSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   dptype: z.enum(DP_TYPE),
   dpid: z.string().min(1, "DP ID is required").max(16, "DP ID is too long"), // adjust to your format if needed
   beneficiaryid: z.enum(BENEFICIARY),

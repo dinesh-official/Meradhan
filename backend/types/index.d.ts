@@ -12,7 +12,7 @@ declare global {
             };
         }
         interface Response {
-            sendResponse: (d: { statusCode: HttpStatus, success?: boolean, message?: string, data?: unknown }) => Response;
+            sendResponse: (d: { statusCode: HttpStatus, success?: boolean, message?: string, responseData?: unknown }) => Response;
         }
     }
 }

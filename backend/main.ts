@@ -6,6 +6,8 @@ import { ExpressServer } from "@core/bootstrap/server";
 import { checkConnectToDatabases, disconnectFromDatabases } from "@core/database/database";
 import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@lib/provider/monitoring/prometheus.provider";
 import authRoutes from "./src/resource/auth/auth.route";
+import { cacheStorage } from "./src/queues/redis/queues";
+import logger from "@utils/logger/logger";
 
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
@@ -16,6 +18,7 @@ const server = new ExpressServer(config.port, {
         responseTimeMonitor.recordResponseTime(data.method, data.url, data.duration, data.statusCode);
     },
 });
+logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
 server.addRoutes([authRoutes]);
@@ -23,7 +26,7 @@ server.addRoutes([authRoutes]);
 // Connect to databases and start server
 checkConnectToDatabases()
     .then(() => {
-        console.log("All databases connected successfully.");
+        logger.logInfo("All databases connected successfully.");
         server.start();
     }).catch((error) => {
         console.error("Error connecting to databases:", error);
@@ -33,10 +36,11 @@ checkConnectToDatabases()
 // Function to handle async shutdown
 async function handleShutdown(signal?: string) {
 
-    console.log(`Process ${signal || "exited"}: Server stopping...`);
+    logger.logInfo(`Process ${signal || "exited"}: Server stopping...`);
     try {
         await disconnectFromDatabases();
-        console.log("Databases disconnected successfully.");
+        await cacheStorage.disconnect();
+        logger.logInfo("Databases disconnected successfully.");
     } catch (err) {
         console.error("Error disconnecting databases:", err);
     }
@@ -53,5 +57,5 @@ process.on("uncaughtException", (err) => {
 
 // Synchronous exit log (async not possible here)
 process.on("exit", (code) => {
-    console.log(`Process exited with code ${code}`);
+    logger.logInfo(`Process exited with code ${code}`);
 });

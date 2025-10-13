@@ -79,16 +79,16 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
             error={manager.errors.institutions?.[0]}
           />
         )}
-
-        <InputField
-          id="clientcode"
-          label="Client Code"
-          placeholder="Enter Client Code"
-          value={manager.state.clientCode}
-          onChangeAction={(e) => manager.setRFQData("clientCode", e)}
-          error={manager.errors.clientCode?.[0]}
-        />
-
+        {manager.state.dealType == "BROKER" && (
+          <InputField
+            id="clientcode"
+            label="Client Code"
+            placeholder="Enter Client Code"
+            value={manager.state.clientCode}
+            onChangeAction={(e) => manager.setRFQData("clientCode", e)}
+            error={manager.errors.clientCode?.[0]}
+          />
+        )}
         <InputField
           id="rfqsize"
           label="RFQ Size"

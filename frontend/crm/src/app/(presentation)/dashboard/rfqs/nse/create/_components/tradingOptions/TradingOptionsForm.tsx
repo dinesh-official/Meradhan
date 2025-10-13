@@ -18,10 +18,10 @@ const TradingOptionsForm = ({
   return (
     <div className="flex flex-col gap-6 relative">
       {/* Section Title */}
-      <h5 className="font-bold text-lg">Trading Options</h5>
+      <h5 className="font-bold">Trading Options</h5>
 
       {/* ===== RFQ Options Section ===== */}
-      <div className="grid md:grid-cols-3 items-center gap-4">
+      <div className="grid md:grid-cols-4  gap-4">
         {/* RFQ Valid Till Market Close */}
 
         <FormCheckbox
@@ -39,6 +39,7 @@ const TradingOptionsForm = ({
             setTradingOptionsData("valueNegotiable", checked === true)
           }
         />
+
         <FormCheckbox
           label="Quote Negotiable"
           checked={state.quoteNegotiable}
@@ -46,11 +47,16 @@ const TradingOptionsForm = ({
             setTradingOptionsData("quoteNegotiable", checked === true)
           }
         />
-        {/* RFQ Expiry Time */}
-      </div>
 
-      {/* ===== Value Negotiation Section ===== */}
-      <div className="grid md:grid-cols-3  gap-4">
+        {/* Anonymous */}
+        <FormCheckbox
+          label="Anonymous"
+          checked={state.anonymous}
+          onCheckedChange={(checked) =>
+            setTradingOptionsData("anonymous", checked === true)
+          }
+        />
+
         {/* Value Negotiable */}
         <InputField
           id="rfqexpirytime"
@@ -83,10 +89,7 @@ const TradingOptionsForm = ({
           onChangeAction={(val) => setTradingOptionsData("valueStepSize", val)}
           error={errors.valueStepSize?.[0]}
         />
-      </div>
 
-      {/* ===== Access Type & Anonymity Section ===== */}
-      <div className="grid md:grid-cols-2 gap-4">
         {/* Access Type */}
         <SelectField
           label="Access Type"
@@ -105,15 +108,6 @@ const TradingOptionsForm = ({
           error={errors.accessType?.[0]}
         />
 
-        {/* Anonymous */}
-
-        <FormCheckbox
-          label="Anonymous"
-          checked={state.anonymous}
-          onCheckedChange={(checked) =>
-            setTradingOptionsData("anonymous", checked === true)
-          }
-        />
       </div>
     </div>
   );

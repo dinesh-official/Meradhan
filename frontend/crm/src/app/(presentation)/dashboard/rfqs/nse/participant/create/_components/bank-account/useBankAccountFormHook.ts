@@ -4,7 +4,7 @@ import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { useState } from "react";
 import { ZodError } from "zod";
 import { BankAccountFormData, BankAccountsFormData, IBankAccountFormHook } from "./backAccount";
-import { bankAccountSchema, bankAccountsSchema } from "./backAccount.schema";
+import { bankAccountSchema } from "./backAccount.schema";
 
 export const createBlankBankAccount = (): BankAccountFormData => ({
   id: crypto.randomUUID(),
@@ -21,9 +21,7 @@ export const useBankAccountFormHook = (
   initial: BankAccountsFormData = initBankAccountsData
 ): IBankAccountFormHook => {
   const [state, setState] = useState<BankAccountsFormData>(initial);
-  const [errors, setErrors] = useState<
-    Record<string, Partial<Record<keyof BankAccountFormData, string[]>>>
-  >({});
+  const [errors, setErrors] = useState<IBankAccountFormHook['errors']>([]);
 
   /** Add a new blank bank account */
   const addBankAccount = () => {
@@ -32,6 +30,7 @@ export const useBankAccountFormHook = (
 
   /** Remove an account and ensure one default remains */
   const removeBankAccount = (id: string) => {
+    const index = state.findIndex((a) => a.id == id);
     setState((prev) => {
       const next = prev.filter((a) => a.id !== id);
       if (next.length && !next.some((a) => a.isdefaultaccount === "Yes")) {
@@ -41,8 +40,9 @@ export const useBankAccountFormHook = (
     });
 
     setErrors((prev) => {
+
       const newErrors = { ...prev };
-      delete newErrors[id];
+      delete newErrors[index];
       return newErrors;
     });
   };
@@ -53,6 +53,8 @@ export const useBankAccountFormHook = (
     key: K,
     value: BankAccountFormData[K]
   ) => {
+    const index = state.findIndex((a) => a.id == id);
+
     setState((prev) =>
       prev.map((a) => (a.id === id ? { ...a, [key]: value } : a))
     );
@@ -60,10 +62,10 @@ export const useBankAccountFormHook = (
     // Clear that field’s error (if any)
     setErrors((prev) => {
       const copy = { ...prev };
-      if (!copy[id]) return copy;
-      const accErrs = { ...copy[id] };
-      delete accErrs[key];
-      copy[id] = accErrs;
+      if (!copy[index]) return copy;
+      const accErrs = { ...copy[index] };
+
+      copy[index] = accErrs;
       return copy;
     });
   };
@@ -81,6 +83,8 @@ export const useBankAccountFormHook = (
 
   /** Validate a single account and update its errors */
   const validateSingleBankAccount = (id: string): boolean => {
+    const index = state.findIndex((a) => a.id == id);
+
     const account = state.find((a) => a.id === id);
     if (!account) return false;
 
@@ -88,7 +92,7 @@ export const useBankAccountFormHook = (
       bankAccountSchema.parse(account);
       setErrors((prev) => {
         const copy = { ...prev };
-        delete copy[id];
+        delete copy[index];
         return copy;
       });
       return true;
@@ -103,24 +107,29 @@ export const useBankAccountFormHook = (
 
   /** Validate all accounts (using array schema) */
   const validateAllBankAccounts = (): boolean => {
-    try {
-      bankAccountsSchema.parse(state);
-      setErrors({});
-      return true;
-    } catch (err) {
-      if (err instanceof ZodError) {
-        const fieldErrors = zodErrorToErrorMap(err);
-        // Optional: You could group errors per account here
-        console.error("Bank account validation failed:", fieldErrors);
+
+    const errorsData: IBankAccountFormHook['errors'] = [];
+
+    state.forEach((data) => {
+      try {
+        bankAccountSchema.parse(data);
+      } catch (error) {
+        const fieldErrors = zodErrorToErrorMap<ZodError>(error);
+        console.log(fieldErrors);
+        
+        errorsData.push(fieldErrors as IBankAccountFormHook['errors'][number])
       }
-      return false;
-    }
+    })
+    console.log(errorsData);
+    
+    setErrors(errorsData)
+    return false;
   };
 
   /** Reset everything */
   const resetBankAccounts = () => {
     setState(initial ?? initBankAccountsData);
-    setErrors({});
+    setErrors([]);
   };
 
   return {

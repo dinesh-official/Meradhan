@@ -4,7 +4,7 @@ import { ZodError } from "zod";
  * Converts a ZodError into a typed error map for any form type
  */
 export const zodErrorToErrorMap = <T>(
-  err: ZodError<T> // ✅ explicitly typed as ZodError<T>
+  err: unknown
 ): Partial<Record<keyof T, string[]>> => {
   const map: Partial<Record<keyof T, string[]>> = {};
 

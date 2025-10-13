@@ -11,7 +11,11 @@ import {
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
-export type SelectOption<T = string> = { label: string; value: T; disabled?: boolean };
+export type SelectOption<T = string> = {
+  label: string;
+  value: T;
+  disabled?: boolean;
+};
 
 type Props = {
   label: string;

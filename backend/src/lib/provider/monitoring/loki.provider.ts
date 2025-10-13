@@ -29,13 +29,13 @@ export class LokiLogsProvider implements LogsMonitorServiceInterface {
         return LokiLogsProvider.instance;
     }
 
-    public logInfo(message: string): void {
-        this.logger.info(message);
+    public logInfo(message: string, ...meta: unknown[]): void {
+        this.logger.info(message,meta);
         console.info(message)
     }
 
-    public logError(message: string): void {
-        this.logger.error(message);
+    public logError(message: string, ...meta: unknown[]): void {
+        this.logger.error(message,meta);
         console.error(message)
     }
 }

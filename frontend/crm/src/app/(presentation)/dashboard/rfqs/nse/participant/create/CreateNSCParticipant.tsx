@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Landmark, Plus } from "lucide-react";
 import AddressInformatoin from "./_components/address-information/AddressInformatoin";
@@ -31,6 +31,7 @@ const CreateNSCParticipant = () => {
   const basicDetailsFormHook = useBasicFormDataHook();
   return (
     <div className="max-w-4xl mt-6 mx-auto flex flex-col gap-4">
+      
       <Card>
         <CardHeader>
           <CardTitle>Basic Informaiton</CardTitle>
@@ -105,21 +106,22 @@ const CreateNSCParticipant = () => {
             }}
           >
             <Plus className="w-4 h-4" />
-            Add DP Account
-          </Button>
-          <Button
-            onClick={() => {
-              bankAccountFormHook.validateAllBankAccounts();
-              dpAccountFormHook.validateAllDPAccounts();
-              leiInformationHook.validateLEIData();
-              addressInformationHook.validateAddressData();
-              basicDetailsFormHook.validateBasicData();
-            }}
-          >
-            Create lead
+            Add Demat Account
           </Button>
         </CardFooter>
       </Card>
+
+      <Button
+        onClick={() => {
+          bankAccountFormHook.validateAllBankAccounts();
+          dpAccountFormHook.validateAllDPAccounts();
+          leiInformationHook.validateLEIData();
+          addressInformationHook.validateAddressData();
+          basicDetailsFormHook.validateBasicData();
+        }}
+      >
+        Create New Participant
+      </Button>
     </div>
   );
 };

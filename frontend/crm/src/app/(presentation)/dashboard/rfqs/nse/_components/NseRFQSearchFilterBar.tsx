@@ -76,7 +76,19 @@ const NseRFQSearchFilterBar: React.FC<NseRFQSearchFilterBarProps> = ({
         </Select>
         <Select value={kycValue} onValueChange={onKycChange}>
           <SelectTrigger className="w-[160px] bg-secondary border-none">
-            <SelectValue placeholder="Apply Source" />
+            <SelectValue placeholder="Apply Segments" />
+          </SelectTrigger>
+          <SelectContent>
+            {kycOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={kycValue} onValueChange={onKycChange}>
+          <SelectTrigger className="w-[160px] bg-secondary border-none">
+            <SelectValue placeholder="Apply Deal Types" />
           </SelectTrigger>
           <SelectContent>
             {kycOptions.map((option) => (

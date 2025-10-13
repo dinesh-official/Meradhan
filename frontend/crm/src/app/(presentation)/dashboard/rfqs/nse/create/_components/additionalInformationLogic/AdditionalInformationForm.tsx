@@ -15,7 +15,7 @@ const AdditionalInformationForm = ({
 }) => {
   return (
     <div className="flex flex-col gap-4 relative">
-      <h5 className="font-bold">Trading Options</h5>
+      <h5 className="font-bold">Additional Information</h5>
       <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
         <SelectField
           label="Sector"

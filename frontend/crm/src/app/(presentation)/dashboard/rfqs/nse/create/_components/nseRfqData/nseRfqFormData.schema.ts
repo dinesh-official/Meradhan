@@ -19,8 +19,7 @@ export const nseRFQFormDataSchema = z.object({
   quoteType: z.enum(QUOTE_TYPES, { message: "Quote Type is required" }),
   clientCode: z
     .string()
-    .min(1, "Client Code is required")
-    .max(50, "Client Code must be under 50 characters"),
+    .max(50, "Client Code must be under 50 characters").optional(),
   dealType: z.enum(DEAL_TYPES, { message: "Deal Type is required" }),
   institutions: z.boolean().optional(),
   rfqSize: z
@@ -46,11 +45,20 @@ export const nseRFQFormDataSchema = z.object({
     .max(20, "Invalid Price value"),
 }).superRefine((data, ctx) => {
   if (data.dealType === "BROKER") {
-    ctx.addIssue({
-      code: "custom",
-      message: "Institutions is required.",
-      path: ["institutions"],
-    });
+    if (!data.institutions) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Institutions is required.",
+        path: ["institutions"],
+      });
+    }
+    if (!data.clientCode) {
+      ctx.addIssue({
+        code: "custom",
+        message: "clientCode is required.",
+        path: ["clientCode"],
+      });
+    }
   }
 });
 

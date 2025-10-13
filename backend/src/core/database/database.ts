@@ -1,4 +1,5 @@
-import userDataDb, { Prisma as DataBaseSchema } from '@databases/postgress/generated/prisma';
+import userDataDb, { Prisma as DataBaseSchema } from '@databases/supabase/generated/prisma';
+import logger from '@utils/logger/logger';
 const dataBase = new userDataDb.PrismaClient();
 
 // Export all databases here
@@ -18,14 +19,14 @@ export const checkConnectToDatabases = async () => {
     disconnectFromDatabases().then(async () => {
         const dbList = Object.entries(db);
 
-        console.log(`Connecting to ${dbList.length} databases...`);
-        console.log(dbList.map(([name]) => `- ${name}`).join('\n'));
+        logger.logInfo(`Connecting to ${dbList.length} databases...`);
+        logger.logInfo(dbList.map(([name]) => `- ${name}`).join('\n'));
         for (const [name, client] of dbList) {
             try {
                 await client.$connect();
-                console.log(`✅ Connected to ${name} database`);
+                logger.logInfo(`✅ Connected to ${name} database`);
             } catch (error) {
-                console.error(`❌ Failed to connect to ${name} database:`, error);
+                logger.logError(`❌ Failed to connect to ${name} database:`, error);
                 throw error; // Exit if any database connection fails
             }
         }
@@ -39,10 +40,10 @@ export const disconnectFromDatabases = async () => {
         try {
             await client.$disconnect();
         } catch (error) {
-            console.error(`❌ Failed to disconnect from ${name} database:`, error);
+            logger.logError(`❌ Failed to disconnect from ${name} database:`, error);
         }
     }
 }
 
 
-export *  from  '@databases/postgress/generated/prisma';
+export *  from  '@databases/supabase/generated/prisma';
