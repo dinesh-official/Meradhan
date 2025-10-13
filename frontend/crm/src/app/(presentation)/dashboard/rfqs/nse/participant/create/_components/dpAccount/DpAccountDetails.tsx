@@ -1,15 +1,12 @@
-import { Card, CardContent } from "@/components/ui/card";
-import React from "react";
-import BankAccountForm from "../account-forms/BankAccountForm";
-import DpAccountform from "../account-forms/DpAccountForm";
-import { Landmark, Plus, X } from "lucide-react";
-import { DPAccountFormData, IDPAccountFormHook } from "./dpaccount";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { X } from "lucide-react";
+import DpAccountForm from "../account-forms/DpAccountForm";
+import { DPAccountFormData, IDPAccountFormHook } from "./dpaccount";
 
 const DPAccountDetails = ({ manager }: { manager: IDPAccountFormHook }) => {
   return (
@@ -31,7 +28,7 @@ const DPAccountDetails = ({ manager }: { manager: IDPAccountFormHook }) => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation(); // prevents accordion toggle when clicking remove
-                     manager.removeDPAccount(account.id)
+                      manager.removeDPAccount(account.id);
                     }}
                     className="inline-flex items-center gap-1 text-sm text-red-600 hover:underline"
                   >
@@ -42,7 +39,7 @@ const DPAccountDetails = ({ manager }: { manager: IDPAccountFormHook }) => {
             </AccordionTrigger>
 
             <AccordionContent>
-              <DpAccountform
+              <DpAccountForm
                 index={idx}
                 account={account}
                 onChange={(k, v) => manager.setDPAccountData(account.id, k, v)}

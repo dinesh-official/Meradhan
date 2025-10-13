@@ -23,13 +23,11 @@ type Props = {
   onRemove: () => void;
 };
 
-const DpAccountform = ({
-  index,
+const DpAccountForm = ({
   account,
   error = {},
   onChange,
   onSetDefault,
-  onRemove,
 }: Props) => {
   return (
     <div className="flex flex-col gap-4">
@@ -86,4 +84,4 @@ const DpAccountform = ({
   );
 };
 
-export default DpAccountform;
+export default DpAccountForm;

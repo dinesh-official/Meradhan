@@ -42,9 +42,9 @@ export const useLEIInformationFormHook = (
     key: K,
     value: LEIInformationFormData[K]
   ) => {
-    const fieldSchema = leiInformationSchema.pick({ [key]: true } as any);
+    const fieldSchema = leiInformationSchema.pick({ [key]: true });
     try {
-      fieldSchema.parse({ [key]: value } as any);
+      fieldSchema.parse({ [key]: value });
       // If valid, clear error
       setErrors((prev) => {
         const copy = { ...prev };

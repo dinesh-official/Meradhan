@@ -11,12 +11,12 @@ import React from "react";
 
 export interface PanCardInfoProps {
   panCardNumber: string;
-  DateOFBirth: String;
-  gender: String;
+  DateOFBirth: string;
+  gender: string;
   Name: string;
   nameVerificationStatus: boolean;
   panVerificationStatus: boolean;
-  verificationTimeStamp: String;
+  verificationTimeStamp: string;
 }
 
 export default function PanCardInfoCard(panCardInfoData: PanCardInfoProps) {

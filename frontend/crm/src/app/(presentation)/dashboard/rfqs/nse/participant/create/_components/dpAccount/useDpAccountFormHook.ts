@@ -117,7 +117,7 @@ export const useDPAccountFormHook = (
     } catch (err) {
       if (err instanceof ZodError) {
         // You can enhance to group by account.id if needed
-        const fieldErrors = zodErrorToErrorMap(err);
+        // const fieldErrors = zodErrorToErrorMap(err);
         // console.error("DP accounts validation failed:", fieldErrors);
       }
       return false;
