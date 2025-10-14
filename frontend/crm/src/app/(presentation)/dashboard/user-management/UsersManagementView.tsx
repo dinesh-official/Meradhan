@@ -5,10 +5,48 @@ import StatusCountCard from "@/global/elements/cards/StatusCountCard";
 import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Briefcase, Heart, Layers, Plus, Users } from "lucide-react";
-import Table from "../Table";
 import UsersSearchFilterBar from "./_components/UsersSearchFilterBar";
 import CreateNewUserPopup from "./_components/newUser/CreateNewUserPopup";
+import UsersTable, { UserRow } from "./_components/Table";
 
+const usersMock: UserRow[] = [
+  {
+    id: "U-1001",
+    name: "Rohit Verma",
+    email: "rohit.verma@example.com",
+    phoneNo: "9876543210",
+    avatar: "https://i.pravatar.cc/80?img=12",
+    lastLogin: "2025-10-10T12:30:00Z",
+    role: "manager",
+    createdAt: "2025-06-01T10:00:00Z",
+    updatedAt: "2025-10-12T09:40:00Z",
+    createdBy: "admin@acme.com",
+  },
+  {
+    id: "U-1002",
+    name: "Neha Sharma",
+    email: "neha.sharma@example.com",
+    phoneNo: "9810012345",
+    avatar: "https://i.pravatar.cc/80?img=21",
+    lastLogin: "2025-10-13T08:05:00Z",
+    role: "admin",
+    createdAt: "2025-05-15T10:00:00Z",
+    updatedAt: "2025-10-13T08:06:00Z",
+    createdBy: "admin@acme.com",
+  },
+  {
+    id: "U-1003",
+    name: "Amit Patel",
+    email: "amit.patel@example.com",
+    phoneNo: "9911223344",
+    avatar: "https://i.pravatar.cc/80?img=31",
+    lastLogin: "2025-10-01T17:20:00Z",
+    role: "viewer",
+    createdAt: "2025-07-22T10:00:00Z",
+    updatedAt: "2025-09-30T18:00:00Z",
+    createdBy: "neha.sharma@example.com",
+  },
+];
 function UsersManagementView() {
   return (
     <div className="flex flex-col gap-5">
@@ -64,7 +102,7 @@ function UsersManagementView() {
       <Card>
         <UsersSearchFilterBar placeholder="Search Users..." />
         <CardContent>
-          <Table />
+          <UsersTable data={usersMock}/>
         </CardContent>
         <CardPagination onClick={() => {}} page={5} totalPages={8} />
       </Card>
