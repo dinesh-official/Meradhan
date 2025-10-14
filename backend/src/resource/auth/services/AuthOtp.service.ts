@@ -18,17 +18,17 @@ export class AuthOtpService implements IAuthOtpService {
 
     private storeKey = "AUTH_OTP";
     private store: IQueueService;
-    constructor() { 
-       this.store =  QueueStore.getStore();
+    constructor() {
+        this.store = QueueStore.getStore();
     }
 
     async generateOtpAndSend(identifier: string, length: number = 6, expirySeconds: number = 300): ReturnType<IAuthOtpService['generateOtpAndSend']> {
         const otp = Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
         if (config.mode == "DEVELOPMENT") {
-           console.log("====================");
+            console.log("====================");
             console.log("OTP SEND - ", otp);
-           console.log("====================");
-       }
+            console.log("====================");
+        }
         const value = await hashingUtils.hashPassword(otp)
         await this.store.setKey(`${this.storeKey}:${identifier}`, value, expirySeconds);
         const token = tokenUtils.generateToken<{ identifier: string }>({ identifier }, expirySeconds)
@@ -40,7 +40,7 @@ export class AuthOtpService implements IAuthOtpService {
         const record = await this.store.getKey<string>(`${this.storeKey}:${tokenData.identifier}`)
         if (!record) throw new AppError("otp is expired");
 
-        const isValid = await hashingUtils.comparePassword(otp,record);
+        const isValid = await hashingUtils.comparePassword(otp, record);
         if (!isValid) throw new AppError("invalid otp");
         await this.store.deleteKey(`${this.storeKey}:${tokenData.identifier}`)
         return isValid;

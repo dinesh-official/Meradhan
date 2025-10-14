@@ -1,11 +1,15 @@
 import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
-import { AuthOtpService, type IAuthOtpService } from "./AuthOtp.service";
 import type { IAuthRepoInterface } from "../auth.repo";
+import { AuthOtpService, type IAuthOtpService } from "./AuthOtp.service";
+
+
+type ReqDataResponse = { token: string, role: string, id: number, avatar?: string | null, name: string, email: string, phoneNo: string }
 
 export interface TEmailAuthServiceInterface {
     sendAuthEmailOtp(email: string): Promise<{ token: string }>,
-    verifyAuthEmailOtp(email: string, token: string, opt: string): Promise<{ token: string, role: string, id: number }>
+    verifyAuthEmailOtp(email: string, token: string, opt: string): Promise<ReqDataResponse>
+    getSession(id: number): Promise<Omit<ReqDataResponse, 'token'>>
 }
 
 export class EmailAuthService implements TEmailAuthServiceInterface {
@@ -27,11 +31,30 @@ export class EmailAuthService implements TEmailAuthServiceInterface {
         if (!isVerified) {
             throw new AppError("invalid otp.")
         }
-        const authToken = tokenUtils.generateToken(user, '1d');
+        const authToken = tokenUtils.generateToken({
+            email: user.email,
+            id: user.id,
+        }, '1d');
         return {
             token: authToken,
             id: user.id,
-            role: user.role
+            role: user.role,
+            avatar: user.avatar,
+            name: user.name,
+            email: user.email,
+            phoneNo: user.phoneNo
+        }
+    }
+
+    async getSession(id: number): ReturnType<TEmailAuthServiceInterface['getSession']> {
+        const user = await this.authRepo.getAuthSession(id);
+        return {
+            id: user.id,
+            role: user.role,
+            avatar: user.avatar,
+            name: user.name,
+            email: user.email,
+            phoneNo: user.phoneNo
         }
     }
 }

@@ -41,13 +41,13 @@ export class ExpressServer implements IServer, IExpressRoute {
         }
 
         // Pre Middlewares -
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true }));
-        this.app.use(responseHandler)
-        this.app.use(morgan("common"));
         this.app.use(cors());
-        this.app.use(cookieParser())
+        this.app.use(morgan("common"));
         this.app.use(helmet());
+        this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(express.json());
+        this.app.use(cookieParser())
+        this.app.use(responseHandler)
 
         // add response time monitor -
         if (this.monitoring?.responseTimeHandler) {

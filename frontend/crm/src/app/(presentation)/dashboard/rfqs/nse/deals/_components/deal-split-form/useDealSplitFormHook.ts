@@ -57,9 +57,9 @@ export const useDealSplitFormHook = (
 
   const validateField = useCallback(
     <K extends keyof DealSplitFormData>(key: K, value: DealSplitFormData[K]) => {
-      const fieldSchema = dealSplitFormSchema.pick({ [key]: true } as any);
+      const fieldSchema = dealSplitFormSchema.pick({ [key]: true });
       try {
-        fieldSchema.parse({ [key]: value } as any);
+        fieldSchema.parse({ [key]: value });
         setErrors((prev) => {
           const copy = { ...prev };
           delete copy[key];

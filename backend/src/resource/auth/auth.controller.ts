@@ -7,6 +7,8 @@ import { config } from "@config/config";
 export interface TAuthController {
     loginWithOtp(req: Request, res: Response): Promise<void>
     verifyLoginOtp(req: Request, res: Response): Promise<void>
+    session(req: Request, res: Response): Promise<void>
+    logout(req: Request, res: Response): Promise<void>
 }
 
 export class AuthController implements TAuthController {
@@ -14,11 +16,13 @@ export class AuthController implements TAuthController {
     constructor(private emailAuthService: TEmailAuthServiceInterface) { }
 
     async loginWithOtp(req: Request, res: Response): Promise<void> {
+        console.log(req.body);
+        
         const data = appSchema.auth.loginWithOtpSchema.parse(req.body);
         const payload = await this.emailAuthService.sendAuthEmailOtp(data.email)
         res.sendResponse({
             statusCode: HttpStatus.OK,
-            message: "opt send successfully",
+            message: "otp send successfully",
             success: true,
             responseData: payload
         })
@@ -29,7 +33,7 @@ export class AuthController implements TAuthController {
         const payload = await this.emailAuthService.verifyAuthEmailOtp(data.email, data.token, data.otp);
 
         const cookieOptions: CookieOptions = {
-            httpOnly: true,   
+            httpOnly: true,
             secure: config.mode === "PRODUCTION",
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "strict",
@@ -41,7 +45,34 @@ export class AuthController implements TAuthController {
 
         res.sendResponse({
             statusCode: HttpStatus.OK,
-            message: "successfully verified"
+            message: "successfully verified",
+            responseData: payload
         });
+    }
+
+    async session(req: Request, res: Response): Promise<void> {
+        const id = req.session!.id;
+        const session = await this.emailAuthService.getSession(Number(id));
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            message: "session",
+            responseData: session
+        })
+    }
+
+    async logout(req: Request, res: Response): Promise<void> {
+        // Clear all cookies
+        for (const cookieName in req.cookies) {
+            res.clearCookie(cookieName, {
+                path: '/',
+                httpOnly: true,
+                secure: config.mode == 'PRODUCTION',
+                sameSite: 'lax',
+            });
+        }
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            message: "logout successfully",
+        })
     }
 }

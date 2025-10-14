@@ -22,7 +22,7 @@ export class AppError extends Error {
     constructor(message: string, options: { statusCode?: HttpStatus; code?: string } = {}) {
         super(message);
         this.statusCode = options.statusCode || 500;
-        this.code = options.code || "INTERNAL_SERVER_ERROR";
+        this.code = options.code;
 
         // 👇 fix prototype chain
         Object.setPrototypeOf(this, AppError.prototype);

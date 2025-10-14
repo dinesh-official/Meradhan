@@ -7,6 +7,7 @@ import axios, {
   AxiosResponse
 } from 'axios';
 import { headers } from 'next/headers';
+import { API_URL } from '@/global/constants/domains';
 
 /**
  * Custom API Server Caller class extending AxiosInstance
@@ -17,7 +18,7 @@ import { headers } from 'next/headers';
 class ApiServerCaller implements IApiCaller {
   private instance: AxiosInstance;
 
-  constructor(baseURL: string = 'http://localhost:3000/api/server') {
+  constructor(baseURL: string = API_URL) {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,

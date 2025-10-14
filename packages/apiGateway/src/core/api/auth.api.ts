@@ -1,33 +1,26 @@
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type z from "zod";
-
 import type { appSchema } from "@root/schema";
-import type { UserDataResponse } from "../../types/response";
 import type { IApiCaller } from "../connection/apiCaller.interface";
+import type { BaseResponseData, OtpVerifyDataResponse, UserSessionDataResponse } from "../../types/response.types";
 
 export interface TAuthApiInterface {
-    login(data: z.infer<typeof appSchema.auth['loginZodSchema']>, config?: AxiosRequestConfig): Promise<AxiosResponse<{ token: string }>>;
-
-    register(data: z.infer<typeof appSchema.auth['registerZodSchema']>, config?: AxiosRequestConfig): Promise<AxiosResponse<{ token: string }>>;
-
-    logout(config?: AxiosRequestConfig): Promise<AxiosResponse<{ message: string }>>;
-
-    getSession(config?: AxiosRequestConfig): Promise<AxiosResponse<UserDataResponse>>;
-
+    loginWithOtp(data: z.infer<typeof appSchema.auth['loginWithOtpSchema']>, config?: AxiosRequestConfig): Promise<AxiosResponse<BaseResponseData<{ token: string }>>>;
+    verifyOtp(data: z.infer<typeof appSchema.auth['verifyOtpSchema']>, config?: AxiosRequestConfig): Promise<AxiosResponse<BaseResponseData<OtpVerifyDataResponse>>>;
+    logout(config?: AxiosRequestConfig): Promise<AxiosResponse<BaseResponseData>>;
+    getSession(config?: AxiosRequestConfig): Promise<AxiosResponse<UserSessionDataResponse>>;
 }
 
 export class AuthApi implements TAuthApiInterface {
-    constructor(private apiClient: IApiCaller) {
+    constructor(private apiClient: IApiCaller) { }
 
+    async loginWithOtp(data: z.infer<typeof appSchema.auth['loginWithOtpSchema']>, config?: AxiosRequestConfig): ReturnType<TAuthApiInterface['loginWithOtp']> {
+        return await this.apiClient.post<{ token: string }>('/auth/login-with-otp', data, config);
     }
 
-    async login(data: z.infer<typeof appSchema.auth['loginZodSchema']>, config?: AxiosRequestConfig): ReturnType<TAuthApiInterface['login']> {
-        return await this.apiClient.get<{ token: string }>('/', config);
-    }
-
-    async register(data: z.infer<typeof appSchema.auth['registerZodSchema']>, config?: AxiosRequestConfig) {
-        return await this.apiClient.post<{ token: string }>('/auth/register', data, config);
+    async verifyOtp(data: z.infer<typeof appSchema.auth['verifyOtpSchema']>, config?: AxiosRequestConfig) {
+        return await this.apiClient.post<{ token: string }>('/auth/verify-otp', data, config);
     }
 
     async logout(config?: AxiosRequestConfig) {
@@ -35,6 +28,6 @@ export class AuthApi implements TAuthApiInterface {
     }
 
     async getSession(config?: AxiosRequestConfig): ReturnType<TAuthApiInterface['getSession']> {
-        return await this.apiClient.get(`/`, config);
+        return await this.apiClient.get(`/session`, config);
     }
 }

@@ -5,7 +5,8 @@ import { useLoginHook } from "./_hooks/useLoginHook";
 import EmailInputStep from "./_components/EmailInputStep";
 
 function LoginForm() {
-  const { actions, state } = useLoginHook();
+  const { actions, state, loginWithOtpMutation } = useLoginHook();
+
   return (
     <div>
       {state.step.value == "EMAIL" && (
@@ -13,7 +14,7 @@ function LoginForm() {
           onChangeAction={state.email.setEmail}
           value={state.email.value}
           onSubmit={actions.handelEmailSubmit}
-          // isLoading={}
+          isLoading={loginWithOtpMutation.isPending}
         />
       )}
 

@@ -1,5 +1,4 @@
-export
-    interface IApiCaller {
+export interface IApiCaller {
     /**
      * Makes a generic request with merged server headers
      */

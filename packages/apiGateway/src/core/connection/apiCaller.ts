@@ -11,11 +11,8 @@ class ApiCallerClient implements IApiCaller {
         this.instance = axios.create({
             baseURL,
             withCredentials: true,
-            validateStatus: () => true,
             timeout: 10000,
         });
-
-
         this.instance.interceptors.response.use(
             (response) => response,
             (error) => {

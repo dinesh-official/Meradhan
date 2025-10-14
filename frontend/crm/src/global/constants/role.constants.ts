@@ -1,13 +1,5 @@
-// 1️ Define all roles
-export const ROLES = [
-    'VIEWER',
-    'ADMIN',
-    'SALES',
-    'SUPPORT',
-    'RELATIONSHIP_MANAGER'
-] as const;
+import { ROLES } from '@root/apiGateway'
 export type Role = typeof ROLES[number];
-
 // 2️ Define all modules (controllers)
 export const MODULES = [
     'dashboard',
@@ -130,3 +122,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
         'view:webanalytics'
     ]
 };
+
+
+export { ROLES };

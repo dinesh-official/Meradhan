@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import YesNoIndicator from "@/global/elements/yesNoIndicator/YesNoIndicator";
-import { CheckCircle, XCircle } from "lucide-react";
 
 export interface TradingOptionsDataProps {
   rfqValidTillMarketClose: boolean;

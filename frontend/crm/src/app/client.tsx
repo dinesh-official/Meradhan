@@ -1,13 +1,12 @@
 "use client";
-
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { UserTrackingProvider } from "@/analytics";
+import { queryClient } from "@/core/config/reactQuery";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { CookiesProvider } from "react-cookie";
 import { Toaster } from "react-hot-toast";
-import { UserTrackingProvider } from "@/analytics";
-
-const queryClient = new QueryClient();
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 function Client({ children }: { children: ReactNode }) {
   return (
@@ -16,6 +15,7 @@ function Client({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
           {children}
           <Toaster position="top-center" reverseOrder={false} />
+          <SonnerToaster position="top-center" richColors />
           <ReactQueryDevtools
             initialIsOpen={false}
             buttonPosition="bottom-right"
