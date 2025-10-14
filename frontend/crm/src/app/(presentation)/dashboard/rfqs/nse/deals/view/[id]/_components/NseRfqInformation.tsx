@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
+import StatusBadge from "@/global/elements/wrapper/StatusBadge";
 import React from "react";
 
 export interface RfqInformationDataProps {
@@ -33,11 +34,11 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
             </LabelView>
 
             <LabelView title="segment">
-              <Badge>{RfqInformationData.segment}</Badge>
-            </LabelView>
+              <StatusBadge value={`${RfqInformationData.segment}`} />
 
+            </LabelView>
             <LabelView title="Buy/Sell">
-              <Badge variant="destructive">{RfqInformationData.buySell}</Badge>
+              <StatusBadge value={`${RfqInformationData.buySell}`} />
             </LabelView>
 
             <LabelView title="Quote Type">
@@ -47,7 +48,7 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
             </LabelView>
 
             <LabelView title="Deal Type">
-              <Badge>{RfqInformationData.dealType}</Badge>
+              <StatusBadge value={`${RfqInformationData.dealType}`} />
             </LabelView>
 
             <LabelView title="RFQ Size (Value in Crores)">
