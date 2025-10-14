@@ -19,7 +19,7 @@ export class AuthApi implements TAuthApiInterface {
         return await this.apiClient.post('/auth/login-with-otp', data, config);
     }
 
-    async verifyOtp(data: z.infer<typeof appSchema.auth['verifyOtpSchema']>, config?: AxiosRequestConfig):ReturnType<TAuthApiInterface['verifyOtp']> {
+    async verifyOtp(data: z.infer<typeof appSchema.auth['verifyOtpSchema']>, config?: AxiosRequestConfig): ReturnType<TAuthApiInterface['verifyOtp']> {
         return await this.apiClient.post('/auth/verify-otp', data, config);
     }
 
@@ -29,5 +29,5 @@ export class AuthApi implements TAuthApiInterface {
 
     async getSession(config?: AxiosRequestConfig): ReturnType<TAuthApiInterface['getSession']> {
         return await this.apiClient.get(`/session`, config);
-    }   
+    }
 }

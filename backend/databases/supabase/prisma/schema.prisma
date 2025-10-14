@@ -10,16 +10,17 @@ datasource db {
 }
 
 model CRMUserDataModel {
-  id        Int         @id @default(autoincrement())
-  name      String
-  email     String      @unique
-  phoneNo   String
-  avatar    String?     @default("person.jpg")
-  lastLogin DateTime?
-  role      CrmUserROLE @default(VIEWER)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  createdBy Int?
+  id            Int           @id @default(autoincrement())
+  name          String
+  email         String        @unique
+  phoneNo       String
+  avatar        String?       @default("person.jpg")
+  lastLogin     DateTime?
+  role          CrmUserROLE   @default(VIEWER)
+  accountStatus AccountStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdBy     Int?
 
   @@index([email])
   @@map("crm_users")
@@ -31,4 +32,9 @@ enum CrmUserROLE {
   SALES
   SUPPORT
   RELATIONSHIP_MANAGER
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
 }

@@ -8,6 +8,7 @@ import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@lib/p
 import logger from "@utils/logger/logger";
 import { cacheStorage } from "./src/queues/redis/queues";
 import authRoutes from "./src/resource/auth/auth.route";
+import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
 
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
@@ -21,7 +22,7 @@ const server = new ExpressServer(config.port, {
 logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
-server.addRoutes([authRoutes]);
+server.addRoutes([authRoutes, crmUsersRoutes]);
 
 // Connect to databases and start server
 checkConnectToDatabases()

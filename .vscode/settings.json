@@ -10,6 +10,7 @@
         "autoincrement",
         "beneficiaryid",
         "bullmq",
+        "crmusers",
         "Divh",
         "dpaccount",
         "dpid",
