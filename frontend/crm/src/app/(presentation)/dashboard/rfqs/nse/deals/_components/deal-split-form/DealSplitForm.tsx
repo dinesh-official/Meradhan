@@ -23,6 +23,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           onChangeAction={(e) => {
             manager.setDealSplitData("value", e);
           }}
+          error={manager?.errors?.value?.[0]}
         />
         <InputField
           id="yield"
@@ -33,6 +34,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           onChangeAction={(e) => {
             manager.setDealSplitData("yield", e);
           }}
+          error={manager?.errors?.yield?.[0]}
         />
         <SelectField
           label="Calculation Method"
@@ -48,6 +50,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
               e as DealSplitFormData["calculationMethod"]
             );
           }}
+          error={manager?.errors?.calculationMethod?.[0]}
         />
         <InputField
           id="priceTriggeredDate"
@@ -58,6 +61,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           onChangeAction={(e) => {
             manager.setDealSplitData("priceTriggeredDate", e);
           }}
+          error={manager?.errors?.priceTriggeredDate?.[0]}
         />
         <InputField
           id="price"
@@ -66,6 +70,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           type="text"
           value={manager.state.price}
           onChangeAction={(e) => manager.setDealSplitData("price", e)}
+          error={manager?.errors?.price?.[0]}
         />
         <InputField
           id="totalAccruedInterest"
@@ -76,6 +81,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           onChangeAction={(e) =>
             manager.setDealSplitData("totalAccruedInterest", e)
           }
+          error={manager?.errors?.totalAccruedInterest?.[0]}
         />
 
         <SelectField
@@ -92,6 +98,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
               e as DealSplitFormData["settlementDate"]
             );
           }}
+          error={manager?.errors?.settlementDate?.[0]}
         />
 
         <InputField
@@ -101,6 +108,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           type="text"
           value={manager.state.quantity}
           onChangeAction={(e) => manager.setDealSplitData("quantity", e)}
+          error={manager?.errors?.quantity?.[0]}
         />
         <SelectField
           label="Good Till Day"
@@ -116,6 +124,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
               e as DealSplitFormData["goodTillDay"]
             )
           }
+          error={manager?.errors?.goodTillDay?.[0]}
         />
 
         <InputField
@@ -125,6 +134,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           type="date"
           value={manager.state.endTime}
           onChangeAction={(e) => manager.setDealSplitData("endTime", e)}
+          error={manager?.errors?.endTime?.[0]}
         />
         <InputField
           id="stampDuty"
@@ -133,6 +143,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           type="text"
           value={manager.state.stampDuty}
           onChangeAction={(e) => manager.setDealSplitData("stampDuty", e)}
+          error={manager?.errors?.stampDuty?.[0]}
         />
         <SelectField
           label="Deal Type"
@@ -156,6 +167,7 @@ const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
           type="text"
           value={manager.state.clientCode}
           onChangeAction={(e) => manager.setDealSplitData("clientCode", e)}
+          error={manager?.errors?.clientCode?.[0]}
         />
         <div className="flex gap-2">
           <FormCheckbox

@@ -13,7 +13,6 @@ import {
 } from "./dealSplitFormData.schema";
 import { DealSplitFormData, IDealSplitFormHook } from "./dealSplitFormData";
 
-
 const initDealSplitData: DealSplitFormData = {
   value: "",
   yield: "",
@@ -34,7 +33,11 @@ const initDealSplitData: DealSplitFormData = {
 
 export const useDealSplitFormHook = (
   initialState: DealSplitFormData = initDealSplitData
-): IDealSplitFormHook => {
+): IDealSplitFormHook & {
+  /** Convenience helpers for UI */
+  getError: <K extends keyof DealSplitFormData>(key: K) => string | undefined;
+  hasError: <K extends keyof DealSplitFormData>(key: K) => boolean;
+} => {
   const [data, setData] = useState<DealSplitFormData>(initialState);
   const [errors, setErrors] =
     useState<Partial<Record<keyof DealSplitFormData, string[]>>>({});
@@ -54,9 +57,9 @@ export const useDealSplitFormHook = (
 
   const validateField = useCallback(
     <K extends keyof DealSplitFormData>(key: K, value: DealSplitFormData[K]) => {
-      const fieldSchema = dealSplitFormSchema.pick({ [key]: true });
+      const fieldSchema = dealSplitFormSchema.pick({ [key]: true } as any);
       try {
-        fieldSchema.parse({ [key]: value });
+        fieldSchema.parse({ [key]: value } as any);
         setErrors((prev) => {
           const copy = { ...prev };
           delete copy[key];
@@ -73,7 +76,6 @@ export const useDealSplitFormHook = (
   );
 
   const validateDealSplitData = useCallback((): boolean => {
-    console.log(data)
     try {
       dealSplitFormSchema.parse(data);
       setErrors({});
@@ -91,6 +93,15 @@ export const useDealSplitFormHook = (
     setErrors({});
   }, []);
 
+  const getError = useCallback(
+    <K extends keyof DealSplitFormData>(key: K) => errors[key]?.[0],
+    [errors]
+  );
+  const hasError = useCallback(
+    <K extends keyof DealSplitFormData>(key: K) => !!errors[key]?.length,
+    [errors]
+  );
+
   return {
     state: data,
     errors,
@@ -98,5 +109,7 @@ export const useDealSplitFormHook = (
     resetDealSplitData,
     validateField,
     validateDealSplitData,
+    getError,
+    hasError,
   };
 };
