@@ -1,15 +1,18 @@
 model CRMUserDataModel {
-  id            Int           @id @default(autoincrement())
-  name          String
-  email         String        @unique
-  phoneNo       String
-  avatar        String?       @default("person.jpg")
-  lastLogin     DateTime?
+  id Int @id @default(autoincrement())
+
+  name    String
+  email   String  @unique
+  phoneNo String
+  avatar  String? @default("person.jpg")
+
   role          CrmUserROLE   @default(VIEWER)
   accountStatus AccountStatus @default(ACTIVE)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  createdBy     Int?
+
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy Int?
 
   @@index([email])
   @@map("crm_users")

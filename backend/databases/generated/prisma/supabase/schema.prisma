@@ -1,72 +1,94 @@
 model CRMUserDataModel {
-  id            Int           @id @default(autoincrement())
-  name          String
-  email         String        @unique
-  phoneNo       String
-  avatar        String?       @default("person.jpg")
-  lastLogin     DateTime?
+  id Int @id @default(autoincrement())
+
+  name    String
+  email   String  @unique
+  phoneNo String
+  avatar  String? @default("person.jpg")
+
   role          CrmUserROLE   @default(VIEWER)
   accountStatus AccountStatus @default(ACTIVE)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  createdBy     Int?
+
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy Int?
 
   @@index([email])
   @@map("crm_users")
 }
 
-// this model store auth or check related data 
+// ------------------------------
+// Customers MODELS SECTION
+// ------------------------------
+
+/// Stores authentication and account-related data for customers
 model CustomersAuthDataModel {
   id Int @id @default(autoincrement())
 
-  password      String?
-  signinWith    SIGNIN_WITH
+  /// Encrypted password (optional if using social login)
+  password String?
+
+  /// Type of sign-in used (e.g., EMAIL, GOOGLE, etc.)
+  signinWith SIGNIN_WITH
+
+  /// Account status (e.g., ACTIVE, INACTIVE, SUSPENDED)
   accountStatus AccountStatus @default(ACTIVE)
 
+  /// Verification flags
   isPhoneVerified           Boolean @default(false)
   isEmailVerified           Boolean @default(false)
   whatsAppNotificationAllow Boolean @default(false)
 
+  /// Timestamps
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   lastLogin DateTime?
-
-  @@map("customers_auth")
 }
 
+/// Stores customer profile information (public / account details)
 model CustomerProfileDataModel {
   id Int @id @default(autoincrement())
 
+  /// Basic identity info
   userName   String @unique
   firstName  String
   middleName String
   lastName   String
   gender     Gender
 
+  /// Contact details
   emailAddress String  @unique
   phoneNo      String
   whatsAppNo   String?
 
+  /// Profile visuals and type
   avatar   String?         @default("person.jpg")
   userType UserAccountType @default(INDIVIDUAL)
 
+  /// KYC (Know Your Customer) related info
   kycStatus  KYCStatus @default(PENDING)
   VerifiedBy Int?
 
+  /// Metadata and audit fields
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   createdBy Int?
 
+  /// Commonly searched fields for faster queries
   @@index([emailAddress, userName])
-  @@map("customers_profile")
+  /// Map to actual database table name
+  @@map("customers")
 }
 
-// Personal Info Data 
+/// Stores customer's personal information and identity documents
 model CustomerPersonalInfoModel {
   id Int @id @default(autoincrement())
 
+  /// Signature image URL
   SignatureUrl String
 
+  /// Personal info
   maritalStatus            String
   occupationType           String
   annualGrossIncome        String
@@ -78,83 +100,91 @@ model CustomerPersonalInfoModel {
   qualification            String
   politicallyExposedPerson String?
 
+  /// Relation with Aadhaar Card details
   aadhaarCard        AADHAARCardModel? @relation(fields: [aADHAARCardModelId], references: [id])
   aADHAARCardModelId Int?
 
+  /// Relation with PAN Card details
   panCard        PanCardModel? @relation(fields: [panCardModelId], references: [id])
   panCardModelId Int?
 
+  /// Linked bank and demat accounts
   bankAccounts  CustomersBankAccountModel[]
   dematAccounts CustomersDematAccountModel[]
 
-  // Current Address relation
+  /// Address relations (current and permanent)
   currentAddress        AddressModel? @relation("CurrentAddress", fields: [currentAddressModelId], references: [id])
   currentAddressModelId Int?
 
-  // Permanent Address relation
   permanentAddress        AddressModel? @relation("PermanentAddress", fields: [permanentAddressModelId], references: [id])
   permanentAddressModelId Int?
 
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("customers_personal_information")
 }
 
-// Aadhaar Card Data 
+/// Aadhaar card (identity proof) data model
 model AADHAARCardModel {
   id Int @id @default(autoincrement())
 
+  /// Name details as per Aadhaar
   firstName  String
   middleName String
   lastName   String
 
+  /// Father’s name for verification
   fatherName String
 
+  /// Aadhaar details
   aadhaarNo   String
   dateOfBirth String
   gender      Gender
+  image       String
 
-  image String
-
+  /// Verification status
   isVerified Boolean  @default(false)
   verifyDate DateTime
 
+  /// Reverse relation to personal info
   CustomerPersonalInfoModel CustomerPersonalInfoModel[]
 
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("aadhaar_card")
 }
 
-// Pan Card Data 
+/// PAN card (tax identity proof) data model
 model PanCardModel {
   id Int @id @default(autoincrement())
 
+  /// Name details as per PAN
   firstName  String
   middleName String
   lastName   String
 
+  /// PAN card details
   panCardNo   String
   dateOfBirth String
   gender      Gender
 
+  /// Verification status
   isVerified Boolean  @default(false)
   verifyDate DateTime
 
+  /// Reverse relation to personal info
   CustomerPersonalInfoModel CustomerPersonalInfoModel[]
 
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("pan_card")
 }
 
-// bank Accounts data
+/// Bank account information linked to a customer
 model CustomersBankAccountModel {
   id Int @id @default(autoincrement())
 
+  /// Basic account info
   accountHolderName String
   bankAccountType   String
   accountNumber     Int
@@ -162,99 +192,123 @@ model CustomersBankAccountModel {
   bankName          String
   branch            String
 
+  /// Status flags
   isPrimary  Boolean @default(false)
   isVerified Boolean @default(false)
 
+  /// Linked customer
   CustomerPersonalInfoModel   CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
   customerPersonalInfoModelId Int?
 
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("bank_accounts")
 }
 
-// demat / broker Accounts data
+/// Demat / Broker account data (for trading accounts)
 model CustomersDematAccountModel {
   id Int @id @default(autoincrement())
 
+  /// Depository info
   depositoryName            DepositoryName
   dpId                      String
   clientId                  String
   accountType               DematAccountType
   depositoryParticipantName String
-  primaryPanNumber          String
-  sndPanNumber              String?
-  trdPanNumber              String?
-  accountHolderName         String
 
+  /// PAN details linked to this account
+  primaryPanNumber  String
+  sndPanNumber      String?
+  trdPanNumber      String?
+  accountHolderName String
+
+  /// Status flags
   isPrimary  Boolean @default(false)
   isVerified Boolean @default(false)
 
+  /// Linked customer
   CustomerPersonalInfoModel   CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
   customerPersonalInfoModelId Int?
 
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("demat_accounts")
 }
 
-// Risk Profile Data
+/// Risk profile of a customer (e.g., low / medium / high risk)
 model CustomersRiskProfileModel {
   id Int @id @default(autoincrement())
 
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("risk_profiles")
 }
 
-// Address data
+/// Address model (used for both current and permanent addresses)
 model AddressModel {
   id Int @id @default(autoincrement())
 
+  /// Address lines
   line1 String
   line2 String?
   line3 String?
 
+  /// Location details
   postOffice     String
   cityOrDistrict String
   state          String
   pinCode        String
   country        String
 
+  /// Full address text
   fullAddress String
 
-  // Back relations
+  /// Reverse relations (used by personal info)
   currentAddressOf   CustomerPersonalInfoModel[] @relation("CurrentAddress")
   permanentAddressOf CustomerPersonalInfoModel[] @relation("PermanentAddress")
 
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("addresses")
 }
 
+// ------------------------------
+// ENUMS SECTION
+// ------------------------------
+
+/// Defines CRM user roles with varying access levels
 enum CrmUserROLE {
+  /// Can only view data, no modifications allowed
   VIEWER
+  /// Full access to all operations
   ADMIN
+  /// Handles lead generation and conversion
   SALES
+  /// Manages customer issues and support requests
   SUPPORT
+  /// Assigned relationship manager for customers
   RELATIONSHIP_MANAGER
 }
 
+/// Defines overall account status for a customer
 enum AccountStatus {
+  /// Account is active and usable
   ACTIVE
+  /// Account is temporarily or permanently suspended
   SUSPENDED
 }
 
+/// Indicates the login/sign-in method used
 enum SIGNIN_WITH {
+  /// Default: Email and password-based login
   CREDENTIALS
+  /// Google account sign-in
   GOOGLE
+  /// Microsoft account sign-in
   MICROSOFT
 }
 
+/// Represents type of user account (based on entity type)
 enum UserAccountType {
   INDIVIDUAL
   INDIVIDUAL_NRI_NRO
@@ -265,23 +319,27 @@ enum UserAccountType {
   PARTNERSHIP_FIRM
 }
 
+/// Gender information for customers
 enum Gender {
   MALE
   FEMALE
   OTHERS
 }
 
+/// Type of depository for Demat accounts
 enum DepositoryName {
   NSDL
   CDSL
 }
 
+/// Type of Demat (trading) account ownership
 enum DematAccountType {
   SINGLE
   JOINT
   HUF
 }
 
+/// KYC (Know Your Customer) verification status
 enum KYCStatus {
   PENDING
   VERIFIED

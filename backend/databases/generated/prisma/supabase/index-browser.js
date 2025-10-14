@@ -126,9 +126,9 @@ exports.Prisma.CRMUserDataModelScalarFieldEnum = {
   email: 'email',
   phoneNo: 'phoneNo',
   avatar: 'avatar',
-  lastLogin: 'lastLogin',
   role: 'role',
   accountStatus: 'accountStatus',
+  lastLogin: 'lastLogin',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   createdBy: 'createdBy'

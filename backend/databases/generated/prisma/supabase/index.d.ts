@@ -20,47 +20,47 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
 export type CRMUserDataModel = $Result.DefaultSelection<Prisma.$CRMUserDataModelPayload>
 /**
  * Model CustomersAuthDataModel
- * 
+ * Stores authentication and account-related data for customers
  */
 export type CustomersAuthDataModel = $Result.DefaultSelection<Prisma.$CustomersAuthDataModelPayload>
 /**
  * Model CustomerProfileDataModel
- * 
+ * Stores customer profile information (public / account details)
  */
 export type CustomerProfileDataModel = $Result.DefaultSelection<Prisma.$CustomerProfileDataModelPayload>
 /**
  * Model CustomerPersonalInfoModel
- * 
+ * Stores customer's personal information and identity documents
  */
 export type CustomerPersonalInfoModel = $Result.DefaultSelection<Prisma.$CustomerPersonalInfoModelPayload>
 /**
  * Model AADHAARCardModel
- * 
+ * Aadhaar card (identity proof) data model
  */
 export type AADHAARCardModel = $Result.DefaultSelection<Prisma.$AADHAARCardModelPayload>
 /**
  * Model PanCardModel
- * 
+ * PAN card (tax identity proof) data model
  */
 export type PanCardModel = $Result.DefaultSelection<Prisma.$PanCardModelPayload>
 /**
  * Model CustomersBankAccountModel
- * 
+ * Bank account information linked to a customer
  */
 export type CustomersBankAccountModel = $Result.DefaultSelection<Prisma.$CustomersBankAccountModelPayload>
 /**
  * Model CustomersDematAccountModel
- * 
+ * Demat / Broker account data (for trading accounts)
  */
 export type CustomersDematAccountModel = $Result.DefaultSelection<Prisma.$CustomersDematAccountModelPayload>
 /**
  * Model CustomersRiskProfileModel
- * 
+ * Risk profile of a customer (e.g., low / medium / high risk)
  */
 export type CustomersRiskProfileModel = $Result.DefaultSelection<Prisma.$CustomersRiskProfileModelPayload>
 /**
  * Model AddressModel
- * 
+ * Address model (used for both current and permanent addresses)
  */
 export type AddressModel = $Result.DefaultSelection<Prisma.$AddressModelPayload>
 
@@ -1961,9 +1961,9 @@ export namespace Prisma {
     email: string | null
     phoneNo: string | null
     avatar: string | null
-    lastLogin: Date | null
     role: $Enums.CrmUserROLE | null
     accountStatus: $Enums.AccountStatus | null
+    lastLogin: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: number | null
@@ -1975,9 +1975,9 @@ export namespace Prisma {
     email: string | null
     phoneNo: string | null
     avatar: string | null
-    lastLogin: Date | null
     role: $Enums.CrmUserROLE | null
     accountStatus: $Enums.AccountStatus | null
+    lastLogin: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: number | null
@@ -1989,9 +1989,9 @@ export namespace Prisma {
     email: number
     phoneNo: number
     avatar: number
-    lastLogin: number
     role: number
     accountStatus: number
+    lastLogin: number
     createdAt: number
     updatedAt: number
     createdBy: number
@@ -2015,9 +2015,9 @@ export namespace Prisma {
     email?: true
     phoneNo?: true
     avatar?: true
-    lastLogin?: true
     role?: true
     accountStatus?: true
+    lastLogin?: true
     createdAt?: true
     updatedAt?: true
     createdBy?: true
@@ -2029,9 +2029,9 @@ export namespace Prisma {
     email?: true
     phoneNo?: true
     avatar?: true
-    lastLogin?: true
     role?: true
     accountStatus?: true
+    lastLogin?: true
     createdAt?: true
     updatedAt?: true
     createdBy?: true
@@ -2043,9 +2043,9 @@ export namespace Prisma {
     email?: true
     phoneNo?: true
     avatar?: true
-    lastLogin?: true
     role?: true
     accountStatus?: true
+    lastLogin?: true
     createdAt?: true
     updatedAt?: true
     createdBy?: true
@@ -2144,9 +2144,9 @@ export namespace Prisma {
     email: string
     phoneNo: string
     avatar: string | null
-    lastLogin: Date | null
     role: $Enums.CrmUserROLE
     accountStatus: $Enums.AccountStatus
+    lastLogin: Date | null
     createdAt: Date
     updatedAt: Date
     createdBy: number | null
@@ -2177,9 +2177,9 @@ export namespace Prisma {
     email?: boolean
     phoneNo?: boolean
     avatar?: boolean
-    lastLogin?: boolean
     role?: boolean
     accountStatus?: boolean
+    lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
@@ -2191,9 +2191,9 @@ export namespace Prisma {
     email?: boolean
     phoneNo?: boolean
     avatar?: boolean
-    lastLogin?: boolean
     role?: boolean
     accountStatus?: boolean
+    lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
@@ -2205,9 +2205,9 @@ export namespace Prisma {
     email?: boolean
     phoneNo?: boolean
     avatar?: boolean
-    lastLogin?: boolean
     role?: boolean
     accountStatus?: boolean
+    lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
@@ -2219,15 +2219,15 @@ export namespace Prisma {
     email?: boolean
     phoneNo?: boolean
     avatar?: boolean
-    lastLogin?: boolean
     role?: boolean
     accountStatus?: boolean
+    lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
   }
 
-  export type CRMUserDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phoneNo" | "avatar" | "lastLogin" | "role" | "accountStatus" | "createdAt" | "updatedAt" | "createdBy", ExtArgs["result"]["cRMUserDataModel"]>
+  export type CRMUserDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phoneNo" | "avatar" | "role" | "accountStatus" | "lastLogin" | "createdAt" | "updatedAt" | "createdBy", ExtArgs["result"]["cRMUserDataModel"]>
 
   export type $CRMUserDataModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CRMUserDataModel"
@@ -2238,9 +2238,9 @@ export namespace Prisma {
       email: string
       phoneNo: string
       avatar: string | null
-      lastLogin: Date | null
       role: $Enums.CrmUserROLE
       accountStatus: $Enums.AccountStatus
+      lastLogin: Date | null
       createdAt: Date
       updatedAt: Date
       createdBy: number | null
@@ -2672,9 +2672,9 @@ export namespace Prisma {
     readonly email: FieldRef<"CRMUserDataModel", 'String'>
     readonly phoneNo: FieldRef<"CRMUserDataModel", 'String'>
     readonly avatar: FieldRef<"CRMUserDataModel", 'String'>
-    readonly lastLogin: FieldRef<"CRMUserDataModel", 'DateTime'>
     readonly role: FieldRef<"CRMUserDataModel", 'CrmUserROLE'>
     readonly accountStatus: FieldRef<"CRMUserDataModel", 'AccountStatus'>
+    readonly lastLogin: FieldRef<"CRMUserDataModel", 'DateTime'>
     readonly createdAt: FieldRef<"CRMUserDataModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CRMUserDataModel", 'DateTime'>
     readonly createdBy: FieldRef<"CRMUserDataModel", 'Int'>
@@ -3330,12 +3330,27 @@ export namespace Prisma {
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Encrypted password (optional if using social login)
+       */
       password: string | null
+      /**
+       * Type of sign-in used (e.g., EMAIL, GOOGLE, etc.)
+       */
       signinWith: $Enums.SIGNIN_WITH
+      /**
+       * Account status (e.g., ACTIVE, INACTIVE, SUSPENDED)
+       */
       accountStatus: $Enums.AccountStatus
+      /**
+       * Verification flags
+       */
       isPhoneVerified: boolean
       isEmailVerified: boolean
       whatsAppNotificationAllow: boolean
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
       lastLogin: Date | null
@@ -4498,18 +4513,33 @@ export namespace Prisma {
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Basic identity info
+       */
       userName: string
       firstName: string
       middleName: string
       lastName: string
       gender: $Enums.Gender
+      /**
+       * Contact details
+       */
       emailAddress: string
       phoneNo: string
       whatsAppNo: string | null
+      /**
+       * Profile visuals and type
+       */
       avatar: string | null
       userType: $Enums.UserAccountType
+      /**
+       * KYC (Know Your Customer) related info
+       */
       kycStatus: $Enums.KYCStatus
       VerifiedBy: number | null
+      /**
+       * Metadata and audit fields
+       */
       createdAt: Date
       updatedAt: Date
       createdBy: number | null
@@ -5742,16 +5772,34 @@ export namespace Prisma {
   export type $CustomerPersonalInfoModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CustomerPersonalInfoModel"
     objects: {
+      /**
+       * Relation with Aadhaar Card details
+       */
       aadhaarCard: Prisma.$AADHAARCardModelPayload<ExtArgs> | null
+      /**
+       * Relation with PAN Card details
+       */
       panCard: Prisma.$PanCardModelPayload<ExtArgs> | null
+      /**
+       * Linked bank and demat accounts
+       */
       bankAccounts: Prisma.$CustomersBankAccountModelPayload<ExtArgs>[]
       dematAccounts: Prisma.$CustomersDematAccountModelPayload<ExtArgs>[]
+      /**
+       * Address relations (current and permanent)
+       */
       currentAddress: Prisma.$AddressModelPayload<ExtArgs> | null
       permanentAddress: Prisma.$AddressModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Signature image URL
+       */
       SignatureUrl: string
+      /**
+       * Personal info
+       */
       maritalStatus: string
       occupationType: string
       annualGrossIncome: string
@@ -5766,6 +5814,9 @@ export namespace Prisma {
       panCardModelId: number | null
       currentAddressModelId: number | null
       permanentAddressModelId: number | null
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -7078,20 +7129,38 @@ export namespace Prisma {
   export type $AADHAARCardModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AADHAARCardModel"
     objects: {
+      /**
+       * Reverse relation to personal info
+       */
       CustomerPersonalInfoModel: Prisma.$CustomerPersonalInfoModelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Name details as per Aadhaar
+       */
       firstName: string
       middleName: string
       lastName: string
+      /**
+       * Father’s name for verification
+       */
       fatherName: string
+      /**
+       * Aadhaar details
+       */
       aadhaarNo: string
       dateOfBirth: string
       gender: $Enums.Gender
       image: string
+      /**
+       * Verification status
+       */
       isVerified: boolean
       verifyDate: Date
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["aADHAARCardModel"]>
@@ -8264,18 +8333,33 @@ export namespace Prisma {
   export type $PanCardModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "PanCardModel"
     objects: {
+      /**
+       * Reverse relation to personal info
+       */
       CustomerPersonalInfoModel: Prisma.$CustomerPersonalInfoModelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Name details as per PAN
+       */
       firstName: string
       middleName: string
       lastName: string
+      /**
+       * PAN card details
+       */
       panCardNo: string
       dateOfBirth: string
       gender: $Enums.Gender
+      /**
+       * Verification status
+       */
       isVerified: boolean
       verifyDate: Date
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["panCardModel"]>
@@ -9469,19 +9553,31 @@ export namespace Prisma {
   export type $CustomersBankAccountModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CustomersBankAccountModel"
     objects: {
+      /**
+       * Linked customer
+       */
       CustomerPersonalInfoModel: Prisma.$CustomerPersonalInfoModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Basic account info
+       */
       accountHolderName: string
       bankAccountType: string
       accountNumber: number
       ifscCode: string
       bankName: string
       branch: string
+      /**
+       * Status flags
+       */
       isPrimary: boolean
       isVerified: boolean
       customerPersonalInfoModelId: number | null
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customersBankAccountModel"]>
@@ -10708,22 +10804,37 @@ export namespace Prisma {
   export type $CustomersDematAccountModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CustomersDematAccountModel"
     objects: {
+      /**
+       * Linked customer
+       */
       CustomerPersonalInfoModel: Prisma.$CustomerPersonalInfoModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Depository info
+       */
       depositoryName: $Enums.DepositoryName
       dpId: string
       clientId: string
       accountType: $Enums.DematAccountType
       depositoryParticipantName: string
+      /**
+       * PAN details linked to this account
+       */
       primaryPanNumber: string
       sndPanNumber: string | null
       trdPanNumber: string | null
       accountHolderName: string
+      /**
+       * Status flags
+       */
       isPrimary: boolean
       isVerified: boolean
       customerPersonalInfoModelId: number | null
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customersDematAccountModel"]>
@@ -11807,6 +11918,9 @@ export namespace Prisma {
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customersRiskProfileModel"]>
@@ -12917,20 +13031,35 @@ export namespace Prisma {
   export type $AddressModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AddressModel"
     objects: {
+      /**
+       * Reverse relations (used by personal info)
+       */
       currentAddressOf: Prisma.$CustomerPersonalInfoModelPayload<ExtArgs>[]
       permanentAddressOf: Prisma.$CustomerPersonalInfoModelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Address lines
+       */
       line1: string
       line2: string | null
       line3: string | null
+      /**
+       * Location details
+       */
       postOffice: string
       cityOrDistrict: string
       state: string
       pinCode: string
       country: string
+      /**
+       * Full address text
+       */
       fullAddress: string
+      /**
+       * Timestamps
+       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["addressModel"]>
@@ -13844,9 +13973,9 @@ export namespace Prisma {
     email: 'email',
     phoneNo: 'phoneNo',
     avatar: 'avatar',
-    lastLogin: 'lastLogin',
     role: 'role',
     accountStatus: 'accountStatus',
+    lastLogin: 'lastLogin',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     createdBy: 'createdBy'
@@ -14077,20 +14206,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'DateTime'
-   */
-  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-  /**
-   * Reference to a field of type 'DateTime[]'
-   */
-  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-  /**
    * Reference to a field of type 'CrmUserROLE'
    */
   export type EnumCrmUserROLEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CrmUserROLE'>
@@ -14115,6 +14230,20 @@ export namespace Prisma {
    * Reference to a field of type 'AccountStatus[]'
    */
   export type ListEnumAccountStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccountStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime'
+   */
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime[]'
+   */
+  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 
@@ -14235,9 +14364,9 @@ export namespace Prisma {
     email?: StringFilter<"CRMUserDataModel"> | string
     phoneNo?: StringFilter<"CRMUserDataModel"> | string
     avatar?: StringNullableFilter<"CRMUserDataModel"> | string | null
-    lastLogin?: DateTimeNullableFilter<"CRMUserDataModel"> | Date | string | null
     role?: EnumCrmUserROLEFilter<"CRMUserDataModel"> | $Enums.CrmUserROLE
     accountStatus?: EnumAccountStatusFilter<"CRMUserDataModel"> | $Enums.AccountStatus
+    lastLogin?: DateTimeNullableFilter<"CRMUserDataModel"> | Date | string | null
     createdAt?: DateTimeFilter<"CRMUserDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CRMUserDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CRMUserDataModel"> | number | null
@@ -14249,9 +14378,9 @@ export namespace Prisma {
     email?: SortOrder
     phoneNo?: SortOrder
     avatar?: SortOrderInput | SortOrder
-    lastLogin?: SortOrderInput | SortOrder
     role?: SortOrder
     accountStatus?: SortOrder
+    lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrderInput | SortOrder
@@ -14266,9 +14395,9 @@ export namespace Prisma {
     name?: StringFilter<"CRMUserDataModel"> | string
     phoneNo?: StringFilter<"CRMUserDataModel"> | string
     avatar?: StringNullableFilter<"CRMUserDataModel"> | string | null
-    lastLogin?: DateTimeNullableFilter<"CRMUserDataModel"> | Date | string | null
     role?: EnumCrmUserROLEFilter<"CRMUserDataModel"> | $Enums.CrmUserROLE
     accountStatus?: EnumAccountStatusFilter<"CRMUserDataModel"> | $Enums.AccountStatus
+    lastLogin?: DateTimeNullableFilter<"CRMUserDataModel"> | Date | string | null
     createdAt?: DateTimeFilter<"CRMUserDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CRMUserDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CRMUserDataModel"> | number | null
@@ -14280,9 +14409,9 @@ export namespace Prisma {
     email?: SortOrder
     phoneNo?: SortOrder
     avatar?: SortOrderInput | SortOrder
-    lastLogin?: SortOrderInput | SortOrder
     role?: SortOrder
     accountStatus?: SortOrder
+    lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrderInput | SortOrder
@@ -14302,9 +14431,9 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"CRMUserDataModel"> | string
     phoneNo?: StringWithAggregatesFilter<"CRMUserDataModel"> | string
     avatar?: StringNullableWithAggregatesFilter<"CRMUserDataModel"> | string | null
-    lastLogin?: DateTimeNullableWithAggregatesFilter<"CRMUserDataModel"> | Date | string | null
     role?: EnumCrmUserROLEWithAggregatesFilter<"CRMUserDataModel"> | $Enums.CrmUserROLE
     accountStatus?: EnumAccountStatusWithAggregatesFilter<"CRMUserDataModel"> | $Enums.AccountStatus
+    lastLogin?: DateTimeNullableWithAggregatesFilter<"CRMUserDataModel"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"CRMUserDataModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CRMUserDataModel"> | Date | string
     createdBy?: IntNullableWithAggregatesFilter<"CRMUserDataModel"> | number | null
@@ -15162,9 +15291,9 @@ export namespace Prisma {
     email: string
     phoneNo: string
     avatar?: string | null
-    lastLogin?: Date | string | null
     role?: $Enums.CrmUserROLE
     accountStatus?: $Enums.AccountStatus
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -15176,9 +15305,9 @@ export namespace Prisma {
     email: string
     phoneNo: string
     avatar?: string | null
-    lastLogin?: Date | string | null
     role?: $Enums.CrmUserROLE
     accountStatus?: $Enums.AccountStatus
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -15189,9 +15318,9 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phoneNo?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumCrmUserROLEFieldUpdateOperationsInput | $Enums.CrmUserROLE
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -15203,9 +15332,9 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phoneNo?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumCrmUserROLEFieldUpdateOperationsInput | $Enums.CrmUserROLE
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -15217,9 +15346,9 @@ export namespace Prisma {
     email: string
     phoneNo: string
     avatar?: string | null
-    lastLogin?: Date | string | null
     role?: $Enums.CrmUserROLE
     accountStatus?: $Enums.AccountStatus
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -15230,9 +15359,9 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phoneNo?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumCrmUserROLEFieldUpdateOperationsInput | $Enums.CrmUserROLE
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -15244,9 +15373,9 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phoneNo?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumCrmUserROLEFieldUpdateOperationsInput | $Enums.CrmUserROLE
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -16243,17 +16372,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type EnumCrmUserROLEFilter<$PrismaModel = never> = {
     equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
     in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
@@ -16266,6 +16384,17 @@ export namespace Prisma {
     in?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumAccountStatusFilter<$PrismaModel> | $Enums.AccountStatus
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -16301,9 +16430,9 @@ export namespace Prisma {
     email?: SortOrder
     phoneNo?: SortOrder
     avatar?: SortOrder
-    lastLogin?: SortOrder
     role?: SortOrder
     accountStatus?: SortOrder
+    lastLogin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
@@ -16320,9 +16449,9 @@ export namespace Prisma {
     email?: SortOrder
     phoneNo?: SortOrder
     avatar?: SortOrder
-    lastLogin?: SortOrder
     role?: SortOrder
     accountStatus?: SortOrder
+    lastLogin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
@@ -16334,9 +16463,9 @@ export namespace Prisma {
     email?: SortOrder
     phoneNo?: SortOrder
     avatar?: SortOrder
-    lastLogin?: SortOrder
     role?: SortOrder
     accountStatus?: SortOrder
+    lastLogin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
@@ -16399,20 +16528,6 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type EnumCrmUserROLEWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
     in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
@@ -16431,6 +16546,20 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAccountStatusFilter<$PrismaModel>
     _max?: NestedEnumAccountStatusFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -17137,16 +17266,16 @@ export namespace Prisma {
     set?: string | null
   }
 
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
-  }
-
   export type EnumCrmUserROLEFieldUpdateOperationsInput = {
     set?: $Enums.CrmUserROLE
   }
 
   export type EnumAccountStatusFieldUpdateOperationsInput = {
     set?: $Enums.AccountStatus
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -17584,17 +17713,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type NestedEnumCrmUserROLEFilter<$PrismaModel = never> = {
     equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
     in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
@@ -17607,6 +17725,17 @@ export namespace Prisma {
     in?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumAccountStatusFilter<$PrismaModel> | $Enums.AccountStatus
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -17692,20 +17821,6 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type NestedEnumCrmUserROLEWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
     in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
@@ -17724,6 +17839,20 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAccountStatusFilter<$PrismaModel>
     _max?: NestedEnumAccountStatusFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
