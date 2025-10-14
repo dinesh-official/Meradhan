@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import "server-only";
 import SideBar from "./SideBar";
 import TopBar from "./TopBar";
-import SessionManager from "./SessionManager";
+import SessionManager from "../wrapper/SessionManager";
 
 export default async function Workspace({
   children,
