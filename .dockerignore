@@ -19,7 +19,7 @@ bun-error.log
 .git
 .gitignore
 
-# Dockerfile-related
+# Dockerfile-related-files
 Dockerfile*
 .dockerignore
 
