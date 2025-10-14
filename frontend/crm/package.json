@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "npx tsc --noEmit"
+    "check": "npx tsc --noEmit",
+    "pm2": "pm2 restart MeraDhan-Crm --update-env || pm2 start npm --name 'MeraDhan-Crm' -- start"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
