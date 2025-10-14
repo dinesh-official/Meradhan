@@ -23,9 +23,10 @@ COPY . .
 
 
 # Install dependencies
+RUN bash setup.sh
 RUN cd schema && bun install
 RUN cd backend && bun install && \
-    cd databases/postgress && \
+    cd databases/supabase && \
     npx prisma db pull && \
     npx prisma generate 
 
