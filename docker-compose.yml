@@ -1,6 +1,6 @@
 version: "3.8"
 
-services:
+services: # Performance Tracking
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -10,7 +10,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     restart: unless-stopped
 
-  loki:
+  loki: # For Log Tracking
     image: grafana/loki:latest
     container_name: loki
     ports:
