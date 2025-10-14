@@ -1,1 +1,1 @@
-sudo docker build -t project-starter-kit ../
+sudo docker build -t MeraDhanBackend ../
