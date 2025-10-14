@@ -60,7 +60,7 @@ function OtpInputStep({
         <Button
           className="w-full col-span-3"
           disabled={isLoading}
-          onSubmit={onSubmit}
+          onClick={onSubmit}
         >
           Verify & Login
         </Button>
