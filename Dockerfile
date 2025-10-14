@@ -21,13 +21,12 @@ WORKDIR /app
 # Copy files
 COPY . .
 
-
 # Install dependencies
 RUN ./setup.sh
+
 # Set working dir to backend
 WORKDIR /app/backend
 
-# Expose port (adjust to your backend server)
 EXPOSE 4000
 
 # Run with Bun (instead of npm)
