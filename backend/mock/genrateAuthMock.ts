@@ -7,7 +7,7 @@ const generateMockUser = async () => {
             email: faker.internet.email(),
             name: faker.person.fullName(),
             role: 'ADMIN',
-            phoneNo:"124567890"
+            phoneNo: "124567890"
         },
     });
 };
