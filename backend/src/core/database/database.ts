@@ -1,4 +1,4 @@
-import userDataDb, { Prisma as DataBaseSchema } from '@databases/supabase/generated/prisma';
+import userDataDb, { Prisma as DataBaseSchema } from '@databases/generated/prisma/supabase';
 import logger from '@utils/logger/logger';
 const dataBase = new userDataDb.PrismaClient();
 
@@ -46,4 +46,4 @@ export const disconnectFromDatabases = async () => {
 }
 
 
-export *  from  '@databases/supabase/generated/prisma';
+export * from '@databases/generated/prisma/supabase';

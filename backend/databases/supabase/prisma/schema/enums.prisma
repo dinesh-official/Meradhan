@@ -1,0 +1,51 @@
+enum CrmUserROLE {
+    VIEWER
+    ADMIN
+    SALES
+    SUPPORT
+    RELATIONSHIP_MANAGER
+}
+
+enum AccountStatus {
+    ACTIVE
+    SUSPENDED
+}
+
+enum SIGNIN_WITH {
+    CREDENTIALS
+    GOOGLE
+    MICROSOFT
+}
+
+enum UserAccountType {
+    INDIVIDUAL
+    INDIVIDUAL_NRI_NRO
+    TRUST
+    CORPORATE
+    HUF
+    LLP
+    PARTNERSHIP_FIRM
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    OTHERS
+}
+
+enum DepositoryName {
+    NSDL
+    CDSL
+}
+
+enum DematAccountType {
+    SINGLE
+    JOINT
+    HUF
+}
+
+enum KYCStatus {
+    PENDING
+    VERIFIED
+    REJECTED
+}
