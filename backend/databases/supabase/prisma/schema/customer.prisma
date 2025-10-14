@@ -1,0 +1,220 @@
+// this model store auth or check related data 
+model CustomersAuthDataModel {
+    id Int @id @default(autoincrement())
+
+    password      String?
+    signinWith    SIGNIN_WITH
+    accountStatus AccountStatus @default(ACTIVE)
+
+    isPhoneVerified           Boolean @default(false)
+    isEmailVerified           Boolean @default(false)
+    whatsAppNotificationAllow Boolean @default(false)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    lastLogin DateTime?
+
+    @@map("customers_auth")
+}
+
+model CustomerProfileDataModel {
+    id Int @id @default(autoincrement())
+
+    userName   String @unique
+    firstName  String
+    middleName String
+    lastName   String
+    gender     Gender
+
+    emailAddress String  @unique
+    phoneNo      String
+    whatsAppNo   String?
+
+    avatar   String?         @default("person.jpg")
+    userType UserAccountType @default(INDIVIDUAL)
+
+    kycStatus  KYCStatus @default(PENDING)
+    VerifiedBy Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    createdBy Int?
+
+    @@index([emailAddress, userName])
+    @@map("customers_profile")
+}
+
+// Personal Info Data 
+model CustomerPersonalInfoModel {
+    id Int @id @default(autoincrement())
+
+    SignatureUrl String
+
+    maritalStatus            String
+    occupationType           String
+    annualGrossIncome        String
+    fatherOrSpouseName       String
+    mothersName              String
+    nationality              String
+    maidenName               String?
+    residentialStatus        String
+    qualification            String
+    politicallyExposedPerson String?
+
+    aadhaarCard        AADHAARCardModel? @relation(fields: [aADHAARCardModelId], references: [id])
+    aADHAARCardModelId Int?
+
+    panCard        PanCardModel? @relation(fields: [panCardModelId], references: [id])
+    panCardModelId Int?
+
+    bankAccounts  CustomersBankAccountModel[]
+    dematAccounts CustomersDematAccountModel[]
+
+    // Current Address relation
+    currentAddress        AddressModel? @relation("CurrentAddress", fields: [currentAddressModelId], references: [id])
+    currentAddressModelId Int?
+
+    // Permanent Address relation
+    permanentAddress        AddressModel? @relation("PermanentAddress", fields: [permanentAddressModelId], references: [id])
+    permanentAddressModelId Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("customers_personal_information")
+}
+
+// Aadhaar Card Data 
+model AADHAARCardModel {
+    id Int @id @default(autoincrement())
+
+    firstName  String
+    middleName String
+    lastName   String
+
+    fatherName String
+
+    aadhaarNo   String
+    dateOfBirth String
+    gender      Gender
+
+    image String
+
+    isVerified Boolean  @default(false)
+    verifyDate DateTime
+
+    CustomerPersonalInfoModel CustomerPersonalInfoModel[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("aadhaar_card")
+}
+
+// Pan Card Data 
+model PanCardModel {
+    id Int @id @default(autoincrement())
+
+    firstName  String
+    middleName String
+    lastName   String
+
+    panCardNo   String
+    dateOfBirth String
+    gender      Gender
+
+    isVerified Boolean  @default(false)
+    verifyDate DateTime
+
+    CustomerPersonalInfoModel CustomerPersonalInfoModel[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("pan_card")
+}
+
+// bank Accounts data
+model CustomersBankAccountModel {
+    id Int @id @default(autoincrement())
+
+    accountHolderName String
+    bankAccountType   String
+    accountNumber     Int
+    ifscCode          String
+    bankName          String
+    branch            String
+
+    isPrimary  Boolean @default(false)
+    isVerified Boolean @default(false)
+
+    CustomerPersonalInfoModel   CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
+    customerPersonalInfoModelId Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("bank_accounts")
+}
+
+// demat / broker Accounts data
+model CustomersDematAccountModel {
+    id Int @id @default(autoincrement())
+
+    depositoryName            DepositoryName
+    dpId                      String
+    clientId                  String
+    accountType               DematAccountType
+    depositoryParticipantName String
+    primaryPanNumber          String
+    sndPanNumber              String?
+    trdPanNumber              String?
+    accountHolderName         String
+
+    isPrimary  Boolean @default(false)
+    isVerified Boolean @default(false)
+
+    CustomerPersonalInfoModel   CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
+    customerPersonalInfoModelId Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("demat_accounts")
+}
+
+// Risk Profile Data
+model CustomersRiskProfileModel {
+    id Int @id @default(autoincrement())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("risk_profiles")
+}
+
+// Address data
+model AddressModel {
+    id Int @id @default(autoincrement())
+
+    line1 String
+    line2 String?
+    line3 String?
+
+    postOffice     String
+    cityOrDistrict String
+    state          String
+    pinCode        String
+    country        String
+
+    fullAddress String
+
+    // Back relations
+    currentAddressOf   CustomerPersonalInfoModel[] @relation("CurrentAddress")
+    permanentAddressOf CustomerPersonalInfoModel[] @relation("PermanentAddress")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("addresses")
+}

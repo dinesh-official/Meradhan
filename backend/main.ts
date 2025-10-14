@@ -12,6 +12,7 @@ import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
 
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
+
 // Initialize server
 const server = new ExpressServer(config.port, {
     serverMonitor: monitoring,
@@ -24,13 +25,14 @@ logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
 server.addRoutes([authRoutes, crmUsersRoutes]);
+
 // Connect to databases and start server
 checkConnectToDatabases()
     .then(() => {
         logger.logInfo("All databases connected successfully.");
         server.start();
     }).catch((error) => {
-        console.error("Error connecting to databases:", error);
+        logger.logError("Error connecting to databases:", error);
         process.exit(1);
     });
 
