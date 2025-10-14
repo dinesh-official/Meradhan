@@ -87,7 +87,7 @@ export class ExpressServer implements IServer, IExpressRoute {
 
         // start server  -
         this.server.listen(this.port, () => {
-            logger.logError(`✅ Server is running in ${process.env.MODE || "DEVELOPMENT"} mode at http://localhost:${this.port}`);
+            logger.logInfo(`✅ Server is running in ${process.env.MODE || "DEVELOPMENT"} mode at http://localhost:${this.port}`);
             cb?.();
         });
     }

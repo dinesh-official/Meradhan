@@ -7,13 +7,17 @@
         "Aadhaar",
         "AADPM",
         "accountnumber",
+        "autoincrement",
         "beneficiaryid",
         "bullmq",
+        "Divh",
         "dpaccount",
         "dpid",
         "dptype",
         "expirydate",
+        "fvxc",
         "Gautam",
+        "gtdg",
         "Gurugram",
         "Haryana",
         "IFSC",
@@ -22,6 +26,8 @@
         "Prepass",
         "Rahul",
         "Rajesh",
-        "Sharma"
+        "RYZZWK",
+        "Sharma",
+        "supabase"
     ]
 }

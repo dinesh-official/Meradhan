@@ -5,9 +5,9 @@ import { config } from "@config/config";
 import { ExpressServer } from "@core/bootstrap/server";
 import { checkConnectToDatabases, disconnectFromDatabases } from "@core/database/database";
 import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@lib/provider/monitoring/prometheus.provider";
-import authRoutes from "./src/resource/auth/auth.route";
-import { cacheStorage } from "./src/queues/redis/queues";
 import logger from "@utils/logger/logger";
+import { cacheStorage } from "./src/queues/redis/queues";
+import authRoutes from "./src/resource/auth/auth.route";
 
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
@@ -59,3 +59,4 @@ process.on("uncaughtException", (err) => {
 process.on("exit", (code) => {
     logger.logInfo(`Process exited with code ${code}`);
 });
+

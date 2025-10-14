@@ -9,15 +9,25 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model UserDataModel {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
+model CRMUserDataModel {
+  id        Int         @id @default(autoincrement())
+  email     String      @unique
   name      String
-  avatar    String?   @default("person.jpg")
+  avatar    String?     @default("person.jpg")
   lastLogin DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  role      CrmUserROLE @default(VIEWER)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  createdBy Int?
 
   @@index([email])
   @@map("crm_users")
+}
+
+enum CrmUserROLE {
+  VIEWER
+  ADMIN
+  SALES
+  SUPPORT
+  RELATIONSHIP_MANAGER
 }

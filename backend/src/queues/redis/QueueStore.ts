@@ -1,7 +1,18 @@
 import { config } from '@config/config';
-import { Redis } from 'ioredis';
-import type { IQueueService } from '../services/interface';
 import logger from '@utils/logger/logger';
+import { Redis } from 'ioredis';
+
+
+export interface IQueueService<T = Redis> {
+  getInstance(): T;
+  checkConnection(): Promise<boolean>;
+  disconnect(): Promise<void>;
+  setKey<T>(key: string, value: T, ttlSeconds?: number): Promise<void>;
+  getKey<T>(key: string): Promise<T | null>;
+  updateKey<T>(key: string, value: T): Promise<boolean>;
+  deleteKey(key: string): Promise<boolean>;
+}
+
 
 export class QueueStore implements IQueueService {
   private static instance: Redis | null = null;
