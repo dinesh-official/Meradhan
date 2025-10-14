@@ -1,3 +1,4 @@
+"use client"
 import Image from "next/image";
 import NotificationsSideBar from "./NotificationsSideBar";
 import ProfileTopView from "./ProfileToogle";

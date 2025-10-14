@@ -1,4 +1,4 @@
-import 'server-only';
+import { API_SERVER_URL } from '@/global/constants/domains';
 import { ApiError, IApiCaller } from '@root/apiGateway';
 import axios, {
   AxiosInstance,
@@ -7,7 +7,7 @@ import axios, {
   AxiosResponse
 } from 'axios';
 import { headers } from 'next/headers';
-import { API_URL } from '@/global/constants/domains';
+import 'server-only';
 
 /**
  * Custom API Server Caller class extending AxiosInstance
@@ -18,17 +18,18 @@ import { API_URL } from '@/global/constants/domains';
 class ApiServerCaller implements IApiCaller {
   private instance: AxiosInstance;
 
-  constructor(baseURL: string = API_URL) {
+  constructor(baseURL: string = API_SERVER_URL) {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
-      validateStatus: () => true,
       timeout: 10000
     });
 
     this.instance.interceptors.response.use(
       (response) => response,
       (error) => {
+        console.log(error);
+        
         if (axios.isAxiosError(error)) {
           return Promise.reject(
             new ApiError(
@@ -74,6 +75,7 @@ class ApiServerCaller implements IApiCaller {
    */
   async request<T = unknown>(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse<T>> {
     const mergedHeaders = await this.prepareHeaders(config.headers as Record<string, string>);
+
     const finalConfig: AxiosRequestConfig = {
       url,
       ...config,
