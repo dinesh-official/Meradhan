@@ -29,7 +29,7 @@ export class EmailAuthService implements TEmailAuthServiceInterface {
         const user = await this.authRepo.getAuthUserByEmail(email);
         const isVerified = await this.optManager.verifyOtp(token, opt);
         if (!isVerified) {
-            throw new AppError("invalid otp.")
+            throw new AppError("The OTP provided is invalid.")
         }
         const authToken = tokenUtils.generateToken({
             email: user.email,

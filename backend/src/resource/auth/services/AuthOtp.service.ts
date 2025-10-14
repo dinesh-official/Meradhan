@@ -38,10 +38,10 @@ export class AuthOtpService implements IAuthOtpService {
     async verifyOtp(token: string, otp: string): ReturnType<IAuthOtpService['verifyOtp']> {
         const tokenData = tokenUtils.verifyToken<{ identifier: string }>(token)
         const record = await this.store.getKey<string>(`${this.storeKey}:${tokenData.identifier}`)
-        if (!record) throw new AppError("otp is expired");
+        if (!record) throw new AppError("The provided OTP is no longer valid.");
 
         const isValid = await hashingUtils.comparePassword(otp, record);
-        if (!isValid) throw new AppError("invalid otp");
+        if (!isValid) throw new AppError("Invalid OTP. Please try again.");
         await this.store.deleteKey(`${this.storeKey}:${tokenData.identifier}`)
         return isValid;
     }
