@@ -12,10 +12,12 @@ const generateMockUser = async () => {
     });
 };
 
-export const createFakeUserAccounts = async (count: number = 10) => {
+export const createFakeUserAccounts = async (count: number = 100) => {
     try {
         for (let i = 0; i < count; i++) {
             await generateMockUser();
+            console.log(i);
+            
         }
     } catch (error) {
         console.error('Error creating fake users:', error);

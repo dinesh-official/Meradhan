@@ -19,11 +19,11 @@ const server = new ExpressServer(config.port, {
         responseTimeMonitor.recordResponseTime(data.method, data.url, data.duration, data.statusCode);
     },
 });
+
 logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
 server.addRoutes([authRoutes, crmUsersRoutes]);
-
 // Connect to databases and start server
 checkConnectToDatabases()
     .then(() => {

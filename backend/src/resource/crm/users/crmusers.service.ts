@@ -1,11 +1,11 @@
-import { db, type CRMUserDataModel } from "@core/database/database"
+import { db, type CRMUserDataModel, type DataBaseSchema } from "@core/database/database"
 import type { appSchema } from "@root/schema"
 import type z from "zod"
 import type { ICrmUserRepo } from "./crmusers.repo"
 
 export interface ICrmUserService {
     findUser(id: number): Promise<CRMUserDataModel>
-    findManyUser(payload: z.infer<typeof appSchema.crm.user.findManyUserSchema>): Promise<CRMUserDataModel[]>
+    findManyUser(payload: z.infer<typeof appSchema.crm.user.findManyUserSchema>): Promise<{ data: CRMUserDataModel[], meta: { total: number; page: number; pageSize: number; totalPages: number }; }>
     createNewUser(payload: z.infer<typeof appSchema.crm.user.createCRMUserSchema>, createdBy: number,): Promise<CRMUserDataModel>
     updateUser(id: number, payload: z.infer<typeof appSchema.crm.user.updateUserSchema>): Promise<CRMUserDataModel>
     deleteUser(id: number): Promise<boolean>
@@ -21,8 +21,48 @@ export class CrmUserService implements ICrmUserService {
         return response;
     }
 
-  async  findManyUser(payload: z.infer<typeof appSchema.crm.user.findManyUserSchema>): ReturnType<ICrmUserService['findManyUser']> {
-        return await db.dataBase.cRMUserDataModel.findMany();
+    async findManyUser(payload: z.infer<typeof appSchema.crm.user.findManyUserSchema>): ReturnType<ICrmUserService['findManyUser']> {
+        const page = Number(payload.page) || 1;
+        const pageSize = 10; // You can make this configurable if needed
+        const skip = (page - 1) * pageSize;
+
+        // Build query filters
+        const filters: DataBaseSchema.CRMUserDataModelWhereInput = {};
+
+        if (payload.status && payload.status !== "ALL") {
+            filters.accountStatus = payload.status;
+        }
+
+        if (payload.role) {
+            filters.role = payload.role;
+        }
+
+        if (payload.search) {
+            filters.OR = [
+                { name: { contains: payload.search, mode: "insensitive" } },
+                { email: { contains: payload.search, mode: "insensitive" } },
+            ];
+        }
+
+        // Count total items matching filters
+        const total = await db.dataBase.cRMUserDataModel.count({ where: filters });
+
+        // Fetch paginated users
+        const data = await this.crmUserRepo.findManyUser({
+            where: filters,
+            skip,
+            take: pageSize,
+        });
+
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                pageSize,
+                totalPages: Math.ceil(total / pageSize),
+            },
+        };
     }
 
     async createNewUser(payload: z.infer<typeof appSchema.crm.user.createCRMUserSchema>, createdBy: number,): ReturnType<ICrmUserService['createNewUser']> {
