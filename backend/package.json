@@ -9,7 +9,8 @@
     "email": "email dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check": "npx tsc --noEmit"
+    "check": "npx tsc --noEmit",
+    "pm2": "pm2 restart MeraDhan-Backend --update-env || pm2 start npm --name 'MeraDhan-Backend' -- start"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
