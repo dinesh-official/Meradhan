@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/server/:path*',
-        destination: 'https://sm8cjh6l-4000.inc1.devtunnels.ms/api/:path*',
+        destination: 'http://3.110.126.202:4000/api/:path*',
       },
     ];
   },
