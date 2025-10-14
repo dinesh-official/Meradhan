@@ -126,9 +126,9 @@ exports.Prisma.CRMUserDataModelScalarFieldEnum = {
   email: 'email',
   phoneNo: 'phoneNo',
   avatar: 'avatar',
+  lastLogin: 'lastLogin',
   role: 'role',
   accountStatus: 'accountStatus',
-  lastLogin: 'lastLogin',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   createdBy: 'createdBy'
@@ -142,6 +142,7 @@ exports.Prisma.CustomersAuthDataModelScalarFieldEnum = {
   isPhoneVerified: 'isPhoneVerified',
   isEmailVerified: 'isEmailVerified',
   whatsAppNotificationAllow: 'whatsAppNotificationAllow',
+  termsAccepted: 'termsAccepted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   lastLogin: 'lastLogin'
@@ -161,6 +162,7 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   userType: 'userType',
   kycStatus: 'kycStatus',
   VerifiedBy: 'VerifiedBy',
+  customersAuthDataModelId: 'customersAuthDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   createdBy: 'createdBy'

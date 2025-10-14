@@ -37,7 +37,7 @@ interface UsersTableProps {
   onEditUser?: (user: Customer) => void;
 }
 
-function CustomerTable({ data, pageSize = 10, onViewUser, onEditUser }:UsersTableProps) {
+function CustomerTable({ data, pageSize = 10 }:UsersTableProps) {
   return (
     <UniversalTable<Customer>
       initialPageSize={pageSize}

@@ -1,7 +1,3 @@
-// ------------------------------
-// ENUMS SECTION
-// ------------------------------
-
 /// Defines CRM user roles with varying access levels
 enum CrmUserROLE {
   /// Can only view data, no modifications allowed
@@ -49,7 +45,7 @@ enum UserAccountType {
 enum Gender {
   MALE
   FEMALE
-  OTHERS
+  OTHER
 }
 
 /// Type of depository for Demat accounts

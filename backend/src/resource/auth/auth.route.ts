@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { AuthController } from './auth.controller';
 import { AuthRepo } from './auth.repo';
-import { EmailAuthService } from './services/EmailAuth.service';
+import { EmailAuthService } from './EmailAuth.service';
 import { withAuthMiddleware } from '@lib/middlewares/auth.middleware';
 const authRoutes = Router();
 

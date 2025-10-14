@@ -16,14 +16,18 @@ model CustomersAuthDataModel {
     accountStatus AccountStatus @default(ACTIVE)
 
     /// Verification flags
-    isPhoneVerified           Boolean @default(false)
-    isEmailVerified           Boolean @default(false)
-    whatsAppNotificationAllow Boolean @default(false)
+    isPhoneVerified           Boolean   @default(false)
+    isEmailVerified           Boolean   @default(false)
+    whatsAppNotificationAllow Boolean   @default(false)
+    termsAccepted             Boolean   @default(false)
+    lastLogin                 DateTime?
 
     /// Timestamps
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    lastLogin DateTime?
+    createdAt                DateTime                   @default(now())
+    updatedAt                DateTime                   @updatedAt
+    CustomerProfileDataModel CustomerProfileDataModel[]
+
+    @@map("customers_auth_data")
 }
 
 /// Stores customer profile information (public / account details)
@@ -50,15 +54,43 @@ model CustomerProfileDataModel {
     kycStatus  KYCStatus @default(PENDING)
     VerifiedBy Int?
 
+    utility                  CustomersAuthDataModel @relation(fields: [customersAuthDataModelId], references: [id])
+    customersAuthDataModelId Int
+
     /// Metadata and audit fields
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     createdBy Int?
 
+    // data set 
+
+    /// Relation with Aadhaar Card details
+    aadhaarCard        AADHAARCardModel? @relation(fields: [aADHAARCardModelId], references: [id])
+    aADHAARCardModelId Int?
+
+    /// Relation with PAN Card details
+    panCard        PanCardModel? @relation(fields: [panCardModelId], references: [id])
+    panCardModelId Int?
+
+    // profile info
+    personalInformation         CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
+    customerPersonalInfoModelId Int?
+
+    /// Linked bank and demat accounts
+    bankAccounts  CustomersBankAccountModel[]
+    dematAccounts CustomersDematAccountModel[]
+
+    /// Address relations (current and permanent)
+    currentAddress        AddressModel? @relation("CurrentAddress", fields: [currentAddressModelId], references: [id])
+    currentAddressModelId Int?
+
+    permanentAddress        AddressModel? @relation("PermanentAddress", fields: [permanentAddressModelId], references: [id])
+    permanentAddressModelId Int?
+
     /// Commonly searched fields for faster queries
     @@index([emailAddress, userName])
     /// Map to actual database table name
-    @@map("customers")
+    @@map("customers_profile_data")
 }
 
 /// Stores customer's personal information and identity documents
@@ -66,7 +98,7 @@ model CustomerPersonalInfoModel {
     id Int @id @default(autoincrement())
 
     /// Signature image URL
-    SignatureUrl String
+    SignatureUrl String?
 
     /// Personal info
     maritalStatus            String
@@ -80,28 +112,12 @@ model CustomerPersonalInfoModel {
     qualification            String
     politicallyExposedPerson String?
 
-    /// Relation with Aadhaar Card details
-    aadhaarCard        AADHAARCardModel? @relation(fields: [aADHAARCardModelId], references: [id])
-    aADHAARCardModelId Int?
-
-    /// Relation with PAN Card details
-    panCard        PanCardModel? @relation(fields: [panCardModelId], references: [id])
-    panCardModelId Int?
-
-    /// Linked bank and demat accounts
-    bankAccounts  CustomersBankAccountModel[]
-    dematAccounts CustomersDematAccountModel[]
-
-    /// Address relations (current and permanent)
-    currentAddress        AddressModel? @relation("CurrentAddress", fields: [currentAddressModelId], references: [id])
-    currentAddressModelId Int?
-
-    permanentAddress        AddressModel? @relation("PermanentAddress", fields: [permanentAddressModelId], references: [id])
-    permanentAddressModelId Int?
-
     /// Timestamps
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt                DateTime                   @default(now())
+    updatedAt                DateTime                   @updatedAt
+    CustomerProfileDataModel CustomerProfileDataModel[]
+
+    @@map("customers_personal_info")
 }
 
 /// Aadhaar card (identity proof) data model
@@ -126,12 +142,13 @@ model AADHAARCardModel {
     isVerified Boolean  @default(false)
     verifyDate DateTime
 
-    /// Reverse relation to personal info
-    CustomerPersonalInfoModel CustomerPersonalInfoModel[]
+    CustomerProfileDataModel CustomerProfileDataModel[]
 
     /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("aadhaar_cards")
 }
 
 /// PAN card (tax identity proof) data model
@@ -152,12 +169,13 @@ model PanCardModel {
     isVerified Boolean  @default(false)
     verifyDate DateTime
 
-    /// Reverse relation to personal info
-    CustomerPersonalInfoModel CustomerPersonalInfoModel[]
+    CustomerProfileDataModel CustomerProfileDataModel[]
 
     /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("pan_cards")
 }
 
 /// Bank account information linked to a customer
@@ -176,13 +194,14 @@ model CustomersBankAccountModel {
     isPrimary  Boolean @default(false)
     isVerified Boolean @default(false)
 
-    /// Linked customer
-    CustomerPersonalInfoModel   CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
-    customerPersonalInfoModelId Int?
+    CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
+    customerProfileDataModelId Int?
 
     /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("customers_bank_accounts")
 }
 
 /// Demat / Broker account data (for trading accounts)
@@ -206,13 +225,14 @@ model CustomersDematAccountModel {
     isPrimary  Boolean @default(false)
     isVerified Boolean @default(false)
 
-    /// Linked customer
-    CustomerPersonalInfoModel   CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
-    customerPersonalInfoModelId Int?
+    CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
+    customerProfileDataModelId Int?
 
     /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("customers_demat_accounts")
 }
 
 /// Risk profile of a customer (e.g., low / medium / high risk)
@@ -222,6 +242,8 @@ model CustomersRiskProfileModel {
     /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("customers_risk_profiles")
 }
 
 /// Address model (used for both current and permanent addresses)
@@ -244,10 +266,12 @@ model AddressModel {
     fullAddress String
 
     /// Reverse relations (used by personal info)
-    currentAddressOf   CustomerPersonalInfoModel[] @relation("CurrentAddress")
-    permanentAddressOf CustomerPersonalInfoModel[] @relation("PermanentAddress")
+    currentAddressOf   CustomerProfileDataModel[] @relation("CurrentAddress")
+    permanentAddressOf CustomerProfileDataModel[] @relation("PermanentAddress")
 
     /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("addresses")
 }

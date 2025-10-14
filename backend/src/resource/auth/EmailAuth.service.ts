@@ -1,7 +1,7 @@
 import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
-import type { IAuthRepoInterface } from "../auth.repo";
-import { AuthOtpService, type IAuthOtpService } from "./AuthOtp.service";
+import type { IAuthRepoInterface } from "./auth.repo";
+import { OtpVerificationService, type IOtpVerificationService } from "@lib/manager/OtpVerificationService.service";
 
 
 type ReqDataResponse = { token: string, role: string, id: number, avatar?: string | null, name: string, email: string, phoneNo: string }
@@ -14,9 +14,9 @@ export interface TEmailAuthServiceInterface {
 
 export class EmailAuthService implements TEmailAuthServiceInterface {
 
-    private optManager: IAuthOtpService;
+    private optManager: IOtpVerificationService;
     constructor(private authRepo: IAuthRepoInterface) {
-        this.optManager = new AuthOtpService();
+        this.optManager = new OtpVerificationService("AUTH_OTP");
     }
 
     async sendAuthEmailOtp(email: string): ReturnType<TEmailAuthServiceInterface['sendAuthEmailOtp']> {

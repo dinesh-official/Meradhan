@@ -7,7 +7,7 @@ import { AccountStatusEnum, CrmUserROLEEnum } from "../enums";
 export const findManyUserSchema = z.object({
     page: z.string().regex(/^\d+$/, { message: "Page must be a numeric string" }).default("1").optional(),
     search: z.string().optional(),
-    status: z.enum(["SUSPENDED", "ACTIVE", "ALL"]).default("ALL").optional(),
+    status: z.enum(["SUSPENDED", "ACTIVE", "ALL"]).optional(),
     role: CrmUserROLEEnum.optional(),
 })
 

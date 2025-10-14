@@ -57,7 +57,6 @@ function CardPagination({ page, totalPages, onClick }: CardPaginationProps) {
           {page != 1 && (
             <PaginationItem>
               <PaginationPrevious
-                href="#"
                 onClick={(e) => handleClick(Math.max(1, page - 1), e)}
               />
             </PaginationItem>
@@ -69,7 +68,6 @@ function CardPagination({ page, totalPages, onClick }: CardPaginationProps) {
                 <PaginationEllipsis />
               ) : (
                 <PaginationLink
-                  href="#"
                   onClick={(e) => handleClick(p, e)}
                   className={page == p ? "bg-secondary" : ""}
                 >
@@ -82,7 +80,6 @@ function CardPagination({ page, totalPages, onClick }: CardPaginationProps) {
           {page != totalPages && (
             <PaginationItem>
               <PaginationNext
-                href="#"
                 onClick={(e) => handleClick(Math.min(totalPages, page + 1), e)}
               />
             </PaginationItem>

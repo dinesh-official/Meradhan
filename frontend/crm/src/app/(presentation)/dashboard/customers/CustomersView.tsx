@@ -7,7 +7,6 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import CustomerSearchFilterBar from "./_components/CustomerSearchFilterBar";
 import CustomerTable, { Customer } from "./_components/CustomerTable";
-import Table from "../Table";
 const customersMock: Customer[] = [
     {
       id: "1",

@@ -3,7 +3,7 @@ import { cookieOptions } from "@config/cookie";
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
-import type { TEmailAuthServiceInterface } from "./services/EmailAuth.service";
+import type { TEmailAuthServiceInterface } from "./EmailAuth.service";
 
 export interface TAuthController {
     loginWithOtp(req: Request, res: Response): Promise<void>

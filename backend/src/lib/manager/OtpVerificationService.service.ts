@@ -1,28 +1,32 @@
 import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
-import { QueueStore, type IQueueService } from "../../../queues/redis/QueueStore";
+import { QueueStore, type IQueueService } from "../../queues/redis/QueueStore";
 import { hashingUtils } from "@utils/hash/hashing.utils";
 import { config } from "@config/config";
+import { EmailSenderGateway } from "@lib/gateway/emailsender/emailSender.gateway";
+import type { IEmailSenderGatewayInterface } from "@lib/gateway/emailsender/emailTask.interface";
 
 export interface OtpRecord {
     otp: string;
     expiresAt: number;
 }
 
-export interface IAuthOtpService {
+export interface IOtpVerificationService {
     generateOtpAndSend(identifier: string, length?: number, expirySeconds?: number): Promise<string>;
     verifyOtp(token: string, otp: string): Promise<boolean>;
 }
 
-export class AuthOtpService implements IAuthOtpService {
+export class OtpVerificationService implements IOtpVerificationService {
 
-    private storeKey = "AUTH_OTP";
+    private gateway: IEmailSenderGatewayInterface;
+    private storeKey;
     private store: IQueueService;
-    constructor() {
-        this.store = QueueStore.getStore();
+    constructor(private useOf: "AUTH_OTP" | "EMAIL_VERIFY" = "AUTH_OTP") {
+        this.store = QueueStore.getStore(); this.storeKey = useOf;
+        this.gateway = new EmailSenderGateway()
     }
 
-    async generateOtpAndSend(identifier: string, length: number = 6, expirySeconds: number = 300): ReturnType<IAuthOtpService['generateOtpAndSend']> {
+    async generateOtpAndSend(identifier: string, length: number = 6, expirySeconds: number = 300): ReturnType<IOtpVerificationService['generateOtpAndSend']> {
         const otp = Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
         if (config.mode == "DEVELOPMENT") {
             console.log("====================");
@@ -35,7 +39,7 @@ export class AuthOtpService implements IAuthOtpService {
         return token;
     }
 
-    async verifyOtp(token: string, otp: string): ReturnType<IAuthOtpService['verifyOtp']> {
+    async verifyOtp(token: string, otp: string): ReturnType<IOtpVerificationService['verifyOtp']> {
         const tokenData = tokenUtils.verifyToken<{ identifier: string }>(token)
         const record = await this.store.getKey<string>(`${this.storeKey}:${tokenData.identifier}`)
         if (!record) throw new AppError("The provided OTP is no longer valid.");

@@ -10,9 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
-import { MoreHorizontal } from "lucide-react";
-import * as React from "react";
 import StatusBadge from "@/global/elements/wrapper/StatusBadge";
+import { MoreHorizontal } from "lucide-react";
 
 type Role = "admin" | "manager" | "sales" | "viewer" | "auditor";
 
@@ -39,8 +38,7 @@ interface UsersTableProps {
 function UsersTable({
   data,
   pageSize = 10,
-  onViewUser,
-  onEditUser,
+
 }: UsersTableProps) {
   return (
     <UniversalTable<UserRow>

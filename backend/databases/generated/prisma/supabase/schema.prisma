@@ -1,18 +1,15 @@
 model CRMUserDataModel {
-  id Int @id @default(autoincrement())
-
-  name    String
-  email   String  @unique
-  phoneNo String
-  avatar  String? @default("person.jpg")
-
+  id            Int           @id @default(autoincrement())
+  name          String
+  email         String        @unique
+  phoneNo       String
+  avatar        String?       @default("person.jpg")
+  lastLogin     DateTime?
   role          CrmUserROLE   @default(VIEWER)
   accountStatus AccountStatus @default(ACTIVE)
-
-  lastLogin DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  createdBy Int?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdBy     Int?
 
   @@index([email])
   @@map("crm_users")
@@ -39,11 +36,15 @@ model CustomersAuthDataModel {
   isPhoneVerified           Boolean @default(false)
   isEmailVerified           Boolean @default(false)
   whatsAppNotificationAllow Boolean @default(false)
+  termsAccepted             Boolean @default(false)
 
   /// Timestamps
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  lastLogin DateTime?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  lastLogin                DateTime?
+  CustomerProfileDataModel CustomerProfileDataModel[]
+
+  @@map("customers_auth_data")
 }
 
 /// Stores customer profile information (public / account details)
@@ -70,6 +71,9 @@ model CustomerProfileDataModel {
   kycStatus  KYCStatus @default(PENDING)
   VerifiedBy Int?
 
+  utility                  CustomersAuthDataModel @relation(fields: [customersAuthDataModelId], references: [id])
+  customersAuthDataModelId Int
+
   /// Metadata and audit fields
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -78,7 +82,7 @@ model CustomerProfileDataModel {
   /// Commonly searched fields for faster queries
   @@index([emailAddress, userName])
   /// Map to actual database table name
-  @@map("customers")
+  @@map("customers_profile_data")
 }
 
 /// Stores customer's personal information and identity documents
@@ -122,6 +126,8 @@ model CustomerPersonalInfoModel {
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("customers_personal_info")
 }
 
 /// Aadhaar card (identity proof) data model
@@ -152,6 +158,8 @@ model AADHAARCardModel {
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("aadhaar_cards")
 }
 
 /// PAN card (tax identity proof) data model
@@ -178,6 +186,8 @@ model PanCardModel {
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("pan_cards")
 }
 
 /// Bank account information linked to a customer
@@ -203,6 +213,8 @@ model CustomersBankAccountModel {
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("customers_bank_accounts")
 }
 
 /// Demat / Broker account data (for trading accounts)
@@ -233,6 +245,8 @@ model CustomersDematAccountModel {
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("customers_demat_accounts")
 }
 
 /// Risk profile of a customer (e.g., low / medium / high risk)
@@ -242,6 +256,8 @@ model CustomersRiskProfileModel {
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("customers_risk_profiles")
 }
 
 /// Address model (used for both current and permanent addresses)
@@ -270,11 +286,9 @@ model AddressModel {
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
 
-// ------------------------------
-// ENUMS SECTION
-// ------------------------------
+  @@map("addresses")
+}
 
 /// Defines CRM user roles with varying access levels
 enum CrmUserROLE {
