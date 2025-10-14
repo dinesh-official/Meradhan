@@ -1,15 +1,16 @@
-"use client"
+"use client";
 import Image from "next/image";
 import NotificationsSideBar from "./NotificationsSideBar";
 import ProfileTopView from "./ProfileToogle";
 import MobMenuBar from "./MobMenuBar";
+import { UserSessionDataResponse } from "@root/apiGateway";
 
-function TopBar() {
+function TopBar({ session }: { session: UserSessionDataResponse }) {
   return (
     <div className="w-full h-[65px] border-b flex sticky top-0 right-0 left-0 z-50 justify-between items-center px-5 bg-white border-gray-100">
       <div className="flex justify-start items-center gap-6 h-full ">
         {/* Mobile Menu Bar */}
-        <MobMenuBar role="ADMIN" />
+        <MobMenuBar role={session.responseData.role} />
 
         <div className="flex justify-start items-center gap-3">
           <Image
@@ -28,7 +29,7 @@ function TopBar() {
       {/* // Side Actions  */}
       <div className="flex justify-center items-center gap-8">
         <NotificationsSideBar />
-        <ProfileTopView />
+        <ProfileTopView session={session.responseData} />
       </div>
     </div>
   );

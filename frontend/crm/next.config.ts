@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         source: '/api/server/:path*',
         destination: 'http://3.110.126.202:4000/api/:path*',
       },
+       {
+        source: '/assets/media/:path*',        // what user visits
+        destination: 'https://bgzlloqonccvfegaxgcm.supabase.co/storage/v1/object/public/public_storage/:path*', // where it actually fetches
+      },
     ];
   },
 };

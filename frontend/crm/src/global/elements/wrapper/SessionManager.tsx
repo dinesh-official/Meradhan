@@ -15,8 +15,6 @@ function SessionManager({
   const { setUserData } = useCurrentUserData();
   const { setCookie } = useAppCookie();
   useEffect(() => {
-    console.log(session.responseData);
-
     setUserData(session.responseData);
     setCookie("role", session.responseData.role, COOKIE_OPTIONS);
     setCookie("userId", session.responseData.id, COOKIE_OPTIONS);

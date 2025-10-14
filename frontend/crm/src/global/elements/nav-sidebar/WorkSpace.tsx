@@ -18,12 +18,12 @@ export default async function Workspace({
     <SessionManager session={session.data}>
       <div className="flex flex-col h-screen">
         {/* Top Bar */}
-        <TopBar />
+        <TopBar session={session.data} />
         {/* Main Section */}
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <div className="lg:block hidden">
-            <SideBar role="ADMIN" />
+            <SideBar role={session.data.responseData.role} />
           </div>
           {/* Scrollable Content Area */}
           <main className="relative flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50">

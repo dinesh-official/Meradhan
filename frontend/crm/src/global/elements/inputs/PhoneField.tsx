@@ -114,7 +114,7 @@ export const PhoneField = ({
   return (
     <div className={cn("w-full", className)} dir="ltr">
       {label && (
-        <Label htmlFor={id} className={cn(error && "text-destructive")}>
+        <Label htmlFor={id} >
           {label} {required && <span className="text-destructive">*</span>}
         </Label>
       )}

@@ -13,6 +13,7 @@ import StatusCountCard from "@/global/elements/cards/StatusCountCard";
 import { SalesPerformanceChart } from "./_components/chart/SalesPerformanceChart";
 import { LeadSourcesPiChart } from "./_components/chart/LeadSourcesPiChart";
 import CrmActivityLogsView from "./audit-logs/crm/activity/CrmActivityLogsView";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
 const DashBoardView = () => {
   return (
@@ -77,7 +78,9 @@ const DashBoardView = () => {
           </CardContent>
         </Card>
       </div>
-      <CrmActivityLogsView />
+      <AllowOnlyView permissions={["view:crmauditlogs"]}>
+        <CrmActivityLogsView />
+      </AllowOnlyView>
     </div>
   );
 };

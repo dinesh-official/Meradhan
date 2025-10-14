@@ -28,7 +28,6 @@ class ApiServerCaller implements IApiCaller {
     this.instance.interceptors.response.use(
       (response) => response,
       (error) => {
-        console.log(error);
         
         if (axios.isAxiosError(error)) {
           return Promise.reject(
