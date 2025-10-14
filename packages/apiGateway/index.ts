@@ -1,11 +1,13 @@
 export * from "./src/core/connection/apiCaller";
 export * from "./src/core/connection/error";
-export type * from "./src/core/api/auth.api"
-export type * from "./src/core/connection/apiCaller.interface"
+export type * from "./src/core/api/auth.api";
+export type * from "./src/core/connection/apiCaller.interface";
 import * as auth from "./src/core/api/auth.api";
-export * from "./src/core/constants/role"
-export * from "./src/types/response.types"
+export * from "./src/core/constants/role";
+export * from "./src/types/response.types";
+import * as crmUser from "./src/core/api/crm/crmUsers.api";
 
-export  default {
-    auth
-}
+export default {
+  auth,
+  crm: { user: crmUser },
+};
