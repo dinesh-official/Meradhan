@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ProjectStarterKit Development Environment Starter
+# MeraDhan Development Environment Starter
 # This script starts all services in separate terminal tabs
 
 # Colors for output
@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 # Get the project root directory
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo -e "${BLUE}🚀 Starting ProjectStarterKit Development Environment...${NC}"
+echo -e "${BLUE}🚀 Starting MeraDhan Development Environment...${NC}"
 echo -e "${YELLOW}Project Root: ${PROJECT_ROOT}${NC}"
 
 # Function to check if a command exists

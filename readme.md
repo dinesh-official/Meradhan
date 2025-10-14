@@ -1,7 +1,7 @@
 
 # MeraDhan
 
-A monorepo starter kit for building scalable full-stack TypeScript projects with Bun, Node.js, Next.js, and Prisma.
+A MeraDhan building scalable full-stack TypeScript projects with Bun, Node.js, Next.js, and Prisma.
 
 ---
 
@@ -35,7 +35,7 @@ A monorepo starter kit for building scalable full-stack TypeScript projects with
 ## Project Structure
 
 ```
-ProjectStarterKit/
+MeraDhan/
 ├── backend/           # API server, business logic, Prisma integration
 ├── frontend/
 │   └── client/        # Next.js frontend app
@@ -103,7 +103,7 @@ Start backend and frontend services in separate terminal tabs:
 ```
 
 - **Backend**: http://localhost:4000
-- **Frontend**: http://localhost:3002
+- **Frontend**: http://localhost:3000
 
 You can also start services manually:
 
@@ -144,8 +144,8 @@ npx prisma migrate dev
 Build and run the project in Docker:
 
 ```bash
-docker build -t projectstarterkit .
-docker run -p 4000:4000 projectstarterkit
+docker build -t MeraDhan .
+docker run -p 4000:4000 MeraDhan
 ```
 
 - The Dockerfile installs Bun, Node.js, npm, and sets up all dependencies

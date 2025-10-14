@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# ProjectStarterKit Setup Script
+# MeraDhan Setup Script
 # This script installs all dependencies for the project components
 
 set -e  # Exit on any error
 
-echo "🚀 Starting ProjectStarterKit setup..."
+echo "🚀 Starting MeraDhan setup..."
 echo "========================================"
 
 # Colors for output

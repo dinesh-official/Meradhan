@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: 'Backend'
     static_configs:
-      - targets: ['192.168.1.4:4000']  # Change this if your Node.js app is inside Docker
+      - targets: ['192.168.1.4:4000']
