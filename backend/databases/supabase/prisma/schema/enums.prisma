@@ -67,3 +67,33 @@ enum KYCStatus {
   VERIFIED
   REJECTED
 }
+
+
+// Lead Sources
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  SOCIAL
+  ADVERTISEMENT
+  EVENT
+  COLD_CALL
+  EMAIL
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  UNQUALIFIED
+  CONVERTED
+}
+
+enum BondType {
+  GOVERNMENT
+  CORPORATE
+  TAX_FREE
+  SOVEREIGN_GOLD_BOND
+  PSU
+  OTHER
+}

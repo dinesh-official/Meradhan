@@ -6,6 +6,8 @@ import MobMenuBar from "./MobMenuBar";
 import { UserSessionDataResponse } from "@root/apiGateway";
 
 function TopBar({ session }: { session: UserSessionDataResponse }) {
+  console.log(session);
+  
   return (
     <div className="w-full h-[65px] border-b flex sticky top-0 right-0 left-0 z-50 justify-between items-center px-5 bg-white border-gray-100">
       <div className="flex justify-start items-center gap-6 h-full ">

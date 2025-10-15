@@ -143,9 +143,9 @@ exports.Prisma.CustomersAuthDataModelScalarFieldEnum = {
   isEmailVerified: 'isEmailVerified',
   whatsAppNotificationAllow: 'whatsAppNotificationAllow',
   termsAccepted: 'termsAccepted',
+  lastLogin: 'lastLogin',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  lastLogin: 'lastLogin'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
@@ -165,7 +165,12 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   customersAuthDataModelId: 'customersAuthDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  createdBy: 'createdBy'
+  createdBy: 'createdBy',
+  aADHAARCardModelId: 'aADHAARCardModelId',
+  panCardModelId: 'panCardModelId',
+  customerPersonalInfoModelId: 'customerPersonalInfoModelId',
+  currentAddressModelId: 'currentAddressModelId',
+  permanentAddressModelId: 'permanentAddressModelId'
 };
 
 exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {
@@ -181,10 +186,6 @@ exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {
   residentialStatus: 'residentialStatus',
   qualification: 'qualification',
   politicallyExposedPerson: 'politicallyExposedPerson',
-  aADHAARCardModelId: 'aADHAARCardModelId',
-  panCardModelId: 'panCardModelId',
-  currentAddressModelId: 'currentAddressModelId',
-  permanentAddressModelId: 'permanentAddressModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -229,7 +230,7 @@ exports.Prisma.CustomersBankAccountModelScalarFieldEnum = {
   branch: 'branch',
   isPrimary: 'isPrimary',
   isVerified: 'isVerified',
-  customerPersonalInfoModelId: 'customerPersonalInfoModelId',
+  customerProfileDataModelId: 'customerProfileDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -247,7 +248,7 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
   accountHolderName: 'accountHolderName',
   isPrimary: 'isPrimary',
   isVerified: 'isVerified',
-  customerPersonalInfoModelId: 'customerPersonalInfoModelId',
+  customerProfileDataModelId: 'customerProfileDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -269,6 +270,33 @@ exports.Prisma.AddressModelScalarFieldEnum = {
   pinCode: 'pinCode',
   country: 'country',
   fullAddress: 'fullAddress',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.LeadsModelScalarFieldEnum = {
+  id: 'id',
+  fullName: 'fullName',
+  emailAddress: 'emailAddress',
+  phoneNo: 'phoneNo',
+  companyName: 'companyName',
+  leadSource: 'leadSource',
+  bondType: 'bondType',
+  status: 'status',
+  exInvestmentAmount: 'exInvestmentAmount',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  createdBy: 'createdBy'
+};
+
+exports.Prisma.LeadFollowUpNotesModelScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  createdBy: 'createdBy',
+  createdByID: 'createdByID',
+  text: 'text',
+  nextDate: 'nextDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -309,7 +337,7 @@ exports.SIGNIN_WITH = exports.$Enums.SIGNIN_WITH = {
 exports.Gender = exports.$Enums.Gender = {
   MALE: 'MALE',
   FEMALE: 'FEMALE',
-  OTHERS: 'OTHERS'
+  OTHER: 'OTHER'
 };
 
 exports.UserAccountType = exports.$Enums.UserAccountType = {
@@ -339,6 +367,34 @@ exports.DematAccountType = exports.$Enums.DematAccountType = {
   HUF: 'HUF'
 };
 
+exports.LeadSource = exports.$Enums.LeadSource = {
+  WEBSITE: 'WEBSITE',
+  REFERRAL: 'REFERRAL',
+  SOCIAL: 'SOCIAL',
+  ADVERTISEMENT: 'ADVERTISEMENT',
+  EVENT: 'EVENT',
+  COLD_CALL: 'COLD_CALL',
+  EMAIL: 'EMAIL',
+  OTHER: 'OTHER'
+};
+
+exports.BondType = exports.$Enums.BondType = {
+  GOVERNMENT: 'GOVERNMENT',
+  CORPORATE: 'CORPORATE',
+  TAX_FREE: 'TAX_FREE',
+  SOVEREIGN_GOLD_BOND: 'SOVEREIGN_GOLD_BOND',
+  PSU: 'PSU',
+  OTHER: 'OTHER'
+};
+
+exports.LeadStatus = exports.$Enums.LeadStatus = {
+  NEW: 'NEW',
+  CONTACTED: 'CONTACTED',
+  QUALIFIED: 'QUALIFIED',
+  UNQUALIFIED: 'UNQUALIFIED',
+  CONVERTED: 'CONVERTED'
+};
+
 exports.Prisma.ModelName = {
   CRMUserDataModel: 'CRMUserDataModel',
   CustomersAuthDataModel: 'CustomersAuthDataModel',
@@ -349,7 +405,9 @@ exports.Prisma.ModelName = {
   CustomersBankAccountModel: 'CustomersBankAccountModel',
   CustomersDematAccountModel: 'CustomersDematAccountModel',
   CustomersRiskProfileModel: 'CustomersRiskProfileModel',
-  AddressModel: 'AddressModel'
+  AddressModel: 'AddressModel',
+  LeadsModel: 'LeadsModel',
+  LeadFollowUpNotesModel: 'LeadFollowUpNotesModel'
 };
 
 /**

@@ -185,7 +185,7 @@ model CustomersBankAccountModel {
     /// Basic account info
     accountHolderName String
     bankAccountType   String
-    accountNumber     Int
+    accountNumber     String
     ifscCode          String
     bankName          String
     branch            String

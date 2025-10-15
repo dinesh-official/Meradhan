@@ -9,6 +9,7 @@ import logger from "@utils/logger/logger";
 import { cacheStorage } from "./src/queues/redis/queues";
 import authRoutes from "./src/resource/auth/auth.route";
 import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
+import { generateUsername } from "@utils/generate/generateUsername";
 
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
@@ -20,6 +21,7 @@ const server = new ExpressServer(config.port, {
         responseTimeMonitor.recordResponseTime(data.method, data.url, data.duration, data.statusCode);
     },
 });
+console.log(generateUsername());
 
 logger.logInfo((await cacheStorage.isConnected()).toString());
 

@@ -17,9 +17,9 @@ const LeadFormManagementForm = ({
     <div className="flex flex-col gap-4 relative">
       <div className="grid md:grid-cols-2 gap-4">
         <InputField
-          id="firstName"
-          label="First Name"
-          placeholder="Enter first name"
+          id="FullName"
+          label="Full Name"
+          placeholder="Enter full name"
           required
           value={manager.state.fullName}
           onChangeAction={(e) => {
@@ -58,7 +58,7 @@ const LeadFormManagementForm = ({
         <InputField
           id="companyName"
           label="company Name"
-          placeholder="Enter first name"
+          placeholder="Enter Full name"
           required
           value={manager.state.company}
           onChangeAction={(e) => {
