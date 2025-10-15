@@ -1,6 +1,5 @@
 git pull
 bash setup.sh
-cd backend && npm run pm2 && npm run pm2:worker
 cd frontend/crm/
 npm run build
 cd ../../
