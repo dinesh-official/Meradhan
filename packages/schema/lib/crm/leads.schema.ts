@@ -30,12 +30,16 @@ export const BondType = z.enum([
 ]);
 
 
-export const filterLeadSchema = z.object({
-    page: z.string().regex(/^\d+$/, { message: "Page must be a numeric string" }).default("1").optional(),
-    search: z.string().optional(),
-    status: LeadStatus.optional(),
-    source: LeadSource.optional(),
-})
+export const findManyLeadsSchema = z.object({
+  page: z
+    .string()
+    .regex(/^\d+$/, { message: "Page must be a numeric string" })
+    .default("1")
+    .optional(),
+  search: z.string().optional(),
+  status: LeadStatus.optional(),
+  source: LeadSource.optional(),
+});
 
 // Main Lead schema
 export const createNewLeadSchema = z.object({
