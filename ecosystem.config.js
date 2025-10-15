@@ -20,7 +20,7 @@ module.exports = {
             name: "MeraDhan-Worker",
             cwd: "./backend",                 // path to worker folder
             script: "npm",
-            args: "run pmw2:worker",        // or "start" depending on your package.json
+            args: "run worker",        // or "start" depending on your package.json
             autorestart: true,
             watch: false,
             max_restarts: 10,
