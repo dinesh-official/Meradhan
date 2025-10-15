@@ -6,5 +6,5 @@ export const cookieOptions: CookieOptions = {
     expires: COOKIE_EXPIRY_TIME,
     path: '/',
     sameSite: 'strict',
-    secure: true,
+    secure: false,
 }

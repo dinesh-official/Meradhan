@@ -6,5 +6,5 @@ export const COOKIE_OPTIONS: ReactCookieProps['defaultSetOptions'] = {
     expires: COOKIE_EXPIRY_TIME,
     path: '/',
     sameSite: 'strict',
-    secure: true,
+    secure: false,
 }
