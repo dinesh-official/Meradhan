@@ -14,7 +14,19 @@ function Client({ children }: { children: ReactNode }) {
       <UserTrackingProvider>
         <QueryClientProvider client={queryClient}>
           {children}
-          <Toaster position="top-center" reverseOrder={false} />
+          <Toaster
+            position="top-right"
+            reverseOrder={false}
+            containerStyle={{
+              marginTop: "60px",
+            }}
+            toastOptions={{
+              duration: 4000,
+              style: {
+                marginTop: "180px",
+              },
+            }}
+          />
           <SonnerToaster position="top-center" richColors />
           <ReactQueryDevtools
             initialIsOpen={false}

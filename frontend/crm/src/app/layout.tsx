@@ -1,9 +1,9 @@
 import { geistMono, geistSans } from "@/global/font/font";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
+import React from "react";
 import Client from "./client";
 import "./globals.css";
-import React from "react";
 export const revalidate = 0;
 export const metadata: Metadata = {
   title: "MeraDhan CRM - Portal",

@@ -16,11 +16,11 @@ export default async function Workspace({
 
   return (
     <SessionManager session={session.data}>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen transition-all">
         {/* Top Bar */}
         <TopBar session={session.data} />
         {/* Main Section */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden   ">
           {/* Sidebar */}
           <div className="lg:block hidden">
             <SideBar role={session.data.responseData.role} />

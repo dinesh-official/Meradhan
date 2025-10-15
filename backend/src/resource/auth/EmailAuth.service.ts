@@ -1,7 +1,8 @@
+import { OtpVerificationService, type IOtpVerificationService } from "@lib/manager/OtpVerificationService.service";
 import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
+import { sendLoginOtpEmail } from "../../queues/services/emails/sendEmailOtp";
 import type { IAuthRepoInterface } from "./auth.repo";
-import { OtpVerificationService, type IOtpVerificationService } from "@lib/manager/OtpVerificationService.service";
 
 
 type ReqDataResponse = { token: string, role: string, id: number, avatar?: string | null, name: string, email: string, phoneNo: string }
@@ -21,7 +22,12 @@ export class EmailAuthService implements TEmailAuthServiceInterface {
 
     async sendAuthEmailOtp(email: string): ReturnType<TEmailAuthServiceInterface['sendAuthEmailOtp']> {
         const user = await this.authRepo.getAuthUserByEmail(email);
-        const token = await this.optManager.generateOtpAndSend(user.id.toString());
+        const { token, otp } = await this.optManager.generateOtpAndSend(user.id.toString());
+        await sendLoginOtpEmail({
+            email: user.email,
+            userName: user.name,
+            otp
+        })
         return { token };
     }
 

@@ -12,6 +12,7 @@ interface SideBarItemProps {
   level?: number;
   activePath?: string;
   role: Role;
+  compacted: boolean;
 }
 
 // use if link add in link else add div inside content
@@ -43,6 +44,7 @@ export const SideBarItems = ({
   level = 0,
   activePath,
   role,
+  compacted,
 }: SideBarItemProps) => {
   // Check if the active path exists in children recursively
   const hasActiveChild = (node: NavItem): boolean => {
@@ -62,6 +64,9 @@ export const SideBarItems = ({
 
   // render separate section
   if (item.section) {
+    if (compacted) {
+      return;
+    }
     if (role != "ADMIN") {
       return (
         <p className="uppercase px-3 mt-6 text-gray-600  text-sm mb-1 ">
@@ -96,7 +101,7 @@ export const SideBarItems = ({
           {item.icon && (
             <div
               className={cn(
-                "flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-200",
+                "flex items-center justify-center min-w-8 min-h-8 rounded-md transition-colors duration-200",
                 isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-600"
               )}
             >
@@ -104,7 +109,14 @@ export const SideBarItems = ({
             </div>
           )}
           {/* Label of link menu  */}
-          <span className="text-sm">{item.label}</span>
+          <span
+            className={cn(
+              "text-sm opacity-100 transition-all",
+              compacted && "opacity-0"
+            )}
+          >
+            {item.label}
+          </span>
         </LDiv>
 
         {/* downdown arrow  */}
@@ -120,8 +132,8 @@ export const SideBarItems = ({
       </div>
 
       {/* Loop Nested Menus levels */}
-      {item.children && isOpen && (
-        <div className="flex flex-col mt-1 border-l border-gray-200 ml-2 pl-2">
+      {item.children && isOpen && !compacted && (
+        <div className="flex flex-col mt-1 border-l border-gray-200 ml-2 pl-2 transition-all">
           {item.children.map((child) => (
             <SideBarItems
               role={role}
@@ -129,6 +141,7 @@ export const SideBarItems = ({
               item={child}
               level={level + 1}
               activePath={activePath}
+              compacted={compacted}
             />
           ))}
         </div>

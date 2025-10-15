@@ -12,7 +12,7 @@ export interface OtpRecord {
 }
 
 export interface IOtpVerificationService {
-    generateOtpAndSend(identifier: string, length?: number, expirySeconds?: number): Promise<string>;
+    generateOtpAndSend(identifier: string, length?: number, expirySeconds?: number): Promise<{ token: string, otp: string }>;
     verifyOtp(token: string, otp: string): Promise<boolean>;
 }
 
@@ -36,7 +36,7 @@ export class OtpVerificationService implements IOtpVerificationService {
         const value = await hashingUtils.hashPassword(otp)
         await this.store.setKey(`${this.storeKey}:${identifier}`, value, expirySeconds);
         const token = tokenUtils.generateToken<{ identifier: string }>({ identifier }, expirySeconds)
-        return token;
+        return { token, otp };
     }
 
     async verifyOtp(token: string, otp: string): ReturnType<IOtpVerificationService['verifyOtp']> {

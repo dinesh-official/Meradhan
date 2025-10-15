@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
       // If role mismatch or session is invalid, clear cookies and redirect
       if (!session?.data?.responseData?.role || session.data.responseData.role !== roleCookie) {
         // Create a response object to delete cookies
-        const response = NextResponse.redirect(new URL('/login', request.url));
+        const response = NextResponse.redirect(new URL('/logout', request.url));
 
         response.cookies.delete('token');
         response.cookies.delete('userId');

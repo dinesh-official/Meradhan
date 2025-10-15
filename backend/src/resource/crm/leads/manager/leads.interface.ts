@@ -5,7 +5,7 @@ import type { META_DATA_PAGINATION } from "../../../../../types/metadata";
 
 export interface ILeadsManagerInterface {
     getLeadById(leadId: number): Promise<LeadsModel>;
-    filterLead(data: z.infer<typeof appSchema.crm.leads.filterLeadSchema>): Promise<{
+    filterLead(data: z.infer<typeof appSchema.crm.leads.findManyLeadsSchema>): Promise<{
         data: LeadsModel[],
         meta: META_DATA_PAGINATION
     }>;

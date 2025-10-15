@@ -21,7 +21,7 @@ export class EmailSenderGateway implements IEmailSenderGatewayInterface {
 
     async sendEmail(data: { to: string; subject: string; html?: string; text?: string; from?: string; }): Promise<string> {
         const info = await this.transporter.sendMail({
-            from: data.from || '"Mail Client" <noreply@mailclient.com>',
+            from: data.from || `${config.smtp.user}`,
             to: data.to,
             subject: data.subject,
             text: data.text,

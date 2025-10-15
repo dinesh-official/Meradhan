@@ -13,7 +13,10 @@ export class QueueJobService {
 
     constructor(private readonly queueName: QueueNames) {
         const redis = QueueStore.prototype.getInstance();
-        this.queue = new Queue(queueName, { connection: redis });
+        this.queue = new Queue(queueName, {
+            connection: redis,
+            
+         });
 
         logger.logInfo(`📋 JobService initialized for queue: "${queueName}"`);
     }

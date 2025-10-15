@@ -14,7 +14,7 @@ function MobMenuBar({ role }: { role: Role }) {
   return (
     <Sheet>
       <SheetTrigger className="cursor-pointer lg:hidden ">
-        <Menu />
+        <Menu  className="text-primary"/>
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>
@@ -34,7 +34,7 @@ function MobMenuBar({ role }: { role: Role }) {
             </div>
           </CardTitle>
         </SheetHeader>
-        <SideBar role={role} />
+        <SideBar role={role} isMobile={true} />
       </SheetContent>
     </Sheet>
   );

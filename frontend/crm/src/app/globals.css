@@ -153,3 +153,120 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Base popup styling */
+.swal2-popup {
+  border-radius: 1.5rem !important;
+  padding: 2rem 2.5rem !important;
+  padding-bottom: 70px !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1) !important;
+  font-family: "Inter", system-ui, sans-serif !important;
+  transition: all 0.25s ease-in-out !important;
+}
+
+/* Title */
+.swal2-title {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #111827 !important; /* gray-900 */
+  margin-bottom: 0rem !important;
+}
+
+/* Text */
+.swal2-html-container {
+  font-size: 0.95rem !important;
+  color: #4b5563 !important; /* gray-600 */
+  line-height: 1.5 !important;
+}
+
+/* Warning icon */
+.swal2-icon.swal2-warning {
+  border-color: #f59e0b !important; /* amber-500 */
+  color: #f59e0b !important;
+  animation: pulseIcon 1.5s infinite;
+}
+
+/* Confirm button */
+.swal2-confirm {
+  background-color: oklch(0.3308 0.1042 253.69) !important; /* blue-600 */
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1.25rem !important;
+  transition: background-color 0.2s ease !important;
+}
+.swal2-confirm:hover {
+  background-color: oklch(0.3308 0.1042 253.69) !important; /* blue-800 */
+}
+
+/* Cancel button */
+.swal2-cancel {
+  background-color: #f3f4f6 !important; /* gray-100 */
+  color: #374151 !important; /* gray-700 */
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1.25rem !important;
+  margin-left: 0.5rem !important;
+  transition: background-color 0.2s ease !important;
+}
+.swal2-cancel:hover {
+  background-color: #e5e7eb !important; /* gray-200 */
+}
+
+/* Animation for popup appearance */
+.swal2-show {
+  animation: scaleIn 0.25s ease forwards !important;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Subtle pulse effect for warning icon */
+@keyframes pulseIcon {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in forwards;
+}

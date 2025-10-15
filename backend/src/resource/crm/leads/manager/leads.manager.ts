@@ -98,7 +98,7 @@ export class LeadManager implements ILeadsManagerInterface {
         return true;
     }
 
-    async filterLead(payload: z.infer<typeof appSchema.crm.leads.filterLeadSchema>): ReturnType<ILeadsManagerInterface['filterLead']> {
+    async filterLead(payload: z.infer<typeof appSchema.crm.leads.findManyLeadsSchema>): ReturnType<ILeadsManagerInterface['filterLead']> {
 
         const page = Number(payload.page) || 1;
         const pageSize = 10; // You can make this configurable if needed

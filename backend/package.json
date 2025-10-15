@@ -6,6 +6,8 @@
   "scripts": {
     "start": "bun run start.ts",
     "dev": "bun run --watch main.ts",
+    "worker": "bun run  ./workers/start.ts",
+
     "email": "email dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -15,6 +17,7 @@
   "devDependencies": {
     "@eslint/js": "^9.37.0",
     "@faker-js/faker": "^10.0.0",
+    "@react-email/preview-server": "^4.2.12",
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
@@ -35,7 +38,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
-    "@react-email/components": "0.5.5",
+    "@react-email/components": "^0.5.5",
+    "@react-email/preview": "^0.0.13",
+    "@react-email/render": "^1.3.2",
     "@root/schema": "file:../packages/schema",
     "@types/multer": "^2.0.0",
     "argon2": "^0.44.0",

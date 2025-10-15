@@ -2,7 +2,8 @@ import { KeyValueStore } from "../services/KeyValueStore";
 import { QueueJobService } from "../services/QueueJobService";
 
 export enum QueueNames {
-    emailSendQueue = "emailSendQueue"
+    emailSendQueue = "emailSendQueue",
+    emailOtpSend = "emailOTPSend"
 }
 
 export const cacheStorage = new KeyValueStore()
