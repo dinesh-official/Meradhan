@@ -32,7 +32,7 @@ module.exports = {
 
         // frontend
         {
-            name: "MeraDhan-Notification",
+            name: "MeraDhan-Frontend",
             cwd: "./frontend/crm",
             script: "npm",
             args: "run start",
