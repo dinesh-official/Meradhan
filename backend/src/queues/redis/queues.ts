@@ -7,5 +7,5 @@ export enum QueueNames {
 }
 
 export const cacheStorage = new KeyValueStore()
-export const emailSenderQueue = new QueueJobService(QueueNames.emailSendQueue);
+export const emailOtpSenderQueue = new QueueJobService(QueueNames.emailOtpSend);
 
