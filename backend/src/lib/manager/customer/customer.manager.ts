@@ -1,15 +1,24 @@
-import type z from "zod";
-import type { ICustomerProfileManagerInterface } from "./customermanager.interface";
+import { db, KYCStatus } from "@core/database/database";
 import type { appSchema } from "@root/schema";
-import { hashingUtils } from "@utils/hash/hashing.utils";
-import { db } from "@core/database/database";
 import { AppError } from "@utils/error/AppError";
-export class CustomerManager implements ICustomerProfileManagerInterface {
+import { generateUsername } from "@utils/generate/generateUsername";
+import { hashingUtils } from "@utils/hash/hashing.utils";
+import type z from "zod";
+import { type ICustomerProfileManagerInterface } from "./customermanager.interface";
+
+
+export class CustomerProfileManager implements ICustomerProfileManagerInterface {
   async createCustomerProfile(
-    data: z.infer<typeof appSchema.customer.createNewCustomerSchema>
+    data: z.infer<typeof appSchema.customer.createNewCustomerSchema>,
+    createdBy?: number
   ): ReturnType<ICustomerProfileManagerInterface["createCustomerProfile"]> {
+
+    const user = await this.getCustomerProfileByEmail(data.emailId)
+    if (user) {
+      throw new AppError("Email is already used")
+    }
+
     const hashPassword = await hashingUtils.hashPassword(data.password);
-    const userName = new Date().getTime();
     const createdCustomerResponse =
       await db.dataBase.customerProfileDataModel.create({
         data: {
@@ -20,9 +29,10 @@ export class CustomerManager implements ICustomerProfileManagerInterface {
           gender: data.gender,
           whatsAppNo: data.whatsAppNo || data.phoneNo,
           phoneNo: data.phoneNo,
-          userName: userName.toString(),
+          userName: generateUsername(),
           kycStatus: data.kycStatus,
           userType: data.userType,
+          createdBy: createdBy,
 
           utility: {
             create: {
@@ -45,14 +55,9 @@ export class CustomerManager implements ICustomerProfileManagerInterface {
     const customerProfile =
       await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerProfileId },
+
       });
 
-    if (!customerProfile) {
-      throw new AppError(`Customer with id ${customerProfileId} not found`, {
-        statusCode: 404,
-        code: "CUSTOMER_NOT_FOUND",
-      });
-    }
     return customerProfile;
   }
 
@@ -60,14 +65,8 @@ export class CustomerManager implements ICustomerProfileManagerInterface {
     const customerProfile =
       await db.dataBase.customerProfileDataModel.findUnique({
         where: { emailAddress: emailAddress },
-      });
 
-    if (!customerProfile) {
-      throw new AppError(`Customer with email ${emailAddress} not found`, {
-        statusCode: 404,
-        code: "CUSTOMER_NOT_FOUND",
       });
-    }
 
     return customerProfile;
   }
@@ -78,12 +77,7 @@ export class CustomerManager implements ICustomerProfileManagerInterface {
         where: { userName: userName },
       });
 
-    if (!customerProfile) {
-      throw new AppError(`Customer with userName ${userName} not found`, {
-        statusCode: 404,
-        code: "CUSTOMER_NOT_FOUND",
-      });
-    }
+
 
     return customerProfile;
   }
@@ -95,6 +89,7 @@ export class CustomerManager implements ICustomerProfileManagerInterface {
     const existing = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerProfileId },
       select: { id: true },
+
     });
 
     if (!existing) {
@@ -147,7 +142,7 @@ export class CustomerManager implements ICustomerProfileManagerInterface {
       });
     }
 
-    await db.dataBase.customerPersonalInfoModel.delete({
+    await db.dataBase.customerProfileDataModel.delete({
       where: { id: customerProfileId },
     });
 
@@ -156,7 +151,7 @@ export class CustomerManager implements ICustomerProfileManagerInterface {
 
   async updateKycStatus(
     customerProfileId: number,
-    kycStatus: "PENDING" | "VERIFIED" | "REJECTED",
+    kycStatus: KYCStatus,
     verifiedBy?: number
   ) {
     const existing = await db.dataBase.customerProfileDataModel.findUnique({

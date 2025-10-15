@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useAppCookie from "@/hooks/useAppCookie.hook";
+import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 export default function LogoutRedirect() {
-  const router = useRouter();
   const { removeCookie } = useAppCookie();
 
   useEffect(() => {
@@ -29,15 +27,15 @@ export default function LogoutRedirect() {
         removeCookie("userId");
 
         // Redirect to login after a brief delay
-        setTimeout(() => router.replace("/login"), 1500);
+        setTimeout(() => window.location.replace("/login"), 1500);
       } catch (error) {
         console.error("Logout error:", error);
-        router.replace("/login");
+        window.location.replace("/login");
       }
     };
 
     logoutUser();
-  }, [router, removeCookie]);
+  }, [removeCookie]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-950">
@@ -55,7 +53,7 @@ export default function LogoutRedirect() {
 
         <Button
           variant="outline"
-          onClick={() => router.replace("/login")}
+          onClick={() => window.location.replace("/login")}
           className="mt-2"
         >
           Go to Login

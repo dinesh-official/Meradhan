@@ -13,6 +13,7 @@ export const errorHandler = (
 
     console.error('ERROR: ' + err.message);
     console.error(err.stack?.split("\n").slice(2).join("\n")); // Log the error stack trace (first two lines)
+console.log("=============================");
 
     if (err instanceof ZodError) {
         const formatted = err.issues.map(e => ({

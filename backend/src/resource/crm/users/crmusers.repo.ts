@@ -7,12 +7,17 @@ export interface ICrmUserRepo {
     createNewUser(payload: DataBaseSchema.CRMUserDataModelCreateInput): Promise<CRMUserDataModel>
     updateUser(payload: DataBaseSchema.CRMUserDataModelUpdateArgs): Promise<CRMUserDataModel>
     deleteUser(payload: DataBaseSchema.CRMUserDataModelDeleteArgs): Promise<boolean>
+    countUsers(payload: DataBaseSchema.CRMUserDataModelCountArgs): Promise<number>
 }
 
 export class CrmUserRepo implements ICrmUserRepo {
 
     async findManyUser(payload: DataBaseSchema.CRMUserDataModelFindManyArgs): ReturnType<ICrmUserRepo['findManyUser']> {
         const response = await db.dataBase.cRMUserDataModel.findMany(payload);
+        return response;
+    }
+    async countUsers(payload: DataBaseSchema.CRMUserDataModelCountArgs): ReturnType<ICrmUserRepo['countUsers']> {
+        const response = await db.dataBase.cRMUserDataModel.count(payload);
         return response;
     }
 

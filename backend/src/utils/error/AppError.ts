@@ -21,7 +21,7 @@ export class AppError extends Error {
     code?: string;
 
     constructor(message: string, options: { statusCode?: HttpStatus; code?: string } = {}) {
-        super(message);
+        super(message.toString());
         this.statusCode = options.statusCode || 500;
         this.code = options.code;
 

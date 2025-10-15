@@ -1,6 +1,71 @@
-import type { AADHAARCardModel, AddressModel, CustomerPersonalInfoModel, CustomerProfileDataModel, CustomersBankAccountModel, CustomersDematAccountModel, PanCardModel } from "@core/database/database";
+import type { AADHAARCardModel, AddressModel, CustomerPersonalInfoModel, CustomerProfileDataModel, CustomersBankAccountModel, CustomersDematAccountModel, DataBaseSchema, KYCStatus, PanCardModel } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
+export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelSelect = {
+    aadhaarCard: true,
+    bankAccounts: true,
+    currentAddress: true,
+    dematAccounts: true,
+    panCard: true,
+    permanentAddress: true,
+    personalInformation: true,
+    userName: true,
+    firstName: true,
+    lastName: true,
+    updatedAt: true,
+    userType: true,
+    avatar: true,
+    createdBy: true,
+    kycStatus: true,
+    middleName: true,
+    emailAddress: true,
+    phoneNo: true,
+    gender: true,
+    whatsAppNo: true,
+    VerifiedBy: true,
+    id: true,
+    utility: {
+        select: {
+            accountStatus: true,
+            id: true,
+            isEmailVerified: true,
+            isPhoneVerified: true,
+            signinWith: true,
+            termsAccepted: true,
+            lastLogin: true,
+            whatsAppNotificationAllow: true,
+        },
+    },
+
+}
+
+
+export const basicProfileInfoSelect: DataBaseSchema.CustomerProfileDataModelSelect = {
+    id: true,
+    firstName: true,
+    middleName: true,
+    lastName: true,
+    userType: true,
+    emailAddress: true,
+    phoneNo: true,
+    whatsAppNo: true,
+    kycStatus: true,
+    createdAt: true,
+    userName: true,
+    gender: true,
+    avatar: true,
+    utility: {
+        select: {
+            accountStatus: true,
+            termsAccepted: true,
+            whatsAppNotificationAllow: true,
+            isEmailVerified: true,
+            isPhoneVerified: true,
+            lastLogin: true,
+            signinWith: true,
+        }
+    }
+}
 
 export interface IBankAccountMangeInterface {
     createBankAccount(customerProfileId: number, data: z.infer<typeof appSchema.customer.createBankAccountSchema>): Promise<CustomersBankAccountModel>,
@@ -54,11 +119,11 @@ export interface IPersonalInfoManagerInterface {
 }
 
 export interface ICustomerProfileManagerInterface {
-    createCustomerProfile(data: z.infer<typeof appSchema.customer.createNewCustomerSchema>): Promise<CustomerProfileDataModel>;
-    getCustomerProfile(customerProfileId: number): Promise<CustomerProfileDataModel>;
-    getCustomerProfileByEmail(emailAddress: string): Promise<CustomerProfileDataModel>;
-    getCustomerProfileByUsername(userName: string): Promise<CustomerProfileDataModel>;
+    createCustomerProfile(data: z.infer<typeof appSchema.customer.createNewCustomerSchema>, createdBy?: number): Promise<CustomerProfileDataModel>;
+    getCustomerProfile(customerProfileId: number): Promise<CustomerProfileDataModel | null>;
+    getCustomerProfileByEmail(emailAddress: string): Promise<CustomerProfileDataModel | null>;
+    getCustomerProfileByUsername(userName: string): Promise<CustomerProfileDataModel | null>;
     updateCustomerProfile(customerProfileId: number, data: z.infer<typeof appSchema.customer.updateCustomerProfileSchema>): Promise<CustomerProfileDataModel>;
     removeCustomerProfile(customerProfileId: number): Promise<boolean>;
-    updateKycStatus(customerProfileId: number, kycStatus: "PENDING" | "VERIFIED" | "REJECTED", verifiedBy?: number): Promise<CustomerProfileDataModel>;
+    updateKycStatus(customerProfileId: number, kycStatus: KYCStatus, verifiedBy?: number): Promise<CustomerProfileDataModel>;
 }

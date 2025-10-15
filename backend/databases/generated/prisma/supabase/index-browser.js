@@ -285,15 +285,15 @@ exports.Prisma.LeadsModelScalarFieldEnum = {
   status: 'status',
   exInvestmentAmount: 'exInvestmentAmount',
   note: 'note',
+  createdBy: 'createdBy',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdBy: 'createdBy'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.LeadFollowUpNotesModelScalarFieldEnum = {
   id: 'id',
   leadId: 'leadId',
-  createdBy: 'createdBy',
+  createdByName: 'createdByName',
   createdByID: 'createdByID',
   text: 'text',
   nextDate: 'nextDate',

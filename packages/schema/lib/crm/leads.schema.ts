@@ -46,10 +46,7 @@ export const createNewLeadSchema = z.object({
 export const updateLeadSchema = createNewLeadSchema.partial();
 
 
-
 export const createNewLeadFollowUpNoteSchema = z.object({
-    leadId: z.number().int(),
-    createdByName: z.string().min(1, "Creator name is required"),
     createdByID: z.number().int(),
     text: z.string().min(1, "Note text is required"),
     nextDate: z.coerce.date().optional(), // accepts string or Date

@@ -14497,9 +14497,9 @@ export namespace Prisma {
     status: $Enums.LeadStatus | null
     exInvestmentAmount: number | null
     note: string | null
+    createdBy: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    createdBy: number | null
   }
 
   export type LeadsModelMaxAggregateOutputType = {
@@ -14513,9 +14513,9 @@ export namespace Prisma {
     status: $Enums.LeadStatus | null
     exInvestmentAmount: number | null
     note: string | null
+    createdBy: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    createdBy: number | null
   }
 
   export type LeadsModelCountAggregateOutputType = {
@@ -14529,9 +14529,9 @@ export namespace Prisma {
     status: number
     exInvestmentAmount: number
     note: number
+    createdBy: number
     createdAt: number
     updatedAt: number
-    createdBy: number
     _all: number
   }
 
@@ -14559,9 +14559,9 @@ export namespace Prisma {
     status?: true
     exInvestmentAmount?: true
     note?: true
+    createdBy?: true
     createdAt?: true
     updatedAt?: true
-    createdBy?: true
   }
 
   export type LeadsModelMaxAggregateInputType = {
@@ -14575,9 +14575,9 @@ export namespace Prisma {
     status?: true
     exInvestmentAmount?: true
     note?: true
+    createdBy?: true
     createdAt?: true
     updatedAt?: true
-    createdBy?: true
   }
 
   export type LeadsModelCountAggregateInputType = {
@@ -14591,9 +14591,9 @@ export namespace Prisma {
     status?: true
     exInvestmentAmount?: true
     note?: true
+    createdBy?: true
     createdAt?: true
     updatedAt?: true
-    createdBy?: true
     _all?: true
   }
 
@@ -14694,9 +14694,9 @@ export namespace Prisma {
     status: $Enums.LeadStatus
     exInvestmentAmount: number | null
     note: string | null
+    createdBy: number
     createdAt: Date
     updatedAt: Date
-    createdBy: number
     _count: LeadsModelCountAggregateOutputType | null
     _avg: LeadsModelAvgAggregateOutputType | null
     _sum: LeadsModelSumAggregateOutputType | null
@@ -14729,9 +14729,9 @@ export namespace Prisma {
     status?: boolean
     exInvestmentAmount?: boolean
     note?: boolean
+    createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    createdBy?: boolean
   }, ExtArgs["result"]["leadsModel"]>
 
   export type LeadsModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -14745,9 +14745,9 @@ export namespace Prisma {
     status?: boolean
     exInvestmentAmount?: boolean
     note?: boolean
+    createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    createdBy?: boolean
   }, ExtArgs["result"]["leadsModel"]>
 
   export type LeadsModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -14761,9 +14761,9 @@ export namespace Prisma {
     status?: boolean
     exInvestmentAmount?: boolean
     note?: boolean
+    createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    createdBy?: boolean
   }, ExtArgs["result"]["leadsModel"]>
 
   export type LeadsModelSelectScalar = {
@@ -14777,12 +14777,12 @@ export namespace Prisma {
     status?: boolean
     exInvestmentAmount?: boolean
     note?: boolean
+    createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    createdBy?: boolean
   }
 
-  export type LeadsModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "emailAddress" | "phoneNo" | "companyName" | "leadSource" | "bondType" | "status" | "exInvestmentAmount" | "note" | "createdAt" | "updatedAt" | "createdBy", ExtArgs["result"]["leadsModel"]>
+  export type LeadsModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "emailAddress" | "phoneNo" | "companyName" | "leadSource" | "bondType" | "status" | "exInvestmentAmount" | "note" | "createdBy" | "createdAt" | "updatedAt", ExtArgs["result"]["leadsModel"]>
 
   export type $LeadsModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LeadsModel"
@@ -14798,12 +14798,12 @@ export namespace Prisma {
       status: $Enums.LeadStatus
       exInvestmentAmount: number | null
       note: string | null
+      createdBy: number
       /**
        * Timestamps
        */
       createdAt: Date
       updatedAt: Date
-      createdBy: number
     }, ExtArgs["result"]["leadsModel"]>
     composites: {}
   }
@@ -15237,9 +15237,9 @@ export namespace Prisma {
     readonly status: FieldRef<"LeadsModel", 'LeadStatus'>
     readonly exInvestmentAmount: FieldRef<"LeadsModel", 'Int'>
     readonly note: FieldRef<"LeadsModel", 'String'>
+    readonly createdBy: FieldRef<"LeadsModel", 'Int'>
     readonly createdAt: FieldRef<"LeadsModel", 'DateTime'>
     readonly updatedAt: FieldRef<"LeadsModel", 'DateTime'>
-    readonly createdBy: FieldRef<"LeadsModel", 'Int'>
   }
     
 
@@ -15633,7 +15633,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelMinAggregateOutputType = {
     id: number | null
     leadId: number | null
-    createdBy: string | null
+    createdByName: string | null
     createdByID: number | null
     text: string | null
     nextDate: Date | null
@@ -15644,7 +15644,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelMaxAggregateOutputType = {
     id: number | null
     leadId: number | null
-    createdBy: string | null
+    createdByName: string | null
     createdByID: number | null
     text: string | null
     nextDate: Date | null
@@ -15655,7 +15655,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelCountAggregateOutputType = {
     id: number
     leadId: number
-    createdBy: number
+    createdByName: number
     createdByID: number
     text: number
     nextDate: number
@@ -15680,7 +15680,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelMinAggregateInputType = {
     id?: true
     leadId?: true
-    createdBy?: true
+    createdByName?: true
     createdByID?: true
     text?: true
     nextDate?: true
@@ -15691,7 +15691,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelMaxAggregateInputType = {
     id?: true
     leadId?: true
-    createdBy?: true
+    createdByName?: true
     createdByID?: true
     text?: true
     nextDate?: true
@@ -15702,7 +15702,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelCountAggregateInputType = {
     id?: true
     leadId?: true
-    createdBy?: true
+    createdByName?: true
     createdByID?: true
     text?: true
     nextDate?: true
@@ -15800,7 +15800,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelGroupByOutputType = {
     id: number
     leadId: number
-    createdBy: string
+    createdByName: string
     createdByID: number
     text: string
     nextDate: Date | null
@@ -15830,7 +15830,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     leadId?: boolean
-    createdBy?: boolean
+    createdByName?: boolean
     createdByID?: boolean
     text?: boolean
     nextDate?: boolean
@@ -15841,7 +15841,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     leadId?: boolean
-    createdBy?: boolean
+    createdByName?: boolean
     createdByID?: boolean
     text?: boolean
     nextDate?: boolean
@@ -15852,7 +15852,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     leadId?: boolean
-    createdBy?: boolean
+    createdByName?: boolean
     createdByID?: boolean
     text?: boolean
     nextDate?: boolean
@@ -15863,7 +15863,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelSelectScalar = {
     id?: boolean
     leadId?: boolean
-    createdBy?: boolean
+    createdByName?: boolean
     createdByID?: boolean
     text?: boolean
     nextDate?: boolean
@@ -15871,7 +15871,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type LeadFollowUpNotesModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "leadId" | "createdBy" | "createdByID" | "text" | "nextDate" | "createdAt" | "updatedAt", ExtArgs["result"]["leadFollowUpNotesModel"]>
+  export type LeadFollowUpNotesModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "leadId" | "createdByName" | "createdByID" | "text" | "nextDate" | "createdAt" | "updatedAt", ExtArgs["result"]["leadFollowUpNotesModel"]>
 
   export type $LeadFollowUpNotesModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LeadFollowUpNotesModel"
@@ -15879,7 +15879,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       leadId: number
-      createdBy: string
+      createdByName: string
       createdByID: number
       text: string
       nextDate: Date | null
@@ -16313,7 +16313,7 @@ export namespace Prisma {
   interface LeadFollowUpNotesModelFieldRefs {
     readonly id: FieldRef<"LeadFollowUpNotesModel", 'Int'>
     readonly leadId: FieldRef<"LeadFollowUpNotesModel", 'Int'>
-    readonly createdBy: FieldRef<"LeadFollowUpNotesModel", 'String'>
+    readonly createdByName: FieldRef<"LeadFollowUpNotesModel", 'String'>
     readonly createdByID: FieldRef<"LeadFollowUpNotesModel", 'Int'>
     readonly text: FieldRef<"LeadFollowUpNotesModel", 'String'>
     readonly nextDate: FieldRef<"LeadFollowUpNotesModel", 'DateTime'>
@@ -16894,9 +16894,9 @@ export namespace Prisma {
     status: 'status',
     exInvestmentAmount: 'exInvestmentAmount',
     note: 'note',
+    createdBy: 'createdBy',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    createdBy: 'createdBy'
+    updatedAt: 'updatedAt'
   };
 
   export type LeadsModelScalarFieldEnum = (typeof LeadsModelScalarFieldEnum)[keyof typeof LeadsModelScalarFieldEnum]
@@ -16905,7 +16905,7 @@ export namespace Prisma {
   export const LeadFollowUpNotesModelScalarFieldEnum: {
     id: 'id',
     leadId: 'leadId',
-    createdBy: 'createdBy',
+    createdByName: 'createdByName',
     createdByID: 'createdByID',
     text: 'text',
     nextDate: 'nextDate',
@@ -18137,9 +18137,9 @@ export namespace Prisma {
     status?: EnumLeadStatusFilter<"LeadsModel"> | $Enums.LeadStatus
     exInvestmentAmount?: IntNullableFilter<"LeadsModel"> | number | null
     note?: StringNullableFilter<"LeadsModel"> | string | null
+    createdBy?: IntFilter<"LeadsModel"> | number
     createdAt?: DateTimeFilter<"LeadsModel"> | Date | string
     updatedAt?: DateTimeFilter<"LeadsModel"> | Date | string
-    createdBy?: IntFilter<"LeadsModel"> | number
   }
 
   export type LeadsModelOrderByWithRelationInput = {
@@ -18153,9 +18153,9 @@ export namespace Prisma {
     status?: SortOrder
     exInvestmentAmount?: SortOrderInput | SortOrder
     note?: SortOrderInput | SortOrder
+    createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    createdBy?: SortOrder
   }
 
   export type LeadsModelWhereUniqueInput = Prisma.AtLeast<{
@@ -18172,9 +18172,9 @@ export namespace Prisma {
     status?: EnumLeadStatusFilter<"LeadsModel"> | $Enums.LeadStatus
     exInvestmentAmount?: IntNullableFilter<"LeadsModel"> | number | null
     note?: StringNullableFilter<"LeadsModel"> | string | null
+    createdBy?: IntFilter<"LeadsModel"> | number
     createdAt?: DateTimeFilter<"LeadsModel"> | Date | string
     updatedAt?: DateTimeFilter<"LeadsModel"> | Date | string
-    createdBy?: IntFilter<"LeadsModel"> | number
   }, "id">
 
   export type LeadsModelOrderByWithAggregationInput = {
@@ -18188,9 +18188,9 @@ export namespace Prisma {
     status?: SortOrder
     exInvestmentAmount?: SortOrderInput | SortOrder
     note?: SortOrderInput | SortOrder
+    createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    createdBy?: SortOrder
     _count?: LeadsModelCountOrderByAggregateInput
     _avg?: LeadsModelAvgOrderByAggregateInput
     _max?: LeadsModelMaxOrderByAggregateInput
@@ -18212,9 +18212,9 @@ export namespace Prisma {
     status?: EnumLeadStatusWithAggregatesFilter<"LeadsModel"> | $Enums.LeadStatus
     exInvestmentAmount?: IntNullableWithAggregatesFilter<"LeadsModel"> | number | null
     note?: StringNullableWithAggregatesFilter<"LeadsModel"> | string | null
+    createdBy?: IntWithAggregatesFilter<"LeadsModel"> | number
     createdAt?: DateTimeWithAggregatesFilter<"LeadsModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"LeadsModel"> | Date | string
-    createdBy?: IntWithAggregatesFilter<"LeadsModel"> | number
   }
 
   export type LeadFollowUpNotesModelWhereInput = {
@@ -18223,7 +18223,7 @@ export namespace Prisma {
     NOT?: LeadFollowUpNotesModelWhereInput | LeadFollowUpNotesModelWhereInput[]
     id?: IntFilter<"LeadFollowUpNotesModel"> | number
     leadId?: IntFilter<"LeadFollowUpNotesModel"> | number
-    createdBy?: StringFilter<"LeadFollowUpNotesModel"> | string
+    createdByName?: StringFilter<"LeadFollowUpNotesModel"> | string
     createdByID?: IntFilter<"LeadFollowUpNotesModel"> | number
     text?: StringFilter<"LeadFollowUpNotesModel"> | string
     nextDate?: DateTimeNullableFilter<"LeadFollowUpNotesModel"> | Date | string | null
@@ -18234,7 +18234,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelOrderByWithRelationInput = {
     id?: SortOrder
     leadId?: SortOrder
-    createdBy?: SortOrder
+    createdByName?: SortOrder
     createdByID?: SortOrder
     text?: SortOrder
     nextDate?: SortOrderInput | SortOrder
@@ -18248,7 +18248,7 @@ export namespace Prisma {
     OR?: LeadFollowUpNotesModelWhereInput[]
     NOT?: LeadFollowUpNotesModelWhereInput | LeadFollowUpNotesModelWhereInput[]
     leadId?: IntFilter<"LeadFollowUpNotesModel"> | number
-    createdBy?: StringFilter<"LeadFollowUpNotesModel"> | string
+    createdByName?: StringFilter<"LeadFollowUpNotesModel"> | string
     createdByID?: IntFilter<"LeadFollowUpNotesModel"> | number
     text?: StringFilter<"LeadFollowUpNotesModel"> | string
     nextDate?: DateTimeNullableFilter<"LeadFollowUpNotesModel"> | Date | string | null
@@ -18259,7 +18259,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelOrderByWithAggregationInput = {
     id?: SortOrder
     leadId?: SortOrder
-    createdBy?: SortOrder
+    createdByName?: SortOrder
     createdByID?: SortOrder
     text?: SortOrder
     nextDate?: SortOrderInput | SortOrder
@@ -18278,7 +18278,7 @@ export namespace Prisma {
     NOT?: LeadFollowUpNotesModelScalarWhereWithAggregatesInput | LeadFollowUpNotesModelScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"LeadFollowUpNotesModel"> | number
     leadId?: IntWithAggregatesFilter<"LeadFollowUpNotesModel"> | number
-    createdBy?: StringWithAggregatesFilter<"LeadFollowUpNotesModel"> | string
+    createdByName?: StringWithAggregatesFilter<"LeadFollowUpNotesModel"> | string
     createdByID?: IntWithAggregatesFilter<"LeadFollowUpNotesModel"> | number
     text?: StringWithAggregatesFilter<"LeadFollowUpNotesModel"> | string
     nextDate?: DateTimeNullableWithAggregatesFilter<"LeadFollowUpNotesModel"> | Date | string | null
@@ -19368,9 +19368,9 @@ export namespace Prisma {
     status: $Enums.LeadStatus
     exInvestmentAmount?: number | null
     note?: string | null
+    createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdBy: number
   }
 
   export type LeadsModelUncheckedCreateInput = {
@@ -19384,9 +19384,9 @@ export namespace Prisma {
     status: $Enums.LeadStatus
     exInvestmentAmount?: number | null
     note?: string | null
+    createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdBy: number
   }
 
   export type LeadsModelUpdateInput = {
@@ -19399,9 +19399,9 @@ export namespace Prisma {
     status?: EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
     exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdBy?: IntFieldUpdateOperationsInput | number
   }
 
   export type LeadsModelUncheckedUpdateInput = {
@@ -19415,9 +19415,9 @@ export namespace Prisma {
     status?: EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
     exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdBy?: IntFieldUpdateOperationsInput | number
   }
 
   export type LeadsModelCreateManyInput = {
@@ -19431,9 +19431,9 @@ export namespace Prisma {
     status: $Enums.LeadStatus
     exInvestmentAmount?: number | null
     note?: string | null
+    createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdBy: number
   }
 
   export type LeadsModelUpdateManyMutationInput = {
@@ -19446,9 +19446,9 @@ export namespace Prisma {
     status?: EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
     exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdBy?: IntFieldUpdateOperationsInput | number
   }
 
   export type LeadsModelUncheckedUpdateManyInput = {
@@ -19462,14 +19462,14 @@ export namespace Prisma {
     status?: EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
     exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdBy?: IntFieldUpdateOperationsInput | number
   }
 
   export type LeadFollowUpNotesModelCreateInput = {
     leadId: number
-    createdBy: string
+    createdByName: string
     createdByID: number
     text: string
     nextDate?: Date | string | null
@@ -19480,7 +19480,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelUncheckedCreateInput = {
     id?: number
     leadId: number
-    createdBy: string
+    createdByName: string
     createdByID: number
     text: string
     nextDate?: Date | string | null
@@ -19490,7 +19490,7 @@ export namespace Prisma {
 
   export type LeadFollowUpNotesModelUpdateInput = {
     leadId?: IntFieldUpdateOperationsInput | number
-    createdBy?: StringFieldUpdateOperationsInput | string
+    createdByName?: StringFieldUpdateOperationsInput | string
     createdByID?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
     nextDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -19501,7 +19501,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     leadId?: IntFieldUpdateOperationsInput | number
-    createdBy?: StringFieldUpdateOperationsInput | string
+    createdByName?: StringFieldUpdateOperationsInput | string
     createdByID?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
     nextDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -19512,7 +19512,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelCreateManyInput = {
     id?: number
     leadId: number
-    createdBy: string
+    createdByName: string
     createdByID: number
     text: string
     nextDate?: Date | string | null
@@ -19522,7 +19522,7 @@ export namespace Prisma {
 
   export type LeadFollowUpNotesModelUpdateManyMutationInput = {
     leadId?: IntFieldUpdateOperationsInput | number
-    createdBy?: StringFieldUpdateOperationsInput | string
+    createdByName?: StringFieldUpdateOperationsInput | string
     createdByID?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
     nextDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -19533,7 +19533,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     leadId?: IntFieldUpdateOperationsInput | number
-    createdBy?: StringFieldUpdateOperationsInput | string
+    createdByName?: StringFieldUpdateOperationsInput | string
     createdByID?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
     nextDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -20521,9 +20521,9 @@ export namespace Prisma {
     status?: SortOrder
     exInvestmentAmount?: SortOrder
     note?: SortOrder
+    createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    createdBy?: SortOrder
   }
 
   export type LeadsModelAvgOrderByAggregateInput = {
@@ -20543,9 +20543,9 @@ export namespace Prisma {
     status?: SortOrder
     exInvestmentAmount?: SortOrder
     note?: SortOrder
+    createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    createdBy?: SortOrder
   }
 
   export type LeadsModelMinOrderByAggregateInput = {
@@ -20559,9 +20559,9 @@ export namespace Prisma {
     status?: SortOrder
     exInvestmentAmount?: SortOrder
     note?: SortOrder
+    createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    createdBy?: SortOrder
   }
 
   export type LeadsModelSumOrderByAggregateInput = {
@@ -20603,7 +20603,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelCountOrderByAggregateInput = {
     id?: SortOrder
     leadId?: SortOrder
-    createdBy?: SortOrder
+    createdByName?: SortOrder
     createdByID?: SortOrder
     text?: SortOrder
     nextDate?: SortOrder
@@ -20620,7 +20620,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelMaxOrderByAggregateInput = {
     id?: SortOrder
     leadId?: SortOrder
-    createdBy?: SortOrder
+    createdByName?: SortOrder
     createdByID?: SortOrder
     text?: SortOrder
     nextDate?: SortOrder
@@ -20631,7 +20631,7 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelMinOrderByAggregateInput = {
     id?: SortOrder
     leadId?: SortOrder
-    createdBy?: SortOrder
+    createdByName?: SortOrder
     createdByID?: SortOrder
     text?: SortOrder
     nextDate?: SortOrder

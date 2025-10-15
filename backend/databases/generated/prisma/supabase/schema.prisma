@@ -404,11 +404,11 @@ model LeadsModel {
   status             LeadStatus
   exInvestmentAmount Int?
   note               String?
+  createdBy          Int
 
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  createdBy Int
 
   @@map("leads")
 }
@@ -417,10 +417,10 @@ model LeadFollowUpNotesModel {
   id     Int @id @default(autoincrement())
   leadId Int
 
-  createdBy   String
-  createdByID Int
-  text        String
-  nextDate    DateTime?
+  createdByName String
+  createdByID   Int
+  text          String
+  nextDate      DateTime?
 
   /// Timestamps
   createdAt DateTime @default(now())

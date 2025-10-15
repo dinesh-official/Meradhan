@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountStatusEnum } from "../enums";
+import { AccountStatusEnum, GenderEnum } from "../enums";
 
 export const UserAccountTypeEnum = z.enum([
     "INDIVIDUAL",
@@ -12,15 +12,14 @@ export const UserAccountTypeEnum = z.enum([
 ], {
     error: "User account type is required",
 });
-export const GenderEnum = z.enum(["MALE", "FEMALE", "OTHER"], { error: "Invalid select valid gender type" });
-const kycStatus = ["PENDING", "REJECTED"] as const;
+export const kycStatus = ["PENDING", "REJECTED"] as const;
 
 
 export const findManyCustomerSchema = z.object({
     page: z.string().regex(/^\d+$/, { message: "Page must be a numeric string" }).default("1").optional(),
     search: z.string().optional(),
-    accountStatus: z.enum(["SUSPENDED", "ACTIVE", "ALL"]).optional(),
-    kycStatus: AccountStatusEnum.optional(),
+    accountStatus: AccountStatusEnum.optional(),
+    kycStatus: z.enum([...kycStatus,"VERIFIED"]).optional(),
 })
 
 

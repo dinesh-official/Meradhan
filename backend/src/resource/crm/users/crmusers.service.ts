@@ -1,11 +1,12 @@
-import { db, type CRMUserDataModel, type DataBaseSchema } from "@core/database/database"
+import { type CRMUserDataModel, type DataBaseSchema } from "@core/database/database"
 import type { appSchema } from "@root/schema"
 import type z from "zod"
+import type { META_DATA_PAGINATION } from "../../../../types/metadata"
 import type { ICrmUserRepo } from "./crmusers.repo"
 
 export interface ICrmUserService {
     findUser(id: number): Promise<CRMUserDataModel>
-    findManyUser(payload: z.infer<typeof appSchema.crm.user.findManyUserSchema>): Promise<{ data: CRMUserDataModel[], meta: { total: number; page: number; pageSize: number; totalPages: number }; }>
+    findManyUser(payload: z.infer<typeof appSchema.crm.user.findManyUserSchema>): Promise<{ data: CRMUserDataModel[], meta: META_DATA_PAGINATION }>
     createNewUser(payload: z.infer<typeof appSchema.crm.user.createCRMUserSchema>, createdBy: number,): Promise<CRMUserDataModel>
     updateUser(id: number, payload: z.infer<typeof appSchema.crm.user.updateUserSchema>): Promise<CRMUserDataModel>
     deleteUser(id: number): Promise<boolean>
@@ -45,7 +46,7 @@ export class CrmUserService implements ICrmUserService {
         }
 
         // Count total items matching filters
-        const total = await db.dataBase.cRMUserDataModel.count({ where: filters });
+        const total = await this.crmUserRepo.countUsers({ where: filters });
 
         // Fetch paginated users
         const data = await this.crmUserRepo.findManyUser({
