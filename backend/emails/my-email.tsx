@@ -38,7 +38,7 @@ export default function MeraDhanOtpEmail({
               </Text>
 
               {/* OTP Box */}
-              <div className=" bg-[#002c59] max-w-[200px] mx-auto text-white text-3xl font-semibold tracking-[20px] py-4 px-8 text-center my-6">
+              <div className=" bg-[#002c59] max-w-[200px] mx-auto text-white text-3xl font-semibold tracking-[10px] py-4 px-8 text-center my-6">
                 {otpCode}
               </div>
 
