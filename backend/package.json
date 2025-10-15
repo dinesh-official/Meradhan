@@ -7,12 +7,12 @@
     "start": "bun run start.ts",
     "dev": "bun run --watch main.ts",
     "worker": "bun run  ./workers/start.ts",
-
     "email": "email dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "npx tsc --noEmit",
-    "pm2": "pm2 restart MeraDhan-Backend --update-env || pm2 start npm --name 'MeraDhan-Backend' -- start"
+    "pm2": "pm2 restart MeraDhan-Backend --update-env || pm2 start npm --name 'MeraDhan-Backend' -- start",
+    "pm2:worker": "pm2 restart MeraDhan-Worker --update-env || pm2 start npm --name 'MeraDhan-Worker' -- run worker"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
