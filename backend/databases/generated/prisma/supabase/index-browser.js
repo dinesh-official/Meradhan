@@ -162,6 +162,7 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   userType: 'userType',
   kycStatus: 'kycStatus',
   VerifiedBy: 'VerifiedBy',
+  customersRiskProfileModelId: 'customersRiskProfileModelId',
   customersAuthDataModelId: 'customersAuthDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -255,6 +256,7 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
 
 exports.Prisma.CustomersRiskProfileModelScalarFieldEnum = {
   id: 'id',
+  data: 'data',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

@@ -10,6 +10,7 @@ import { cacheStorage } from "./src/queues/redis/queues";
 import authRoutes from "./src/resource/auth/auth.route";
 import customersRoutes from "./src/resource/crm/customers/customers.routes";
 import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
+import leadsRoutes from "./src/resource/crm/leads/leads.routes";
 
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
@@ -25,7 +26,7 @@ const server = new ExpressServer(config.port, {
 logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
-server.addRoutes([authRoutes, crmUsersRoutes, customersRoutes]);
+server.addRoutes([authRoutes, crmUsersRoutes, customersRoutes, leadsRoutes]);
 
 // Connect to databases and start server
 checkConnectToDatabases()

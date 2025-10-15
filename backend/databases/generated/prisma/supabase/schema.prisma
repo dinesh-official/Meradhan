@@ -71,6 +71,9 @@ model CustomerProfileDataModel {
   kycStatus  KYCStatus @default(PENDING)
   VerifiedBy Int?
 
+  riskProfile                 CustomersRiskProfileModel? @relation(fields: [customersRiskProfileModelId], references: [id])
+  customersRiskProfileModelId Int?
+
   utility                  CustomersAuthDataModel @relation(fields: [customersAuthDataModelId], references: [id])
   customersAuthDataModelId Int
 
@@ -256,9 +259,12 @@ model CustomersDematAccountModel {
 model CustomersRiskProfileModel {
   id Int @id @default(autoincrement())
 
+  data Json[]
+
   /// Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  CustomerProfileDataModel CustomerProfileDataModel[]
 
   @@map("customers_risk_profiles")
 }

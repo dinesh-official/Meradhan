@@ -12,7 +12,7 @@ export interface AnalyticsEvent {
 
 // -------------------- Configuration --------------------
 const ENDPOINT = "/api/analytics";
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 1;
 
 // -------------------- Utility Functions --------------------
 function generateId(): string {
@@ -85,10 +85,7 @@ export async function flush(): Promise<void> {
             const isNeedAutoLogout = payload.find((data) => data.type == "auto_logout");
             if (isNeedAutoLogout) {
                 localStorage.clear();
-                document.cookie.split(";").forEach(cookie => {
-                    document.cookie = cookie.split("=")[0].trim() +
-                        "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-                });
+                window.location.replace("/logout")
             }
 
         })

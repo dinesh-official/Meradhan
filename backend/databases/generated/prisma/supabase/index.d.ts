@@ -2183,6 +2183,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type CustomersRiskProfileModelCountOutputType
+   */
+
+  export type CustomersRiskProfileModelCountOutputType = {
+    CustomerProfileDataModel: number
+  }
+
+  export type CustomersRiskProfileModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    CustomerProfileDataModel?: boolean | CustomersRiskProfileModelCountOutputTypeCountCustomerProfileDataModelArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CustomersRiskProfileModelCountOutputType without action
+   */
+  export type CustomersRiskProfileModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModelCountOutputType
+     */
+    select?: CustomersRiskProfileModelCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CustomersRiskProfileModelCountOutputType without action
+   */
+  export type CustomersRiskProfileModelCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerProfileDataModelWhereInput
+  }
+
+
+  /**
    * Count Type AddressModelCountOutputType
    */
 
@@ -4549,6 +4580,7 @@ export namespace Prisma {
   export type CustomerProfileDataModelAvgAggregateOutputType = {
     id: number | null
     VerifiedBy: number | null
+    customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
     createdBy: number | null
     aADHAARCardModelId: number | null
@@ -4561,6 +4593,7 @@ export namespace Prisma {
   export type CustomerProfileDataModelSumAggregateOutputType = {
     id: number | null
     VerifiedBy: number | null
+    customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
     createdBy: number | null
     aADHAARCardModelId: number | null
@@ -4584,6 +4617,7 @@ export namespace Prisma {
     userType: $Enums.UserAccountType | null
     kycStatus: $Enums.KYCStatus | null
     VerifiedBy: number | null
+    customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4609,6 +4643,7 @@ export namespace Prisma {
     userType: $Enums.UserAccountType | null
     kycStatus: $Enums.KYCStatus | null
     VerifiedBy: number | null
+    customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4634,6 +4669,7 @@ export namespace Prisma {
     userType: number
     kycStatus: number
     VerifiedBy: number
+    customersRiskProfileModelId: number
     customersAuthDataModelId: number
     createdAt: number
     updatedAt: number
@@ -4650,6 +4686,7 @@ export namespace Prisma {
   export type CustomerProfileDataModelAvgAggregateInputType = {
     id?: true
     VerifiedBy?: true
+    customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
     createdBy?: true
     aADHAARCardModelId?: true
@@ -4662,6 +4699,7 @@ export namespace Prisma {
   export type CustomerProfileDataModelSumAggregateInputType = {
     id?: true
     VerifiedBy?: true
+    customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
     createdBy?: true
     aADHAARCardModelId?: true
@@ -4685,6 +4723,7 @@ export namespace Prisma {
     userType?: true
     kycStatus?: true
     VerifiedBy?: true
+    customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -4710,6 +4749,7 @@ export namespace Prisma {
     userType?: true
     kycStatus?: true
     VerifiedBy?: true
+    customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -4735,6 +4775,7 @@ export namespace Prisma {
     userType?: true
     kycStatus?: true
     VerifiedBy?: true
+    customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -4847,6 +4888,7 @@ export namespace Prisma {
     userType: $Enums.UserAccountType
     kycStatus: $Enums.KYCStatus
     VerifiedBy: number | null
+    customersRiskProfileModelId: number | null
     customersAuthDataModelId: number
     createdAt: Date
     updatedAt: Date
@@ -4891,6 +4933,7 @@ export namespace Prisma {
     userType?: boolean
     kycStatus?: boolean
     VerifiedBy?: boolean
+    customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4900,6 +4943,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
+    riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
@@ -4925,6 +4969,7 @@ export namespace Prisma {
     userType?: boolean
     kycStatus?: boolean
     VerifiedBy?: boolean
+    customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4934,6 +4979,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
+    riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
@@ -4956,6 +5002,7 @@ export namespace Prisma {
     userType?: boolean
     kycStatus?: boolean
     VerifiedBy?: boolean
+    customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4965,6 +5012,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
+    riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
@@ -4987,6 +5035,7 @@ export namespace Prisma {
     userType?: boolean
     kycStatus?: boolean
     VerifiedBy?: boolean
+    customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4998,8 +5047,9 @@ export namespace Prisma {
     permanentAddressModelId?: boolean
   }
 
-  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "customersAuthDataModelId" | "createdAt" | "updatedAt" | "createdBy" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId", ExtArgs["result"]["customerProfileDataModel"]>
+  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "createdAt" | "updatedAt" | "createdBy" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId", ExtArgs["result"]["customerProfileDataModel"]>
   export type CustomerProfileDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
@@ -5011,6 +5061,7 @@ export namespace Prisma {
     _count?: boolean | CustomerProfileDataModelCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerProfileDataModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
@@ -5019,6 +5070,7 @@ export namespace Prisma {
     permanentAddress?: boolean | CustomerProfileDataModel$permanentAddressArgs<ExtArgs>
   }
   export type CustomerProfileDataModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
@@ -5030,6 +5082,7 @@ export namespace Prisma {
   export type $CustomerProfileDataModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CustomerProfileDataModel"
     objects: {
+      riskProfile: Prisma.$CustomersRiskProfileModelPayload<ExtArgs> | null
       utility: Prisma.$CustomersAuthDataModelPayload<ExtArgs>
       /**
        * Relation with Aadhaar Card details
@@ -5077,6 +5130,7 @@ export namespace Prisma {
        */
       kycStatus: $Enums.KYCStatus
       VerifiedBy: number | null
+      customersRiskProfileModelId: number | null
       customersAuthDataModelId: number
       /**
        * Metadata and audit fields
@@ -5483,6 +5537,7 @@ export namespace Prisma {
    */
   export interface Prisma__CustomerProfileDataModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    riskProfile<T extends CustomerProfileDataModel$riskProfileArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$riskProfileArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     utility<T extends CustomersAuthDataModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomersAuthDataModelDefaultArgs<ExtArgs>>): Prisma__CustomersAuthDataModelClient<$Result.GetResult<Prisma.$CustomersAuthDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     aadhaarCard<T extends CustomerProfileDataModel$aadhaarCardArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>>): Prisma__AADHAARCardModelClient<$Result.GetResult<Prisma.$AADHAARCardModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     panCard<T extends CustomerProfileDataModel$panCardArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$panCardArgs<ExtArgs>>): Prisma__PanCardModelClient<$Result.GetResult<Prisma.$PanCardModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -5533,6 +5588,7 @@ export namespace Prisma {
     readonly userType: FieldRef<"CustomerProfileDataModel", 'UserAccountType'>
     readonly kycStatus: FieldRef<"CustomerProfileDataModel", 'KYCStatus'>
     readonly VerifiedBy: FieldRef<"CustomerProfileDataModel", 'Int'>
+    readonly customersRiskProfileModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly customersAuthDataModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly createdAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
@@ -5935,6 +5991,25 @@ export namespace Prisma {
      * Limit how many CustomerProfileDataModels to delete.
      */
     limit?: number
+  }
+
+  /**
+   * CustomerProfileDataModel.riskProfile
+   */
+  export type CustomerProfileDataModel$riskProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    where?: CustomersRiskProfileModelWhereInput
   }
 
   /**
@@ -12252,6 +12327,7 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelCountAggregateOutputType = {
     id: number
+    data: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -12280,6 +12356,7 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelCountAggregateInputType = {
     id?: true
+    data?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -12373,6 +12450,7 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelGroupByOutputType = {
     id: number
+    data: JsonValue[]
     createdAt: Date
     updatedAt: Date
     _count: CustomersRiskProfileModelCountAggregateOutputType | null
@@ -12398,35 +12476,50 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    data?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    CustomerProfileDataModel?: boolean | CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs>
+    _count?: boolean | CustomersRiskProfileModelCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customersRiskProfileModel"]>
 
   export type CustomersRiskProfileModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    data?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["customersRiskProfileModel"]>
 
   export type CustomersRiskProfileModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    data?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["customersRiskProfileModel"]>
 
   export type CustomersRiskProfileModelSelectScalar = {
     id?: boolean
+    data?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CustomersRiskProfileModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt", ExtArgs["result"]["customersRiskProfileModel"]>
+  export type CustomersRiskProfileModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "data" | "createdAt" | "updatedAt", ExtArgs["result"]["customersRiskProfileModel"]>
+  export type CustomersRiskProfileModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    CustomerProfileDataModel?: boolean | CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs>
+    _count?: boolean | CustomersRiskProfileModelCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CustomersRiskProfileModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CustomersRiskProfileModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $CustomersRiskProfileModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CustomersRiskProfileModel"
-    objects: {}
+    objects: {
+      CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      data: Prisma.JsonValue[]
       /**
        * Timestamps
        */
@@ -12826,6 +12919,7 @@ export namespace Prisma {
    */
   export interface Prisma__CustomersRiskProfileModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    CustomerProfileDataModel<T extends CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12856,6 +12950,7 @@ export namespace Prisma {
    */
   interface CustomersRiskProfileModelFieldRefs {
     readonly id: FieldRef<"CustomersRiskProfileModel", 'Int'>
+    readonly data: FieldRef<"CustomersRiskProfileModel", 'Json[]'>
     readonly createdAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
   }
@@ -12875,6 +12970,10 @@ export namespace Prisma {
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
      * Filter, which CustomersRiskProfileModel to fetch.
      */
     where: CustomersRiskProfileModelWhereUniqueInput
@@ -12893,6 +12992,10 @@ export namespace Prisma {
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
      * Filter, which CustomersRiskProfileModel to fetch.
      */
     where: CustomersRiskProfileModelWhereUniqueInput
@@ -12910,6 +13013,10 @@ export namespace Prisma {
      * Omit specific fields from the CustomersRiskProfileModel
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
     /**
      * Filter, which CustomersRiskProfileModel to fetch.
      */
@@ -12959,6 +13066,10 @@ export namespace Prisma {
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
      * Filter, which CustomersRiskProfileModel to fetch.
      */
     where?: CustomersRiskProfileModelWhereInput
@@ -13007,6 +13118,10 @@ export namespace Prisma {
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
      * Filter, which CustomersRiskProfileModels to fetch.
      */
     where?: CustomersRiskProfileModelWhereInput
@@ -13049,6 +13164,10 @@ export namespace Prisma {
      * Omit specific fields from the CustomersRiskProfileModel
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
     /**
      * The data needed to create a CustomersRiskProfileModel.
      */
@@ -13097,6 +13216,10 @@ export namespace Prisma {
      * Omit specific fields from the CustomersRiskProfileModel
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
     /**
      * The data needed to update a CustomersRiskProfileModel.
      */
@@ -13164,6 +13287,10 @@ export namespace Prisma {
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
      * The filter to search for the CustomersRiskProfileModel to update in case it exists.
      */
     where: CustomersRiskProfileModelWhereUniqueInput
@@ -13190,6 +13317,10 @@ export namespace Prisma {
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
      * Filter which CustomersRiskProfileModel to delete.
      */
     where: CustomersRiskProfileModelWhereUniqueInput
@@ -13210,6 +13341,30 @@ export namespace Prisma {
   }
 
   /**
+   * CustomersRiskProfileModel.CustomerProfileDataModel
+   */
+  export type CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerProfileDataModel
+     */
+    select?: CustomerProfileDataModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerProfileDataModel
+     */
+    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerProfileDataModelInclude<ExtArgs> | null
+    where?: CustomerProfileDataModelWhereInput
+    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
+    cursor?: CustomerProfileDataModelWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
+  }
+
+  /**
    * CustomersRiskProfileModel without action
    */
   export type CustomersRiskProfileModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13221,6 +13376,10 @@ export namespace Prisma {
      * Omit specific fields from the CustomersRiskProfileModel
      */
     omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
   }
 
 
@@ -16747,6 +16906,7 @@ export namespace Prisma {
     userType: 'userType',
     kycStatus: 'kycStatus',
     VerifiedBy: 'VerifiedBy',
+    customersRiskProfileModelId: 'customersRiskProfileModelId',
     customersAuthDataModelId: 'customersAuthDataModelId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -16858,6 +17018,7 @@ export namespace Prisma {
 
   export const CustomersRiskProfileModelScalarFieldEnum: {
     id: 'id',
+    data: 'data',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -17103,6 +17264,20 @@ export namespace Prisma {
    * Reference to a field of type 'DematAccountType[]'
    */
   export type ListEnumDematAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DematAccountType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json[]'
+   */
+  export type ListJsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
     
 
 
@@ -17353,6 +17528,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFilter<"CustomerProfileDataModel"> | $Enums.KYCStatus
     VerifiedBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    customersRiskProfileModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     customersAuthDataModelId?: IntFilter<"CustomerProfileDataModel"> | number
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
@@ -17362,6 +17538,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
     utility?: XOR<CustomersAuthDataModelScalarRelationFilter, CustomersAuthDataModelWhereInput>
     aadhaarCard?: XOR<AADHAARCardModelNullableScalarRelationFilter, AADHAARCardModelWhereInput> | null
     panCard?: XOR<PanCardModelNullableScalarRelationFilter, PanCardModelWhereInput> | null
@@ -17386,6 +17563,7 @@ export namespace Prisma {
     userType?: SortOrder
     kycStatus?: SortOrder
     VerifiedBy?: SortOrderInput | SortOrder
+    customersRiskProfileModelId?: SortOrderInput | SortOrder
     customersAuthDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -17395,6 +17573,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrderInput | SortOrder
     currentAddressModelId?: SortOrderInput | SortOrder
     permanentAddressModelId?: SortOrderInput | SortOrder
+    riskProfile?: CustomersRiskProfileModelOrderByWithRelationInput
     utility?: CustomersAuthDataModelOrderByWithRelationInput
     aadhaarCard?: AADHAARCardModelOrderByWithRelationInput
     panCard?: PanCardModelOrderByWithRelationInput
@@ -17422,6 +17601,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFilter<"CustomerProfileDataModel"> | $Enums.KYCStatus
     VerifiedBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    customersRiskProfileModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     customersAuthDataModelId?: IntFilter<"CustomerProfileDataModel"> | number
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
@@ -17431,6 +17611,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
     utility?: XOR<CustomersAuthDataModelScalarRelationFilter, CustomersAuthDataModelWhereInput>
     aadhaarCard?: XOR<AADHAARCardModelNullableScalarRelationFilter, AADHAARCardModelWhereInput> | null
     panCard?: XOR<PanCardModelNullableScalarRelationFilter, PanCardModelWhereInput> | null
@@ -17455,6 +17636,7 @@ export namespace Prisma {
     userType?: SortOrder
     kycStatus?: SortOrder
     VerifiedBy?: SortOrderInput | SortOrder
+    customersRiskProfileModelId?: SortOrderInput | SortOrder
     customersAuthDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -17488,6 +17670,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeWithAggregatesFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusWithAggregatesFilter<"CustomerProfileDataModel"> | $Enums.KYCStatus
     VerifiedBy?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
+    customersRiskProfileModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     customersAuthDataModelId?: IntWithAggregatesFilter<"CustomerProfileDataModel"> | number
     createdAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
@@ -17989,14 +18172,18 @@ export namespace Prisma {
     OR?: CustomersRiskProfileModelWhereInput[]
     NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
     id?: IntFilter<"CustomersRiskProfileModel"> | number
+    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
     createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
+    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
   }
 
   export type CustomersRiskProfileModelOrderByWithRelationInput = {
     id?: SortOrder
+    data?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
   }
 
   export type CustomersRiskProfileModelWhereUniqueInput = Prisma.AtLeast<{
@@ -18004,12 +18191,15 @@ export namespace Prisma {
     AND?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
     OR?: CustomersRiskProfileModelWhereInput[]
     NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
+    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
     createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
+    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
   }, "id">
 
   export type CustomersRiskProfileModelOrderByWithAggregationInput = {
     id?: SortOrder
+    data?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CustomersRiskProfileModelCountOrderByAggregateInput
@@ -18024,6 +18214,7 @@ export namespace Prisma {
     OR?: CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
     NOT?: CustomersRiskProfileModelScalarWhereWithAggregatesInput | CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"CustomersRiskProfileModel"> | number
+    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
     createdAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
   }
@@ -18496,6 +18687,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -18520,6 +18712,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18549,6 +18742,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -18573,6 +18767,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18600,6 +18795,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18643,6 +18839,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19210,40 +19407,51 @@ export namespace Prisma {
   }
 
   export type CustomersRiskProfileModelCreateInput = {
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
+    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutRiskProfileInput
   }
 
   export type CustomersRiskProfileModelUncheckedCreateInput = {
     id?: number
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
+    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutRiskProfileInput
   }
 
   export type CustomersRiskProfileModelUpdateInput = {
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutRiskProfileNestedInput
   }
 
   export type CustomersRiskProfileModelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileNestedInput
   }
 
   export type CustomersRiskProfileModelCreateManyInput = {
     id?: number
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type CustomersRiskProfileModelUpdateManyMutationInput = {
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CustomersRiskProfileModelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19913,6 +20121,11 @@ export namespace Prisma {
     not?: NestedEnumKYCStatusFilter<$PrismaModel> | $Enums.KYCStatus
   }
 
+  export type CustomersRiskProfileModelNullableScalarRelationFilter = {
+    is?: CustomersRiskProfileModelWhereInput | null
+    isNot?: CustomersRiskProfileModelWhereInput | null
+  }
+
   export type CustomersAuthDataModelScalarRelationFilter = {
     is?: CustomersAuthDataModelWhereInput
     isNot?: CustomersAuthDataModelWhereInput
@@ -19972,6 +20185,7 @@ export namespace Prisma {
     userType?: SortOrder
     kycStatus?: SortOrder
     VerifiedBy?: SortOrder
+    customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -19986,6 +20200,7 @@ export namespace Prisma {
   export type CustomerProfileDataModelAvgOrderByAggregateInput = {
     id?: SortOrder
     VerifiedBy?: SortOrder
+    customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
     createdBy?: SortOrder
     aADHAARCardModelId?: SortOrder
@@ -20009,6 +20224,7 @@ export namespace Prisma {
     userType?: SortOrder
     kycStatus?: SortOrder
     VerifiedBy?: SortOrder
+    customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20034,6 +20250,7 @@ export namespace Prisma {
     userType?: SortOrder
     kycStatus?: SortOrder
     VerifiedBy?: SortOrder
+    customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20048,6 +20265,7 @@ export namespace Prisma {
   export type CustomerProfileDataModelSumOrderByAggregateInput = {
     id?: SortOrder
     VerifiedBy?: SortOrder
+    customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
     createdBy?: SortOrder
     aADHAARCardModelId?: SortOrder
@@ -20409,9 +20627,24 @@ export namespace Prisma {
     _min?: NestedEnumDematAccountTypeFilter<$PrismaModel>
     _max?: NestedEnumDematAccountTypeFilter<$PrismaModel>
   }
+  export type JsonNullableListFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableListFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableListFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableListFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableListFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableListFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel> | null
+    has?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    hasEvery?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel>
+    hasSome?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
 
   export type CustomersRiskProfileModelCountOrderByAggregateInput = {
     id?: SortOrder
+    data?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -20735,6 +20968,12 @@ export namespace Prisma {
     deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
   }
 
+  export type CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput = {
+    create?: XOR<CustomersRiskProfileModelCreateWithoutCustomerProfileDataModelInput, CustomersRiskProfileModelUncheckedCreateWithoutCustomerProfileDataModelInput>
+    connectOrCreate?: CustomersRiskProfileModelCreateOrConnectWithoutCustomerProfileDataModelInput
+    connect?: CustomersRiskProfileModelWhereUniqueInput
+  }
+
   export type CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput = {
     create?: XOR<CustomersAuthDataModelCreateWithoutCustomerProfileDataModelInput, CustomersAuthDataModelUncheckedCreateWithoutCustomerProfileDataModelInput>
     connectOrCreate?: CustomersAuthDataModelCreateOrConnectWithoutCustomerProfileDataModelInput
@@ -20809,6 +21048,16 @@ export namespace Prisma {
 
   export type EnumKYCStatusFieldUpdateOperationsInput = {
     set?: $Enums.KYCStatus
+  }
+
+  export type CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput = {
+    create?: XOR<CustomersRiskProfileModelCreateWithoutCustomerProfileDataModelInput, CustomersRiskProfileModelUncheckedCreateWithoutCustomerProfileDataModelInput>
+    connectOrCreate?: CustomersRiskProfileModelCreateOrConnectWithoutCustomerProfileDataModelInput
+    upsert?: CustomersRiskProfileModelUpsertWithoutCustomerProfileDataModelInput
+    disconnect?: CustomersRiskProfileModelWhereInput | boolean
+    delete?: CustomersRiskProfileModelWhereInput | boolean
+    connect?: CustomersRiskProfileModelWhereUniqueInput
+    update?: XOR<XOR<CustomersRiskProfileModelUpdateToOneWithWhereWithoutCustomerProfileDataModelInput, CustomersRiskProfileModelUpdateWithoutCustomerProfileDataModelInput>, CustomersRiskProfileModelUncheckedUpdateWithoutCustomerProfileDataModelInput>
   }
 
   export type CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput = {
@@ -21089,6 +21338,57 @@ export namespace Prisma {
     delete?: CustomerProfileDataModelWhereInput | boolean
     connect?: CustomerProfileDataModelWhereUniqueInput
     update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutDematAccountsInput, CustomerProfileDataModelUpdateWithoutDematAccountsInput>, CustomerProfileDataModelUncheckedUpdateWithoutDematAccountsInput>
+  }
+
+  export type CustomersRiskProfileModelCreatedataInput = {
+    set: InputJsonValue[]
+  }
+
+  export type CustomerProfileDataModelCreateNestedManyWithoutRiskProfileInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
+    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
+    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutRiskProfileInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
+    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
+    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  }
+
+  export type CustomersRiskProfileModelUpdatedataInput = {
+    set?: InputJsonValue[]
+    push?: InputJsonValue | InputJsonValue[]
+  }
+
+  export type CustomerProfileDataModelUpdateManyWithoutRiskProfileNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
+    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput[]
+    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
+    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput[]
+    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput | CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput[]
+    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
+    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput[]
+    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
+    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput[]
+    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput | CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput[]
+    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
   }
 
   export type CustomerProfileDataModelCreateNestedManyWithoutCurrentAddressInput = {
@@ -21591,6 +21891,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -21614,6 +21915,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -21669,6 +21971,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFilter<"CustomerProfileDataModel"> | $Enums.KYCStatus
     VerifiedBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    customersRiskProfileModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     customersAuthDataModelId?: IntFilter<"CustomerProfileDataModel"> | number
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
@@ -21678,6 +21981,24 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+  }
+
+  export type CustomersRiskProfileModelCreateWithoutCustomerProfileDataModelInput = {
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CustomersRiskProfileModelUncheckedCreateWithoutCustomerProfileDataModelInput = {
+    id?: number
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CustomersRiskProfileModelCreateOrConnectWithoutCustomerProfileDataModelInput = {
+    where: CustomersRiskProfileModelWhereUniqueInput
+    create: XOR<CustomersRiskProfileModelCreateWithoutCustomerProfileDataModelInput, CustomersRiskProfileModelUncheckedCreateWithoutCustomerProfileDataModelInput>
   }
 
   export type CustomersAuthDataModelCreateWithoutCustomerProfileDataModelInput = {
@@ -21968,6 +22289,30 @@ export namespace Prisma {
   export type AddressModelCreateOrConnectWithoutPermanentAddressOfInput = {
     where: AddressModelWhereUniqueInput
     create: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
+  }
+
+  export type CustomersRiskProfileModelUpsertWithoutCustomerProfileDataModelInput = {
+    update: XOR<CustomersRiskProfileModelUpdateWithoutCustomerProfileDataModelInput, CustomersRiskProfileModelUncheckedUpdateWithoutCustomerProfileDataModelInput>
+    create: XOR<CustomersRiskProfileModelCreateWithoutCustomerProfileDataModelInput, CustomersRiskProfileModelUncheckedCreateWithoutCustomerProfileDataModelInput>
+    where?: CustomersRiskProfileModelWhereInput
+  }
+
+  export type CustomersRiskProfileModelUpdateToOneWithWhereWithoutCustomerProfileDataModelInput = {
+    where?: CustomersRiskProfileModelWhereInput
+    data: XOR<CustomersRiskProfileModelUpdateWithoutCustomerProfileDataModelInput, CustomersRiskProfileModelUncheckedUpdateWithoutCustomerProfileDataModelInput>
+  }
+
+  export type CustomersRiskProfileModelUpdateWithoutCustomerProfileDataModelInput = {
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomersRiskProfileModelUncheckedUpdateWithoutCustomerProfileDataModelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CustomersAuthDataModelUpsertWithoutCustomerProfileDataModelInput = {
@@ -22303,6 +22648,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -22326,6 +22672,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22380,6 +22727,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -22403,6 +22751,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22457,6 +22806,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -22480,6 +22830,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22534,6 +22885,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -22557,6 +22909,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22601,6 +22954,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -22624,6 +22978,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22652,6 +23007,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -22675,6 +23031,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22719,6 +23076,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -22742,6 +23100,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22752,6 +23111,85 @@ export namespace Prisma {
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelCreateWithoutRiskProfileInput = {
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
+    permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput = {
+    id?: number
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    customersAuthDataModelId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    aADHAARCardModelId?: number | null
+    panCardModelId?: number | null
+    customerPersonalInfoModelId?: number | null
+    currentAddressModelId?: number | null
+    permanentAddressModelId?: number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+  }
+
+  export type CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput = {
+    where: CustomerProfileDataModelWhereUniqueInput
+    create: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+  }
+
+  export type CustomerProfileDataModelCreateManyRiskProfileInputEnvelope = {
+    data: CustomerProfileDataModelCreateManyRiskProfileInput | CustomerProfileDataModelCreateManyRiskProfileInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput = {
+    where: CustomerProfileDataModelWhereUniqueInput
+    update: XOR<CustomerProfileDataModelUpdateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
+    create: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+  }
+
+  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput = {
+    where: CustomerProfileDataModelWhereUniqueInput
+    data: XOR<CustomerProfileDataModelUpdateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
+  }
+
+  export type CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput = {
+    where: CustomerProfileDataModelScalarWhereInput
+    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileInput>
   }
 
   export type CustomerProfileDataModelCreateWithoutCurrentAddressInput = {
@@ -22770,6 +23208,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -22793,6 +23232,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22831,6 +23271,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -22854,6 +23295,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22922,6 +23364,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -22948,6 +23391,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -22971,6 +23415,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -22997,6 +23442,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -23143,6 +23589,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23169,6 +23616,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -23192,6 +23640,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23218,6 +23667,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23242,6 +23692,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23268,6 +23719,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -23291,6 +23743,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23317,6 +23770,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23341,6 +23795,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23367,6 +23822,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -23390,6 +23846,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23416,11 +23873,115 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type CustomerProfileDataModelCreateManyRiskProfileInput = {
+    id?: number
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    customersAuthDataModelId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    aADHAARCardModelId?: number | null
+    panCardModelId?: number | null
+    customerPersonalInfoModelId?: number | null
+    currentAddressModelId?: number | null
+    permanentAddressModelId?: number | null
+  }
+
+  export type CustomerProfileDataModelUpdateWithoutRiskProfileInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -23440,6 +24001,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23464,6 +24026,7 @@ export namespace Prisma {
     userType?: $Enums.UserAccountType
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
+    customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23490,6 +24053,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -23513,6 +24077,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23539,6 +24104,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23565,6 +24131,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -23588,6 +24155,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23614,6 +24182,7 @@ export namespace Prisma {
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

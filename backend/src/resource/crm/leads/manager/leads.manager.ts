@@ -1,10 +1,27 @@
-import { db } from "@core/database/database";
+import { db, type DataBaseSchema } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
 import type { ILeadsManagerInterface } from "./leads.interface";
 
 export class LeadManager implements ILeadsManagerInterface {
+    async getLeadById(
+        leadId: number
+    ): ReturnType<ILeadsManagerInterface["getLeadById"]> {
+        const lead = await db.dataBase.leadsModel.findUnique({
+            where: { id: leadId },
+        });
+
+        if (!lead) {
+            throw new AppError(`Lead with ID ${leadId} not found`, {
+                statusCode: 404,
+                code: "LEAD_NOT_FOUND",
+            });
+        }
+
+        return lead;
+    }
+
     async createNewLead(
         createdBy: number,
         data: z.infer<typeof appSchema.crm.leads.createNewLeadSchema>,
@@ -79,5 +96,51 @@ export class LeadManager implements ILeadsManagerInterface {
         });
 
         return true;
+    }
+
+
+
+    async filterLead(payload: z.infer<typeof appSchema.crm.leads.filterLeadSchema>): ReturnType<ILeadsManagerInterface['filterLead']> {
+
+        const page = Number(payload.page) || 1;
+        const pageSize = 10; // You can make this configurable if needed
+        const skip = (page - 1) * pageSize;
+        const filters: DataBaseSchema.LeadsModelWhereInput = {};
+
+
+        if (payload.status) {
+            filters.status = payload.status;
+        }
+
+        if (payload.source) {
+            filters.leadSource = payload.source;
+        }
+        if (payload.search) {
+            filters.OR = [
+                { fullName: { contains: payload.search, mode: "insensitive" } },
+                { emailAddress: { contains: payload.search, mode: "insensitive" } },
+                { companyName: { contains: payload.search, mode: "insensitive" } },
+                { emailAddress: { contains: payload.search, mode: "insensitive" } },
+                { phoneNo: { contains: payload.search, mode: "insensitive" } },
+            ];
+        }
+
+        const total = await db.dataBase.leadsModel.count({ where: filters });
+        const data = await db.dataBase.leadsModel.findMany({
+            where: filters,
+            skip,
+            take: pageSize,
+        })
+        
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                pageSize,
+                totalPages: Math.ceil(total / pageSize),
+            },
+        };
+
     }
 }

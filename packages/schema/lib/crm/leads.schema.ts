@@ -29,6 +29,14 @@ export const BondType = z.enum([
     "OTHER",
 ]);
 
+
+export const filterLeadSchema = z.object({
+    page: z.string().regex(/^\d+$/, { message: "Page must be a numeric string" }).default("1").optional(),
+    search: z.string().optional(),
+    status: LeadStatus.optional(),
+    source: LeadSource.optional(),
+})
+
 // Main Lead schema
 export const createNewLeadSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),
@@ -40,14 +48,12 @@ export const createNewLeadSchema = z.object({
     status: LeadStatus,
     exInvestmentAmount: z.number().int().optional(),
     note: z.string().optional(),
-    createdBy: z.number().int(),
 });
 
 export const updateLeadSchema = createNewLeadSchema.partial();
 
 
 export const createNewLeadFollowUpNoteSchema = z.object({
-    createdByID: z.number().int(),
     text: z.string().min(1, "Note text is required"),
     nextDate: z.coerce.date().optional(), // accepts string or Date
 });
