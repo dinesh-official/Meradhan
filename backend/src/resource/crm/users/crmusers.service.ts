@@ -30,7 +30,7 @@ export class CrmUserService implements ICrmUserService {
         // Build query filters
         const filters: DataBaseSchema.CRMUserDataModelWhereInput = {};
 
-        if (payload.status && payload.status !== "ALL") {
+        if (payload.status) {
             filters.accountStatus = payload.status;
         }
 
