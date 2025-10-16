@@ -199,5 +199,4 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
   );
 };
 
-export const useUserTracking = (): TrackingContextValue =>
-  useContext(TrackingContext);
+export const useUserTracking = (): TrackingContextValue => useContext(TrackingContext);

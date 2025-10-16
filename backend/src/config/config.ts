@@ -8,8 +8,8 @@ function getEnvVar(key: string, devDefault?: string): string {
 }
 
 export const config = {
-    hostUrl: getEnvVar("HOST_URL", "http://localhost:3000"),
-    storageUrl: getEnvVar("STORAGE_URL", "http://localhost:3000"),
+    hostUrl: getEnvVar("HOST_URL", "http://3.110.126.202:3000"),
+    storageUrl: getEnvVar("STORAGE_URL", "http://3.110.126.202:3000"),
     jwtSecret: getEnvVar("JWT_SECRET", "your_jwt_secret"),
     port: parseInt(getEnvVar("PORT", "3000")),
     mode: (process.env.MODE || "DEVELOPMENT") as "DEVELOPMENT" | "PRODUCTION",
@@ -31,7 +31,7 @@ export const config = {
     },
     monitoring: {
         jobName: "Backend",
-        lokiUrl: "http://localhost:3100",
+        lokiUrl: "http://3.110.126.202:3100",
     },
     redis: {
         username: getEnvVar("REDIS_USERNAME", "default"),

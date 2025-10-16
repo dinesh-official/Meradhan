@@ -6,14 +6,16 @@ import logger from "@utils/logger/logger";
 export const startQueueWorker = (
     queueName: QueueNames,
     processor: (job: Job) => Promise<void>,
-    concurrency = 1
+    concurrency = 100
 ) => {
     const redis = QueueStore.prototype.getInstance();
-
 
     const worker = new Worker(queueName, processor, {
         connection: redis,
         concurrency,
+        removeOnComplete: {
+            count: 0,
+        }
     });
 
     // Event listeners
@@ -22,7 +24,7 @@ export const startQueueWorker = (
     });
 
     worker.on("failed", (job, err) => {
-        logger.logError(`❌ Job "${job?.name}" (ID: ${job?.id}) failed:`, err);
+        logger.logError(`❌ Job "${job?.name}" (ID: ${job?.id}) failed:`, { job, err });
     });
 
     worker.on("active", (job) => {

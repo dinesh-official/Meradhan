@@ -23,8 +23,6 @@ export class QueueStore implements IQueueService {
   public static getStore(): QueueStore {
     if (!QueueStore.store) {
       QueueStore.store = new QueueStore();
-      logger.logInfo("===================================================");
-
     }
     return QueueStore.store;
   }

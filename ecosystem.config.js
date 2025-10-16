@@ -3,9 +3,9 @@ module.exports = {
         // 🚀 Backend API
         {
             name: "MeraDhan-Backend",
-            cwd: "./backend",                // path to backend folder
+            cwd: "./backend",
             script: "npm",
-            args: "run start",               // or whatever your backend start script is
+            args: "run start",
             autorestart: true,
             watch: false,
             max_restarts: 10,
@@ -18,9 +18,9 @@ module.exports = {
         // ⚙️ Worker Process
         {
             name: "MeraDhan-Worker",
-            cwd: "./backend",                 // path to worker folder
+            cwd: "./backend",
             script: "npm",
-            args: "run worker",        // or "start" depending on your package.json
+            args: "run worker",
             autorestart: true,
             watch: false,
             max_restarts: 10,
