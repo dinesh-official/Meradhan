@@ -1,8 +1,10 @@
 import z from "zod";
 
-export const CrmUserROLEEnum = z.enum([
-    "VIEWER","ADMIN","SALES","SUPPORT","RELATIONSHIP_MANAGER"
-]);
+ const UserRoles = [ "VIEWER","ADMIN","SALES","SUPPORT","RELATIONSHIP_MANAGER"]
+
+export const CrmUserROLEEnum = z.enum(
+   UserRoles
+);
 
 export const AccountStatusEnum = z.enum(["SUSPENDED", "ACTIVE"]);
 export const gender = ["MALE", "FEMALE", "OTHER",]

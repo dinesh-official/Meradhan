@@ -3,6 +3,7 @@ import * as userSchema from "./lib/crm/users.schema";
 import * as leadSchema from "./lib/crm/leads.schema";
 
 import * as customerSchema from "./lib/customers/customers.schema";
+import * as Enum from "./lib/enums"
 
 
 
@@ -12,5 +13,6 @@ export const appSchema = {
       user: userSchema,
       leads: leadSchema
    },
+   Enum,
    customer: customerSchema
 };

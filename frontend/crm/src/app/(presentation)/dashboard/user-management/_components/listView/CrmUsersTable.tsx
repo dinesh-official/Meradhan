@@ -11,39 +11,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import StatusBadge from "@/global/elements/wrapper/StatusBadge";
+import { CrmUsersProfile } from "@root/apiGateway";
 import { MoreHorizontal } from "lucide-react";
 
 type Role = "admin" | "manager" | "sales" | "viewer" | "auditor";
 
-export type UserRow = {
-  id: string;
-  name: string;
-  email: string;
-  phoneNo: string;
-  avatar?: string;
-  lastLogin?: string | Date;
-  role: Role;
-  createdAt: string | Date;
-  updatedAt: string | Date;
-  createdBy: string;
-};
-
 interface UsersTableProps {
-  data: UserRow[];
+  data: CrmUsersProfile[];
   pageSize?: number;
-  onViewUser?: (user: UserRow) => void;
-  onEditUser?: (user: UserRow) => void;
+  onViewUser?: (user: CrmUsersProfile) => void;
+  onEditUser?: (user: CrmUsersProfile) => void;
+  isLoading?: boolean;
 }
-
-function UsersTable({
-  data,
-  pageSize = 10,
-
-}: UsersTableProps) {
+function UsersTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
   return (
-    <UniversalTable<UserRow>
+    <UniversalTable<CrmUsersProfile>
       data={data}
       initialPageSize={pageSize}
+      isLoading={isLoading}
       fields={[
         { key: "name", label: "Name" },
         {
@@ -83,7 +68,7 @@ function UsersTable({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem
-                  onClick={() => navigator.clipboard.writeText(row.id)}
+                // onClick={() => navigator.clipboard.writeText(row.id)}
                 >
                   Copy User ID
                 </DropdownMenuItem>
