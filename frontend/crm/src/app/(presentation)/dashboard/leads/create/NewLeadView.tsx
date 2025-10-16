@@ -13,8 +13,14 @@ function NewLeadView() {
         <CardContent>
           <LeadFormManagementForm manager={manager} />
         </CardContent>
-              <CardFooter>
-                  <Button className="md:w-auto w-full" >Save Lead</Button>
+        <CardFooter>
+          <Button
+            className="md:w-auto w-full"
+            onClick={manager.validateLeadData}
+            disabled={manager.createLeadMutation.isPending}
+          >
+            Save Lead
+          </Button>
         </CardFooter>
       </Card>
     </div>

@@ -45,7 +45,7 @@ export class CrmUsersApi implements TCrmUsersInterface {
     data: z.infer<(typeof appSchema.crm.user)["createCRMUserSchema"]>,
     config?: AxiosRequestConfig
   ): ReturnType<TCrmUsersInterface["createUser"]> {
-    return this.apiClient.post<CreateUsersResponse>("/crm/users", data, config);
+    return this.apiClient.post<CreateUsersResponse>("/crm/user", data, config);
   }
 
   async updateUser(

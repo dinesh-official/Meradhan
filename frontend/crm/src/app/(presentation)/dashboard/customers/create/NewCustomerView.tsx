@@ -17,6 +17,7 @@ function NewCustomerView() {
           <Button
             onClick={manager.validateCustomerData}
             className="md:w-auto w-full"
+            // disabled= {manager.createCustomerMutation}
           >
             Save New Customer
           </Button>

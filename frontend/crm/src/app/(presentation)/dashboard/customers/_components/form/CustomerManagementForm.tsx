@@ -4,6 +4,8 @@ import { PhoneField } from "@/global/elements/inputs/PhoneField";
 import { RadioYesNoField } from "@/global/elements/inputs/RadioYesNoField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
+import { UserAccountType } from "../../../../../../../../../packages/schema/lib/customers/customers.schema";
+import { gender } from "../../../../../../../../../packages/schema/lib/enums";
 
 function CustomerManagementForm({
   manager,
@@ -74,9 +76,9 @@ function CustomerManagementForm({
           defaultCountry="IN"
           placeholder="mobile number"
           required
-          value={manager.state.mobileNo}
-          onChangeAction={(e) => manager.setCustomerData("mobileNo", e)}
-          error={manager?.errors?.mobileNo?.[0]}
+          value={manager.state.phoneNo}
+          onChangeAction={(e) => manager.setCustomerData("phoneNo", e)}
+          error={manager?.errors?.phoneNo?.[0]}
         />
       </div>
 
@@ -85,9 +87,9 @@ function CustomerManagementForm({
         defaultCountry="IN"
         placeholder="WhatsApp number"
         required
-        value={manager.state.whatsAppNumber?.toString()}
-        onChangeAction={(e) => manager.setCustomerData("whatsAppNumber", e)}
-        error={manager?.errors?.whatsAppNumber?.[0]}
+        value={manager.state.whatsAppNo?.toString()}
+        onChangeAction={(e) => manager.setCustomerData("whatsAppNo", e)}
+        error={manager?.errors?.whatsAppNo?.[0]}
       />
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -95,23 +97,27 @@ function CustomerManagementForm({
           label="User Type"
           placeholder="Individual"
           defaultValue="individual"
-          options={[
-            { label: "Individual", value: "individual" },
-            { label: "Corporate", value: "corporate" },
-          ]}
+          options={UserAccountType.map((g) => ({
+            label: g.charAt(0).toUpperCase() + g.slice(1),
+            value: g,
+          }))}
           required
           value={manager.state.userType}
           onChangeAction={(e) => manager.setCustomerData("userType", e)}
           error={manager?.errors?.userType?.[0]}
         />
-        <InputField
-          id="username"
-          label="Username"
-          placeholder="Enter username"
+
+        <SelectField
+          label="Gender"
+          placeholder="Select Gender"
+          options={gender.map((g) => ({
+            label: g.charAt(0).toUpperCase() + g.slice(1), // Capitalize first letter
+            value: g,
+          }))}
           required
-          value={manager.state.userName}
-          onChangeAction={(e) => manager.setCustomerData("userName", e)}
-          error={manager?.errors?.userName?.[0]}
+          value={manager.state.gender}
+          onChangeAction={(e) => manager.setCustomerData("gender", e)}
+          error={manager?.errors?.gender?.[0]}
         />
       </div>
 
@@ -121,33 +127,38 @@ function CustomerManagementForm({
           label="Terms Accepted"
           required
           defaultValue="no"
-          value={manager.state.termsAccept ? "yes" : "no"}
-          onChangeAction={(e) => manager.setCustomerData("termsAccept", e == "yes")}
+          value={manager.state.termsAccepted ? "yes" : "no"}
+          onChangeAction={(e) =>
+            manager.setCustomerData("termsAccepted", e == "yes")
+          }
+          // error = {manager?.errors?.termsAccepted?.[0]}
         />
         <RadioYesNoField
           id="wa"
           label="WhatsApp Notification Accepted"
           defaultValue="no"
-          value={manager.state.whatsAppNotificationAccept ? "yes" : "no"}
+          value={manager.state.whatsAppNotificationAllow ? "yes" : "no"}
           onChangeAction={(e) =>
-            manager.setCustomerData("whatsAppNotificationAccept", e == "yes")
+            manager.setCustomerData("whatsAppNotificationAllow", e == "yes")
           }
         />
         <RadioYesNoField
           id="emailConfirmed"
           label="Email Confirmed"
           defaultValue="no"
-          value={manager.state.emailConfirmed ? "yes" : "no"}
+          value={manager.state.isEmailVerified ? "yes" : "no"}
           onChangeAction={(e) =>
-            manager.setCustomerData("emailConfirmed", e == "yes")
+            manager.setCustomerData("isEmailVerified", e == "yes")
           }
         />
         <RadioYesNoField
           id="mobileConfirmed"
           label="Mobile Confirmed"
           defaultValue="no"
-          value={manager.state.mobileConfirm ? "yes" : "no"}
-          onChangeAction={(e) => manager.setCustomerData("mobileConfirm", e == "yes")}
+          value={manager.state.isPhoneVerified ? "yes" : "no"}
+          onChangeAction={(e) =>
+            manager.setCustomerData("isPhoneVerified", e == "yes")
+          }
         />
       </div>
 
@@ -205,14 +216,14 @@ function CustomerManagementForm({
         error={manager?.errors?.relationshipManagerId?.[0]}
       />
 
-      <InputField
+      {/* <InputField
         id="investment"
         label="Total Investment"
         placeholder="Enter total investment amount"
         value={manager.state.totalInvestment?.toString()}
         onChangeAction={(e) => manager.setCustomerData("totalInvestment", Number(e))}
         error={manager?.errors?.totalInvestment?.[0]}
-      />
+      /> */}
 
       {/* Password */}
 

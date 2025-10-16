@@ -6,19 +6,31 @@ import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { userFormSchema } from "./newUser.schema";
 import { UserFormData } from "./userForm";
 import { ROLES } from "@/global/constants/role.constants";
+import { useUserCreateApiHook } from "./useCreateUserApiHook";
+import { parseError } from "@/core/error/parseError";
+import { toast } from "sonner";
+import { appSchema } from "@root/schema";
 
 export const initUserData: UserFormData = {
-  fullname: "",
+  name: "",
   email: "",
-  password: "",
+  phoneNo: "",
   role: ROLES[0],
 };
 
 export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
   const [data, setData] = useState<UserFormData>(initial);
+    const [open, setOpen] = useState(false);
+  
   const [errors, setErrors] = useState<
     Partial<Record<keyof UserFormData, string[]>>
   >({});
+  const createUserApi = useUserCreateApiHook({
+    onSuccess:()=>{
+      setOpen(false)
+    }
+  });
+  const { createUserMutation } = createUserApi;
 
   /** ✅ Update a single field and clear its error */
   const setUserData = useCallback(
@@ -61,10 +73,16 @@ export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
     try {
       userFormSchema.parse(data);
       setErrors({});
+      const payload = appSchema.crm.user.createCRMUserSchema.parse(data);
+      createUserMutation.mutate(payload);
       return true;
-    } catch (err) {
-      if (err instanceof ZodError) {
-        setErrors(zodErrorToErrorMap(err));
+    } catch (error) {
+      console.log("error hai in validateUserData", error);
+      const err = parseError<ZodError>(error);
+      if (err.issues.length) {
+        toast.error(err.issues[0].message);
+      } else {
+        toast.error(err.message);
       }
       return false;
     }
@@ -79,6 +97,11 @@ export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
   return {
     state: data,
     errors,
+    popup:{
+      setOpen,
+      open
+    },
+    createUserMutation,
     setUserData,
     resetUserData,
     validateField,

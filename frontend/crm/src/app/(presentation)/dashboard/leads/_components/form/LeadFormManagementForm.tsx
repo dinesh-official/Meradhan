@@ -2,11 +2,11 @@
 import { InputField } from "@/global/elements/inputs/InputField";
 import { PhoneField } from "@/global/elements/inputs/PhoneField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
-import { BOND_TYPES, LEAD_SOURCES, STATUS } from "./leadfFormData.schema";
 import { ILeadDataFormHook, LeadFormData } from "./leadForm";
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { bonds, source, status } from "../../../../../../../../../packages/schema/lib/crm/leads.schema";
 
 const LeadFormManagementForm = ({
   manager,
@@ -34,11 +34,11 @@ const LeadFormManagementForm = ({
           placeholder="Enter email address"
           type="email"
           required
-          value={manager.state.emailId}
+          value={manager.state.emailAddress}
           onChangeAction={(e) => {
-            manager.setLeadData("emailId", e);
+            manager.setLeadData("emailAddress", e);
           }}
-          error={manager?.errors?.emailId?.[0]}
+          error={manager?.errors?.emailAddress?.[0]}
         />
       </div>
 
@@ -48,11 +48,11 @@ const LeadFormManagementForm = ({
           defaultCountry="IN"
           placeholder="mobile number"
           required
-          value={manager.state.phoneNumber}
+          value={manager.state.phoneNo}
           onChangeAction={(e) => {
-            manager.setLeadData("phoneNumber", e);
+            manager.setLeadData("phoneNo", e);
           }}
-          error={manager?.errors?.phoneNumber?.[0]}
+          error={manager?.errors?.phoneNo?.[0]}
         />
 
         <InputField
@@ -60,18 +60,18 @@ const LeadFormManagementForm = ({
           label="company Name"
           placeholder="Enter Full name"
           required
-          value={manager.state.company}
+          value={manager.state.companyName}
           onChangeAction={(e) => {
-            manager.setLeadData("company", e);
+            manager.setLeadData("companyName", e);
           }}
-          error={manager?.errors?.company?.[0]}
+          error={manager?.errors?.companyName?.[0]}
         />
       </div>
       <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
         <SelectField
           label="Lead Source"
           placeholder="Select Source"
-          options={LEAD_SOURCES.map((src) => ({ label: src, value: src }))}
+          options={source.map((src) => ({ label: src, value: src }))}
           required
           value={manager.state.leadSource}
           onChangeAction={(e) =>
@@ -83,7 +83,7 @@ const LeadFormManagementForm = ({
         <SelectField
           label="Status"
           placeholder="Select Status"
-          options={STATUS.map((status) => ({ label: status, value: status }))}
+          options={status.map((status) => ({ label: status, value: status }))}
           required
           value={manager.state.status}
           onChangeAction={(e) =>
@@ -109,15 +109,15 @@ const LeadFormManagementForm = ({
         <SelectField
           label="Bond Type Interest"
           placeholder="Select Bond Type"
-          options={BOND_TYPES.map((bond) => ({ label: bond, value: bond }))}
-          value={manager.state.bondTypeInterest}
+          options={bonds.map((bond) => ({ label: bond, value: bond }))}
+          value={manager.state.bondType}
           onChangeAction={(e) =>
             manager.setLeadData(
-              "bondTypeInterest",
-              e as LeadFormData["bondTypeInterest"]
+              "bondType",
+              e as LeadFormData["bondType"]
             )
           }
-          error={manager?.errors?.bondTypeInterest?.[0]}
+          error={manager?.errors?.bondType?.[0]}
         />
       </div>
 
@@ -126,14 +126,14 @@ const LeadFormManagementForm = ({
         label="Expected Investment Amount"
         placeholder="Enter amount in INR"
         type="number"
-        value={manager.state.expectedInvestmentAmount?.toString() || ""}
+        value={manager.state.exInvestmentAmount?.toString() || ""}
         onChangeAction={(e) => {
           if (e) {
             const num = Number(e);
-            manager.setLeadData("expectedInvestmentAmount", num);
+            manager.setLeadData("exInvestmentAmount", num);
           }
         }}
-        error={manager?.errors?.expectedInvestmentAmount?.[0]}
+        error={manager?.errors?.exInvestmentAmount?.[0]}
       />
 
       <div className="flex flex-col w-full">
@@ -141,9 +141,9 @@ const LeadFormManagementForm = ({
         <Textarea
           id="notes"
           placeholder="Add any additional notes about this lead"
-          value={manager.state.notes}
+          value={manager.state.note}
           className="mt-1"
-          onChange={(e) => manager.setLeadData("notes", e.target.value)}
+          onChange={(e) => manager.setLeadData("note", e.target.value)}
         ></Textarea>
       </div>
     </div>
