@@ -9,7 +9,6 @@ export const startQueueWorker = (
     concurrency = 100
 ) => {
     const redis = QueueStore.prototype.getInstance();
-
     const worker = new Worker(queueName, processor, {
         connection: redis,
         concurrency,
