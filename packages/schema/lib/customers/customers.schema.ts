@@ -1,201 +1,229 @@
 import { z } from "zod";
 import { AccountStatusEnum, GenderEnum } from "../enums";
 
-export const UserAccountTypeEnum = z.enum([
-    "INDIVIDUAL",
-    "INDIVIDUAL_NRI_NRO",
-    "TRUST",
-    "CORPORATE",
-    "HUF",
-    "LLP",
-    "PARTNERSHIP_FIRM",
-], {
-    error: "User account type is required",
-});
+export const UserAccountType = [
+  "INDIVIDUAL",
+  "INDIVIDUAL_NRI_NRO",
+  "TRUST",
+  "CORPORATE",
+  "HUF",
+  "LLP",
+  "PARTNERSHIP_FIRM",
+];
+
 export const kycStatus = ["PENDING", "REJECTED"] as const;
 
-
 export const findManyCustomerSchema = z.object({
-    page: z.string().regex(/^\d+$/, { message: "Page must be a numeric string" }).default("1").optional(),
-    search: z.string().optional(),
-    accountStatus: AccountStatusEnum.optional(),
-    kycStatus: z.enum([...kycStatus,"VERIFIED"]).optional(),
-})
-
+  page: z
+    .string()
+    .regex(/^\d+$/, { message: "Page must be a numeric string" })
+    .default("1")
+    .optional(),
+  search: z.string().optional(),
+  accountStatus: AccountStatusEnum.optional(),
+  kycStatus: z.enum([...kycStatus, "VERIFIED"]).optional(),
+});
 
 export const createNewCustomerSchema = z.object({
-    firstName: z.string({ error: "First name is required", })
-        .min(2, { message: "First name must be at least 2 characters long" }),
-    middleName: z.string({ error: "Middle name is required", })
-        .min(1, { message: "Middle name cannot be empty" }),
-    lastName: z.string({ error: "Last name is required", })
-        .min(2, { message: "Last name must be at least 2 characters long" }),
-    emailId: z.email({ message: "Please enter a valid email address" }),
-    phoneNo: z.string({ error: "Phone number is required", })
-        .min(10, { message: "Phone number must be at least 10 digits long" }),
-    whatsAppNo: z.string({ error: "WhatsApp number is required", })
-        .min(10, { message: "WhatsApp number must be at least 10 digits long" }),
-    userType: UserAccountTypeEnum,
-    termsAccepted: z.boolean({
-        error: "Terms and conditions acceptance is required",
+  firstName: z
+    .string({ error: "First name is required" })
+    .min(2, { message: "First name must be at least 2 characters long" }),
+  middleName: z
+    .string({ error: "Middle name is required" })
+    .min(1, { message: "Middle name cannot be empty" }),
+  lastName: z
+    .string({ error: "Last name is required" })
+    .min(2, { message: "Last name must be at least 2 characters long" }),
+  emailId: z.email({ message: "Please enter a valid email address" }),
+  phoneNo: z
+    .string({ error: "Phone number is required" })
+    .min(10, { message: "Phone number must be at least 10 digits long" }),
+  whatsAppNo: z
+    .string({ error: "WhatsApp number is required" })
+    .min(10, { message: "WhatsApp number must be at least 10 digits long" }),
+  userType: z.enum(UserAccountType, {
+    error: "User account type is required",
+  }),
+  termsAccepted: z.boolean({
+    error: "Terms and conditions acceptance is required",
+  }),
+  whatsAppNotificationAllow: z.boolean({
+    error: "WhatsApp notification preference is required",
+  }),
+  isEmailVerified: z.boolean({
+    error: "Email verification status is required",
+  }),
+  isPhoneVerified: z.boolean({
+    error: "Phone verification status is required",
+  }),
+  kycStatus: z
+    .enum(kycStatus, { error: "Invalid KYC status provided" })
+    .optional(),
+  status: AccountStatusEnum.optional(),
+  gender: GenderEnum,
+  password: z
+    .string({
+      error: "Password is required",
+    })
+    .min(6, { message: "Password must be at least 6 characters long" })
+    .regex(/[A-Z]/, {
+      message: "Password must contain at least one uppercase letter",
+    })
+    .regex(/[a-z]/, {
+      message: "Password must contain at least one lowercase letter",
+    })
+    .regex(/[0-9]/, { message: "Password must contain at least one number" })
+    .regex(/[^A-Za-z0-9]/, {
+      message: "Password must contain at least one special character",
     }),
-    whatsAppNotificationAllow: z.boolean({
-        error: "WhatsApp notification preference is required",
-    }),
-    isEmailVerified: z.boolean({
-        error: "Email verification status is required",
-    }),
-    isPhoneVerified: z.boolean({
-        error: "Phone verification status is required",
 
-    }),
-    kycStatus: z.enum(kycStatus, { error: "Invalid KYC status provided", }).optional(),
-    status: AccountStatusEnum.optional(),
-    gender: GenderEnum,
-    password: z.string({
-        error: "Password is required",
-    }).min(6, { message: "Password must be at least 6 characters long" })
-        .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" }).regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" }).regex(/[0-9]/, { message: "Password must contain at least one number" }).regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
+  relationshipManagerId: z.union([z.string(), z.number()]).optional(),
 
-    totalInvestment: z.string({
-        error: "Total investment value is required",
-    }).regex(/^\d+(\.\d{1,2})?$/, { message: "Total investment must be a valid number format" }),
+  // totalInvestment: z.string({
+  //     error: "Total investment value is required",
+  // }).regex(/^\d+(\.\d{1,2})?$/, { message: "Total investment must be a valid number format" }),
 });
 
-
-export const updateCustomerProfileSchema = createNewCustomerSchema.partial()
+export const updateCustomerProfileSchema = createNewCustomerSchema.partial();
 
 export const createBankAccountSchema = z.object({
-    accountHolderName: z.string().min(1, "Account holder name is required"),
-    bankAccountType: z.string().min(1, "Bank account type is required"),
-    accountNumber: z.number().int().positive("Account number must be a positive integer"),
-    ifscCode: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format"),
-    bankName: z.string().min(1, "Bank name is required"),
-    branch: z.string().min(1, "Branch name is required"),
+  accountHolderName: z.string().min(1, "Account holder name is required"),
+  bankAccountType: z.string().min(1, "Bank account type is required"),
+  accountNumber: z
+    .number()
+    .int()
+    .positive("Account number must be a positive integer"),
+  ifscCode: z
+    .string()
+    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format"),
+  bankName: z.string().min(1, "Bank name is required"),
+  branch: z.string().min(1, "Branch name is required"),
 
-    // Optional flags with defaults
-    isPrimary: z.boolean().default(false),
-    isVerified: z.boolean().default(false),
+  // Optional flags with defaults
+  isPrimary: z.boolean().default(false),
+  isVerified: z.boolean().default(false),
 });
 
-export const updateBackAccountBankAccountSchema = createBankAccountSchema.partial()
+export const updateBackAccountBankAccountSchema =
+  createBankAccountSchema.partial();
 
 // Enums (define these based on your app logic)
 export const DepositoryNameEnum = z.enum(["NSDL", "CDSL"]);
 export const DematAccountTypeEnum = z.enum(["SINGLE", "JOINT", "HUF"]);
 
 export const createDematAccountSchema = z.object({
-    // Depository info
-    depositoryName: DepositoryNameEnum,
-    dpId: z.string().min(1, "DP ID is required"),
-    clientId: z.string().min(1, "Client ID is required"),
-    accountType: DematAccountTypeEnum,
-    depositoryParticipantName: z.string().min(1, "Depository participant name is required"),
+  // Depository info
+  depositoryName: DepositoryNameEnum,
+  dpId: z.string().min(1, "DP ID is required"),
+  clientId: z.string().min(1, "Client ID is required"),
+  accountType: DematAccountTypeEnum,
+  depositoryParticipantName: z
+    .string()
+    .min(1, "Depository participant name is required"),
 
-    // PAN details
-    primaryPanNumber: z
-        .string()
-        .regex(/[A-Z]{5}[0-9]{4}[A-Z]{1}/, "Invalid PAN number format"),
-    sndPanNumber: z
-        .string()
-        .regex(/[A-Z]{5}[0-9]{4}[A-Z]{1}/, "Invalid PAN number format")
-        .optional(),
-    trdPanNumber: z
-        .string()
-        .regex(/[A-Z]{5}[0-9]{4}[A-Z]{1}/, "Invalid PAN number format")
-        .optional(),
-    accountHolderName: z.string().min(1, "Account holder name is required"),
+  // PAN details
+  primaryPanNumber: z
+    .string()
+    .regex(/[A-Z]{5}[0-9]{4}[A-Z]{1}/, "Invalid PAN number format"),
+  sndPanNumber: z
+    .string()
+    .regex(/[A-Z]{5}[0-9]{4}[A-Z]{1}/, "Invalid PAN number format")
+    .optional(),
+  trdPanNumber: z
+    .string()
+    .regex(/[A-Z]{5}[0-9]{4}[A-Z]{1}/, "Invalid PAN number format")
+    .optional(),
+  accountHolderName: z.string().min(1, "Account holder name is required"),
 
-    // Status flags
-    isPrimary: z.boolean().default(false),
-    isVerified: z.boolean().default(false),
+  // Status flags
+  isPrimary: z.boolean().default(false),
+  isVerified: z.boolean().default(false),
 });
 
-export const updateDematAccountSchema = createDematAccountSchema.partial()
+export const updateDematAccountSchema = createDematAccountSchema.partial();
 
 export const createAddressSchema = z.object({
-    // Address lines
-    line1: z.string().min(1, "Address line 1 is required"),
-    line2: z.string().optional(),
-    line3: z.string().optional(),
+  // Address lines
+  line1: z.string().min(1, "Address line 1 is required"),
+  line2: z.string().optional(),
+  line3: z.string().optional(),
 
-    // Location details
-    postOffice: z.string().min(1, "Post office is required"),
-    cityOrDistrict: z.string().min(1, "City or district is required"),
-    state: z.string().min(1, "State is required"),
-    pinCode: z
-        .string()
-        .regex(/^[1-9][0-9]{5}$/, "Invalid PIN code format (must be 6 digits)"),
-    country: z.string().min(1, "Country is required"),
+  // Location details
+  postOffice: z.string().min(1, "Post office is required"),
+  cityOrDistrict: z.string().min(1, "City or district is required"),
+  state: z.string().min(1, "State is required"),
+  pinCode: z
+    .string()
+    .regex(/^[1-9][0-9]{5}$/, "Invalid PIN code format (must be 6 digits)"),
+  country: z.string().min(1, "Country is required"),
 
-    // Full address
-    fullAddress: z.string().min(1, "Full address is required"),
+  // Full address
+  fullAddress: z.string().min(1, "Full address is required"),
 });
-
 
 export const createPanDetailsSchema = z.object({
-    // Name details as per PAN
-    firstName: z.string().min(1, "First name is required"),
-    middleName: z.string().optional(),
-    lastName: z.string().min(1, "Last name is required"),
+  // Name details as per PAN
+  firstName: z.string().min(1, "First name is required"),
+  middleName: z.string().optional(),
+  lastName: z.string().min(1, "Last name is required"),
 
-    // PAN card details
-    panCardNo: z
-        .string()
-        .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN number format"),
-    dateOfBirth: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format"),
-    gender: GenderEnum,
+  // PAN card details
+  panCardNo: z
+    .string()
+    .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN number format"),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format"),
+  gender: GenderEnum,
 
-    // Verification status
-    isVerified: z.boolean().default(false),
-    verifyDate: z.coerce.date(), // coerces string → Date
+  // Verification status
+  isVerified: z.boolean().default(false),
+  verifyDate: z.coerce.date(), // coerces string → Date
 });
 
-export const updatePanDetailsSchema = createPanDetailsSchema.partial()
+export const updatePanDetailsSchema = createPanDetailsSchema.partial();
 
 export const createAadhaarDetailsSchema = z.object({
-    // Name details as per Aadhaar
-    firstName: z.string().min(1, "First name is required"),
-    middleName: z.string().optional(),
-    lastName: z.string().min(1, "Last name is required"),
+  // Name details as per Aadhaar
+  firstName: z.string().min(1, "First name is required"),
+  middleName: z.string().optional(),
+  lastName: z.string().min(1, "Last name is required"),
 
-    // Father’s name for verification
-    fatherName: z.string().min(1, "Father’s name is required"),
+  // Father’s name for verification
+  fatherName: z.string().min(1, "Father’s name is required"),
 
-    // Aadhaar details
-    aadhaarNo: z
-        .string()
-        .regex(/^[2-9]{1}[0-9]{11}$/, "Invalid Aadhaar number (must be 12 digits)"),
-    dateOfBirth: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format"),
-    gender: GenderEnum,
-    image: z.string("add card image"),
+  // Aadhaar details
+  aadhaarNo: z
+    .string()
+    .regex(/^[2-9]{1}[0-9]{11}$/, "Invalid Aadhaar number (must be 12 digits)"),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format"),
+  gender: GenderEnum,
+  image: z.string("add card image"),
 
-    // Verification status
-    isVerified: z.boolean().default(false),
-    verifyDate: z.coerce.date(),
+  // Verification status
+  isVerified: z.boolean().default(false),
+  verifyDate: z.coerce.date(),
 });
 
-export const updateAadhaarDetailsSchema = createAadhaarDetailsSchema.partial()
+export const updateAadhaarDetailsSchema = createAadhaarDetailsSchema.partial();
 
 export const createPersonalInfoSchema = z.object({
-    // Signature
-    signatureUrl: z.url("Signature URL must be a valid URL").optional(),
+  // Signature
+  signatureUrl: z.url("Signature URL must be a valid URL").optional(),
 
-    // Personal info
-    maritalStatus: z.string().min(1, "Marital status is required"),
-    occupationType: z.string().min(1, "Occupation type is required"),
-    annualGrossIncome: z.string().min(1, "Annual gross income is required"),
-    fatherOrSpouseName: z.string().min(1, "Father or spouse name is required"),
-    mothersName: z.string().min(1, "Mother’s name is required"),
-    nationality: z.string().min(1, "Nationality is required"),
-    maidenName: z.string().optional(),
-    residentialStatus: z.string().min(1, "Residential status is required"),
-    qualification: z.string().min(1, "Qualification is required"),
-    politicallyExposedPerson: z.string().optional(),
+  // Personal info
+  maritalStatus: z.string().min(1, "Marital status is required"),
+  occupationType: z.string().min(1, "Occupation type is required"),
+  annualGrossIncome: z.string().min(1, "Annual gross income is required"),
+  fatherOrSpouseName: z.string().min(1, "Father or spouse name is required"),
+  mothersName: z.string().min(1, "Mother’s name is required"),
+  nationality: z.string().min(1, "Nationality is required"),
+  maidenName: z.string().optional(),
+  residentialStatus: z.string().min(1, "Residential status is required"),
+  qualification: z.string().min(1, "Qualification is required"),
+  politicallyExposedPerson: z.string().optional(),
 });
 
-export const updatePersonalInfoSchema = createPersonalInfoSchema.partial()
+export const updatePersonalInfoSchema = createPersonalInfoSchema.partial();

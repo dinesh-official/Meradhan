@@ -5,4 +5,5 @@ export const CrmUserROLEEnum = z.enum([
 ]);
 
 export const AccountStatusEnum = z.enum(["SUSPENDED", "ACTIVE"]);
-export const GenderEnum = z.enum(["MALE", "FEMALE", "OTHER",], { error: "Invalid select valid gender type" });
+export const gender = ["MALE", "FEMALE", "OTHER",]
+export const GenderEnum = z.enum(gender, { error: "Invalid select valid gender type" });

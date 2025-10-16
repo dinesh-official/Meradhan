@@ -3,20 +3,28 @@
 import { useState, useCallback } from "react";
 import { ZodError } from "zod";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
-import { BOND_TYPES, leadFormDataSchema } from "./leadfFormData.schema"; // ensure path/name matches your file
+import { leadFormDataSchema } from "./leadFormData.schema"; // ensure path/name matches your file
 import { LeadFormData } from "./leadForm";
+import {
+  bonds,
+  source,
+} from "../../../../../../../../../packages/schema/lib/crm/leads.schema";
+import { useLeadFollowUpApiHook } from "./useLeadApiHook";
+import { appSchema } from "@root/schema";
+import { parseError } from "@/core/error/parseError";
+import { toast } from "sonner";
 
 export const initLeadData: LeadFormData = {
   fullName: "",
-  emailId: "",
-  phoneNumber: "",
-  company: "",
-  leadSource: "Website",
+  emailAddress: "",
+  phoneNo: "",
+  companyName: "",
+  leadSource: source[0],
   status: "New",
   assignTo: undefined,
-  bondTypeInterest: BOND_TYPES[0],
-  expectedInvestmentAmount: undefined,
-  notes: "",
+  bondType: bonds[0],
+  exInvestmentAmount: undefined,
+  note: "",
 };
 
 export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
@@ -24,7 +32,8 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
   const [errors, setErrors] = useState<
     Partial<Record<keyof LeadFormData, string[]>>
   >({});
-
+  const leadsApi = useLeadFollowUpApiHook();
+  const { createLeadMutation } = leadsApi;
   /** Update a single field and clear its error (if any) */
   const setLeadData = useCallback(
     <K extends keyof LeadFormData>(key: K, value: LeadFormData[K]) => {
@@ -66,10 +75,16 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
     try {
       leadFormDataSchema.parse(data);
       setErrors({});
+      const payload = appSchema.crm.leads.createNewLeadSchema.parse(data);
+      createLeadMutation.mutate(payload);
       return true;
-    } catch (err) {
-      if (err instanceof ZodError) {
-        setErrors(zodErrorToErrorMap(err));
+    } catch (error) {
+     console.log("error hai in validateUserData", error);
+      const err = parseError<ZodError>(error);
+      if (err.issues.length) {
+        toast.error(err.issues[0].message);
+      } else {
+        toast.error(err.message);
       }
       return false;
     }
@@ -84,6 +99,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
   return {
     state: data,
     errors,
+    createLeadMutation,
     setLeadData,
     resetLeadData,
     validateField,

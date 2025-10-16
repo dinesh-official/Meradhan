@@ -14,15 +14,14 @@ import UserManageForm from "./forms/userManageForm";
 
 function CreateNewUserPopup({ children }: { children: ReactNode }) {
   const manager = useCreateUserDataHook();
-  const [open, setOpen] = useState(false);
-  const { resetUserData } = manager;
+  const { resetUserData, popup } = manager;
 
   useEffect(() => {
-    if (open) resetUserData();
-  }, [open, resetUserData]);
+    if (popup.open) resetUserData();
+  }, [popup.open, resetUserData]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={popup.open} onOpenChange={popup.setOpen}>
       <DialogTrigger>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -33,12 +32,19 @@ function CreateNewUserPopup({ children }: { children: ReactNode }) {
           <Button
             variant={`secondary`}
             onClick={() => {
-              setOpen(false);
+              popup.setOpen(false);
             }}
           >
             Cancel
           </Button>
-          <Button onClick={manager.validateUserData}>Save User</Button>
+          <Button
+            onClick={() => {
+              manager.validateUserData();
+            }}
+            disabled={manager.createUserMutation.isPending}
+          >
+            Save User
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

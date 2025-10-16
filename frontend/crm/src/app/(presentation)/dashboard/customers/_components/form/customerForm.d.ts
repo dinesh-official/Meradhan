@@ -24,4 +24,6 @@ export interface ICustomerDataFormHook {
 
     /** Validate entire form, returns true if valid */
     validateCustomerData: () => boolean;
+      createCustomerMutation: UseMutationResult<>;
+
 }

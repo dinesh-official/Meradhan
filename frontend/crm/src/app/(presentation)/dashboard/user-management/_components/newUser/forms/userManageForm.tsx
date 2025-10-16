@@ -11,15 +11,15 @@ const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
   return (
     <div className="flex flex-col gap-4 relative">
       <InputField
-        id="firstName"
-        label="First Name"
+        id="name"
+        label="Name"
         placeholder="Enter first name"
         required
-        value={manager.state.fullname}
+        value={manager.state.name}
         onChangeAction={(e) => {
-          manager.setUserData("fullname", e);
+          manager.setUserData("name", e);
         }}
-        error={manager?.errors?.fullname?.[0]}
+        error={manager?.errors?.name?.[0]}
       />
 
       <InputField
@@ -35,16 +35,16 @@ const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
         error={manager?.errors?.email?.[0]}
       />
       <InputField
-        id="password"
-        label="Enter Password"
-        placeholder="Password"
-        type="password"
+        id="phoneNo"
+        label="Phone Number"
+        placeholder="Enter Phone Number"
+        type="text"
         required
-        value={manager.state.password}
+        value={manager.state.phoneNo}
         onChangeAction={(e) => {
-          manager.setUserData("password", e);
+          manager.setUserData("phoneNo", e);
         }}
-        error={manager?.errors?.password?.[0]}
+        error={manager?.errors?.phoneNo?.[0]}
       />
 
       <SelectField

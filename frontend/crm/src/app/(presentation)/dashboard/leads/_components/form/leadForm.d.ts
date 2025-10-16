@@ -1,4 +1,4 @@
-import {leadFormDataSchema} from './leadfFormData.schema';
+import {leadFormDataSchema} from './leadFormData.schema';
 import { z } from "zod";
 
 
