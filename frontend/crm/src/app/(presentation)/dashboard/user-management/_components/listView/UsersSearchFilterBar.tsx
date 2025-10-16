@@ -13,11 +13,11 @@ import { SelectOption } from "@/global/elements/inputs/SelectField";
 
 interface UsersSearchFilterBarProps {
   searchValue?: string;
-  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange?: (e: string) => void;
   statusValue?: string;
   onStatusChange?: (value: string) => void;
-  kycValue?: string;
-  onKycChange?: (value: string) => void;
+  roleValue?: string;
+  onRoleChange?: (value: string) => void;
   statusOptions?: SelectOption[];
   roles?: SelectOption[];
   placeholder?: string;
@@ -41,8 +41,8 @@ const UsersSearchFilterBar: React.FC<UsersSearchFilterBarProps> = ({
   onSearchChange,
   statusValue,
   onStatusChange,
-  kycValue,
-  onKycChange,
+  roleValue,
+  onRoleChange,
   statusOptions = filterStatusOptions,
   roles = filterRoleStatus,
   placeholder = "Search...",
@@ -55,7 +55,9 @@ const UsersSearchFilterBar: React.FC<UsersSearchFilterBarProps> = ({
           placeholder={placeholder}
           type="search"
           value={searchValue}
-          onChange={onSearchChange}
+          onChange={(e)=>{
+            onSearchChange?.(e.target.value)
+          }}
         />
         <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
           <Search size={16} aria-hidden="true" />
@@ -74,7 +76,7 @@ const UsersSearchFilterBar: React.FC<UsersSearchFilterBarProps> = ({
             ))}
           </SelectContent>
         </Select>
-        <Select value={kycValue} onValueChange={onKycChange}>
+        <Select value={roleValue} onValueChange={onRoleChange}>
           <SelectTrigger className="w-[160px] bg-secondary border-none">
             <SelectValue placeholder="Apply Role" />
           </SelectTrigger>

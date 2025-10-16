@@ -5,49 +5,24 @@ import StatusCountCard from "@/global/elements/cards/StatusCountCard";
 import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Briefcase, Heart, Layers, Plus, Users } from "lucide-react";
-import UsersSearchFilterBar from "./_components/UsersSearchFilterBar";
+import UsersTable from "./_components/listView/CrmUsersTable";
+import UsersSearchFilterBar from "./_components/listView/UsersSearchFilterBar";
 import CreateNewUserPopup from "./_components/newUser/CreateNewUserPopup";
-import UsersTable, { UserRow } from "./_components/Table";
+import { useUserFilterListHook } from "./_components/listView/useUserFilterListHook";
+import { useFilterListApiHook } from "./_components/listView/useUserFilterListApiHook";
 
-const usersMock: UserRow[] = [
-  {
-    id: "U-1001",
-    name: "Rohit Verma",
-    email: "rohit.verma@example.com",
-    phoneNo: "9876543210",
-    avatar: "https://i.pravatar.cc/80?img=12",
-    lastLogin: "2025-10-10T12:30:00Z",
-    role: "manager",
-    createdAt: "2025-06-01T10:00:00Z",
-    updatedAt: "2025-10-12T09:40:00Z",
-    createdBy: "admin@acme.com",
-  },
-  {
-    id: "U-1002",
-    name: "Neha Sharma",
-    email: "neha.sharma@example.com",
-    phoneNo: "9810012345",
-    avatar: "https://i.pravatar.cc/80?img=21",
-    lastLogin: "2025-10-13T08:05:00Z",
-    role: "admin",
-    createdAt: "2025-05-15T10:00:00Z",
-    updatedAt: "2025-10-13T08:06:00Z",
-    createdBy: "admin@acme.com",
-  },
-  {
-    id: "U-1003",
-    name: "Amit Patel",
-    email: "amit.patel@example.com",
-    phoneNo: "9911223344",
-    avatar: "https://i.pravatar.cc/80?img=31",
-    lastLogin: "2025-10-01T17:20:00Z",
-    role: "viewer",
-    createdAt: "2025-07-22T10:00:00Z",
-    updatedAt: "2025-09-30T18:00:00Z",
-    createdBy: "neha.sharma@example.com",
-  },
-];
 function UsersManagementView() {
+  const filterManager = useUserFilterListHook();
+  const filterApiManager = useFilterListApiHook(filterManager);
+
+  const isShowPagination = () => {
+    return (
+      (filterApiManager.fetchUserQuery.data?.responseData.data.length || 0) >
+        1 &&
+      filterApiManager.fetchUserQuery.data?.responseData.meta.totalPages != 1 &&
+      !filterApiManager.fetchUserQuery.isPending
+    );
+  };
   return (
     <div className="flex flex-col gap-5">
       <PageInfoBar
@@ -100,11 +75,31 @@ function UsersManagementView() {
       </div>
 
       <Card>
-        <UsersSearchFilterBar placeholder="Search Users..." />
+        <UsersSearchFilterBar
+          placeholder="Search Users..."
+          onRoleChange={filterManager.state.setRoleFilter}
+          onSearchChange={filterManager.state.setSearch}
+          onStatusChange={filterManager.state.setAccountStatus}
+          roleValue={filterManager.state.roleFilter}
+          searchValue={filterManager.state.search}
+          statusValue={filterManager.state.accountStatus}
+        />
         <CardContent>
-          <UsersTable data={usersMock}/>
+          <UsersTable
+            data={filterApiManager.fetchUserQuery.data?.responseData.data || []}
+            isLoading={filterApiManager.fetchUserQuery.isLoading}
+          />
         </CardContent>
-        <CardPagination onClick={() => {}} page={5} totalPages={8} />
+        {isShowPagination() && (
+          <CardPagination
+            onClick={filterManager.state.setPaginationIndex}
+            page={filterManager.state.paginationIndex}
+            totalPages={
+              filterApiManager.fetchUserQuery.data?.responseData.meta
+                .totalPages || 1
+            }
+          />
+        )}
       </Card>
     </div>
   );

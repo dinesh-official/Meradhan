@@ -305,7 +305,7 @@ BaseResponseData<NewFollowUpPayload[]>
 
 
 ///crm/lead/followup/:followId
-export type DeleteFollowUpByIdResponse=BaseResponseData<Boolean>
+export type DeleteFollowUpByIdResponse=BaseResponseData<boolean>
 
 ///crm/lead/followup/:followUpId
 export type UpdateFollowUpByIdResponse = BaseResponseData<NewFollowUpPayload>
