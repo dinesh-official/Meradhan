@@ -28,7 +28,7 @@ export interface TCrmLeadInterface {
   ): Promise<AxiosResponse<UpdateNewLeadByIDResponse>>;
 
   deleteNewLeadById(
-    leadId: number,
+    followId: number,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<DeleteNewLeadByIDResponse>>;
 
@@ -75,11 +75,11 @@ export class CrmLead implements TCrmLeadInterface {
   }
 
   async deleteNewLeadById(
-    leadId: number,
+    followId: number,
     config?: AxiosRequestConfig
   ): ReturnType<TCrmLeadInterface["deleteNewLeadById"]> {
     return this.apiClient.delete<DeleteNewLeadByIDResponse>(
-      `crm/lead/${leadId}`,
+      `crm/lead/${followId}`,
       config
     );
   }

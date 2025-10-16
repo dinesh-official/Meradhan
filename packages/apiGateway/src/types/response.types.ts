@@ -304,8 +304,7 @@ export type GetAllFollowUpsByIdResponse =
 BaseResponseData<NewFollowUpPayload[]>
 
 
-///crm/lead/followup/:leadId
-//question id and leadid must be send for delete specific followup up
+///crm/lead/followup/:followId
 export type DeleteFollowUpByIdResponse=BaseResponseData<Boolean>
 
 ///crm/lead/followup/:followUpId
