@@ -6,6 +6,8 @@ import { SelectField } from "@/global/elements/inputs/SelectField";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
 import { UserAccountType } from "../../../../../../../../../packages/schema/lib/customers/customers.schema";
 import { gender } from "../../../../../../../../../packages/schema/lib/enums";
+import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
+import { Label } from "@/components/ui/label";
 
 function CustomerManagementForm({
   manager,
@@ -103,7 +105,12 @@ function CustomerManagementForm({
           }))}
           required
           value={manager.state.userType}
-          onChangeAction={(e) => manager.setCustomerData("userType", e)}
+          onChangeAction={(e) =>
+            manager.setCustomerData(
+              "userType",
+              e as CustomerFormData["userType"]
+            )
+          }
           error={manager?.errors?.userType?.[0]}
         />
 
@@ -116,7 +123,9 @@ function CustomerManagementForm({
           }))}
           required
           value={manager.state.gender}
-          onChangeAction={(e) => manager.setCustomerData("gender", e)}
+          onChangeAction={(e) =>
+            manager.setCustomerData("gender", e as CustomerFormData["gender"])
+          }
           error={manager?.errors?.gender?.[0]}
         />
       </div>
@@ -188,7 +197,7 @@ function CustomerManagementForm({
           defaultValue={manager.state.status}
           options={[
             { label: "Active", value: "ACTIVE" },
-            { label: "Inactive", value: "SUSPENDED" },
+            { label: "Suspended", value: "SUSPENDED" },
           ]}
           value={manager.state.status}
           onChangeAction={(e) =>
@@ -201,29 +210,14 @@ function CustomerManagementForm({
 
       {/* Relationship Manager + Total Investment */}
 
-      <SelectField
-        label="Relationship Manager"
-        placeholder="Select relationship manager"
-        defaultValue={manager.state.relationshipManagerId?.toString()}
-        options={[
-          { label: "Manager 1", value: "1" },
-          { label: "Manager 2", value: "2" },
-        ]}
-        value={manager.state.relationshipManagerId?.toString()}
-        onChangeAction={(e) =>
-          manager.setCustomerData("relationshipManagerId", Number(e))
-        }
-        error={manager?.errors?.relationshipManagerId?.[0]}
-      />
+      <div className="flex flex-col gap-2">
+        <Label>Relationship Manager</Label>
+        <SelectRoleUser
+          role="RELATIONSHIP_MANAGER"
+          placeholder="Select relationship manager"
+        />
+      </div>
 
-      {/* <InputField
-        id="investment"
-        label="Total Investment"
-        placeholder="Enter total investment amount"
-        value={manager.state.totalInvestment?.toString()}
-        onChangeAction={(e) => manager.setCustomerData("totalInvestment", Number(e))}
-        error={manager?.errors?.totalInvestment?.[0]}
-      /> */}
 
       {/* Password */}
 

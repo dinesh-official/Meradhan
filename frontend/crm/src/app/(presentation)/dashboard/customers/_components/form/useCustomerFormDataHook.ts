@@ -15,7 +15,7 @@ const initData: CustomerFormData = {
   emailId: "",
   phoneNo: "",
   whatsAppNo: "",
-  userType: "",
+  userType: "INDIVIDUAL",
   termsAccepted: false,
   whatsAppNotificationAllow: false,
   isEmailVerified: false,

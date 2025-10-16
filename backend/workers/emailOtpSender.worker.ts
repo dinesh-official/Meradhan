@@ -6,7 +6,7 @@ import { QueueNames } from "../src/queues/redis/queues";
 import { startQueueWorker } from "./startQueueWorker";
 
 
-startQueueWorker(QueueNames.emailOtpSend, async (job: Job) => {
+const { worker } = startQueueWorker(QueueNames.emailOtpSend, async (job: Job) => {
     const emailSend = new EmailSenderGateway()
     const { email, userName, subject, otp } = job.data;
     console.log("Sending Email - " + email);
@@ -21,3 +21,14 @@ startQueueWorker(QueueNames.emailOtpSend, async (job: Job) => {
     })
 
 })
+
+
+process.on("SIGTERM", async () => {
+    await worker.close();
+    process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+    await worker.close();
+    process.exit(0);
+});

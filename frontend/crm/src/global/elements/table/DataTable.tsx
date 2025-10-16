@@ -149,9 +149,9 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={table.getAllLeafColumns().length}
-                  className="h-24 text-center"
+                  className="h-40 text-center"
                 >
-                  <div className="flex justify-center items-center h-80">
+                  <div className="flex justify-center items-center h-96">
                     <Spinner />
                   </div>
                 </TableCell>

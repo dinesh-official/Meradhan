@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
-import StatusBadge from "@/global/elements/wrapper/StatusBadge";
+import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 
 export interface RfqInformationDataProps {
   isin: string;

@@ -2,10 +2,10 @@
 
 import { useCallback, useState } from "react";
 import { ZodError } from "zod";
-import { userFormSchema } from "./newUser.schema";
+import { userFormSchema } from "./manageUser.schema";
 import { UserFormData } from "./userForm";
 import { ROLES } from "@/global/constants/role.constants";
-import { useUserCreateApiHook } from "./useCreateUserApiHook";
+import { useUserManageApiHook } from "./useUserManageApiHook";
 import { parseError } from "@/core/error/parseError";
 import { toast } from "sonner";
 import { appSchema } from "@root/schema";
@@ -17,19 +17,19 @@ export const initUserData: UserFormData = {
   role: ROLES[0],
 };
 
-export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
+export const useManageUserDataHook = (initial: UserFormData = initUserData) => {
   const [data, setData] = useState<UserFormData>(initial);
-    const [open, setOpen] = useState(false);
-  
+  const [open, setOpen] = useState(false);
+
   const [errors, setErrors] = useState<
     Partial<Record<keyof UserFormData, string[]>>
   >({});
-  const createUserApi = useUserCreateApiHook({
-    onSuccess:()=>{
-      setOpen(false)
-    }
+  const manageUserApi = useUserManageApiHook({
+    onSuccess: () => {
+      setOpen(false);
+    },
   });
-  const { createUserMutation } = createUserApi;
+  const { createUserMutation, updateUserMutation } = manageUserApi;
 
   /** ✅ Update a single field and clear its error */
   const setUserData = useCallback(
@@ -67,7 +67,7 @@ export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
   );
 
   /** ✅ Validate entire form (returns true if valid) */
-  const validateUserData = useCallback((): boolean => {
+  const validateAndCreateUserData = useCallback((): boolean => {
     console.log("Validating user data:", data);
     try {
       userFormSchema.parse(data);
@@ -76,7 +76,7 @@ export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
       createUserMutation.mutate(payload);
       return true;
     } catch (error) {
-      console.log("error hai in validateUserData", error);
+      console.log("error hai in validateAndCreateUserData", error);
       const err = parseError<ZodError>(error);
       if (err.issues.length) {
         toast.error(err.issues[0].message);
@@ -85,7 +85,31 @@ export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
       }
       return false;
     }
-  }, [data,createUserMutation]);
+  }, [data, createUserMutation]);
+
+  /** ✅ Validate entire form (returns true if valid) */
+  const validateAndUpdateUserData = useCallback(
+    (id: number): boolean => {
+      console.log("Validating user data:", data);
+      try {
+        userFormSchema.parse(data);
+        setErrors({});
+        const payload = appSchema.crm.user.updateUserSchema.parse(data);
+        updateUserMutation.mutate({ id, data: payload });
+        return true;
+      } catch (error) {
+        console.log("error hai in validateAndCreateUserData", error);
+        const err = parseError<ZodError>(error);
+        if (err.issues.length) {
+          toast.error(err.issues[0].message);
+        } else {
+          toast.error(err.message);
+        }
+        return false;
+      }
+    },
+    [data, updateUserMutation]
+  );
 
   /** ✅ Reset form data and clear errors */
   const resetUserData = useCallback(() => {
@@ -96,14 +120,16 @@ export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
   return {
     state: data,
     errors,
-    popup:{
+    popup: {
       setOpen,
-      open
+      open,
     },
     createUserMutation,
+    updateUserMutation,
     setUserData,
     resetUserData,
     validateField,
-    validateUserData,
+    validateAndCreateUserData,
+    validateAndUpdateUserData,
   };
 };

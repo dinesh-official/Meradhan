@@ -54,7 +54,7 @@ export class CrmUsersApi implements TCrmUsersInterface {
     config?: AxiosRequestConfig
   ): ReturnType<TCrmUsersInterface["updateUser"]> {
     return this.apiClient.patch<UpdateUserResponse>(
-      `/crm/users/${id}`,
+      `/crm/user/${id}`,
       data,
       config
     );

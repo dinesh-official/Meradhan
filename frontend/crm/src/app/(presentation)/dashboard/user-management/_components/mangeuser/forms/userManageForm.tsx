@@ -6,6 +6,7 @@ import {
 import React from "react";
 import { IUserDataFormHook, UserFormData } from "./userForm";
 import { Role } from "@/global/constants/role.constants";
+import { PhoneField } from "@/global/elements/inputs/PhoneField";
 
 const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
   return (
@@ -34,11 +35,10 @@ const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
         }}
         error={manager?.errors?.email?.[0]}
       />
-      <InputField
-        id="phoneNo"
+      <PhoneField
+     
         label="Phone Number"
         placeholder="Enter Phone Number"
-        type="text"
         required
         value={manager.state.phoneNo}
         onChangeAction={(e) => {

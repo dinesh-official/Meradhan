@@ -1,21 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ASSETS_URL } from "@/global/constants/domains";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
-import StatusBadge from "@/global/elements/wrapper/StatusBadge";
+import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import UserRoleBadge from "@/global/elements/wrapper/badges/UserRoleBadge";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { CrmUsersProfile } from "@root/apiGateway";
-import { MoreHorizontal } from "lucide-react";
-
-type Role = "admin" | "manager" | "sales" | "viewer" | "auditor";
-
+import UserTableActions from "./actions/UserTableActions";
 interface UsersTableProps {
   data: CrmUsersProfile[];
   pageSize?: number;
@@ -23,14 +15,29 @@ interface UsersTableProps {
   onEditUser?: (user: CrmUsersProfile) => void;
   isLoading?: boolean;
 }
-function UsersTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
+function UsersTable({ data, pageSize, isLoading }: UsersTableProps) {
   return (
     <UniversalTable<CrmUsersProfile>
       data={data}
       initialPageSize={pageSize}
       isLoading={isLoading}
       fields={[
-        { key: "name", label: "Name" },
+        {
+          key: "name",
+          label: "Name",
+
+          cell: (row) => {
+            return (
+              <div className="flex  justify-start gap-4 items-center">
+                <Avatar>
+                  <AvatarImage src={ASSETS_URL + "/" + row.avatar} />
+                  <AvatarFallback></AvatarFallback>
+                </Avatar>
+                <p className="text-md">{row.name}</p>
+              </div>
+            );
+          },
+        },
         {
           key: "email",
           label: "Email",
@@ -38,16 +45,33 @@ function UsersTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
         },
         { key: "phoneNo", label: "Phone" },
         {
+          key: "accountStatus",
+          label: "Status",
+          cell: (row) => <StatusBadge value={row.accountStatus} />,
+        },
+
+        {
           key: "lastLogin",
           label: "Last Login",
-          type: "date",
+          cell: (row) => {
+            return (
+              <p>
+                {!row.lastLogin
+                  ? "NO Login"
+                  : dateTimeUtils.formatDateTime(
+                      row.lastLogin,
+                      "DD MMMM YYYY hh:mm AA"
+                    )}
+              </p>
+            );
+          },
         },
         {
           key: "role",
           label: "Role",
-          cell: (row) => <StatusBadge value={row.role} />,
+          cell: (row) => <UserRoleBadge value={row.role} />,
         },
-        { key: "createdBy", label: "Created By" },
+        // { key: "createdBy", label: "Created By" },
         { key: "createdAt", label: "Created At", type: "date" },
         { key: "updatedAt", label: "Updated At", type: "date" },
 
@@ -57,31 +81,7 @@ function UsersTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           label: "Action",
           stickyRight: true,
           sortable: false,
-          cell: (row) => (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem
-                // onClick={() => navigator.clipboard.writeText(row.id)}
-                >
-                  Copy User ID
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => console.log("View", row.id)}>
-                  View
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Edit", row.id)}>
-                  Edit
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ),
+          cell: (row) => <UserTableActions profile={row} />,
         },
       ]}
     />

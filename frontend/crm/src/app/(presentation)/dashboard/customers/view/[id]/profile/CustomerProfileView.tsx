@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import StatusBadge from "@/global/elements/wrapper/StatusBadge";
+import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { IdCardIcon, NotebookPen } from "lucide-react";
 
 function CustomerProfileView() {

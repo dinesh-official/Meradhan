@@ -2,7 +2,6 @@ import { KeyValueStore } from "../services/KeyValueStore";
 import { QueueJobService } from "../services/QueueJobService";
 
 export enum QueueNames {
-    emailSendQueue = "emailSendQueue",
     emailOtpSend = "emailOTPSend"
 }
 

@@ -24,6 +24,8 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
     whatsAppNo: true,
     VerifiedBy: true,
     id: true,
+    riskProfile: true,
+    createdAt: true,
     utility: {
         select: {
             accountStatus: true,

@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import StatusBadge from "@/global/elements/wrapper/StatusBadge";
+import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { MoreHorizontal } from "lucide-react";
 

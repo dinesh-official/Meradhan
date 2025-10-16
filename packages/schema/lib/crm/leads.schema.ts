@@ -10,7 +10,7 @@ export const source = [
   "COLD_CALL",
   "EMAIL",
   "OTHER",
-];
+] as const;
 export const LeadSource = z.enum(source);
 export const status = [
   "NEW",
@@ -18,7 +18,7 @@ export const status = [
   "QUALIFIED",
   "UNQUALIFIED",
   "CONVERTED",
-];
+] as const;
 export const bonds = [
   "GOVERNMENT",
   "CORPORATE",
@@ -26,7 +26,7 @@ export const bonds = [
   "SOVEREIGN_GOLD_BOND",
   "PSU",
   "OTHER",
-];
+] as const;
 
 export const findManyLeadsSchema = z.object({
   page: z

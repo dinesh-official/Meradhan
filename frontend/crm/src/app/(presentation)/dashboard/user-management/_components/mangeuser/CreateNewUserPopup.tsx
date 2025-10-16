@@ -9,11 +9,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ReactNode, useEffect } from "react";
-import { useCreateUserDataHook } from "./forms/useCreateUserFormDataHook";
+import { useManageUserDataHook } from "./forms/useManageUserDataHook";
 import UserManageForm from "./forms/userManageForm";
 
 function CreateNewUserPopup({ children }: { children: ReactNode }) {
-  const manager = useCreateUserDataHook();
+  const manager = useManageUserDataHook();
   const { resetUserData, popup } = manager;
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function CreateNewUserPopup({ children }: { children: ReactNode }) {
           </Button>
           <Button
             onClick={() => {
-              manager.validateUserData();
+              manager.validateAndCreateUserData();
             }}
             disabled={manager.createUserMutation.isPending}
           >

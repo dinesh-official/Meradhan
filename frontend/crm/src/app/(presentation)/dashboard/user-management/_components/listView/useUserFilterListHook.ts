@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 export interface TUserFilterListHook {
   state: {
@@ -25,6 +25,10 @@ export const useUserFilterListHook = (): TUserFilterListHook => {
     setAccountStatus("");
     setRoleFilter("");
   }
+
+  useEffect(() => {
+    setPaginationIndex(1);
+  }, [search, accountStatus, roleFilter]);
 
   return {
     state: {

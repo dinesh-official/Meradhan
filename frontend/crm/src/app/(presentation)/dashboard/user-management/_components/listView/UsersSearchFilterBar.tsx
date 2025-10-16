@@ -24,15 +24,23 @@ interface UsersSearchFilterBarProps {
 }
 
 const filterRoleStatus: SelectOption[] = [
-  { label: "All Kyc Status", value: "ALL" },
-  { label: "Pending", value: "PENDING" },
-  { label: "Verified", value: "APPROVED" },
-  { label: "Rejected", value: "REJECTED" },
+  { label: "All Users", value: "ALL" },
+  { label: "VIEWER", value: "VIEWER" },
+  { label: "ADMIN", value: "ADMIN" },
+  { label: "SALES", value: "SALES" },
+  { label: "SUPPORT", value: "SUPPORT" },
+  { label: "RELATIONSHIP MANAGER", value: "RELATIONSHIP_MANAGER" },
 ];
+
+// const filterStatusOptions: SelectOption[] = [
+//   { label: "All Status", value: "ALL" },
+//   { label: "New", value: "New" },
+//   { label: "Suspended", value: "SUSPENDED" },
+// ];
 
 const filterStatusOptions: SelectOption[] = [
   { label: "All Status", value: "ALL" },
-  { label: "New", value: "New" },
+  { label: "Active", value: "ACTIVE" },
   { label: "Suspended", value: "SUSPENDED" },
 ];
 
@@ -55,8 +63,8 @@ const UsersSearchFilterBar: React.FC<UsersSearchFilterBarProps> = ({
           placeholder={placeholder}
           type="search"
           value={searchValue}
-          onChange={(e)=>{
-            onSearchChange?.(e.target.value)
+          onChange={(e) => {
+            onSearchChange?.(e.target.value);
           }}
         />
         <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
@@ -66,7 +74,7 @@ const UsersSearchFilterBar: React.FC<UsersSearchFilterBarProps> = ({
       <CardAction className="flex flex-row gap-3">
         <Select value={statusValue} onValueChange={onStatusChange}>
           <SelectTrigger className="w-[160px] bg-secondary border-none">
-            <SelectValue placeholder="Apply Status" />
+            <SelectValue placeholder="Apply Role" />
           </SelectTrigger>
           <SelectContent>
             {statusOptions.map((option) => (

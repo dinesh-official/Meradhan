@@ -19,7 +19,7 @@ export const initLeadData: LeadFormData = {
   phoneNo: "",
   companyName: "",
   leadSource: source[0],
-  status: "New",
+  status: "NEW",
   assignTo: undefined,
   bondType: bonds[0],
   exInvestmentAmount: undefined,

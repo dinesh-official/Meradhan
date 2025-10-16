@@ -12,9 +12,8 @@ export const startQueueWorker = (
     const worker = new Worker(queueName, processor, {
         connection: redis,
         concurrency,
-        removeOnComplete: {
-            count: 0,
-        }
+        removeOnComplete: { count: 0 },
+        removeOnFail: { count: 100 },
     });
 
     // Event listeners

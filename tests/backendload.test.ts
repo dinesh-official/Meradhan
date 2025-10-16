@@ -1,5 +1,5 @@
 // loadtest.ts
-const TARGET_URL = "http://3.110.126.202:4000/api/session";
+const TARGET_URL = "http://localhost:4000/api/session";
 // const TARGET_URL = "http://localhost:4000/api/session";
 
 const COOKIE =

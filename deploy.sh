@@ -1,8 +1,13 @@
 git pull
 bash setup.sh
 cd frontend/crm/
-npm run build
+npm run lint
+npm run check
+# npm run build
 cd ../../
-pm2 start ecosystem.config.js
-pm2 restart all
-pm2 save
+cd backend
+npm run lint
+npm run check
+# pm2 start ecosystem.config.js
+# pm2 restart all
+# pm2 save

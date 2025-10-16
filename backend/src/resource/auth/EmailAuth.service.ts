@@ -41,6 +41,7 @@ export class EmailAuthService implements TEmailAuthServiceInterface {
             email: user.email,
             id: user.id,
         }, '1d');
+        await this.authRepo.setLastLoginNow(user.id);
         return {
             token: authToken,
             id: user.id,

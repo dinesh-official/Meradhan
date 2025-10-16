@@ -9,7 +9,7 @@ export const UserAccountType = [
   "HUF",
   "LLP",
   "PARTNERSHIP_FIRM",
-];
+] as const;
 
 export const kycStatus = ["PENDING", "REJECTED"] as const;
 

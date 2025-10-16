@@ -11,7 +11,7 @@ export const userFormSchema = z.object({
     .min(1, "Email is required"),
   phoneNo: z
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(100, "Password is too long"),
+    .min(10, "Enter a valid mobile umber")
+    .max(16, "Mobile no is too long"),
   role: z.enum(ROLES)
 });

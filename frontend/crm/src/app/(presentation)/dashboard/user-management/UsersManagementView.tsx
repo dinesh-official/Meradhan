@@ -7,7 +7,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Briefcase, Heart, Layers, Plus, Users } from "lucide-react";
 import UsersTable from "./_components/listView/CrmUsersTable";
 import UsersSearchFilterBar from "./_components/listView/UsersSearchFilterBar";
-import CreateNewUserPopup from "./_components/newUser/CreateNewUserPopup";
+import CreateNewUserPopup from "./_components/mangeuser/CreateNewUserPopup";
 import { useUserFilterListHook } from "./_components/listView/useUserFilterListHook";
 import { useFilterListApiHook } from "./_components/listView/useUserFilterListApiHook";
 
@@ -18,11 +18,12 @@ function UsersManagementView() {
   const isShowPagination = () => {
     return (
       (filterApiManager.fetchUserQuery.data?.responseData.data.length || 0) >
-        1 &&
+        0 &&
       filterApiManager.fetchUserQuery.data?.responseData.meta.totalPages != 1 &&
       !filterApiManager.fetchUserQuery.isPending
     );
   };
+
   return (
     <div className="flex flex-col gap-5">
       <PageInfoBar

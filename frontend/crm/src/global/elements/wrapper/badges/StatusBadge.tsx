@@ -14,7 +14,7 @@ function getStatusClass(value: string) {
     case "yes":
     case "enabled":
     case "active":
-      case "buy":
+    case "buy":
       return "bg-green-100 text-green-800";
 
     case "pending":

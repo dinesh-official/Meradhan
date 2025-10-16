@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
-import StatusBadge from "@/global/elements/wrapper/StatusBadge";
+import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import React from "react";
 import AddressCard, { AddressCardDataProp } from "./AddressCard";
 

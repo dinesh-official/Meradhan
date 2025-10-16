@@ -1,5 +1,5 @@
 import z from "zod";
-import { userFormSchema } from "./newUser.schema"; // adjust path as needed
+import { userFormSchema } from "./manageUser.schema"; // adjust path as needed
 
 export type UserFormData = z.infer<typeof userFormSchema>;
 
@@ -23,7 +23,7 @@ export interface IUserDataFormHook {
   ) => void;
 
   /** Validate entire form, returns true if valid */
-  validateUserData: () => boolean;
+  validateAndCreateUserData: () => boolean;
 
   createUserMutation: UseMutationResult;
 }
