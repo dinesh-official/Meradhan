@@ -30,7 +30,6 @@ export class QueueStore implements IQueueService {
   public getInstance(): Redis {
     if (!QueueStore.instance) {
       const redis = new Redis({ ...config.redis, maxRetriesPerRequest: null });
-
       redis.on('connect', () => logger.logInfo('🟢 Redis is connecting...'));
       redis.on('ready', () => logger.logInfo('✅ Redis connection established and ready to use.'));
       redis.on('error', (err) => logger.logError('🔴 Redis connection error:', err));
