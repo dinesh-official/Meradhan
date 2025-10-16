@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react";
 import { ZodError } from "zod";
-import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { userFormSchema } from "./newUser.schema";
 import { UserFormData } from "./userForm";
 import { ROLES } from "@/global/constants/role.constants";
@@ -86,7 +85,7 @@ export const useCreateUserDataHook = (initial: UserFormData = initUserData) => {
       }
       return false;
     }
-  }, [data]);
+  }, [data,createUserMutation]);
 
   /** ✅ Reset form data and clear errors */
   const resetUserData = useCallback(() => {

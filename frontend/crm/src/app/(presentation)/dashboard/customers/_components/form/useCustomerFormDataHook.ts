@@ -1,4 +1,3 @@
-import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { useState, useCallback } from "react";
 import { ZodError } from "zod";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
@@ -91,7 +90,7 @@ export const useCustomerFromDataHook = (
       }
       return false;
     }
-  }, [data]);
+  }, [data,createCustomerMutation]);
 
   /** Reset form */
   const resetCustomerData = useCallback(() => {

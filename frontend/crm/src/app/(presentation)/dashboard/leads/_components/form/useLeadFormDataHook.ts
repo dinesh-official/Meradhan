@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { ZodError } from "zod";
-import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { leadFormDataSchema } from "./leadFormData.schema"; // ensure path/name matches your file
 import { LeadFormData } from "./leadForm";
 import {
@@ -88,7 +87,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
       }
       return false;
     }
-  }, [data]);
+  }, [data,createLeadMutation]);
 
   /** Reset state and errors */
   const resetLeadData = useCallback(() => {

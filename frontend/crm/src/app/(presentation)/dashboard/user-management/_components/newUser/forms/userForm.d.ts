@@ -25,5 +25,5 @@ export interface IUserDataFormHook {
   /** Validate entire form, returns true if valid */
   validateUserData: () => boolean;
 
-  createUserMutation: UseMutationResult<>;
+  createUserMutation: UseMutationResult;
 }
