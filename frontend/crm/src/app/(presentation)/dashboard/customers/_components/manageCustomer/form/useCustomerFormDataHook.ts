@@ -1,12 +1,13 @@
-import { useState, useCallback } from "react";
+import { parseError } from "@/core/error/parseError";
+import { CrmUsersProfile } from "@root/apiGateway";
+import { appSchema } from "@root/schema";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { ZodError } from "zod";
+import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
 import { customerFormDataSchema } from "./customerFormData.schema";
 import { useCustomerApiHook } from "./useCustomerApiHook";
-import { appSchema } from "@root/schema";
-import { parseError } from "@/core/error/parseError";
-import { toast } from "sonner";
-import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 
 const initData: CustomerFormData = {
   firstName: "",
@@ -30,12 +31,17 @@ const initData: CustomerFormData = {
 export const useCustomerFromDataHook = (
   state: CustomerFormData = initData
 ): ICustomerDataFormHook => {
+
+  const [relationManager, setRelationManager] = useState<CrmUsersProfile | undefined>(undefined)
+
   const [data, setData] = useState(state);
   const [errors, setErrors] = useState<
     Partial<Record<keyof CustomerFormData, string[]>>
   >({});
   const customerApi = useCustomerApiHook();
   const { createCustomerMutation } = customerApi;
+
+
   /** Update any field and clear its error */
   const setCustomerData = useCallback(
     <K extends keyof CustomerFormData>(key: K, value: CustomerFormData[K]) => {
@@ -78,7 +84,11 @@ export const useCustomerFromDataHook = (
       customerFormDataSchema.parse(data);
       setErrors({});
       const payload = appSchema.customer.createNewCustomerSchema.parse(data);
-      createCustomerMutation.mutate(payload);
+
+      createCustomerMutation.mutate({
+        ...payload,
+        relationshipManagerId: relationManager?.id
+      });
       return true;
     } catch (error) {
       console.log("error hai in validateUserData", error);
@@ -90,21 +100,27 @@ export const useCustomerFromDataHook = (
       }
       return false;
     }
-  }, [data, createCustomerMutation]);
+  }, [data, createCustomerMutation, relationManager]);
 
   /** Reset form */
   const resetCustomerData = useCallback(() => {
     setData(initData);
     setErrors({});
+    setRelationManager(undefined)
   }, []);
 
   return {
     state: data,
+    setData,
     errors,
     createCustomerMutation,
     setCustomerData,
     resetCustomerData,
     validateField,
     validateCustomerData,
+    relationManager: {
+      relationManager: relationManager,
+      setRelationManager
+    },
   };
 };

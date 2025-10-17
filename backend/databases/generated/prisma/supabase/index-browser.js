@@ -145,7 +145,8 @@ exports.Prisma.CustomersAuthDataModelScalarFieldEnum = {
   termsAccepted: 'termsAccepted',
   lastLogin: 'lastLogin',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  cRMUserDataModelId: 'cRMUserDataModelId'
 };
 
 exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
@@ -164,15 +165,15 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   VerifiedBy: 'VerifiedBy',
   customersRiskProfileModelId: 'customersRiskProfileModelId',
   customersAuthDataModelId: 'customersAuthDataModelId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
   createdBy: 'createdBy',
   aADHAARCardModelId: 'aADHAARCardModelId',
   panCardModelId: 'panCardModelId',
   customerPersonalInfoModelId: 'customerPersonalInfoModelId',
   currentAddressModelId: 'currentAddressModelId',
   permanentAddressModelId: 'permanentAddressModelId',
-  nSEDATASETId: 'nSEDATASETId'
+  nSEDATASETId: 'nSEDATASETId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {

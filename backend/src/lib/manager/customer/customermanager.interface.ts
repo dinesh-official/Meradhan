@@ -36,6 +36,7 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
             termsAccepted: true,
             lastLogin: true,
             whatsAppNotificationAllow: true,
+            relationshipManager: true
         },
     },
 

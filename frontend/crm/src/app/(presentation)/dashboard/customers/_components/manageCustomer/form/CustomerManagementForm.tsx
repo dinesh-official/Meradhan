@@ -13,8 +13,10 @@ import { useState } from "react";
 
 function CustomerManagementForm({
   manager,
+  updateMode,
 }: {
   manager: ICustomerDataFormHook;
+  updateMode?: boolean;
 }) {
   const [relationshipManager, setRelationshipManager] = useState<CrmUsersProfile | null>(null);
 
@@ -232,15 +234,17 @@ function CustomerManagementForm({
 
       {/* Password */}
 
-      <InputField
-        id="password"
-        label="Password"
-        placeholder="Enter Password"
-        type="password"
-        value={manager.state.password}
-        onChangeAction={(e) => manager.setCustomerData("password", e)}
-        error={manager?.errors?.password?.[0]}
-      />
+      {!updateMode && (
+        <InputField
+          id="password"
+          label="Password"
+          placeholder="Enter Password"
+          type="password"
+          value={manager.state.password}
+          onChangeAction={(e) => manager.setCustomerData("password", e)}
+          error={manager?.errors?.password?.[0]}
+        />
+      )}
     </div>
   );
 }

@@ -46,7 +46,7 @@ export class CustomerProfileService extends CustomerProfileManager implements IC
 
         if (payload.kycStatus) {
             filters.kycStatus = {
-                equals: payload.kycStatus!
+                equals: payload.kycStatus
             }
         }
 

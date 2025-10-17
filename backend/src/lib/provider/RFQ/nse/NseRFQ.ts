@@ -81,6 +81,8 @@ import logger from "@utils/logger/logger";
 // formatted as “hh24:mm:ss”. Date times are formatted as “dd-MMM-yyyy hh24:mm:ss”
 // (E.g. 01-Jan-2016 15:30:00).
 
+
+
 export class NseRfq {
     private loginStoreKey = "NSE_RFQ_LOGIN_KEY";
     private client: Axios;
@@ -93,19 +95,25 @@ export class NseRfq {
     constructor() {
         this.client = axios.create({
             baseURL: "https://bricsonlinereguat.nseindia.com/rfq/rest/v1",
-            // withCredentials: true,
+            withCredentials: true,
             headers: {
-                "Accept": "*/*",
-                // "User-Agent": "MeraDhan/0.0.1",
+                "User-Agent": "MeraDhan/0.0.1",
                 "Content-Type": "application/json",
+                'Accept': 'application/json, text/javascript, */*; q=0.01',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Origin': 'https://bricsonline.nseindia.com',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-origin',
             },
         });
     }
 
     // 🔐 Login API
     private async login() {
-        console.log("working5");
-
         const { data } = await this.client.post<{
             lastLogin: number;
             brokerEnablementType: string;
@@ -116,21 +124,23 @@ export class NseRfq {
             broker: boolean;
             status: string;
         }>("/login", this.credentials);
+        console.log(data);
+
         return data;
     }
 
     // 🧠 Get or Refresh Login Key
     public async getLoginKey(forceRefresh = false): Promise<string> {
-
-
         if (!forceRefresh) {
             const cached = await cacheStorage.get<string>(this.loginStoreKey);
+
             if (cached) return cached;
         }
-
-
+        await this.logout();
         const { loginKey } = await this.login();
-        await cacheStorage.set(this.loginStoreKey, loginKey, 1000); // TTL 1000s
+        if (loginKey) {
+            await cacheStorage.set(this.loginStoreKey, loginKey, 1000); // TTL 1000s
+        }
 
         return loginKey;
     }
@@ -139,12 +149,8 @@ export class NseRfq {
     private async withReLoginRetry<T>(
         apiCall: (loginKey: string) => Promise<T>
     ): Promise<T> {
-
-
         try {
             const key = await this.getLoginKey();
-            console.log(key);
-
             return await apiCall(key);
         } catch (error) {
             if (axios.isAxiosError(error) && this.isLoginExpired(error)) {
@@ -573,16 +579,19 @@ export class NseRfq {
     }
 
     public async getAllIsins(payload: GetAllIsinsRequest): Promise<GetAllIsinsResponse> {
-        console.log("Working");
-
+        if (!payload.filtCoupon && !payload.filtIssueCategory && !payload.filtMaturity && !payload.issuer && !payload.symbol) {
+            const cashedIsin = await cacheStorage.get("ISIN_NSE_ALL")
+            if (cashedIsin) {
+                return cashedIsin as GetAllIsinsResponse;
+            }
+        }
         return await this.withReLoginRetry(async (loginKey) => {
             const { data } = await this.client.post<GetAllIsinsResponse>(
                 "/isins/all",
                 payload,
                 { headers: { loginKey } }
             );
-            console.log(data);
-
+            await cacheStorage.set("ISIN_NSE_ALL", data, 20000)
             return data;
         });
     }
@@ -621,9 +630,3 @@ export class NseRfq {
         });
     }
 }
-
-
-const test = new NseRfq();
-const data = await test.getLoginKey()
-
-console.log(data);

@@ -14,7 +14,7 @@ export class NSEIsinController {
     async searchIsin(req: Request, res: Response) {
         const payload = appSchema.crm.rfq.nse.isin.isinFilterSchema.parse(req.query);
         const data = await this.nseIsinService.searchIsin(payload);
-        console.log(data);
+
         
         res.sendResponse({
             statusCode: HttpStatus.OK,

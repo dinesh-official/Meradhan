@@ -25,7 +25,7 @@ export const customerFormDataSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
 
   // ✅ correct email usage
-  emailId: z.string().email("Invalid email address"),
+  emailId: z.email("Invalid email address"),
 
   phoneNo: z
     .string()
@@ -61,7 +61,7 @@ export const customerFormDataSchema = z.object({
   // if `gender` import is a readonly tuple, this is correct
   gender: z.enum(GenderEnum),
 
-  relationshipManagerId: z.union([z.string(), z.number()]).optional(),
+  relationshipManagerId: z.number().optional(),
 
   password: z
     .string()

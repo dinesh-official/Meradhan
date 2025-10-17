@@ -41,8 +41,12 @@ export const useCustomerApiHook = () => {
       data: z.infer<(typeof appSchema.customer)["updateCustomerProfileSchema"]>;
       customerId: string;
     }) => {
+
       const res = await customerApi.updateCustomer(
-        payload.data,
+        {
+          ...payload.data,
+          password: undefined
+        },
         payload.customerId
       );
       return res.data;
@@ -60,8 +64,20 @@ export const useCustomerApiHook = () => {
     },
   });
 
+  const fetchCustomerByid = useMutation({
+    mutationKey: ['customerInfoById'],
+    mutationFn: async (profileId: number) => {
+      const response = await customerApi.customerInfoById(profileId);
+      return response.data;
+    },
+  });
+
+
+
+
   return {
     updateCustomerMutation,
     createCustomerMutation,
+    fetchCustomerByid
   };
 };
