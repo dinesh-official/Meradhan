@@ -38,7 +38,7 @@ export interface TCrmLeadInterface {
   ): Promise<AxiosResponse<FindLeadsResponse>>;
 }
 
-export class CrmLead implements TCrmLeadInterface {
+export class CrmLeadApi implements TCrmLeadInterface {
   constructor(private apiClient: IApiCaller) {}
 
   async createNewLead(

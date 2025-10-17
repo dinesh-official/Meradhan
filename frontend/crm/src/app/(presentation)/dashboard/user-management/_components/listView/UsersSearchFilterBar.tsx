@@ -32,12 +32,6 @@ const filterRoleStatus: SelectOption[] = [
   { label: "RELATIONSHIP MANAGER", value: "RELATIONSHIP_MANAGER" },
 ];
 
-// const filterStatusOptions: SelectOption[] = [
-//   { label: "All Status", value: "ALL" },
-//   { label: "New", value: "New" },
-//   { label: "Suspended", value: "SUSPENDED" },
-// ];
-
 const filterStatusOptions: SelectOption[] = [
   { label: "All Status", value: "ALL" },
   { label: "Active", value: "ACTIVE" },
