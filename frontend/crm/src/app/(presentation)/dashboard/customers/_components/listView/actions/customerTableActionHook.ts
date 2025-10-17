@@ -1,6 +1,7 @@
+import { queryClient } from "@/core/config/reactQuery";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway, { ApiError } from "@root/apiGateway";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Route } from "next";
 import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ export const useCustomerTableActions = ({
       return response.data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['searchCustomersList'] });
       toast.success("Customer delete SuccessFully");
     },
   });
@@ -63,6 +65,7 @@ export const useCustomerTableActions = ({
       return res.data;
     },
     onSuccess(_, payload) {
+      queryClient.invalidateQueries({ queryKey: ['searchCustomersList'] });
       toast.success(
         `Profile ${payload.data.status.toLowerCase()} successfully`
       );
@@ -76,18 +79,11 @@ export const useCustomerTableActions = ({
     },
   });
 
-  const fetchCustomerData = useQuery({
-    queryKey: [],
-    queryFn: async () => {
-      const response = await customerApi.customerInfoById(profileId);
-      return response.data;
-    },
-  });
+
 
   return {
     handleViewKyc,
     handleProfileView,
-    fetchCustomerData,
     handleProfileUpdate,
     deleteProfileMutation,
     manageSuspendCustomerMutation,

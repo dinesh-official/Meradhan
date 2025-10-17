@@ -11,7 +11,7 @@ export const UserAccountType = [
   "PARTNERSHIP_FIRM",
 ] as const;
 
-export const kycStatus = ["APPROVED","PENDING", "REJECTED"] as const;
+export const kycStatus = ["VERIFIED", "PENDING", "REJECTED"] as const;
 
 export const findManyCustomerSchema = z.object({
   page: z
@@ -21,7 +21,7 @@ export const findManyCustomerSchema = z.object({
     .optional(),
   search: z.string().optional(),
   accountStatus: AccountStatusEnum.optional(),
-  kycStatus: z.enum([...kycStatus, "VERIFIED"]).optional(),
+  kycStatus: z.enum([...kycStatus]).optional(),
 });
 
 export const createNewCustomerSchema = z.object({
@@ -77,7 +77,7 @@ export const createNewCustomerSchema = z.object({
       message: "Password must contain at least one special character",
     }),
 
-  relationshipManagerId: z.union([z.string(), z.number()]).optional(),
+  relationshipManagerId: z.number().optional(),
 
   // totalInvestment: z.string({
   //     error: "Total investment value is required",

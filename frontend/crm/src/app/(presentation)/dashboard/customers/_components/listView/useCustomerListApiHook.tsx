@@ -13,7 +13,7 @@ export const useFilterListApiHook = (filterStatus: TCustomerFilterListHook) => {
 
   const fetchCustomerQuery = useQuery({
     queryKey: [
-      "searchCRMCustomers",
+      "searchCustomersList",
       state.accountKycStatus,
       state.accountStatus,
       state.paginationIndex,

@@ -1,54 +1,96 @@
 "use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import React from "react";
-import CustomerManagementForm from "../../../_components/manageCustomer/form/CustomerManagementForm";
 import { Button } from "@/components/ui/button";
-import { useCustomerTableActions } from "../../../_components/listView/actions/customerTableActionHook";
-import { useParams } from "next/navigation";
-import { useCustomerFromDataHook } from "../../../_components/manageCustomer/form/useCustomerFormDataHook";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import apiGateway from "@root/apiGateway";
+import { useQuery } from "@tanstack/react-query";
+import CustomerManagementForm from "../../../_components/manageCustomer/form/CustomerManagementForm";
 import { useCustomerApiHook } from "../../../_components/manageCustomer/form/useCustomerApiHook";
+import { useCustomerFromDataHook } from "../../../_components/manageCustomer/form/useCustomerFormDataHook";
 
-const UpdateCustomerView = () => {
-  const params = useParams();
-  const id = Number(params?.id);
-
-  const { fetchCustomerData } = useCustomerTableActions({ profileId: id });
-  const u = fetchCustomerData.data?.responseData;
-
-  console.log("fetchCustomerData", fetchCustomerData);
-  const manager = useCustomerFromDataHook({
-    firstName: u?.firstName ?? "",
-    middleName: u?.middleName ?? null,
-    lastName: u?.lastName ?? "",
-    emailId: u?.emailAddress ?? "",
-    gender: u?.gender ?? "MALE",
-    kycStatus: u?.kycStatus ?? "PENDING",
-    phoneNo: u?.phoneNo ?? "",
-    status: u?.utility?.accountStatus ?? "ACTIVE",
-    isEmailVerified: u?.utility?.isEmailVerified ?? false,
-    isPhoneVerified: u?.utility?.isPhoneVerified ?? false,
-    termsAccepted: u?.utility?.termsAccepted ?? false,
-    whatsAppNotificationAllow: u?.utility?.whatsAppNotificationAllow ?? false,
-    whatsAppNo: u?.whatsAppNo ?? null,
-    userType: u?.userType ?? "INDIVIDUAL",
-  });
+const UpdateCustomerView = ({ id }: { id: number }) => {
+  const manager = useCustomerFromDataHook();
   const { updateCustomerMutation } = useCustomerApiHook();
+
+  const fetchUser = async () => {
+    const fetchUserApi = new apiGateway.crm.customer.CrmCustomerApi(
+      apiClientCaller
+    );
+    try {
+      const { data } = await fetchUserApi.customerInfoById(id);
+      const cs = data.responseData;
+
+      manager.setData({
+        emailId: cs.emailAddress,
+        firstName: cs.firstName,
+        gender: cs.gender,
+        isEmailVerified: cs.utility.isEmailVerified,
+        isPhoneVerified: cs.utility.isPhoneVerified,
+        kycStatus: cs.kycStatus,
+        lastName: cs.lastName,
+        phoneNo: cs.phoneNo,
+        status: cs.utility.accountStatus,
+        termsAccepted: cs.utility.termsAccepted,
+        userType: cs.userType,
+        whatsAppNo: cs.whatsAppNo,
+        whatsAppNotificationAllow: cs.utility.whatsAppNotificationAllow,
+        middleName: cs.middleName,
+        relationshipManagerId: cs.utility.relationshipManager?.id,
+      });
+      if (cs.utility.relationshipManager) {
+        manager.relationManager.setRelationManager(
+          cs.utility.relationshipManager || undefined
+        );
+      }
+    } catch (error) {
+      console.error("Failed to fetch customer info:", error);
+    }
+  };
+
+  const { isLoading } = useQuery({
+    queryKey: ["fetchCustomer", id],
+    queryFn: fetchUser,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-96 flex justify-center items-center">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mt-6 mx-auto">
       <Card>
         <CardContent>
-          <CustomerManagementForm manager={manager} />
+          <CustomerManagementForm manager={manager} updateMode />
         </CardContent>
         <CardFooter>
           <Button
             onClick={() => {
               updateCustomerMutation.mutate({
                 data: {
-                  ...manager.state,
-                  middleName: manager.state.middleName ?? undefined,
-                  whatsAppNo: manager.state.whatsAppNo ?? undefined,
+                  emailId: manager.state.emailId,
+                  firstName: manager.state.firstName,
+                  gender: manager.state.gender,
+                  isEmailVerified: manager.state.isEmailVerified,
+                  isPhoneVerified: manager.state.isPhoneVerified,
+                  kycStatus: manager.state.kycStatus,
+                  lastName: manager.state.lastName,
+                  phoneNo: manager.state.phoneNo,
+                  status: manager.state.status,
+                  termsAccepted: manager.state.termsAccepted,
+                  userType: manager.state.userType,
+                  whatsAppNo: manager.state.whatsAppNo || undefined,
+                  whatsAppNotificationAllow:
+                    manager.state.whatsAppNotificationAllow,
+                  middleName: manager.state.middleName || undefined,
+                  relationshipManagerId:
+                    manager.state.relationshipManagerId || undefined,
                 },
                 customerId: String(id),
               });
@@ -56,7 +98,7 @@ const UpdateCustomerView = () => {
             className="md:w-auto w-full"
             disabled={updateCustomerMutation.isPending}
           >
-            UpdateUser Customer
+            Update Customer
           </Button>
         </CardFooter>
       </Card>

@@ -1,5 +1,6 @@
 import z from "zod";
 import { customerFormDataSchema } from "./customerFormData.schema";
+import { CrmUsersProfile } from "@root/apiGateway";
 
 export type CustomerFormData = z.infer<typeof customerFormDataSchema>;
 
@@ -13,6 +14,8 @@ export interface ICustomerDataFormHook {
         value: CustomerFormData[K]
     ) => void;
 
+    setData: (data: CustomerFormData) => void
+
     /** Reset all form fields and errors */
     resetCustomerData: () => void;
 
@@ -24,6 +27,10 @@ export interface ICustomerDataFormHook {
 
     /** Validate entire form, returns true if valid */
     validateCustomerData: () => boolean;
-      createCustomerMutation: UseMutationResult
+    createCustomerMutation: UseMutationResult
+    relationManager: {
+        relationManager: CrmUsersProfile | undefined;
+        setRelationManager: (value: CrmUsersProfile) => void;
+    }
 
 }

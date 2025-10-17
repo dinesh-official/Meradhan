@@ -3,7 +3,9 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import React from "react";
 import UpdateCustomerView from "./UpdateCustomer.View";
 
-function page() {
+export const revalidate = 0;
+async function page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <Workspace>
       <PageInfoBar
@@ -11,7 +13,7 @@ function page() {
         description="Update Customer Latest Information"
         showBack
       />
-      <UpdateCustomerView />
+      <UpdateCustomerView id={Number(id)} />
     </Workspace>
   );
 }

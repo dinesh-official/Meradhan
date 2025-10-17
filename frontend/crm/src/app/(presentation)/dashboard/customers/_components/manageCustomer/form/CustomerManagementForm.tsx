@@ -11,8 +11,10 @@ import { gender } from "../../../../../../../../../../packages/schema/lib/enums"
 
 function CustomerManagementForm({
   manager,
+  updateMode,
 }: {
   manager: ICustomerDataFormHook;
+  updateMode?: boolean;
 }) {
   return (
     <div className="flex flex-col  gap-4 relative">
@@ -32,7 +34,7 @@ function CustomerManagementForm({
           id="middleName"
           label="Middle Name"
           placeholder="Enter middle name"
-          value={manager.state.middleName?? undefined}
+          value={manager.state.middleName ?? undefined}
           onChangeAction={(e) => manager.setCustomerData("middleName", e)}
           error={manager?.errors?.middleName?.[0]}
         />
@@ -215,22 +217,28 @@ function CustomerManagementForm({
         <SelectRoleUser
           role="RELATIONSHIP_MANAGER"
           placeholder="Select relationship manager"
-          // value={} 
+          value={manager.relationManager.relationManager}
+          onSelect={(e) => {
+            if (e) {
+              manager.relationManager.setRelationManager(e);
+            }
+          }}
         />
       </div>
 
-
       {/* Password */}
 
-      <InputField
-        id="password"
-        label="Password"
-        placeholder="Enter Password"
-        type="password"
-        value={manager.state.password}
-        onChangeAction={(e) => manager.setCustomerData("password", e)}
-        error={manager?.errors?.password?.[0]}
-      />
+      {!updateMode && (
+        <InputField
+          id="password"
+          label="Password"
+          placeholder="Enter Password"
+          type="password"
+          value={manager.state.password}
+          onChangeAction={(e) => manager.setCustomerData("password", e)}
+          error={manager?.errors?.password?.[0]}
+        />
+      )}
     </div>
   );
 }

@@ -49,16 +49,12 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
             onClick={async () => {
               const result = await Swal.fire({
                 title: "Are you sure?",
-                text: `Are you sure you want to ${
-                  status === "Active account" ? "activate" : "Suspend"
-                } this account?`,
+                text: `Are you sure you want to ${status} ?`,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
                 cancelButtonColor: "#3085d6",
-                confirmButtonText: `Yes, ${
-                  status === "Active account" ? "activate" : "Suspend"
-                } it!`,
+                confirmButtonText: `Yes, do it!`,
                 cancelButtonText: "Cancel",
               });
 
@@ -67,7 +63,9 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
                 manageSuspendCustomerMutation.mutate({
                   data: {
                     status:
-                      status === "Active account" ? "SUSPENDED" : "ACTIVE", // toggle logic
+                      profile.utility.accountStatus === "ACTIVE"
+                        ? "SUSPENDED"
+                        : "ACTIVE", // toggle logic
                   },
                   customerId: String(profile.id), // or whatever your id variable is
                 });

@@ -63,7 +63,6 @@ export class CustomerProfileController implements ICustomerControllerInterface {
 
     async getFullProfileCustomer(req: Request, res: Response): Promise<void> {
         const customerId = req.params.customerId;
-        console.log(customerId);
         
         const response = await this.profileService.getFullCustomerProfile(Number(customerId))
         res.sendResponse({

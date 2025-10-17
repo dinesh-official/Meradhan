@@ -65,6 +65,15 @@ export class NseCBRICS {
             headers: {
                 "User-Agent": "MeraDhan/0.0.1",
                 "Content-Type": "application/json",
+                'Accept': 'application/json, text/javascript, */*; q=0.01',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Origin': 'https://bricsonline.nseindia.com',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-origin',
             },
         });
     }
@@ -73,7 +82,7 @@ export class NseCBRICS {
     // 🔐 LOGIN / LOGOUT HANDLING
     // ────────────────────────────────────────────────────────────────
 
-    private async login() {
+    async login() {
         const { data } = await this.client.post<{
             firstName: string;
             lastLogin: number;
@@ -488,3 +497,12 @@ export class NseCBRICS {
         });
     }
 }
+
+const cb = new NseCBRICS();
+
+const data = await cb.login();
+console.log(data);
+const l = await cb.logout();
+console.log(l);
+
+

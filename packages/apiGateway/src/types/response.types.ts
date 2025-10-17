@@ -56,14 +56,14 @@ export type CrmUserBase = {
   role: Role;
   createdAt: string;
   updatedAt: string;
+  accountStatus: AccountStatus
   createdBy: number;
 };
 
 export type CrmUserAccountStatus = "SUSPENDED" | "ACTIVE";
 
 export type CrmUsersProfile = CrmUserBase & {
-  accountStatus: CrmUserAccountStatus;
-  createdBy: number | null;
+
 };
 
 export type PaginationMeta = {
@@ -74,7 +74,7 @@ export type PaginationMeta = {
 };
 
 // patch crm/users/:id
-export type UpdateUserResponse = BaseResponseData<CrmUserBase>;
+export type UpdateUserResponse = BaseResponseData<CrmUsersProfile>;
 
 // post crm/users
 export type CreateUsersResponse = BaseResponseData<CrmUserBase>;
@@ -157,6 +157,7 @@ export type DetailCustomerUtility = {
   termsAccepted: boolean;
   lastLogin: string | null; // ISO string or null
   whatsAppNotificationAllow: boolean;
+  relationshipManager: CrmUsersProfile | null
 };
 // Customer By ID Payload
 export type CustomerByIdPayload = {
@@ -310,12 +311,12 @@ export type CreateNewFollowUpResponse =
   BaseResponseData<NewFollowUpPayload>;
 
 // /crm/lead/followup/:leadId
-export type GetAllFollowUpsByIdResponse = 
-BaseResponseData<NewFollowUpPayload[]>
+export type GetAllFollowUpsByIdResponse =
+  BaseResponseData<NewFollowUpPayload[]>
 
 
 ///crm/lead/followup/:followId
-export type DeleteFollowUpByIdResponse=BaseResponseData<boolean>
+export type DeleteFollowUpByIdResponse = BaseResponseData<boolean>
 
 ///crm/lead/followup/:followUpId
 export type UpdateFollowUpByIdResponse = BaseResponseData<NewFollowUpPayload>

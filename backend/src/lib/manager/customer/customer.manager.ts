@@ -43,6 +43,7 @@ export class CustomerProfileManager implements ICustomerProfileManagerInterface 
               isPhoneVerified: data.isPhoneVerified,
               termsAccepted: data.termsAccepted,
               whatsAppNotificationAllow: data.whatsAppNotificationAllow,
+              cRMUserDataModelId: data.relationshipManagerId
             },
           },
         },
@@ -86,6 +87,8 @@ export class CustomerProfileManager implements ICustomerProfileManagerInterface 
     customerProfileId: number,
     data: z.infer<typeof appSchema.customer.updateCustomerProfileSchema>
   ) {
+    console.log(data);
+
     const existing = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerProfileId },
       select: { id: true },
@@ -99,10 +102,7 @@ export class CustomerProfileManager implements ICustomerProfileManagerInterface 
       });
     }
 
-    const utilityUpdate: Record<string, unknown> = {
-      accountStatus: data.status,
-      whatsAppNotificationAllow: data.whatsAppNotificationAllow,
-    };
+
 
     const updatedCustomerProfileData =
       await db.dataBase.customerProfileDataModel.update({
@@ -116,7 +116,22 @@ export class CustomerProfileManager implements ICustomerProfileManagerInterface 
           whatsAppNo: data.whatsAppNo?.trim(),
           userType: data.userType,
           gender: data.gender,
-          utility: { update: utilityUpdate },
+          kycStatus: data.kycStatus,
+          utility: {
+            update: {
+              accountStatus: data.status,
+              whatsAppNotificationAllow: data.whatsAppNotificationAllow,
+              termsAccepted: data.termsAccepted,
+              isEmailVerified: data.isEmailVerified,
+              isPhoneVerified: data.isPhoneVerified,
+              relationshipManager: data.relationshipManagerId ? {
+                connect: {
+                  id: data.relationshipManagerId,
+                }
+              }
+                : undefined
+            }
+          },
         },
       });
 

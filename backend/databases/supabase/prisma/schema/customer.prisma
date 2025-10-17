@@ -22,10 +22,13 @@ model CustomersAuthDataModel {
     termsAccepted             Boolean   @default(false)
     lastLogin                 DateTime?
 
-    /// Timestamps
-    createdAt                DateTime                   @default(now())
-    updatedAt                DateTime                   @updatedAt
+    relationshipManager      CRMUserDataModel?          @relation(fields: [cRMUserDataModelId], references: [id])
     CustomerProfileDataModel CustomerProfileDataModel[]
+
+    /// Timestamps
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+    cRMUserDataModelId Int?
 
     @@map("customers_auth_data")
 }
@@ -60,9 +63,6 @@ model CustomerProfileDataModel {
     utility                  CustomersAuthDataModel @relation(fields: [customersAuthDataModelId], references: [id])
     customersAuthDataModelId Int
 
-    /// Metadata and audit fields
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
     createdBy Int?
 
     // data set 
@@ -92,6 +92,9 @@ model CustomerProfileDataModel {
 
     nse          NSEDATASET? @relation(fields: [nSEDATASETId], references: [id])
     nSEDATASETId Int?
+    /// Metadata and audit fields
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @updatedAt
 
     /// Commonly searched fields for faster queries
     @@index([emailAddress, userName])

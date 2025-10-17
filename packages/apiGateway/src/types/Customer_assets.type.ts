@@ -13,7 +13,7 @@ export type CustomerUserType = "INDIVIDUAL"|
   "LLP"|
   "PARTNERSHIP_FIRM";
   
-export type KycStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type KycStatus = "PENDING" | "VERIFIED" | "REJECTED";
 
 export type AadhaarCard = {
   id: number;
