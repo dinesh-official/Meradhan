@@ -95,7 +95,7 @@ export type FindManyUsersResponse = BaseResponseData<{
 //BASE MODEL
 
 // Enums
-export type CustomerKycStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type CustomerKycStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 // Base Model
 export type CustomerBase = {
@@ -148,6 +148,16 @@ export type CustomeredUtility = {
   whatsAppNotificationAllow: boolean;
 };
 
+export type DetailCustomerUtility = {
+  id: number;
+  accountStatus: CrmUserAccountStatus; // adjust enums as per schema
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  signinWith: SigninWith; // extend if needed
+  termsAccepted: boolean;
+  lastLogin: string | null; // ISO string or null
+  whatsAppNotificationAllow: boolean;
+};
 // Customer By ID Payload
 export type CustomerByIdPayload = {
   aadhaarCard: AadhaarCard | null;
@@ -176,7 +186,7 @@ export type CustomerByIdPayload = {
   id: number;
   updatedAt: string; // ISO
 
-  utility: CustomerUtility;
+  utility: DetailCustomerUtility;
 };
 
 // GET /crm/customers/:id

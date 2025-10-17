@@ -11,7 +11,7 @@ export const UserAccountType = [
   "PARTNERSHIP_FIRM",
 ] as const;
 
-export const kycStatus = ["PENDING", "REJECTED"] as const;
+export const kycStatus = ["APPROVED","PENDING", "REJECTED"] as const;
 
 export const findManyCustomerSchema = z.object({
   page: z

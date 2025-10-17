@@ -1,9 +1,10 @@
 "use client";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import CustomerManagementForm from "../_components/form/CustomerManagementForm";
-import { useCustomerFromDataHook } from "../_components/form/useCustomerFormDataHook";
+
 import { Button } from "@/components/ui/button";
+import CustomerManagementForm from "../_components/manageCustomer/form/CustomerManagementForm";
+import { useCustomerFromDataHook } from "../_components/manageCustomer/form/useCustomerFormDataHook";
 
 function NewCustomerView() {
   const manager = useCustomerFromDataHook();
@@ -17,7 +18,7 @@ function NewCustomerView() {
           <Button
             onClick={manager.validateCustomerData}
             className="md:w-auto w-full"
-            // disabled= {manager.createCustomerMutation}
+            disabled={manager.createCustomerMutation.isLoading}
           >
             Save New Customer
           </Button>
