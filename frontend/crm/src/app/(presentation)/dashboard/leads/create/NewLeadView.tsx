@@ -1,8 +1,8 @@
 "use client";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import React from "react";
-import LeadFormManagementForm from "../_components/form/LeadFormManagementForm";
-import { useLeadFormDataHook } from "../_components/form/useLeadFormDataHook";
+import LeadFormManagementForm from "../_components/manageLeads/form/LeadFormManagementForm";
+import { useLeadFormDataHook } from "../_components/manageLeads/form/useLeadFormDataHook";
 import { Button } from "@/components/ui/button";
 
 function NewLeadView() {

@@ -3,7 +3,7 @@ import {
   bonds,
   source,
   status,
-} from "../../../../../../../../../packages/schema/lib/crm/leads.schema";
+} from "../../../../../../../../../../packages/schema/lib/crm/leads.schema";
 
 export const leadFormDataSchema = z.object({
   fullName: z
