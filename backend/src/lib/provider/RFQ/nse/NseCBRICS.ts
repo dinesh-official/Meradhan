@@ -1,4 +1,4 @@
-import axios, { Axios } from "axios";
+import axios, { Axios, AxiosError } from "axios";
 import { cacheStorage } from "../../../../queues/redis/queues";
 import type {
     ActiveIssuesRequest,
@@ -47,22 +47,11 @@ import type {
     UpdateUnregisteredDpAccountStatusRequest,
     UpdateUnregisteredDpAccountStatusResponse,
     UpiPaymentInitiationRequest,
-} from "./types";
+} from "./cbrics.types";
 
-/**
- * @class NseCBRICS
- * @description
- * Handles authenticated communication with the NSE CBRICS REST v1 API.
- * Includes methods for managing participants, unregistered accounts,
- * orders, settlements, and payments.
- *
- * This class automatically caches login keys and appends them
- * as headers to every request.
- */
 export class NseCBRICS {
-    private loginStoreKey = "NSE_CBRICS_LOGIN__KEY";
+    private loginStoreKey = "NSE_CBRICS_LOGIN_KEY";
     private client: Axios;
-
     private credentials = {
         domain: "BCISPL",
         login: "DEV",
@@ -80,11 +69,10 @@ export class NseCBRICS {
         });
     }
 
-    /**
-     * @private
-     * @description Logs in and retrieves a session `loginKey`.
-     * @returns Promise resolving to the login payload including `loginKey`.
-     */
+    // ────────────────────────────────────────────────────────────────
+    // 🔐 LOGIN / LOGOUT HANDLING
+    // ────────────────────────────────────────────────────────────────
+
     private async login() {
         const { data } = await this.client.post<{
             firstName: string;
@@ -98,357 +86,405 @@ export class NseCBRICS {
         return data;
     }
 
-    /**
-     * @description
-     * Retrieves a cached NSE CBRICS login key or logs in if not cached.
-     * The login key is stored in Redis for quick reuse.
-     * @returns Promise<string> - A valid NSE session login key.
-     */
-    public async getLoginKey(): Promise<string> {
-        const cached = await cacheStorage.get<string>(this.loginStoreKey);
-        if (!cached) {
-            const { loginKey } = await this.login();
-            const CACHE_TTL_SEC = 1000;
-            await cacheStorage.set(this.loginStoreKey, loginKey, CACHE_TTL_SEC);
-            return loginKey;
+    public async getLoginKey(forceRefresh = false): Promise<string> {
+        if (!forceRefresh) {
+            const cached = await cacheStorage.get<string>(this.loginStoreKey);
+            if (cached) return cached;
         }
-        return cached;
+
+        const { loginKey } = await this.login();
+        await cacheStorage.set(this.loginStoreKey, loginKey, 1000);
+        return loginKey;
     }
 
-    /**
-     * @description Logs out the current NSE CBRICS session.
-     * @returns Promise<{ status: "C" }> - Confirmation of logout.
-     */
+    private isLoginExpired(error: AxiosError<{ message?: string }>): boolean {
+        const msg = (error.response?.data)?.message ?? error.message;
+        const status = error.response?.status;
+        return (
+            status === 401 ||
+            msg.includes("Invalid loginKey") ||
+            msg.includes("Session expired")
+        );
+    }
+
+    private async withReLoginRetry<T>(
+        apiCall: (loginKey: string) => Promise<T>
+    ): Promise<T> {
+        try {
+            const key = await this.getLoginKey();
+            return await apiCall(key);
+        } catch (error) {
+            if (axios.isAxiosError(error) && this.isLoginExpired(error)) {
+                const newKey = await this.getLoginKey(true);
+                return await apiCall(newKey);
+            }
+            throw error;
+        }
+    }
+
     public async logout() {
-        const { data } = await this.client.get<{ status: "C" }>("/logout");
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.get<{ status: "C" }>("/logout", {
+                headers: { loginKey },
+            });
+            return data;
+        });
     }
 
-    // =====================================================
-    // Participant APIs
-    // =====================================================
+    // ────────────────────────────────────────────────────────────────
+    // 🧩 PARTICIPANTS
+    // ────────────────────────────────────────────────────────────────
 
-    /**
-     * @description Searches for registered participants.
-     * @param payload - Participant search parameters.
-     * @returns Promise<ParticipantFindResponse>
-     */
-    async findParticipants(payload?: ParticipantFindRequest) {
-        const { data } = await this.client.post<ParticipantFindResponse>(
-            "/participant/find",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async findParticipants(payload?: ParticipantFindRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<ParticipantFindResponse>(
+                "/participant/find",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    // =====================================================
-    // Unregistered Participants APIs
-    // =====================================================
+    // ────────────────────────────────────────────────────────────────
+    // 🧾 UNREGISTERED PARTICIPANTS
+    // ────────────────────────────────────────────────────────────────
 
-    /** Create new unregistered participant */
-    async unregisteredParticipant(payload: UnregisteredParticipantRequest) {
-        const { data } = await this.client.post<UnregisteredParticipantResponse>(
-            "/unreg",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async unregisteredParticipant(payload: UnregisteredParticipantRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<UnregisteredParticipantResponse>(
+                "/unreg",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Update existing unregistered participant */
-    async updateUnregisteredParticipant(
+    public async updateUnregisteredParticipant(
         payload: Omit<UnregisteredParticipantRequest, "loginId"> & { id: number }
     ) {
-        const { data } = await this.client.post<UnregisteredParticipantResponse>(
-            "/unreg/update",
-            { ...payload, actualStatus: 4 },
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<UnregisteredParticipantResponse>(
+                "/unreg/update",
+                { ...payload, actualStatus: 4 },
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Fetch list of all unregistered participants */
-    async getAllUnregisteredParticipants(payload?: UnregisteredParticipantParams) {
-        const { data } = await this.client.post<UnregisteredParticipantResponse>(
-            "/unreg/all",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async getAllUnregisteredParticipants(payload?: UnregisteredParticipantParams) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<UnregisteredParticipantResponse>(
+                "/unreg/all",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Get unregistered participant details by ID */
-    async getUnregisteredParticipantById(id: number) {
-        const { data } = await this.client.get<UnregisteredParticipantResponse>(
-            `/unreg/${id}`,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async getUnregisteredParticipantById(id: number) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.get<UnregisteredParticipantResponse>(
+                `/unreg/${id}`,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Update contact info of final unregistered participant */
-    async updateFinalUnregisteredParticipantContact(
+    public async updateFinalUnregisteredParticipantContact(
         payload: UnregisteredParticipantFinalUpdateContactRequest
     ) {
-        const { data } =
-            await this.client.post<UnregisteredParticipantFinalUpdateContactResponse>(
-                "/unreg/final/updatecontact",
-                payload,
-                { headers: { loginKey: await this.getLoginKey() } }
-            );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } =
+                await this.client.post<UnregisteredParticipantFinalUpdateContactResponse>(
+                    "/unreg/final/updatecontact",
+                    payload,
+                    { headers: { loginKey } }
+                );
+            return data;
+        });
     }
 
-    /** Permanently delete unregistered participant */
-    async deleteFinalUnregisteredParticipant(
+    public async deleteFinalUnregisteredParticipant(
         payload: UnregisteredParticipantFinalDeleteRequest
     ) {
-        const { data } =
-            await this.client.post<UnregisteredParticipantFinalDeleteResponse>(
-                "/unreg/final/delete",
-                payload,
-                { headers: { loginKey: await this.getLoginKey() } }
-            );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } =
+                await this.client.post<UnregisteredParticipantFinalDeleteResponse>(
+                    "/unreg/final/delete",
+                    payload,
+                    { headers: { loginKey } }
+                );
+            return data;
+        });
     }
 
-    // =====================================================
-    // Unregistered Bank Accounts
-    // =====================================================
+    // ────────────────────────────────────────────────────────────────
+    // 🏦 UNREGISTERED BANK ACCOUNTS
+    // ────────────────────────────────────────────────────────────────
 
-    /** Add a new unregistered participant bank account */
-    async addUnregisteredBankAccount(
+    public async addUnregisteredBankAccount(
         payload: UnregisteredParticipantBankAccountRequest
     ) {
-        const { data } = await this.client.post<UnregisteredParticipantBankAccountResponse>(
-            "/unreg/bankacc",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } =
+                await this.client.post<UnregisteredParticipantBankAccountResponse>(
+                    "/unreg/bankacc",
+                    payload,
+                    { headers: { loginKey } }
+                );
+            return data;
+        });
     }
 
-    /** Fetch all unregistered participant bank accounts */
-    async getAllUnregisteredBankAccounts(
+    public async getAllUnregisteredBankAccounts(
         payload: UnregisteredBankAccountListRequest
     ) {
-        const { data } = await this.client.post<UnregisteredParticipantBankAccountResponse[]>(
-            "/unreg/bankacc/all",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } =
+                await this.client.post<UnregisteredParticipantBankAccountResponse[]>(
+                    "/unreg/bankacc/all",
+                    payload,
+                    { headers: { loginKey } }
+                );
+            return data;
+        });
     }
 
-    /** Mark a bank account as default */
-    async markDefaultUnregisteredBankAccount(
+    public async markDefaultUnregisteredBankAccount(
         payload: MarkDefaultUnregisteredBankAccountRequest
     ) {
-        const { data } = await this.client.post<UnregisteredParticipantBankAccountResponse>(
-            "/unreg/bankacc/final/markdefault",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } =
+                await this.client.post<UnregisteredParticipantBankAccountResponse>(
+                    "/unreg/bankacc/final/markdefault",
+                    payload,
+                    { headers: { loginKey } }
+                );
+            return data;
+        });
     }
 
-    /** Update status of a bank account (e.g., active/inactive) */
-    async updateUnregisteredBankAccountStatus(
+    public async updateUnregisteredBankAccountStatus(
         payload: UpdateUnregisteredBankAccountStatusRequest
     ) {
-        const { data } = await this.client.post<UnregisteredParticipantBankAccountResponse>(
-            "/unreg/bankacc/final/updatestatus",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } =
+                await this.client.post<UnregisteredParticipantBankAccountResponse>(
+                    "/unreg/bankacc/final/updatestatus",
+                    payload,
+                    { headers: { loginKey } }
+                );
+            return data;
+        });
     }
 
-    // =====================================================
-    // Unregistered DP Accounts
-    // =====================================================
+    // ────────────────────────────────────────────────────────────────
+    // 📑 UNREGISTERED DP ACCOUNTS
+    // ────────────────────────────────────────────────────────────────
 
-    /** Add a new unregistered participant DP account */
-    async addUnregisteredDpAccount(payload: AddUnregisteredDpAccountRequest) {
-        const { data } = await this.client.post<UnregisteredDpAccountResponse>(
-            "/unreg/dpacc",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async addUnregisteredDpAccount(payload: AddUnregisteredDpAccountRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<UnregisteredDpAccountResponse>(
+                "/unreg/dpacc",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Fetch all unregistered participant DP accounts */
-    async getAllUnregisteredDpAccounts(payload?: GetUnregisteredDpAccountsRequest) {
-        const { data } = await this.client.post<GetUnregisteredDpAccountsResponse>(
-            "/unreg/dpacc/all",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async getAllUnregisteredDpAccounts(payload?: GetUnregisteredDpAccountsRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<GetUnregisteredDpAccountsResponse>(
+                "/unreg/dpacc/all",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Mark DP account as default */
-    async markDefaultUnregisteredDpAccount(
+    public async markDefaultUnregisteredDpAccount(
         payload: MarkDefaultUnregisteredDpAccountRequest
     ) {
-        const { data } = await this.client.post<MarkDefaultUnregisteredDpAccountResponse>(
-            "/unreg/dpacc/final/markdefault",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<MarkDefaultUnregisteredDpAccountResponse>(
+                "/unreg/dpacc/final/markdefault",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Update DP account status */
-    async updateUnregisteredDpAccountStatus(
+    public async updateUnregisteredDpAccountStatus(
         payload: UpdateUnregisteredDpAccountStatusRequest
     ) {
-        const { data } = await this.client.post<UpdateUnregisteredDpAccountStatusResponse>(
-            "/unreg/dpacc/final/updatestart",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
-    }
-
-    // =====================================================
-    // Orders and Instructions
-    // =====================================================
-
-    /** Create a new order */
-    async createOrder(payload: OrderRequest) {
-        const { data } = await this.client.post<OrderResponse>("/order", payload, {
-            headers: { loginKey: await this.getLoginKey() },
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } =
+                await this.client.post<UpdateUnregisteredDpAccountStatusResponse>(
+                    "/unreg/dpacc/final/updatestatus",
+                    payload,
+                    { headers: { loginKey } }
+                );
+            return data;
         });
-        return data;
     }
 
-    /** Update an existing order */
-    async updateOrder(payload: OrderUpdateRequest) {
-        const { data } = await this.client.post<OrderUpdateResponse>(
-            "/order/update",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    // ────────────────────────────────────────────────────────────────
+    // 📦 ORDERS & INSTRUCTIONS
+    // ────────────────────────────────────────────────────────────────
+
+    public async createOrder(payload: OrderRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<OrderResponse>("/order", payload, {
+                headers: { loginKey },
+            });
+            return data;
+        });
     }
 
-    /** Update order status (PUT request) */
-    async updateOrderStatus(payload: OrderStatusRequest) {
-        const { data } = await this.client.put<OrderStatusResponse>(
-            "/order/status",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async updateOrder(payload: OrderUpdateRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<OrderUpdateResponse>(
+                "/order/update",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Get all active issues in market watch */
-    async getActiveIssues(payload?: ActiveIssuesRequest) {
-        const { data } = await this.client.post<ActiveIssuesResponse>(
-            "/marketwatch/activeissues",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async updateOrderStatus(payload: OrderStatusRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.put<OrderStatusResponse>(
+                "/order/status",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Fetch sell reporting data (unfiltered) */
-    async getSellReportings() {
-        const { data } = await this.client.get<SellReportingsResponse>(
-            "/order/sellreportings",
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async getActiveIssues(payload?: ActiveIssuesRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<ActiveIssuesResponse>(
+                "/marketwatch/activeissues",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Fetch filtered sell reporting data */
-    async getFilteredSellReportings(payload?: SellReportingsFilterRequest) {
-        const { data } = await this.client.post<SellReportingsResponse>(
-            "/order/sellreportings",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async getSellReportings() {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.get<SellReportingsResponse>(
+                "/order/sellreportings",
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Retrieve buyer instructions for settlement */
-    async getBuyerInstructions(payload?: BuyInstructionsRequest) {
-        const { data } = await this.client.post<BuyInstructionsResponse>(
-            "/order/buyinstructions",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async getFilteredSellReportings(payload?: SellReportingsFilterRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<SellReportingsResponse>(
+                "/order/sellreportings",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    // =====================================================
-    // Settlement APIs
-    // =====================================================
-
-    /** Fetch settlement order list */
-    async getSettlementOrders(payload: SettleOrderListRequest) {
-        const { data } = await this.client.post<SettleOrderListResponse>(
-            "/settle/order/all",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async getBuyerInstructions(payload?: BuyInstructionsRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<BuyInstructionsResponse>(
+                "/order/buyinstructions",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Update settlement order */
-    async updateSettlementOrder(payload: SettleOrderUpdateRequest) {
-        const { data } = await this.client.post<SettleOrderUpdateResponse>(
-            "/settle/order/update",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    // ────────────────────────────────────────────────────────────────
+    // ⚖️ SETTLEMENT
+    // ────────────────────────────────────────────────────────────────
+
+    public async getSettlementOrders(payload: SettleOrderListRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<SettleOrderListResponse>(
+                "/settle/order/all",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Update settlement bank details */
-    async updateSettlementOrderBank(payload: SettleOrderUpdateBankRequest) {
-        const { data } = await this.client.post<SettleOrderUpdateBankResponse>(
-            "/settle/order/updatebank",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async updateSettlementOrder(payload: SettleOrderUpdateRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<SettleOrderUpdateResponse>(
+                "/settle/order/update",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Update settlement DP details */
-    async updateSettlementOrderDp(payload: SettleOrderUpdateDpRequest) {
-        const { data } = await this.client.post<SettleOrderUpdateDpResponse>(
-            "/settle/order/updatedp",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async updateSettlementOrderBank(payload: SettleOrderUpdateBankRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<SettleOrderUpdateBankResponse>(
+                "/settle/order/updatebank",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    // =====================================================
-    // Payment APIs
-    // =====================================================
-
-    /** Fetch list of payment transactions */
-    async getPaymentTransactions(payload: PaymentTransactionQueryRequest) {
-        const { data } = await this.client.post<PaymentTransactionRecord[]>(
-            "/paytxn",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    public async updateSettlementOrderDp(payload: SettleOrderUpdateDpRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<SettleOrderUpdateDpResponse>(
+                "/settle/order/updatedp",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 
-    /** Initiate a UPI payment transaction */
-    async initiateUpiPayment(payload: UpiPaymentInitiationRequest) {
-        const { data } = await this.client.post<PaymentTransactionResponse>(
-            "/paytxn/upi",
-            payload,
-            { headers: { loginKey: await this.getLoginKey() } }
-        );
-        return data;
+    // ────────────────────────────────────────────────────────────────
+    // 💸 PAYMENTS
+    // ────────────────────────────────────────────────────────────────
+
+    public async getPaymentTransactions(payload: PaymentTransactionQueryRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<PaymentTransactionRecord[]>(
+                "/paytxn",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
+    }
+
+    public async initiateUpiPayment(payload: UpiPaymentInitiationRequest) {
+        return this.withReLoginRetry(async (loginKey) => {
+            const { data } = await this.client.post<PaymentTransactionResponse>(
+                "/paytxn/upi",
+                payload,
+                { headers: { loginKey } }
+            );
+            return data;
+        });
     }
 }

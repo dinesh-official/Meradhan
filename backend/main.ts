@@ -10,6 +10,7 @@ import customersRoutes from "./src/resource/crm/customers/customers.routes";
 import followUpRouter from "./src/resource/crm/leads/followup/leadsFollowUp.routes";
 import leadsRoutes from "./src/resource/crm/leads/leads.routes";
 import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
+import nseIsinRoute from "./src/resource/crm/refq/nse/isin/nseisin.routes";
 dotenv.config({ debug: false });
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
@@ -25,7 +26,14 @@ const server = new ExpressServer(config.port, {
 logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
-server.addRoutes([authRoutes, crmUsersRoutes, customersRoutes, leadsRoutes, followUpRouter]);
+server.addRoutes([
+    authRoutes,
+    crmUsersRoutes,
+    customersRoutes,
+    leadsRoutes,
+    followUpRouter,
+    nseIsinRoute
+]);
 
 // Connect to databases and start server
 checkConnectToDatabases()

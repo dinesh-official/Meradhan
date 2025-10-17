@@ -1,0 +1,84 @@
+model NSEDATASET {
+    id                       Int                        @id @default(autoincrement())
+    CustomerProfileDataModel CustomerProfileDataModel[]
+
+    participant                 NSECbricsParticipantModel @relation(fields: [nSECbricsParticipantModelId], references: [id])
+    nSECbricsParticipantModelId Int
+}
+
+model NSECbricsParticipantModel {
+    id      Int    @unique
+    loginId String @unique
+
+    actualStatus   Int
+    workflowStatus Int
+    firstName      String
+    panNo          String
+    custodian      String?
+    contactPerson  String
+    mobileList     String[]
+    emailList      String[]
+    telephone      String
+    fax            String?
+    address        String?
+    address2       String?
+    address3       String?
+    stateCode      String
+    regAddress     String
+    leiCode        String?
+    expiryDate     DateTime?
+    panVerStatus   Int?
+    panVerRemarks  String?
+    remarks        String?
+
+    bankAccountList NSEBankAccount[]
+    dpAccountList   NSEDpAccount[]
+
+    /// Timestamps
+    createdAt  DateTime     @default(now())
+    updatedAt  DateTime     @updatedAt
+    NSEDATASET NSEDATASET[]
+
+    @@map("NSE_cbrics_unregistered_participant")
+}
+
+model NSEBankAccount {
+    id Int @id @default(autoincrement())
+
+    bankName       String
+    bankIFSC       String
+    bankAccountNo  String
+    isDefault      DefaultSelect
+    workflowStatus Int?
+    status         String?
+
+    createdAt                   DateTime                   @default(now())
+    updatedAt                   DateTime                   @updatedAt
+    NSECbricsParticipantModel   NSECbricsParticipantModel? @relation(fields: [nSECbricsParticipantModelId], references: [id])
+    nSECbricsParticipantModelId Int?
+
+    @@map("NSE_cbrics_bank_account")
+}
+
+model NSEDpAccount {
+    id Int @id @default(autoincrement())
+
+    dpType         DepositoryName
+    dpId           String?
+    benId          String
+    isDefault      DefaultSelect
+    workflowStatus Int?
+    status         String?
+
+    createdAt                   DateTime                   @default(now())
+    updatedAt                   DateTime                   @updatedAt
+    NSECbricsParticipantModel   NSECbricsParticipantModel? @relation(fields: [nSECbricsParticipantModelId], references: [id])
+    nSECbricsParticipantModelId Int?
+
+    @@map("NSE_cbrics_dp_account")
+}
+
+enum DefaultSelect {
+    Y
+    N
+}
