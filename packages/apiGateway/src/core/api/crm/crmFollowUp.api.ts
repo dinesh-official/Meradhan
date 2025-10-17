@@ -35,7 +35,7 @@ export interface TCrmFollowUp {
   ): Promise<AxiosResponse<UpdateFollowUpByIdResponse>>;
 }
 
-export class CrmFollowUp implements TCrmFollowUp {
+export class CrmFollowUpApi implements TCrmFollowUp {
   constructor(private apiClient: IApiCaller) {}
 
   async createFollowUp(

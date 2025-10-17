@@ -18,7 +18,7 @@ import { useLeadTableActionHook } from "./useLeadTableActionHook";
 const LeadTableActions = ({ lead }: { lead: NewLeadPayload }) => {
   const manager = useFollowUpNoteFormHook();
   const [followUpOpen, setFollowUpOpen] = useState(false);
-  const { handleLeadUpdate } = useLeadTableActionHook({
+  const { handleLeadUpdate,deleteLeadMutation } = useLeadTableActionHook({
     leadId: lead.id,
   });
   return (
@@ -56,7 +56,7 @@ const LeadTableActions = ({ lead }: { lead: NewLeadPayload }) => {
               });
 
               if (result.isConfirmed) {
-                // deleteUserMutation.mutate(profile.id);
+                 deleteLeadMutation.mutate()
               }
             }}
           >
