@@ -4,6 +4,7 @@ import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { NewLeadPayload } from "@root/apiGateway";
+import LeadTableActions from "./actions/leadTableAction";
 // import LeadTableActions from "./actions/LeadTableActions";
 
 
@@ -99,13 +100,13 @@ function LeadTable({ data, pageSize = 10, isLoading }: LeadsTableProps) {
             </span>
           ),
         },
-        // {
-        //   key: "actions",
-        //   label: "Action",
-        //   stickyRight: true,
-        //   sortable: false,
-        //   cell: (row) => <LeadTableActions lead={row} />,
-        // },
+        {
+          key: "actions",
+          label: "Action",
+          stickyRight: true,
+          sortable: false,
+          cell: (row) => <LeadTableActions lead={row} />,
+        },
       ]}
       searchColumnKey="fullName"
     />
