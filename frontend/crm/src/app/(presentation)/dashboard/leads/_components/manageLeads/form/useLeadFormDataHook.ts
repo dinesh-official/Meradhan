@@ -32,7 +32,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
     Partial<Record<keyof LeadFormData, string[]>>
   >({});
   const leadsApi = useLeadFollowUpApiHook();
-  const { createLeadMutation } = leadsApi;
+  const { createLeadMutation ,updateLeadMutation} = leadsApi;
   /** Update a single field and clear its error (if any) */
   const setLeadData = useCallback(
     <K extends keyof LeadFormData>(key: K, value: LeadFormData[K]) => {
@@ -46,6 +46,16 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
     },
     []
   );
+  const setLeadDataMany = useCallback((patch: Partial<LeadFormData>) => {
+  setData(prev => ({ ...prev, ...patch }));
+  setErrors(prev => {
+    const copy = { ...prev };
+    (Object.keys(patch) as (keyof LeadFormData)[]).forEach(k => {
+      if (copy[k]) delete copy[k];
+    });
+    return copy;
+  });
+}, []);
 
   /** Validate a single field against the Zod schema */
   const validateField = useCallback(
@@ -89,6 +99,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
     }
   }, [data,createLeadMutation]);
 
+ 
   /** Reset state and errors */
   const resetLeadData = useCallback(() => {
     setData(initial ?? initLeadData);
@@ -98,6 +109,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
   return {
     state: data,
     errors,
+    setLeadDataMany,
     createLeadMutation,
     setLeadData,
     resetLeadData,
