@@ -90,6 +90,9 @@ model CustomerProfileDataModel {
     permanentAddress        AddressModel? @relation("PermanentAddress", fields: [permanentAddressModelId], references: [id])
     permanentAddressModelId Int?
 
+    nse          NSEDATASET? @relation(fields: [nSEDATASETId], references: [id])
+    nSEDATASETId Int?
+
     /// Commonly searched fields for faster queries
     @@index([emailAddress, userName])
     /// Map to actual database table name

@@ -132,7 +132,7 @@ export interface UnregisteredParticipantResponse {
     contactPerson: string;
     mobileList: string[];
     emailList: string[];
-    telephone?: string | null;
+    telephone: string;
     fax?: string | null;
     address: string;
     address2?: string | null;
@@ -180,7 +180,7 @@ interface BankAccountResponse {
      * S = Suspended
      * D = Deleted
      */
-    statusType: "A" | "S" | "D";
+    status: "A" | "S" | "D";
 
     /**
      * Approval status of this bank account
@@ -221,7 +221,7 @@ interface DPAccountResponse {
      * S = Suspended
      * D = Deleted
      */
-    statusType: "A" | "S" | "D";
+    status: "A" | "S" | "D";
 
     /**
      * Approval status of this DP account

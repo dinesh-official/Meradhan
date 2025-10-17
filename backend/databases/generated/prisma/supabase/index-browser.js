@@ -171,7 +171,8 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   panCardModelId: 'panCardModelId',
   customerPersonalInfoModelId: 'customerPersonalInfoModelId',
   currentAddressModelId: 'currentAddressModelId',
-  permanentAddressModelId: 'permanentAddressModelId'
+  permanentAddressModelId: 'permanentAddressModelId',
+  nSEDATASETId: 'nSEDATASETId'
 };
 
 exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {
@@ -303,6 +304,64 @@ exports.Prisma.LeadFollowUpNotesModelScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.NSEDATASETScalarFieldEnum = {
+  id: 'id',
+  nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+};
+
+exports.Prisma.NSECbricsParticipantModelScalarFieldEnum = {
+  id: 'id',
+  loginId: 'loginId',
+  actualStatus: 'actualStatus',
+  workflowStatus: 'workflowStatus',
+  firstName: 'firstName',
+  panNo: 'panNo',
+  custodian: 'custodian',
+  contactPerson: 'contactPerson',
+  mobileList: 'mobileList',
+  emailList: 'emailList',
+  telephone: 'telephone',
+  fax: 'fax',
+  address: 'address',
+  address2: 'address2',
+  address3: 'address3',
+  stateCode: 'stateCode',
+  regAddress: 'regAddress',
+  leiCode: 'leiCode',
+  expiryDate: 'expiryDate',
+  panVerStatus: 'panVerStatus',
+  panVerRemarks: 'panVerRemarks',
+  remarks: 'remarks',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.NSEBankAccountScalarFieldEnum = {
+  id: 'id',
+  bankName: 'bankName',
+  bankIFSC: 'bankIFSC',
+  bankAccountNo: 'bankAccountNo',
+  isDefault: 'isDefault',
+  workflowStatus: 'workflowStatus',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+};
+
+exports.Prisma.NSEDpAccountScalarFieldEnum = {
+  id: 'id',
+  dpType: 'dpType',
+  dpId: 'dpId',
+  benId: 'benId',
+  isDefault: 'isDefault',
+  workflowStatus: 'workflowStatus',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -397,6 +456,11 @@ exports.LeadStatus = exports.$Enums.LeadStatus = {
   CONVERTED: 'CONVERTED'
 };
 
+exports.DefaultSelect = exports.$Enums.DefaultSelect = {
+  Y: 'Y',
+  N: 'N'
+};
+
 exports.Prisma.ModelName = {
   CRMUserDataModel: 'CRMUserDataModel',
   CustomersAuthDataModel: 'CustomersAuthDataModel',
@@ -409,7 +473,11 @@ exports.Prisma.ModelName = {
   CustomersRiskProfileModel: 'CustomersRiskProfileModel',
   AddressModel: 'AddressModel',
   LeadsModel: 'LeadsModel',
-  LeadFollowUpNotesModel: 'LeadFollowUpNotesModel'
+  LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
+  NSEDATASET: 'NSEDATASET',
+  NSECbricsParticipantModel: 'NSECbricsParticipantModel',
+  NSEBankAccount: 'NSEBankAccount',
+  NSEDpAccount: 'NSEDpAccount'
 };
 
 /**
