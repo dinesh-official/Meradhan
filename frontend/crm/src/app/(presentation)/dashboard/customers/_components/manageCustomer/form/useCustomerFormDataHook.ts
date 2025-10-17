@@ -6,7 +6,7 @@ import { useCustomerApiHook } from "./useCustomerApiHook";
 import { appSchema } from "@root/schema";
 import { parseError } from "@/core/error/parseError";
 import { toast } from "sonner";
-import { gender } from "../../../../../../../../../packages/schema/lib/enums";
+import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 
 const initData: CustomerFormData = {
   firstName: "",
@@ -22,7 +22,7 @@ const initData: CustomerFormData = {
   isPhoneVerified: false,
   kycStatus: "PENDING",
   status: "ACTIVE",
-  gender:gender[0],
+  gender: gender[0],
   relationshipManagerId: undefined,
   password: "",
 };
@@ -74,14 +74,14 @@ export const useCustomerFromDataHook = (
   /** Validate entire form */
   const validateCustomerData = useCallback((): boolean => {
     try {
-      console.log('validateCustomerData',data)
+      console.log("validateCustomerData", data);
       customerFormDataSchema.parse(data);
       setErrors({});
       const payload = appSchema.customer.createNewCustomerSchema.parse(data);
-      createCustomerMutation.mutate(payload)
+      createCustomerMutation.mutate(payload);
       return true;
     } catch (error) {
-     console.log("error hai in validateUserData", error);
+      console.log("error hai in validateUserData", error);
       const err = parseError<ZodError>(error);
       if (err.issues.length) {
         toast.error(err.issues[0].message);
@@ -90,7 +90,7 @@ export const useCustomerFromDataHook = (
       }
       return false;
     }
-  }, [data,createCustomerMutation]);
+  }, [data, createCustomerMutation]);
 
   /** Reset form */
   const resetCustomerData = useCallback(() => {

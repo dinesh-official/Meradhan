@@ -4,10 +4,10 @@ import { PhoneField } from "@/global/elements/inputs/PhoneField";
 import { RadioYesNoField } from "@/global/elements/inputs/RadioYesNoField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
-import { UserAccountType } from "../../../../../../../../../packages/schema/lib/customers/customers.schema";
-import { gender } from "../../../../../../../../../packages/schema/lib/enums";
 import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
 import { Label } from "@/components/ui/label";
+import { UserAccountType } from "../../../../../../../../../../packages/schema/lib/customers/customers.schema";
+import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 
 function CustomerManagementForm({
   manager,
@@ -32,7 +32,7 @@ function CustomerManagementForm({
           id="middleName"
           label="Middle Name"
           placeholder="Enter middle name"
-          value={manager.state.middleName}
+          value={manager.state.middleName?? undefined}
           onChangeAction={(e) => manager.setCustomerData("middleName", e)}
           error={manager?.errors?.middleName?.[0]}
         />
@@ -215,6 +215,7 @@ function CustomerManagementForm({
         <SelectRoleUser
           role="RELATIONSHIP_MANAGER"
           placeholder="Select relationship manager"
+          // value={} 
         />
       </div>
 

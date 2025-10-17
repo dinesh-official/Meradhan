@@ -38,7 +38,7 @@ export interface TCrmCustomerInterface {
   ): Promise<AxiosResponse<UpdateCustomerResponse>>;
 }
 
-export class CrmCustomer implements TCrmCustomerInterface {
+export class CrmCustomerApi implements TCrmCustomerInterface {
   constructor(private apiClient: IApiCaller) {}
 
   async createCustomer(
@@ -56,7 +56,7 @@ export class CrmCustomer implements TCrmCustomerInterface {
     customerId: number,
     config?: AxiosRequestConfig
   ): ReturnType<TCrmCustomerInterface["customerInfoById"]> {
-    return this.apiClient.post<GetCustomerResponseById>(
+    return this.apiClient.get<GetCustomerResponseById>(
       `/crm/customer/${customerId}`,
       config
     );
@@ -93,6 +93,7 @@ export class CrmCustomer implements TCrmCustomerInterface {
   ): ReturnType<TCrmCustomerInterface["updateCustomer"]> {
     return this.apiClient.patch<UpdateCustomerResponse>(
       `/crm/customer/${customerId}`,
+      data,
       config
     );
   }

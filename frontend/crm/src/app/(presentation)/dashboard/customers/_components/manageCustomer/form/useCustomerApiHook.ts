@@ -8,7 +8,9 @@ import z from "zod";
 
 export const useCustomerApiHook = () => {
   const router = useRouter();
-  const customerApi = new apiGateway.crm.customer.CrmCustomer(apiClientCaller);
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
+    apiClientCaller
+  );
 
   const createCustomerMutation = useMutation({
     mutationKey: ["createCustomerMutation"],
@@ -33,7 +35,33 @@ export const useCustomerApiHook = () => {
     },
   });
 
+  const updateCustomerMutation = useMutation({
+    mutationKey: ["updateCustomerMutation"],
+    mutationFn: async (payload: {
+      data: z.infer<(typeof appSchema.customer)["updateCustomerProfileSchema"]>;
+      customerId: string;
+    }) => {
+      const res = await customerApi.updateCustomer(
+        payload.data,
+        payload.customerId
+      );
+      return res.data;
+    },
+    onSuccess() {
+      toast.success("User updated successfully");
+      router.back();
+    },
+    onError(error) {
+      if (error instanceof ApiError) {
+        toast.error(error.response?.data?.message);
+      } else {
+        toast.error(error?.message ?? "Something went wrong");
+      }
+    },
+  });
+
   return {
+    updateCustomerMutation,
     createCustomerMutation,
   };
 };

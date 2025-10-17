@@ -5,8 +5,15 @@ export type DepositoryName = "NSDL" | "CDSL";
 export type DematAccountType = "SINGLE" | "JOINT";
 export type AccountStatus = "ACTIVE" | "SUSPENDED";
 export type SigninWith = "CREDENTIALS" | "GOOGLE" | "GITHUB" | "APPLE";
-export type CustomerUserType = "INDIVIDUAL" | "COMPANY";
-export type KycStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type CustomerUserType = "INDIVIDUAL"|
+  "INDIVIDUAL_NRI_NRO"|
+  "TRUST"|
+  "CORPORATE"|
+  "HUF"|
+  "LLP"|
+  "PARTNERSHIP_FIRM";
+  
+export type KycStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export type AadhaarCard = {
   id: number;

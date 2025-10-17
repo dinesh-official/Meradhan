@@ -13,25 +13,25 @@ import { SelectOption } from "@/global/elements/inputs/SelectField";
 
 interface CustomerSearchFilterBarProps {
   searchValue?: string;
-  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange?: (e: string) => void;
   statusValue?: string;
   onStatusChange?: (value: string) => void;
   kycValue?: string;
   onKycChange?: (value: string) => void;
-  statusOptions?: SelectOption[];
-  kycOptions?: SelectOption[];
+  statusOptions?: typeof filterStatusOptions;
+  kycOptions?: typeof filterKycStatus;
   placeholder?: string;
 }
 const filterKycStatus: SelectOption[] = [
   { label: "All Kyc Status", value: "ALL" },
   { label: "Pending", value: "PENDING" },
-  { label: "Verified", value: "APPROVED" },
+  { label: "Verified", value: "VERIFIED" },
   { label: "Rejected", value: "REJECTED" },
 ];
 
 const filterStatusOptions: SelectOption[] = [
   { label: "All Status", value: "ALL" },
-  { label: "New", value: "New" },
+  { label: "Active", value: "ACTIVE" },
   { label: "Suspended", value: "SUSPENDED" },
 ];
 const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
@@ -41,8 +41,8 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
   onStatusChange,
   kycValue,
   onKycChange,
-  statusOptions =filterKycStatus,
-  kycOptions =filterStatusOptions,
+  statusOptions =filterStatusOptions,
+  kycOptions =filterKycStatus,
   placeholder = "Search...",
 }) => {
   return (
@@ -53,7 +53,9 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
           placeholder={placeholder}
           type="search"
           value={searchValue}
-          onChange={onSearchChange}
+          onChange={(e)=>{
+            onSearchChange?.(e.target.value)
+          }}
         />
         <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
           <Search size={16} aria-hidden="true" />
