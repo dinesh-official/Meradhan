@@ -8,6 +8,8 @@ import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
 import { Label } from "@/components/ui/label";
 import { UserAccountType } from "../../../../../../../../../../packages/schema/lib/customers/customers.schema";
 import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
+import { CrmUsersProfile } from "@root/apiGateway";
+import { useState } from "react";
 
 function CustomerManagementForm({
   manager,
@@ -16,6 +18,8 @@ function CustomerManagementForm({
   manager: ICustomerDataFormHook;
   updateMode?: boolean;
 }) {
+  const [relationshipManager, setRelationshipManager] = useState<CrmUsersProfile | null>(null);
+
   return (
     <div className="flex flex-col  gap-4 relative">
       {/* First / Middle / Last Name */}
@@ -217,11 +221,13 @@ function CustomerManagementForm({
         <SelectRoleUser
           role="RELATIONSHIP_MANAGER"
           placeholder="Select relationship manager"
-          value={manager.relationManager.relationManager}
-          onSelect={(e) => {
-            if (e) {
-              manager.relationManager.setRelationManager(e);
-            }
+          value={relationshipManager?? undefined} // shows selected name
+          onSelect={(user) => {
+            setRelationshipManager(user);
+            manager.setCustomerData(
+              "relationshipManagerId",
+              user ? user.id : undefined
+            );
           }}
         />
       </div>

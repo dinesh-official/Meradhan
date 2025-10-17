@@ -5,14 +5,27 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import LeadsSearchFilterBar from "./_components/LeadsSearchFilterBar";
-import Table from "../Table";
+import LeadsSearchFilterBar from "./_components/listLeads/LeadsSearchFilterBar";
 import CardPagination from "@/global/elements/table/CardPagination";
 import LeadFollowUpNotes from "./_components/followUpNotes/LeadFollowUpNotes";
 import { useFollowUpNoteFormHook } from "./_components/followUpNotes/useFollowUpFormDataHook";
+import LeadTable from "./_components/listLeads/LeadTable";
+import { useLeadFilterListHook } from "./_components/listLeads/useLeadFilterListHook";
+import { useLeadFilterApiHook } from "./_components/listLeads/useLeadFilterApiHook";
 
 function LeadsView() {
   const manager = useFollowUpNoteFormHook();
+  const filterManager = useLeadFilterListHook();
+  const filterApiManager = useLeadFilterApiHook(filterManager);
+  const isShowPagination = () => {
+    return (
+      (filterApiManager.fetchLeadsQuery.data?.responseData.data.length || 0) >
+        0 &&
+      filterApiManager.fetchLeadsQuery.data?.responseData.meta.totalPages !=
+        1 &&
+      !filterApiManager.fetchLeadsQuery.isPending
+    );
+  };
   return (
     <div>
       <PageInfoBar
@@ -28,11 +41,33 @@ function LeadsView() {
       />
       <LeadFollowUpNotes manager={manager} />
       <Card className="mt-5">
-        <LeadsSearchFilterBar placeholder="Search leads..." />
+        <LeadsSearchFilterBar
+          placeholder="Search leads..."
+          onSearchChange={filterManager.state.setSearch}
+          onSourceChange={filterManager.state.setSourceFilter}
+          onStatusChange={filterManager.state.setStatusFilter}
+          searchValue={filterManager.state.search}
+          sourceValue={filterManager.state.sourceFilter}
+          statusValue={filterManager.state.statusFilter}
+        />
         <CardContent>
-          <Table />
+          <LeadTable
+            data={
+              filterApiManager.fetchLeadsQuery.data?.responseData.data || []
+            }
+            isLoading={filterApiManager.fetchLeadsQuery.isLoading}
+          />
         </CardContent>
-        <CardPagination onClick={() => {}} page={3} totalPages={10} />
+        {isShowPagination() && (
+          <CardPagination
+            onClick={filterManager.state.setPaginationIndex}
+            page={filterManager.state.paginationIndex}
+            totalPages={
+              filterApiManager.fetchLeadsQuery.data?.responseData.meta
+                .totalPages || 1
+            }
+          />
+        )}
       </Card>
     </div>
   );

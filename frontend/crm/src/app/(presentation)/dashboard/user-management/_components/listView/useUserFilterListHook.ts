@@ -22,8 +22,8 @@ export const useUserFilterListHook = (): TUserFilterListHook => {
   function resetAll() {
     setPaginationIndex(1);
     setSearch("");
-    setAccountStatus("");
-    setRoleFilter("");
+    setAccountStatus("ALL");
+    setRoleFilter("ALL");
   }
 
   useEffect(() => {

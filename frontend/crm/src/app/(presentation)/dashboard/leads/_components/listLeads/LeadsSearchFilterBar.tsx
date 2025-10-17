@@ -13,27 +13,35 @@ import { SelectOption } from "@/global/elements/inputs/SelectField";
 
 interface LeadsSearchFilterBarProps {
   searchValue?: string;
-  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange?: (e: string) => void;
   statusValue?: string;
   onStatusChange?: (value: string) => void;
-  kycValue?: string;
-  onKycChange?: (value: string) => void;
+  sourceValue?: string;
+  onSourceChange?: (value: string) => void;
   statusOptions?: SelectOption[];
-  kycOptions?: SelectOption[];
+  sourceOptions?:SelectOption[];
   placeholder?: string;
 }
 
-const filterKycStatus: SelectOption[] = [
-  { label: "All Kyc Status", value: "ALL" },
-  { label: "Pending", value: "PENDING" },
-  { label: "Verified", value: "APPROVED" },
-  { label: "Rejected", value: "REJECTED" },
+const filterStatus: SelectOption[]= [
+  { label: "All Status", value: "ALL" },
+  { label: "New", value: "NEW" },
+  { label: "Contacted", value: "CONTACTED" },
+  { label: "Qualified", value: "QUALIFIED" },
+  { label: "Unqualified", value: "UNQUALIFIED" },
+  { label: "Converted", value: "CONVERTED" },
 ];
 
-const filterStatusOptions: SelectOption[] = [
-  { label: "All Status", value: "ALL" },
-  { label: "New", value: "New" },
-  { label: "Suspended", value: "SUSPENDED" },
+const filterSourceOptions: SelectOption[] = [
+  { label: "All Source", value: "ALL" },
+  { label: "New", value: "WEBSITE" },
+  { label: "New", value: "REFERRAL" },
+  { label: "social", value: "SOCIAL" },
+  { label: "Advertisement", value: "ADVERTISEMENT" },
+  { label: "Event", value: "EVENT" },
+  { label: "Cold Call", value: "COLD_CALL" },
+  { label: "Email", value: "EMAIL" },
+  { label: "Other", value: "OTHER" },
 ];
 
 const LeadsSearchFilterBar: React.FC<LeadsSearchFilterBarProps> = ({
@@ -41,10 +49,10 @@ const LeadsSearchFilterBar: React.FC<LeadsSearchFilterBarProps> = ({
   onSearchChange,
   statusValue,
   onStatusChange,
-  kycValue,
-  onKycChange,
-  statusOptions = filterStatusOptions,
-  kycOptions = filterKycStatus,
+  sourceValue,
+  onSourceChange,
+  statusOptions = filterStatus,
+  sourceOptions = filterSourceOptions,
   placeholder = "Search...",
 }) => {
   return (
@@ -55,7 +63,9 @@ const LeadsSearchFilterBar: React.FC<LeadsSearchFilterBarProps> = ({
           placeholder={placeholder}
           type="search"
           value={searchValue}
-          onChange={onSearchChange}
+          onChange={(e)=>{
+            onSearchChange?.(e.target.value)
+          }}
         />
         <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
           <Search size={16} aria-hidden="true" />
@@ -74,12 +84,12 @@ const LeadsSearchFilterBar: React.FC<LeadsSearchFilterBarProps> = ({
             ))}
           </SelectContent>
         </Select>
-        <Select value={kycValue} onValueChange={onKycChange}>
+        <Select value={sourceValue} onValueChange={onSourceChange}>
           <SelectTrigger className="w-[160px] bg-secondary border-none">
             <SelectValue placeholder="Apply Source" />
           </SelectTrigger>
           <SelectContent>
-            {kycOptions.map((option) => (
+            {sourceOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
