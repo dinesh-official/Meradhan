@@ -3,6 +3,8 @@ import * as userSchema from "./lib/crm/users.schema";
 import * as leadSchema from "./lib/crm/leads.schema";
 
 import * as customerSchema from "./lib/customers/customers.schema";
+import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
+
 import * as Enum from "./lib/enums"
 
 
@@ -11,7 +13,12 @@ export const appSchema = {
    auth: authSchema,
    crm: {
       user: userSchema,
-      leads: leadSchema
+      leads: leadSchema,
+      rfq: {
+         nse: {
+            isin: nseIsinSchema
+         }
+      }
    },
    Enum,
    customer: customerSchema
