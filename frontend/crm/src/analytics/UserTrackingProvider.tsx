@@ -1,10 +1,7 @@
 "use client";
 
 import useAppCookie from "@/hooks/useAppCookie.hook";
-import {
-  usePathname,
-  useSearchParams
-} from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,
   ReactNode,
@@ -22,6 +19,72 @@ import {
   ActivityType,
   CustomDetails,
 } from "./types";
+
+type GeoData = {
+  ip?: string;
+  city?: string;
+  region?: string;
+  region_code?: string;
+  country?: string;
+  country_name?: string;
+  postal?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  utc_offset?: string;
+  org?: string;
+  asn?: string;
+};
+
+const LOCAL_STORAGE_KEY = "ipLocationData";
+const ONE_HOUR_MS = 60 * 60 * 1000; // 1 hour
+
+export async function getUserIpData(): Promise<GeoData | null> {
+  try {
+    // 1) Check localStorage
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved) as { timestamp: number; data: GeoData };
+      const age = Date.now() - parsed.timestamp;
+      if (age < ONE_HOUR_MS) {
+        return parsed.data; // return cached data
+      }
+    }
+
+    // 2) Fetch public IP
+    const ipRes = await fetch("https://api.ipify.org?format=json");
+    if (!ipRes.ok) throw new Error(`Failed to fetch IP: ${ipRes.status}`);
+    const ipJson = await ipRes.json();
+    const userIp = ipJson.ip as string;
+
+    // 3) Fetch geo data
+    const geoRes = await fetch(
+      `https://ipapi.co/${encodeURIComponent(userIp)}/json/`
+    );
+    if (!geoRes.ok) throw new Error(`Failed to fetch geo: ${geoRes.status}`);
+    const geoJson = (await geoRes.json()) as GeoData;
+
+    // Normalize lat/long
+    if (geoJson.latitude && typeof geoJson.latitude === "string") {
+      geoJson.latitude = parseFloat(geoJson.latitude as unknown as string);
+    }
+    if (geoJson.longitude && typeof geoJson.longitude === "string") {
+      geoJson.longitude = parseFloat(geoJson.longitude as unknown as string);
+    }
+    geoJson.ip = userIp;
+
+    // Save to localStorage with timestamp
+    localStorage.setItem(
+      LOCAL_STORAGE_KEY,
+      JSON.stringify({ timestamp: Date.now(), data: geoJson })
+    );
+
+    return geoJson;
+  } catch (err) {
+    console.error("getUserIpData error:", err);
+    return null;
+  }
+}
 
 export interface TrackingContextValue {
   track: (type: ActivityType, details: ActivityDetails) => void;
@@ -72,7 +135,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
    * Public API: trackActivity
    --------------------------------*/
   const trackActivity = useCallback(
-    (type: ActivityType, data: Record<string, unknown> = {}) => {
+    async (type: ActivityType, data: Record<string, unknown> = {}) => {
       if (!type) return;
       const payload = {
         url: pathname,
@@ -85,6 +148,8 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         language: navigator.language,
         userId: cookies.userId,
         role: cookies.role,
+        token: cookies.token,
+        ipData: await getUserIpData(),
         ...data,
       };
       logActivity(type, payload);
@@ -199,4 +264,5 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
   );
 };
 
-export const useUserTracking = (): TrackingContextValue => useContext(TrackingContext);
+export const useUserTracking = (): TrackingContextValue =>
+  useContext(TrackingContext);

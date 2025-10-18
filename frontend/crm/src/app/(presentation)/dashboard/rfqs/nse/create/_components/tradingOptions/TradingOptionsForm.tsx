@@ -6,7 +6,6 @@ import {
   ITradingOptionsFormHook,
   TradingOptionsFormData,
 } from "./tradingOptionsFormData";
-import { ACCESS_TYPES } from "./tradingOptionsFormData.schema";
 
 const TradingOptionsForm = ({
   manager,
@@ -94,10 +93,20 @@ const TradingOptionsForm = ({
         <SelectField
           label="Access Type"
           placeholder="Select Access Type"
-          options={ACCESS_TYPES.map((type) => ({
-            label: type,
-            value: type,
-          }))}
+          options={[
+            {
+              label: "OTM (One to many)",
+              value: "1",
+            },
+            {
+              label: "OTO (One to One)",
+              value: "2",
+            },
+            {
+              label: "IST (Inter scheme transfer)",
+              value: "3",
+            },
+          ]}
           value={state.accessType}
           onChangeAction={(val) =>
             setTradingOptionsData(
@@ -107,7 +116,6 @@ const TradingOptionsForm = ({
           }
           error={errors.accessType?.[0]}
         />
-
       </div>
     </div>
   );

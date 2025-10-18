@@ -1,6 +1,5 @@
-import { CrmUsersProfile } from '@root/apiGateway';
-import { leadFormDataSchema } from './leadFormData.schema';
 import { z } from "zod";
+import { leadFormDataSchema } from './leadFormData.schema';
 import { useLeadFormDataHook } from './useLeadFormDataHook';
 
 

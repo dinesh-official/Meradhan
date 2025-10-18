@@ -1,3 +1,4 @@
+import logger from "@utils/logger/logger";
 import axios, { Axios, AxiosError } from "axios";
 import { cacheStorage } from "../../../../queues/redis/queues";
 import type {
@@ -73,7 +74,6 @@ import type {
     WithdrawRfqRequest,
     WithdrawRfqResponse,
 } from "./rfq.types";
-import logger from "@utils/logger/logger";
 
 // :: NOTE - 
 // All dates, times and datetimes are represented as strings and in Indian standard time.
@@ -136,7 +136,6 @@ export class NseRfq {
 
             if (cached) return cached;
         }
-        await this.logout();
         const { loginKey } = await this.login();
         if (loginKey) {
             await cacheStorage.set(this.loginStoreKey, loginKey, 1000); // TTL 1000s
@@ -147,20 +146,33 @@ export class NseRfq {
 
     // 🔁 Universal Auto-Retry Wrapper
     private async withReLoginRetry<T>(
-        apiCall: (loginKey: string) => Promise<T>
+        apiCall: (loginKey: string, retry?: boolean) => Promise<T>,
+        retryAttempt = false
     ): Promise<T> {
         try {
+            console.log("Get Login");
+
             const key = await this.getLoginKey();
             return await apiCall(key);
         } catch (error) {
             if (axios.isAxiosError(error) && this.isLoginExpired(error)) {
-                logger.logError(error.message, error)
+                // Prevent infinite loop: retry only once
+                if (retryAttempt) {
+                    console.error("Login expired again after retry. Aborting to prevent infinite loop.");
+                    throw error;
+                }
+
+                console.warn("Login expired. Attempting re-login...");
+                logger.logError(error.message, error);
+
                 const newKey = await this.getLoginKey(true);
-                return await apiCall(newKey);
+                return await apiCall(newKey, true);
             }
+
             throw error;
         }
     }
+
 
     private isLoginExpired(error: AxiosError<{ message?: string }>): boolean {
         const msg = error.response?.data?.message ?? error.message;
@@ -578,20 +590,13 @@ export class NseRfq {
         });
     }
 
-    public async getAllIsins(payload: GetAllIsinsRequest): Promise<GetAllIsinsResponse> {
-        if (!payload.filtCoupon && !payload.filtIssueCategory && !payload.filtMaturity && !payload.issuer && !payload.symbol) {
-            const cashedIsin = await cacheStorage.get("ISIN_NSE_ALL")
-            if (cashedIsin) {
-                return cashedIsin as GetAllIsinsResponse;
-            }
-        }
+    public async getAllIsins(payload?: GetAllIsinsRequest): Promise<GetAllIsinsResponse> {
         return await this.withReLoginRetry(async (loginKey) => {
             const { data } = await this.client.post<GetAllIsinsResponse>(
                 "/isins/all",
                 payload,
                 { headers: { loginKey } }
             );
-            await cacheStorage.set("ISIN_NSE_ALL", data, 20000)
             return data;
         });
     }

@@ -1,3 +1,4 @@
+
 export const ActivityTypes = [
   "login",
   "page_view",

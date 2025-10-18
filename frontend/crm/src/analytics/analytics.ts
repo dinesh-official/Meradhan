@@ -11,7 +11,7 @@ export interface AnalyticsEvent {
 }
 
 // -------------------- Configuration --------------------
-const ENDPOINT = "/api/analytics";
+const ENDPOINT = "/api/server/crm/tracking";
 const BATCH_SIZE = 1;
 
 // -------------------- Utility Functions --------------------

@@ -1,20 +1,20 @@
 import { z } from "zod";
 
-export const SEGMENTS = ["dummy1", "dummy2"] as const;
-export const BUY_SELL = ["Buy", "Sell"] as const;
-export const QUOTE_TYPES = ["dummy1", "dummy2"] as const;
-export const DEAL_TYPES = ["DIRECT", "BROKER"] as const;
-export const SETTLEMENT_TYPES = ["dummy1", "dummy2"] as const;
-export const YIELD_TYPES = ["dummy1", "dummy2"] as const;
-export const CALC_METHODS = ["dummy1", "dummy2"] as const;
+export const SEGMENTS = ["R", "C"] as const;
+export const BUY_SELL = ["B", "S", "X"] as const;
+export const QUOTE_TYPES = ["Y", "B"] as const;
+export const DEAL_TYPES = ["D", "B"] as const;
+export const SETTLEMENT_TYPES = ["0", "1"] as const;
+export const YIELD_TYPES = ["YTM", "YTP", "YTC"] as const;
+export const CALC_METHODS = ["M", "O"] as const;
 
 export const nseRFQFormDataSchema = z.object({
+  segment: z.enum(SEGMENTS, { message: "Segment is required" }),
   isin: z
     .string()
     .min(1, "ISIN is required")
     .max(50, "ISIN must be under 50 characters"),
 
-  segment: z.enum(SEGMENTS, { message: "Segment is required" }),
   buySell: z.enum(BUY_SELL, { message: "Buy/Sell selection is required" }),
   quoteType: z.enum(QUOTE_TYPES, { message: "Quote Type is required" }),
   clientCode: z
@@ -44,7 +44,7 @@ export const nseRFQFormDataSchema = z.object({
     .min(1, "Price is required")
     .max(20, "Invalid Price value"),
 }).superRefine((data, ctx) => {
-  if (data.dealType === "BROKER") {
+  if (data.dealType === "B") {
     if (!data.institutions) {
       ctx.addIssue({
         code: "custom",

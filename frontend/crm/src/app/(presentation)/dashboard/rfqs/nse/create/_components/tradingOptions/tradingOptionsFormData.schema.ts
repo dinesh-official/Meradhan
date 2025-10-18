@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ACCESS_TYPES = ["dummy1", "dummy2"] as const;
+export const ACCESS_TYPES = ["1", "2", "3"] as const;
 
 export const TradingOptionsSchema = z.object({
   rfqValidTillMarketClose: z.boolean().default(false),

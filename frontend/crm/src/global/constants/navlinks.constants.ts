@@ -176,7 +176,7 @@ export const NAV_ITEMS: NavItem[] = [
             },
             {
                 label: 'Suspended Users',
-                path: '/dashboard/user-management/roles',
+                path: '/dashboard/user-management/suspended',
                 module: 'user',
                 allowOnly: ['edit:user']
             }

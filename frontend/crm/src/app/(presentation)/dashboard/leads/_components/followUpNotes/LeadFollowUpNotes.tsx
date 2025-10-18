@@ -36,7 +36,7 @@ const LeadFollowUpNotes = ({
 
   const fetchFollowUps = async () => {
     const res = await leadFollowUpApi.getAllFollowUpById(leadId);
-    const list = res.data?.data || [];
+    const list = res.data?.responseData || [];
     setFollowUps(Array.isArray(list) ? (list as NewFollowUpPayload[]) : []);
   };
 
@@ -81,20 +81,22 @@ const LeadFollowUpNotes = ({
         </div>
         <div>
           <p className="font-medium text-sm mb-2 ">Follow-up History</p>
-          <div className="max-h-64 overflow-auto flex flex-col gap-3">
-            {isLoadingFollowUps ? (
+          <div className="min-h-64 max-h-64 overflow-auto flex flex-col gap-3 ">
+            {isLoadingFollowUps && followUps.length == 0 ? (
               <p className="text-sm text-muted-foreground">
                 Loading follow-ups...
               </p>
             ) : followUps.length > 0 ? (
-              <div className="max-h-64 overflow-auto flex flex-col gap-3">
+              <div className="min-h-64 max-h-64 overflow-auto flex flex-col gap-3">
                 {followUps.map((note: NewFollowUpPayload) => (
                   <FollowUpMessageCard
                     key={note.id}
                     leadFollowUpId={note.id}
                     name={note.createdByName}
                     message={note.text}
-                    date={new Date(note.createdAt).toLocaleDateString("en-US", {
+                    date={new Date(
+                      note.nextDate || note.createdAt
+                    ).toLocaleDateString("en-US", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",

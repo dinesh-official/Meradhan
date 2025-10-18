@@ -2,7 +2,7 @@ import { queryClient } from "@/core/config/reactQuery";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import z from "zod";
 

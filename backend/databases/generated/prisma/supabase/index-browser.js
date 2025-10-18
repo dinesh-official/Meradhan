@@ -171,7 +171,7 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   customerPersonalInfoModelId: 'customerPersonalInfoModelId',
   currentAddressModelId: 'currentAddressModelId',
   permanentAddressModelId: 'permanentAddressModelId',
-  nSEDATASETId: 'nSEDATASETId',
+  nseDataSetId: 'nseDataSetId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -306,12 +306,12 @@ exports.Prisma.LeadFollowUpNotesModelScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.NSEDATASETScalarFieldEnum = {
+exports.Prisma.NseDataSetScalarFieldEnum = {
   id: 'id',
-  nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+  nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
 };
 
-exports.Prisma.NSECbricsParticipantModelScalarFieldEnum = {
+exports.Prisma.NseCbricsParticipantModelScalarFieldEnum = {
   id: 'id',
   loginId: 'loginId',
   actualStatus: 'actualStatus',
@@ -348,7 +348,7 @@ exports.Prisma.NSEBankAccountScalarFieldEnum = {
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+  nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
 };
 
 exports.Prisma.NSEDpAccountScalarFieldEnum = {
@@ -361,7 +361,20 @@ exports.Prisma.NSEDpAccountScalarFieldEnum = {
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+  nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
+};
+
+exports.Prisma.NseIsinSecurityReceiptScalarFieldEnum = {
+  id: 'id',
+  symbol: 'symbol',
+  couponRate: 'couponRate',
+  issueCategory: 'issueCategory',
+  listed: 'listed',
+  maturityDate: 'maturityDate',
+  faceValue: 'faceValue',
+  description: 'description',
+  type: 'type',
+  issuer: 'issuer'
 };
 
 exports.Prisma.SortOrder = {
@@ -476,10 +489,11 @@ exports.Prisma.ModelName = {
   AddressModel: 'AddressModel',
   LeadsModel: 'LeadsModel',
   LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
-  NSEDATASET: 'NSEDATASET',
-  NSECbricsParticipantModel: 'NSECbricsParticipantModel',
+  NseDataSet: 'NseDataSet',
+  NseCbricsParticipantModel: 'NseCbricsParticipantModel',
   NSEBankAccount: 'NSEBankAccount',
-  NSEDpAccount: 'NSEDpAccount'
+  NSEDpAccount: 'NSEDpAccount',
+  NseIsinSecurityReceipt: 'NseIsinSecurityReceipt'
 };
 
 /**

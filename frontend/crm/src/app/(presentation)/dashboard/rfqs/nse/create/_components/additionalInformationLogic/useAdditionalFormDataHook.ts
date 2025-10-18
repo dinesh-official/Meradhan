@@ -4,11 +4,12 @@ import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { useState } from "react";
 import { ZodError } from "zod";
 import { AdditionalOptionsFormData } from "./additionalFormaData";
-import { AdditionalOptionsSchema, RATINGS, SECTORS } from "./addtionalFormaData.schema";
+import { AdditionalOptionsSchema, } from "./addtionalFormaData.schema";
+import { RatingCodeArray, sectorOptions } from "@/global/constants/nseData";
 
 export const initAdditionalOptionsData: AdditionalOptionsFormData = {
-  sector: SECTORS[0],
-  rating: RATINGS[0],
+  sector: sectorOptions[0].value,
+  rating: RatingCodeArray[0],
   notes: "",
 };
 

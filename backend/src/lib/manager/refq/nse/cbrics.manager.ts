@@ -141,6 +141,152 @@ export class ParticipantManager {
         return saveToMyDb.nse!.participant;
     }
 
+    public async updateParticipant(userId: number) {
+        // query data
+        const user = await db.dataBase.customerProfileDataModel.findUnique({
+            where: { id: userId },
+            include: {
+                panCard: true,
+                currentAddress: true,
+                bankAccounts: true,
+                dematAccounts: true,
+                nse: {
+                    select: {
+                        participant: {
+                            select: {
+                                id: true,
+                                bankAccountList: true,
+                                dpAccountList: true,
+                            },
+
+                        }
+                    }
+                }
+            }
+        });
+        if (!user) {
+            throw new AppError("No User Found");
+        }
+
+        // send to cbrics
+        const participant = await this.cbrics.updateUnregisteredParticipant({
+            id: user.nse!.participant.id,
+            address: user.currentAddress!.line1,
+            address2: user.currentAddress?.line2 || undefined,
+            address3: user.currentAddress?.line3 || undefined,
+            contactPerson: `${user.firstName} ${user.middleName} ${user.lastName}`,
+            firstName: `${user.firstName} ${user.middleName} ${user.lastName}`,
+            mobileList: [user.middleName],
+            panNo: user.panCard!.panCardNo,
+            emailList: [user.emailAddress],
+            stateCode: getStateCode(user.currentAddress!.state)!,
+            regAddress: user.currentAddress!.fullAddress,
+            telephone: user.phoneNo,
+            expiryDate: null,
+            leiCode: null,
+            custodian: null,
+            bankAccountList: user.bankAccounts.map((e) => {
+                return {
+                    bankAccountNo: e.accountNumber,
+                    bankIFSC: e.ifscCode,
+                    bankName: e.bankName,
+                    isDefault: e.isPrimary ? "Y" : "N",
+                    status: "A"
+                }
+            }),
+            dpAccountList: user.dematAccounts.map((e) => {
+                return {
+                    benId: e.clientId,
+                    dpType: e.depositoryName,
+                    dpId: e.dpId,
+                    isDefault: e.isPrimary ? "Y" : "N",
+                    status: "A"
+                }
+            }),
+        });
+
+
+        /// delete old nse Bank Accounts form local
+        await db.dataBase.nSEBankAccount.deleteMany({
+            where: {
+                id: {
+                    in: user.nse?.participant.bankAccountList.map((e) => e.id)
+                }
+            }
+        });
+
+        /// delete old nse dp Accounts form local
+        await db.dataBase.nSEDpAccount.deleteMany({
+            where: {
+                id: {
+                    in: user.nse?.participant.dpAccountList.map((e) => e.id)
+                }
+            }
+        });
+
+        // Auto Create New Bank And Dp account
+        // save to our db 
+        const saveToMyDb = await db.dataBase.nseCbricsParticipantModel.update({
+            where: {
+                id: user.nse!.participant.id,
+            },
+            data: {
+                actualStatus: participant.actualStatus,
+                contactPerson: participant.contactPerson,
+                custodian: participant.custodian,
+                firstName: participant.firstName,
+                id: participant.id,
+                loginId: participant.loginId,
+                panNo: participant.panNo,
+                regAddress: participant.regAddress,
+                stateCode: participant.stateCode,
+                telephone: participant.telephone,
+                workflowStatus: participant.workflowStatus,
+                address: participant.address,
+                address2: participant.address2,
+                address3: participant.address3,
+                emailList: participant.emailList,
+                expiryDate: participant.expiryDate,
+                fax: participant.fax,
+                leiCode: participant.leiCode,
+                mobileList: participant.mobileList,
+                panVerRemarks: participant.panVerRemarks,
+                panVerStatus: participant.panVerStatus,
+                remarks: participant.remarks,
+                bankAccountList: {
+                    createMany: {
+                        data: participant.bankAccountList.map((bank) => {
+                            return {
+                                bankAccountNo: bank.bankAccountNo!,
+                                bankIFSC: bank.bankIFSC,
+                                bankName: bank.bankName,
+                                isDefault: bank.isDefault,
+                                status: bank.status,
+                                workflowStatus: bank.workflowStatus
+                            }
+                        })
+                    }
+                },
+                dpAccountList: {
+                    createMany: {
+                        data: participant.dpAccountList.map((dp) => {
+                            return {
+                                benId: dp.benId,
+                                dpType: dp.dpType,
+                                dpId: dp.dpId,
+                                isDefault: dp.isDefault,
+                                status: dp.status,
+                                workflowStatus: dp.workflowStatus
+                            }
+                        })
+                    }
+                }
+            }
+        })
+
+        return saveToMyDb;
+    }
+
     public async syncParticipant(userId: number) {
         // query data
         const user = await db.dataBase.customerProfileDataModel.findUnique({
@@ -167,7 +313,7 @@ export class ParticipantManager {
 
 
         // save to our db 
-        const updateToMyDb = await db.dataBase.nSECbricsParticipantModel.update({
+        const updateToMyDb = await db.dataBase.nseCbricsParticipantModel.update({
             where: {
                 id: user.nse.participant.id
             },

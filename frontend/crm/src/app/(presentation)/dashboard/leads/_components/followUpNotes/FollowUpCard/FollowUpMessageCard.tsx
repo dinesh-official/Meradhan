@@ -1,43 +1,36 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Trash2 } from "lucide-react";
 import { useFollowUpApiHook } from "../useFollowUpApiHook";
 
-interface FollowUpMessageCard {
+interface FollowUpMessageCardProps {
   name: string;
   message: string;
-  date: string;
+  date?: string;
   leadFollowUpId: number;
 }
-const FollowUpMessageCard = (followUPMessageFormData: FollowUpMessageCard) => {
+
+const FollowUpMessageCard = ({
+  name,
+  message,
+  date,
+  leadFollowUpId,
+}: FollowUpMessageCardProps) => {
   const { deleteFollowUpNotes } = useFollowUpApiHook();
+
   return (
-    <Card className="bg-gray-100 border-0">
-      <CardHeader className=" items-center">
-        <CardTitle className="">{followUPMessageFormData.name}</CardTitle>
-        <CardAction
-          onClick={() => {
-            deleteFollowUpNotes.mutate(followUPMessageFormData.leadFollowUpId);
-          }}
-        >
-          <Trash2 className="h-4 w-4 text-red-600 cursor-pointer" />
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <p className="text-gray-700 text-sm">
-          {followUPMessageFormData.message}
-        </p>
-      </CardContent>
-      <CardFooter className="text-xs text-gray-500">
-        {followUPMessageFormData.date}
-      </CardFooter>
-    </Card>
+    <div className="  rounded-xl p-3 px-5 bg-gray-50 flex justify-between items-start ">
+      <div className="flex flex-col gap-1">
+        <p className="font-semibold text-gray-800">{name}</p>
+        <p className="text-gray-600">{message}</p>
+        <p className="text-sm text-gray-400">{date || "No Date"}</p>
+      </div>
+      <Trash2
+        className="text-red-500 cursor-pointer hover:text-red-700 transition-colors duration-200"
+        onClick={async () => {
+          deleteFollowUpNotes.mutate(leadFollowUpId);
+        }}
+        size={20}
+      />
+    </div>
   );
 };
 

@@ -74,15 +74,15 @@ export type LeadsModel = $Result.DefaultSelection<Prisma.$LeadsModelPayload>
  */
 export type LeadFollowUpNotesModel = $Result.DefaultSelection<Prisma.$LeadFollowUpNotesModelPayload>
 /**
- * Model NSEDATASET
+ * Model NseDataSet
  * 
  */
-export type NSEDATASET = $Result.DefaultSelection<Prisma.$NSEDATASETPayload>
+export type NseDataSet = $Result.DefaultSelection<Prisma.$NseDataSetPayload>
 /**
- * Model NSECbricsParticipantModel
+ * Model NseCbricsParticipantModel
  * 
  */
-export type NSECbricsParticipantModel = $Result.DefaultSelection<Prisma.$NSECbricsParticipantModelPayload>
+export type NseCbricsParticipantModel = $Result.DefaultSelection<Prisma.$NseCbricsParticipantModelPayload>
 /**
  * Model NSEBankAccount
  * 
@@ -93,6 +93,11 @@ export type NSEBankAccount = $Result.DefaultSelection<Prisma.$NSEBankAccountPayl
  * 
  */
 export type NSEDpAccount = $Result.DefaultSelection<Prisma.$NSEDpAccountPayload>
+/**
+ * Model NseIsinSecurityReceipt
+ * 
+ */
+export type NseIsinSecurityReceipt = $Result.DefaultSelection<Prisma.$NseIsinSecurityReceiptPayload>
 
 /**
  * Enums
@@ -507,24 +512,24 @@ export class PrismaClient<
   get leadFollowUpNotesModel(): Prisma.LeadFollowUpNotesModelDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.nSEDATASET`: Exposes CRUD operations for the **NSEDATASET** model.
+   * `prisma.nseDataSet`: Exposes CRUD operations for the **NseDataSet** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more NSEDATASETS
-    * const nSEDATASETS = await prisma.nSEDATASET.findMany()
+    * // Fetch zero or more NseDataSets
+    * const nseDataSets = await prisma.nseDataSet.findMany()
     * ```
     */
-  get nSEDATASET(): Prisma.NSEDATASETDelegate<ExtArgs, ClientOptions>;
+  get nseDataSet(): Prisma.NseDataSetDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.nSECbricsParticipantModel`: Exposes CRUD operations for the **NSECbricsParticipantModel** model.
+   * `prisma.nseCbricsParticipantModel`: Exposes CRUD operations for the **NseCbricsParticipantModel** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more NSECbricsParticipantModels
-    * const nSECbricsParticipantModels = await prisma.nSECbricsParticipantModel.findMany()
+    * // Fetch zero or more NseCbricsParticipantModels
+    * const nseCbricsParticipantModels = await prisma.nseCbricsParticipantModel.findMany()
     * ```
     */
-  get nSECbricsParticipantModel(): Prisma.NSECbricsParticipantModelDelegate<ExtArgs, ClientOptions>;
+  get nseCbricsParticipantModel(): Prisma.NseCbricsParticipantModelDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.nSEBankAccount`: Exposes CRUD operations for the **NSEBankAccount** model.
@@ -545,6 +550,16 @@ export class PrismaClient<
     * ```
     */
   get nSEDpAccount(): Prisma.NSEDpAccountDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.nseIsinSecurityReceipt`: Exposes CRUD operations for the **NseIsinSecurityReceipt** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NseIsinSecurityReceipts
+    * const nseIsinSecurityReceipts = await prisma.nseIsinSecurityReceipt.findMany()
+    * ```
+    */
+  get nseIsinSecurityReceipt(): Prisma.NseIsinSecurityReceiptDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -997,10 +1012,11 @@ export namespace Prisma {
     AddressModel: 'AddressModel',
     LeadsModel: 'LeadsModel',
     LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
-    NSEDATASET: 'NSEDATASET',
-    NSECbricsParticipantModel: 'NSECbricsParticipantModel',
+    NseDataSet: 'NseDataSet',
+    NseCbricsParticipantModel: 'NseCbricsParticipantModel',
     NSEBankAccount: 'NSEBankAccount',
-    NSEDpAccount: 'NSEDpAccount'
+    NSEDpAccount: 'NSEDpAccount',
+    NseIsinSecurityReceipt: 'NseIsinSecurityReceipt'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1019,7 +1035,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersBankAccountModel" | "customersDematAccountModel" | "customersRiskProfileModel" | "addressModel" | "leadsModel" | "leadFollowUpNotesModel" | "nSEDATASET" | "nSECbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount"
+      modelProps: "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersBankAccountModel" | "customersDematAccountModel" | "customersRiskProfileModel" | "addressModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1911,151 +1927,151 @@ export namespace Prisma {
           }
         }
       }
-      NSEDATASET: {
-        payload: Prisma.$NSEDATASETPayload<ExtArgs>
-        fields: Prisma.NSEDATASETFieldRefs
+      NseDataSet: {
+        payload: Prisma.$NseDataSetPayload<ExtArgs>
+        fields: Prisma.NseDataSetFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.NSEDATASETFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload> | null
+            args: Prisma.NseDataSetFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.NSEDATASETFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>
+            args: Prisma.NseDataSetFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>
           }
           findFirst: {
-            args: Prisma.NSEDATASETFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload> | null
+            args: Prisma.NseDataSetFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.NSEDATASETFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>
+            args: Prisma.NseDataSetFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>
           }
           findMany: {
-            args: Prisma.NSEDATASETFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>[]
+            args: Prisma.NseDataSetFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>[]
           }
           create: {
-            args: Prisma.NSEDATASETCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>
+            args: Prisma.NseDataSetCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>
           }
           createMany: {
-            args: Prisma.NSEDATASETCreateManyArgs<ExtArgs>
+            args: Prisma.NseDataSetCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.NSEDATASETCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>[]
+            args: Prisma.NseDataSetCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>[]
           }
           delete: {
-            args: Prisma.NSEDATASETDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>
+            args: Prisma.NseDataSetDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>
           }
           update: {
-            args: Prisma.NSEDATASETUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>
+            args: Prisma.NseDataSetUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>
           }
           deleteMany: {
-            args: Prisma.NSEDATASETDeleteManyArgs<ExtArgs>
+            args: Prisma.NseDataSetDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.NSEDATASETUpdateManyArgs<ExtArgs>
+            args: Prisma.NseDataSetUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.NSEDATASETUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>[]
+            args: Prisma.NseDataSetUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>[]
           }
           upsert: {
-            args: Prisma.NSEDATASETUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSEDATASETPayload>
+            args: Prisma.NseDataSetUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseDataSetPayload>
           }
           aggregate: {
-            args: Prisma.NSEDATASETAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateNSEDATASET>
+            args: Prisma.NseDataSetAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNseDataSet>
           }
           groupBy: {
-            args: Prisma.NSEDATASETGroupByArgs<ExtArgs>
-            result: $Utils.Optional<NSEDATASETGroupByOutputType>[]
+            args: Prisma.NseDataSetGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NseDataSetGroupByOutputType>[]
           }
           count: {
-            args: Prisma.NSEDATASETCountArgs<ExtArgs>
-            result: $Utils.Optional<NSEDATASETCountAggregateOutputType> | number
+            args: Prisma.NseDataSetCountArgs<ExtArgs>
+            result: $Utils.Optional<NseDataSetCountAggregateOutputType> | number
           }
         }
       }
-      NSECbricsParticipantModel: {
-        payload: Prisma.$NSECbricsParticipantModelPayload<ExtArgs>
-        fields: Prisma.NSECbricsParticipantModelFieldRefs
+      NseCbricsParticipantModel: {
+        payload: Prisma.$NseCbricsParticipantModelPayload<ExtArgs>
+        fields: Prisma.NseCbricsParticipantModelFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.NSECbricsParticipantModelFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload> | null
+            args: Prisma.NseCbricsParticipantModelFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.NSECbricsParticipantModelFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>
+            args: Prisma.NseCbricsParticipantModelFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>
           }
           findFirst: {
-            args: Prisma.NSECbricsParticipantModelFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload> | null
+            args: Prisma.NseCbricsParticipantModelFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.NSECbricsParticipantModelFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>
+            args: Prisma.NseCbricsParticipantModelFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>
           }
           findMany: {
-            args: Prisma.NSECbricsParticipantModelFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>[]
+            args: Prisma.NseCbricsParticipantModelFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>[]
           }
           create: {
-            args: Prisma.NSECbricsParticipantModelCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>
+            args: Prisma.NseCbricsParticipantModelCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>
           }
           createMany: {
-            args: Prisma.NSECbricsParticipantModelCreateManyArgs<ExtArgs>
+            args: Prisma.NseCbricsParticipantModelCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.NSECbricsParticipantModelCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>[]
+            args: Prisma.NseCbricsParticipantModelCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>[]
           }
           delete: {
-            args: Prisma.NSECbricsParticipantModelDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>
+            args: Prisma.NseCbricsParticipantModelDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>
           }
           update: {
-            args: Prisma.NSECbricsParticipantModelUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>
+            args: Prisma.NseCbricsParticipantModelUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>
           }
           deleteMany: {
-            args: Prisma.NSECbricsParticipantModelDeleteManyArgs<ExtArgs>
+            args: Prisma.NseCbricsParticipantModelDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.NSECbricsParticipantModelUpdateManyArgs<ExtArgs>
+            args: Prisma.NseCbricsParticipantModelUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.NSECbricsParticipantModelUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>[]
+            args: Prisma.NseCbricsParticipantModelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>[]
           }
           upsert: {
-            args: Prisma.NSECbricsParticipantModelUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSECbricsParticipantModelPayload>
+            args: Prisma.NseCbricsParticipantModelUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseCbricsParticipantModelPayload>
           }
           aggregate: {
-            args: Prisma.NSECbricsParticipantModelAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateNSECbricsParticipantModel>
+            args: Prisma.NseCbricsParticipantModelAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNseCbricsParticipantModel>
           }
           groupBy: {
-            args: Prisma.NSECbricsParticipantModelGroupByArgs<ExtArgs>
-            result: $Utils.Optional<NSECbricsParticipantModelGroupByOutputType>[]
+            args: Prisma.NseCbricsParticipantModelGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NseCbricsParticipantModelGroupByOutputType>[]
           }
           count: {
-            args: Prisma.NSECbricsParticipantModelCountArgs<ExtArgs>
-            result: $Utils.Optional<NSECbricsParticipantModelCountAggregateOutputType> | number
+            args: Prisma.NseCbricsParticipantModelCountArgs<ExtArgs>
+            result: $Utils.Optional<NseCbricsParticipantModelCountAggregateOutputType> | number
           }
         }
       }
@@ -2207,6 +2223,80 @@ export namespace Prisma {
           }
         }
       }
+      NseIsinSecurityReceipt: {
+        payload: Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>
+        fields: Prisma.NseIsinSecurityReceiptFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NseIsinSecurityReceiptFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NseIsinSecurityReceiptFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>
+          }
+          findFirst: {
+            args: Prisma.NseIsinSecurityReceiptFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NseIsinSecurityReceiptFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>
+          }
+          findMany: {
+            args: Prisma.NseIsinSecurityReceiptFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>[]
+          }
+          create: {
+            args: Prisma.NseIsinSecurityReceiptCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>
+          }
+          createMany: {
+            args: Prisma.NseIsinSecurityReceiptCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NseIsinSecurityReceiptCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>[]
+          }
+          delete: {
+            args: Prisma.NseIsinSecurityReceiptDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>
+          }
+          update: {
+            args: Prisma.NseIsinSecurityReceiptUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>
+          }
+          deleteMany: {
+            args: Prisma.NseIsinSecurityReceiptDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NseIsinSecurityReceiptUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NseIsinSecurityReceiptUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>[]
+          }
+          upsert: {
+            args: Prisma.NseIsinSecurityReceiptUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NseIsinSecurityReceiptPayload>
+          }
+          aggregate: {
+            args: Prisma.NseIsinSecurityReceiptAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNseIsinSecurityReceipt>
+          }
+          groupBy: {
+            args: Prisma.NseIsinSecurityReceiptGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NseIsinSecurityReceiptGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NseIsinSecurityReceiptCountArgs<ExtArgs>
+            result: $Utils.Optional<NseIsinSecurityReceiptCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2315,10 +2405,11 @@ export namespace Prisma {
     addressModel?: AddressModelOmit
     leadsModel?: LeadsModelOmit
     leadFollowUpNotesModel?: LeadFollowUpNotesModelOmit
-    nSEDATASET?: NSEDATASETOmit
-    nSECbricsParticipantModel?: NSECbricsParticipantModelOmit
+    nseDataSet?: NseDataSetOmit
+    nseCbricsParticipantModel?: NseCbricsParticipantModelOmit
     nSEBankAccount?: NSEBankAccountOmit
     nSEDpAccount?: NSEDpAccountOmit
+    nseIsinSecurityReceipt?: NseIsinSecurityReceiptOmit
   }
 
   /* Types for Logging */
@@ -2670,82 +2761,82 @@ export namespace Prisma {
 
 
   /**
-   * Count Type NSEDATASETCountOutputType
+   * Count Type NseDataSetCountOutputType
    */
 
-  export type NSEDATASETCountOutputType = {
+  export type NseDataSetCountOutputType = {
     CustomerProfileDataModel: number
   }
 
-  export type NSEDATASETCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | NSEDATASETCountOutputTypeCountCustomerProfileDataModelArgs
+  export type NseDataSetCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    CustomerProfileDataModel?: boolean | NseDataSetCountOutputTypeCountCustomerProfileDataModelArgs
   }
 
   // Custom InputTypes
   /**
-   * NSEDATASETCountOutputType without action
+   * NseDataSetCountOutputType without action
    */
-  export type NSEDATASETCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASETCountOutputType
+     * Select specific fields to fetch from the NseDataSetCountOutputType
      */
-    select?: NSEDATASETCountOutputTypeSelect<ExtArgs> | null
+    select?: NseDataSetCountOutputTypeSelect<ExtArgs> | null
   }
 
   /**
-   * NSEDATASETCountOutputType without action
+   * NseDataSetCountOutputType without action
    */
-  export type NSEDATASETCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CustomerProfileDataModelWhereInput
   }
 
 
   /**
-   * Count Type NSECbricsParticipantModelCountOutputType
+   * Count Type NseCbricsParticipantModelCountOutputType
    */
 
-  export type NSECbricsParticipantModelCountOutputType = {
+  export type NseCbricsParticipantModelCountOutputType = {
     bankAccountList: number
     dpAccountList: number
     NSEDATASET: number
   }
 
-  export type NSECbricsParticipantModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    bankAccountList?: boolean | NSECbricsParticipantModelCountOutputTypeCountBankAccountListArgs
-    dpAccountList?: boolean | NSECbricsParticipantModelCountOutputTypeCountDpAccountListArgs
-    NSEDATASET?: boolean | NSECbricsParticipantModelCountOutputTypeCountNSEDATASETArgs
+  export type NseCbricsParticipantModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    bankAccountList?: boolean | NseCbricsParticipantModelCountOutputTypeCountBankAccountListArgs
+    dpAccountList?: boolean | NseCbricsParticipantModelCountOutputTypeCountDpAccountListArgs
+    NSEDATASET?: boolean | NseCbricsParticipantModelCountOutputTypeCountNSEDATASETArgs
   }
 
   // Custom InputTypes
   /**
-   * NSECbricsParticipantModelCountOutputType without action
+   * NseCbricsParticipantModelCountOutputType without action
    */
-  export type NSECbricsParticipantModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModelCountOutputType
+     * Select specific fields to fetch from the NseCbricsParticipantModelCountOutputType
      */
-    select?: NSECbricsParticipantModelCountOutputTypeSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelCountOutputTypeSelect<ExtArgs> | null
   }
 
   /**
-   * NSECbricsParticipantModelCountOutputType without action
+   * NseCbricsParticipantModelCountOutputType without action
    */
-  export type NSECbricsParticipantModelCountOutputTypeCountBankAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelCountOutputTypeCountBankAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: NSEBankAccountWhereInput
   }
 
   /**
-   * NSECbricsParticipantModelCountOutputType without action
+   * NseCbricsParticipantModelCountOutputType without action
    */
-  export type NSECbricsParticipantModelCountOutputTypeCountDpAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelCountOutputTypeCountDpAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: NSEDpAccountWhereInput
   }
 
   /**
-   * NSECbricsParticipantModelCountOutputType without action
+   * NseCbricsParticipantModelCountOutputType without action
    */
-  export type NSECbricsParticipantModelCountOutputTypeCountNSEDATASETArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NSEDATASETWhereInput
+  export type NseCbricsParticipantModelCountOutputTypeCountNSEDATASETArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NseDataSetWhereInput
   }
 
 
@@ -5241,7 +5332,7 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nSEDATASETId: number | null
+    nseDataSetId: number | null
   }
 
   export type CustomerProfileDataModelSumAggregateOutputType = {
@@ -5255,7 +5346,7 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nSEDATASETId: number | null
+    nseDataSetId: number | null
   }
 
   export type CustomerProfileDataModelMinAggregateOutputType = {
@@ -5280,7 +5371,7 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nSEDATASETId: number | null
+    nseDataSetId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5307,7 +5398,7 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nSEDATASETId: number | null
+    nseDataSetId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5334,7 +5425,7 @@ export namespace Prisma {
     customerPersonalInfoModelId: number
     currentAddressModelId: number
     permanentAddressModelId: number
-    nSEDATASETId: number
+    nseDataSetId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -5352,7 +5443,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nSEDATASETId?: true
+    nseDataSetId?: true
   }
 
   export type CustomerProfileDataModelSumAggregateInputType = {
@@ -5366,7 +5457,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nSEDATASETId?: true
+    nseDataSetId?: true
   }
 
   export type CustomerProfileDataModelMinAggregateInputType = {
@@ -5391,7 +5482,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nSEDATASETId?: true
+    nseDataSetId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5418,7 +5509,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nSEDATASETId?: true
+    nseDataSetId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5445,7 +5536,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nSEDATASETId?: true
+    nseDataSetId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -5559,7 +5650,7 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nSEDATASETId: number | null
+    nseDataSetId: number | null
     createdAt: Date
     updatedAt: Date
     _count: CustomerProfileDataModelCountAggregateOutputType | null
@@ -5605,7 +5696,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nSEDATASETId?: boolean
+    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
@@ -5643,7 +5734,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nSEDATASETId?: boolean
+    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
@@ -5678,7 +5769,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nSEDATASETId?: boolean
+    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
@@ -5713,12 +5804,12 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nSEDATASETId?: boolean
+    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "createdBy" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "nSEDATASETId" | "createdAt" | "updatedAt", ExtArgs["result"]["customerProfileDataModel"]>
+  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "createdBy" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "nseDataSetId" | "createdAt" | "updatedAt", ExtArgs["result"]["customerProfileDataModel"]>
   export type CustomerProfileDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
@@ -5777,7 +5868,7 @@ export namespace Prisma {
        */
       currentAddress: Prisma.$AddressModelPayload<ExtArgs> | null
       permanentAddress: Prisma.$AddressModelPayload<ExtArgs> | null
-      nse: Prisma.$NSEDATASETPayload<ExtArgs> | null
+      nse: Prisma.$NseDataSetPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5813,7 +5904,7 @@ export namespace Prisma {
       customerPersonalInfoModelId: number | null
       currentAddressModelId: number | null
       permanentAddressModelId: number | null
-      nSEDATASETId: number | null
+      nseDataSetId: number | null
       /**
        * Metadata and audit fields
        */
@@ -6222,7 +6313,7 @@ export namespace Prisma {
     dematAccounts<T extends CustomerProfileDataModel$dematAccountsArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$dematAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersDematAccountModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     currentAddress<T extends CustomerProfileDataModel$currentAddressArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$currentAddressArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     permanentAddress<T extends CustomerProfileDataModel$permanentAddressArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$permanentAddressArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    nse<T extends CustomerProfileDataModel$nseArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$nseArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    nse<T extends CustomerProfileDataModel$nseArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$nseArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6273,7 +6364,7 @@ export namespace Prisma {
     readonly customerPersonalInfoModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly currentAddressModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly permanentAddressModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
-    readonly nSEDATASETId: FieldRef<"CustomerProfileDataModel", 'Int'>
+    readonly nseDataSetId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly createdAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
   }
@@ -6838,18 +6929,18 @@ export namespace Prisma {
    */
   export type CustomerProfileDataModel$nseArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
-    where?: NSEDATASETWhereInput
+    include?: NseDataSetInclude<ExtArgs> | null
+    where?: NseDataSetWhereInput
   }
 
   /**
@@ -17641,357 +17732,357 @@ export namespace Prisma {
 
 
   /**
-   * Model NSEDATASET
+   * Model NseDataSet
    */
 
-  export type AggregateNSEDATASET = {
-    _count: NSEDATASETCountAggregateOutputType | null
-    _avg: NSEDATASETAvgAggregateOutputType | null
-    _sum: NSEDATASETSumAggregateOutputType | null
-    _min: NSEDATASETMinAggregateOutputType | null
-    _max: NSEDATASETMaxAggregateOutputType | null
+  export type AggregateNseDataSet = {
+    _count: NseDataSetCountAggregateOutputType | null
+    _avg: NseDataSetAvgAggregateOutputType | null
+    _sum: NseDataSetSumAggregateOutputType | null
+    _min: NseDataSetMinAggregateOutputType | null
+    _max: NseDataSetMaxAggregateOutputType | null
   }
 
-  export type NSEDATASETAvgAggregateOutputType = {
+  export type NseDataSetAvgAggregateOutputType = {
     id: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
-  export type NSEDATASETSumAggregateOutputType = {
+  export type NseDataSetSumAggregateOutputType = {
     id: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
-  export type NSEDATASETMinAggregateOutputType = {
+  export type NseDataSetMinAggregateOutputType = {
     id: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
-  export type NSEDATASETMaxAggregateOutputType = {
+  export type NseDataSetMaxAggregateOutputType = {
     id: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
-  export type NSEDATASETCountAggregateOutputType = {
+  export type NseDataSetCountAggregateOutputType = {
     id: number
-    nSECbricsParticipantModelId: number
+    nseCbricsParticipantModelId: number
     _all: number
   }
 
 
-  export type NSEDATASETAvgAggregateInputType = {
+  export type NseDataSetAvgAggregateInputType = {
     id?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
-  export type NSEDATASETSumAggregateInputType = {
+  export type NseDataSetSumAggregateInputType = {
     id?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
-  export type NSEDATASETMinAggregateInputType = {
+  export type NseDataSetMinAggregateInputType = {
     id?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
-  export type NSEDATASETMaxAggregateInputType = {
+  export type NseDataSetMaxAggregateInputType = {
     id?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
-  export type NSEDATASETCountAggregateInputType = {
+  export type NseDataSetCountAggregateInputType = {
     id?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
     _all?: true
   }
 
-  export type NSEDATASETAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NSEDATASET to aggregate.
+     * Filter which NseDataSet to aggregate.
      */
-    where?: NSEDATASETWhereInput
+    where?: NseDataSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSEDATASETS to fetch.
+     * Determine the order of NseDataSets to fetch.
      */
-    orderBy?: NSEDATASETOrderByWithRelationInput | NSEDATASETOrderByWithRelationInput[]
+    orderBy?: NseDataSetOrderByWithRelationInput | NseDataSetOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: NSEDATASETWhereUniqueInput
+    cursor?: NseDataSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSEDATASETS from the position of the cursor.
+     * Take `±n` NseDataSets from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSEDATASETS.
+     * Skip the first `n` NseDataSets.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned NSEDATASETS
+     * Count returned NseDataSets
     **/
-    _count?: true | NSEDATASETCountAggregateInputType
+    _count?: true | NseDataSetCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to average
     **/
-    _avg?: NSEDATASETAvgAggregateInputType
+    _avg?: NseDataSetAvgAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to sum
     **/
-    _sum?: NSEDATASETSumAggregateInputType
+    _sum?: NseDataSetSumAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: NSEDATASETMinAggregateInputType
+    _min?: NseDataSetMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: NSEDATASETMaxAggregateInputType
+    _max?: NseDataSetMaxAggregateInputType
   }
 
-  export type GetNSEDATASETAggregateType<T extends NSEDATASETAggregateArgs> = {
-        [P in keyof T & keyof AggregateNSEDATASET]: P extends '_count' | 'count'
+  export type GetNseDataSetAggregateType<T extends NseDataSetAggregateArgs> = {
+        [P in keyof T & keyof AggregateNseDataSet]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateNSEDATASET[P]>
-      : GetScalarType<T[P], AggregateNSEDATASET[P]>
+        : GetScalarType<T[P], AggregateNseDataSet[P]>
+      : GetScalarType<T[P], AggregateNseDataSet[P]>
   }
 
 
 
 
-  export type NSEDATASETGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NSEDATASETWhereInput
-    orderBy?: NSEDATASETOrderByWithAggregationInput | NSEDATASETOrderByWithAggregationInput[]
-    by: NSEDATASETScalarFieldEnum[] | NSEDATASETScalarFieldEnum
-    having?: NSEDATASETScalarWhereWithAggregatesInput
+  export type NseDataSetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NseDataSetWhereInput
+    orderBy?: NseDataSetOrderByWithAggregationInput | NseDataSetOrderByWithAggregationInput[]
+    by: NseDataSetScalarFieldEnum[] | NseDataSetScalarFieldEnum
+    having?: NseDataSetScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: NSEDATASETCountAggregateInputType | true
-    _avg?: NSEDATASETAvgAggregateInputType
-    _sum?: NSEDATASETSumAggregateInputType
-    _min?: NSEDATASETMinAggregateInputType
-    _max?: NSEDATASETMaxAggregateInputType
+    _count?: NseDataSetCountAggregateInputType | true
+    _avg?: NseDataSetAvgAggregateInputType
+    _sum?: NseDataSetSumAggregateInputType
+    _min?: NseDataSetMinAggregateInputType
+    _max?: NseDataSetMaxAggregateInputType
   }
 
-  export type NSEDATASETGroupByOutputType = {
+  export type NseDataSetGroupByOutputType = {
     id: number
-    nSECbricsParticipantModelId: number
-    _count: NSEDATASETCountAggregateOutputType | null
-    _avg: NSEDATASETAvgAggregateOutputType | null
-    _sum: NSEDATASETSumAggregateOutputType | null
-    _min: NSEDATASETMinAggregateOutputType | null
-    _max: NSEDATASETMaxAggregateOutputType | null
+    nseCbricsParticipantModelId: number
+    _count: NseDataSetCountAggregateOutputType | null
+    _avg: NseDataSetAvgAggregateOutputType | null
+    _sum: NseDataSetSumAggregateOutputType | null
+    _min: NseDataSetMinAggregateOutputType | null
+    _max: NseDataSetMaxAggregateOutputType | null
   }
 
-  type GetNSEDATASETGroupByPayload<T extends NSEDATASETGroupByArgs> = Prisma.PrismaPromise<
+  type GetNseDataSetGroupByPayload<T extends NseDataSetGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<NSEDATASETGroupByOutputType, T['by']> &
+      PickEnumerable<NseDataSetGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof NSEDATASETGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof NseDataSetGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], NSEDATASETGroupByOutputType[P]>
-            : GetScalarType<T[P], NSEDATASETGroupByOutputType[P]>
+              : GetScalarType<T[P], NseDataSetGroupByOutputType[P]>
+            : GetScalarType<T[P], NseDataSetGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type NSEDATASETSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NseDataSetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    nSECbricsParticipantModelId?: boolean
-    CustomerProfileDataModel?: boolean | NSEDATASET$CustomerProfileDataModelArgs<ExtArgs>
-    participant?: boolean | NSECbricsParticipantModelDefaultArgs<ExtArgs>
-    _count?: boolean | NSEDATASETCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["nSEDATASET"]>
+    nseCbricsParticipantModelId?: boolean
+    CustomerProfileDataModel?: boolean | NseDataSet$CustomerProfileDataModelArgs<ExtArgs>
+    participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
+    _count?: boolean | NseDataSetCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["nseDataSet"]>
 
-  export type NSEDATASETSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NseDataSetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    nSECbricsParticipantModelId?: boolean
-    participant?: boolean | NSECbricsParticipantModelDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["nSEDATASET"]>
+    nseCbricsParticipantModelId?: boolean
+    participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["nseDataSet"]>
 
-  export type NSEDATASETSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NseDataSetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    nSECbricsParticipantModelId?: boolean
-    participant?: boolean | NSECbricsParticipantModelDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["nSEDATASET"]>
+    nseCbricsParticipantModelId?: boolean
+    participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["nseDataSet"]>
 
-  export type NSEDATASETSelectScalar = {
+  export type NseDataSetSelectScalar = {
     id?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
   }
 
-  export type NSEDATASETOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "nSECbricsParticipantModelId", ExtArgs["result"]["nSEDATASET"]>
-  export type NSEDATASETInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | NSEDATASET$CustomerProfileDataModelArgs<ExtArgs>
-    participant?: boolean | NSECbricsParticipantModelDefaultArgs<ExtArgs>
-    _count?: boolean | NSEDATASETCountOutputTypeDefaultArgs<ExtArgs>
+  export type NseDataSetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "nseCbricsParticipantModelId", ExtArgs["result"]["nseDataSet"]>
+  export type NseDataSetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    CustomerProfileDataModel?: boolean | NseDataSet$CustomerProfileDataModelArgs<ExtArgs>
+    participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
+    _count?: boolean | NseDataSetCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type NSEDATASETIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    participant?: boolean | NSECbricsParticipantModelDefaultArgs<ExtArgs>
+  export type NseDataSetIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
   }
-  export type NSEDATASETIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    participant?: boolean | NSECbricsParticipantModelDefaultArgs<ExtArgs>
+  export type NseDataSetIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
   }
 
-  export type $NSEDATASETPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "NSEDATASET"
+  export type $NseDataSetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NseDataSet"
     objects: {
       CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
-      participant: Prisma.$NSECbricsParticipantModelPayload<ExtArgs>
+      participant: Prisma.$NseCbricsParticipantModelPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      nSECbricsParticipantModelId: number
-    }, ExtArgs["result"]["nSEDATASET"]>
+      nseCbricsParticipantModelId: number
+    }, ExtArgs["result"]["nseDataSet"]>
     composites: {}
   }
 
-  type NSEDATASETGetPayload<S extends boolean | null | undefined | NSEDATASETDefaultArgs> = $Result.GetResult<Prisma.$NSEDATASETPayload, S>
+  type NseDataSetGetPayload<S extends boolean | null | undefined | NseDataSetDefaultArgs> = $Result.GetResult<Prisma.$NseDataSetPayload, S>
 
-  type NSEDATASETCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<NSEDATASETFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: NSEDATASETCountAggregateInputType | true
+  type NseDataSetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NseDataSetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NseDataSetCountAggregateInputType | true
     }
 
-  export interface NSEDATASETDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NSEDATASET'], meta: { name: 'NSEDATASET' } }
+  export interface NseDataSetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NseDataSet'], meta: { name: 'NseDataSet' } }
     /**
-     * Find zero or one NSEDATASET that matches the filter.
-     * @param {NSEDATASETFindUniqueArgs} args - Arguments to find a NSEDATASET
+     * Find zero or one NseDataSet that matches the filter.
+     * @param {NseDataSetFindUniqueArgs} args - Arguments to find a NseDataSet
      * @example
-     * // Get one NSEDATASET
-     * const nSEDATASET = await prisma.nSEDATASET.findUnique({
+     * // Get one NseDataSet
+     * const nseDataSet = await prisma.nseDataSet.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends NSEDATASETFindUniqueArgs>(args: SelectSubset<T, NSEDATASETFindUniqueArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends NseDataSetFindUniqueArgs>(args: SelectSubset<T, NseDataSetFindUniqueArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one NSEDATASET that matches the filter or throw an error with `error.code='P2025'`
+     * Find one NseDataSet that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {NSEDATASETFindUniqueOrThrowArgs} args - Arguments to find a NSEDATASET
+     * @param {NseDataSetFindUniqueOrThrowArgs} args - Arguments to find a NseDataSet
      * @example
-     * // Get one NSEDATASET
-     * const nSEDATASET = await prisma.nSEDATASET.findUniqueOrThrow({
+     * // Get one NseDataSet
+     * const nseDataSet = await prisma.nseDataSet.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends NSEDATASETFindUniqueOrThrowArgs>(args: SelectSubset<T, NSEDATASETFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends NseDataSetFindUniqueOrThrowArgs>(args: SelectSubset<T, NseDataSetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NSEDATASET that matches the filter.
+     * Find the first NseDataSet that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSEDATASETFindFirstArgs} args - Arguments to find a NSEDATASET
+     * @param {NseDataSetFindFirstArgs} args - Arguments to find a NseDataSet
      * @example
-     * // Get one NSEDATASET
-     * const nSEDATASET = await prisma.nSEDATASET.findFirst({
+     * // Get one NseDataSet
+     * const nseDataSet = await prisma.nseDataSet.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends NSEDATASETFindFirstArgs>(args?: SelectSubset<T, NSEDATASETFindFirstArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends NseDataSetFindFirstArgs>(args?: SelectSubset<T, NseDataSetFindFirstArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NSEDATASET that matches the filter or
+     * Find the first NseDataSet that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSEDATASETFindFirstOrThrowArgs} args - Arguments to find a NSEDATASET
+     * @param {NseDataSetFindFirstOrThrowArgs} args - Arguments to find a NseDataSet
      * @example
-     * // Get one NSEDATASET
-     * const nSEDATASET = await prisma.nSEDATASET.findFirstOrThrow({
+     * // Get one NseDataSet
+     * const nseDataSet = await prisma.nseDataSet.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends NSEDATASETFindFirstOrThrowArgs>(args?: SelectSubset<T, NSEDATASETFindFirstOrThrowArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends NseDataSetFindFirstOrThrowArgs>(args?: SelectSubset<T, NseDataSetFindFirstOrThrowArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more NSEDATASETS that matches the filter.
+     * Find zero or more NseDataSets that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSEDATASETFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {NseDataSetFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all NSEDATASETS
-     * const nSEDATASETS = await prisma.nSEDATASET.findMany()
+     * // Get all NseDataSets
+     * const nseDataSets = await prisma.nseDataSet.findMany()
      * 
-     * // Get first 10 NSEDATASETS
-     * const nSEDATASETS = await prisma.nSEDATASET.findMany({ take: 10 })
+     * // Get first 10 NseDataSets
+     * const nseDataSets = await prisma.nseDataSet.findMany({ take: 10 })
      * 
      * // Only select the `id`
-     * const nSEDATASETWithIdOnly = await prisma.nSEDATASET.findMany({ select: { id: true } })
+     * const nseDataSetWithIdOnly = await prisma.nseDataSet.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends NSEDATASETFindManyArgs>(args?: SelectSubset<T, NSEDATASETFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends NseDataSetFindManyArgs>(args?: SelectSubset<T, NseDataSetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a NSEDATASET.
-     * @param {NSEDATASETCreateArgs} args - Arguments to create a NSEDATASET.
+     * Create a NseDataSet.
+     * @param {NseDataSetCreateArgs} args - Arguments to create a NseDataSet.
      * @example
-     * // Create one NSEDATASET
-     * const NSEDATASET = await prisma.nSEDATASET.create({
+     * // Create one NseDataSet
+     * const NseDataSet = await prisma.nseDataSet.create({
      *   data: {
-     *     // ... data to create a NSEDATASET
+     *     // ... data to create a NseDataSet
      *   }
      * })
      * 
      */
-    create<T extends NSEDATASETCreateArgs>(args: SelectSubset<T, NSEDATASETCreateArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends NseDataSetCreateArgs>(args: SelectSubset<T, NseDataSetCreateArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many NSEDATASETS.
-     * @param {NSEDATASETCreateManyArgs} args - Arguments to create many NSEDATASETS.
+     * Create many NseDataSets.
+     * @param {NseDataSetCreateManyArgs} args - Arguments to create many NseDataSets.
      * @example
-     * // Create many NSEDATASETS
-     * const nSEDATASET = await prisma.nSEDATASET.createMany({
+     * // Create many NseDataSets
+     * const nseDataSet = await prisma.nseDataSet.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends NSEDATASETCreateManyArgs>(args?: SelectSubset<T, NSEDATASETCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends NseDataSetCreateManyArgs>(args?: SelectSubset<T, NseDataSetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many NSEDATASETS and returns the data saved in the database.
-     * @param {NSEDATASETCreateManyAndReturnArgs} args - Arguments to create many NSEDATASETS.
+     * Create many NseDataSets and returns the data saved in the database.
+     * @param {NseDataSetCreateManyAndReturnArgs} args - Arguments to create many NseDataSets.
      * @example
-     * // Create many NSEDATASETS
-     * const nSEDATASET = await prisma.nSEDATASET.createManyAndReturn({
+     * // Create many NseDataSets
+     * const nseDataSet = await prisma.nseDataSet.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many NSEDATASETS and only return the `id`
-     * const nSEDATASETWithIdOnly = await prisma.nSEDATASET.createManyAndReturn({
+     * // Create many NseDataSets and only return the `id`
+     * const nseDataSetWithIdOnly = await prisma.nseDataSet.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -18001,28 +18092,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends NSEDATASETCreateManyAndReturnArgs>(args?: SelectSubset<T, NSEDATASETCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends NseDataSetCreateManyAndReturnArgs>(args?: SelectSubset<T, NseDataSetCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a NSEDATASET.
-     * @param {NSEDATASETDeleteArgs} args - Arguments to delete one NSEDATASET.
+     * Delete a NseDataSet.
+     * @param {NseDataSetDeleteArgs} args - Arguments to delete one NseDataSet.
      * @example
-     * // Delete one NSEDATASET
-     * const NSEDATASET = await prisma.nSEDATASET.delete({
+     * // Delete one NseDataSet
+     * const NseDataSet = await prisma.nseDataSet.delete({
      *   where: {
-     *     // ... filter to delete one NSEDATASET
+     *     // ... filter to delete one NseDataSet
      *   }
      * })
      * 
      */
-    delete<T extends NSEDATASETDeleteArgs>(args: SelectSubset<T, NSEDATASETDeleteArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends NseDataSetDeleteArgs>(args: SelectSubset<T, NseDataSetDeleteArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one NSEDATASET.
-     * @param {NSEDATASETUpdateArgs} args - Arguments to update one NSEDATASET.
+     * Update one NseDataSet.
+     * @param {NseDataSetUpdateArgs} args - Arguments to update one NseDataSet.
      * @example
-     * // Update one NSEDATASET
-     * const nSEDATASET = await prisma.nSEDATASET.update({
+     * // Update one NseDataSet
+     * const nseDataSet = await prisma.nseDataSet.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -18032,30 +18123,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends NSEDATASETUpdateArgs>(args: SelectSubset<T, NSEDATASETUpdateArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends NseDataSetUpdateArgs>(args: SelectSubset<T, NseDataSetUpdateArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more NSEDATASETS.
-     * @param {NSEDATASETDeleteManyArgs} args - Arguments to filter NSEDATASETS to delete.
+     * Delete zero or more NseDataSets.
+     * @param {NseDataSetDeleteManyArgs} args - Arguments to filter NseDataSets to delete.
      * @example
-     * // Delete a few NSEDATASETS
-     * const { count } = await prisma.nSEDATASET.deleteMany({
+     * // Delete a few NseDataSets
+     * const { count } = await prisma.nseDataSet.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends NSEDATASETDeleteManyArgs>(args?: SelectSubset<T, NSEDATASETDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends NseDataSetDeleteManyArgs>(args?: SelectSubset<T, NseDataSetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NSEDATASETS.
+     * Update zero or more NseDataSets.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSEDATASETUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {NseDataSetUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many NSEDATASETS
-     * const nSEDATASET = await prisma.nSEDATASET.updateMany({
+     * // Update many NseDataSets
+     * const nseDataSet = await prisma.nseDataSet.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -18065,14 +18156,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends NSEDATASETUpdateManyArgs>(args: SelectSubset<T, NSEDATASETUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends NseDataSetUpdateManyArgs>(args: SelectSubset<T, NseDataSetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NSEDATASETS and returns the data updated in the database.
-     * @param {NSEDATASETUpdateManyAndReturnArgs} args - Arguments to update many NSEDATASETS.
+     * Update zero or more NseDataSets and returns the data updated in the database.
+     * @param {NseDataSetUpdateManyAndReturnArgs} args - Arguments to update many NseDataSets.
      * @example
-     * // Update many NSEDATASETS
-     * const nSEDATASET = await prisma.nSEDATASET.updateManyAndReturn({
+     * // Update many NseDataSets
+     * const nseDataSet = await prisma.nseDataSet.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -18081,8 +18172,8 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more NSEDATASETS and only return the `id`
-     * const nSEDATASETWithIdOnly = await prisma.nSEDATASET.updateManyAndReturn({
+     * // Update zero or more NseDataSets and only return the `id`
+     * const nseDataSetWithIdOnly = await prisma.nseDataSet.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -18095,56 +18186,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends NSEDATASETUpdateManyAndReturnArgs>(args: SelectSubset<T, NSEDATASETUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends NseDataSetUpdateManyAndReturnArgs>(args: SelectSubset<T, NseDataSetUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one NSEDATASET.
-     * @param {NSEDATASETUpsertArgs} args - Arguments to update or create a NSEDATASET.
+     * Create or update one NseDataSet.
+     * @param {NseDataSetUpsertArgs} args - Arguments to update or create a NseDataSet.
      * @example
-     * // Update or create a NSEDATASET
-     * const nSEDATASET = await prisma.nSEDATASET.upsert({
+     * // Update or create a NseDataSet
+     * const nseDataSet = await prisma.nseDataSet.upsert({
      *   create: {
-     *     // ... data to create a NSEDATASET
+     *     // ... data to create a NseDataSet
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the NSEDATASET we want to update
+     *     // ... the filter for the NseDataSet we want to update
      *   }
      * })
      */
-    upsert<T extends NSEDATASETUpsertArgs>(args: SelectSubset<T, NSEDATASETUpsertArgs<ExtArgs>>): Prisma__NSEDATASETClient<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends NseDataSetUpsertArgs>(args: SelectSubset<T, NseDataSetUpsertArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of NSEDATASETS.
+     * Count the number of NseDataSets.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSEDATASETCountArgs} args - Arguments to filter NSEDATASETS to count.
+     * @param {NseDataSetCountArgs} args - Arguments to filter NseDataSets to count.
      * @example
-     * // Count the number of NSEDATASETS
-     * const count = await prisma.nSEDATASET.count({
+     * // Count the number of NseDataSets
+     * const count = await prisma.nseDataSet.count({
      *   where: {
-     *     // ... the filter for the NSEDATASETS we want to count
+     *     // ... the filter for the NseDataSets we want to count
      *   }
      * })
     **/
-    count<T extends NSEDATASETCountArgs>(
-      args?: Subset<T, NSEDATASETCountArgs>,
+    count<T extends NseDataSetCountArgs>(
+      args?: Subset<T, NseDataSetCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], NSEDATASETCountAggregateOutputType>
+          : GetScalarType<T['select'], NseDataSetCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a NSEDATASET.
+     * Allows you to perform aggregations operations on a NseDataSet.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSEDATASETAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {NseDataSetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -18164,13 +18255,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends NSEDATASETAggregateArgs>(args: Subset<T, NSEDATASETAggregateArgs>): Prisma.PrismaPromise<GetNSEDATASETAggregateType<T>>
+    aggregate<T extends NseDataSetAggregateArgs>(args: Subset<T, NseDataSetAggregateArgs>): Prisma.PrismaPromise<GetNseDataSetAggregateType<T>>
 
     /**
-     * Group by NSEDATASET.
+     * Group by NseDataSet.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSEDATASETGroupByArgs} args - Group by arguments.
+     * @param {NseDataSetGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -18185,14 +18276,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends NSEDATASETGroupByArgs,
+      T extends NseDataSetGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: NSEDATASETGroupByArgs['orderBy'] }
-        : { orderBy?: NSEDATASETGroupByArgs['orderBy'] },
+        ? { orderBy: NseDataSetGroupByArgs['orderBy'] }
+        : { orderBy?: NseDataSetGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -18241,23 +18332,23 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, NSEDATASETGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNSEDATASETGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, NseDataSetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNseDataSetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the NSEDATASET model
+   * Fields of the NseDataSet model
    */
-  readonly fields: NSEDATASETFieldRefs;
+  readonly fields: NseDataSetFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for NSEDATASET.
+   * The delegate class that acts as a "Promise-like" for NseDataSet.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__NSEDATASETClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__NseDataSetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    CustomerProfileDataModel<T extends NSEDATASET$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, NSEDATASET$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    participant<T extends NSECbricsParticipantModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, NSECbricsParticipantModelDefaultArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    CustomerProfileDataModel<T extends NseDataSet$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, NseDataSet$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    participant<T extends NseCbricsParticipantModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, NseCbricsParticipantModelDefaultArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -18284,410 +18375,410 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the NSEDATASET model
+   * Fields of the NseDataSet model
    */
-  interface NSEDATASETFieldRefs {
-    readonly id: FieldRef<"NSEDATASET", 'Int'>
-    readonly nSECbricsParticipantModelId: FieldRef<"NSEDATASET", 'Int'>
+  interface NseDataSetFieldRefs {
+    readonly id: FieldRef<"NseDataSet", 'Int'>
+    readonly nseCbricsParticipantModelId: FieldRef<"NseDataSet", 'Int'>
   }
     
 
   // Custom InputTypes
   /**
-   * NSEDATASET findUnique
+   * NseDataSet findUnique
    */
-  export type NSEDATASETFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * Filter, which NSEDATASET to fetch.
+     * Filter, which NseDataSet to fetch.
      */
-    where: NSEDATASETWhereUniqueInput
+    where: NseDataSetWhereUniqueInput
   }
 
   /**
-   * NSEDATASET findUniqueOrThrow
+   * NseDataSet findUniqueOrThrow
    */
-  export type NSEDATASETFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * Filter, which NSEDATASET to fetch.
+     * Filter, which NseDataSet to fetch.
      */
-    where: NSEDATASETWhereUniqueInput
+    where: NseDataSetWhereUniqueInput
   }
 
   /**
-   * NSEDATASET findFirst
+   * NseDataSet findFirst
    */
-  export type NSEDATASETFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * Filter, which NSEDATASET to fetch.
+     * Filter, which NseDataSet to fetch.
      */
-    where?: NSEDATASETWhereInput
+    where?: NseDataSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSEDATASETS to fetch.
+     * Determine the order of NseDataSets to fetch.
      */
-    orderBy?: NSEDATASETOrderByWithRelationInput | NSEDATASETOrderByWithRelationInput[]
+    orderBy?: NseDataSetOrderByWithRelationInput | NseDataSetOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for NSEDATASETS.
+     * Sets the position for searching for NseDataSets.
      */
-    cursor?: NSEDATASETWhereUniqueInput
+    cursor?: NseDataSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSEDATASETS from the position of the cursor.
+     * Take `±n` NseDataSets from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSEDATASETS.
+     * Skip the first `n` NseDataSets.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of NSEDATASETS.
+     * Filter by unique combinations of NseDataSets.
      */
-    distinct?: NSEDATASETScalarFieldEnum | NSEDATASETScalarFieldEnum[]
+    distinct?: NseDataSetScalarFieldEnum | NseDataSetScalarFieldEnum[]
   }
 
   /**
-   * NSEDATASET findFirstOrThrow
+   * NseDataSet findFirstOrThrow
    */
-  export type NSEDATASETFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * Filter, which NSEDATASET to fetch.
+     * Filter, which NseDataSet to fetch.
      */
-    where?: NSEDATASETWhereInput
+    where?: NseDataSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSEDATASETS to fetch.
+     * Determine the order of NseDataSets to fetch.
      */
-    orderBy?: NSEDATASETOrderByWithRelationInput | NSEDATASETOrderByWithRelationInput[]
+    orderBy?: NseDataSetOrderByWithRelationInput | NseDataSetOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for NSEDATASETS.
+     * Sets the position for searching for NseDataSets.
      */
-    cursor?: NSEDATASETWhereUniqueInput
+    cursor?: NseDataSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSEDATASETS from the position of the cursor.
+     * Take `±n` NseDataSets from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSEDATASETS.
+     * Skip the first `n` NseDataSets.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of NSEDATASETS.
+     * Filter by unique combinations of NseDataSets.
      */
-    distinct?: NSEDATASETScalarFieldEnum | NSEDATASETScalarFieldEnum[]
+    distinct?: NseDataSetScalarFieldEnum | NseDataSetScalarFieldEnum[]
   }
 
   /**
-   * NSEDATASET findMany
+   * NseDataSet findMany
    */
-  export type NSEDATASETFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * Filter, which NSEDATASETS to fetch.
+     * Filter, which NseDataSets to fetch.
      */
-    where?: NSEDATASETWhereInput
+    where?: NseDataSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSEDATASETS to fetch.
+     * Determine the order of NseDataSets to fetch.
      */
-    orderBy?: NSEDATASETOrderByWithRelationInput | NSEDATASETOrderByWithRelationInput[]
+    orderBy?: NseDataSetOrderByWithRelationInput | NseDataSetOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing NSEDATASETS.
+     * Sets the position for listing NseDataSets.
      */
-    cursor?: NSEDATASETWhereUniqueInput
+    cursor?: NseDataSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSEDATASETS from the position of the cursor.
+     * Take `±n` NseDataSets from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSEDATASETS.
+     * Skip the first `n` NseDataSets.
      */
     skip?: number
-    distinct?: NSEDATASETScalarFieldEnum | NSEDATASETScalarFieldEnum[]
+    distinct?: NseDataSetScalarFieldEnum | NseDataSetScalarFieldEnum[]
   }
 
   /**
-   * NSEDATASET create
+   * NseDataSet create
    */
-  export type NSEDATASETCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * The data needed to create a NSEDATASET.
+     * The data needed to create a NseDataSet.
      */
-    data: XOR<NSEDATASETCreateInput, NSEDATASETUncheckedCreateInput>
+    data: XOR<NseDataSetCreateInput, NseDataSetUncheckedCreateInput>
   }
 
   /**
-   * NSEDATASET createMany
+   * NseDataSet createMany
    */
-  export type NSEDATASETCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many NSEDATASETS.
+     * The data used to create many NseDataSets.
      */
-    data: NSEDATASETCreateManyInput | NSEDATASETCreateManyInput[]
+    data: NseDataSetCreateManyInput | NseDataSetCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * NSEDATASET createManyAndReturn
+   * NseDataSet createManyAndReturn
    */
-  export type NSEDATASETCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelectCreateManyAndReturn<ExtArgs> | null
+    select?: NseDataSetSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
-     * The data used to create many NSEDATASETS.
+     * The data used to create many NseDataSets.
      */
-    data: NSEDATASETCreateManyInput | NSEDATASETCreateManyInput[]
+    data: NseDataSetCreateManyInput | NseDataSetCreateManyInput[]
     skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETIncludeCreateManyAndReturn<ExtArgs> | null
+    include?: NseDataSetIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * NSEDATASET update
+   * NseDataSet update
    */
-  export type NSEDATASETUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * The data needed to update a NSEDATASET.
+     * The data needed to update a NseDataSet.
      */
-    data: XOR<NSEDATASETUpdateInput, NSEDATASETUncheckedUpdateInput>
+    data: XOR<NseDataSetUpdateInput, NseDataSetUncheckedUpdateInput>
     /**
-     * Choose, which NSEDATASET to update.
+     * Choose, which NseDataSet to update.
      */
-    where: NSEDATASETWhereUniqueInput
+    where: NseDataSetWhereUniqueInput
   }
 
   /**
-   * NSEDATASET updateMany
+   * NseDataSet updateMany
    */
-  export type NSEDATASETUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update NSEDATASETS.
+     * The data used to update NseDataSets.
      */
-    data: XOR<NSEDATASETUpdateManyMutationInput, NSEDATASETUncheckedUpdateManyInput>
+    data: XOR<NseDataSetUpdateManyMutationInput, NseDataSetUncheckedUpdateManyInput>
     /**
-     * Filter which NSEDATASETS to update
+     * Filter which NseDataSets to update
      */
-    where?: NSEDATASETWhereInput
+    where?: NseDataSetWhereInput
     /**
-     * Limit how many NSEDATASETS to update.
+     * Limit how many NseDataSets to update.
      */
     limit?: number
   }
 
   /**
-   * NSEDATASET updateManyAndReturn
+   * NseDataSet updateManyAndReturn
    */
-  export type NSEDATASETUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: NseDataSetSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
-     * The data used to update NSEDATASETS.
+     * The data used to update NseDataSets.
      */
-    data: XOR<NSEDATASETUpdateManyMutationInput, NSEDATASETUncheckedUpdateManyInput>
+    data: XOR<NseDataSetUpdateManyMutationInput, NseDataSetUncheckedUpdateManyInput>
     /**
-     * Filter which NSEDATASETS to update
+     * Filter which NseDataSets to update
      */
-    where?: NSEDATASETWhereInput
+    where?: NseDataSetWhereInput
     /**
-     * Limit how many NSEDATASETS to update.
+     * Limit how many NseDataSets to update.
      */
     limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETIncludeUpdateManyAndReturn<ExtArgs> | null
+    include?: NseDataSetIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * NSEDATASET upsert
+   * NseDataSet upsert
    */
-  export type NSEDATASETUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * The filter to search for the NSEDATASET to update in case it exists.
+     * The filter to search for the NseDataSet to update in case it exists.
      */
-    where: NSEDATASETWhereUniqueInput
+    where: NseDataSetWhereUniqueInput
     /**
-     * In case the NSEDATASET found by the `where` argument doesn't exist, create a new NSEDATASET with this data.
+     * In case the NseDataSet found by the `where` argument doesn't exist, create a new NseDataSet with this data.
      */
-    create: XOR<NSEDATASETCreateInput, NSEDATASETUncheckedCreateInput>
+    create: XOR<NseDataSetCreateInput, NseDataSetUncheckedCreateInput>
     /**
-     * In case the NSEDATASET was found with the provided `where` argument, update it with this data.
+     * In case the NseDataSet was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<NSEDATASETUpdateInput, NSEDATASETUncheckedUpdateInput>
+    update: XOR<NseDataSetUpdateInput, NseDataSetUncheckedUpdateInput>
   }
 
   /**
-   * NSEDATASET delete
+   * NseDataSet delete
    */
-  export type NSEDATASETDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
     /**
-     * Filter which NSEDATASET to delete.
+     * Filter which NseDataSet to delete.
      */
-    where: NSEDATASETWhereUniqueInput
+    where: NseDataSetWhereUniqueInput
   }
 
   /**
-   * NSEDATASET deleteMany
+   * NseDataSet deleteMany
    */
-  export type NSEDATASETDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NSEDATASETS to delete
+     * Filter which NseDataSets to delete
      */
-    where?: NSEDATASETWhereInput
+    where?: NseDataSetWhereInput
     /**
-     * Limit how many NSEDATASETS to delete.
+     * Limit how many NseDataSets to delete.
      */
     limit?: number
   }
 
   /**
-   * NSEDATASET.CustomerProfileDataModel
+   * NseDataSet.CustomerProfileDataModel
    */
-  export type NSEDATASET$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSet$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the CustomerProfileDataModel
      */
@@ -18709,76 +18800,51 @@ export namespace Prisma {
   }
 
   /**
-   * NSEDATASET without action
+   * NseDataSet without action
    */
-  export type NSEDATASETDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseDataSetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
+    include?: NseDataSetInclude<ExtArgs> | null
   }
 
 
   /**
-   * Model NSECbricsParticipantModel
+   * Model NseCbricsParticipantModel
    */
 
-  export type AggregateNSECbricsParticipantModel = {
-    _count: NSECbricsParticipantModelCountAggregateOutputType | null
-    _avg: NSECbricsParticipantModelAvgAggregateOutputType | null
-    _sum: NSECbricsParticipantModelSumAggregateOutputType | null
-    _min: NSECbricsParticipantModelMinAggregateOutputType | null
-    _max: NSECbricsParticipantModelMaxAggregateOutputType | null
+  export type AggregateNseCbricsParticipantModel = {
+    _count: NseCbricsParticipantModelCountAggregateOutputType | null
+    _avg: NseCbricsParticipantModelAvgAggregateOutputType | null
+    _sum: NseCbricsParticipantModelSumAggregateOutputType | null
+    _min: NseCbricsParticipantModelMinAggregateOutputType | null
+    _max: NseCbricsParticipantModelMaxAggregateOutputType | null
   }
 
-  export type NSECbricsParticipantModelAvgAggregateOutputType = {
+  export type NseCbricsParticipantModelAvgAggregateOutputType = {
     id: number | null
     actualStatus: number | null
     workflowStatus: number | null
     panVerStatus: number | null
   }
 
-  export type NSECbricsParticipantModelSumAggregateOutputType = {
+  export type NseCbricsParticipantModelSumAggregateOutputType = {
     id: number | null
     actualStatus: number | null
     workflowStatus: number | null
     panVerStatus: number | null
   }
 
-  export type NSECbricsParticipantModelMinAggregateOutputType = {
-    id: number | null
-    loginId: string | null
-    actualStatus: number | null
-    workflowStatus: number | null
-    firstName: string | null
-    panNo: string | null
-    custodian: string | null
-    contactPerson: string | null
-    telephone: string | null
-    fax: string | null
-    address: string | null
-    address2: string | null
-    address3: string | null
-    stateCode: string | null
-    regAddress: string | null
-    leiCode: string | null
-    expiryDate: Date | null
-    panVerStatus: number | null
-    panVerRemarks: string | null
-    remarks: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type NSECbricsParticipantModelMaxAggregateOutputType = {
+  export type NseCbricsParticipantModelMinAggregateOutputType = {
     id: number | null
     loginId: string | null
     actualStatus: number | null
@@ -18803,7 +18869,32 @@ export namespace Prisma {
     updatedAt: Date | null
   }
 
-  export type NSECbricsParticipantModelCountAggregateOutputType = {
+  export type NseCbricsParticipantModelMaxAggregateOutputType = {
+    id: number | null
+    loginId: string | null
+    actualStatus: number | null
+    workflowStatus: number | null
+    firstName: string | null
+    panNo: string | null
+    custodian: string | null
+    contactPerson: string | null
+    telephone: string | null
+    fax: string | null
+    address: string | null
+    address2: string | null
+    address3: string | null
+    stateCode: string | null
+    regAddress: string | null
+    leiCode: string | null
+    expiryDate: Date | null
+    panVerStatus: number | null
+    panVerRemarks: string | null
+    remarks: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NseCbricsParticipantModelCountAggregateOutputType = {
     id: number
     loginId: number
     actualStatus: number
@@ -18832,46 +18923,21 @@ export namespace Prisma {
   }
 
 
-  export type NSECbricsParticipantModelAvgAggregateInputType = {
+  export type NseCbricsParticipantModelAvgAggregateInputType = {
     id?: true
     actualStatus?: true
     workflowStatus?: true
     panVerStatus?: true
   }
 
-  export type NSECbricsParticipantModelSumAggregateInputType = {
+  export type NseCbricsParticipantModelSumAggregateInputType = {
     id?: true
     actualStatus?: true
     workflowStatus?: true
     panVerStatus?: true
   }
 
-  export type NSECbricsParticipantModelMinAggregateInputType = {
-    id?: true
-    loginId?: true
-    actualStatus?: true
-    workflowStatus?: true
-    firstName?: true
-    panNo?: true
-    custodian?: true
-    contactPerson?: true
-    telephone?: true
-    fax?: true
-    address?: true
-    address2?: true
-    address3?: true
-    stateCode?: true
-    regAddress?: true
-    leiCode?: true
-    expiryDate?: true
-    panVerStatus?: true
-    panVerRemarks?: true
-    remarks?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type NSECbricsParticipantModelMaxAggregateInputType = {
+  export type NseCbricsParticipantModelMinAggregateInputType = {
     id?: true
     loginId?: true
     actualStatus?: true
@@ -18896,7 +18962,32 @@ export namespace Prisma {
     updatedAt?: true
   }
 
-  export type NSECbricsParticipantModelCountAggregateInputType = {
+  export type NseCbricsParticipantModelMaxAggregateInputType = {
+    id?: true
+    loginId?: true
+    actualStatus?: true
+    workflowStatus?: true
+    firstName?: true
+    panNo?: true
+    custodian?: true
+    contactPerson?: true
+    telephone?: true
+    fax?: true
+    address?: true
+    address2?: true
+    address3?: true
+    stateCode?: true
+    regAddress?: true
+    leiCode?: true
+    expiryDate?: true
+    panVerStatus?: true
+    panVerRemarks?: true
+    remarks?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NseCbricsParticipantModelCountAggregateInputType = {
     id?: true
     loginId?: true
     actualStatus?: true
@@ -18924,93 +19015,93 @@ export namespace Prisma {
     _all?: true
   }
 
-  export type NSECbricsParticipantModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NSECbricsParticipantModel to aggregate.
+     * Filter which NseCbricsParticipantModel to aggregate.
      */
-    where?: NSECbricsParticipantModelWhereInput
+    where?: NseCbricsParticipantModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSECbricsParticipantModels to fetch.
+     * Determine the order of NseCbricsParticipantModels to fetch.
      */
-    orderBy?: NSECbricsParticipantModelOrderByWithRelationInput | NSECbricsParticipantModelOrderByWithRelationInput[]
+    orderBy?: NseCbricsParticipantModelOrderByWithRelationInput | NseCbricsParticipantModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: NSECbricsParticipantModelWhereUniqueInput
+    cursor?: NseCbricsParticipantModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSECbricsParticipantModels from the position of the cursor.
+     * Take `±n` NseCbricsParticipantModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSECbricsParticipantModels.
+     * Skip the first `n` NseCbricsParticipantModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned NSECbricsParticipantModels
+     * Count returned NseCbricsParticipantModels
     **/
-    _count?: true | NSECbricsParticipantModelCountAggregateInputType
+    _count?: true | NseCbricsParticipantModelCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to average
     **/
-    _avg?: NSECbricsParticipantModelAvgAggregateInputType
+    _avg?: NseCbricsParticipantModelAvgAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to sum
     **/
-    _sum?: NSECbricsParticipantModelSumAggregateInputType
+    _sum?: NseCbricsParticipantModelSumAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: NSECbricsParticipantModelMinAggregateInputType
+    _min?: NseCbricsParticipantModelMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: NSECbricsParticipantModelMaxAggregateInputType
+    _max?: NseCbricsParticipantModelMaxAggregateInputType
   }
 
-  export type GetNSECbricsParticipantModelAggregateType<T extends NSECbricsParticipantModelAggregateArgs> = {
-        [P in keyof T & keyof AggregateNSECbricsParticipantModel]: P extends '_count' | 'count'
+  export type GetNseCbricsParticipantModelAggregateType<T extends NseCbricsParticipantModelAggregateArgs> = {
+        [P in keyof T & keyof AggregateNseCbricsParticipantModel]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateNSECbricsParticipantModel[P]>
-      : GetScalarType<T[P], AggregateNSECbricsParticipantModel[P]>
+        : GetScalarType<T[P], AggregateNseCbricsParticipantModel[P]>
+      : GetScalarType<T[P], AggregateNseCbricsParticipantModel[P]>
   }
 
 
 
 
-  export type NSECbricsParticipantModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NSECbricsParticipantModelWhereInput
-    orderBy?: NSECbricsParticipantModelOrderByWithAggregationInput | NSECbricsParticipantModelOrderByWithAggregationInput[]
-    by: NSECbricsParticipantModelScalarFieldEnum[] | NSECbricsParticipantModelScalarFieldEnum
-    having?: NSECbricsParticipantModelScalarWhereWithAggregatesInput
+  export type NseCbricsParticipantModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NseCbricsParticipantModelWhereInput
+    orderBy?: NseCbricsParticipantModelOrderByWithAggregationInput | NseCbricsParticipantModelOrderByWithAggregationInput[]
+    by: NseCbricsParticipantModelScalarFieldEnum[] | NseCbricsParticipantModelScalarFieldEnum
+    having?: NseCbricsParticipantModelScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: NSECbricsParticipantModelCountAggregateInputType | true
-    _avg?: NSECbricsParticipantModelAvgAggregateInputType
-    _sum?: NSECbricsParticipantModelSumAggregateInputType
-    _min?: NSECbricsParticipantModelMinAggregateInputType
-    _max?: NSECbricsParticipantModelMaxAggregateInputType
+    _count?: NseCbricsParticipantModelCountAggregateInputType | true
+    _avg?: NseCbricsParticipantModelAvgAggregateInputType
+    _sum?: NseCbricsParticipantModelSumAggregateInputType
+    _min?: NseCbricsParticipantModelMinAggregateInputType
+    _max?: NseCbricsParticipantModelMaxAggregateInputType
   }
 
-  export type NSECbricsParticipantModelGroupByOutputType = {
+  export type NseCbricsParticipantModelGroupByOutputType = {
     id: number
     loginId: string
     actualStatus: number
@@ -19035,28 +19126,28 @@ export namespace Prisma {
     remarks: string | null
     createdAt: Date
     updatedAt: Date
-    _count: NSECbricsParticipantModelCountAggregateOutputType | null
-    _avg: NSECbricsParticipantModelAvgAggregateOutputType | null
-    _sum: NSECbricsParticipantModelSumAggregateOutputType | null
-    _min: NSECbricsParticipantModelMinAggregateOutputType | null
-    _max: NSECbricsParticipantModelMaxAggregateOutputType | null
+    _count: NseCbricsParticipantModelCountAggregateOutputType | null
+    _avg: NseCbricsParticipantModelAvgAggregateOutputType | null
+    _sum: NseCbricsParticipantModelSumAggregateOutputType | null
+    _min: NseCbricsParticipantModelMinAggregateOutputType | null
+    _max: NseCbricsParticipantModelMaxAggregateOutputType | null
   }
 
-  type GetNSECbricsParticipantModelGroupByPayload<T extends NSECbricsParticipantModelGroupByArgs> = Prisma.PrismaPromise<
+  type GetNseCbricsParticipantModelGroupByPayload<T extends NseCbricsParticipantModelGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<NSECbricsParticipantModelGroupByOutputType, T['by']> &
+      PickEnumerable<NseCbricsParticipantModelGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof NSECbricsParticipantModelGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof NseCbricsParticipantModelGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], NSECbricsParticipantModelGroupByOutputType[P]>
-            : GetScalarType<T[P], NSECbricsParticipantModelGroupByOutputType[P]>
+              : GetScalarType<T[P], NseCbricsParticipantModelGroupByOutputType[P]>
+            : GetScalarType<T[P], NseCbricsParticipantModelGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type NSECbricsParticipantModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NseCbricsParticipantModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     loginId?: boolean
     actualStatus?: boolean
@@ -19081,13 +19172,13 @@ export namespace Prisma {
     remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    bankAccountList?: boolean | NSECbricsParticipantModel$bankAccountListArgs<ExtArgs>
-    dpAccountList?: boolean | NSECbricsParticipantModel$dpAccountListArgs<ExtArgs>
-    NSEDATASET?: boolean | NSECbricsParticipantModel$NSEDATASETArgs<ExtArgs>
-    _count?: boolean | NSECbricsParticipantModelCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["nSECbricsParticipantModel"]>
+    bankAccountList?: boolean | NseCbricsParticipantModel$bankAccountListArgs<ExtArgs>
+    dpAccountList?: boolean | NseCbricsParticipantModel$dpAccountListArgs<ExtArgs>
+    NSEDATASET?: boolean | NseCbricsParticipantModel$NSEDATASETArgs<ExtArgs>
+    _count?: boolean | NseCbricsParticipantModelCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["nseCbricsParticipantModel"]>
 
-  export type NSECbricsParticipantModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NseCbricsParticipantModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     loginId?: boolean
     actualStatus?: boolean
@@ -19112,9 +19203,9 @@ export namespace Prisma {
     remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-  }, ExtArgs["result"]["nSECbricsParticipantModel"]>
+  }, ExtArgs["result"]["nseCbricsParticipantModel"]>
 
-  export type NSECbricsParticipantModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NseCbricsParticipantModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     loginId?: boolean
     actualStatus?: boolean
@@ -19139,9 +19230,9 @@ export namespace Prisma {
     remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-  }, ExtArgs["result"]["nSECbricsParticipantModel"]>
+  }, ExtArgs["result"]["nseCbricsParticipantModel"]>
 
-  export type NSECbricsParticipantModelSelectScalar = {
+  export type NseCbricsParticipantModelSelectScalar = {
     id?: boolean
     loginId?: boolean
     actualStatus?: boolean
@@ -19168,22 +19259,22 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type NSECbricsParticipantModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "loginId" | "actualStatus" | "workflowStatus" | "firstName" | "panNo" | "custodian" | "contactPerson" | "mobileList" | "emailList" | "telephone" | "fax" | "address" | "address2" | "address3" | "stateCode" | "regAddress" | "leiCode" | "expiryDate" | "panVerStatus" | "panVerRemarks" | "remarks" | "createdAt" | "updatedAt", ExtArgs["result"]["nSECbricsParticipantModel"]>
-  export type NSECbricsParticipantModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    bankAccountList?: boolean | NSECbricsParticipantModel$bankAccountListArgs<ExtArgs>
-    dpAccountList?: boolean | NSECbricsParticipantModel$dpAccountListArgs<ExtArgs>
-    NSEDATASET?: boolean | NSECbricsParticipantModel$NSEDATASETArgs<ExtArgs>
-    _count?: boolean | NSECbricsParticipantModelCountOutputTypeDefaultArgs<ExtArgs>
+  export type NseCbricsParticipantModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "loginId" | "actualStatus" | "workflowStatus" | "firstName" | "panNo" | "custodian" | "contactPerson" | "mobileList" | "emailList" | "telephone" | "fax" | "address" | "address2" | "address3" | "stateCode" | "regAddress" | "leiCode" | "expiryDate" | "panVerStatus" | "panVerRemarks" | "remarks" | "createdAt" | "updatedAt", ExtArgs["result"]["nseCbricsParticipantModel"]>
+  export type NseCbricsParticipantModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    bankAccountList?: boolean | NseCbricsParticipantModel$bankAccountListArgs<ExtArgs>
+    dpAccountList?: boolean | NseCbricsParticipantModel$dpAccountListArgs<ExtArgs>
+    NSEDATASET?: boolean | NseCbricsParticipantModel$NSEDATASETArgs<ExtArgs>
+    _count?: boolean | NseCbricsParticipantModelCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type NSECbricsParticipantModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type NSECbricsParticipantModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type NseCbricsParticipantModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type NseCbricsParticipantModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
-  export type $NSECbricsParticipantModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "NSECbricsParticipantModel"
+  export type $NseCbricsParticipantModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NseCbricsParticipantModel"
     objects: {
       bankAccountList: Prisma.$NSEBankAccountPayload<ExtArgs>[]
       dpAccountList: Prisma.$NSEDpAccountPayload<ExtArgs>[]
-      NSEDATASET: Prisma.$NSEDATASETPayload<ExtArgs>[]
+      NSEDATASET: Prisma.$NseDataSetPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -19213,136 +19304,136 @@ export namespace Prisma {
        */
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["nSECbricsParticipantModel"]>
+    }, ExtArgs["result"]["nseCbricsParticipantModel"]>
     composites: {}
   }
 
-  type NSECbricsParticipantModelGetPayload<S extends boolean | null | undefined | NSECbricsParticipantModelDefaultArgs> = $Result.GetResult<Prisma.$NSECbricsParticipantModelPayload, S>
+  type NseCbricsParticipantModelGetPayload<S extends boolean | null | undefined | NseCbricsParticipantModelDefaultArgs> = $Result.GetResult<Prisma.$NseCbricsParticipantModelPayload, S>
 
-  type NSECbricsParticipantModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<NSECbricsParticipantModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: NSECbricsParticipantModelCountAggregateInputType | true
+  type NseCbricsParticipantModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NseCbricsParticipantModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NseCbricsParticipantModelCountAggregateInputType | true
     }
 
-  export interface NSECbricsParticipantModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NSECbricsParticipantModel'], meta: { name: 'NSECbricsParticipantModel' } }
+  export interface NseCbricsParticipantModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NseCbricsParticipantModel'], meta: { name: 'NseCbricsParticipantModel' } }
     /**
-     * Find zero or one NSECbricsParticipantModel that matches the filter.
-     * @param {NSECbricsParticipantModelFindUniqueArgs} args - Arguments to find a NSECbricsParticipantModel
+     * Find zero or one NseCbricsParticipantModel that matches the filter.
+     * @param {NseCbricsParticipantModelFindUniqueArgs} args - Arguments to find a NseCbricsParticipantModel
      * @example
-     * // Get one NSECbricsParticipantModel
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.findUnique({
+     * // Get one NseCbricsParticipantModel
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends NSECbricsParticipantModelFindUniqueArgs>(args: SelectSubset<T, NSECbricsParticipantModelFindUniqueArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends NseCbricsParticipantModelFindUniqueArgs>(args: SelectSubset<T, NseCbricsParticipantModelFindUniqueArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one NSECbricsParticipantModel that matches the filter or throw an error with `error.code='P2025'`
+     * Find one NseCbricsParticipantModel that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {NSECbricsParticipantModelFindUniqueOrThrowArgs} args - Arguments to find a NSECbricsParticipantModel
+     * @param {NseCbricsParticipantModelFindUniqueOrThrowArgs} args - Arguments to find a NseCbricsParticipantModel
      * @example
-     * // Get one NSECbricsParticipantModel
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.findUniqueOrThrow({
+     * // Get one NseCbricsParticipantModel
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends NSECbricsParticipantModelFindUniqueOrThrowArgs>(args: SelectSubset<T, NSECbricsParticipantModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends NseCbricsParticipantModelFindUniqueOrThrowArgs>(args: SelectSubset<T, NseCbricsParticipantModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NSECbricsParticipantModel that matches the filter.
+     * Find the first NseCbricsParticipantModel that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSECbricsParticipantModelFindFirstArgs} args - Arguments to find a NSECbricsParticipantModel
+     * @param {NseCbricsParticipantModelFindFirstArgs} args - Arguments to find a NseCbricsParticipantModel
      * @example
-     * // Get one NSECbricsParticipantModel
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.findFirst({
+     * // Get one NseCbricsParticipantModel
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends NSECbricsParticipantModelFindFirstArgs>(args?: SelectSubset<T, NSECbricsParticipantModelFindFirstArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends NseCbricsParticipantModelFindFirstArgs>(args?: SelectSubset<T, NseCbricsParticipantModelFindFirstArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NSECbricsParticipantModel that matches the filter or
+     * Find the first NseCbricsParticipantModel that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSECbricsParticipantModelFindFirstOrThrowArgs} args - Arguments to find a NSECbricsParticipantModel
+     * @param {NseCbricsParticipantModelFindFirstOrThrowArgs} args - Arguments to find a NseCbricsParticipantModel
      * @example
-     * // Get one NSECbricsParticipantModel
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.findFirstOrThrow({
+     * // Get one NseCbricsParticipantModel
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends NSECbricsParticipantModelFindFirstOrThrowArgs>(args?: SelectSubset<T, NSECbricsParticipantModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends NseCbricsParticipantModelFindFirstOrThrowArgs>(args?: SelectSubset<T, NseCbricsParticipantModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more NSECbricsParticipantModels that matches the filter.
+     * Find zero or more NseCbricsParticipantModels that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSECbricsParticipantModelFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {NseCbricsParticipantModelFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all NSECbricsParticipantModels
-     * const nSECbricsParticipantModels = await prisma.nSECbricsParticipantModel.findMany()
+     * // Get all NseCbricsParticipantModels
+     * const nseCbricsParticipantModels = await prisma.nseCbricsParticipantModel.findMany()
      * 
-     * // Get first 10 NSECbricsParticipantModels
-     * const nSECbricsParticipantModels = await prisma.nSECbricsParticipantModel.findMany({ take: 10 })
+     * // Get first 10 NseCbricsParticipantModels
+     * const nseCbricsParticipantModels = await prisma.nseCbricsParticipantModel.findMany({ take: 10 })
      * 
      * // Only select the `id`
-     * const nSECbricsParticipantModelWithIdOnly = await prisma.nSECbricsParticipantModel.findMany({ select: { id: true } })
+     * const nseCbricsParticipantModelWithIdOnly = await prisma.nseCbricsParticipantModel.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends NSECbricsParticipantModelFindManyArgs>(args?: SelectSubset<T, NSECbricsParticipantModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends NseCbricsParticipantModelFindManyArgs>(args?: SelectSubset<T, NseCbricsParticipantModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a NSECbricsParticipantModel.
-     * @param {NSECbricsParticipantModelCreateArgs} args - Arguments to create a NSECbricsParticipantModel.
+     * Create a NseCbricsParticipantModel.
+     * @param {NseCbricsParticipantModelCreateArgs} args - Arguments to create a NseCbricsParticipantModel.
      * @example
-     * // Create one NSECbricsParticipantModel
-     * const NSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.create({
+     * // Create one NseCbricsParticipantModel
+     * const NseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.create({
      *   data: {
-     *     // ... data to create a NSECbricsParticipantModel
+     *     // ... data to create a NseCbricsParticipantModel
      *   }
      * })
      * 
      */
-    create<T extends NSECbricsParticipantModelCreateArgs>(args: SelectSubset<T, NSECbricsParticipantModelCreateArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends NseCbricsParticipantModelCreateArgs>(args: SelectSubset<T, NseCbricsParticipantModelCreateArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many NSECbricsParticipantModels.
-     * @param {NSECbricsParticipantModelCreateManyArgs} args - Arguments to create many NSECbricsParticipantModels.
+     * Create many NseCbricsParticipantModels.
+     * @param {NseCbricsParticipantModelCreateManyArgs} args - Arguments to create many NseCbricsParticipantModels.
      * @example
-     * // Create many NSECbricsParticipantModels
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.createMany({
+     * // Create many NseCbricsParticipantModels
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends NSECbricsParticipantModelCreateManyArgs>(args?: SelectSubset<T, NSECbricsParticipantModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends NseCbricsParticipantModelCreateManyArgs>(args?: SelectSubset<T, NseCbricsParticipantModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many NSECbricsParticipantModels and returns the data saved in the database.
-     * @param {NSECbricsParticipantModelCreateManyAndReturnArgs} args - Arguments to create many NSECbricsParticipantModels.
+     * Create many NseCbricsParticipantModels and returns the data saved in the database.
+     * @param {NseCbricsParticipantModelCreateManyAndReturnArgs} args - Arguments to create many NseCbricsParticipantModels.
      * @example
-     * // Create many NSECbricsParticipantModels
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.createManyAndReturn({
+     * // Create many NseCbricsParticipantModels
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many NSECbricsParticipantModels and only return the `id`
-     * const nSECbricsParticipantModelWithIdOnly = await prisma.nSECbricsParticipantModel.createManyAndReturn({
+     * // Create many NseCbricsParticipantModels and only return the `id`
+     * const nseCbricsParticipantModelWithIdOnly = await prisma.nseCbricsParticipantModel.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -19352,28 +19443,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends NSECbricsParticipantModelCreateManyAndReturnArgs>(args?: SelectSubset<T, NSECbricsParticipantModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends NseCbricsParticipantModelCreateManyAndReturnArgs>(args?: SelectSubset<T, NseCbricsParticipantModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a NSECbricsParticipantModel.
-     * @param {NSECbricsParticipantModelDeleteArgs} args - Arguments to delete one NSECbricsParticipantModel.
+     * Delete a NseCbricsParticipantModel.
+     * @param {NseCbricsParticipantModelDeleteArgs} args - Arguments to delete one NseCbricsParticipantModel.
      * @example
-     * // Delete one NSECbricsParticipantModel
-     * const NSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.delete({
+     * // Delete one NseCbricsParticipantModel
+     * const NseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.delete({
      *   where: {
-     *     // ... filter to delete one NSECbricsParticipantModel
+     *     // ... filter to delete one NseCbricsParticipantModel
      *   }
      * })
      * 
      */
-    delete<T extends NSECbricsParticipantModelDeleteArgs>(args: SelectSubset<T, NSECbricsParticipantModelDeleteArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends NseCbricsParticipantModelDeleteArgs>(args: SelectSubset<T, NseCbricsParticipantModelDeleteArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one NSECbricsParticipantModel.
-     * @param {NSECbricsParticipantModelUpdateArgs} args - Arguments to update one NSECbricsParticipantModel.
+     * Update one NseCbricsParticipantModel.
+     * @param {NseCbricsParticipantModelUpdateArgs} args - Arguments to update one NseCbricsParticipantModel.
      * @example
-     * // Update one NSECbricsParticipantModel
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.update({
+     * // Update one NseCbricsParticipantModel
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -19383,30 +19474,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends NSECbricsParticipantModelUpdateArgs>(args: SelectSubset<T, NSECbricsParticipantModelUpdateArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends NseCbricsParticipantModelUpdateArgs>(args: SelectSubset<T, NseCbricsParticipantModelUpdateArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more NSECbricsParticipantModels.
-     * @param {NSECbricsParticipantModelDeleteManyArgs} args - Arguments to filter NSECbricsParticipantModels to delete.
+     * Delete zero or more NseCbricsParticipantModels.
+     * @param {NseCbricsParticipantModelDeleteManyArgs} args - Arguments to filter NseCbricsParticipantModels to delete.
      * @example
-     * // Delete a few NSECbricsParticipantModels
-     * const { count } = await prisma.nSECbricsParticipantModel.deleteMany({
+     * // Delete a few NseCbricsParticipantModels
+     * const { count } = await prisma.nseCbricsParticipantModel.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends NSECbricsParticipantModelDeleteManyArgs>(args?: SelectSubset<T, NSECbricsParticipantModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends NseCbricsParticipantModelDeleteManyArgs>(args?: SelectSubset<T, NseCbricsParticipantModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NSECbricsParticipantModels.
+     * Update zero or more NseCbricsParticipantModels.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSECbricsParticipantModelUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {NseCbricsParticipantModelUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many NSECbricsParticipantModels
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.updateMany({
+     * // Update many NseCbricsParticipantModels
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -19416,14 +19507,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends NSECbricsParticipantModelUpdateManyArgs>(args: SelectSubset<T, NSECbricsParticipantModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends NseCbricsParticipantModelUpdateManyArgs>(args: SelectSubset<T, NseCbricsParticipantModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NSECbricsParticipantModels and returns the data updated in the database.
-     * @param {NSECbricsParticipantModelUpdateManyAndReturnArgs} args - Arguments to update many NSECbricsParticipantModels.
+     * Update zero or more NseCbricsParticipantModels and returns the data updated in the database.
+     * @param {NseCbricsParticipantModelUpdateManyAndReturnArgs} args - Arguments to update many NseCbricsParticipantModels.
      * @example
-     * // Update many NSECbricsParticipantModels
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.updateManyAndReturn({
+     * // Update many NseCbricsParticipantModels
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -19432,8 +19523,8 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more NSECbricsParticipantModels and only return the `id`
-     * const nSECbricsParticipantModelWithIdOnly = await prisma.nSECbricsParticipantModel.updateManyAndReturn({
+     * // Update zero or more NseCbricsParticipantModels and only return the `id`
+     * const nseCbricsParticipantModelWithIdOnly = await prisma.nseCbricsParticipantModel.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -19446,56 +19537,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends NSECbricsParticipantModelUpdateManyAndReturnArgs>(args: SelectSubset<T, NSECbricsParticipantModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends NseCbricsParticipantModelUpdateManyAndReturnArgs>(args: SelectSubset<T, NseCbricsParticipantModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one NSECbricsParticipantModel.
-     * @param {NSECbricsParticipantModelUpsertArgs} args - Arguments to update or create a NSECbricsParticipantModel.
+     * Create or update one NseCbricsParticipantModel.
+     * @param {NseCbricsParticipantModelUpsertArgs} args - Arguments to update or create a NseCbricsParticipantModel.
      * @example
-     * // Update or create a NSECbricsParticipantModel
-     * const nSECbricsParticipantModel = await prisma.nSECbricsParticipantModel.upsert({
+     * // Update or create a NseCbricsParticipantModel
+     * const nseCbricsParticipantModel = await prisma.nseCbricsParticipantModel.upsert({
      *   create: {
-     *     // ... data to create a NSECbricsParticipantModel
+     *     // ... data to create a NseCbricsParticipantModel
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the NSECbricsParticipantModel we want to update
+     *     // ... the filter for the NseCbricsParticipantModel we want to update
      *   }
      * })
      */
-    upsert<T extends NSECbricsParticipantModelUpsertArgs>(args: SelectSubset<T, NSECbricsParticipantModelUpsertArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends NseCbricsParticipantModelUpsertArgs>(args: SelectSubset<T, NseCbricsParticipantModelUpsertArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of NSECbricsParticipantModels.
+     * Count the number of NseCbricsParticipantModels.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSECbricsParticipantModelCountArgs} args - Arguments to filter NSECbricsParticipantModels to count.
+     * @param {NseCbricsParticipantModelCountArgs} args - Arguments to filter NseCbricsParticipantModels to count.
      * @example
-     * // Count the number of NSECbricsParticipantModels
-     * const count = await prisma.nSECbricsParticipantModel.count({
+     * // Count the number of NseCbricsParticipantModels
+     * const count = await prisma.nseCbricsParticipantModel.count({
      *   where: {
-     *     // ... the filter for the NSECbricsParticipantModels we want to count
+     *     // ... the filter for the NseCbricsParticipantModels we want to count
      *   }
      * })
     **/
-    count<T extends NSECbricsParticipantModelCountArgs>(
-      args?: Subset<T, NSECbricsParticipantModelCountArgs>,
+    count<T extends NseCbricsParticipantModelCountArgs>(
+      args?: Subset<T, NseCbricsParticipantModelCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], NSECbricsParticipantModelCountAggregateOutputType>
+          : GetScalarType<T['select'], NseCbricsParticipantModelCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a NSECbricsParticipantModel.
+     * Allows you to perform aggregations operations on a NseCbricsParticipantModel.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSECbricsParticipantModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {NseCbricsParticipantModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -19515,13 +19606,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends NSECbricsParticipantModelAggregateArgs>(args: Subset<T, NSECbricsParticipantModelAggregateArgs>): Prisma.PrismaPromise<GetNSECbricsParticipantModelAggregateType<T>>
+    aggregate<T extends NseCbricsParticipantModelAggregateArgs>(args: Subset<T, NseCbricsParticipantModelAggregateArgs>): Prisma.PrismaPromise<GetNseCbricsParticipantModelAggregateType<T>>
 
     /**
-     * Group by NSECbricsParticipantModel.
+     * Group by NseCbricsParticipantModel.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSECbricsParticipantModelGroupByArgs} args - Group by arguments.
+     * @param {NseCbricsParticipantModelGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -19536,14 +19627,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends NSECbricsParticipantModelGroupByArgs,
+      T extends NseCbricsParticipantModelGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: NSECbricsParticipantModelGroupByArgs['orderBy'] }
-        : { orderBy?: NSECbricsParticipantModelGroupByArgs['orderBy'] },
+        ? { orderBy: NseCbricsParticipantModelGroupByArgs['orderBy'] }
+        : { orderBy?: NseCbricsParticipantModelGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -19592,24 +19683,24 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, NSECbricsParticipantModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNSECbricsParticipantModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, NseCbricsParticipantModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNseCbricsParticipantModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the NSECbricsParticipantModel model
+   * Fields of the NseCbricsParticipantModel model
    */
-  readonly fields: NSECbricsParticipantModelFieldRefs;
+  readonly fields: NseCbricsParticipantModelFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for NSECbricsParticipantModel.
+   * The delegate class that acts as a "Promise-like" for NseCbricsParticipantModel.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__NSECbricsParticipantModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__NseCbricsParticipantModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    bankAccountList<T extends NSECbricsParticipantModel$bankAccountListArgs<ExtArgs> = {}>(args?: Subset<T, NSECbricsParticipantModel$bankAccountListArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEBankAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    dpAccountList<T extends NSECbricsParticipantModel$dpAccountListArgs<ExtArgs> = {}>(args?: Subset<T, NSECbricsParticipantModel$dpAccountListArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEDpAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    NSEDATASET<T extends NSECbricsParticipantModel$NSEDATASETArgs<ExtArgs> = {}>(args?: Subset<T, NSECbricsParticipantModel$NSEDATASETArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEDATASETPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    bankAccountList<T extends NseCbricsParticipantModel$bankAccountListArgs<ExtArgs> = {}>(args?: Subset<T, NseCbricsParticipantModel$bankAccountListArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEBankAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    dpAccountList<T extends NseCbricsParticipantModel$dpAccountListArgs<ExtArgs> = {}>(args?: Subset<T, NseCbricsParticipantModel$dpAccountListArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSEDpAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    NSEDATASET<T extends NseCbricsParticipantModel$NSEDATASETArgs<ExtArgs> = {}>(args?: Subset<T, NseCbricsParticipantModel$NSEDATASETArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19636,424 +19727,424 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the NSECbricsParticipantModel model
+   * Fields of the NseCbricsParticipantModel model
    */
-  interface NSECbricsParticipantModelFieldRefs {
-    readonly id: FieldRef<"NSECbricsParticipantModel", 'Int'>
-    readonly loginId: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly actualStatus: FieldRef<"NSECbricsParticipantModel", 'Int'>
-    readonly workflowStatus: FieldRef<"NSECbricsParticipantModel", 'Int'>
-    readonly firstName: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly panNo: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly custodian: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly contactPerson: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly mobileList: FieldRef<"NSECbricsParticipantModel", 'String[]'>
-    readonly emailList: FieldRef<"NSECbricsParticipantModel", 'String[]'>
-    readonly telephone: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly fax: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly address: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly address2: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly address3: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly stateCode: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly regAddress: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly leiCode: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly expiryDate: FieldRef<"NSECbricsParticipantModel", 'DateTime'>
-    readonly panVerStatus: FieldRef<"NSECbricsParticipantModel", 'Int'>
-    readonly panVerRemarks: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly remarks: FieldRef<"NSECbricsParticipantModel", 'String'>
-    readonly createdAt: FieldRef<"NSECbricsParticipantModel", 'DateTime'>
-    readonly updatedAt: FieldRef<"NSECbricsParticipantModel", 'DateTime'>
+  interface NseCbricsParticipantModelFieldRefs {
+    readonly id: FieldRef<"NseCbricsParticipantModel", 'Int'>
+    readonly loginId: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly actualStatus: FieldRef<"NseCbricsParticipantModel", 'Int'>
+    readonly workflowStatus: FieldRef<"NseCbricsParticipantModel", 'Int'>
+    readonly firstName: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly panNo: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly custodian: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly contactPerson: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly mobileList: FieldRef<"NseCbricsParticipantModel", 'String[]'>
+    readonly emailList: FieldRef<"NseCbricsParticipantModel", 'String[]'>
+    readonly telephone: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly fax: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly address: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly address2: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly address3: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly stateCode: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly regAddress: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly leiCode: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly expiryDate: FieldRef<"NseCbricsParticipantModel", 'DateTime'>
+    readonly panVerStatus: FieldRef<"NseCbricsParticipantModel", 'Int'>
+    readonly panVerRemarks: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly remarks: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly createdAt: FieldRef<"NseCbricsParticipantModel", 'DateTime'>
+    readonly updatedAt: FieldRef<"NseCbricsParticipantModel", 'DateTime'>
   }
     
 
   // Custom InputTypes
   /**
-   * NSECbricsParticipantModel findUnique
+   * NseCbricsParticipantModel findUnique
    */
-  export type NSECbricsParticipantModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * Filter, which NSECbricsParticipantModel to fetch.
+     * Filter, which NseCbricsParticipantModel to fetch.
      */
-    where: NSECbricsParticipantModelWhereUniqueInput
+    where: NseCbricsParticipantModelWhereUniqueInput
   }
 
   /**
-   * NSECbricsParticipantModel findUniqueOrThrow
+   * NseCbricsParticipantModel findUniqueOrThrow
    */
-  export type NSECbricsParticipantModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * Filter, which NSECbricsParticipantModel to fetch.
+     * Filter, which NseCbricsParticipantModel to fetch.
      */
-    where: NSECbricsParticipantModelWhereUniqueInput
+    where: NseCbricsParticipantModelWhereUniqueInput
   }
 
   /**
-   * NSECbricsParticipantModel findFirst
+   * NseCbricsParticipantModel findFirst
    */
-  export type NSECbricsParticipantModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * Filter, which NSECbricsParticipantModel to fetch.
+     * Filter, which NseCbricsParticipantModel to fetch.
      */
-    where?: NSECbricsParticipantModelWhereInput
+    where?: NseCbricsParticipantModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSECbricsParticipantModels to fetch.
+     * Determine the order of NseCbricsParticipantModels to fetch.
      */
-    orderBy?: NSECbricsParticipantModelOrderByWithRelationInput | NSECbricsParticipantModelOrderByWithRelationInput[]
+    orderBy?: NseCbricsParticipantModelOrderByWithRelationInput | NseCbricsParticipantModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for NSECbricsParticipantModels.
+     * Sets the position for searching for NseCbricsParticipantModels.
      */
-    cursor?: NSECbricsParticipantModelWhereUniqueInput
+    cursor?: NseCbricsParticipantModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSECbricsParticipantModels from the position of the cursor.
+     * Take `±n` NseCbricsParticipantModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSECbricsParticipantModels.
+     * Skip the first `n` NseCbricsParticipantModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of NSECbricsParticipantModels.
+     * Filter by unique combinations of NseCbricsParticipantModels.
      */
-    distinct?: NSECbricsParticipantModelScalarFieldEnum | NSECbricsParticipantModelScalarFieldEnum[]
+    distinct?: NseCbricsParticipantModelScalarFieldEnum | NseCbricsParticipantModelScalarFieldEnum[]
   }
 
   /**
-   * NSECbricsParticipantModel findFirstOrThrow
+   * NseCbricsParticipantModel findFirstOrThrow
    */
-  export type NSECbricsParticipantModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * Filter, which NSECbricsParticipantModel to fetch.
+     * Filter, which NseCbricsParticipantModel to fetch.
      */
-    where?: NSECbricsParticipantModelWhereInput
+    where?: NseCbricsParticipantModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSECbricsParticipantModels to fetch.
+     * Determine the order of NseCbricsParticipantModels to fetch.
      */
-    orderBy?: NSECbricsParticipantModelOrderByWithRelationInput | NSECbricsParticipantModelOrderByWithRelationInput[]
+    orderBy?: NseCbricsParticipantModelOrderByWithRelationInput | NseCbricsParticipantModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for NSECbricsParticipantModels.
+     * Sets the position for searching for NseCbricsParticipantModels.
      */
-    cursor?: NSECbricsParticipantModelWhereUniqueInput
+    cursor?: NseCbricsParticipantModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSECbricsParticipantModels from the position of the cursor.
+     * Take `±n` NseCbricsParticipantModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSECbricsParticipantModels.
+     * Skip the first `n` NseCbricsParticipantModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of NSECbricsParticipantModels.
+     * Filter by unique combinations of NseCbricsParticipantModels.
      */
-    distinct?: NSECbricsParticipantModelScalarFieldEnum | NSECbricsParticipantModelScalarFieldEnum[]
+    distinct?: NseCbricsParticipantModelScalarFieldEnum | NseCbricsParticipantModelScalarFieldEnum[]
   }
 
   /**
-   * NSECbricsParticipantModel findMany
+   * NseCbricsParticipantModel findMany
    */
-  export type NSECbricsParticipantModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * Filter, which NSECbricsParticipantModels to fetch.
+     * Filter, which NseCbricsParticipantModels to fetch.
      */
-    where?: NSECbricsParticipantModelWhereInput
+    where?: NseCbricsParticipantModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSECbricsParticipantModels to fetch.
+     * Determine the order of NseCbricsParticipantModels to fetch.
      */
-    orderBy?: NSECbricsParticipantModelOrderByWithRelationInput | NSECbricsParticipantModelOrderByWithRelationInput[]
+    orderBy?: NseCbricsParticipantModelOrderByWithRelationInput | NseCbricsParticipantModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing NSECbricsParticipantModels.
+     * Sets the position for listing NseCbricsParticipantModels.
      */
-    cursor?: NSECbricsParticipantModelWhereUniqueInput
+    cursor?: NseCbricsParticipantModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSECbricsParticipantModels from the position of the cursor.
+     * Take `±n` NseCbricsParticipantModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSECbricsParticipantModels.
+     * Skip the first `n` NseCbricsParticipantModels.
      */
     skip?: number
-    distinct?: NSECbricsParticipantModelScalarFieldEnum | NSECbricsParticipantModelScalarFieldEnum[]
+    distinct?: NseCbricsParticipantModelScalarFieldEnum | NseCbricsParticipantModelScalarFieldEnum[]
   }
 
   /**
-   * NSECbricsParticipantModel create
+   * NseCbricsParticipantModel create
    */
-  export type NSECbricsParticipantModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * The data needed to create a NSECbricsParticipantModel.
+     * The data needed to create a NseCbricsParticipantModel.
      */
-    data: XOR<NSECbricsParticipantModelCreateInput, NSECbricsParticipantModelUncheckedCreateInput>
+    data: XOR<NseCbricsParticipantModelCreateInput, NseCbricsParticipantModelUncheckedCreateInput>
   }
 
   /**
-   * NSECbricsParticipantModel createMany
+   * NseCbricsParticipantModel createMany
    */
-  export type NSECbricsParticipantModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many NSECbricsParticipantModels.
+     * The data used to create many NseCbricsParticipantModels.
      */
-    data: NSECbricsParticipantModelCreateManyInput | NSECbricsParticipantModelCreateManyInput[]
+    data: NseCbricsParticipantModelCreateManyInput | NseCbricsParticipantModelCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * NSECbricsParticipantModel createManyAndReturn
+   * NseCbricsParticipantModel createManyAndReturn
    */
-  export type NSECbricsParticipantModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelectCreateManyAndReturn<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
-     * The data used to create many NSECbricsParticipantModels.
+     * The data used to create many NseCbricsParticipantModels.
      */
-    data: NSECbricsParticipantModelCreateManyInput | NSECbricsParticipantModelCreateManyInput[]
+    data: NseCbricsParticipantModelCreateManyInput | NseCbricsParticipantModelCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * NSECbricsParticipantModel update
+   * NseCbricsParticipantModel update
    */
-  export type NSECbricsParticipantModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * The data needed to update a NSECbricsParticipantModel.
+     * The data needed to update a NseCbricsParticipantModel.
      */
-    data: XOR<NSECbricsParticipantModelUpdateInput, NSECbricsParticipantModelUncheckedUpdateInput>
+    data: XOR<NseCbricsParticipantModelUpdateInput, NseCbricsParticipantModelUncheckedUpdateInput>
     /**
-     * Choose, which NSECbricsParticipantModel to update.
+     * Choose, which NseCbricsParticipantModel to update.
      */
-    where: NSECbricsParticipantModelWhereUniqueInput
+    where: NseCbricsParticipantModelWhereUniqueInput
   }
 
   /**
-   * NSECbricsParticipantModel updateMany
+   * NseCbricsParticipantModel updateMany
    */
-  export type NSECbricsParticipantModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update NSECbricsParticipantModels.
+     * The data used to update NseCbricsParticipantModels.
      */
-    data: XOR<NSECbricsParticipantModelUpdateManyMutationInput, NSECbricsParticipantModelUncheckedUpdateManyInput>
+    data: XOR<NseCbricsParticipantModelUpdateManyMutationInput, NseCbricsParticipantModelUncheckedUpdateManyInput>
     /**
-     * Filter which NSECbricsParticipantModels to update
+     * Filter which NseCbricsParticipantModels to update
      */
-    where?: NSECbricsParticipantModelWhereInput
+    where?: NseCbricsParticipantModelWhereInput
     /**
-     * Limit how many NSECbricsParticipantModels to update.
+     * Limit how many NseCbricsParticipantModels to update.
      */
     limit?: number
   }
 
   /**
-   * NSECbricsParticipantModel updateManyAndReturn
+   * NseCbricsParticipantModel updateManyAndReturn
    */
-  export type NSECbricsParticipantModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
-     * The data used to update NSECbricsParticipantModels.
+     * The data used to update NseCbricsParticipantModels.
      */
-    data: XOR<NSECbricsParticipantModelUpdateManyMutationInput, NSECbricsParticipantModelUncheckedUpdateManyInput>
+    data: XOR<NseCbricsParticipantModelUpdateManyMutationInput, NseCbricsParticipantModelUncheckedUpdateManyInput>
     /**
-     * Filter which NSECbricsParticipantModels to update
+     * Filter which NseCbricsParticipantModels to update
      */
-    where?: NSECbricsParticipantModelWhereInput
+    where?: NseCbricsParticipantModelWhereInput
     /**
-     * Limit how many NSECbricsParticipantModels to update.
+     * Limit how many NseCbricsParticipantModels to update.
      */
     limit?: number
   }
 
   /**
-   * NSECbricsParticipantModel upsert
+   * NseCbricsParticipantModel upsert
    */
-  export type NSECbricsParticipantModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * The filter to search for the NSECbricsParticipantModel to update in case it exists.
+     * The filter to search for the NseCbricsParticipantModel to update in case it exists.
      */
-    where: NSECbricsParticipantModelWhereUniqueInput
+    where: NseCbricsParticipantModelWhereUniqueInput
     /**
-     * In case the NSECbricsParticipantModel found by the `where` argument doesn't exist, create a new NSECbricsParticipantModel with this data.
+     * In case the NseCbricsParticipantModel found by the `where` argument doesn't exist, create a new NseCbricsParticipantModel with this data.
      */
-    create: XOR<NSECbricsParticipantModelCreateInput, NSECbricsParticipantModelUncheckedCreateInput>
+    create: XOR<NseCbricsParticipantModelCreateInput, NseCbricsParticipantModelUncheckedCreateInput>
     /**
-     * In case the NSECbricsParticipantModel was found with the provided `where` argument, update it with this data.
+     * In case the NseCbricsParticipantModel was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<NSECbricsParticipantModelUpdateInput, NSECbricsParticipantModelUncheckedUpdateInput>
+    update: XOR<NseCbricsParticipantModelUpdateInput, NseCbricsParticipantModelUncheckedUpdateInput>
   }
 
   /**
-   * NSECbricsParticipantModel delete
+   * NseCbricsParticipantModel delete
    */
-  export type NSECbricsParticipantModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
     /**
-     * Filter which NSECbricsParticipantModel to delete.
+     * Filter which NseCbricsParticipantModel to delete.
      */
-    where: NSECbricsParticipantModelWhereUniqueInput
+    where: NseCbricsParticipantModelWhereUniqueInput
   }
 
   /**
-   * NSECbricsParticipantModel deleteMany
+   * NseCbricsParticipantModel deleteMany
    */
-  export type NSECbricsParticipantModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NSECbricsParticipantModels to delete
+     * Filter which NseCbricsParticipantModels to delete
      */
-    where?: NSECbricsParticipantModelWhereInput
+    where?: NseCbricsParticipantModelWhereInput
     /**
-     * Limit how many NSECbricsParticipantModels to delete.
+     * Limit how many NseCbricsParticipantModels to delete.
      */
     limit?: number
   }
 
   /**
-   * NSECbricsParticipantModel.bankAccountList
+   * NseCbricsParticipantModel.bankAccountList
    */
-  export type NSECbricsParticipantModel$bankAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModel$bankAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the NSEBankAccount
      */
@@ -20075,9 +20166,9 @@ export namespace Prisma {
   }
 
   /**
-   * NSECbricsParticipantModel.dpAccountList
+   * NseCbricsParticipantModel.dpAccountList
    */
-  export type NSECbricsParticipantModel$dpAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModel$dpAccountListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the NSEDpAccount
      */
@@ -20099,45 +20190,45 @@ export namespace Prisma {
   }
 
   /**
-   * NSECbricsParticipantModel.NSEDATASET
+   * NseCbricsParticipantModel.NSEDATASET
    */
-  export type NSECbricsParticipantModel$NSEDATASETArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModel$NSEDATASETArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSEDATASET
+     * Select specific fields to fetch from the NseDataSet
      */
-    select?: NSEDATASETSelect<ExtArgs> | null
+    select?: NseDataSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSEDATASET
+     * Omit specific fields from the NseDataSet
      */
-    omit?: NSEDATASETOmit<ExtArgs> | null
+    omit?: NseDataSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSEDATASETInclude<ExtArgs> | null
-    where?: NSEDATASETWhereInput
-    orderBy?: NSEDATASETOrderByWithRelationInput | NSEDATASETOrderByWithRelationInput[]
-    cursor?: NSEDATASETWhereUniqueInput
+    include?: NseDataSetInclude<ExtArgs> | null
+    where?: NseDataSetWhereInput
+    orderBy?: NseDataSetOrderByWithRelationInput | NseDataSetOrderByWithRelationInput[]
+    cursor?: NseDataSetWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: NSEDATASETScalarFieldEnum | NSEDATASETScalarFieldEnum[]
+    distinct?: NseDataSetScalarFieldEnum | NseDataSetScalarFieldEnum[]
   }
 
   /**
-   * NSECbricsParticipantModel without action
+   * NseCbricsParticipantModel without action
    */
-  export type NSECbricsParticipantModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NseCbricsParticipantModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
   }
 
 
@@ -20156,13 +20247,13 @@ export namespace Prisma {
   export type NSEBankAccountAvgAggregateOutputType = {
     id: number | null
     workflowStatus: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEBankAccountSumAggregateOutputType = {
     id: number | null
     workflowStatus: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEBankAccountMinAggregateOutputType = {
@@ -20175,7 +20266,7 @@ export namespace Prisma {
     status: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEBankAccountMaxAggregateOutputType = {
@@ -20188,7 +20279,7 @@ export namespace Prisma {
     status: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEBankAccountCountAggregateOutputType = {
@@ -20201,7 +20292,7 @@ export namespace Prisma {
     status: number
     createdAt: number
     updatedAt: number
-    nSECbricsParticipantModelId: number
+    nseCbricsParticipantModelId: number
     _all: number
   }
 
@@ -20209,13 +20300,13 @@ export namespace Prisma {
   export type NSEBankAccountAvgAggregateInputType = {
     id?: true
     workflowStatus?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEBankAccountSumAggregateInputType = {
     id?: true
     workflowStatus?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEBankAccountMinAggregateInputType = {
@@ -20228,7 +20319,7 @@ export namespace Prisma {
     status?: true
     createdAt?: true
     updatedAt?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEBankAccountMaxAggregateInputType = {
@@ -20241,7 +20332,7 @@ export namespace Prisma {
     status?: true
     createdAt?: true
     updatedAt?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEBankAccountCountAggregateInputType = {
@@ -20254,7 +20345,7 @@ export namespace Prisma {
     status?: true
     createdAt?: true
     updatedAt?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
     _all?: true
   }
 
@@ -20354,7 +20445,7 @@ export namespace Prisma {
     status: string | null
     createdAt: Date
     updatedAt: Date
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
     _count: NSEBankAccountCountAggregateOutputType | null
     _avg: NSEBankAccountAvgAggregateOutputType | null
     _sum: NSEBankAccountSumAggregateOutputType | null
@@ -20386,7 +20477,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
     NSECbricsParticipantModel?: boolean | NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }, ExtArgs["result"]["nSEBankAccount"]>
 
@@ -20400,7 +20491,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
     NSECbricsParticipantModel?: boolean | NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }, ExtArgs["result"]["nSEBankAccount"]>
 
@@ -20414,7 +20505,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
     NSECbricsParticipantModel?: boolean | NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }, ExtArgs["result"]["nSEBankAccount"]>
 
@@ -20428,10 +20519,10 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
   }
 
-  export type NSEBankAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bankName" | "bankIFSC" | "bankAccountNo" | "isDefault" | "workflowStatus" | "status" | "createdAt" | "updatedAt" | "nSECbricsParticipantModelId", ExtArgs["result"]["nSEBankAccount"]>
+  export type NSEBankAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bankName" | "bankIFSC" | "bankAccountNo" | "isDefault" | "workflowStatus" | "status" | "createdAt" | "updatedAt" | "nseCbricsParticipantModelId", ExtArgs["result"]["nSEBankAccount"]>
   export type NSEBankAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     NSECbricsParticipantModel?: boolean | NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }
@@ -20445,7 +20536,7 @@ export namespace Prisma {
   export type $NSEBankAccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "NSEBankAccount"
     objects: {
-      NSECbricsParticipantModel: Prisma.$NSECbricsParticipantModelPayload<ExtArgs> | null
+      NSECbricsParticipantModel: Prisma.$NseCbricsParticipantModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -20457,7 +20548,7 @@ export namespace Prisma {
       status: string | null
       createdAt: Date
       updatedAt: Date
-      nSECbricsParticipantModelId: number | null
+      nseCbricsParticipantModelId: number | null
     }, ExtArgs["result"]["nSEBankAccount"]>
     composites: {}
   }
@@ -20852,7 +20943,7 @@ export namespace Prisma {
    */
   export interface Prisma__NSEBankAccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    NSECbricsParticipantModel<T extends NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs> = {}>(args?: Subset<T, NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    NSECbricsParticipantModel<T extends NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs> = {}>(args?: Subset<T, NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20891,7 +20982,7 @@ export namespace Prisma {
     readonly status: FieldRef<"NSEBankAccount", 'String'>
     readonly createdAt: FieldRef<"NSEBankAccount", 'DateTime'>
     readonly updatedAt: FieldRef<"NSEBankAccount", 'DateTime'>
-    readonly nSECbricsParticipantModelId: FieldRef<"NSEBankAccount", 'Int'>
+    readonly nseCbricsParticipantModelId: FieldRef<"NSEBankAccount", 'Int'>
   }
     
 
@@ -21292,18 +21383,18 @@ export namespace Prisma {
    */
   export type NSEBankAccount$NSECbricsParticipantModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
-    where?: NSECbricsParticipantModelWhereInput
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
+    where?: NseCbricsParticipantModelWhereInput
   }
 
   /**
@@ -21340,13 +21431,13 @@ export namespace Prisma {
   export type NSEDpAccountAvgAggregateOutputType = {
     id: number | null
     workflowStatus: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEDpAccountSumAggregateOutputType = {
     id: number | null
     workflowStatus: number | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEDpAccountMinAggregateOutputType = {
@@ -21359,7 +21450,7 @@ export namespace Prisma {
     status: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEDpAccountMaxAggregateOutputType = {
@@ -21372,7 +21463,7 @@ export namespace Prisma {
     status: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
   }
 
   export type NSEDpAccountCountAggregateOutputType = {
@@ -21385,7 +21476,7 @@ export namespace Prisma {
     status: number
     createdAt: number
     updatedAt: number
-    nSECbricsParticipantModelId: number
+    nseCbricsParticipantModelId: number
     _all: number
   }
 
@@ -21393,13 +21484,13 @@ export namespace Prisma {
   export type NSEDpAccountAvgAggregateInputType = {
     id?: true
     workflowStatus?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEDpAccountSumAggregateInputType = {
     id?: true
     workflowStatus?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEDpAccountMinAggregateInputType = {
@@ -21412,7 +21503,7 @@ export namespace Prisma {
     status?: true
     createdAt?: true
     updatedAt?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEDpAccountMaxAggregateInputType = {
@@ -21425,7 +21516,7 @@ export namespace Prisma {
     status?: true
     createdAt?: true
     updatedAt?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
   }
 
   export type NSEDpAccountCountAggregateInputType = {
@@ -21438,7 +21529,7 @@ export namespace Prisma {
     status?: true
     createdAt?: true
     updatedAt?: true
-    nSECbricsParticipantModelId?: true
+    nseCbricsParticipantModelId?: true
     _all?: true
   }
 
@@ -21538,7 +21629,7 @@ export namespace Prisma {
     status: string | null
     createdAt: Date
     updatedAt: Date
-    nSECbricsParticipantModelId: number | null
+    nseCbricsParticipantModelId: number | null
     _count: NSEDpAccountCountAggregateOutputType | null
     _avg: NSEDpAccountAvgAggregateOutputType | null
     _sum: NSEDpAccountSumAggregateOutputType | null
@@ -21570,7 +21661,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
     NSECbricsParticipantModel?: boolean | NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }, ExtArgs["result"]["nSEDpAccount"]>
 
@@ -21584,7 +21675,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
     NSECbricsParticipantModel?: boolean | NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }, ExtArgs["result"]["nSEDpAccount"]>
 
@@ -21598,7 +21689,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
     NSECbricsParticipantModel?: boolean | NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }, ExtArgs["result"]["nSEDpAccount"]>
 
@@ -21612,10 +21703,10 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    nSECbricsParticipantModelId?: boolean
+    nseCbricsParticipantModelId?: boolean
   }
 
-  export type NSEDpAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "dpType" | "dpId" | "benId" | "isDefault" | "workflowStatus" | "status" | "createdAt" | "updatedAt" | "nSECbricsParticipantModelId", ExtArgs["result"]["nSEDpAccount"]>
+  export type NSEDpAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "dpType" | "dpId" | "benId" | "isDefault" | "workflowStatus" | "status" | "createdAt" | "updatedAt" | "nseCbricsParticipantModelId", ExtArgs["result"]["nSEDpAccount"]>
   export type NSEDpAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     NSECbricsParticipantModel?: boolean | NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs>
   }
@@ -21629,7 +21720,7 @@ export namespace Prisma {
   export type $NSEDpAccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "NSEDpAccount"
     objects: {
-      NSECbricsParticipantModel: Prisma.$NSECbricsParticipantModelPayload<ExtArgs> | null
+      NSECbricsParticipantModel: Prisma.$NseCbricsParticipantModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -21641,7 +21732,7 @@ export namespace Prisma {
       status: string | null
       createdAt: Date
       updatedAt: Date
-      nSECbricsParticipantModelId: number | null
+      nseCbricsParticipantModelId: number | null
     }, ExtArgs["result"]["nSEDpAccount"]>
     composites: {}
   }
@@ -22036,7 +22127,7 @@ export namespace Prisma {
    */
   export interface Prisma__NSEDpAccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    NSECbricsParticipantModel<T extends NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs> = {}>(args?: Subset<T, NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs>>): Prisma__NSECbricsParticipantModelClient<$Result.GetResult<Prisma.$NSECbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    NSECbricsParticipantModel<T extends NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs> = {}>(args?: Subset<T, NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -22075,7 +22166,7 @@ export namespace Prisma {
     readonly status: FieldRef<"NSEDpAccount", 'String'>
     readonly createdAt: FieldRef<"NSEDpAccount", 'DateTime'>
     readonly updatedAt: FieldRef<"NSEDpAccount", 'DateTime'>
-    readonly nSECbricsParticipantModelId: FieldRef<"NSEDpAccount", 'Int'>
+    readonly nseCbricsParticipantModelId: FieldRef<"NSEDpAccount", 'Int'>
   }
     
 
@@ -22476,18 +22567,18 @@ export namespace Prisma {
    */
   export type NSEDpAccount$NSECbricsParticipantModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSECbricsParticipantModel
+     * Select specific fields to fetch from the NseCbricsParticipantModel
      */
-    select?: NSECbricsParticipantModelSelect<ExtArgs> | null
+    select?: NseCbricsParticipantModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSECbricsParticipantModel
+     * Omit specific fields from the NseCbricsParticipantModel
      */
-    omit?: NSECbricsParticipantModelOmit<ExtArgs> | null
+    omit?: NseCbricsParticipantModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NSECbricsParticipantModelInclude<ExtArgs> | null
-    where?: NSECbricsParticipantModelWhereInput
+    include?: NseCbricsParticipantModelInclude<ExtArgs> | null
+    where?: NseCbricsParticipantModelWhereInput
   }
 
   /**
@@ -22506,6 +22597,1108 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: NSEDpAccountInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model NseIsinSecurityReceipt
+   */
+
+  export type AggregateNseIsinSecurityReceipt = {
+    _count: NseIsinSecurityReceiptCountAggregateOutputType | null
+    _avg: NseIsinSecurityReceiptAvgAggregateOutputType | null
+    _sum: NseIsinSecurityReceiptSumAggregateOutputType | null
+    _min: NseIsinSecurityReceiptMinAggregateOutputType | null
+    _max: NseIsinSecurityReceiptMaxAggregateOutputType | null
+  }
+
+  export type NseIsinSecurityReceiptAvgAggregateOutputType = {
+    id: number | null
+    couponRate: number | null
+    faceValue: number | null
+  }
+
+  export type NseIsinSecurityReceiptSumAggregateOutputType = {
+    id: number | null
+    couponRate: number | null
+    faceValue: number | null
+  }
+
+  export type NseIsinSecurityReceiptMinAggregateOutputType = {
+    id: number | null
+    symbol: string | null
+    couponRate: number | null
+    issueCategory: string | null
+    listed: string | null
+    maturityDate: Date | null
+    faceValue: number | null
+    description: string | null
+    type: string | null
+    issuer: string | null
+  }
+
+  export type NseIsinSecurityReceiptMaxAggregateOutputType = {
+    id: number | null
+    symbol: string | null
+    couponRate: number | null
+    issueCategory: string | null
+    listed: string | null
+    maturityDate: Date | null
+    faceValue: number | null
+    description: string | null
+    type: string | null
+    issuer: string | null
+  }
+
+  export type NseIsinSecurityReceiptCountAggregateOutputType = {
+    id: number
+    symbol: number
+    couponRate: number
+    issueCategory: number
+    listed: number
+    maturityDate: number
+    faceValue: number
+    description: number
+    type: number
+    issuer: number
+    _all: number
+  }
+
+
+  export type NseIsinSecurityReceiptAvgAggregateInputType = {
+    id?: true
+    couponRate?: true
+    faceValue?: true
+  }
+
+  export type NseIsinSecurityReceiptSumAggregateInputType = {
+    id?: true
+    couponRate?: true
+    faceValue?: true
+  }
+
+  export type NseIsinSecurityReceiptMinAggregateInputType = {
+    id?: true
+    symbol?: true
+    couponRate?: true
+    issueCategory?: true
+    listed?: true
+    maturityDate?: true
+    faceValue?: true
+    description?: true
+    type?: true
+    issuer?: true
+  }
+
+  export type NseIsinSecurityReceiptMaxAggregateInputType = {
+    id?: true
+    symbol?: true
+    couponRate?: true
+    issueCategory?: true
+    listed?: true
+    maturityDate?: true
+    faceValue?: true
+    description?: true
+    type?: true
+    issuer?: true
+  }
+
+  export type NseIsinSecurityReceiptCountAggregateInputType = {
+    id?: true
+    symbol?: true
+    couponRate?: true
+    issueCategory?: true
+    listed?: true
+    maturityDate?: true
+    faceValue?: true
+    description?: true
+    type?: true
+    issuer?: true
+    _all?: true
+  }
+
+  export type NseIsinSecurityReceiptAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NseIsinSecurityReceipt to aggregate.
+     */
+    where?: NseIsinSecurityReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NseIsinSecurityReceipts to fetch.
+     */
+    orderBy?: NseIsinSecurityReceiptOrderByWithRelationInput | NseIsinSecurityReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NseIsinSecurityReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NseIsinSecurityReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NseIsinSecurityReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NseIsinSecurityReceipts
+    **/
+    _count?: true | NseIsinSecurityReceiptCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: NseIsinSecurityReceiptAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: NseIsinSecurityReceiptSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NseIsinSecurityReceiptMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NseIsinSecurityReceiptMaxAggregateInputType
+  }
+
+  export type GetNseIsinSecurityReceiptAggregateType<T extends NseIsinSecurityReceiptAggregateArgs> = {
+        [P in keyof T & keyof AggregateNseIsinSecurityReceipt]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNseIsinSecurityReceipt[P]>
+      : GetScalarType<T[P], AggregateNseIsinSecurityReceipt[P]>
+  }
+
+
+
+
+  export type NseIsinSecurityReceiptGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NseIsinSecurityReceiptWhereInput
+    orderBy?: NseIsinSecurityReceiptOrderByWithAggregationInput | NseIsinSecurityReceiptOrderByWithAggregationInput[]
+    by: NseIsinSecurityReceiptScalarFieldEnum[] | NseIsinSecurityReceiptScalarFieldEnum
+    having?: NseIsinSecurityReceiptScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NseIsinSecurityReceiptCountAggregateInputType | true
+    _avg?: NseIsinSecurityReceiptAvgAggregateInputType
+    _sum?: NseIsinSecurityReceiptSumAggregateInputType
+    _min?: NseIsinSecurityReceiptMinAggregateInputType
+    _max?: NseIsinSecurityReceiptMaxAggregateInputType
+  }
+
+  export type NseIsinSecurityReceiptGroupByOutputType = {
+    id: number
+    symbol: string
+    couponRate: number
+    issueCategory: string
+    listed: string
+    maturityDate: Date
+    faceValue: number
+    description: string
+    type: string
+    issuer: string
+    _count: NseIsinSecurityReceiptCountAggregateOutputType | null
+    _avg: NseIsinSecurityReceiptAvgAggregateOutputType | null
+    _sum: NseIsinSecurityReceiptSumAggregateOutputType | null
+    _min: NseIsinSecurityReceiptMinAggregateOutputType | null
+    _max: NseIsinSecurityReceiptMaxAggregateOutputType | null
+  }
+
+  type GetNseIsinSecurityReceiptGroupByPayload<T extends NseIsinSecurityReceiptGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NseIsinSecurityReceiptGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NseIsinSecurityReceiptGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NseIsinSecurityReceiptGroupByOutputType[P]>
+            : GetScalarType<T[P], NseIsinSecurityReceiptGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NseIsinSecurityReceiptSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    symbol?: boolean
+    couponRate?: boolean
+    issueCategory?: boolean
+    listed?: boolean
+    maturityDate?: boolean
+    faceValue?: boolean
+    description?: boolean
+    type?: boolean
+    issuer?: boolean
+  }, ExtArgs["result"]["nseIsinSecurityReceipt"]>
+
+  export type NseIsinSecurityReceiptSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    symbol?: boolean
+    couponRate?: boolean
+    issueCategory?: boolean
+    listed?: boolean
+    maturityDate?: boolean
+    faceValue?: boolean
+    description?: boolean
+    type?: boolean
+    issuer?: boolean
+  }, ExtArgs["result"]["nseIsinSecurityReceipt"]>
+
+  export type NseIsinSecurityReceiptSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    symbol?: boolean
+    couponRate?: boolean
+    issueCategory?: boolean
+    listed?: boolean
+    maturityDate?: boolean
+    faceValue?: boolean
+    description?: boolean
+    type?: boolean
+    issuer?: boolean
+  }, ExtArgs["result"]["nseIsinSecurityReceipt"]>
+
+  export type NseIsinSecurityReceiptSelectScalar = {
+    id?: boolean
+    symbol?: boolean
+    couponRate?: boolean
+    issueCategory?: boolean
+    listed?: boolean
+    maturityDate?: boolean
+    faceValue?: boolean
+    description?: boolean
+    type?: boolean
+    issuer?: boolean
+  }
+
+  export type NseIsinSecurityReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "symbol" | "couponRate" | "issueCategory" | "listed" | "maturityDate" | "faceValue" | "description" | "type" | "issuer", ExtArgs["result"]["nseIsinSecurityReceipt"]>
+
+  export type $NseIsinSecurityReceiptPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NseIsinSecurityReceipt"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      symbol: string
+      couponRate: number
+      issueCategory: string
+      listed: string
+      maturityDate: Date
+      faceValue: number
+      description: string
+      type: string
+      issuer: string
+    }, ExtArgs["result"]["nseIsinSecurityReceipt"]>
+    composites: {}
+  }
+
+  type NseIsinSecurityReceiptGetPayload<S extends boolean | null | undefined | NseIsinSecurityReceiptDefaultArgs> = $Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload, S>
+
+  type NseIsinSecurityReceiptCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NseIsinSecurityReceiptFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NseIsinSecurityReceiptCountAggregateInputType | true
+    }
+
+  export interface NseIsinSecurityReceiptDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NseIsinSecurityReceipt'], meta: { name: 'NseIsinSecurityReceipt' } }
+    /**
+     * Find zero or one NseIsinSecurityReceipt that matches the filter.
+     * @param {NseIsinSecurityReceiptFindUniqueArgs} args - Arguments to find a NseIsinSecurityReceipt
+     * @example
+     * // Get one NseIsinSecurityReceipt
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NseIsinSecurityReceiptFindUniqueArgs>(args: SelectSubset<T, NseIsinSecurityReceiptFindUniqueArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one NseIsinSecurityReceipt that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NseIsinSecurityReceiptFindUniqueOrThrowArgs} args - Arguments to find a NseIsinSecurityReceipt
+     * @example
+     * // Get one NseIsinSecurityReceipt
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NseIsinSecurityReceiptFindUniqueOrThrowArgs>(args: SelectSubset<T, NseIsinSecurityReceiptFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NseIsinSecurityReceipt that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NseIsinSecurityReceiptFindFirstArgs} args - Arguments to find a NseIsinSecurityReceipt
+     * @example
+     * // Get one NseIsinSecurityReceipt
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NseIsinSecurityReceiptFindFirstArgs>(args?: SelectSubset<T, NseIsinSecurityReceiptFindFirstArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NseIsinSecurityReceipt that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NseIsinSecurityReceiptFindFirstOrThrowArgs} args - Arguments to find a NseIsinSecurityReceipt
+     * @example
+     * // Get one NseIsinSecurityReceipt
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NseIsinSecurityReceiptFindFirstOrThrowArgs>(args?: SelectSubset<T, NseIsinSecurityReceiptFindFirstOrThrowArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more NseIsinSecurityReceipts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NseIsinSecurityReceiptFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NseIsinSecurityReceipts
+     * const nseIsinSecurityReceipts = await prisma.nseIsinSecurityReceipt.findMany()
+     * 
+     * // Get first 10 NseIsinSecurityReceipts
+     * const nseIsinSecurityReceipts = await prisma.nseIsinSecurityReceipt.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const nseIsinSecurityReceiptWithIdOnly = await prisma.nseIsinSecurityReceipt.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NseIsinSecurityReceiptFindManyArgs>(args?: SelectSubset<T, NseIsinSecurityReceiptFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a NseIsinSecurityReceipt.
+     * @param {NseIsinSecurityReceiptCreateArgs} args - Arguments to create a NseIsinSecurityReceipt.
+     * @example
+     * // Create one NseIsinSecurityReceipt
+     * const NseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.create({
+     *   data: {
+     *     // ... data to create a NseIsinSecurityReceipt
+     *   }
+     * })
+     * 
+     */
+    create<T extends NseIsinSecurityReceiptCreateArgs>(args: SelectSubset<T, NseIsinSecurityReceiptCreateArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many NseIsinSecurityReceipts.
+     * @param {NseIsinSecurityReceiptCreateManyArgs} args - Arguments to create many NseIsinSecurityReceipts.
+     * @example
+     * // Create many NseIsinSecurityReceipts
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NseIsinSecurityReceiptCreateManyArgs>(args?: SelectSubset<T, NseIsinSecurityReceiptCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NseIsinSecurityReceipts and returns the data saved in the database.
+     * @param {NseIsinSecurityReceiptCreateManyAndReturnArgs} args - Arguments to create many NseIsinSecurityReceipts.
+     * @example
+     * // Create many NseIsinSecurityReceipts
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NseIsinSecurityReceipts and only return the `id`
+     * const nseIsinSecurityReceiptWithIdOnly = await prisma.nseIsinSecurityReceipt.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NseIsinSecurityReceiptCreateManyAndReturnArgs>(args?: SelectSubset<T, NseIsinSecurityReceiptCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a NseIsinSecurityReceipt.
+     * @param {NseIsinSecurityReceiptDeleteArgs} args - Arguments to delete one NseIsinSecurityReceipt.
+     * @example
+     * // Delete one NseIsinSecurityReceipt
+     * const NseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.delete({
+     *   where: {
+     *     // ... filter to delete one NseIsinSecurityReceipt
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NseIsinSecurityReceiptDeleteArgs>(args: SelectSubset<T, NseIsinSecurityReceiptDeleteArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one NseIsinSecurityReceipt.
+     * @param {NseIsinSecurityReceiptUpdateArgs} args - Arguments to update one NseIsinSecurityReceipt.
+     * @example
+     * // Update one NseIsinSecurityReceipt
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NseIsinSecurityReceiptUpdateArgs>(args: SelectSubset<T, NseIsinSecurityReceiptUpdateArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more NseIsinSecurityReceipts.
+     * @param {NseIsinSecurityReceiptDeleteManyArgs} args - Arguments to filter NseIsinSecurityReceipts to delete.
+     * @example
+     * // Delete a few NseIsinSecurityReceipts
+     * const { count } = await prisma.nseIsinSecurityReceipt.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NseIsinSecurityReceiptDeleteManyArgs>(args?: SelectSubset<T, NseIsinSecurityReceiptDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NseIsinSecurityReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NseIsinSecurityReceiptUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NseIsinSecurityReceipts
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NseIsinSecurityReceiptUpdateManyArgs>(args: SelectSubset<T, NseIsinSecurityReceiptUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NseIsinSecurityReceipts and returns the data updated in the database.
+     * @param {NseIsinSecurityReceiptUpdateManyAndReturnArgs} args - Arguments to update many NseIsinSecurityReceipts.
+     * @example
+     * // Update many NseIsinSecurityReceipts
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more NseIsinSecurityReceipts and only return the `id`
+     * const nseIsinSecurityReceiptWithIdOnly = await prisma.nseIsinSecurityReceipt.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NseIsinSecurityReceiptUpdateManyAndReturnArgs>(args: SelectSubset<T, NseIsinSecurityReceiptUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one NseIsinSecurityReceipt.
+     * @param {NseIsinSecurityReceiptUpsertArgs} args - Arguments to update or create a NseIsinSecurityReceipt.
+     * @example
+     * // Update or create a NseIsinSecurityReceipt
+     * const nseIsinSecurityReceipt = await prisma.nseIsinSecurityReceipt.upsert({
+     *   create: {
+     *     // ... data to create a NseIsinSecurityReceipt
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NseIsinSecurityReceipt we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NseIsinSecurityReceiptUpsertArgs>(args: SelectSubset<T, NseIsinSecurityReceiptUpsertArgs<ExtArgs>>): Prisma__NseIsinSecurityReceiptClient<$Result.GetResult<Prisma.$NseIsinSecurityReceiptPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of NseIsinSecurityReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NseIsinSecurityReceiptCountArgs} args - Arguments to filter NseIsinSecurityReceipts to count.
+     * @example
+     * // Count the number of NseIsinSecurityReceipts
+     * const count = await prisma.nseIsinSecurityReceipt.count({
+     *   where: {
+     *     // ... the filter for the NseIsinSecurityReceipts we want to count
+     *   }
+     * })
+    **/
+    count<T extends NseIsinSecurityReceiptCountArgs>(
+      args?: Subset<T, NseIsinSecurityReceiptCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NseIsinSecurityReceiptCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NseIsinSecurityReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NseIsinSecurityReceiptAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NseIsinSecurityReceiptAggregateArgs>(args: Subset<T, NseIsinSecurityReceiptAggregateArgs>): Prisma.PrismaPromise<GetNseIsinSecurityReceiptAggregateType<T>>
+
+    /**
+     * Group by NseIsinSecurityReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NseIsinSecurityReceiptGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NseIsinSecurityReceiptGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NseIsinSecurityReceiptGroupByArgs['orderBy'] }
+        : { orderBy?: NseIsinSecurityReceiptGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NseIsinSecurityReceiptGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNseIsinSecurityReceiptGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NseIsinSecurityReceipt model
+   */
+  readonly fields: NseIsinSecurityReceiptFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NseIsinSecurityReceipt.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NseIsinSecurityReceiptClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NseIsinSecurityReceipt model
+   */
+  interface NseIsinSecurityReceiptFieldRefs {
+    readonly id: FieldRef<"NseIsinSecurityReceipt", 'Int'>
+    readonly symbol: FieldRef<"NseIsinSecurityReceipt", 'String'>
+    readonly couponRate: FieldRef<"NseIsinSecurityReceipt", 'Float'>
+    readonly issueCategory: FieldRef<"NseIsinSecurityReceipt", 'String'>
+    readonly listed: FieldRef<"NseIsinSecurityReceipt", 'String'>
+    readonly maturityDate: FieldRef<"NseIsinSecurityReceipt", 'DateTime'>
+    readonly faceValue: FieldRef<"NseIsinSecurityReceipt", 'Float'>
+    readonly description: FieldRef<"NseIsinSecurityReceipt", 'String'>
+    readonly type: FieldRef<"NseIsinSecurityReceipt", 'String'>
+    readonly issuer: FieldRef<"NseIsinSecurityReceipt", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NseIsinSecurityReceipt findUnique
+   */
+  export type NseIsinSecurityReceiptFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * Filter, which NseIsinSecurityReceipt to fetch.
+     */
+    where: NseIsinSecurityReceiptWhereUniqueInput
+  }
+
+  /**
+   * NseIsinSecurityReceipt findUniqueOrThrow
+   */
+  export type NseIsinSecurityReceiptFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * Filter, which NseIsinSecurityReceipt to fetch.
+     */
+    where: NseIsinSecurityReceiptWhereUniqueInput
+  }
+
+  /**
+   * NseIsinSecurityReceipt findFirst
+   */
+  export type NseIsinSecurityReceiptFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * Filter, which NseIsinSecurityReceipt to fetch.
+     */
+    where?: NseIsinSecurityReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NseIsinSecurityReceipts to fetch.
+     */
+    orderBy?: NseIsinSecurityReceiptOrderByWithRelationInput | NseIsinSecurityReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NseIsinSecurityReceipts.
+     */
+    cursor?: NseIsinSecurityReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NseIsinSecurityReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NseIsinSecurityReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NseIsinSecurityReceipts.
+     */
+    distinct?: NseIsinSecurityReceiptScalarFieldEnum | NseIsinSecurityReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * NseIsinSecurityReceipt findFirstOrThrow
+   */
+  export type NseIsinSecurityReceiptFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * Filter, which NseIsinSecurityReceipt to fetch.
+     */
+    where?: NseIsinSecurityReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NseIsinSecurityReceipts to fetch.
+     */
+    orderBy?: NseIsinSecurityReceiptOrderByWithRelationInput | NseIsinSecurityReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NseIsinSecurityReceipts.
+     */
+    cursor?: NseIsinSecurityReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NseIsinSecurityReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NseIsinSecurityReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NseIsinSecurityReceipts.
+     */
+    distinct?: NseIsinSecurityReceiptScalarFieldEnum | NseIsinSecurityReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * NseIsinSecurityReceipt findMany
+   */
+  export type NseIsinSecurityReceiptFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * Filter, which NseIsinSecurityReceipts to fetch.
+     */
+    where?: NseIsinSecurityReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NseIsinSecurityReceipts to fetch.
+     */
+    orderBy?: NseIsinSecurityReceiptOrderByWithRelationInput | NseIsinSecurityReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NseIsinSecurityReceipts.
+     */
+    cursor?: NseIsinSecurityReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NseIsinSecurityReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NseIsinSecurityReceipts.
+     */
+    skip?: number
+    distinct?: NseIsinSecurityReceiptScalarFieldEnum | NseIsinSecurityReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * NseIsinSecurityReceipt create
+   */
+  export type NseIsinSecurityReceiptCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * The data needed to create a NseIsinSecurityReceipt.
+     */
+    data: XOR<NseIsinSecurityReceiptCreateInput, NseIsinSecurityReceiptUncheckedCreateInput>
+  }
+
+  /**
+   * NseIsinSecurityReceipt createMany
+   */
+  export type NseIsinSecurityReceiptCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NseIsinSecurityReceipts.
+     */
+    data: NseIsinSecurityReceiptCreateManyInput | NseIsinSecurityReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NseIsinSecurityReceipt createManyAndReturn
+   */
+  export type NseIsinSecurityReceiptCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to create many NseIsinSecurityReceipts.
+     */
+    data: NseIsinSecurityReceiptCreateManyInput | NseIsinSecurityReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NseIsinSecurityReceipt update
+   */
+  export type NseIsinSecurityReceiptUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * The data needed to update a NseIsinSecurityReceipt.
+     */
+    data: XOR<NseIsinSecurityReceiptUpdateInput, NseIsinSecurityReceiptUncheckedUpdateInput>
+    /**
+     * Choose, which NseIsinSecurityReceipt to update.
+     */
+    where: NseIsinSecurityReceiptWhereUniqueInput
+  }
+
+  /**
+   * NseIsinSecurityReceipt updateMany
+   */
+  export type NseIsinSecurityReceiptUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NseIsinSecurityReceipts.
+     */
+    data: XOR<NseIsinSecurityReceiptUpdateManyMutationInput, NseIsinSecurityReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which NseIsinSecurityReceipts to update
+     */
+    where?: NseIsinSecurityReceiptWhereInput
+    /**
+     * Limit how many NseIsinSecurityReceipts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NseIsinSecurityReceipt updateManyAndReturn
+   */
+  export type NseIsinSecurityReceiptUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to update NseIsinSecurityReceipts.
+     */
+    data: XOR<NseIsinSecurityReceiptUpdateManyMutationInput, NseIsinSecurityReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which NseIsinSecurityReceipts to update
+     */
+    where?: NseIsinSecurityReceiptWhereInput
+    /**
+     * Limit how many NseIsinSecurityReceipts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NseIsinSecurityReceipt upsert
+   */
+  export type NseIsinSecurityReceiptUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * The filter to search for the NseIsinSecurityReceipt to update in case it exists.
+     */
+    where: NseIsinSecurityReceiptWhereUniqueInput
+    /**
+     * In case the NseIsinSecurityReceipt found by the `where` argument doesn't exist, create a new NseIsinSecurityReceipt with this data.
+     */
+    create: XOR<NseIsinSecurityReceiptCreateInput, NseIsinSecurityReceiptUncheckedCreateInput>
+    /**
+     * In case the NseIsinSecurityReceipt was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NseIsinSecurityReceiptUpdateInput, NseIsinSecurityReceiptUncheckedUpdateInput>
+  }
+
+  /**
+   * NseIsinSecurityReceipt delete
+   */
+  export type NseIsinSecurityReceiptDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
+    /**
+     * Filter which NseIsinSecurityReceipt to delete.
+     */
+    where: NseIsinSecurityReceiptWhereUniqueInput
+  }
+
+  /**
+   * NseIsinSecurityReceipt deleteMany
+   */
+  export type NseIsinSecurityReceiptDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NseIsinSecurityReceipts to delete
+     */
+    where?: NseIsinSecurityReceiptWhereInput
+    /**
+     * Limit how many NseIsinSecurityReceipts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * NseIsinSecurityReceipt without action
+   */
+  export type NseIsinSecurityReceiptDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NseIsinSecurityReceipt
+     */
+    select?: NseIsinSecurityReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NseIsinSecurityReceipt
+     */
+    omit?: NseIsinSecurityReceiptOmit<ExtArgs> | null
   }
 
 
@@ -22580,7 +23773,7 @@ export namespace Prisma {
     customerPersonalInfoModelId: 'customerPersonalInfoModelId',
     currentAddressModelId: 'currentAddressModelId',
     permanentAddressModelId: 'permanentAddressModelId',
-    nSEDATASETId: 'nSEDATASETId',
+    nseDataSetId: 'nseDataSetId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -22745,15 +23938,15 @@ export namespace Prisma {
   export type LeadFollowUpNotesModelScalarFieldEnum = (typeof LeadFollowUpNotesModelScalarFieldEnum)[keyof typeof LeadFollowUpNotesModelScalarFieldEnum]
 
 
-  export const NSEDATASETScalarFieldEnum: {
+  export const NseDataSetScalarFieldEnum: {
     id: 'id',
-    nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+    nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
   };
 
-  export type NSEDATASETScalarFieldEnum = (typeof NSEDATASETScalarFieldEnum)[keyof typeof NSEDATASETScalarFieldEnum]
+  export type NseDataSetScalarFieldEnum = (typeof NseDataSetScalarFieldEnum)[keyof typeof NseDataSetScalarFieldEnum]
 
 
-  export const NSECbricsParticipantModelScalarFieldEnum: {
+  export const NseCbricsParticipantModelScalarFieldEnum: {
     id: 'id',
     loginId: 'loginId',
     actualStatus: 'actualStatus',
@@ -22780,7 +23973,7 @@ export namespace Prisma {
     updatedAt: 'updatedAt'
   };
 
-  export type NSECbricsParticipantModelScalarFieldEnum = (typeof NSECbricsParticipantModelScalarFieldEnum)[keyof typeof NSECbricsParticipantModelScalarFieldEnum]
+  export type NseCbricsParticipantModelScalarFieldEnum = (typeof NseCbricsParticipantModelScalarFieldEnum)[keyof typeof NseCbricsParticipantModelScalarFieldEnum]
 
 
   export const NSEBankAccountScalarFieldEnum: {
@@ -22793,7 +23986,7 @@ export namespace Prisma {
     status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+    nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
   };
 
   export type NSEBankAccountScalarFieldEnum = (typeof NSEBankAccountScalarFieldEnum)[keyof typeof NSEBankAccountScalarFieldEnum]
@@ -22809,10 +24002,26 @@ export namespace Prisma {
     status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    nSECbricsParticipantModelId: 'nSECbricsParticipantModelId'
+    nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
   };
 
   export type NSEDpAccountScalarFieldEnum = (typeof NSEDpAccountScalarFieldEnum)[keyof typeof NSEDpAccountScalarFieldEnum]
+
+
+  export const NseIsinSecurityReceiptScalarFieldEnum: {
+    id: 'id',
+    symbol: 'symbol',
+    couponRate: 'couponRate',
+    issueCategory: 'issueCategory',
+    listed: 'listed',
+    maturityDate: 'maturityDate',
+    faceValue: 'faceValue',
+    description: 'description',
+    type: 'type',
+    issuer: 'issuer'
+  };
+
+  export type NseIsinSecurityReceiptScalarFieldEnum = (typeof NseIsinSecurityReceiptScalarFieldEnum)[keyof typeof NseIsinSecurityReceiptScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -23302,7 +24511,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    nSEDATASETId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    nseDataSetId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
@@ -23314,7 +24523,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelListRelationFilter
     currentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
     permanentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
-    nse?: XOR<NSEDATASETNullableScalarRelationFilter, NSEDATASETWhereInput> | null
+    nse?: XOR<NseDataSetNullableScalarRelationFilter, NseDataSetWhereInput> | null
   }
 
   export type CustomerProfileDataModelOrderByWithRelationInput = {
@@ -23339,7 +24548,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrderInput | SortOrder
     currentAddressModelId?: SortOrderInput | SortOrder
     permanentAddressModelId?: SortOrderInput | SortOrder
-    nSEDATASETId?: SortOrderInput | SortOrder
+    nseDataSetId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     riskProfile?: CustomersRiskProfileModelOrderByWithRelationInput
@@ -23351,7 +24560,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelOrderByRelationAggregateInput
     currentAddress?: AddressModelOrderByWithRelationInput
     permanentAddress?: AddressModelOrderByWithRelationInput
-    nse?: NSEDATASETOrderByWithRelationInput
+    nse?: NseDataSetOrderByWithRelationInput
   }
 
   export type CustomerProfileDataModelWhereUniqueInput = Prisma.AtLeast<{
@@ -23379,7 +24588,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    nSEDATASETId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    nseDataSetId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
@@ -23391,7 +24600,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelListRelationFilter
     currentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
     permanentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
-    nse?: XOR<NSEDATASETNullableScalarRelationFilter, NSEDATASETWhereInput> | null
+    nse?: XOR<NseDataSetNullableScalarRelationFilter, NseDataSetWhereInput> | null
   }, "id" | "userName" | "emailAddress">
 
   export type CustomerProfileDataModelOrderByWithAggregationInput = {
@@ -23416,7 +24625,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrderInput | SortOrder
     currentAddressModelId?: SortOrderInput | SortOrder
     permanentAddressModelId?: SortOrderInput | SortOrder
-    nSEDATASETId?: SortOrderInput | SortOrder
+    nseDataSetId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CustomerProfileDataModelCountOrderByAggregateInput
@@ -23451,7 +24660,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
-    nSEDATASETId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
+    nseDataSetId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
   }
@@ -24259,85 +25468,85 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"LeadFollowUpNotesModel"> | Date | string
   }
 
-  export type NSEDATASETWhereInput = {
-    AND?: NSEDATASETWhereInput | NSEDATASETWhereInput[]
-    OR?: NSEDATASETWhereInput[]
-    NOT?: NSEDATASETWhereInput | NSEDATASETWhereInput[]
-    id?: IntFilter<"NSEDATASET"> | number
-    nSECbricsParticipantModelId?: IntFilter<"NSEDATASET"> | number
+  export type NseDataSetWhereInput = {
+    AND?: NseDataSetWhereInput | NseDataSetWhereInput[]
+    OR?: NseDataSetWhereInput[]
+    NOT?: NseDataSetWhereInput | NseDataSetWhereInput[]
+    id?: IntFilter<"NseDataSet"> | number
+    nseCbricsParticipantModelId?: IntFilter<"NseDataSet"> | number
     CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
-    participant?: XOR<NSECbricsParticipantModelScalarRelationFilter, NSECbricsParticipantModelWhereInput>
+    participant?: XOR<NseCbricsParticipantModelScalarRelationFilter, NseCbricsParticipantModelWhereInput>
   }
 
-  export type NSEDATASETOrderByWithRelationInput = {
+  export type NseDataSetOrderByWithRelationInput = {
     id?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
     CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
-    participant?: NSECbricsParticipantModelOrderByWithRelationInput
+    participant?: NseCbricsParticipantModelOrderByWithRelationInput
   }
 
-  export type NSEDATASETWhereUniqueInput = Prisma.AtLeast<{
+  export type NseDataSetWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    AND?: NSEDATASETWhereInput | NSEDATASETWhereInput[]
-    OR?: NSEDATASETWhereInput[]
-    NOT?: NSEDATASETWhereInput | NSEDATASETWhereInput[]
-    nSECbricsParticipantModelId?: IntFilter<"NSEDATASET"> | number
+    AND?: NseDataSetWhereInput | NseDataSetWhereInput[]
+    OR?: NseDataSetWhereInput[]
+    NOT?: NseDataSetWhereInput | NseDataSetWhereInput[]
+    nseCbricsParticipantModelId?: IntFilter<"NseDataSet"> | number
     CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
-    participant?: XOR<NSECbricsParticipantModelScalarRelationFilter, NSECbricsParticipantModelWhereInput>
+    participant?: XOR<NseCbricsParticipantModelScalarRelationFilter, NseCbricsParticipantModelWhereInput>
   }, "id">
 
-  export type NSEDATASETOrderByWithAggregationInput = {
+  export type NseDataSetOrderByWithAggregationInput = {
     id?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
-    _count?: NSEDATASETCountOrderByAggregateInput
-    _avg?: NSEDATASETAvgOrderByAggregateInput
-    _max?: NSEDATASETMaxOrderByAggregateInput
-    _min?: NSEDATASETMinOrderByAggregateInput
-    _sum?: NSEDATASETSumOrderByAggregateInput
+    nseCbricsParticipantModelId?: SortOrder
+    _count?: NseDataSetCountOrderByAggregateInput
+    _avg?: NseDataSetAvgOrderByAggregateInput
+    _max?: NseDataSetMaxOrderByAggregateInput
+    _min?: NseDataSetMinOrderByAggregateInput
+    _sum?: NseDataSetSumOrderByAggregateInput
   }
 
-  export type NSEDATASETScalarWhereWithAggregatesInput = {
-    AND?: NSEDATASETScalarWhereWithAggregatesInput | NSEDATASETScalarWhereWithAggregatesInput[]
-    OR?: NSEDATASETScalarWhereWithAggregatesInput[]
-    NOT?: NSEDATASETScalarWhereWithAggregatesInput | NSEDATASETScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"NSEDATASET"> | number
-    nSECbricsParticipantModelId?: IntWithAggregatesFilter<"NSEDATASET"> | number
+  export type NseDataSetScalarWhereWithAggregatesInput = {
+    AND?: NseDataSetScalarWhereWithAggregatesInput | NseDataSetScalarWhereWithAggregatesInput[]
+    OR?: NseDataSetScalarWhereWithAggregatesInput[]
+    NOT?: NseDataSetScalarWhereWithAggregatesInput | NseDataSetScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"NseDataSet"> | number
+    nseCbricsParticipantModelId?: IntWithAggregatesFilter<"NseDataSet"> | number
   }
 
-  export type NSECbricsParticipantModelWhereInput = {
-    AND?: NSECbricsParticipantModelWhereInput | NSECbricsParticipantModelWhereInput[]
-    OR?: NSECbricsParticipantModelWhereInput[]
-    NOT?: NSECbricsParticipantModelWhereInput | NSECbricsParticipantModelWhereInput[]
-    id?: IntFilter<"NSECbricsParticipantModel"> | number
-    loginId?: StringFilter<"NSECbricsParticipantModel"> | string
-    actualStatus?: IntFilter<"NSECbricsParticipantModel"> | number
-    workflowStatus?: IntFilter<"NSECbricsParticipantModel"> | number
-    firstName?: StringFilter<"NSECbricsParticipantModel"> | string
-    panNo?: StringFilter<"NSECbricsParticipantModel"> | string
-    custodian?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    contactPerson?: StringFilter<"NSECbricsParticipantModel"> | string
-    mobileList?: StringNullableListFilter<"NSECbricsParticipantModel">
-    emailList?: StringNullableListFilter<"NSECbricsParticipantModel">
-    telephone?: StringFilter<"NSECbricsParticipantModel"> | string
-    fax?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    address?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    address2?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    address3?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    stateCode?: StringFilter<"NSECbricsParticipantModel"> | string
-    regAddress?: StringFilter<"NSECbricsParticipantModel"> | string
-    leiCode?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    expiryDate?: DateTimeNullableFilter<"NSECbricsParticipantModel"> | Date | string | null
-    panVerStatus?: IntNullableFilter<"NSECbricsParticipantModel"> | number | null
-    panVerRemarks?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    remarks?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    createdAt?: DateTimeFilter<"NSECbricsParticipantModel"> | Date | string
-    updatedAt?: DateTimeFilter<"NSECbricsParticipantModel"> | Date | string
+  export type NseCbricsParticipantModelWhereInput = {
+    AND?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
+    OR?: NseCbricsParticipantModelWhereInput[]
+    NOT?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
+    id?: IntFilter<"NseCbricsParticipantModel"> | number
+    loginId?: StringFilter<"NseCbricsParticipantModel"> | string
+    actualStatus?: IntFilter<"NseCbricsParticipantModel"> | number
+    workflowStatus?: IntFilter<"NseCbricsParticipantModel"> | number
+    firstName?: StringFilter<"NseCbricsParticipantModel"> | string
+    panNo?: StringFilter<"NseCbricsParticipantModel"> | string
+    custodian?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    contactPerson?: StringFilter<"NseCbricsParticipantModel"> | string
+    mobileList?: StringNullableListFilter<"NseCbricsParticipantModel">
+    emailList?: StringNullableListFilter<"NseCbricsParticipantModel">
+    telephone?: StringFilter<"NseCbricsParticipantModel"> | string
+    fax?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    address?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    address2?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    address3?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    stateCode?: StringFilter<"NseCbricsParticipantModel"> | string
+    regAddress?: StringFilter<"NseCbricsParticipantModel"> | string
+    leiCode?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    expiryDate?: DateTimeNullableFilter<"NseCbricsParticipantModel"> | Date | string | null
+    panVerStatus?: IntNullableFilter<"NseCbricsParticipantModel"> | number | null
+    panVerRemarks?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    remarks?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    createdAt?: DateTimeFilter<"NseCbricsParticipantModel"> | Date | string
+    updatedAt?: DateTimeFilter<"NseCbricsParticipantModel"> | Date | string
     bankAccountList?: NSEBankAccountListRelationFilter
     dpAccountList?: NSEDpAccountListRelationFilter
-    NSEDATASET?: NSEDATASETListRelationFilter
+    NSEDATASET?: NseDataSetListRelationFilter
   }
 
-  export type NSECbricsParticipantModelOrderByWithRelationInput = {
+  export type NseCbricsParticipantModelOrderByWithRelationInput = {
     id?: SortOrder
     loginId?: SortOrder
     actualStatus?: SortOrder
@@ -24364,43 +25573,43 @@ export namespace Prisma {
     updatedAt?: SortOrder
     bankAccountList?: NSEBankAccountOrderByRelationAggregateInput
     dpAccountList?: NSEDpAccountOrderByRelationAggregateInput
-    NSEDATASET?: NSEDATASETOrderByRelationAggregateInput
+    NSEDATASET?: NseDataSetOrderByRelationAggregateInput
   }
 
-  export type NSECbricsParticipantModelWhereUniqueInput = Prisma.AtLeast<{
+  export type NseCbricsParticipantModelWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     loginId?: string
-    AND?: NSECbricsParticipantModelWhereInput | NSECbricsParticipantModelWhereInput[]
-    OR?: NSECbricsParticipantModelWhereInput[]
-    NOT?: NSECbricsParticipantModelWhereInput | NSECbricsParticipantModelWhereInput[]
-    actualStatus?: IntFilter<"NSECbricsParticipantModel"> | number
-    workflowStatus?: IntFilter<"NSECbricsParticipantModel"> | number
-    firstName?: StringFilter<"NSECbricsParticipantModel"> | string
-    panNo?: StringFilter<"NSECbricsParticipantModel"> | string
-    custodian?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    contactPerson?: StringFilter<"NSECbricsParticipantModel"> | string
-    mobileList?: StringNullableListFilter<"NSECbricsParticipantModel">
-    emailList?: StringNullableListFilter<"NSECbricsParticipantModel">
-    telephone?: StringFilter<"NSECbricsParticipantModel"> | string
-    fax?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    address?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    address2?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    address3?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    stateCode?: StringFilter<"NSECbricsParticipantModel"> | string
-    regAddress?: StringFilter<"NSECbricsParticipantModel"> | string
-    leiCode?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    expiryDate?: DateTimeNullableFilter<"NSECbricsParticipantModel"> | Date | string | null
-    panVerStatus?: IntNullableFilter<"NSECbricsParticipantModel"> | number | null
-    panVerRemarks?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    remarks?: StringNullableFilter<"NSECbricsParticipantModel"> | string | null
-    createdAt?: DateTimeFilter<"NSECbricsParticipantModel"> | Date | string
-    updatedAt?: DateTimeFilter<"NSECbricsParticipantModel"> | Date | string
+    AND?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
+    OR?: NseCbricsParticipantModelWhereInput[]
+    NOT?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
+    actualStatus?: IntFilter<"NseCbricsParticipantModel"> | number
+    workflowStatus?: IntFilter<"NseCbricsParticipantModel"> | number
+    firstName?: StringFilter<"NseCbricsParticipantModel"> | string
+    panNo?: StringFilter<"NseCbricsParticipantModel"> | string
+    custodian?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    contactPerson?: StringFilter<"NseCbricsParticipantModel"> | string
+    mobileList?: StringNullableListFilter<"NseCbricsParticipantModel">
+    emailList?: StringNullableListFilter<"NseCbricsParticipantModel">
+    telephone?: StringFilter<"NseCbricsParticipantModel"> | string
+    fax?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    address?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    address2?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    address3?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    stateCode?: StringFilter<"NseCbricsParticipantModel"> | string
+    regAddress?: StringFilter<"NseCbricsParticipantModel"> | string
+    leiCode?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    expiryDate?: DateTimeNullableFilter<"NseCbricsParticipantModel"> | Date | string | null
+    panVerStatus?: IntNullableFilter<"NseCbricsParticipantModel"> | number | null
+    panVerRemarks?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    remarks?: StringNullableFilter<"NseCbricsParticipantModel"> | string | null
+    createdAt?: DateTimeFilter<"NseCbricsParticipantModel"> | Date | string
+    updatedAt?: DateTimeFilter<"NseCbricsParticipantModel"> | Date | string
     bankAccountList?: NSEBankAccountListRelationFilter
     dpAccountList?: NSEDpAccountListRelationFilter
-    NSEDATASET?: NSEDATASETListRelationFilter
+    NSEDATASET?: NseDataSetListRelationFilter
   }, "id" | "loginId">
 
-  export type NSECbricsParticipantModelOrderByWithAggregationInput = {
+  export type NseCbricsParticipantModelOrderByWithAggregationInput = {
     id?: SortOrder
     loginId?: SortOrder
     actualStatus?: SortOrder
@@ -24425,41 +25634,41 @@ export namespace Prisma {
     remarks?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    _count?: NSECbricsParticipantModelCountOrderByAggregateInput
-    _avg?: NSECbricsParticipantModelAvgOrderByAggregateInput
-    _max?: NSECbricsParticipantModelMaxOrderByAggregateInput
-    _min?: NSECbricsParticipantModelMinOrderByAggregateInput
-    _sum?: NSECbricsParticipantModelSumOrderByAggregateInput
+    _count?: NseCbricsParticipantModelCountOrderByAggregateInput
+    _avg?: NseCbricsParticipantModelAvgOrderByAggregateInput
+    _max?: NseCbricsParticipantModelMaxOrderByAggregateInput
+    _min?: NseCbricsParticipantModelMinOrderByAggregateInput
+    _sum?: NseCbricsParticipantModelSumOrderByAggregateInput
   }
 
-  export type NSECbricsParticipantModelScalarWhereWithAggregatesInput = {
-    AND?: NSECbricsParticipantModelScalarWhereWithAggregatesInput | NSECbricsParticipantModelScalarWhereWithAggregatesInput[]
-    OR?: NSECbricsParticipantModelScalarWhereWithAggregatesInput[]
-    NOT?: NSECbricsParticipantModelScalarWhereWithAggregatesInput | NSECbricsParticipantModelScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"NSECbricsParticipantModel"> | number
-    loginId?: StringWithAggregatesFilter<"NSECbricsParticipantModel"> | string
-    actualStatus?: IntWithAggregatesFilter<"NSECbricsParticipantModel"> | number
-    workflowStatus?: IntWithAggregatesFilter<"NSECbricsParticipantModel"> | number
-    firstName?: StringWithAggregatesFilter<"NSECbricsParticipantModel"> | string
-    panNo?: StringWithAggregatesFilter<"NSECbricsParticipantModel"> | string
-    custodian?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    contactPerson?: StringWithAggregatesFilter<"NSECbricsParticipantModel"> | string
-    mobileList?: StringNullableListFilter<"NSECbricsParticipantModel">
-    emailList?: StringNullableListFilter<"NSECbricsParticipantModel">
-    telephone?: StringWithAggregatesFilter<"NSECbricsParticipantModel"> | string
-    fax?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    address?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    address2?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    address3?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    stateCode?: StringWithAggregatesFilter<"NSECbricsParticipantModel"> | string
-    regAddress?: StringWithAggregatesFilter<"NSECbricsParticipantModel"> | string
-    leiCode?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    expiryDate?: DateTimeNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | Date | string | null
-    panVerStatus?: IntNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | number | null
-    panVerRemarks?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    remarks?: StringNullableWithAggregatesFilter<"NSECbricsParticipantModel"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"NSECbricsParticipantModel"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"NSECbricsParticipantModel"> | Date | string
+  export type NseCbricsParticipantModelScalarWhereWithAggregatesInput = {
+    AND?: NseCbricsParticipantModelScalarWhereWithAggregatesInput | NseCbricsParticipantModelScalarWhereWithAggregatesInput[]
+    OR?: NseCbricsParticipantModelScalarWhereWithAggregatesInput[]
+    NOT?: NseCbricsParticipantModelScalarWhereWithAggregatesInput | NseCbricsParticipantModelScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
+    loginId?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    actualStatus?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
+    workflowStatus?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
+    firstName?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    panNo?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    custodian?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    contactPerson?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    mobileList?: StringNullableListFilter<"NseCbricsParticipantModel">
+    emailList?: StringNullableListFilter<"NseCbricsParticipantModel">
+    telephone?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    fax?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    address?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    address2?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    address3?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    stateCode?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    regAddress?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    leiCode?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    expiryDate?: DateTimeNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | Date | string | null
+    panVerStatus?: IntNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | number | null
+    panVerRemarks?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    remarks?: StringNullableWithAggregatesFilter<"NseCbricsParticipantModel"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"NseCbricsParticipantModel"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"NseCbricsParticipantModel"> | Date | string
   }
 
   export type NSEBankAccountWhereInput = {
@@ -24475,8 +25684,8 @@ export namespace Prisma {
     status?: StringNullableFilter<"NSEBankAccount"> | string | null
     createdAt?: DateTimeFilter<"NSEBankAccount"> | Date | string
     updatedAt?: DateTimeFilter<"NSEBankAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableFilter<"NSEBankAccount"> | number | null
-    NSECbricsParticipantModel?: XOR<NSECbricsParticipantModelNullableScalarRelationFilter, NSECbricsParticipantModelWhereInput> | null
+    nseCbricsParticipantModelId?: IntNullableFilter<"NSEBankAccount"> | number | null
+    NSECbricsParticipantModel?: XOR<NseCbricsParticipantModelNullableScalarRelationFilter, NseCbricsParticipantModelWhereInput> | null
   }
 
   export type NSEBankAccountOrderByWithRelationInput = {
@@ -24489,8 +25698,8 @@ export namespace Prisma {
     status?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrderInput | SortOrder
-    NSECbricsParticipantModel?: NSECbricsParticipantModelOrderByWithRelationInput
+    nseCbricsParticipantModelId?: SortOrderInput | SortOrder
+    NSECbricsParticipantModel?: NseCbricsParticipantModelOrderByWithRelationInput
   }
 
   export type NSEBankAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -24506,8 +25715,8 @@ export namespace Prisma {
     status?: StringNullableFilter<"NSEBankAccount"> | string | null
     createdAt?: DateTimeFilter<"NSEBankAccount"> | Date | string
     updatedAt?: DateTimeFilter<"NSEBankAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableFilter<"NSEBankAccount"> | number | null
-    NSECbricsParticipantModel?: XOR<NSECbricsParticipantModelNullableScalarRelationFilter, NSECbricsParticipantModelWhereInput> | null
+    nseCbricsParticipantModelId?: IntNullableFilter<"NSEBankAccount"> | number | null
+    NSECbricsParticipantModel?: XOR<NseCbricsParticipantModelNullableScalarRelationFilter, NseCbricsParticipantModelWhereInput> | null
   }, "id">
 
   export type NSEBankAccountOrderByWithAggregationInput = {
@@ -24520,7 +25729,7 @@ export namespace Prisma {
     status?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrderInput | SortOrder
+    nseCbricsParticipantModelId?: SortOrderInput | SortOrder
     _count?: NSEBankAccountCountOrderByAggregateInput
     _avg?: NSEBankAccountAvgOrderByAggregateInput
     _max?: NSEBankAccountMaxOrderByAggregateInput
@@ -24541,7 +25750,7 @@ export namespace Prisma {
     status?: StringNullableWithAggregatesFilter<"NSEBankAccount"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"NSEBankAccount"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"NSEBankAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableWithAggregatesFilter<"NSEBankAccount"> | number | null
+    nseCbricsParticipantModelId?: IntNullableWithAggregatesFilter<"NSEBankAccount"> | number | null
   }
 
   export type NSEDpAccountWhereInput = {
@@ -24557,8 +25766,8 @@ export namespace Prisma {
     status?: StringNullableFilter<"NSEDpAccount"> | string | null
     createdAt?: DateTimeFilter<"NSEDpAccount"> | Date | string
     updatedAt?: DateTimeFilter<"NSEDpAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableFilter<"NSEDpAccount"> | number | null
-    NSECbricsParticipantModel?: XOR<NSECbricsParticipantModelNullableScalarRelationFilter, NSECbricsParticipantModelWhereInput> | null
+    nseCbricsParticipantModelId?: IntNullableFilter<"NSEDpAccount"> | number | null
+    NSECbricsParticipantModel?: XOR<NseCbricsParticipantModelNullableScalarRelationFilter, NseCbricsParticipantModelWhereInput> | null
   }
 
   export type NSEDpAccountOrderByWithRelationInput = {
@@ -24571,8 +25780,8 @@ export namespace Prisma {
     status?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrderInput | SortOrder
-    NSECbricsParticipantModel?: NSECbricsParticipantModelOrderByWithRelationInput
+    nseCbricsParticipantModelId?: SortOrderInput | SortOrder
+    NSECbricsParticipantModel?: NseCbricsParticipantModelOrderByWithRelationInput
   }
 
   export type NSEDpAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -24588,8 +25797,8 @@ export namespace Prisma {
     status?: StringNullableFilter<"NSEDpAccount"> | string | null
     createdAt?: DateTimeFilter<"NSEDpAccount"> | Date | string
     updatedAt?: DateTimeFilter<"NSEDpAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableFilter<"NSEDpAccount"> | number | null
-    NSECbricsParticipantModel?: XOR<NSECbricsParticipantModelNullableScalarRelationFilter, NSECbricsParticipantModelWhereInput> | null
+    nseCbricsParticipantModelId?: IntNullableFilter<"NSEDpAccount"> | number | null
+    NSECbricsParticipantModel?: XOR<NseCbricsParticipantModelNullableScalarRelationFilter, NseCbricsParticipantModelWhereInput> | null
   }, "id">
 
   export type NSEDpAccountOrderByWithAggregationInput = {
@@ -24602,7 +25811,7 @@ export namespace Prisma {
     status?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrderInput | SortOrder
+    nseCbricsParticipantModelId?: SortOrderInput | SortOrder
     _count?: NSEDpAccountCountOrderByAggregateInput
     _avg?: NSEDpAccountAvgOrderByAggregateInput
     _max?: NSEDpAccountMaxOrderByAggregateInput
@@ -24623,7 +25832,86 @@ export namespace Prisma {
     status?: StringNullableWithAggregatesFilter<"NSEDpAccount"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"NSEDpAccount"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"NSEDpAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableWithAggregatesFilter<"NSEDpAccount"> | number | null
+    nseCbricsParticipantModelId?: IntNullableWithAggregatesFilter<"NSEDpAccount"> | number | null
+  }
+
+  export type NseIsinSecurityReceiptWhereInput = {
+    AND?: NseIsinSecurityReceiptWhereInput | NseIsinSecurityReceiptWhereInput[]
+    OR?: NseIsinSecurityReceiptWhereInput[]
+    NOT?: NseIsinSecurityReceiptWhereInput | NseIsinSecurityReceiptWhereInput[]
+    id?: IntFilter<"NseIsinSecurityReceipt"> | number
+    symbol?: StringFilter<"NseIsinSecurityReceipt"> | string
+    couponRate?: FloatFilter<"NseIsinSecurityReceipt"> | number
+    issueCategory?: StringFilter<"NseIsinSecurityReceipt"> | string
+    listed?: StringFilter<"NseIsinSecurityReceipt"> | string
+    maturityDate?: DateTimeFilter<"NseIsinSecurityReceipt"> | Date | string
+    faceValue?: FloatFilter<"NseIsinSecurityReceipt"> | number
+    description?: StringFilter<"NseIsinSecurityReceipt"> | string
+    type?: StringFilter<"NseIsinSecurityReceipt"> | string
+    issuer?: StringFilter<"NseIsinSecurityReceipt"> | string
+  }
+
+  export type NseIsinSecurityReceiptOrderByWithRelationInput = {
+    id?: SortOrder
+    symbol?: SortOrder
+    couponRate?: SortOrder
+    issueCategory?: SortOrder
+    listed?: SortOrder
+    maturityDate?: SortOrder
+    faceValue?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    issuer?: SortOrder
+  }
+
+  export type NseIsinSecurityReceiptWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    symbol?: string
+    AND?: NseIsinSecurityReceiptWhereInput | NseIsinSecurityReceiptWhereInput[]
+    OR?: NseIsinSecurityReceiptWhereInput[]
+    NOT?: NseIsinSecurityReceiptWhereInput | NseIsinSecurityReceiptWhereInput[]
+    couponRate?: FloatFilter<"NseIsinSecurityReceipt"> | number
+    issueCategory?: StringFilter<"NseIsinSecurityReceipt"> | string
+    listed?: StringFilter<"NseIsinSecurityReceipt"> | string
+    maturityDate?: DateTimeFilter<"NseIsinSecurityReceipt"> | Date | string
+    faceValue?: FloatFilter<"NseIsinSecurityReceipt"> | number
+    description?: StringFilter<"NseIsinSecurityReceipt"> | string
+    type?: StringFilter<"NseIsinSecurityReceipt"> | string
+    issuer?: StringFilter<"NseIsinSecurityReceipt"> | string
+  }, "id" | "symbol">
+
+  export type NseIsinSecurityReceiptOrderByWithAggregationInput = {
+    id?: SortOrder
+    symbol?: SortOrder
+    couponRate?: SortOrder
+    issueCategory?: SortOrder
+    listed?: SortOrder
+    maturityDate?: SortOrder
+    faceValue?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    issuer?: SortOrder
+    _count?: NseIsinSecurityReceiptCountOrderByAggregateInput
+    _avg?: NseIsinSecurityReceiptAvgOrderByAggregateInput
+    _max?: NseIsinSecurityReceiptMaxOrderByAggregateInput
+    _min?: NseIsinSecurityReceiptMinOrderByAggregateInput
+    _sum?: NseIsinSecurityReceiptSumOrderByAggregateInput
+  }
+
+  export type NseIsinSecurityReceiptScalarWhereWithAggregatesInput = {
+    AND?: NseIsinSecurityReceiptScalarWhereWithAggregatesInput | NseIsinSecurityReceiptScalarWhereWithAggregatesInput[]
+    OR?: NseIsinSecurityReceiptScalarWhereWithAggregatesInput[]
+    NOT?: NseIsinSecurityReceiptScalarWhereWithAggregatesInput | NseIsinSecurityReceiptScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"NseIsinSecurityReceipt"> | number
+    symbol?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
+    couponRate?: FloatWithAggregatesFilter<"NseIsinSecurityReceipt"> | number
+    issueCategory?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
+    listed?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
+    maturityDate?: DateTimeWithAggregatesFilter<"NseIsinSecurityReceipt"> | Date | string
+    faceValue?: FloatWithAggregatesFilter<"NseIsinSecurityReceipt"> | number
+    description?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
+    type?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
+    issuer?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
   }
 
   export type CRMUserDataModelCreateInput = {
@@ -24859,7 +26147,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateInput = {
@@ -24884,7 +26172,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -24916,7 +26204,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateInput = {
@@ -24941,7 +26229,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -24970,7 +26258,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -25015,7 +26303,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25924,43 +27212,43 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type NSEDATASETCreateInput = {
+  export type NseDataSetCreateInput = {
     CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutNseInput
-    participant: NSECbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput
+    participant: NseCbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput
   }
 
-  export type NSEDATASETUncheckedCreateInput = {
+  export type NseDataSetUncheckedCreateInput = {
     id?: number
-    nSECbricsParticipantModelId: number
+    nseCbricsParticipantModelId: number
     CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutNseInput
   }
 
-  export type NSEDATASETUpdateInput = {
+  export type NseDataSetUpdateInput = {
     CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutNseNestedInput
-    participant?: NSECbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput
+    participant?: NseCbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput
   }
 
-  export type NSEDATASETUncheckedUpdateInput = {
+  export type NseDataSetUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    nSECbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
+    nseCbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
     CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutNseNestedInput
   }
 
-  export type NSEDATASETCreateManyInput = {
+  export type NseDataSetCreateManyInput = {
     id?: number
-    nSECbricsParticipantModelId: number
+    nseCbricsParticipantModelId: number
   }
 
-  export type NSEDATASETUpdateManyMutationInput = {
+  export type NseDataSetUpdateManyMutationInput = {
 
   }
 
-  export type NSEDATASETUncheckedUpdateManyInput = {
+  export type NseDataSetUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    nSECbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
+    nseCbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
   }
 
-  export type NSECbricsParticipantModelCreateInput = {
+  export type NseCbricsParticipantModelCreateInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -25969,8 +27257,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -25987,10 +27275,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     bankAccountList?: NSEBankAccountCreateNestedManyWithoutNSECbricsParticipantModelInput
     dpAccountList?: NSEDpAccountCreateNestedManyWithoutNSECbricsParticipantModelInput
-    NSEDATASET?: NSEDATASETCreateNestedManyWithoutParticipantInput
+    NSEDATASET?: NseDataSetCreateNestedManyWithoutParticipantInput
   }
 
-  export type NSECbricsParticipantModelUncheckedCreateInput = {
+  export type NseCbricsParticipantModelUncheckedCreateInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -25999,8 +27287,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -26017,10 +27305,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     bankAccountList?: NSEBankAccountUncheckedCreateNestedManyWithoutNSECbricsParticipantModelInput
     dpAccountList?: NSEDpAccountUncheckedCreateNestedManyWithoutNSECbricsParticipantModelInput
-    NSEDATASET?: NSEDATASETUncheckedCreateNestedManyWithoutParticipantInput
+    NSEDATASET?: NseDataSetUncheckedCreateNestedManyWithoutParticipantInput
   }
 
-  export type NSECbricsParticipantModelUpdateInput = {
+  export type NseCbricsParticipantModelUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -26029,8 +27317,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26047,10 +27335,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccountList?: NSEBankAccountUpdateManyWithoutNSECbricsParticipantModelNestedInput
     dpAccountList?: NSEDpAccountUpdateManyWithoutNSECbricsParticipantModelNestedInput
-    NSEDATASET?: NSEDATASETUpdateManyWithoutParticipantNestedInput
+    NSEDATASET?: NseDataSetUpdateManyWithoutParticipantNestedInput
   }
 
-  export type NSECbricsParticipantModelUncheckedUpdateInput = {
+  export type NseCbricsParticipantModelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -26059,8 +27347,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26077,10 +27365,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccountList?: NSEBankAccountUncheckedUpdateManyWithoutNSECbricsParticipantModelNestedInput
     dpAccountList?: NSEDpAccountUncheckedUpdateManyWithoutNSECbricsParticipantModelNestedInput
-    NSEDATASET?: NSEDATASETUncheckedUpdateManyWithoutParticipantNestedInput
+    NSEDATASET?: NseDataSetUncheckedUpdateManyWithoutParticipantNestedInput
   }
 
-  export type NSECbricsParticipantModelCreateManyInput = {
+  export type NseCbricsParticipantModelCreateManyInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -26089,8 +27377,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -26107,7 +27395,7 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type NSECbricsParticipantModelUpdateManyMutationInput = {
+  export type NseCbricsParticipantModelUpdateManyMutationInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -26116,8 +27404,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26134,7 +27422,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type NSECbricsParticipantModelUncheckedUpdateManyInput = {
+  export type NseCbricsParticipantModelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -26143,8 +27431,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26170,7 +27458,7 @@ export namespace Prisma {
     status?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    NSECbricsParticipantModel?: NSECbricsParticipantModelCreateNestedOneWithoutBankAccountListInput
+    NSECbricsParticipantModel?: NseCbricsParticipantModelCreateNestedOneWithoutBankAccountListInput
   }
 
   export type NSEBankAccountUncheckedCreateInput = {
@@ -26183,7 +27471,7 @@ export namespace Prisma {
     status?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    nSECbricsParticipantModelId?: number | null
+    nseCbricsParticipantModelId?: number | null
   }
 
   export type NSEBankAccountUpdateInput = {
@@ -26195,7 +27483,7 @@ export namespace Prisma {
     status?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    NSECbricsParticipantModel?: NSECbricsParticipantModelUpdateOneWithoutBankAccountListNestedInput
+    NSECbricsParticipantModel?: NseCbricsParticipantModelUpdateOneWithoutBankAccountListNestedInput
   }
 
   export type NSEBankAccountUncheckedUpdateInput = {
@@ -26208,7 +27496,7 @@ export namespace Prisma {
     status?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nSECbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseCbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type NSEBankAccountCreateManyInput = {
@@ -26221,7 +27509,7 @@ export namespace Prisma {
     status?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    nSECbricsParticipantModelId?: number | null
+    nseCbricsParticipantModelId?: number | null
   }
 
   export type NSEBankAccountUpdateManyMutationInput = {
@@ -26245,7 +27533,7 @@ export namespace Prisma {
     status?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nSECbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseCbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type NSEDpAccountCreateInput = {
@@ -26257,7 +27545,7 @@ export namespace Prisma {
     status?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    NSECbricsParticipantModel?: NSECbricsParticipantModelCreateNestedOneWithoutDpAccountListInput
+    NSECbricsParticipantModel?: NseCbricsParticipantModelCreateNestedOneWithoutDpAccountListInput
   }
 
   export type NSEDpAccountUncheckedCreateInput = {
@@ -26270,7 +27558,7 @@ export namespace Prisma {
     status?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    nSECbricsParticipantModelId?: number | null
+    nseCbricsParticipantModelId?: number | null
   }
 
   export type NSEDpAccountUpdateInput = {
@@ -26282,7 +27570,7 @@ export namespace Prisma {
     status?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    NSECbricsParticipantModel?: NSECbricsParticipantModelUpdateOneWithoutDpAccountListNestedInput
+    NSECbricsParticipantModel?: NseCbricsParticipantModelUpdateOneWithoutDpAccountListNestedInput
   }
 
   export type NSEDpAccountUncheckedUpdateInput = {
@@ -26295,7 +27583,7 @@ export namespace Prisma {
     status?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nSECbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseCbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type NSEDpAccountCreateManyInput = {
@@ -26308,7 +27596,7 @@ export namespace Prisma {
     status?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    nSECbricsParticipantModelId?: number | null
+    nseCbricsParticipantModelId?: number | null
   }
 
   export type NSEDpAccountUpdateManyMutationInput = {
@@ -26332,7 +27620,95 @@ export namespace Prisma {
     status?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nSECbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseCbricsParticipantModelId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type NseIsinSecurityReceiptCreateInput = {
+    symbol: string
+    couponRate: number
+    issueCategory: string
+    listed: string
+    maturityDate: Date | string
+    faceValue: number
+    description: string
+    type: string
+    issuer: string
+  }
+
+  export type NseIsinSecurityReceiptUncheckedCreateInput = {
+    id?: number
+    symbol: string
+    couponRate: number
+    issueCategory: string
+    listed: string
+    maturityDate: Date | string
+    faceValue: number
+    description: string
+    type: string
+    issuer: string
+  }
+
+  export type NseIsinSecurityReceiptUpdateInput = {
+    symbol?: StringFieldUpdateOperationsInput | string
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    issueCategory?: StringFieldUpdateOperationsInput | string
+    listed?: StringFieldUpdateOperationsInput | string
+    maturityDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    description?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    issuer?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type NseIsinSecurityReceiptUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    symbol?: StringFieldUpdateOperationsInput | string
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    issueCategory?: StringFieldUpdateOperationsInput | string
+    listed?: StringFieldUpdateOperationsInput | string
+    maturityDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    description?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    issuer?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type NseIsinSecurityReceiptCreateManyInput = {
+    id?: number
+    symbol: string
+    couponRate: number
+    issueCategory: string
+    listed: string
+    maturityDate: Date | string
+    faceValue: number
+    description: string
+    type: string
+    issuer: string
+  }
+
+  export type NseIsinSecurityReceiptUpdateManyMutationInput = {
+    symbol?: StringFieldUpdateOperationsInput | string
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    issueCategory?: StringFieldUpdateOperationsInput | string
+    listed?: StringFieldUpdateOperationsInput | string
+    maturityDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    description?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    issuer?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type NseIsinSecurityReceiptUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    symbol?: StringFieldUpdateOperationsInput | string
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    issueCategory?: StringFieldUpdateOperationsInput | string
+    listed?: StringFieldUpdateOperationsInput | string
+    maturityDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    description?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    issuer?: StringFieldUpdateOperationsInput | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -26779,9 +28155,9 @@ export namespace Prisma {
     isNot?: AddressModelWhereInput | null
   }
 
-  export type NSEDATASETNullableScalarRelationFilter = {
-    is?: NSEDATASETWhereInput | null
-    isNot?: NSEDATASETWhereInput | null
+  export type NseDataSetNullableScalarRelationFilter = {
+    is?: NseDataSetWhereInput | null
+    isNot?: NseDataSetWhereInput | null
   }
 
   export type CustomersBankAccountModelOrderByRelationAggregateInput = {
@@ -26814,7 +28190,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nSEDATASETId?: SortOrder
+    nseDataSetId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26830,7 +28206,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nSEDATASETId?: SortOrder
+    nseDataSetId?: SortOrder
   }
 
   export type CustomerProfileDataModelMaxOrderByAggregateInput = {
@@ -26855,7 +28231,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nSEDATASETId?: SortOrder
+    nseDataSetId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26882,7 +28258,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nSEDATASETId?: SortOrder
+    nseDataSetId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26898,7 +28274,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nSEDATASETId?: SortOrder
+    nseDataSetId?: SortOrder
   }
 
   export type EnumGenderWithAggregatesFilter<$PrismaModel = never> = {
@@ -27509,34 +28885,34 @@ export namespace Prisma {
     createdByID?: SortOrder
   }
 
-  export type NSECbricsParticipantModelScalarRelationFilter = {
-    is?: NSECbricsParticipantModelWhereInput
-    isNot?: NSECbricsParticipantModelWhereInput
+  export type NseCbricsParticipantModelScalarRelationFilter = {
+    is?: NseCbricsParticipantModelWhereInput
+    isNot?: NseCbricsParticipantModelWhereInput
   }
 
-  export type NSEDATASETCountOrderByAggregateInput = {
+  export type NseDataSetCountOrderByAggregateInput = {
     id?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
-  export type NSEDATASETAvgOrderByAggregateInput = {
+  export type NseDataSetAvgOrderByAggregateInput = {
     id?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
-  export type NSEDATASETMaxOrderByAggregateInput = {
+  export type NseDataSetMaxOrderByAggregateInput = {
     id?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
-  export type NSEDATASETMinOrderByAggregateInput = {
+  export type NseDataSetMinOrderByAggregateInput = {
     id?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
-  export type NSEDATASETSumOrderByAggregateInput = {
+  export type NseDataSetSumOrderByAggregateInput = {
     id?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -27559,10 +28935,10 @@ export namespace Prisma {
     none?: NSEDpAccountWhereInput
   }
 
-  export type NSEDATASETListRelationFilter = {
-    every?: NSEDATASETWhereInput
-    some?: NSEDATASETWhereInput
-    none?: NSEDATASETWhereInput
+  export type NseDataSetListRelationFilter = {
+    every?: NseDataSetWhereInput
+    some?: NseDataSetWhereInput
+    none?: NseDataSetWhereInput
   }
 
   export type NSEBankAccountOrderByRelationAggregateInput = {
@@ -27573,11 +28949,11 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type NSEDATASETOrderByRelationAggregateInput = {
+  export type NseDataSetOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type NSECbricsParticipantModelCountOrderByAggregateInput = {
+  export type NseCbricsParticipantModelCountOrderByAggregateInput = {
     id?: SortOrder
     loginId?: SortOrder
     actualStatus?: SortOrder
@@ -27604,39 +28980,14 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
-  export type NSECbricsParticipantModelAvgOrderByAggregateInput = {
+  export type NseCbricsParticipantModelAvgOrderByAggregateInput = {
     id?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     panVerStatus?: SortOrder
   }
 
-  export type NSECbricsParticipantModelMaxOrderByAggregateInput = {
-    id?: SortOrder
-    loginId?: SortOrder
-    actualStatus?: SortOrder
-    workflowStatus?: SortOrder
-    firstName?: SortOrder
-    panNo?: SortOrder
-    custodian?: SortOrder
-    contactPerson?: SortOrder
-    telephone?: SortOrder
-    fax?: SortOrder
-    address?: SortOrder
-    address2?: SortOrder
-    address3?: SortOrder
-    stateCode?: SortOrder
-    regAddress?: SortOrder
-    leiCode?: SortOrder
-    expiryDate?: SortOrder
-    panVerStatus?: SortOrder
-    panVerRemarks?: SortOrder
-    remarks?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type NSECbricsParticipantModelMinOrderByAggregateInput = {
+  export type NseCbricsParticipantModelMaxOrderByAggregateInput = {
     id?: SortOrder
     loginId?: SortOrder
     actualStatus?: SortOrder
@@ -27661,7 +29012,32 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
-  export type NSECbricsParticipantModelSumOrderByAggregateInput = {
+  export type NseCbricsParticipantModelMinOrderByAggregateInput = {
+    id?: SortOrder
+    loginId?: SortOrder
+    actualStatus?: SortOrder
+    workflowStatus?: SortOrder
+    firstName?: SortOrder
+    panNo?: SortOrder
+    custodian?: SortOrder
+    contactPerson?: SortOrder
+    telephone?: SortOrder
+    fax?: SortOrder
+    address?: SortOrder
+    address2?: SortOrder
+    address3?: SortOrder
+    stateCode?: SortOrder
+    regAddress?: SortOrder
+    leiCode?: SortOrder
+    expiryDate?: SortOrder
+    panVerStatus?: SortOrder
+    panVerRemarks?: SortOrder
+    remarks?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type NseCbricsParticipantModelSumOrderByAggregateInput = {
     id?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
@@ -27675,9 +29051,9 @@ export namespace Prisma {
     not?: NestedEnumDefaultSelectFilter<$PrismaModel> | $Enums.DefaultSelect
   }
 
-  export type NSECbricsParticipantModelNullableScalarRelationFilter = {
-    is?: NSECbricsParticipantModelWhereInput | null
-    isNot?: NSECbricsParticipantModelWhereInput | null
+  export type NseCbricsParticipantModelNullableScalarRelationFilter = {
+    is?: NseCbricsParticipantModelWhereInput | null
+    isNot?: NseCbricsParticipantModelWhereInput | null
   }
 
   export type NSEBankAccountCountOrderByAggregateInput = {
@@ -27690,13 +29066,13 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEBankAccountAvgOrderByAggregateInput = {
     id?: SortOrder
     workflowStatus?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEBankAccountMaxOrderByAggregateInput = {
@@ -27709,7 +29085,7 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEBankAccountMinOrderByAggregateInput = {
@@ -27722,13 +29098,13 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEBankAccountSumOrderByAggregateInput = {
     id?: SortOrder
     workflowStatus?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type EnumDefaultSelectWithAggregatesFilter<$PrismaModel = never> = {
@@ -27751,13 +29127,13 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEDpAccountAvgOrderByAggregateInput = {
     id?: SortOrder
     workflowStatus?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEDpAccountMaxOrderByAggregateInput = {
@@ -27770,7 +29146,7 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEDpAccountMinOrderByAggregateInput = {
@@ -27783,13 +29159,91 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NSEDpAccountSumOrderByAggregateInput = {
     id?: SortOrder
     workflowStatus?: SortOrder
-    nSECbricsParticipantModelId?: SortOrder
+    nseCbricsParticipantModelId?: SortOrder
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NseIsinSecurityReceiptCountOrderByAggregateInput = {
+    id?: SortOrder
+    symbol?: SortOrder
+    couponRate?: SortOrder
+    issueCategory?: SortOrder
+    listed?: SortOrder
+    maturityDate?: SortOrder
+    faceValue?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    issuer?: SortOrder
+  }
+
+  export type NseIsinSecurityReceiptAvgOrderByAggregateInput = {
+    id?: SortOrder
+    couponRate?: SortOrder
+    faceValue?: SortOrder
+  }
+
+  export type NseIsinSecurityReceiptMaxOrderByAggregateInput = {
+    id?: SortOrder
+    symbol?: SortOrder
+    couponRate?: SortOrder
+    issueCategory?: SortOrder
+    listed?: SortOrder
+    maturityDate?: SortOrder
+    faceValue?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    issuer?: SortOrder
+  }
+
+  export type NseIsinSecurityReceiptMinOrderByAggregateInput = {
+    id?: SortOrder
+    symbol?: SortOrder
+    couponRate?: SortOrder
+    issueCategory?: SortOrder
+    listed?: SortOrder
+    maturityDate?: SortOrder
+    faceValue?: SortOrder
+    description?: SortOrder
+    type?: SortOrder
+    issuer?: SortOrder
+  }
+
+  export type NseIsinSecurityReceiptSumOrderByAggregateInput = {
+    id?: SortOrder
+    couponRate?: SortOrder
+    faceValue?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type CustomersAuthDataModelCreateNestedManyWithoutRelationshipManagerInput = {
@@ -28038,10 +29492,10 @@ export namespace Prisma {
     connect?: AddressModelWhereUniqueInput
   }
 
-  export type NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput = {
-    create?: XOR<NSEDATASETCreateWithoutCustomerProfileDataModelInput, NSEDATASETUncheckedCreateWithoutCustomerProfileDataModelInput>
-    connectOrCreate?: NSEDATASETCreateOrConnectWithoutCustomerProfileDataModelInput
-    connect?: NSEDATASETWhereUniqueInput
+  export type NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput = {
+    create?: XOR<NseDataSetCreateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput>
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutCustomerProfileDataModelInput
+    connect?: NseDataSetWhereUniqueInput
   }
 
   export type CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput = {
@@ -28166,14 +29620,14 @@ export namespace Prisma {
     update?: XOR<XOR<AddressModelUpdateToOneWithWhereWithoutPermanentAddressOfInput, AddressModelUpdateWithoutPermanentAddressOfInput>, AddressModelUncheckedUpdateWithoutPermanentAddressOfInput>
   }
 
-  export type NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput = {
-    create?: XOR<NSEDATASETCreateWithoutCustomerProfileDataModelInput, NSEDATASETUncheckedCreateWithoutCustomerProfileDataModelInput>
-    connectOrCreate?: NSEDATASETCreateOrConnectWithoutCustomerProfileDataModelInput
-    upsert?: NSEDATASETUpsertWithoutCustomerProfileDataModelInput
-    disconnect?: NSEDATASETWhereInput | boolean
-    delete?: NSEDATASETWhereInput | boolean
-    connect?: NSEDATASETWhereUniqueInput
-    update?: XOR<XOR<NSEDATASETUpdateToOneWithWhereWithoutCustomerProfileDataModelInput, NSEDATASETUpdateWithoutCustomerProfileDataModelInput>, NSEDATASETUncheckedUpdateWithoutCustomerProfileDataModelInput>
+  export type NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput = {
+    create?: XOR<NseDataSetCreateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput>
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutCustomerProfileDataModelInput
+    upsert?: NseDataSetUpsertWithoutCustomerProfileDataModelInput
+    disconnect?: NseDataSetWhereInput | boolean
+    delete?: NseDataSetWhereInput | boolean
+    connect?: NseDataSetWhereUniqueInput
+    update?: XOR<XOR<NseDataSetUpdateToOneWithWhereWithoutCustomerProfileDataModelInput, NseDataSetUpdateWithoutCustomerProfileDataModelInput>, NseDataSetUncheckedUpdateWithoutCustomerProfileDataModelInput>
   }
 
   export type CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput = {
@@ -28540,10 +29994,10 @@ export namespace Prisma {
     connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
   }
 
-  export type NSECbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput = {
-    create?: XOR<NSECbricsParticipantModelCreateWithoutNSEDATASETInput, NSECbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
-    connectOrCreate?: NSECbricsParticipantModelCreateOrConnectWithoutNSEDATASETInput
-    connect?: NSECbricsParticipantModelWhereUniqueInput
+  export type NseCbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput = {
+    create?: XOR<NseCbricsParticipantModelCreateWithoutNSEDATASETInput, NseCbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
+    connectOrCreate?: NseCbricsParticipantModelCreateOrConnectWithoutNSEDATASETInput
+    connect?: NseCbricsParticipantModelWhereUniqueInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutNseInput = {
@@ -28567,12 +30021,12 @@ export namespace Prisma {
     deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
   }
 
-  export type NSECbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput = {
-    create?: XOR<NSECbricsParticipantModelCreateWithoutNSEDATASETInput, NSECbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
-    connectOrCreate?: NSECbricsParticipantModelCreateOrConnectWithoutNSEDATASETInput
-    upsert?: NSECbricsParticipantModelUpsertWithoutNSEDATASETInput
-    connect?: NSECbricsParticipantModelWhereUniqueInput
-    update?: XOR<XOR<NSECbricsParticipantModelUpdateToOneWithWhereWithoutNSEDATASETInput, NSECbricsParticipantModelUpdateWithoutNSEDATASETInput>, NSECbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput>
+  export type NseCbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput = {
+    create?: XOR<NseCbricsParticipantModelCreateWithoutNSEDATASETInput, NseCbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
+    connectOrCreate?: NseCbricsParticipantModelCreateOrConnectWithoutNSEDATASETInput
+    upsert?: NseCbricsParticipantModelUpsertWithoutNSEDATASETInput
+    connect?: NseCbricsParticipantModelWhereUniqueInput
+    update?: XOR<XOR<NseCbricsParticipantModelUpdateToOneWithWhereWithoutNSEDATASETInput, NseCbricsParticipantModelUpdateWithoutNSEDATASETInput>, NseCbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput>
   }
 
   export type CustomerProfileDataModelUncheckedUpdateManyWithoutNseNestedInput = {
@@ -28589,11 +30043,11 @@ export namespace Prisma {
     deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
   }
 
-  export type NSECbricsParticipantModelCreatemobileListInput = {
+  export type NseCbricsParticipantModelCreatemobileListInput = {
     set: string[]
   }
 
-  export type NSECbricsParticipantModelCreateemailListInput = {
+  export type NseCbricsParticipantModelCreateemailListInput = {
     set: string[]
   }
 
@@ -28611,11 +30065,11 @@ export namespace Prisma {
     connect?: NSEDpAccountWhereUniqueInput | NSEDpAccountWhereUniqueInput[]
   }
 
-  export type NSEDATASETCreateNestedManyWithoutParticipantInput = {
-    create?: XOR<NSEDATASETCreateWithoutParticipantInput, NSEDATASETUncheckedCreateWithoutParticipantInput> | NSEDATASETCreateWithoutParticipantInput[] | NSEDATASETUncheckedCreateWithoutParticipantInput[]
-    connectOrCreate?: NSEDATASETCreateOrConnectWithoutParticipantInput | NSEDATASETCreateOrConnectWithoutParticipantInput[]
-    createMany?: NSEDATASETCreateManyParticipantInputEnvelope
-    connect?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
+  export type NseDataSetCreateNestedManyWithoutParticipantInput = {
+    create?: XOR<NseDataSetCreateWithoutParticipantInput, NseDataSetUncheckedCreateWithoutParticipantInput> | NseDataSetCreateWithoutParticipantInput[] | NseDataSetUncheckedCreateWithoutParticipantInput[]
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutParticipantInput | NseDataSetCreateOrConnectWithoutParticipantInput[]
+    createMany?: NseDataSetCreateManyParticipantInputEnvelope
+    connect?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
   }
 
   export type NSEBankAccountUncheckedCreateNestedManyWithoutNSECbricsParticipantModelInput = {
@@ -28632,19 +30086,19 @@ export namespace Prisma {
     connect?: NSEDpAccountWhereUniqueInput | NSEDpAccountWhereUniqueInput[]
   }
 
-  export type NSEDATASETUncheckedCreateNestedManyWithoutParticipantInput = {
-    create?: XOR<NSEDATASETCreateWithoutParticipantInput, NSEDATASETUncheckedCreateWithoutParticipantInput> | NSEDATASETCreateWithoutParticipantInput[] | NSEDATASETUncheckedCreateWithoutParticipantInput[]
-    connectOrCreate?: NSEDATASETCreateOrConnectWithoutParticipantInput | NSEDATASETCreateOrConnectWithoutParticipantInput[]
-    createMany?: NSEDATASETCreateManyParticipantInputEnvelope
-    connect?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
+  export type NseDataSetUncheckedCreateNestedManyWithoutParticipantInput = {
+    create?: XOR<NseDataSetCreateWithoutParticipantInput, NseDataSetUncheckedCreateWithoutParticipantInput> | NseDataSetCreateWithoutParticipantInput[] | NseDataSetUncheckedCreateWithoutParticipantInput[]
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutParticipantInput | NseDataSetCreateOrConnectWithoutParticipantInput[]
+    createMany?: NseDataSetCreateManyParticipantInputEnvelope
+    connect?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
   }
 
-  export type NSECbricsParticipantModelUpdatemobileListInput = {
+  export type NseCbricsParticipantModelUpdatemobileListInput = {
     set?: string[]
     push?: string | string[]
   }
 
-  export type NSECbricsParticipantModelUpdateemailListInput = {
+  export type NseCbricsParticipantModelUpdateemailListInput = {
     set?: string[]
     push?: string | string[]
   }
@@ -28677,18 +30131,18 @@ export namespace Prisma {
     deleteMany?: NSEDpAccountScalarWhereInput | NSEDpAccountScalarWhereInput[]
   }
 
-  export type NSEDATASETUpdateManyWithoutParticipantNestedInput = {
-    create?: XOR<NSEDATASETCreateWithoutParticipantInput, NSEDATASETUncheckedCreateWithoutParticipantInput> | NSEDATASETCreateWithoutParticipantInput[] | NSEDATASETUncheckedCreateWithoutParticipantInput[]
-    connectOrCreate?: NSEDATASETCreateOrConnectWithoutParticipantInput | NSEDATASETCreateOrConnectWithoutParticipantInput[]
-    upsert?: NSEDATASETUpsertWithWhereUniqueWithoutParticipantInput | NSEDATASETUpsertWithWhereUniqueWithoutParticipantInput[]
-    createMany?: NSEDATASETCreateManyParticipantInputEnvelope
-    set?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    disconnect?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    delete?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    connect?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    update?: NSEDATASETUpdateWithWhereUniqueWithoutParticipantInput | NSEDATASETUpdateWithWhereUniqueWithoutParticipantInput[]
-    updateMany?: NSEDATASETUpdateManyWithWhereWithoutParticipantInput | NSEDATASETUpdateManyWithWhereWithoutParticipantInput[]
-    deleteMany?: NSEDATASETScalarWhereInput | NSEDATASETScalarWhereInput[]
+  export type NseDataSetUpdateManyWithoutParticipantNestedInput = {
+    create?: XOR<NseDataSetCreateWithoutParticipantInput, NseDataSetUncheckedCreateWithoutParticipantInput> | NseDataSetCreateWithoutParticipantInput[] | NseDataSetUncheckedCreateWithoutParticipantInput[]
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutParticipantInput | NseDataSetCreateOrConnectWithoutParticipantInput[]
+    upsert?: NseDataSetUpsertWithWhereUniqueWithoutParticipantInput | NseDataSetUpsertWithWhereUniqueWithoutParticipantInput[]
+    createMany?: NseDataSetCreateManyParticipantInputEnvelope
+    set?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    disconnect?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    delete?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    connect?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    update?: NseDataSetUpdateWithWhereUniqueWithoutParticipantInput | NseDataSetUpdateWithWhereUniqueWithoutParticipantInput[]
+    updateMany?: NseDataSetUpdateManyWithWhereWithoutParticipantInput | NseDataSetUpdateManyWithWhereWithoutParticipantInput[]
+    deleteMany?: NseDataSetScalarWhereInput | NseDataSetScalarWhereInput[]
   }
 
   export type NSEBankAccountUncheckedUpdateManyWithoutNSECbricsParticipantModelNestedInput = {
@@ -28719,54 +30173,62 @@ export namespace Prisma {
     deleteMany?: NSEDpAccountScalarWhereInput | NSEDpAccountScalarWhereInput[]
   }
 
-  export type NSEDATASETUncheckedUpdateManyWithoutParticipantNestedInput = {
-    create?: XOR<NSEDATASETCreateWithoutParticipantInput, NSEDATASETUncheckedCreateWithoutParticipantInput> | NSEDATASETCreateWithoutParticipantInput[] | NSEDATASETUncheckedCreateWithoutParticipantInput[]
-    connectOrCreate?: NSEDATASETCreateOrConnectWithoutParticipantInput | NSEDATASETCreateOrConnectWithoutParticipantInput[]
-    upsert?: NSEDATASETUpsertWithWhereUniqueWithoutParticipantInput | NSEDATASETUpsertWithWhereUniqueWithoutParticipantInput[]
-    createMany?: NSEDATASETCreateManyParticipantInputEnvelope
-    set?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    disconnect?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    delete?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    connect?: NSEDATASETWhereUniqueInput | NSEDATASETWhereUniqueInput[]
-    update?: NSEDATASETUpdateWithWhereUniqueWithoutParticipantInput | NSEDATASETUpdateWithWhereUniqueWithoutParticipantInput[]
-    updateMany?: NSEDATASETUpdateManyWithWhereWithoutParticipantInput | NSEDATASETUpdateManyWithWhereWithoutParticipantInput[]
-    deleteMany?: NSEDATASETScalarWhereInput | NSEDATASETScalarWhereInput[]
+  export type NseDataSetUncheckedUpdateManyWithoutParticipantNestedInput = {
+    create?: XOR<NseDataSetCreateWithoutParticipantInput, NseDataSetUncheckedCreateWithoutParticipantInput> | NseDataSetCreateWithoutParticipantInput[] | NseDataSetUncheckedCreateWithoutParticipantInput[]
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutParticipantInput | NseDataSetCreateOrConnectWithoutParticipantInput[]
+    upsert?: NseDataSetUpsertWithWhereUniqueWithoutParticipantInput | NseDataSetUpsertWithWhereUniqueWithoutParticipantInput[]
+    createMany?: NseDataSetCreateManyParticipantInputEnvelope
+    set?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    disconnect?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    delete?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    connect?: NseDataSetWhereUniqueInput | NseDataSetWhereUniqueInput[]
+    update?: NseDataSetUpdateWithWhereUniqueWithoutParticipantInput | NseDataSetUpdateWithWhereUniqueWithoutParticipantInput[]
+    updateMany?: NseDataSetUpdateManyWithWhereWithoutParticipantInput | NseDataSetUpdateManyWithWhereWithoutParticipantInput[]
+    deleteMany?: NseDataSetScalarWhereInput | NseDataSetScalarWhereInput[]
   }
 
-  export type NSECbricsParticipantModelCreateNestedOneWithoutBankAccountListInput = {
-    create?: XOR<NSECbricsParticipantModelCreateWithoutBankAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
-    connectOrCreate?: NSECbricsParticipantModelCreateOrConnectWithoutBankAccountListInput
-    connect?: NSECbricsParticipantModelWhereUniqueInput
+  export type NseCbricsParticipantModelCreateNestedOneWithoutBankAccountListInput = {
+    create?: XOR<NseCbricsParticipantModelCreateWithoutBankAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
+    connectOrCreate?: NseCbricsParticipantModelCreateOrConnectWithoutBankAccountListInput
+    connect?: NseCbricsParticipantModelWhereUniqueInput
   }
 
   export type EnumDefaultSelectFieldUpdateOperationsInput = {
     set?: $Enums.DefaultSelect
   }
 
-  export type NSECbricsParticipantModelUpdateOneWithoutBankAccountListNestedInput = {
-    create?: XOR<NSECbricsParticipantModelCreateWithoutBankAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
-    connectOrCreate?: NSECbricsParticipantModelCreateOrConnectWithoutBankAccountListInput
-    upsert?: NSECbricsParticipantModelUpsertWithoutBankAccountListInput
-    disconnect?: NSECbricsParticipantModelWhereInput | boolean
-    delete?: NSECbricsParticipantModelWhereInput | boolean
-    connect?: NSECbricsParticipantModelWhereUniqueInput
-    update?: XOR<XOR<NSECbricsParticipantModelUpdateToOneWithWhereWithoutBankAccountListInput, NSECbricsParticipantModelUpdateWithoutBankAccountListInput>, NSECbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput>
+  export type NseCbricsParticipantModelUpdateOneWithoutBankAccountListNestedInput = {
+    create?: XOR<NseCbricsParticipantModelCreateWithoutBankAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
+    connectOrCreate?: NseCbricsParticipantModelCreateOrConnectWithoutBankAccountListInput
+    upsert?: NseCbricsParticipantModelUpsertWithoutBankAccountListInput
+    disconnect?: NseCbricsParticipantModelWhereInput | boolean
+    delete?: NseCbricsParticipantModelWhereInput | boolean
+    connect?: NseCbricsParticipantModelWhereUniqueInput
+    update?: XOR<XOR<NseCbricsParticipantModelUpdateToOneWithWhereWithoutBankAccountListInput, NseCbricsParticipantModelUpdateWithoutBankAccountListInput>, NseCbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput>
   }
 
-  export type NSECbricsParticipantModelCreateNestedOneWithoutDpAccountListInput = {
-    create?: XOR<NSECbricsParticipantModelCreateWithoutDpAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
-    connectOrCreate?: NSECbricsParticipantModelCreateOrConnectWithoutDpAccountListInput
-    connect?: NSECbricsParticipantModelWhereUniqueInput
+  export type NseCbricsParticipantModelCreateNestedOneWithoutDpAccountListInput = {
+    create?: XOR<NseCbricsParticipantModelCreateWithoutDpAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
+    connectOrCreate?: NseCbricsParticipantModelCreateOrConnectWithoutDpAccountListInput
+    connect?: NseCbricsParticipantModelWhereUniqueInput
   }
 
-  export type NSECbricsParticipantModelUpdateOneWithoutDpAccountListNestedInput = {
-    create?: XOR<NSECbricsParticipantModelCreateWithoutDpAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
-    connectOrCreate?: NSECbricsParticipantModelCreateOrConnectWithoutDpAccountListInput
-    upsert?: NSECbricsParticipantModelUpsertWithoutDpAccountListInput
-    disconnect?: NSECbricsParticipantModelWhereInput | boolean
-    delete?: NSECbricsParticipantModelWhereInput | boolean
-    connect?: NSECbricsParticipantModelWhereUniqueInput
-    update?: XOR<XOR<NSECbricsParticipantModelUpdateToOneWithWhereWithoutDpAccountListInput, NSECbricsParticipantModelUpdateWithoutDpAccountListInput>, NSECbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
+  export type NseCbricsParticipantModelUpdateOneWithoutDpAccountListNestedInput = {
+    create?: XOR<NseCbricsParticipantModelCreateWithoutDpAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
+    connectOrCreate?: NseCbricsParticipantModelCreateOrConnectWithoutDpAccountListInput
+    upsert?: NseCbricsParticipantModelUpsertWithoutDpAccountListInput
+    disconnect?: NseCbricsParticipantModelWhereInput | boolean
+    delete?: NseCbricsParticipantModelWhereInput | boolean
+    connect?: NseCbricsParticipantModelWhereUniqueInput
+    update?: XOR<XOR<NseCbricsParticipantModelUpdateToOneWithWhereWithoutDpAccountListInput, NseCbricsParticipantModelUpdateWithoutDpAccountListInput>, NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -29174,6 +30636,22 @@ export namespace Prisma {
     _max?: NestedEnumDefaultSelectFilter<$PrismaModel>
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type CustomersAuthDataModelCreateWithoutRelationshipManagerInput = {
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
@@ -29382,7 +30860,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutUtilityInput = {
@@ -29406,7 +30884,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -29504,7 +30982,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    nSEDATASETId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    nseDataSetId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
   }
@@ -29819,18 +31297,18 @@ export namespace Prisma {
     create: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
   }
 
-  export type NSEDATASETCreateWithoutCustomerProfileDataModelInput = {
-    participant: NSECbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput
+  export type NseDataSetCreateWithoutCustomerProfileDataModelInput = {
+    participant: NseCbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput
   }
 
-  export type NSEDATASETUncheckedCreateWithoutCustomerProfileDataModelInput = {
+  export type NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput = {
     id?: number
-    nSECbricsParticipantModelId: number
+    nseCbricsParticipantModelId: number
   }
 
-  export type NSEDATASETCreateOrConnectWithoutCustomerProfileDataModelInput = {
-    where: NSEDATASETWhereUniqueInput
-    create: XOR<NSEDATASETCreateWithoutCustomerProfileDataModelInput, NSEDATASETUncheckedCreateWithoutCustomerProfileDataModelInput>
+  export type NseDataSetCreateOrConnectWithoutCustomerProfileDataModelInput = {
+    where: NseDataSetWhereUniqueInput
+    create: XOR<NseDataSetCreateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput>
   }
 
   export type CustomersRiskProfileModelUpsertWithoutCustomerProfileDataModelInput = {
@@ -30176,24 +31654,24 @@ export namespace Prisma {
     currentAddressOf?: CustomerProfileDataModelUncheckedUpdateManyWithoutCurrentAddressNestedInput
   }
 
-  export type NSEDATASETUpsertWithoutCustomerProfileDataModelInput = {
-    update: XOR<NSEDATASETUpdateWithoutCustomerProfileDataModelInput, NSEDATASETUncheckedUpdateWithoutCustomerProfileDataModelInput>
-    create: XOR<NSEDATASETCreateWithoutCustomerProfileDataModelInput, NSEDATASETUncheckedCreateWithoutCustomerProfileDataModelInput>
-    where?: NSEDATASETWhereInput
+  export type NseDataSetUpsertWithoutCustomerProfileDataModelInput = {
+    update: XOR<NseDataSetUpdateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedUpdateWithoutCustomerProfileDataModelInput>
+    create: XOR<NseDataSetCreateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput>
+    where?: NseDataSetWhereInput
   }
 
-  export type NSEDATASETUpdateToOneWithWhereWithoutCustomerProfileDataModelInput = {
-    where?: NSEDATASETWhereInput
-    data: XOR<NSEDATASETUpdateWithoutCustomerProfileDataModelInput, NSEDATASETUncheckedUpdateWithoutCustomerProfileDataModelInput>
+  export type NseDataSetUpdateToOneWithWhereWithoutCustomerProfileDataModelInput = {
+    where?: NseDataSetWhereInput
+    data: XOR<NseDataSetUpdateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedUpdateWithoutCustomerProfileDataModelInput>
   }
 
-  export type NSEDATASETUpdateWithoutCustomerProfileDataModelInput = {
-    participant?: NSECbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput
+  export type NseDataSetUpdateWithoutCustomerProfileDataModelInput = {
+    participant?: NseCbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput
   }
 
-  export type NSEDATASETUncheckedUpdateWithoutCustomerProfileDataModelInput = {
+  export type NseDataSetUncheckedUpdateWithoutCustomerProfileDataModelInput = {
     id?: IntFieldUpdateOperationsInput | number
-    nSECbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
+    nseCbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
   }
 
   export type CustomerProfileDataModelCreateWithoutPersonalInformationInput = {
@@ -30220,7 +31698,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput = {
@@ -30244,7 +31722,7 @@ export namespace Prisma {
     panCardModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -30301,7 +31779,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput = {
@@ -30325,7 +31803,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -30382,7 +31860,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutPanCardInput = {
@@ -30406,7 +31884,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -30463,7 +31941,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutBankAccountsInput = {
@@ -30488,7 +31966,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -30534,7 +32012,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutBankAccountsInput = {
@@ -30559,7 +32037,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -30589,7 +32067,7 @@ export namespace Prisma {
     bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutDematAccountsInput = {
@@ -30614,7 +32092,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -30660,7 +32138,7 @@ export namespace Prisma {
     bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutDematAccountsInput = {
@@ -30685,7 +32163,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -30715,7 +32193,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput = {
@@ -30739,7 +32217,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -30796,7 +32274,7 @@ export namespace Prisma {
     bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput = {
@@ -30820,7 +32298,7 @@ export namespace Prisma {
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -30861,7 +32339,7 @@ export namespace Prisma {
     bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
-    nse?: NSEDATASETCreateNestedOneWithoutCustomerProfileDataModelInput
+    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput = {
@@ -30885,7 +32363,7 @@ export namespace Prisma {
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
@@ -31073,7 +32551,7 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type NSECbricsParticipantModelCreateWithoutNSEDATASETInput = {
+  export type NseCbricsParticipantModelCreateWithoutNSEDATASETInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -31082,8 +32560,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -31102,7 +32580,7 @@ export namespace Prisma {
     dpAccountList?: NSEDpAccountCreateNestedManyWithoutNSECbricsParticipantModelInput
   }
 
-  export type NSECbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput = {
+  export type NseCbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -31111,8 +32589,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -31131,9 +32609,9 @@ export namespace Prisma {
     dpAccountList?: NSEDpAccountUncheckedCreateNestedManyWithoutNSECbricsParticipantModelInput
   }
 
-  export type NSECbricsParticipantModelCreateOrConnectWithoutNSEDATASETInput = {
-    where: NSECbricsParticipantModelWhereUniqueInput
-    create: XOR<NSECbricsParticipantModelCreateWithoutNSEDATASETInput, NSECbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
+  export type NseCbricsParticipantModelCreateOrConnectWithoutNSEDATASETInput = {
+    where: NseCbricsParticipantModelWhereUniqueInput
+    create: XOR<NseCbricsParticipantModelCreateWithoutNSEDATASETInput, NseCbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
   }
 
   export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutNseInput = {
@@ -31152,18 +32630,18 @@ export namespace Prisma {
     data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutNseInput>
   }
 
-  export type NSECbricsParticipantModelUpsertWithoutNSEDATASETInput = {
-    update: XOR<NSECbricsParticipantModelUpdateWithoutNSEDATASETInput, NSECbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput>
-    create: XOR<NSECbricsParticipantModelCreateWithoutNSEDATASETInput, NSECbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
-    where?: NSECbricsParticipantModelWhereInput
+  export type NseCbricsParticipantModelUpsertWithoutNSEDATASETInput = {
+    update: XOR<NseCbricsParticipantModelUpdateWithoutNSEDATASETInput, NseCbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput>
+    create: XOR<NseCbricsParticipantModelCreateWithoutNSEDATASETInput, NseCbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
+    where?: NseCbricsParticipantModelWhereInput
   }
 
-  export type NSECbricsParticipantModelUpdateToOneWithWhereWithoutNSEDATASETInput = {
-    where?: NSECbricsParticipantModelWhereInput
-    data: XOR<NSECbricsParticipantModelUpdateWithoutNSEDATASETInput, NSECbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput>
+  export type NseCbricsParticipantModelUpdateToOneWithWhereWithoutNSEDATASETInput = {
+    where?: NseCbricsParticipantModelWhereInput
+    data: XOR<NseCbricsParticipantModelUpdateWithoutNSEDATASETInput, NseCbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput>
   }
 
-  export type NSECbricsParticipantModelUpdateWithoutNSEDATASETInput = {
+  export type NseCbricsParticipantModelUpdateWithoutNSEDATASETInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -31172,8 +32650,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31192,7 +32670,7 @@ export namespace Prisma {
     dpAccountList?: NSEDpAccountUpdateManyWithoutNSECbricsParticipantModelNestedInput
   }
 
-  export type NSECbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput = {
+  export type NseCbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -31201,8 +32679,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31287,22 +32765,22 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type NSEDATASETCreateWithoutParticipantInput = {
+  export type NseDataSetCreateWithoutParticipantInput = {
     CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutNseInput
   }
 
-  export type NSEDATASETUncheckedCreateWithoutParticipantInput = {
+  export type NseDataSetUncheckedCreateWithoutParticipantInput = {
     id?: number
     CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutNseInput
   }
 
-  export type NSEDATASETCreateOrConnectWithoutParticipantInput = {
-    where: NSEDATASETWhereUniqueInput
-    create: XOR<NSEDATASETCreateWithoutParticipantInput, NSEDATASETUncheckedCreateWithoutParticipantInput>
+  export type NseDataSetCreateOrConnectWithoutParticipantInput = {
+    where: NseDataSetWhereUniqueInput
+    create: XOR<NseDataSetCreateWithoutParticipantInput, NseDataSetUncheckedCreateWithoutParticipantInput>
   }
 
-  export type NSEDATASETCreateManyParticipantInputEnvelope = {
-    data: NSEDATASETCreateManyParticipantInput | NSEDATASETCreateManyParticipantInput[]
+  export type NseDataSetCreateManyParticipantInputEnvelope = {
+    data: NseDataSetCreateManyParticipantInput | NseDataSetCreateManyParticipantInput[]
     skipDuplicates?: boolean
   }
 
@@ -31335,7 +32813,7 @@ export namespace Prisma {
     status?: StringNullableFilter<"NSEBankAccount"> | string | null
     createdAt?: DateTimeFilter<"NSEBankAccount"> | Date | string
     updatedAt?: DateTimeFilter<"NSEBankAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableFilter<"NSEBankAccount"> | number | null
+    nseCbricsParticipantModelId?: IntNullableFilter<"NSEBankAccount"> | number | null
   }
 
   export type NSEDpAccountUpsertWithWhereUniqueWithoutNSECbricsParticipantModelInput = {
@@ -31367,34 +32845,34 @@ export namespace Prisma {
     status?: StringNullableFilter<"NSEDpAccount"> | string | null
     createdAt?: DateTimeFilter<"NSEDpAccount"> | Date | string
     updatedAt?: DateTimeFilter<"NSEDpAccount"> | Date | string
-    nSECbricsParticipantModelId?: IntNullableFilter<"NSEDpAccount"> | number | null
+    nseCbricsParticipantModelId?: IntNullableFilter<"NSEDpAccount"> | number | null
   }
 
-  export type NSEDATASETUpsertWithWhereUniqueWithoutParticipantInput = {
-    where: NSEDATASETWhereUniqueInput
-    update: XOR<NSEDATASETUpdateWithoutParticipantInput, NSEDATASETUncheckedUpdateWithoutParticipantInput>
-    create: XOR<NSEDATASETCreateWithoutParticipantInput, NSEDATASETUncheckedCreateWithoutParticipantInput>
+  export type NseDataSetUpsertWithWhereUniqueWithoutParticipantInput = {
+    where: NseDataSetWhereUniqueInput
+    update: XOR<NseDataSetUpdateWithoutParticipantInput, NseDataSetUncheckedUpdateWithoutParticipantInput>
+    create: XOR<NseDataSetCreateWithoutParticipantInput, NseDataSetUncheckedCreateWithoutParticipantInput>
   }
 
-  export type NSEDATASETUpdateWithWhereUniqueWithoutParticipantInput = {
-    where: NSEDATASETWhereUniqueInput
-    data: XOR<NSEDATASETUpdateWithoutParticipantInput, NSEDATASETUncheckedUpdateWithoutParticipantInput>
+  export type NseDataSetUpdateWithWhereUniqueWithoutParticipantInput = {
+    where: NseDataSetWhereUniqueInput
+    data: XOR<NseDataSetUpdateWithoutParticipantInput, NseDataSetUncheckedUpdateWithoutParticipantInput>
   }
 
-  export type NSEDATASETUpdateManyWithWhereWithoutParticipantInput = {
-    where: NSEDATASETScalarWhereInput
-    data: XOR<NSEDATASETUpdateManyMutationInput, NSEDATASETUncheckedUpdateManyWithoutParticipantInput>
+  export type NseDataSetUpdateManyWithWhereWithoutParticipantInput = {
+    where: NseDataSetScalarWhereInput
+    data: XOR<NseDataSetUpdateManyMutationInput, NseDataSetUncheckedUpdateManyWithoutParticipantInput>
   }
 
-  export type NSEDATASETScalarWhereInput = {
-    AND?: NSEDATASETScalarWhereInput | NSEDATASETScalarWhereInput[]
-    OR?: NSEDATASETScalarWhereInput[]
-    NOT?: NSEDATASETScalarWhereInput | NSEDATASETScalarWhereInput[]
-    id?: IntFilter<"NSEDATASET"> | number
-    nSECbricsParticipantModelId?: IntFilter<"NSEDATASET"> | number
+  export type NseDataSetScalarWhereInput = {
+    AND?: NseDataSetScalarWhereInput | NseDataSetScalarWhereInput[]
+    OR?: NseDataSetScalarWhereInput[]
+    NOT?: NseDataSetScalarWhereInput | NseDataSetScalarWhereInput[]
+    id?: IntFilter<"NseDataSet"> | number
+    nseCbricsParticipantModelId?: IntFilter<"NseDataSet"> | number
   }
 
-  export type NSECbricsParticipantModelCreateWithoutBankAccountListInput = {
+  export type NseCbricsParticipantModelCreateWithoutBankAccountListInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -31403,8 +32881,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -31420,10 +32898,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     dpAccountList?: NSEDpAccountCreateNestedManyWithoutNSECbricsParticipantModelInput
-    NSEDATASET?: NSEDATASETCreateNestedManyWithoutParticipantInput
+    NSEDATASET?: NseDataSetCreateNestedManyWithoutParticipantInput
   }
 
-  export type NSECbricsParticipantModelUncheckedCreateWithoutBankAccountListInput = {
+  export type NseCbricsParticipantModelUncheckedCreateWithoutBankAccountListInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -31432,8 +32910,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -31449,26 +32927,26 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     dpAccountList?: NSEDpAccountUncheckedCreateNestedManyWithoutNSECbricsParticipantModelInput
-    NSEDATASET?: NSEDATASETUncheckedCreateNestedManyWithoutParticipantInput
+    NSEDATASET?: NseDataSetUncheckedCreateNestedManyWithoutParticipantInput
   }
 
-  export type NSECbricsParticipantModelCreateOrConnectWithoutBankAccountListInput = {
-    where: NSECbricsParticipantModelWhereUniqueInput
-    create: XOR<NSECbricsParticipantModelCreateWithoutBankAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
+  export type NseCbricsParticipantModelCreateOrConnectWithoutBankAccountListInput = {
+    where: NseCbricsParticipantModelWhereUniqueInput
+    create: XOR<NseCbricsParticipantModelCreateWithoutBankAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
   }
 
-  export type NSECbricsParticipantModelUpsertWithoutBankAccountListInput = {
-    update: XOR<NSECbricsParticipantModelUpdateWithoutBankAccountListInput, NSECbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput>
-    create: XOR<NSECbricsParticipantModelCreateWithoutBankAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
-    where?: NSECbricsParticipantModelWhereInput
+  export type NseCbricsParticipantModelUpsertWithoutBankAccountListInput = {
+    update: XOR<NseCbricsParticipantModelUpdateWithoutBankAccountListInput, NseCbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput>
+    create: XOR<NseCbricsParticipantModelCreateWithoutBankAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutBankAccountListInput>
+    where?: NseCbricsParticipantModelWhereInput
   }
 
-  export type NSECbricsParticipantModelUpdateToOneWithWhereWithoutBankAccountListInput = {
-    where?: NSECbricsParticipantModelWhereInput
-    data: XOR<NSECbricsParticipantModelUpdateWithoutBankAccountListInput, NSECbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput>
+  export type NseCbricsParticipantModelUpdateToOneWithWhereWithoutBankAccountListInput = {
+    where?: NseCbricsParticipantModelWhereInput
+    data: XOR<NseCbricsParticipantModelUpdateWithoutBankAccountListInput, NseCbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput>
   }
 
-  export type NSECbricsParticipantModelUpdateWithoutBankAccountListInput = {
+  export type NseCbricsParticipantModelUpdateWithoutBankAccountListInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -31477,8 +32955,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31494,10 +32972,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dpAccountList?: NSEDpAccountUpdateManyWithoutNSECbricsParticipantModelNestedInput
-    NSEDATASET?: NSEDATASETUpdateManyWithoutParticipantNestedInput
+    NSEDATASET?: NseDataSetUpdateManyWithoutParticipantNestedInput
   }
 
-  export type NSECbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput = {
+  export type NseCbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -31506,8 +32984,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31523,10 +33001,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dpAccountList?: NSEDpAccountUncheckedUpdateManyWithoutNSECbricsParticipantModelNestedInput
-    NSEDATASET?: NSEDATASETUncheckedUpdateManyWithoutParticipantNestedInput
+    NSEDATASET?: NseDataSetUncheckedUpdateManyWithoutParticipantNestedInput
   }
 
-  export type NSECbricsParticipantModelCreateWithoutDpAccountListInput = {
+  export type NseCbricsParticipantModelCreateWithoutDpAccountListInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -31535,8 +33013,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -31552,10 +33030,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccountList?: NSEBankAccountCreateNestedManyWithoutNSECbricsParticipantModelInput
-    NSEDATASET?: NSEDATASETCreateNestedManyWithoutParticipantInput
+    NSEDATASET?: NseDataSetCreateNestedManyWithoutParticipantInput
   }
 
-  export type NSECbricsParticipantModelUncheckedCreateWithoutDpAccountListInput = {
+  export type NseCbricsParticipantModelUncheckedCreateWithoutDpAccountListInput = {
     id: number
     loginId: string
     actualStatus: number
@@ -31564,8 +33042,8 @@ export namespace Prisma {
     panNo: string
     custodian?: string | null
     contactPerson: string
-    mobileList?: NSECbricsParticipantModelCreatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelCreateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelCreatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelCreateemailListInput | string[]
     telephone: string
     fax?: string | null
     address?: string | null
@@ -31581,26 +33059,26 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     bankAccountList?: NSEBankAccountUncheckedCreateNestedManyWithoutNSECbricsParticipantModelInput
-    NSEDATASET?: NSEDATASETUncheckedCreateNestedManyWithoutParticipantInput
+    NSEDATASET?: NseDataSetUncheckedCreateNestedManyWithoutParticipantInput
   }
 
-  export type NSECbricsParticipantModelCreateOrConnectWithoutDpAccountListInput = {
-    where: NSECbricsParticipantModelWhereUniqueInput
-    create: XOR<NSECbricsParticipantModelCreateWithoutDpAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
+  export type NseCbricsParticipantModelCreateOrConnectWithoutDpAccountListInput = {
+    where: NseCbricsParticipantModelWhereUniqueInput
+    create: XOR<NseCbricsParticipantModelCreateWithoutDpAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
   }
 
-  export type NSECbricsParticipantModelUpsertWithoutDpAccountListInput = {
-    update: XOR<NSECbricsParticipantModelUpdateWithoutDpAccountListInput, NSECbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
-    create: XOR<NSECbricsParticipantModelCreateWithoutDpAccountListInput, NSECbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
-    where?: NSECbricsParticipantModelWhereInput
+  export type NseCbricsParticipantModelUpsertWithoutDpAccountListInput = {
+    update: XOR<NseCbricsParticipantModelUpdateWithoutDpAccountListInput, NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
+    create: XOR<NseCbricsParticipantModelCreateWithoutDpAccountListInput, NseCbricsParticipantModelUncheckedCreateWithoutDpAccountListInput>
+    where?: NseCbricsParticipantModelWhereInput
   }
 
-  export type NSECbricsParticipantModelUpdateToOneWithWhereWithoutDpAccountListInput = {
-    where?: NSECbricsParticipantModelWhereInput
-    data: XOR<NSECbricsParticipantModelUpdateWithoutDpAccountListInput, NSECbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
+  export type NseCbricsParticipantModelUpdateToOneWithWhereWithoutDpAccountListInput = {
+    where?: NseCbricsParticipantModelWhereInput
+    data: XOR<NseCbricsParticipantModelUpdateWithoutDpAccountListInput, NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
   }
 
-  export type NSECbricsParticipantModelUpdateWithoutDpAccountListInput = {
+  export type NseCbricsParticipantModelUpdateWithoutDpAccountListInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -31609,8 +33087,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31626,10 +33104,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccountList?: NSEBankAccountUpdateManyWithoutNSECbricsParticipantModelNestedInput
-    NSEDATASET?: NSEDATASETUpdateManyWithoutParticipantNestedInput
+    NSEDATASET?: NseDataSetUpdateManyWithoutParticipantNestedInput
   }
 
-  export type NSECbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput = {
+  export type NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
     actualStatus?: IntFieldUpdateOperationsInput | number
@@ -31638,8 +33116,8 @@ export namespace Prisma {
     panNo?: StringFieldUpdateOperationsInput | string
     custodian?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: StringFieldUpdateOperationsInput | string
-    mobileList?: NSECbricsParticipantModelUpdatemobileListInput | string[]
-    emailList?: NSECbricsParticipantModelUpdateemailListInput | string[]
+    mobileList?: NseCbricsParticipantModelUpdatemobileListInput | string[]
+    emailList?: NseCbricsParticipantModelUpdateemailListInput | string[]
     telephone?: StringFieldUpdateOperationsInput | string
     fax?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31655,7 +33133,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccountList?: NSEBankAccountUncheckedUpdateManyWithoutNSECbricsParticipantModelNestedInput
-    NSEDATASET?: NSEDATASETUncheckedUpdateManyWithoutParticipantNestedInput
+    NSEDATASET?: NseDataSetUncheckedUpdateManyWithoutParticipantNestedInput
   }
 
   export type CustomersAuthDataModelCreateManyRelationshipManagerInput = {
@@ -31799,7 +33277,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31828,7 +33306,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutUtilityInput = {
@@ -31852,7 +33330,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -31880,7 +33358,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32028,7 +33506,7 @@ export namespace Prisma {
     panCardModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32057,7 +33535,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutPersonalInformationInput = {
@@ -32081,7 +33559,7 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -32109,7 +33587,7 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32135,7 +33613,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32164,7 +33642,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutAadhaarCardInput = {
@@ -32188,7 +33666,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -32216,7 +33694,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32242,7 +33720,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32271,7 +33749,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput = {
@@ -32295,7 +33773,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -32323,7 +33801,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32349,7 +33827,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32378,7 +33856,7 @@ export namespace Prisma {
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput = {
@@ -32402,7 +33880,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -32430,7 +33908,7 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32456,7 +33934,7 @@ export namespace Prisma {
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     permanentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32482,7 +33960,7 @@ export namespace Prisma {
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
-    nSEDATASETId?: number | null
+    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32511,7 +33989,7 @@ export namespace Prisma {
     bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput = {
@@ -32535,7 +34013,7 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -32563,7 +34041,7 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32592,7 +34070,7 @@ export namespace Prisma {
     bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    nse?: NSEDATASETUpdateOneWithoutCustomerProfileDataModelNestedInput
+    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput = {
@@ -32616,7 +34094,7 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
@@ -32644,7 +34122,7 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nSEDATASETId?: NullableIntFieldUpdateOperationsInput | number | null
+    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32780,7 +34258,7 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type NSEDATASETCreateManyParticipantInput = {
+  export type NseDataSetCreateManyParticipantInput = {
     id?: number
   }
 
@@ -32854,16 +34332,16 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type NSEDATASETUpdateWithoutParticipantInput = {
+  export type NseDataSetUpdateWithoutParticipantInput = {
     CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutNseNestedInput
   }
 
-  export type NSEDATASETUncheckedUpdateWithoutParticipantInput = {
+  export type NseDataSetUncheckedUpdateWithoutParticipantInput = {
     id?: IntFieldUpdateOperationsInput | number
     CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutNseNestedInput
   }
 
-  export type NSEDATASETUncheckedUpdateManyWithoutParticipantInput = {
+  export type NseDataSetUncheckedUpdateManyWithoutParticipantInput = {
     id?: IntFieldUpdateOperationsInput | number
   }
 

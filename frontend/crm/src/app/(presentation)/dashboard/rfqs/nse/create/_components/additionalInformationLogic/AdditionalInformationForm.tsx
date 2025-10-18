@@ -1,12 +1,11 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RatingCodeArray, sectorOptions } from "@/global/constants/nseData";
 import { SelectField } from "@/global/elements/inputs/SelectField";
-import React from "react";
 import {
   AdditionalOptionsFormData,
   ITradingOptionsFormHook,
 } from "./additionalFormaData";
-import { RATINGS, SECTORS } from "./addtionalFormaData.schema";
 
 const AdditionalInformationForm = ({
   manager,
@@ -20,7 +19,7 @@ const AdditionalInformationForm = ({
         <SelectField
           label="Sector"
           placeholder="Select Sector"
-          options={SECTORS.map((s) => ({ label: s, value: s }))}
+          options={sectorOptions}
           value={manager.state.sector}
           onChangeAction={(e) =>
             manager.setAdditionalOptionsData(
@@ -34,7 +33,7 @@ const AdditionalInformationForm = ({
         <SelectField
           label="Ratings"
           placeholder="select Ratings"
-          options={RATINGS.map((s) => ({ label: s, value: s }))}
+          options={RatingCodeArray.map((s) => ({ label: s, value: s }))}
           value={manager.state.rating}
           onChangeAction={(e) =>
             manager.setAdditionalOptionsData(

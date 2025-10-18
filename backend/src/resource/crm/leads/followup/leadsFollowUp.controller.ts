@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { LeadsFollowUpManager } from "../manager/leadFollowup.manager";
 import { appSchema } from "@root/schema";
+import { HttpStatus } from "@utils/error/AppError";
 
 export interface ILeadsFollowUpControllerInterface {
     createFollowUpNote(req: Request, res: Response): Promise<void>;
@@ -32,10 +33,10 @@ export class LeadsFollowUpController implements ILeadsFollowUpControllerInterfac
             data
         );
 
-        res.status(201).json({
-            status: true,
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
             message: "Follow-up note created successfully",
-            data: newNote,
+            responseData: newNote,
         });
 
     }
@@ -52,11 +53,10 @@ export class LeadsFollowUpController implements ILeadsFollowUpControllerInterfac
             followUpNoteId,
             data
         );
-
-        res.status(200).json({
-            status: true,
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
             message: "Follow-up note updated successfully",
-            data: updatedNote,
+            responseData: updatedNote,
         });
 
     }
@@ -69,8 +69,8 @@ export class LeadsFollowUpController implements ILeadsFollowUpControllerInterfac
         const followUpNoteId = Number(req.params.id);
         await this.followUpManager.deleteFollowUpNote(followUpNoteId);
 
-        res.status(200).json({
-            status: true,
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
             message: "Follow-up note deleted successfully",
         });
 
@@ -83,11 +83,10 @@ export class LeadsFollowUpController implements ILeadsFollowUpControllerInterfac
 
         const leadId = Number(req.params.leadId);
         const notes = await this.followUpManager.getFollowUpNotesByLeadId(leadId);
-
-        res.status(200).json({
-            status: true,
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
             message: "Follow-up notes fetched successfully",
-            data: notes,
+            responseData: notes,
         });
 
     }

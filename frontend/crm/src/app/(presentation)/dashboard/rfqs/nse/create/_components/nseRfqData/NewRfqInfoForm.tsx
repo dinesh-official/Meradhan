@@ -3,14 +3,8 @@ import { InputField } from "@/global/elements/inputs/InputField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
 import { INseRFQFormHook } from "./NseFormData";
 import {
-  BUY_SELL,
-  CALC_METHODS,
-  DEAL_TYPES,
   NseRFQFormData,
-  QUOTE_TYPES,
-  SEGMENTS,
-  SETTLEMENT_TYPES,
-  YIELD_TYPES,
+  YIELD_TYPES
 } from "./nseRfqFormData.schema";
 
 const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
@@ -29,7 +23,16 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
         <SelectField
           label="Segment"
           placeholder="Select Segment"
-          options={SEGMENTS.map((s) => ({ label: s, value: s }))}
+          options={[
+            {
+              label: "Normal RFQ",
+              value: "R",
+            },
+            {
+              label: "CDMDF RFQ",
+              value: "C",
+            },
+          ]}
           value={manager.state.segment}
           onChangeAction={(e) =>
             manager.setRFQData("segment", e as NseRFQFormData["segment"])
@@ -41,7 +44,20 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
         <SelectField
           label="Buy/Sell"
           placeholder="Select Buy/Sell"
-          options={BUY_SELL.map((s) => ({ label: s, value: s }))}
+          options={[
+            {
+              label: "Buy",
+              value: "B",
+            },
+            {
+              label: "Sell",
+              value: "S",
+            },
+            {
+              label: "Both",
+              value: "X",
+            },
+          ]}
           value={manager.state.buySell}
           onChangeAction={(e) =>
             manager.setRFQData("buySell", e as NseRFQFormData["buySell"])
@@ -52,7 +68,16 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
         <SelectField
           label="Quote Type"
           placeholder="Select Quote Type"
-          options={QUOTE_TYPES.map((s) => ({ label: s, value: s }))}
+          options={[
+            {
+              label: "Only Yield",
+              value: "Y",
+            },
+            {
+              label: "Both Price and Yield",
+              value: "B",
+            },
+          ]}
           value={manager.state.quoteType}
           onChangeAction={(e) =>
             manager.setRFQData("quoteType", e as NseRFQFormData["quoteType"])
@@ -63,7 +88,16 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
         <SelectField
           label="Deal Type"
           placeholder="Select deal type"
-          options={DEAL_TYPES.map((s) => ({ label: s, value: s }))}
+          options={[
+            {
+              label: "Direct",
+              value: "D",
+            },
+            {
+              label: "Brokered",
+              value: "B",
+            },
+          ]}
           value={manager.state.dealType}
           onChangeAction={(e) =>
             manager.setRFQData("dealType", e as NseRFQFormData["dealType"])
@@ -71,7 +105,7 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
           error={manager.errors.dealType?.[0]}
         />
 
-        {manager.state.dealType == "BROKER" && (
+        {manager.state.dealType == "B" && (
           <FormCheckbox
             label="Institutions"
             checked={manager.state.institutions || false}
@@ -79,7 +113,7 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
             error={manager.errors.institutions?.[0]}
           />
         )}
-        {manager.state.dealType == "BROKER" && (
+        {manager.state.dealType == "B" && (
           <InputField
             id="clientcode"
             label="Client Code"
@@ -101,7 +135,16 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
         <SelectField
           label="Settlement Type"
           placeholder="Settlement Type"
-          options={SETTLEMENT_TYPES.map((s) => ({ label: s, value: s }))}
+          options={[
+            {
+              label: "T+0",
+              value: "0",
+            },
+            {
+              label: "T+1",
+              value: "1",
+            },
+          ]}
           value={manager.state.settlementType}
           onChangeAction={(e) =>
             manager.setRFQData(
@@ -142,7 +185,10 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
         <SelectField
           label="Calc Method"
           placeholder="Select Calc Method"
-          options={CALC_METHODS.map((s) => ({ label: s, value: s }))}
+          options={[
+            { label: "Money Market", value: "M" },
+            { label: "Other", value: "O" },
+          ]}
           value={manager.state.calcMethod}
           onChangeAction={(e) =>
             manager.setRFQData("calcMethod", e as NseRFQFormData["calcMethod"])
