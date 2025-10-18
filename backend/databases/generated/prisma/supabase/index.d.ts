@@ -14,6 +14,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
 
 /**
+ * Model CrmAuditLogs
+ * 
+ */
+export type CrmAuditLogs = $Result.DefaultSelection<Prisma.$CrmAuditLogsPayload>
+/**
  * Model CRMUserDataModel
  * 
  */
@@ -280,8 +285,8 @@ export const DefaultSelect: typeof $Enums.DefaultSelect
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more CRMUserDataModels
- * const cRMUserDataModels = await prisma.cRMUserDataModel.findMany()
+ * // Fetch zero or more CrmAuditLogs
+ * const crmAuditLogs = await prisma.crmAuditLogs.findMany()
  * ```
  *
  *
@@ -301,8 +306,8 @@ export class PrismaClient<
    * @example
    * ```
    * const prisma = new PrismaClient()
-   * // Fetch zero or more CRMUserDataModels
-   * const cRMUserDataModels = await prisma.cRMUserDataModel.findMany()
+   * // Fetch zero or more CrmAuditLogs
+   * const crmAuditLogs = await prisma.crmAuditLogs.findMany()
    * ```
    *
    *
@@ -392,6 +397,16 @@ export class PrismaClient<
   }>>
 
       /**
+   * `prisma.crmAuditLogs`: Exposes CRUD operations for the **CrmAuditLogs** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CrmAuditLogs
+    * const crmAuditLogs = await prisma.crmAuditLogs.findMany()
+    * ```
+    */
+  get crmAuditLogs(): Prisma.CrmAuditLogsDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.cRMUserDataModel`: Exposes CRUD operations for the **CRMUserDataModel** model.
     * Example usage:
     * ```ts
@@ -1000,6 +1015,7 @@ export namespace Prisma {
 
 
   export const ModelName: {
+    CrmAuditLogs: 'CrmAuditLogs',
     CRMUserDataModel: 'CRMUserDataModel',
     CustomersAuthDataModel: 'CustomersAuthDataModel',
     CustomerProfileDataModel: 'CustomerProfileDataModel',
@@ -1035,10 +1051,84 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersBankAccountModel" | "customersDematAccountModel" | "customersRiskProfileModel" | "addressModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt"
+      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersBankAccountModel" | "customersDematAccountModel" | "customersRiskProfileModel" | "addressModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
+      CrmAuditLogs: {
+        payload: Prisma.$CrmAuditLogsPayload<ExtArgs>
+        fields: Prisma.CrmAuditLogsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CrmAuditLogsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CrmAuditLogsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>
+          }
+          findFirst: {
+            args: Prisma.CrmAuditLogsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CrmAuditLogsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>
+          }
+          findMany: {
+            args: Prisma.CrmAuditLogsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>[]
+          }
+          create: {
+            args: Prisma.CrmAuditLogsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>
+          }
+          createMany: {
+            args: Prisma.CrmAuditLogsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CrmAuditLogsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>[]
+          }
+          delete: {
+            args: Prisma.CrmAuditLogsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>
+          }
+          update: {
+            args: Prisma.CrmAuditLogsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>
+          }
+          deleteMany: {
+            args: Prisma.CrmAuditLogsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CrmAuditLogsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CrmAuditLogsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>[]
+          }
+          upsert: {
+            args: Prisma.CrmAuditLogsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CrmAuditLogsPayload>
+          }
+          aggregate: {
+            args: Prisma.CrmAuditLogsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCrmAuditLogs>
+          }
+          groupBy: {
+            args: Prisma.CrmAuditLogsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CrmAuditLogsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CrmAuditLogsCountArgs<ExtArgs>
+            result: $Utils.Optional<CrmAuditLogsCountAggregateOutputType> | number
+          }
+        }
+      }
       CRMUserDataModel: {
         payload: Prisma.$CRMUserDataModelPayload<ExtArgs>
         fields: Prisma.CRMUserDataModelFieldRefs
@@ -2393,6 +2483,7 @@ export namespace Prisma {
     omit?: Prisma.GlobalOmitConfig
   }
   export type GlobalOmitConfig = {
+    crmAuditLogs?: CrmAuditLogsOmit
     cRMUserDataModel?: CRMUserDataModelOmit
     customersAuthDataModel?: CustomersAuthDataModelOmit
     customerProfileDataModel?: CustomerProfileDataModelOmit
@@ -2843,6 +2934,1061 @@ export namespace Prisma {
   /**
    * Models
    */
+
+  /**
+   * Model CrmAuditLogs
+   */
+
+  export type AggregateCrmAuditLogs = {
+    _count: CrmAuditLogsCountAggregateOutputType | null
+    _avg: CrmAuditLogsAvgAggregateOutputType | null
+    _sum: CrmAuditLogsSumAggregateOutputType | null
+    _min: CrmAuditLogsMinAggregateOutputType | null
+    _max: CrmAuditLogsMaxAggregateOutputType | null
+  }
+
+  export type CrmAuditLogsAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type CrmAuditLogsSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type CrmAuditLogsMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    type: string | null
+    token: string | null
+    url: string | null
+    createdAt: Date | null
+  }
+
+  export type CrmAuditLogsMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    type: string | null
+    token: string | null
+    url: string | null
+    createdAt: Date | null
+  }
+
+  export type CrmAuditLogsCountAggregateOutputType = {
+    id: number
+    userId: number
+    type: number
+    token: number
+    url: number
+    data: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type CrmAuditLogsAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type CrmAuditLogsSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type CrmAuditLogsMinAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    token?: true
+    url?: true
+    createdAt?: true
+  }
+
+  export type CrmAuditLogsMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    token?: true
+    url?: true
+    createdAt?: true
+  }
+
+  export type CrmAuditLogsCountAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    token?: true
+    url?: true
+    data?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type CrmAuditLogsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CrmAuditLogs to aggregate.
+     */
+    where?: CrmAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CrmAuditLogs to fetch.
+     */
+    orderBy?: CrmAuditLogsOrderByWithRelationInput | CrmAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CrmAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CrmAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CrmAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CrmAuditLogs
+    **/
+    _count?: true | CrmAuditLogsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CrmAuditLogsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CrmAuditLogsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CrmAuditLogsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CrmAuditLogsMaxAggregateInputType
+  }
+
+  export type GetCrmAuditLogsAggregateType<T extends CrmAuditLogsAggregateArgs> = {
+        [P in keyof T & keyof AggregateCrmAuditLogs]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCrmAuditLogs[P]>
+      : GetScalarType<T[P], AggregateCrmAuditLogs[P]>
+  }
+
+
+
+
+  export type CrmAuditLogsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CrmAuditLogsWhereInput
+    orderBy?: CrmAuditLogsOrderByWithAggregationInput | CrmAuditLogsOrderByWithAggregationInput[]
+    by: CrmAuditLogsScalarFieldEnum[] | CrmAuditLogsScalarFieldEnum
+    having?: CrmAuditLogsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CrmAuditLogsCountAggregateInputType | true
+    _avg?: CrmAuditLogsAvgAggregateInputType
+    _sum?: CrmAuditLogsSumAggregateInputType
+    _min?: CrmAuditLogsMinAggregateInputType
+    _max?: CrmAuditLogsMaxAggregateInputType
+  }
+
+  export type CrmAuditLogsGroupByOutputType = {
+    id: number
+    userId: number | null
+    type: string
+    token: string | null
+    url: string | null
+    data: JsonValue
+    createdAt: Date
+    _count: CrmAuditLogsCountAggregateOutputType | null
+    _avg: CrmAuditLogsAvgAggregateOutputType | null
+    _sum: CrmAuditLogsSumAggregateOutputType | null
+    _min: CrmAuditLogsMinAggregateOutputType | null
+    _max: CrmAuditLogsMaxAggregateOutputType | null
+  }
+
+  type GetCrmAuditLogsGroupByPayload<T extends CrmAuditLogsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CrmAuditLogsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CrmAuditLogsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CrmAuditLogsGroupByOutputType[P]>
+            : GetScalarType<T[P], CrmAuditLogsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CrmAuditLogsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["crmAuditLogs"]>
+
+  export type CrmAuditLogsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["crmAuditLogs"]>
+
+  export type CrmAuditLogsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["crmAuditLogs"]>
+
+  export type CrmAuditLogsSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }
+
+  export type CrmAuditLogsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "token" | "url" | "data" | "createdAt", ExtArgs["result"]["crmAuditLogs"]>
+
+  export type $CrmAuditLogsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CrmAuditLogs"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number | null
+      type: string
+      token: string | null
+      url: string | null
+      data: Prisma.JsonValue
+      createdAt: Date
+    }, ExtArgs["result"]["crmAuditLogs"]>
+    composites: {}
+  }
+
+  type CrmAuditLogsGetPayload<S extends boolean | null | undefined | CrmAuditLogsDefaultArgs> = $Result.GetResult<Prisma.$CrmAuditLogsPayload, S>
+
+  type CrmAuditLogsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CrmAuditLogsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CrmAuditLogsCountAggregateInputType | true
+    }
+
+  export interface CrmAuditLogsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CrmAuditLogs'], meta: { name: 'CrmAuditLogs' } }
+    /**
+     * Find zero or one CrmAuditLogs that matches the filter.
+     * @param {CrmAuditLogsFindUniqueArgs} args - Arguments to find a CrmAuditLogs
+     * @example
+     * // Get one CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CrmAuditLogsFindUniqueArgs>(args: SelectSubset<T, CrmAuditLogsFindUniqueArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CrmAuditLogs that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CrmAuditLogsFindUniqueOrThrowArgs} args - Arguments to find a CrmAuditLogs
+     * @example
+     * // Get one CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CrmAuditLogsFindUniqueOrThrowArgs>(args: SelectSubset<T, CrmAuditLogsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CrmAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CrmAuditLogsFindFirstArgs} args - Arguments to find a CrmAuditLogs
+     * @example
+     * // Get one CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CrmAuditLogsFindFirstArgs>(args?: SelectSubset<T, CrmAuditLogsFindFirstArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CrmAuditLogs that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CrmAuditLogsFindFirstOrThrowArgs} args - Arguments to find a CrmAuditLogs
+     * @example
+     * // Get one CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CrmAuditLogsFindFirstOrThrowArgs>(args?: SelectSubset<T, CrmAuditLogsFindFirstOrThrowArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CrmAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CrmAuditLogsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.findMany()
+     * 
+     * // Get first 10 CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const crmAuditLogsWithIdOnly = await prisma.crmAuditLogs.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CrmAuditLogsFindManyArgs>(args?: SelectSubset<T, CrmAuditLogsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CrmAuditLogs.
+     * @param {CrmAuditLogsCreateArgs} args - Arguments to create a CrmAuditLogs.
+     * @example
+     * // Create one CrmAuditLogs
+     * const CrmAuditLogs = await prisma.crmAuditLogs.create({
+     *   data: {
+     *     // ... data to create a CrmAuditLogs
+     *   }
+     * })
+     * 
+     */
+    create<T extends CrmAuditLogsCreateArgs>(args: SelectSubset<T, CrmAuditLogsCreateArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CrmAuditLogs.
+     * @param {CrmAuditLogsCreateManyArgs} args - Arguments to create many CrmAuditLogs.
+     * @example
+     * // Create many CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CrmAuditLogsCreateManyArgs>(args?: SelectSubset<T, CrmAuditLogsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CrmAuditLogs and returns the data saved in the database.
+     * @param {CrmAuditLogsCreateManyAndReturnArgs} args - Arguments to create many CrmAuditLogs.
+     * @example
+     * // Create many CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CrmAuditLogs and only return the `id`
+     * const crmAuditLogsWithIdOnly = await prisma.crmAuditLogs.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CrmAuditLogsCreateManyAndReturnArgs>(args?: SelectSubset<T, CrmAuditLogsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CrmAuditLogs.
+     * @param {CrmAuditLogsDeleteArgs} args - Arguments to delete one CrmAuditLogs.
+     * @example
+     * // Delete one CrmAuditLogs
+     * const CrmAuditLogs = await prisma.crmAuditLogs.delete({
+     *   where: {
+     *     // ... filter to delete one CrmAuditLogs
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CrmAuditLogsDeleteArgs>(args: SelectSubset<T, CrmAuditLogsDeleteArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CrmAuditLogs.
+     * @param {CrmAuditLogsUpdateArgs} args - Arguments to update one CrmAuditLogs.
+     * @example
+     * // Update one CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CrmAuditLogsUpdateArgs>(args: SelectSubset<T, CrmAuditLogsUpdateArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CrmAuditLogs.
+     * @param {CrmAuditLogsDeleteManyArgs} args - Arguments to filter CrmAuditLogs to delete.
+     * @example
+     * // Delete a few CrmAuditLogs
+     * const { count } = await prisma.crmAuditLogs.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CrmAuditLogsDeleteManyArgs>(args?: SelectSubset<T, CrmAuditLogsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CrmAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CrmAuditLogsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CrmAuditLogsUpdateManyArgs>(args: SelectSubset<T, CrmAuditLogsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CrmAuditLogs and returns the data updated in the database.
+     * @param {CrmAuditLogsUpdateManyAndReturnArgs} args - Arguments to update many CrmAuditLogs.
+     * @example
+     * // Update many CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CrmAuditLogs and only return the `id`
+     * const crmAuditLogsWithIdOnly = await prisma.crmAuditLogs.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CrmAuditLogsUpdateManyAndReturnArgs>(args: SelectSubset<T, CrmAuditLogsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CrmAuditLogs.
+     * @param {CrmAuditLogsUpsertArgs} args - Arguments to update or create a CrmAuditLogs.
+     * @example
+     * // Update or create a CrmAuditLogs
+     * const crmAuditLogs = await prisma.crmAuditLogs.upsert({
+     *   create: {
+     *     // ... data to create a CrmAuditLogs
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CrmAuditLogs we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CrmAuditLogsUpsertArgs>(args: SelectSubset<T, CrmAuditLogsUpsertArgs<ExtArgs>>): Prisma__CrmAuditLogsClient<$Result.GetResult<Prisma.$CrmAuditLogsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CrmAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CrmAuditLogsCountArgs} args - Arguments to filter CrmAuditLogs to count.
+     * @example
+     * // Count the number of CrmAuditLogs
+     * const count = await prisma.crmAuditLogs.count({
+     *   where: {
+     *     // ... the filter for the CrmAuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends CrmAuditLogsCountArgs>(
+      args?: Subset<T, CrmAuditLogsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CrmAuditLogsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CrmAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CrmAuditLogsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CrmAuditLogsAggregateArgs>(args: Subset<T, CrmAuditLogsAggregateArgs>): Prisma.PrismaPromise<GetCrmAuditLogsAggregateType<T>>
+
+    /**
+     * Group by CrmAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CrmAuditLogsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CrmAuditLogsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CrmAuditLogsGroupByArgs['orderBy'] }
+        : { orderBy?: CrmAuditLogsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CrmAuditLogsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCrmAuditLogsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CrmAuditLogs model
+   */
+  readonly fields: CrmAuditLogsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CrmAuditLogs.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CrmAuditLogsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CrmAuditLogs model
+   */
+  interface CrmAuditLogsFieldRefs {
+    readonly id: FieldRef<"CrmAuditLogs", 'Int'>
+    readonly userId: FieldRef<"CrmAuditLogs", 'Int'>
+    readonly type: FieldRef<"CrmAuditLogs", 'String'>
+    readonly token: FieldRef<"CrmAuditLogs", 'String'>
+    readonly url: FieldRef<"CrmAuditLogs", 'String'>
+    readonly data: FieldRef<"CrmAuditLogs", 'Json'>
+    readonly createdAt: FieldRef<"CrmAuditLogs", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CrmAuditLogs findUnique
+   */
+  export type CrmAuditLogsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which CrmAuditLogs to fetch.
+     */
+    where: CrmAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * CrmAuditLogs findUniqueOrThrow
+   */
+  export type CrmAuditLogsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which CrmAuditLogs to fetch.
+     */
+    where: CrmAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * CrmAuditLogs findFirst
+   */
+  export type CrmAuditLogsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which CrmAuditLogs to fetch.
+     */
+    where?: CrmAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CrmAuditLogs to fetch.
+     */
+    orderBy?: CrmAuditLogsOrderByWithRelationInput | CrmAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CrmAuditLogs.
+     */
+    cursor?: CrmAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CrmAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CrmAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CrmAuditLogs.
+     */
+    distinct?: CrmAuditLogsScalarFieldEnum | CrmAuditLogsScalarFieldEnum[]
+  }
+
+  /**
+   * CrmAuditLogs findFirstOrThrow
+   */
+  export type CrmAuditLogsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which CrmAuditLogs to fetch.
+     */
+    where?: CrmAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CrmAuditLogs to fetch.
+     */
+    orderBy?: CrmAuditLogsOrderByWithRelationInput | CrmAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CrmAuditLogs.
+     */
+    cursor?: CrmAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CrmAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CrmAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CrmAuditLogs.
+     */
+    distinct?: CrmAuditLogsScalarFieldEnum | CrmAuditLogsScalarFieldEnum[]
+  }
+
+  /**
+   * CrmAuditLogs findMany
+   */
+  export type CrmAuditLogsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which CrmAuditLogs to fetch.
+     */
+    where?: CrmAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CrmAuditLogs to fetch.
+     */
+    orderBy?: CrmAuditLogsOrderByWithRelationInput | CrmAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CrmAuditLogs.
+     */
+    cursor?: CrmAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CrmAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CrmAuditLogs.
+     */
+    skip?: number
+    distinct?: CrmAuditLogsScalarFieldEnum | CrmAuditLogsScalarFieldEnum[]
+  }
+
+  /**
+   * CrmAuditLogs create
+   */
+  export type CrmAuditLogsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a CrmAuditLogs.
+     */
+    data: XOR<CrmAuditLogsCreateInput, CrmAuditLogsUncheckedCreateInput>
+  }
+
+  /**
+   * CrmAuditLogs createMany
+   */
+  export type CrmAuditLogsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CrmAuditLogs.
+     */
+    data: CrmAuditLogsCreateManyInput | CrmAuditLogsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CrmAuditLogs createManyAndReturn
+   */
+  export type CrmAuditLogsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data used to create many CrmAuditLogs.
+     */
+    data: CrmAuditLogsCreateManyInput | CrmAuditLogsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CrmAuditLogs update
+   */
+  export type CrmAuditLogsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a CrmAuditLogs.
+     */
+    data: XOR<CrmAuditLogsUpdateInput, CrmAuditLogsUncheckedUpdateInput>
+    /**
+     * Choose, which CrmAuditLogs to update.
+     */
+    where: CrmAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * CrmAuditLogs updateMany
+   */
+  export type CrmAuditLogsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CrmAuditLogs.
+     */
+    data: XOR<CrmAuditLogsUpdateManyMutationInput, CrmAuditLogsUncheckedUpdateManyInput>
+    /**
+     * Filter which CrmAuditLogs to update
+     */
+    where?: CrmAuditLogsWhereInput
+    /**
+     * Limit how many CrmAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CrmAuditLogs updateManyAndReturn
+   */
+  export type CrmAuditLogsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data used to update CrmAuditLogs.
+     */
+    data: XOR<CrmAuditLogsUpdateManyMutationInput, CrmAuditLogsUncheckedUpdateManyInput>
+    /**
+     * Filter which CrmAuditLogs to update
+     */
+    where?: CrmAuditLogsWhereInput
+    /**
+     * Limit how many CrmAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CrmAuditLogs upsert
+   */
+  export type CrmAuditLogsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the CrmAuditLogs to update in case it exists.
+     */
+    where: CrmAuditLogsWhereUniqueInput
+    /**
+     * In case the CrmAuditLogs found by the `where` argument doesn't exist, create a new CrmAuditLogs with this data.
+     */
+    create: XOR<CrmAuditLogsCreateInput, CrmAuditLogsUncheckedCreateInput>
+    /**
+     * In case the CrmAuditLogs was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CrmAuditLogsUpdateInput, CrmAuditLogsUncheckedUpdateInput>
+  }
+
+  /**
+   * CrmAuditLogs delete
+   */
+  export type CrmAuditLogsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter which CrmAuditLogs to delete.
+     */
+    where: CrmAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * CrmAuditLogs deleteMany
+   */
+  export type CrmAuditLogsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CrmAuditLogs to delete
+     */
+    where?: CrmAuditLogsWhereInput
+    /**
+     * Limit how many CrmAuditLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CrmAuditLogs without action
+   */
+  export type CrmAuditLogsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CrmAuditLogs
+     */
+    select?: CrmAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CrmAuditLogs
+     */
+    omit?: CrmAuditLogsOmit<ExtArgs> | null
+  }
+
 
   /**
    * Model CRMUserDataModel
@@ -23781,6 +24927,19 @@ export namespace Prisma {
   export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+  export const CrmAuditLogsScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    token: 'token',
+    url: 'url',
+    data: 'data',
+    createdAt: 'createdAt'
+  };
+
+  export type CrmAuditLogsScalarFieldEnum = (typeof CrmAuditLogsScalarFieldEnum)[keyof typeof CrmAuditLogsScalarFieldEnum]
+
+
   export const CRMUserDataModelScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -24102,12 +25261,28 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
   export const QueryMode: {
     default: 'default',
     insensitive: 'insensitive'
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   export const NullsOrder: {
@@ -24148,6 +25323,20 @@ export namespace Prisma {
    * Reference to a field of type 'String[]'
    */
   export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -24292,13 +25481,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
    * Reference to a field of type 'LeadSource'
    */
   export type EnumLeadSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadSource'>
@@ -24370,6 +25552,70 @@ export namespace Prisma {
    * Deep Input Types
    */
 
+
+  export type CrmAuditLogsWhereInput = {
+    AND?: CrmAuditLogsWhereInput | CrmAuditLogsWhereInput[]
+    OR?: CrmAuditLogsWhereInput[]
+    NOT?: CrmAuditLogsWhereInput | CrmAuditLogsWhereInput[]
+    id?: IntFilter<"CrmAuditLogs"> | number
+    userId?: IntNullableFilter<"CrmAuditLogs"> | number | null
+    type?: StringFilter<"CrmAuditLogs"> | string
+    token?: StringNullableFilter<"CrmAuditLogs"> | string | null
+    url?: StringNullableFilter<"CrmAuditLogs"> | string | null
+    data?: JsonFilter<"CrmAuditLogs">
+    createdAt?: DateTimeFilter<"CrmAuditLogs"> | Date | string
+  }
+
+  export type CrmAuditLogsOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    token?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type CrmAuditLogsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: CrmAuditLogsWhereInput | CrmAuditLogsWhereInput[]
+    OR?: CrmAuditLogsWhereInput[]
+    NOT?: CrmAuditLogsWhereInput | CrmAuditLogsWhereInput[]
+    userId?: IntNullableFilter<"CrmAuditLogs"> | number | null
+    type?: StringFilter<"CrmAuditLogs"> | string
+    token?: StringNullableFilter<"CrmAuditLogs"> | string | null
+    url?: StringNullableFilter<"CrmAuditLogs"> | string | null
+    data?: JsonFilter<"CrmAuditLogs">
+    createdAt?: DateTimeFilter<"CrmAuditLogs"> | Date | string
+  }, "id">
+
+  export type CrmAuditLogsOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    token?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    _count?: CrmAuditLogsCountOrderByAggregateInput
+    _avg?: CrmAuditLogsAvgOrderByAggregateInput
+    _max?: CrmAuditLogsMaxOrderByAggregateInput
+    _min?: CrmAuditLogsMinOrderByAggregateInput
+    _sum?: CrmAuditLogsSumOrderByAggregateInput
+  }
+
+  export type CrmAuditLogsScalarWhereWithAggregatesInput = {
+    AND?: CrmAuditLogsScalarWhereWithAggregatesInput | CrmAuditLogsScalarWhereWithAggregatesInput[]
+    OR?: CrmAuditLogsScalarWhereWithAggregatesInput[]
+    NOT?: CrmAuditLogsScalarWhereWithAggregatesInput | CrmAuditLogsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"CrmAuditLogs"> | number
+    userId?: IntNullableWithAggregatesFilter<"CrmAuditLogs"> | number | null
+    type?: StringWithAggregatesFilter<"CrmAuditLogs"> | string
+    token?: StringNullableWithAggregatesFilter<"CrmAuditLogs"> | string | null
+    url?: StringNullableWithAggregatesFilter<"CrmAuditLogs"> | string | null
+    data?: JsonWithAggregatesFilter<"CrmAuditLogs">
+    createdAt?: DateTimeWithAggregatesFilter<"CrmAuditLogs"> | Date | string
+  }
 
   export type CRMUserDataModelWhereInput = {
     AND?: CRMUserDataModelWhereInput | CRMUserDataModelWhereInput[]
@@ -26007,6 +27253,73 @@ export namespace Prisma {
     description?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
     type?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
     issuer?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
+  }
+
+  export type CrmAuditLogsCreateInput = {
+    userId?: number | null
+    type: string
+    token?: string | null
+    url?: string | null
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type CrmAuditLogsUncheckedCreateInput = {
+    id?: number
+    userId?: number | null
+    type: string
+    token?: string | null
+    url?: string | null
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type CrmAuditLogsUpdateInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CrmAuditLogsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CrmAuditLogsCreateManyInput = {
+    id?: number
+    userId?: number | null
+    type: string
+    token?: string | null
+    url?: string | null
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type CrmAuditLogsUpdateManyMutationInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CrmAuditLogsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CRMUserDataModelCreateInput = {
@@ -27852,6 +29165,17 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -27881,6 +29205,191 @@ export namespace Prisma {
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
+  export type CrmAuditLogsCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    token?: SortOrder
+    url?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type CrmAuditLogsAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type CrmAuditLogsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    token?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type CrmAuditLogsMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    token?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type CrmAuditLogsSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type StringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
@@ -27907,28 +29416,6 @@ export namespace Prisma {
     not?: NestedEnumAccountStatusFilter<$PrismaModel> | $Enums.AccountStatus
   }
 
-  export type DateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type CustomersAuthDataModelListRelationFilter = {
     every?: CustomersAuthDataModelWhereInput
     some?: CustomersAuthDataModelWhereInput
@@ -27939,11 +29426,6 @@ export namespace Prisma {
     every?: LeadsModelWhereInput
     some?: LeadsModelWhereInput
     none?: LeadsModelWhereInput
-  }
-
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
   }
 
   export type CustomersAuthDataModelOrderByRelationAggregateInput = {
@@ -28006,58 +29488,6 @@ export namespace Prisma {
     createdBy?: SortOrder
   }
 
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type StringWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[] | ListStringFieldRefInput<$PrismaModel>
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedStringFilter<$PrismaModel>
-    _max?: NestedStringFilter<$PrismaModel>
-  }
-
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -28090,36 +29520,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAccountStatusFilter<$PrismaModel>
     _max?: NestedEnumAccountStatusFilter<$PrismaModel>
-  }
-
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type EnumSIGNIN_WITHFilter<$PrismaModel = never> = {
@@ -29391,6 +30791,34 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type StringFieldUpdateOperationsInput = {
+    set?: string
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type CustomersAuthDataModelCreateNestedManyWithoutRelationshipManagerInput = {
     create?: XOR<CustomersAuthDataModelCreateWithoutRelationshipManagerInput, CustomersAuthDataModelUncheckedCreateWithoutRelationshipManagerInput> | CustomersAuthDataModelCreateWithoutRelationshipManagerInput[] | CustomersAuthDataModelUncheckedCreateWithoutRelationshipManagerInput[]
     connectOrCreate?: CustomersAuthDataModelCreateOrConnectWithoutRelationshipManagerInput | CustomersAuthDataModelCreateOrConnectWithoutRelationshipManagerInput[]
@@ -29419,14 +30847,6 @@ export namespace Prisma {
     connect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
   }
 
-  export type StringFieldUpdateOperationsInput = {
-    set?: string
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
   }
@@ -29437,18 +30857,6 @@ export namespace Prisma {
 
   export type EnumAccountStatusFieldUpdateOperationsInput = {
     set?: $Enums.AccountStatus
-  }
-
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type CustomersAuthDataModelUpdateManyWithoutRelationshipManagerNestedInput = {
@@ -29477,14 +30885,6 @@ export namespace Prisma {
     update?: LeadsModelUpdateWithWhereUniqueWithoutAssignToInput | LeadsModelUpdateWithWhereUniqueWithoutAssignToInput[]
     updateMany?: LeadsModelUpdateManyWithWhereWithoutAssignToInput | LeadsModelUpdateManyWithWhereWithoutAssignToInput[]
     deleteMany?: LeadsModelScalarWhereInput | LeadsModelScalarWhereInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type CustomersAuthDataModelUncheckedUpdateManyWithoutRelationshipManagerNestedInput = {
@@ -30387,6 +31787,17 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -30415,31 +31826,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedEnumCrmUserROLEFilter<$PrismaModel = never> = {
-    equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
-    in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
-    notIn?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
-    not?: NestedEnumCrmUserROLEFilter<$PrismaModel> | $Enums.CrmUserROLE
-  }
-
-  export type NestedEnumAccountStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.AccountStatus | EnumAccountStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumAccountStatusFilter<$PrismaModel> | $Enums.AccountStatus
-  }
-
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -30449,17 +31835,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -30487,6 +31862,33 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -30522,6 +31924,68 @@ export namespace Prisma {
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedEnumCrmUserROLEFilter<$PrismaModel = never> = {
+    equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
+    in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
+    not?: NestedEnumCrmUserROLEFilter<$PrismaModel> | $Enums.CrmUserROLE
+  }
+
+  export type NestedEnumAccountStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.AccountStatus | EnumAccountStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumAccountStatusFilter<$PrismaModel> | $Enums.AccountStatus
+  }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
@@ -30555,47 +32019,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAccountStatusFilter<$PrismaModel>
     _max?: NestedEnumAccountStatusFilter<$PrismaModel>
-  }
-
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedEnumSIGNIN_WITHFilter<$PrismaModel = never> = {

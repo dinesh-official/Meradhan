@@ -1,10 +1,10 @@
-import { AppError } from "@utils/error/AppError";
-import { tokenUtils } from "@utils/token/JwtToken.utils";
-import { QueueStore, type IQueueService } from "../../queues/redis/QueueStore";
-import { hashingUtils } from "@utils/hash/hashing.utils";
 import { config } from "@config/config";
 import { EmailSenderGateway } from "@lib/gateway/emailsender/emailSender.gateway";
 import type { IEmailSenderGatewayInterface } from "@lib/gateway/emailsender/emailTask.interface";
+import { AppError } from "@utils/error/AppError";
+import { hashingUtils } from "@utils/hash/hashing.utils";
+import { tokenUtils } from "@utils/token/JwtToken.utils";
+import { QueueStore } from "../../queues/redis/QueueStore";
 
 export interface OtpRecord {
     otp: string;
@@ -20,7 +20,7 @@ export class OtpVerificationService implements IOtpVerificationService {
 
     private gateway: IEmailSenderGatewayInterface;
     private storeKey;
-    private store: IQueueService;
+    private store: QueueStore;
     constructor(private useOf: "AUTH_OTP" | "EMAIL_VERIFY" = "AUTH_OTP") {
         this.store = QueueStore.getStore(); this.storeKey = useOf;
         this.gateway = new EmailSenderGateway()

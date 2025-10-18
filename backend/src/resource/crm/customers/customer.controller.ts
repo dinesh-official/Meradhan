@@ -2,12 +2,11 @@ import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { CustomerProfileRepo } from "./customer.repo";
-import type { ICustomerControllerInterface, ICustomerProfileServiceInterface } from "./customers.interfcae";
 import { CustomerProfileService } from "./customer.service";
 
 
-export class CustomerProfileController implements ICustomerControllerInterface {
-    private profileService: ICustomerProfileServiceInterface
+export class CustomerProfileController {
+    private profileService: CustomerProfileService
     constructor() {
         const repo = new CustomerProfileRepo()
         this.profileService = new CustomerProfileService(repo)
@@ -63,7 +62,7 @@ export class CustomerProfileController implements ICustomerControllerInterface {
 
     async getFullProfileCustomer(req: Request, res: Response): Promise<void> {
         const customerId = req.params.customerId;
-        
+
         const response = await this.profileService.getFullCustomerProfile(Number(customerId))
         res.sendResponse({
             statusCode: HttpStatus.OK,

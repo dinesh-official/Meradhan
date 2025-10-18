@@ -120,6 +120,16 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.CrmAuditLogsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  token: 'token',
+  url: 'url',
+  data: 'data',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.CRMUserDataModelScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -387,9 +397,19 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 
 exports.Prisma.NullsOrder = {
@@ -482,6 +502,7 @@ exports.DefaultSelect = exports.$Enums.DefaultSelect = {
 };
 
 exports.Prisma.ModelName = {
+  CrmAuditLogs: 'CrmAuditLogs',
   CRMUserDataModel: 'CRMUserDataModel',
   CustomersAuthDataModel: 'CustomersAuthDataModel',
   CustomerProfileDataModel: 'CustomerProfileDataModel',

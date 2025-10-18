@@ -2,15 +2,12 @@ import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
-import type { IPersonalInfoManagerInterface } from "./customermanager.interface";
 
-export class CustomerPersonalInformationManager
-  implements IPersonalInfoManagerInterface
-{
+export class CustomerPersonalInformationManager {
   async createPersonalInfo(
     customerProfileId: number,
     data: z.infer<typeof appSchema.customer.createPersonalInfoSchema>
-  ): ReturnType<IPersonalInfoManagerInterface["createPersonalInfo"]> {
+  ) {
     const createdPersonalInfo =
       await db.dataBase.customerPersonalInfoModel.create({
         data: {
@@ -39,7 +36,7 @@ export class CustomerPersonalInformationManager
 
   async getPersonalInfo(
     personalInfoId: number
-  ): ReturnType<IPersonalInfoManagerInterface["getPersonalInfo"]> {
+  ) {
     const personalInformation =
       await db.dataBase.customerPersonalInfoModel.findUnique({
         where: { id: personalInfoId },
@@ -56,10 +53,10 @@ export class CustomerPersonalInformationManager
 
   async getCustomerPersonalInfo(
     customerProfileId: number
-  ): ReturnType<IPersonalInfoManagerInterface["getCustomerPersonalInfo"]> {
+  ) {
     const customerPersonalInformation =
       await db.dataBase.customerPersonalInfoModel.findFirst({
-        where: {CustomerProfileDataModel:{some:{id:customerProfileId}}},
+        where: { CustomerProfileDataModel: { some: { id: customerProfileId } } },
       });
     if (!customerPersonalInformation) {
       throw new AppError(
@@ -75,7 +72,7 @@ export class CustomerPersonalInformationManager
 
   async removePersonalInfo(
     personalInfoId: number
-  ): ReturnType<IPersonalInfoManagerInterface["removePersonalInfo"]> {
+  ) {
     const existing = await db.dataBase.customerPersonalInfoModel.findUnique({
       where: { id: personalInfoId },
       select: { id: true },
@@ -98,7 +95,7 @@ export class CustomerPersonalInformationManager
   async updatePersonalInfo(
     personalInfoId: number,
     data: z.infer<typeof appSchema.customer.updatePersonalInfoSchema>
-  ): ReturnType<IPersonalInfoManagerInterface["updatePersonalInfo"]> {
+  ) {
     const existing = await db.dataBase.customerPersonalInfoModel.findUnique({
       where: { id: personalInfoId },
       select: { id: true },
@@ -111,28 +108,28 @@ export class CustomerPersonalInformationManager
       });
     }
 
-     const updatedPersonalInfo = await db.dataBase.customerPersonalInfoModel.update({
-        where: { id: personalInfoId },
-        data: {
-          annualGrossIncome: data.annualGrossIncome?.trim(),
-          fatherOrSpouseName: data.fatherOrSpouseName?.trim(),
-          maritalStatus: data.maritalStatus?.trim(),
-          mothersName: data.mothersName?.trim(),
-          nationality: data.nationality?.trim(),
-          occupationType: data.occupationType?.trim(),
-          qualification: data.qualification?.trim(),
-          residentialStatus: data.residentialStatus?.trim(),
-        },
+    const updatedPersonalInfo = await db.dataBase.customerPersonalInfoModel.update({
+      where: { id: personalInfoId },
+      data: {
+        annualGrossIncome: data.annualGrossIncome?.trim(),
+        fatherOrSpouseName: data.fatherOrSpouseName?.trim(),
+        maritalStatus: data.maritalStatus?.trim(),
+        mothersName: data.mothersName?.trim(),
+        nationality: data.nationality?.trim(),
+        occupationType: data.occupationType?.trim(),
+        qualification: data.qualification?.trim(),
+        residentialStatus: data.residentialStatus?.trim(),
+      },
+    });
+
+    if (!updatedPersonalInfo) {
+      throw new AppError("Failed to update personal information", {
+        statusCode: 404,
+        code: "PERSONAL_INFO_UPDATE_FAILED",
       });
+    }
 
-      if (!updatedPersonalInfo) {
-        throw new AppError("Failed to update personal information", {
-          statusCode: 404,
-          code: "PERSONAL_INFO_UPDATE_FAILED",
-        });
-      }
-
-      return updatedPersonalInfo;
+    return updatedPersonalInfo;
 
   }
 }

@@ -3,7 +3,6 @@ import { CustomerProfileController } from "./customer.controller";
 import { withAuthMiddleware } from "@lib/middlewares/auth.middleware";
 
 const customersRoutes = Router();
-
 const controller = new CustomerProfileController()
 
 customersRoutes.get("/api/crm/customers", withAuthMiddleware, (req, res) => controller.filterCustomer(req, res));
