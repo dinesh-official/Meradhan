@@ -1,11 +1,50 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import apiGateway, { GetCustomerResponseById } from "@root/apiGateway";
+import { useQuery } from "@tanstack/react-query";
 import { IdCardIcon, NotebookPen } from "lucide-react";
+import { useState } from "react";
 
-function CustomerProfileView() {
+function CustomerProfileView({ profileId }: { profileId: number }) {
+  // const [useCustomerFormDataHook, setuseCustomerFormDataHook] = useState<GetCustomerResponseById>()])
+  const fetchCustomer = async () => {
+    const fetchCustomerProfile = new apiGateway.crm.customer.CrmCustomerApi(
+      apiClientCaller
+    );
+    try {
+      const response = await fetchCustomerProfile.customerInfoById(profileId);
+      return response.data.responseData;
+    } catch (error) {
+      console.error("Failed to fetch customer info:", error);
+    }
+  };
+
+  const {
+    data: customer,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["fetchCustomer", profileId],
+    queryFn: fetchCustomer,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-96 flex justify-center items-center">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <PageInfoBar
@@ -31,33 +70,48 @@ function CustomerProfileView() {
           <b className="text-xs block mb-4">Basic Information</b>
           <div className="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-5 mb-4">
             <LabelView title="Full Name">
-              <p>Working Bapari</p>
+              <p>
+                {customer?.firstName} {customer?.middleName}{" "}
+                {customer?.lastName}
+              </p>
             </LabelView>
             <LabelView title="First Name">
-              <p>Working Bapari</p>
+              <p>{customer?.firstName}</p>
             </LabelView>
             <LabelView title="Middle Name">
-              <p>Working Bapari</p>
+              <p>{customer?.middleName}</p>
             </LabelView>
             <LabelView title="Last Name">
-              <p>Working Bapari</p>
+              <p>{customer?.lastName}</p>
             </LabelView>
             <LabelView title="User Type">
-              <p>Working Bapari</p>
+              <p>{customer?.userType}</p>
             </LabelView>
           </div>
           <b className="text-xs block mb-4 mt-7">Contact Information</b>
           <div className="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-5 mb-4">
             <LabelView title="Email ID">
-              <p>Working Bapari</p>
+              <p>{customer?.emailAddress}</p>
             </LabelView>
             <LabelView title="Mobile Number">
-              <p>Working Bapari</p>
-              <StatusBadge value={"Not Verified"} />
+              <div className="flex flex-row gap-2">
+                <p>{customer?.phoneNo}</p>
+                <StatusBadge
+                  value={
+                    customer?.utility.isPhoneVerified ? "Verified" : "pending"
+                  }
+                />
+              </div>
             </LabelView>
             <LabelView title="WhatsApp Number">
-              <p>Working Bapari</p>
-              <StatusBadge value={"Verified"} />
+              <div className="flex flex-row gap-2">
+                <p>{customer?.whatsAppNo}</p>
+                <StatusBadge
+                  value={
+                    customer?.utility.isPhoneVerified ? "Verified" : "pending"
+                  }
+                />
+              </div>
             </LabelView>
           </div>
         </CardContent>
@@ -71,16 +125,28 @@ function CustomerProfileView() {
           <CardContent>
             <div className="grid xl:grid-cols-4 grid-cols-2  gap-5 mb-4">
               <LabelView title="Account Status">
-                <StatusBadge value={"Verified"} />
+                <StatusBadge
+                  value={customer?.utility?.accountStatus ?? "pending"}
+                />
               </LabelView>
               <LabelView title="KYC Status">
-                <StatusBadge value={"Pending"} />
+                <StatusBadge value={customer?.kycStatus ?? "pending"} />
               </LabelView>
               <LabelView title="Terms Accepted">
-                <StatusBadge value={"Yes"} />
+                <StatusBadge
+                  value={
+                    customer?.utility.termsAccepted ? "Accepted" : "pending"
+                  }
+                />
               </LabelView>
               <LabelView title="WhatsApp Notifications">
-                <StatusBadge value={"Enabled"} />
+                <StatusBadge
+                  value={
+                    customer?.utility.whatsAppNotificationAllow
+                      ? "Accepted"
+                      : "Pending"
+                  }
+                />
               </LabelView>
             </div>
           </CardContent>
@@ -92,13 +158,20 @@ function CustomerProfileView() {
           <CardContent>
             <div className="grid lg:grid-cols-3 gap-5">
               <LabelView title="Account Created">
-                <p>July 1st, 2025</p>
+                <p>
+                  {customer?.createdAt
+                    ? dateTimeUtils.formatDateTime(
+                        customer.updatedAt,
+                        "DD MMMM YYYY hh:mm AA"
+                      )
+                    : "—"}
+                </p>
               </LabelView>
               <LabelView title="KYC Status">
-                <p>September 22nd, 2025</p>
+                <p>{customer?.kycStatus}</p>
               </LabelView>
               <LabelView title="Customer ID">
-                <p>#dlfcgcw0mdqxybgeiysnwlxa</p>
+                <p>{customer?.id}</p>
               </LabelView>
             </div>
           </CardContent>

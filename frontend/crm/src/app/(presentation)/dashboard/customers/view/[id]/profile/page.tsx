@@ -2,12 +2,15 @@ import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
 import React from "react";
 import CustomerProfileView from "./CustomerProfileView";
 
-function ProfilePage() {
+async function page({ params }: { params: Promise<{ id: number }> }) {
+  const { id } = await params;
+  console.log("id", id);
+
   return (
     <Workspace>
-      <CustomerProfileView />
+      <CustomerProfileView profileId = {id}/>
     </Workspace>
   );
 }
 
-export default ProfilePage;
+export default page;
