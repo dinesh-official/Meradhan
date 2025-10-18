@@ -165,7 +165,7 @@ export type CustomerByIdPayload = {
   dematAccounts: DematAccount[];
   panCard: PanCard | null;
   permanentAddress: Address | null;
-  personalInformation: unknown | null;
+  personalInformation: PersonalInfo | null;
 
   userName: string;
   firstName: string;
@@ -177,7 +177,7 @@ export type CustomerByIdPayload = {
   gender: Gender;
   userType: CustomerUserType;
   kycStatus: KycStatus;
-
+  verifyDate: string | null,
   avatar: string | null;
   VerifiedBy: number | null;
   createdBy: number | null;
@@ -187,6 +187,26 @@ export type CustomerByIdPayload = {
 
   utility: DetailCustomerUtility;
 };
+
+interface PersonalInfo {
+  /// Signature image URL
+  SignatureUrl?: string;
+  dateOfBirth?: string;
+
+  /// Personal info
+  maritalStatus?: string;
+  occupationType?: string;
+  annualGrossIncome?: string;
+  fatherOrSpouseName?: string;
+  relationshipWithPerson?: string;
+  mothersName?: string;
+  nationality?: string;
+  maidenName?: string;
+  residentialStatus?: string;
+  qualification?: string;
+  politicallyExposedPerson?: string;
+}
+
 
 // GET /crm/customers/:id
 export type GetCustomerResponseById = BaseResponseData<CustomerByIdPayload>;

@@ -16,3 +16,20 @@ export const playSound = () => {
 
   });
 }
+
+
+
+export interface PersonName {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+}
+
+export function areNamesMatched(a: PersonName, b: PersonName): boolean {
+  const clean = (s: string = "") => s.replace(/\s+/g, "").toLowerCase();
+
+  const fullA = clean(a.firstName) + clean(a.middleName) + clean(a.lastName);
+  const fullB = clean(b.firstName) + clean(b.middleName) + clean(b.lastName);
+
+  return fullA === fullB;
+}

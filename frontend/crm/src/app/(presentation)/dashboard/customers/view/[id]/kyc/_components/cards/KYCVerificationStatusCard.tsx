@@ -25,13 +25,7 @@ function KYCVerificationStatusCard(
             </p>
           </LabelView>
           <LabelView title="Overall Status">
-            <StatusBadge
-              value={
-                KYCVerificationStatusInfo.overallStatus
-                  ? "completed"
-                  : "Incomplete"
-              }
-            />
+            <StatusBadge value={KYCVerificationStatusInfo.overallStatus} />
           </LabelView>
           <LabelView title="Verified By">
             <p className="font-medium text-sm">

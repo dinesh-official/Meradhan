@@ -5,7 +5,7 @@ import React from "react";
 export interface PanCardProps {
   panNumber: string;
   name: string;
-  fatherName: string;
+  gender?: string;
   dateOfBirth: string;
   isVerified: boolean;
 }
@@ -44,8 +44,8 @@ function PanCard(panCardData: PanCardProps) {
         </div>
 
         <div className="text-xs">
-          <p className="text-blue-950">पिता का नाम / Fathers Name</p>
-          <p>{panCardData.fatherName}</p>
+           <p className="text-blue-950">जन्म तिथि / Gender</p>
+          <p>{panCardData.gender}</p>
         </div>
         <div className="text-xs">
           <p className="text-blue-950">जन्म तिथि / Date Of Birth</p>

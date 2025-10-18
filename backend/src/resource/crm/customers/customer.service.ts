@@ -77,9 +77,13 @@ export class CustomerProfileService extends CustomerProfileManager implements IC
                 lastName: true,
                 emailAddress: true,
                 phoneNo: true,
+                VerifiedBy: true,
+                verifyDate: true,
+
                 panCard: {
                     select: {
                         panCardNo: true,
+
                     }
                 },
                 kycStatus: true,

@@ -5,14 +5,14 @@ export type DepositoryName = "NSDL" | "CDSL";
 export type DematAccountType = "SINGLE" | "JOINT";
 export type AccountStatus = "ACTIVE" | "SUSPENDED";
 export type SigninWith = "CREDENTIALS" | "GOOGLE" | "GITHUB" | "APPLE";
-export type CustomerUserType = "INDIVIDUAL"|
-  "INDIVIDUAL_NRI_NRO"|
-  "TRUST"|
-  "CORPORATE"|
-  "HUF"|
-  "LLP"|
+export type CustomerUserType = "INDIVIDUAL" |
+  "INDIVIDUAL_NRI_NRO" |
+  "TRUST" |
+  "CORPORATE" |
+  "HUF" |
+  "LLP" |
   "PARTNERSHIP_FIRM";
-  
+
 export type KycStatus = "PENDING" | "VERIFIED" | "REJECTED";
 
 export type AadhaarCard = {
@@ -43,6 +43,7 @@ export type BankAccount = {
   isPrimary: boolean;
   isVerified: boolean;
   customerProfileDataModelId: number;
+  verifyDate: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -77,6 +78,7 @@ export type DematAccount = {
   accountHolderName: string;
   isPrimary: boolean;
   isVerified: boolean;
+  verifyDate: string;
   customerProfileDataModelId: number;
   createdAt: string;
   updatedAt: string;

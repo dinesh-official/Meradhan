@@ -50,7 +50,7 @@ export default function PanCardInfoCard(panCardInfoData: PanCardInfoProps) {
                 value={
                   panCardInfoData.nameVerificationStatus
                     ? "Verified"
-                    : "Pending"
+                    : "Not Matched"
                 }
               />{" "}
             </p>

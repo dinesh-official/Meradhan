@@ -13,22 +13,39 @@ import PersonalInformationCard from "./cards/PersonalInformationCard";
 import RiskProfileQuestion, {
   RiskProfileAnsOption,
 } from "./cards/riskprofile/RiskProfileQuestion";
+import { CustomerByIdPayload } from "@root/apiGateway";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { areNamesMatched } from "@/lib/utils";
 
-function ViewKycDataComponent() {
+function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   return (
     <div className="flex flex-col gap-5 relative">
       <div className="grid xl:grid-cols-2 gap-5">
         <CustomerOverViewCard
-          name="Rahul Sharma"
-          customerSince="15 Jul 2020"
-          kycStatus={true}
+          name={`${data.firstName} ${data.middleName} ${data.lastName}`}
+          customerSince={
+            !data.utility.lastLogin
+              ? "--"
+              : dateTimeUtils.formatDateTime(
+                  data.utility.lastLogin,
+                  "DD MMMM YYYY hh:mm AA"
+                )
+          }
+          kycStatus={data.kycStatus}
         />
         <KYCVerificationStatusCard
           kycLevel="Full"
-          overallStatus="Verified"
-          verifiedBy="Rahul Sharma (Compliance Officer)"
-          verifiedDate="13 Oct 2025, 11:45 AM"
-        />{" "}
+          overallStatus="PENDING"
+          verifiedBy="--"
+          verifiedDate={
+            !data.verifyDate
+              ? "--"
+              : dateTimeUtils.formatDateTime(
+                  data.verifyDate,
+                  "DD MMMM YYYY hh:mm AA"
+                )
+          }
+        />
       </div>
 
       <StickyHeader />
@@ -36,21 +53,40 @@ function ViewKycDataComponent() {
       {/* Personal Information */}
       <div className="scroll-mt-16" id="personal-info">
         <PersonalInformationCard
-          photoUrl="/images/user.jpeg"
-          signatureUrl="/images/sign.jpg"
-          fullName="Rahul Sharma"
-          dateOfBirth="1996-07-15"
-          gender="Male"
-          maritalStatus="Single"
-          fatherOrSpouseName="Rajesh Sharma"
-          relationshipWithPerson="Son"
-          motherName="Anita Sharma"
-          qualification="Graduate"
-          occupationType="Salaried"
-          annualGrossIncome="₹6,00,000"
-          nationality="Indian"
-          residentialStatus="Resident Indian"
-        />{" "}
+          photoUrl={data.avatar || "/noimage.jpg"}
+          signatureUrl={
+            data.personalInformation?.SignatureUrl || "/noimage.jpg"
+          }
+          fullName={`${data.firstName} ${data.middleName} ${data.lastName}`}
+          dateOfBirth={
+            !data.personalInformation?.dateOfBirth
+              ? "--"
+              : dateTimeUtils.formatDateTime(
+                  data.personalInformation?.dateOfBirth,
+                  "DD/MM/YYYY"
+                )
+          }
+          gender={data.gender}
+          maritalStatus={data.personalInformation?.maritalStatus || "--"}
+          fatherOrSpouseName={
+            data.personalInformation?.fatherOrSpouseName || "--"
+          }
+          relationshipWithPerson={
+            data.personalInformation?.relationshipWithPerson || "--"
+          }
+          motherName={data.personalInformation?.mothersName || "--"}
+          qualification={data.personalInformation?.qualification || "--"}
+          occupationType={data.personalInformation?.occupationType || "--"}
+          annualGrossIncome={
+            data.personalInformation?.annualGrossIncome?.replaceAll("_", " ") ||
+            "--"
+          }
+          nationality={data.personalInformation?.nationality || "--"}
+          residentialStatus={
+            data.personalInformation?.residentialStatus?.replaceAll("_", " ") ||
+            "--"
+          }
+        />
       </div>
 
       {/* Identity Documents */}
@@ -62,107 +98,134 @@ function ViewKycDataComponent() {
           <CardContent>
             <div className="flex flex-wrap gap-8">
               <PanCard
-                panNumber="AADPM2907K"
-                name="Rahul Sharma"
-                fatherName="Rajesh Kumar Sharma"
-                dateOfBirth="21/10/1980"
-                isVerified={true}
+                panNumber={data.panCard?.panCardNo || "--------"}
+                name={`${data.panCard?.firstName || "----"} ${
+                  data.panCard?.middleName || "--"
+                } ${data.panCard?.lastName || "---"}`}
+                gender={data.panCard?.gender || "----"}
+                dateOfBirth={
+                  data.panCard?.dateOfBirth
+                    ? dateTimeUtils.formatDateTime(
+                        data.panCard?.dateOfBirth,
+                        "DD/MM/YYYY"
+                      )
+                    : "--/--/----"
+                }
+                isVerified={data.panCard?.isVerified || false}
               />
               <AdharaCard
-                name="Rahul Sharma"
-                dateOfBirth="15/07/1996"
-                gender="Male"
-                aadhaarNumberMasked="xxx-xxx-xxx-1234"
-                isVerified={true}
+                name={`${data.aadhaarCard?.firstName || "----"} ${
+                  data.aadhaarCard?.middleName || "--"
+                } ${data.aadhaarCard?.lastName || "---"}`}
+                gender={data.aadhaarCard?.gender || "----"}
+                aadhaarNumberMasked={
+                  data.aadhaarCard?.aadhaarNo || "----------------"
+                }
+                dateOfBirth={
+                  data.aadhaarCard?.dateOfBirth
+                    ? dateTimeUtils.formatDateTime(
+                        data.aadhaarCard?.dateOfBirth,
+                        "DD/MM/YYYY"
+                      )
+                    : "--/--/----"
+                }
+                isVerified={data.aadhaarCard?.isVerified || false}
               />
             </div>
           </CardContent>
         </Card>
         <PanCardInfoCard
-          panCardNumber="AADPM2907K"
-          Name="Rahul Sharma"
-          DateOFBirth="15 Jul 1996"
-          gender="Male"
-          nameVerificationStatus={true}
-          panVerificationStatus={true}
-          verificationTimeStamp="13 Oct 2025, 10:45 AM"
-        />{" "}
-        <AadhaarCardInfo
-          aadhaarNumber="1234-5678-9012"
-          name="Rahul Sharma"
-          nameVerificationStatus={true}
-          dateOfBirth="15 Jul 1996"
-          gender="Male"
-          permanentAddress={{
-            addressLine1: "A-32, Sector 10 Main Road",
-            addressLine2: "Near City Park",
-            postOffice: "Noida Sector 10",
-            district: "Gautam Buddha Nagar",
-            stateName: "Uttar Pradesh",
-            pinCode: "201301",
-            country: "India",
-            fullAddress:
-              "A-32, Sector 10 Main Road, Near City Park, Noida, Gautam Buddha Nagar, Uttar Pradesh, 201301, India",
-          }}
-          currentAddress={{
-            addressLine1: "Flat 205, MG Road",
-            addressLine2: "Opposite Metro Station",
-            postOffice: "Gurugram H.O",
-            district: "Gurugram",
-            stateName: "Haryana",
-            pinCode: "122002",
-            country: "India",
-            fullAddress:
-              "Flat 205, MG Road, Opposite Metro Station, Gurugram, Haryana, 122002, India",
-          }}
-          verificationTimeStamp="13 Oct 2025, 10:30 AM"
+          panCardNumber={data.panCard?.panCardNo || "--------"}
+          Name={`${data.panCard?.firstName || "----"} ${
+            data.panCard?.middleName || "--"
+          } ${data.panCard?.lastName || "---"}`}
+          gender={data.panCard?.gender || "----"}
+          DateOFBirth={
+            data.panCard?.dateOfBirth
+              ? dateTimeUtils.formatDateTime(
+                  data.panCard?.dateOfBirth,
+                  "DD/MM/YYYY"
+                )
+              : "--/--/----"
+          }
+          panVerificationStatus={data.panCard?.isVerified || false}
+          nameVerificationStatus={areNamesMatched(
+            {
+              firstName: data.firstName,
+              lastName: data.lastName,
+              middleName: data.middleName || undefined,
+            },
+            {
+              firstName: data.panCard?.firstName || "",
+              lastName: data.panCard?.lastName || "",
+              middleName: data.panCard?.middleName || undefined,
+            }
+          )}
+          verificationTimeStamp={
+            !data.panCard?.verifyDate
+              ? "-------"
+              : dateTimeUtils.formatDateTime(
+                  data.panCard?.verifyDate,
+                  "DD MMMM YYYY hh:mm AA"
+                )
+          }
         />
-      </div>
-
-      {/* PAN Details */}
-      <div className="scroll-mt-16" id="pan-details">
-        <PanCardInfoCard
-          panCardNumber="AADPM2907K"
-          Name="Rahul Sharma"
-          DateOFBirth="15 Jul 1996"
-          gender="Male"
-          nameVerificationStatus={true}
-          panVerificationStatus={true}
-          verificationTimeStamp="13 Oct 2025, 10:45 AM"
-        />{" "}
-      </div>
-
-      {/* Aadhaar & Address */}
-      <div className="scroll-mt-16" id="aadhaar-address">
         <AadhaarCardInfo
-          aadhaarNumber="1234-5678-9012"
-          name="Rahul Sharma"
-          nameVerificationStatus={true}
-          dateOfBirth="15 Jul 1996"
-          gender="Male"
+          name={`${data.aadhaarCard?.firstName || "----"} ${
+            data.aadhaarCard?.middleName || "--"
+          } ${data.aadhaarCard?.lastName || "---"}`}
+          gender={data.aadhaarCard?.gender || "----"}
+          aadhaarNumber={data.aadhaarCard?.aadhaarNo || "----------------"}
+          dateOfBirth={
+            data.aadhaarCard?.dateOfBirth
+              ? dateTimeUtils.formatDateTime(
+                  data.aadhaarCard?.dateOfBirth,
+                  "DD/MM/YYYY"
+                )
+              : "--/--/----"
+          }
+          nameVerificationStatus={areNamesMatched(
+            {
+              firstName: data.firstName,
+              lastName: data.lastName,
+              middleName: data.middleName || undefined,
+            },
+            {
+              firstName: data.aadhaarCard?.firstName || "",
+              lastName: data.aadhaarCard?.lastName || "",
+              middleName: data.aadhaarCard?.middleName || undefined,
+            }
+          )}
           permanentAddress={{
-            addressLine1: "A-32, Sector 10 Main Road",
-            addressLine2: "Near City Park",
-            postOffice: "Noida Sector 10",
-            district: "Gautam Buddha Nagar",
-            stateName: "Uttar Pradesh",
-            pinCode: "201301",
-            country: "India",
-            fullAddress:
-              "A-32, Sector 10 Main Road, Near City Park, Noida, Gautam Buddha Nagar, Uttar Pradesh, 201301, India",
+            addressLine1: data.permanentAddress?.line1 || "------",
+            addressLine2: data.permanentAddress?.line2 || undefined,
+            addressLine3: data.permanentAddress?.line3 || undefined,
+            postOffice: data.permanentAddress?.postOffice || "-----",
+            district: data.permanentAddress?.cityOrDistrict || "------",
+            stateName: data.permanentAddress?.state || "------",
+            pinCode: data.permanentAddress?.pinCode || "------",
+            country: data.permanentAddress?.country || "------",
+            fullAddress: data.permanentAddress?.fullAddress || "------",
           }}
           currentAddress={{
-            addressLine1: "Flat 205, MG Road",
-            addressLine2: "Opposite Metro Station",
-            postOffice: "Gurugram H.O",
-            district: "Gurugram",
-            stateName: "Haryana",
-            pinCode: "122002",
-            country: "India",
-            fullAddress:
-              "Flat 205, MG Road, Opposite Metro Station, Gurugram, Haryana, 122002, India",
+            addressLine1: data.currentAddress?.line1 || "------",
+            addressLine2: data.currentAddress?.line2 || undefined,
+            addressLine3: data.currentAddress?.line3 || undefined,
+            postOffice: data.currentAddress?.postOffice || "-----",
+            district: data.currentAddress?.cityOrDistrict || "------",
+            stateName: data.currentAddress?.state || "------",
+            pinCode: data.currentAddress?.pinCode || "------",
+            country: data.currentAddress?.country || "------",
+            fullAddress: data.currentAddress?.fullAddress || "------",
           }}
-          verificationTimeStamp="13 Oct 2025, 10:30 AM"
+          verificationTimeStamp={
+            data.aadhaarCard?.verifyDate
+              ? dateTimeUtils.formatDateTime(
+                  data.aadhaarCard?.dateOfBirth,
+                  "DD MMMM YYYY hh:mm AA"
+                )
+              : "--/--/----"
+          }
         />
       </div>
 
@@ -174,42 +237,35 @@ function ViewKycDataComponent() {
           </CardHeader>
           <CardContent>
             <div className="grid lg:grid-cols-3  gap-5">
-              <DematCard
-                dpId="IN301151"
-                clientId="25112106"
-                depository="CDSL"
-                accountType="SINGLE"
-                pan1={{ value: "AADPM2907K", verified: false }}
-                pan2={{ value: "Not applicable" }}
-                pan3={{ value: "Not applicable" }}
-                depositoryParticipantName="sadad"
-                isDefault={true}
-                verifiedOn="01 Oct 2025, 11:59 AM"
-              />
-              <DematCard
-                dpId="IN301151"
-                clientId="25112106"
-                depository="CDSL"
-                accountType="SINGLE"
-                pan1={{ value: "AADPM2907K", verified: false }}
-                pan2={{ value: "Not applicable" }}
-                pan3={{ value: "Not applicable" }}
-                depositoryParticipantName="sadad"
-                isDefault={true}
-                verifiedOn="01 Oct 2025, 11:59 AM"
-              />
-              <DematCard
-                dpId="IN301151"
-                clientId="25112106"
-                depository="CDSL"
-                accountType="SINGLE"
-                pan1={{ value: "AADPM2907K", verified: false }}
-                pan2={{ value: "Not applicable" }}
-                pan3={{ value: "Not applicable" }}
-                depositoryParticipantName="sadad"
-                isDefault={true}
-                verifiedOn="01 Oct 2025, 11:59 AM"
-              />
+              {data.dematAccounts.map((e) => {
+                return (
+                  <DematCard
+                    key={e.dpId + e.id}
+                    dpId={e.dpId}
+                    clientId={e.clientId}
+                    depository={e.depositoryName}
+                    accountType={e.accountType}
+                    pan1={{ value: e.primaryPanNumber, verified: false }}
+                    pan2={
+                      e.sndPanNumber ? { value: e.sndPanNumber } : undefined
+                    }
+                    pan3={
+                      e.trdPanNumber ? { value: e.trdPanNumber } : undefined
+                    }
+                    depositoryParticipantName={e.depositoryParticipantName}
+                    isDefault={e.isPrimary}
+                    isVerified={e.isVerified}
+                    verifiedOn={
+                      e.verifyDate
+                        ? dateTimeUtils.formatDateTime(
+                            e.verifyDate,
+                            "DD MMMM YYYY hh:mm AA"
+                          )
+                        : "--/--/----"
+                    }
+                  />
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -223,33 +279,28 @@ function ViewKycDataComponent() {
           </CardHeader>
           <CardContent>
             <div className="grid lg:grid-cols-3 gap-5">
-              <BankCard
-                bankName="Axis Bank"
-                accountNumber="1234567890"
-                ifscCode="UTIB0000056"
-                branch="GURGAON"
-                verifiedOn="01 Oct 2025, 08:24 PM"
-                isDefault={true}
-                verified={true}
-              />
-              <BankCard
-                bankName="Axis Bank"
-                accountNumber="1234567890"
-                ifscCode="UTIB0000056"
-                branch="GURGAON"
-                verifiedOn="01 Oct 2025, 08:24 PM"
-                isDefault={true}
-                verified={true}
-              />
-              <BankCard
-                bankName="Axis Bank"
-                accountNumber="1234567890"
-                ifscCode="UTIB0000056"
-                branch="GURGAON"
-                verifiedOn="01 Oct 2025, 08:24 PM"
-                isDefault={true}
-                verified={true}
-              />
+              {data.bankAccounts.map((e) => {
+                return (
+                  <BankCard
+                    key={e.id}
+                    bankName={e.bankName}
+                    accountNumber={e.accountNumber}
+                    ifscCode={e.ifscCode}
+                    branch={e.branch}
+                    holderName={e.accountHolderName}
+                    verifiedOn={
+                      e.verifyDate
+                        ? dateTimeUtils.formatDateTime(
+                            e.verifyDate,
+                            "DD MMMM YYYY hh:mm AA"
+                          )
+                        : "--/--/----"
+                    }
+                    isDefault={e.isPrimary}
+                    verified={e.isVerified}
+                  />
+                );
+              })}
             </div>
           </CardContent>
         </Card>

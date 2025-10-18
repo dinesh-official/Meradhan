@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-left",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
   cacheMaxMemorySize: 0, // disable default in-memory caching
   async rewrites() {
     return [

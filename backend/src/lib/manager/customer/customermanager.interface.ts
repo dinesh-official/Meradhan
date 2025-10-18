@@ -23,9 +23,11 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
     gender: true,
     whatsAppNo: true,
     VerifiedBy: true,
+    verifyDate: true,
     id: true,
     riskProfile: true,
     createdAt: true,
+    
     utility: {
         select: {
             accountStatus: true,

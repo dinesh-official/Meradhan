@@ -18,6 +18,8 @@ interface BankCardProps {
   verifiedOn: string;
   isDefault?: boolean;
   verified?: boolean;
+  isNameVerified?: boolean;
+  holderName:string
 }
 
 export function BankCard({
@@ -28,6 +30,8 @@ export function BankCard({
   verifiedOn,
   isDefault = false,
   verified = false,
+  isNameVerified,
+  holderName
 }: BankCardProps) {
   return (
     <Card className="relative overflow-hidden  bg-gray-50 border-none shadow-sm ">
@@ -40,13 +44,13 @@ export function BankCard({
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{bankName}</CardTitle>
           <CardAction>
-            <StatusBadge value={verified ? "Verified" : "Unverified"} />
+            <StatusBadge value={verified ? "Verified" : "Not Verified"} />
           </CardAction>
         </CardHeader>
 
         <CardContent>
-          <p className="text-xs capitalize text-gray-700 flex flex-row gap-2 justify-start mb-2 items-center" >
-            sourav bapari <StatusBadge value="Verified" />
+          <p className="text-xs capitalize text-gray-700 flex flex-row gap-2 justify-start mb-2 items-center">
+            {holderName} <StatusBadge value={isNameVerified?"Verified":"Not Match"} />
           </p>
           <h4 className="text-2xl font-semibold text-gray-800 tracking-widest">
             {accountNumber}

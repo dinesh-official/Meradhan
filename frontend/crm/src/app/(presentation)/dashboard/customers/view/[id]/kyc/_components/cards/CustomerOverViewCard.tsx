@@ -6,7 +6,7 @@ import React from "react";
 interface CustomerOverViewCardProps {
   name: string;
   customerSince: string;
-  kycStatus: boolean;
+  kycStatus: string;
 }
 function CustomerOverViewCard(
   customerOverViewCardData: CustomerOverViewCardProps
@@ -24,11 +24,7 @@ function CustomerOverViewCard(
             </p>
           </LabelView>
           <LabelView title="Current KYC Status">
-            <StatusBadge
-              value={
-                customerOverViewCardData.kycStatus ? "completed" : "Incomplete"
-              }
-            />
+            <StatusBadge value={customerOverViewCardData.kycStatus} />
           </LabelView>
           <LabelView title="Customer Since">
             <p className="font-medium text-sm">

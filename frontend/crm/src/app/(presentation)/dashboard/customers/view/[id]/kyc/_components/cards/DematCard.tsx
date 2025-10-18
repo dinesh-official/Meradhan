@@ -21,6 +21,7 @@ interface DematCardProps {
   depositoryParticipantName: string;
   isDefault?: boolean;
   verifiedOn: string;
+  isVerified: boolean;
 }
 
 export function DematCard({
@@ -33,6 +34,8 @@ export function DematCard({
   pan3,
   depositoryParticipantName,
   isDefault = false,
+  isVerified = false,
+
   verifiedOn,
 }: DematCardProps) {
   return (
@@ -44,19 +47,19 @@ export function DematCard({
       <CardHeader>
         <CardTitle className="text-lg font-semibold">{depository}</CardTitle>
         <CardAction>
-          <StatusBadge value="Verified" />
+          <StatusBadge value={isVerified ? "Verified" : "Not Verify"} />
         </CardAction>
       </CardHeader>
 
       <CardContent className="space-y-2">
         <div className="grid grid-cols-3 gap-5">
-          <LabelView title="DP ID" stack="CHECKED">
+          <LabelView title="DP ID">
             <p>{dpId}</p>
           </LabelView>
-          <LabelView title="Client ID" stack="ERROR">
+          <LabelView title="Client ID">
             <p>{clientId}</p>
           </LabelView>
-          <LabelView title="Account Type" stack="ERROR">
+          <LabelView title="Account Type">
             <p>{accountType}</p>
           </LabelView>
         </div>

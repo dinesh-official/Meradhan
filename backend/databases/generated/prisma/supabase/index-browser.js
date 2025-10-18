@@ -163,6 +163,7 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   userType: 'userType',
   kycStatus: 'kycStatus',
   VerifiedBy: 'VerifiedBy',
+  verifyDate: 'verifyDate',
   customersRiskProfileModelId: 'customersRiskProfileModelId',
   customersAuthDataModelId: 'customersAuthDataModelId',
   createdBy: 'createdBy',
@@ -183,12 +184,14 @@ exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {
   occupationType: 'occupationType',
   annualGrossIncome: 'annualGrossIncome',
   fatherOrSpouseName: 'fatherOrSpouseName',
+  relationshipWithPerson: 'relationshipWithPerson',
   mothersName: 'mothersName',
   nationality: 'nationality',
   maidenName: 'maidenName',
   residentialStatus: 'residentialStatus',
   qualification: 'qualification',
   politicallyExposedPerson: 'politicallyExposedPerson',
+  dateOfBirth: 'dateOfBirth',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -233,6 +236,7 @@ exports.Prisma.CustomersBankAccountModelScalarFieldEnum = {
   branch: 'branch',
   isPrimary: 'isPrimary',
   isVerified: 'isVerified',
+  verifyDate: 'verifyDate',
   customerProfileDataModelId: 'customerProfileDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -251,6 +255,7 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
   accountHolderName: 'accountHolderName',
   isPrimary: 'isPrimary',
   isVerified: 'isVerified',
+  verifyDate: 'verifyDate',
   customerProfileDataModelId: 'customerProfileDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

@@ -41,7 +41,7 @@ function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
                 value={
                   addressCardInfoData.nameVerificationStatus
                     ? "Verified"
-                    : "InCorrect"
+                    : "Not Match"
                 }
               />
             </p>

@@ -75,6 +75,7 @@ model CustomerProfileDataModel {
   /// KYC (Know Your Customer) related info
   kycStatus  KYCStatus @default(PENDING)
   VerifiedBy Int?
+  verifyDate DateTime?
 
   riskProfile                 CustomersRiskProfileModel? @relation(fields: [customersRiskProfileModelId], references: [id])
   customersRiskProfileModelId Int?
@@ -134,12 +135,14 @@ model CustomerPersonalInfoModel {
   occupationType           String
   annualGrossIncome        String
   fatherOrSpouseName       String
+  relationshipWithPerson   String?
   mothersName              String
   nationality              String
   maidenName               String?
   residentialStatus        String
   qualification            String
   politicallyExposedPerson String?
+  dateOfBirth              String?
 
   /// Timestamps
   createdAt                DateTime                   @default(now())
@@ -220,8 +223,9 @@ model CustomersBankAccountModel {
   branch            String
 
   /// Status flags
-  isPrimary  Boolean @default(false)
-  isVerified Boolean @default(false)
+  isPrimary  Boolean  @default(false)
+  isVerified Boolean  @default(false)
+  verifyDate DateTime
 
   CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
   customerProfileDataModelId Int?
@@ -251,8 +255,9 @@ model CustomersDematAccountModel {
   accountHolderName String
 
   /// Status flags
-  isPrimary  Boolean @default(false)
-  isVerified Boolean @default(false)
+  isPrimary  Boolean  @default(false)
+  isVerified Boolean  @default(false)
+  verifyDate DateTime
 
   CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
   customerProfileDataModelId Int?
