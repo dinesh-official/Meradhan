@@ -1,19 +1,18 @@
 import type { DataBaseSchema } from "@core/database/database";
 import { CustomerProfileManager } from "@lib/manager/customer/customer.manager";
-import { type ICustomerProfileManagerInterface } from "@lib/manager/customer/customermanager.interface";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
-import type { ICustomerProfileRepo, ICustomerProfileServiceInterface } from "./customers.interfcae";
+import type { CustomerProfileRepo } from "./customer.repo";
 
 
 
-export class CustomerProfileService extends CustomerProfileManager implements ICustomerProfileServiceInterface {
+export class CustomerProfileService extends CustomerProfileManager {
 
-    constructor(private customerRepo: ICustomerProfileRepo) {
+    constructor(private customerRepo: CustomerProfileRepo) {
         super();
     }
 
-    getProfile(value: string | number): ReturnType<ICustomerProfileManagerInterface["getCustomerProfile"]> {
+    getProfile(value: string | number) {
         if (typeof value === "number" || /^\d+$/.test(value.toString())) {
             // Numeric → likely an ID
             return this.getCustomerProfile(Number(value));
@@ -30,7 +29,7 @@ export class CustomerProfileService extends CustomerProfileManager implements IC
 
 
 
-    async filterCustomers(payload: z.infer<typeof appSchema.customer.findManyCustomerSchema>): ReturnType<ICustomerProfileServiceInterface['filterCustomers']> {
+    async filterCustomers(payload: z.infer<typeof appSchema.customer.findManyCustomerSchema>) {
         const page = Number(payload.page) || 1;
         const pageSize = 10; // You can make this configurable if needed
         const skip = (page - 1) * pageSize;
@@ -111,7 +110,7 @@ export class CustomerProfileService extends CustomerProfileManager implements IC
 
     }
 
-    getFullCustomerProfile(customerId: number): ReturnType<ICustomerProfileServiceInterface["getFullCustomerProfile"]> {
+    getFullCustomerProfile(customerId: number) {
         return this.customerRepo.getFullCustomerProfile(customerId);
     }
 }

@@ -1,41 +1,32 @@
-import { Worker, Job } from "bullmq";
-import { QueueStore } from "../src/queues/redis/QueueStore";
-import type { QueueNames } from "../src/queues/redis/queues";
 import logger from "@utils/logger/logger";
+import Bull from "bull";
 
 export const startQueueWorker = (
-    queueName: QueueNames,
-    processor: (job: Job) => Promise<void>,
-    concurrency = 100
+    queue: Bull.Queue,
+    processor: (job: Bull.Job) => Promise<void>,
 ) => {
-    const redis = QueueStore.prototype.getInstance();
-    const worker = new Worker(queueName, processor, {
-        connection: redis,
-        concurrency,
-        removeOnComplete: { count: 0 },
-        removeOnFail: { count: 100 },
+    logger.logInfo(`🚀 Starting worker for queue: ${queue.name}`);
+
+    // Process jobs using the provided processor function
+    queue.process(async (job) => {
+        try {
+            await processor(job);
+        } catch (err) {
+            logger.logError(`❌ Job ${job.id} failed:`, err);
+            throw err; // Bull will handle retries if configured
+        }
     });
 
     // Event listeners
-    worker.on("completed", (job) => {
-        logger.logInfo(`✅ Job "${job.name}" (ID: ${job.id}) completed`);
+    queue.on("completed", (job) => {
+        logger.logInfo(`✅ Job ${job.id} completed successfully`);
     });
 
-    worker.on("failed", (job, err) => {
-        logger.logError(`❌ Job "${job?.name}" (ID: ${job?.id}) failed:`, { job, err });
+    queue.on("failed", (job, err) => {
+        logger.logError(`❌ Job ${job?.id} failed:`, err);
     });
 
-    worker.on("active", (job) => {
-        logger.logInfo(`🚀 Started processing job "${job.name}" (ID: ${job.id})`);
+    queue.on("error", (err) => {
+        logger.logError(`Queue "${queue.name}" error:`, err);
     });
-
-    logger.logInfo(`⚙️ Worker started for queue: "${queueName}"`);
-
-    // Optional graceful shutdown helper
-    const close = async () => {
-        await worker.close();
-        logger.logInfo(`👋 Worker closed for queue "${queueName}"`);
-    };
-
-    return { worker, close };
 };

@@ -3,12 +3,9 @@
 import { useState, useCallback } from "react";
 import { ZodError } from "zod";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
-import {
-  FollowUpNoteFormData,
-  IFollowUpNoteFormHook,
-} from "./followUpFormData";
-import { followUpNoteSchema } from "./leadFollowUpFormData.schema";
+import { FollowUpNoteFormData, followUpNoteSchema } from "./leadFollowUpFormData.schema";
 import { useFollowUpApiHook } from "./useFollowUpApiHook";
+
 
 const initData: FollowUpNoteFormData = {
   text: "",
@@ -18,7 +15,7 @@ const initData: FollowUpNoteFormData = {
 export const useFollowUpNoteFormHook = (
   leadId: number,
   initialState: FollowUpNoteFormData = initData
-): IFollowUpNoteFormHook => {
+) => {
   const [data, setData] = useState<FollowUpNoteFormData>(initialState);
   const [errors, setErrors] = useState<
     Partial<Record<keyof FollowUpNoteFormData, string[]>>

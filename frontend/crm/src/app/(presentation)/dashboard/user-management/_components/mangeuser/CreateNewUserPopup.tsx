@@ -9,8 +9,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ReactNode, useEffect } from "react";
-import { useManageUserDataHook } from "./forms/useManageUserDataHook";
-import UserManageForm from "./forms/userManageForm";
+import UserManageForm from "./forms/UserManageForm";
+import { useManageUserDataHook } from "./forms/hooks/useManageUserDataHook";
 
 function CreateNewUserPopup({ children }: { children: ReactNode }) {
   const manager = useManageUserDataHook();

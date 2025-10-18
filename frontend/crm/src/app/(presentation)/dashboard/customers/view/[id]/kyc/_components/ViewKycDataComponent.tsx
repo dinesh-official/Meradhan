@@ -16,6 +16,7 @@ import RiskProfileQuestion, {
 import { CustomerByIdPayload } from "@root/apiGateway";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { areNamesMatched } from "@/lib/utils";
+import { genMediaUrl } from "@/global/utils/url.utils";
 
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   return (
@@ -53,10 +54,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       {/* Personal Information */}
       <div className="scroll-mt-16" id="personal-info">
         <PersonalInformationCard
-          photoUrl={data.avatar || "/noimage.jpg"}
-          signatureUrl={
-            data.personalInformation?.SignatureUrl || "/noimage.jpg"
-          }
+          photoUrl={genMediaUrl(data.avatar)}
+          signatureUrl={genMediaUrl(data.personalInformation?.SignatureUrl)}
           fullName={`${data.firstName} ${data.middleName} ${data.lastName}`}
           dateOfBirth={
             !data.personalInformation?.dateOfBirth

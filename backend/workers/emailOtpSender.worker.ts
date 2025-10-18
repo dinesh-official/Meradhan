@@ -1,12 +1,12 @@
 import MeraDhanOtpEmail from "@emails/my-email";
 import { EmailSenderGateway } from "@lib/gateway/emailsender/emailSender.gateway";
 import { render } from "@react-email/render";
-import type { Job } from "bullmq";
-import { QueueNames } from "../src/queues/redis/queues";
+import type { Job } from "bull";
+import { emailOtpSenderQueue } from "../src/queues/redis/queues";
 import { startQueueWorker } from "./startQueueWorker";
 
 
-const { worker } = startQueueWorker(QueueNames.emailOtpSend, async (job: Job) => {
+startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
     const emailSend = new EmailSenderGateway()
     const { email, userName, subject, otp } = job.data;
     console.log("Sending Email - " + email);
@@ -21,14 +21,3 @@ const { worker } = startQueueWorker(QueueNames.emailOtpSend, async (job: Job) =>
     })
 
 })
-
-
-process.on("SIGTERM", async () => {
-    await worker.close();
-    process.exit(0);
-});
-
-process.on("SIGINT", async () => {
-    await worker.close();
-    process.exit(0);
-});

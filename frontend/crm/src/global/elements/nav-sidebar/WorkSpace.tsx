@@ -26,7 +26,7 @@ export default async function Workspace({
             <SideBar role={session.data.responseData.role} />
           </div>
           {/* Scrollable Content Area */}
-          <main className="relative flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50">
+          <main className="relative flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50" id="mainpage" >
             {children}
           </main>
         </div>

@@ -8,12 +8,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import React, { useMemo, useState } from "react";
-import FollowUpMessageCard from "./FollowUpCard/FollowUpMessageCard";
-import { IFollowUpNoteFormHook } from "./followUpFormData";
-import apiGateway, { NewFollowUpPayload } from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import apiGateway, { NewFollowUpPayload } from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import FollowUpMessageCard from "./FollowUpCard/FollowUpMessageCard";
+import { IFollowUpNoteFormHook } from "./hooks/followUpFormData";
 
 type LeadFollowUpNotesProps = {
   manager: IFollowUpNoteFormHook;

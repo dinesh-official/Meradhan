@@ -2,12 +2,11 @@ import { db, type DataBaseSchema } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
-import type { ILeadsManagerInterface } from "./leads.interface";
 
-export class LeadManager implements ILeadsManagerInterface {
+export class LeadManager {
     async getLeadById(
         leadId: number
-    ): ReturnType<ILeadsManagerInterface["getLeadById"]> {
+    ) {
         const lead = await db.dataBase.leadsModel.findUnique({
             where: { id: leadId },
             include: {
@@ -28,7 +27,7 @@ export class LeadManager implements ILeadsManagerInterface {
     async createNewLead(
         createdBy: number,
         data: z.infer<typeof appSchema.crm.leads.createNewLeadSchema>,
-    ): ReturnType<ILeadsManagerInterface["createNewLead"]> {
+    ) {
         const createdNewLead = db.dataBase.leadsModel.create({
             data: {
                 companyName: data.companyName,
@@ -54,7 +53,7 @@ export class LeadManager implements ILeadsManagerInterface {
     async updateLead(
         leadId: number,
         data: z.infer<typeof appSchema.crm.leads.updateLeadSchema>
-    ): ReturnType<ILeadsManagerInterface["updateLead"]> {
+    ) {
         const existing = await db.dataBase.leadsModel.findUnique({
             where: { id: leadId },
         });
@@ -97,7 +96,7 @@ export class LeadManager implements ILeadsManagerInterface {
 
     async deleteLead(
         leadId: number
-    ): ReturnType<ILeadsManagerInterface["deleteLead"]> {
+    ) {
         const existing = await db.dataBase.leadsModel.findUnique({
             where: { id: leadId },
         });
@@ -115,7 +114,7 @@ export class LeadManager implements ILeadsManagerInterface {
         return true;
     }
 
-    async filterLead(payload: z.infer<typeof appSchema.crm.leads.findManyLeadsSchema>): ReturnType<ILeadsManagerInterface['filterLead']> {
+    async filterLead(payload: z.infer<typeof appSchema.crm.leads.findManyLeadsSchema>) {
 
         const page = Number(payload.page) || 1;
         const pageSize = 10; // You can make this configurable if needed

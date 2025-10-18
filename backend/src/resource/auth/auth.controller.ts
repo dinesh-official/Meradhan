@@ -3,18 +3,15 @@ import { cookieOptions } from "@config/cookie";
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
-import type { TEmailAuthServiceInterface } from "./EmailAuth.service";
+import { EmailAuthService } from "./emailAuth.service";
 
-export interface TAuthController {
-    loginWithOtp(req: Request, res: Response): Promise<void>
-    verifyLoginOtp(req: Request, res: Response): Promise<void>
-    session(req: Request, res: Response): Promise<void>
-    logout(req: Request, res: Response): Promise<void>
-}
 
-export class AuthController implements TAuthController {
+export class AuthController {
 
-    constructor(private emailAuthService: TEmailAuthServiceInterface) { }
+    private emailAuthService: EmailAuthService;
+    constructor() {
+        this.emailAuthService = new EmailAuthService();
+    }
 
     async loginWithOtp(req: Request, res: Response): Promise<void> {
         console.log(req.body);

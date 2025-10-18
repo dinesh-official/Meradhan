@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import { useFollowUpApiHook } from "../useFollowUpApiHook";
+import { useFollowUpApiHook } from "../hooks/useFollowUpApiHook";
 
 interface FollowUpMessageCardProps {
   name: string;

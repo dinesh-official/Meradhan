@@ -8,8 +8,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CrmUsersProfile } from "@root/apiGateway";
-import { useManageUserDataHook } from "./forms/useManageUserDataHook";
-import UserManageForm from "./forms/userManageForm";
+import UserManageForm from "./forms/UserManageForm";
+import { useManageUserDataHook } from "./forms/hooks/useManageUserDataHook";
 
 function UpdateUserPopup({
   user,

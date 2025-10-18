@@ -1,16 +1,11 @@
-import { db, type CRMUserDataModel } from "@core/database/database";
+import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
-export interface IAuthRepoInterface {
-    getAuthUserByEmail(email: string): Promise<CRMUserDataModel>
-    getAuthSession(id: number): Promise<CRMUserDataModel>,
-    setLastLoginNow(id: number): Promise<boolean>,
-
-}
 
 
-export class AuthRepo implements IAuthRepoInterface {
 
-    async getAuthUserByEmail(email: string): ReturnType<IAuthRepoInterface['getAuthUserByEmail']> {
+export class AuthRepo {
+
+    async getAuthUserByEmail(email: string) {
         const data = await db.dataBase.cRMUserDataModel.findUnique({
             where: { email }
         });
@@ -18,7 +13,7 @@ export class AuthRepo implements IAuthRepoInterface {
         return data;
     }
 
-    async getAuthSession(id: number): ReturnType<IAuthRepoInterface['getAuthUserByEmail']> {
+    async getAuthSession(id: number) {
         const data = await db.dataBase.cRMUserDataModel.findUnique({
             where: { id }
         });

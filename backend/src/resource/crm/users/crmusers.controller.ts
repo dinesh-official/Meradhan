@@ -1,18 +1,14 @@
-import type { Request, Response } from "express"
-import type { ICrmUserService } from "./crmusers.service"
-import { appSchema } from "@root/schema"
-import { HttpStatus } from "@utils/error/AppError"
+import { appSchema } from "@root/schema";
+import { HttpStatus } from "@utils/error/AppError";
+import type { Request, Response } from "express";
+import { CrmUserService } from "./crmusers.service";
 
-export interface ICrmUserController {
-    findUser(req: Request, res: Response): Promise<void>
-    findManyUser(req: Request, res: Response): Promise<void>
-    createNewUser(req: Request, res: Response): Promise<void>
-    updateUser(req: Request, res: Response): Promise<void>
-    deleteUser(req: Request, res: Response): Promise<void>
-}
 
-export class CrmUserController implements ICrmUserController {
-    constructor(private crmUserService: ICrmUserService) { }
+export class CrmUserController {
+    private crmUserService: CrmUserService
+    constructor() {
+        this.crmUserService = new CrmUserService();
+    }
 
     async createNewUser(req: Request, res: Response): Promise<void> {
         const createBy = req.session!.id;

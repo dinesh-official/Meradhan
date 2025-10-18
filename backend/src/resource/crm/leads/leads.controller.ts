@@ -1,20 +1,13 @@
-import { appSchema } from "@root/schema"
-import type { Request, Response } from "express"
-import type { ILeadsManagerInterface } from "./manager/leads.interface"
-import { LeadManager } from "./manager/leads.manager"
-import { HttpStatus } from "@utils/error/AppError"
+import { appSchema } from "@root/schema";
+import { HttpStatus } from "@utils/error/AppError";
+import type { Request, Response } from "express";
+import { LeadManager } from "./manager/leads.manager";
 
-export interface ILeadControllerInterface {
-    createLead(req: Request, res: Response): Promise<void>
-    updateLead(req: Request, res: Response): Promise<void>
-    deleteLead(req: Request, res: Response): Promise<void>
-    filterLead(req: Request, res: Response): Promise<void>
-    getLead(req: Request, res: Response): Promise<void>
-}
 
-export class LeadController implements ILeadControllerInterface {
 
-    private manager: ILeadsManagerInterface;
+export class LeadController {
+
+    private manager: LeadManager;
     constructor() {
         this.manager = new LeadManager();
     }

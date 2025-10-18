@@ -1,12 +1,12 @@
 "use client";
 import { UserTrackingProvider } from "@/analytics";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { queryClient } from "@/core/config/reactQuery";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactNode } from "react";
 import { CookiesProvider } from "react-cookie";
 import { Toaster } from "react-hot-toast";
-import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 function Client({ children }: { children: ReactNode }) {
   return (

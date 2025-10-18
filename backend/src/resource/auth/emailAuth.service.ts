@@ -2,25 +2,18 @@ import { OtpVerificationService, type IOtpVerificationService } from "@lib/manag
 import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
 import { sendLoginOtpEmail } from "../../queues/services/emails/sendEmailOtp";
-import type { IAuthRepoInterface } from "./auth.repo";
+import { AuthRepo } from "./auth.repo";
 
-
-type ReqDataResponse = { token: string, role: string, id: number, avatar?: string | null, name: string, email: string, phoneNo: string }
-
-export interface TEmailAuthServiceInterface {
-    sendAuthEmailOtp(email: string): Promise<{ token: string }>,
-    verifyAuthEmailOtp(email: string, token: string, opt: string): Promise<ReqDataResponse>
-    getSession(id: number): Promise<Omit<ReqDataResponse, 'token'>>
-}
-
-export class EmailAuthService implements TEmailAuthServiceInterface {
+export class EmailAuthService {
 
     private optManager: IOtpVerificationService;
-    constructor(private authRepo: IAuthRepoInterface) {
+    private authRepo: AuthRepo;
+    constructor() {
         this.optManager = new OtpVerificationService("AUTH_OTP");
+        this.authRepo = new AuthRepo();
     }
 
-    async sendAuthEmailOtp(email: string): ReturnType<TEmailAuthServiceInterface['sendAuthEmailOtp']> {
+    async sendAuthEmailOtp(email: string) {
         const user = await this.authRepo.getAuthUserByEmail(email);
         const { token, otp } = await this.optManager.generateOtpAndSend(user.id.toString());
         await sendLoginOtpEmail({
@@ -31,7 +24,7 @@ export class EmailAuthService implements TEmailAuthServiceInterface {
         return { token };
     }
 
-    async verifyAuthEmailOtp(email: string, token: string, opt: string): ReturnType<TEmailAuthServiceInterface['verifyAuthEmailOtp']> {
+    async verifyAuthEmailOtp(email: string, token: string, opt: string) {
         const user = await this.authRepo.getAuthUserByEmail(email);
         const isVerified = await this.optManager.verifyOtp(token, opt);
         if (!isVerified) {
@@ -53,7 +46,7 @@ export class EmailAuthService implements TEmailAuthServiceInterface {
         }
     }
 
-    async getSession(id: number): ReturnType<TEmailAuthServiceInterface['getSession']> {
+    async getSession(id: number) {
         const user = await this.authRepo.getAuthSession(id);
         return {
             id: user.id,

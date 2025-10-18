@@ -10,10 +10,10 @@ import {
 import { NewLeadPayload } from "@root/apiGateway";
 import { MoreHorizontal } from "lucide-react";
 import LeadFollowUpNotes from "../../followUpNotes/LeadFollowUpNotes";
-import { useFollowUpNoteFormHook } from "../../followUpNotes/useFollowUpFormDataHook";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { useLeadTableActionHook } from "./useLeadTableActionHook";
+import { useFollowUpNoteFormHook } from "../../followUpNotes/hooks/useFollowUpFormDataHook";
 
 const LeadTableActions = ({ lead }: { lead: NewLeadPayload }) => {
 const manager = useFollowUpNoteFormHook(lead.id);

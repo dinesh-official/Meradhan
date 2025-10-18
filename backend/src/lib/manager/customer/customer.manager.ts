@@ -4,14 +4,13 @@ import { AppError } from "@utils/error/AppError";
 import { generateUsername } from "@utils/generate/generateUsername";
 import { hashingUtils } from "@utils/hash/hashing.utils";
 import type z from "zod";
-import { type ICustomerProfileManagerInterface } from "./customermanager.interface";
 
 
-export class CustomerProfileManager implements ICustomerProfileManagerInterface {
+export class CustomerProfileManager {
   async createCustomerProfile(
     data: z.infer<typeof appSchema.customer.createNewCustomerSchema>,
     createdBy?: number
-  ): ReturnType<ICustomerProfileManagerInterface["createCustomerProfile"]> {
+  ) {
 
     const user = await this.getCustomerProfileByEmail(data.emailId)
     if (user) {

@@ -1,22 +1,21 @@
 import { db, type DataBaseSchema } from "@core/database/database";
-import { fullCustomerProfileSelect } from "@lib/manager/customer/customermanager.interface";
+import { fullCustomerProfileSelect } from "@lib/manager/customer/customermanager.selector";
 import { AppError } from "@utils/error/AppError";
-import { type ICustomerProfileRepo } from "./customers.interfcae";
 
 
 
-export class CustomerProfileRepo implements ICustomerProfileRepo {
-    createNewCustomer(payload: DataBaseSchema.CustomerProfileDataModelCreateArgs): ReturnType<ICustomerProfileRepo['createNewCustomer']> {
+export class CustomerProfileRepo {
+    createNewCustomer(payload: DataBaseSchema.CustomerProfileDataModelCreateArgs) {
         return db.dataBase.customerProfileDataModel.create(payload);
     }
-    updateCustomer(payload: DataBaseSchema.CustomerProfileDataModelUpdateArgs): ReturnType<ICustomerProfileRepo['updateCustomer']> {
+    updateCustomer(payload: DataBaseSchema.CustomerProfileDataModelUpdateArgs) {
         return db.dataBase.customerProfileDataModel.update(payload);
     }
     async deleteCustomer(payload: DataBaseSchema.CustomerProfileDataModelDeleteArgs): Promise<boolean> {
         await db.dataBase.customerProfileDataModel.delete(payload);
         return true;
     }
-    async findCustomer(payload: DataBaseSchema.CustomerProfileDataModelFindUniqueArgs): ReturnType<ICustomerProfileRepo['findCustomer']> {
+    async findCustomer(payload: DataBaseSchema.CustomerProfileDataModelFindUniqueArgs) {
         const data = await db.dataBase.customerProfileDataModel.findUnique(payload);
         if (!data) {
             throw new AppError("User does not exist.");
@@ -24,15 +23,15 @@ export class CustomerProfileRepo implements ICustomerProfileRepo {
         return data;
     }
 
-    findManyCustomer(payload: DataBaseSchema.CustomerProfileDataModelFindManyArgs): ReturnType<ICustomerProfileRepo['findManyCustomer']> {
+    findManyCustomer(payload: DataBaseSchema.CustomerProfileDataModelFindManyArgs) {
         return db.dataBase.customerProfileDataModel.findMany(payload);
     }
 
-    countCustomers(payload: DataBaseSchema.CustomerProfileDataModelCountArgs): ReturnType<ICustomerProfileRepo['countCustomers']> {
+    countCustomers(payload: DataBaseSchema.CustomerProfileDataModelCountArgs) {
         return db.dataBase.customerProfileDataModel.count(payload);
     }
 
-    async getFullCustomerProfile(customerId: number): ReturnType<ICustomerProfileRepo['getFullCustomerProfile']> {
+    async getFullCustomerProfile(customerId: number) {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: {
                 id: customerId

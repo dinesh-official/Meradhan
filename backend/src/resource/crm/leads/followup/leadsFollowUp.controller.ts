@@ -3,15 +3,7 @@ import { LeadsFollowUpManager } from "../manager/leadFollowup.manager";
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 
-export interface ILeadsFollowUpControllerInterface {
-    createFollowUpNote(req: Request, res: Response): Promise<void>;
-    updateFollowUpNote(req: Request, res: Response): Promise<void>;
-    deleteFollowUpNote(req: Request, res: Response): Promise<void>;
-    getFollowUpNotesByLeadId(req: Request, res: Response): Promise<void>;
-}
-
-
-export class LeadsFollowUpController implements ILeadsFollowUpControllerInterface {
+export class LeadsFollowUpController {
     private followUpManager: LeadsFollowUpManager;
 
     constructor() {

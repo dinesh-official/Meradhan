@@ -2,12 +2,11 @@ import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
-import type { ILeadsFollowUpManagerInterface } from "./leads.interface";
 
-export class LeadsFollowUpManager implements ILeadsFollowUpManagerInterface {
+export class LeadsFollowUpManager {
   async getFollowUpNotesByLeadId(
     leadId: number
-  ): ReturnType<ILeadsFollowUpManagerInterface["getFollowUpNotesByLeadId"]> {
+  ) {
     const leadNotes = await db.dataBase.leadFollowUpNotesModel.findMany({
       where: { leadId },
       orderBy: { createdAt: "desc" }, // optional, adjust to your schema
@@ -24,7 +23,7 @@ export class LeadsFollowUpManager implements ILeadsFollowUpManagerInterface {
 
   async deleteFollowUpNote(
     followUpNoteId: number
-  ): ReturnType<ILeadsFollowUpManagerInterface["deleteFollowUpNote"]> {
+  ) {
     const existing = await db.dataBase.leadFollowUpNotesModel.findUnique({
       where: { id: followUpNoteId },
     });
@@ -46,7 +45,7 @@ export class LeadsFollowUpManager implements ILeadsFollowUpManagerInterface {
     leadId: number,
     createdById: number,
     data: z.infer<typeof appSchema.crm.leads.createNewLeadFollowUpNoteSchema>
-  ): ReturnType<ILeadsFollowUpManagerInterface["createNewFollowUpNote"]> {
+  ) {
     const createrUser = await db.dataBase.cRMUserDataModel.findUnique({
       where: { id: createdById },
     });
@@ -79,7 +78,7 @@ export class LeadsFollowUpManager implements ILeadsFollowUpManagerInterface {
   async updateFollowUpNote(
     followUpNoteId: number,
     data: z.infer<typeof appSchema.crm.leads.updateLeadFollowUpNoteSchema>
-  ): ReturnType<ILeadsFollowUpManagerInterface["updateFollowUpNote"]> {
+  ) {
     const existing = await db.dataBase.leadFollowUpNotesModel.findUnique({
       where: { id: followUpNoteId },
     });

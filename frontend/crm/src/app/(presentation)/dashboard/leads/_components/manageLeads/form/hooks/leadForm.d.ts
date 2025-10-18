@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { leadFormDataSchema } from './leadFormData.schema';
 import { useLeadFormDataHook } from './useLeadFormDataHook';
+import { leadFormDataSchema } from "./leadFormData.schema";
 
 
 export type LeadFormData = z.infer<typeof leadFormDataSchema>;

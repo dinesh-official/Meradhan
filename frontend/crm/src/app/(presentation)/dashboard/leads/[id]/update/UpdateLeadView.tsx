@@ -2,13 +2,13 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import React from "react";
 import LeadFormManagementForm from "../../_components/manageLeads/form/LeadFormManagementForm";
-import { useLeadFormDataHook } from "../../_components/manageLeads/form/useLeadFormDataHook";
+import { useLeadFormDataHook } from "../../_components/manageLeads/form/hooks/useLeadFormDataHook";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
-import { useLeadFollowUpApiHook } from "../../_components/manageLeads/form/useLeadApiHook";
+import { useLeadFollowUpApiHook } from "../../_components/manageLeads/form/hooks/useLeadApiHook";
 import { appSchema } from "@root/schema";
 import { toast } from "sonner";
 

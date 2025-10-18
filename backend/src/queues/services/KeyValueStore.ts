@@ -1,7 +1,10 @@
 import { QueueStore } from '../redis/QueueStore';
 
 export class KeyValueStore {
-  private readonly redisStore = QueueStore.getStore();
+  private readonly redisStore: QueueStore;
+  constructor(redisStore: QueueStore) {
+  this.redisStore  = redisStore;
+  }
 
   async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
     await this.redisStore.setKey(key, value, ttlSeconds);
