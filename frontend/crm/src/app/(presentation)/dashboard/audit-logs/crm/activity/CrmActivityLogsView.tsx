@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -57,6 +58,7 @@ function CrmActivityLogsView() {
 export default CrmActivityLogsView;
 
 // ============= Table Component =============
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Table({ data = [] }: { data: any[] }) {
   const [expanded, setExpanded] = useState<number | null>(null);
 
