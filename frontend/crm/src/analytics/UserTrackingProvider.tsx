@@ -19,6 +19,7 @@ import {
   ActivityType,
   CustomDetails,
 } from "./types";
+import { useMaxScrollPercent } from "./hooks/useMaxScrollPercent";
 
 type GeoData = {
   ip?: string;
@@ -41,30 +42,26 @@ const ONE_HOUR_MS = 60 * 60 * 1000; // 1 hour
 
 export async function getUserIpData(): Promise<GeoData | null> {
   try {
-    // 1) Check localStorage
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved) as { timestamp: number; data: GeoData };
       const age = Date.now() - parsed.timestamp;
       if (age < ONE_HOUR_MS) {
-        return parsed.data; // return cached data
+        return parsed.data;
       }
     }
 
-    // 2) Fetch public IP
     const ipRes = await fetch("https://api.ipify.org?format=json");
     if (!ipRes.ok) throw new Error(`Failed to fetch IP: ${ipRes.status}`);
     const ipJson = await ipRes.json();
     const userIp = ipJson.ip as string;
 
-    // 3) Fetch geo data
     const geoRes = await fetch(
       `https://ipapi.co/${encodeURIComponent(userIp)}/json/`
     );
     if (!geoRes.ok) throw new Error(`Failed to fetch geo: ${geoRes.status}`);
     const geoJson = (await geoRes.json()) as GeoData;
 
-    // Normalize lat/long
     if (geoJson.latitude && typeof geoJson.latitude === "string") {
       geoJson.latitude = parseFloat(geoJson.latitude as unknown as string);
     }
@@ -73,7 +70,6 @@ export async function getUserIpData(): Promise<GeoData | null> {
     }
     geoJson.ip = userIp;
 
-    // Save to localStorage with timestamp
     localStorage.setItem(
       LOCAL_STORAGE_KEY,
       JSON.stringify({ timestamp: Date.now(), data: geoJson })
@@ -106,6 +102,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
   children,
 }) => {
   const pathname = usePathname();
+  const maxScrollPercent = useMaxScrollPercent("mainpage");
   const searchParams = useSearchParams();
   const { cookies } = useAppCookie();
 
@@ -114,9 +111,9 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
   const lastPath = useRef<string>(pathname);
   const idleTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  /** -------------------------------
-   * Log activity to UI + server
-   --------------------------------*/
+  // New: track clicks and max scroll per page
+  const clickCount = useRef<number>(0);
+
   const logActivity = useCallback(
     (type: ActivityType, details: Record<string, unknown>) => {
       const entry: Activity = {
@@ -124,16 +121,13 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         details,
         time: new Date().toLocaleTimeString(),
       };
-      console.log("[TRACK]", entry);
+      console.log("%c[TRACK]", "color: #4ade80", entry);
       setActivities((prev) => [entry, ...prev.slice(0, 19)]);
       track(type, details);
     },
     []
   );
 
-  /** -------------------------------
-   * Public API: trackActivity
-   --------------------------------*/
   const trackActivity = useCallback(
     async (type: ActivityType, data: Record<string, unknown> = {}) => {
       if (!type) return;
@@ -149,67 +143,60 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         userId: cookies.userId,
         role: cookies.role,
         token: cookies.token,
+        maxScrollPercent: maxScrollPercent,
         ipData: await getUserIpData(),
         ...data,
       };
       logActivity(type, payload);
     },
-    [pathname, searchParams, cookies, logActivity]
+    [pathname, searchParams, cookies, logActivity, maxScrollPercent]
   );
 
   /** -------------------------------
    * Track page view
    --------------------------------*/
   useEffect(() => {
-    trackActivity("page_view");
-    pageStart.current = Date.now();
-    lastPath.current = pathname;
-  }, [pathname, trackActivity]);
+    const timer = setTimeout(() => {
+      trackActivity("page_view");
+      pageStart.current = Date.now();
+      lastPath.current = pathname;
+    }, 300); // small delay ensures title & DOM are ready
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   /** -------------------------------
-   * Track scroll depth (throttled)
+   * Track clicks
    --------------------------------*/
   useEffect(() => {
-    let maxScroll = 0;
-    let ticking = false;
-
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const percent = Math.round(
-            ((window.scrollY + window.innerHeight) /
-              document.body.scrollHeight) *
-              100
-          );
-          if (percent > maxScroll) {
-            maxScroll = percent;
-            trackActivity("scroll_depth", { percent });
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
+    const onClick = () => {
+      clickCount.current += 1;
     };
-
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [trackActivity]);
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
 
   /** -------------------------------
-   * Track route change duration
+   * Track route change duration + send page metrics
    --------------------------------*/
   useEffect(() => {
-    if (lastPath.current !== pathname) {
+    if (lastPath.current && lastPath.current !== pathname) {
       const duration = Math.round((Date.now() - pageStart.current) / 1000);
       trackActivity("page_duration", {
         duration,
         from: lastPath.current,
         to: pathname,
+        clicks: clickCount.current,
       });
-      pageStart.current = Date.now();
-      lastPath.current = pathname;
     }
-  }, [pathname, trackActivity]);
+
+    // Reset after tracking
+    clickCount.current = 0;
+    pageStart.current = Date.now();
+    lastPath.current = pathname;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   /** -------------------------------
    * Track unload (page close / refresh)
@@ -221,14 +208,16 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         duration,
         url: pathname,
         reason: "page_unload",
+        clicks: clickCount.current,
       });
     };
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
-  }, [pathname, trackActivity]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** -------------------------------
-   * Inactivity Auto-Logout (accurate)
+   * Inactivity Auto-Logout
    --------------------------------*/
   useEffect(() => {
     const events = ["mousemove", "mousedown", "keydown", "touchstart"];
@@ -242,7 +231,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
             reason: "User inactive for 5 minutes",
           });
         }
-      }, 5000 * 60 * 1000); // 5 minutes
+      }, 5 * 60 * 1000); // 5 minutes
     };
 
     events.forEach((event) => window.addEventListener(event, resetIdleTimer));
@@ -254,7 +243,8 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         window.removeEventListener(event, resetIdleTimer)
       );
     };
-  }, [trackActivity, cookies, pathname]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <TrackingContext.Provider value={{ track, activities, trackActivity }}>

@@ -1,9 +1,5 @@
+import { appSchema } from "@root/schema";
 import z from "zod";
-import {
-  bonds,
-  source,
-  status,
-} from "../../../../../../../../../../packages/schema/lib/crm/leads.schema";
 
 export const leadFormDataSchema = z.object({
   fullName: z
@@ -25,10 +21,10 @@ export const leadFormDataSchema = z.object({
     .trim()
     .max(120, "Company name is too long")
     .optional(),
-  leadSource: z.enum(source),
-  status: z.enum(status),
+  leadSource: z.enum(appSchema.crm.leads.source),
+  status: z.enum(appSchema.crm.leads.status),
   assignTo: z.number("Please assign to member").optional(),
-  bondType: z.enum(bonds).optional(),
+  bondType: z.enum(appSchema.crm.leads.bonds).optional(),
 
   exInvestmentAmount: z
     .preprocess(

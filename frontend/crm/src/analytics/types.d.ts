@@ -1,20 +1,17 @@
 
 export const ActivityTypes = [
   "login",
+  'logout', 
   "page_view",
+  "auto_logout",
   "click",
   "scroll_depth",
-  "heartbeat",
-  "page_duration",
-  "auto_logout",
   "otp_request",
-  'logout',
-
-  // Manage
+  "page_duration",
   "create_entry",
   "delete_entry",
   "update_entry",
-
+  "refresh",
   "activity"
 ] as const;
 

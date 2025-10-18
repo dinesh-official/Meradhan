@@ -7,10 +7,9 @@ import LabelView from "@/global/elements/wrapper/LabelView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import apiGateway, { GetCustomerResponseById } from "@root/apiGateway";
+import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import { IdCardIcon, NotebookPen } from "lucide-react";
-import { useState } from "react";
 
 function CustomerProfileView({ profileId }: { profileId: number }) {
   // const [useCustomerFormDataHook, setuseCustomerFormDataHook] = useState<GetCustomerResponseById>()])
@@ -29,8 +28,6 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
   const {
     data: customer,
     isLoading,
-    isError,
-    error,
   } = useQuery({
     queryKey: ["fetchCustomer", profileId],
     queryFn: fetchCustomer,
@@ -156,7 +153,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
             <CardTitle>Account Timeline</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid lg:grid-cols-3 gap-5">
+            <div className="grid lg:grid-cols-2 gap-5">
               <LabelView title="Account Created">
                 <p>
                   {customer?.createdAt
@@ -167,11 +164,9 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
                     : "—"}
                 </p>
               </LabelView>
-              <LabelView title="KYC Status">
-                <p>{customer?.kycStatus}</p>
-              </LabelView>
+           
               <LabelView title="Customer ID">
-                <p>{customer?.id}</p>
+                <p>{customer?.userName}</p>
               </LabelView>
             </div>
           </CardContent>

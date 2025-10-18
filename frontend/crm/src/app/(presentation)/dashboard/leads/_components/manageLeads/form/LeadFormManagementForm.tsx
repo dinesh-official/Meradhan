@@ -2,7 +2,7 @@
 import { InputField } from "@/global/elements/inputs/InputField";
 import { PhoneField } from "@/global/elements/inputs/PhoneField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
-import { ILeadDataFormHook, LeadFormData } from "./leadForm";
+import { ILeadDataFormHook, LeadFormData } from "./hooks/leadForm";
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

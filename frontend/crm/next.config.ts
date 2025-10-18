@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**",
       },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
     ],
   },
   cacheMaxMemorySize: 0, // disable default in-memory caching
@@ -22,8 +26,8 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/server/:path*",
-        destination: "http://3.110.126.202:4000/api/:path*",
-        // destination: 'http://localhost:4000/api/:path*',
+        // destination: "http://3.110.126.202:4000/api/:path*",
+        destination: 'http://localhost:4000/api/:path*',
       },
       {
         source: "/assets/media/:path*", // what user visits

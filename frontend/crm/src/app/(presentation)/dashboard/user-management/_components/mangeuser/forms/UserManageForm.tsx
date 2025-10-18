@@ -4,7 +4,7 @@ import {
   SelectOption,
 } from "@/global/elements/inputs/SelectField";
 import React from "react";
-import { IUserDataFormHook, UserFormData } from "./userForm";
+import { IUserDataFormHook, UserFormData } from "./hooks/userForm";
 import { Role } from "@/global/constants/role.constants";
 import { PhoneField } from "@/global/elements/inputs/PhoneField";
 

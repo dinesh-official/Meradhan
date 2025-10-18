@@ -87,7 +87,6 @@ export async function flush(): Promise<void> {
                 localStorage.clear();
                 window.location.replace("/logout")
             }
-
         })
 
     } catch (error) {

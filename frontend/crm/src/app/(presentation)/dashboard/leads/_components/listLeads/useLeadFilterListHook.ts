@@ -1,20 +1,8 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 
-export interface TLeadFilterListHook {
-  state: {
-    resetAll: () => void;
-    paginationIndex: number;
-    setPaginationIndex: Dispatch<SetStateAction<number>>;
-    search: string;
-    setSearch: Dispatch<SetStateAction<string>>;
-    statusFilter: string;
-    setStatusFilter: Dispatch<SetStateAction<string>>;
-    sourceFilter: string;
-    setSourceFilter: Dispatch<SetStateAction<string>>;
-  };
-}
+export type TLeadFilterListHook = ReturnType<typeof useLeadFilterListHook>
 
-export const useLeadFilterListHook = (): TLeadFilterListHook => {
+export const useLeadFilterListHook = () => {
   const [paginationIndex, setPaginationIndex] = useState<number>(1);
   const [search, setSearch] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
