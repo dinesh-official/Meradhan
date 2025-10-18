@@ -24,7 +24,7 @@ export interface TCrmFollowUp {
   ): Promise<AxiosResponse<GetAllFollowUpsByIdResponse>>;
 
   deleteFollowUpById(
-    leadId: number,
+    notesId: number,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<DeleteFollowUpByIdResponse>>;
 
@@ -63,11 +63,11 @@ export class CrmFollowUpApi implements TCrmFollowUp {
   }
 
   async deleteFollowUpById(
-    leadId: number,
+    notesId: number,
     config?: AxiosRequestConfig
   ): ReturnType<TCrmFollowUp["deleteFollowUpById"]> {
     return this.apiClient.delete<DeleteFollowUpByIdResponse>(
-      `/crm/lead/followup/${leadId}`,
+      `/crm/lead/followup/${notesId}`,
       config
     );
   }

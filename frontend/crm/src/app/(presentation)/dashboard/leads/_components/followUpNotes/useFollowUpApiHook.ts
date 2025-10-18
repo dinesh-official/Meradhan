@@ -1,7 +1,8 @@
+import { queryClient } from "@/core/config/reactQuery";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -24,6 +25,7 @@ export const useFollowUpApiHook = () => {
     },
     onSuccess: () => {
       toast.success("FollowUp Lead Successfully Created!");
+      queryClient.invalidateQueries({ queryKey: ["followUpsNotes"] });
     },
     onError(error) {
       console.log("error", error);
@@ -34,8 +36,31 @@ export const useFollowUpApiHook = () => {
       }
     },
   });
+  
+  const deleteFollowUpNotes = useMutation({
+    mutationKey: ["useFollowUpNote"],
+    mutationFn: async ( notesId:number) => {
+      const response = await leadFollowUpApi.deleteFollowUpById(notesId);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("FollowUp Lead Successfully Deleted!");
+      queryClient.invalidateQueries({ queryKey: ["followUpsNotes"] });
+    },
+    onError(error) {
+      console.log("error", error);
+      if (error instanceof ApiError) {
+        toast.error(error.response?.data?.message);
+      } else {
+        toast.error(error.message);
+      }
+    },
+  });
+  
+
 
   return {
     createFollowUpMutation,
+    deleteFollowUpNotes
   };
 };

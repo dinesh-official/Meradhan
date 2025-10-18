@@ -65,7 +65,7 @@ const manager = useFollowUpNoteFormHook(lead.id);
         </DropdownMenuContent>
       </DropdownMenu>
       <LeadFollowUpNotes
-      // leadId={lead.id}
+      leadId={lead.id}
         manager={manager}
         open={followUpOpen}
         onOpenChange={setFollowUpOpen}
