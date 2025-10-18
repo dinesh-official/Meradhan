@@ -48,7 +48,8 @@ export const createNewLeadSchema = z.object({
   leadSource: LeadSource,
   bondType: z.enum(bonds),
   status: z.enum(status),
-  exInvestmentAmount: z.number().int().optional(),
+  exInvestmentAmount: z.number().optional(),
+  assignTo: z.number().int().optional(),
   note: z.string().optional(),
 });
 

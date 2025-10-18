@@ -291,7 +291,8 @@ exports.Prisma.LeadsModelScalarFieldEnum = {
   note: 'note',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  cRMUserDataModelId: 'cRMUserDataModelId'
 };
 
 exports.Prisma.LeadFollowUpNotesModelScalarFieldEnum = {

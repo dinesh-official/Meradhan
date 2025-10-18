@@ -10,6 +10,9 @@ export class LeadManager implements ILeadsManagerInterface {
     ): ReturnType<ILeadsManagerInterface["getLeadById"]> {
         const lead = await db.dataBase.leadsModel.findUnique({
             where: { id: leadId },
+            include: {
+                assignTo: true
+            }
         });
 
         if (!lead) {
@@ -36,6 +39,13 @@ export class LeadManager implements ILeadsManagerInterface {
                 emailAddress: data.emailAddress,
                 status: data.status,
                 createdBy: createdBy,
+                exInvestmentAmount: data.exInvestmentAmount,
+                note: data.note,
+                assignTo: data.assignTo ? {
+                    connect: {
+                        id: data.assignTo
+                    }
+                } : undefined
             },
         });
         return createdNewLead;
@@ -65,6 +75,13 @@ export class LeadManager implements ILeadsManagerInterface {
                 leadSource: data.leadSource,
                 emailAddress: data.emailAddress?.trim().toLowerCase(),
                 status: data.status,
+                exInvestmentAmount: data.exInvestmentAmount,
+                note: data.note,
+                assignTo: data.assignTo ? {
+                    connect: {
+                        id: data.assignTo
+                    }
+                } : undefined
             },
         });
 
@@ -113,6 +130,7 @@ export class LeadManager implements ILeadsManagerInterface {
         if (payload.source) {
             filters.leadSource = payload.source;
         }
+
         if (payload.search) {
             filters.OR = [
                 { fullName: { contains: payload.search, mode: "insensitive" } },
@@ -128,8 +146,19 @@ export class LeadManager implements ILeadsManagerInterface {
             where: filters,
             skip,
             take: pageSize,
+            include: {
+                assignTo: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        avatar: true,
+                        role: true,
+                    }
+                }
+            }
         })
-        
+
         return {
             data,
             meta: {

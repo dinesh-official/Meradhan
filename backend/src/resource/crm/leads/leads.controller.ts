@@ -62,7 +62,8 @@ export class LeadController implements ILeadControllerInterface {
     }
 
     async filterLead(req: Request, res: Response): Promise<void> {
-        const payload = appSchema.crm.leads.updateLeadSchema.parse(req.query);
+        const payload = appSchema.crm.leads.findManyLeadsSchema.parse(req.query);
+
         const response = await this.manager.filterLead(payload)
         res.sendResponse({
             statusCode: HttpStatus.OK,

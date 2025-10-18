@@ -10,11 +10,13 @@ model LeadsModel {
     status             LeadStatus
     exInvestmentAmount Int?
     note               String?
-    createdBy Int
+    assignTo           CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
+    createdBy          Int
 
     /// Timestamps
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+    cRMUserDataModelId Int?
 
     @@map("leads")
 }
@@ -23,10 +25,10 @@ model LeadFollowUpNotesModel {
     id     Int @id @default(autoincrement())
     leadId Int
 
-    createdByName   String
-    createdByID Int
-    text        String
-    nextDate    DateTime?
+    createdByName String
+    createdByID   Int
+    text          String
+    nextDate      DateTime?
 
     /// Timestamps
     createdAt DateTime @default(now())

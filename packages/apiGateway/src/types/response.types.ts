@@ -295,6 +295,7 @@ export type NewLeadPayload = {
   createdBy: number;
   createdAt: string;
   updatedAt: string;
+  assignTo?: CrmUsersProfile
 };
 
 //POST /crm/lead

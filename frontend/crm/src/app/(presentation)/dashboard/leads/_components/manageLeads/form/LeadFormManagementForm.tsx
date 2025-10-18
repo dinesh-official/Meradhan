@@ -6,7 +6,12 @@ import { ILeadDataFormHook, LeadFormData } from "./leadForm";
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { bonds, source, status } from "../../../../../../../../../../packages/schema/lib/crm/leads.schema";
+import {
+  bonds,
+  source,
+  status,
+} from "../../../../../../../../../../packages/schema/lib/crm/leads.schema";
+import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
 
 const LeadFormManagementForm = ({
   manager,
@@ -94,17 +99,19 @@ const LeadFormManagementForm = ({
       </div>
 
       <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
-        <SelectField
-          label="Assign To"
-          placeholder="Select team member"
-          options={[
-            { label: "Individual", value: "1" },
-            { label: "Corporate", value: "2" },
-          ]}
-          value={manager.state.assignTo?.toString()}
-          onChangeAction={(e) => manager.setLeadData("assignTo", Number(e))}
-          error={manager?.errors?.assignTo?.[0]}
-        />
+        <div className="flex flex-col gap-2">
+          <Label>Assign To</Label>
+          <SelectRoleUser
+            role="SALES"
+            value={manager.relationManager.relationManager}
+            onSelect={(e) => {
+              if (e) {
+                manager.relationManager.setRelationManager(e);
+                manager.setLeadData("assignTo", e.id);
+              }
+            }}
+          />
+        </div>
 
         <SelectField
           label="Bond Type Interest"
@@ -112,10 +119,7 @@ const LeadFormManagementForm = ({
           options={bonds.map((bond) => ({ label: bond, value: bond }))}
           value={manager.state.bondType}
           onChangeAction={(e) =>
-            manager.setLeadData(
-              "bondType",
-              e as LeadFormData["bondType"]
-            )
+            manager.setLeadData("bondType", e as LeadFormData["bondType"])
           }
           error={manager?.errors?.bondType?.[0]}
         />

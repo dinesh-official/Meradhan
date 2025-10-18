@@ -1,15 +1,13 @@
 "use client";
+import { Label } from "@/components/ui/label";
+import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
 import { InputField } from "@/global/elements/inputs/InputField";
 import { PhoneField } from "@/global/elements/inputs/PhoneField";
 import { RadioYesNoField } from "@/global/elements/inputs/RadioYesNoField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
-import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
-import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
-import { Label } from "@/components/ui/label";
 import { UserAccountType } from "../../../../../../../../../../packages/schema/lib/customers/customers.schema";
 import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
-import { CrmUsersProfile } from "@root/apiGateway";
-import { useState } from "react";
+import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
 
 function CustomerManagementForm({
   manager,
@@ -18,7 +16,6 @@ function CustomerManagementForm({
   manager: ICustomerDataFormHook;
   updateMode?: boolean;
 }) {
-  const [relationshipManager, setRelationshipManager] = useState<CrmUsersProfile | null>(null);
 
   return (
     <div className="flex flex-col  gap-4 relative">
@@ -221,13 +218,15 @@ function CustomerManagementForm({
         <SelectRoleUser
           role="RELATIONSHIP_MANAGER"
           placeholder="Select relationship manager"
-          value={relationshipManager?? undefined} // shows selected name
+          value={manager.relationManager.relationManager?? undefined} // shows selected name
           onSelect={(user) => {
-            setRelationshipManager(user);
-            manager.setCustomerData(
-              "relationshipManagerId",
-              user ? user.id : undefined
-            );
+            if (user) {
+              manager.relationManager.setRelationManager(user);
+              manager.setCustomerData(
+                "relationshipManagerId",
+                user ? user.id : undefined
+              );
+            }
           }}
         />
       </div>

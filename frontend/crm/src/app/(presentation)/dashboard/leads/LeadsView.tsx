@@ -1,21 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 import LeadsSearchFilterBar from "./_components/listLeads/LeadsSearchFilterBar";
-import CardPagination from "@/global/elements/table/CardPagination";
-import LeadFollowUpNotes from "./_components/followUpNotes/LeadFollowUpNotes";
-import { useFollowUpNoteFormHook } from "./_components/followUpNotes/useFollowUpFormDataHook";
 import LeadTable from "./_components/listLeads/LeadTable";
-import { useLeadFilterListHook } from "./_components/listLeads/useLeadFilterListHook";
 import { useLeadFilterApiHook } from "./_components/listLeads/useLeadFilterApiHook";
+import { useLeadFilterListHook } from "./_components/listLeads/useLeadFilterListHook";
 
 function LeadsView() {
   const filterManager = useLeadFilterListHook();
   const filterApiManager = useLeadFilterApiHook(filterManager);
+  
   const isShowPagination = () => {
     return (
       (filterApiManager.fetchLeadsQuery.data?.responseData.data.length || 0) >

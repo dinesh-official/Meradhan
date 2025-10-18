@@ -15,7 +15,7 @@ import { toast } from "sonner";
 const UpdateLeadView = ({ id }: { id: number }) => {
   console.log("id", id);
   const manager = useLeadFormDataHook();
-  const {updateLeadMutation}=useLeadFollowUpApiHook()
+  const { updateLeadMutation } = useLeadFollowUpApiHook();
   const fetchUser = async () => {
     const fetchLeadApi = new apiGateway.crm.crmLeads.CrmLeadApi(
       apiClientCaller
@@ -34,7 +34,11 @@ const UpdateLeadView = ({ id }: { id: number }) => {
         bondType: cs.bondType ?? undefined,
         exInvestmentAmount: cs.exInvestmentAmount ?? undefined,
         note: cs.note ?? "",
+        assignTo: cs.assignTo?.id,
       });
+      console.log(cs);
+
+      manager.relationManager.setRelationManager(cs.assignTo);
     } catch (error) {
       console.log("error", error);
     }
@@ -54,7 +58,7 @@ const UpdateLeadView = ({ id }: { id: number }) => {
     );
   }
 
-    const handleUpdate = () => {
+  const handleUpdate = () => {
     try {
       // parse/validate with the UPDATE schema
       const payload = appSchema.crm.leads.updateLeadSchema.parse(manager.state);
@@ -65,11 +69,12 @@ const UpdateLeadView = ({ id }: { id: number }) => {
   };
 
   return (
-    <Card>
-      <CardContent>
-        <LeadFormManagementForm manager={manager} />
-      </CardContent>
-         <CardFooter>
+    <div className="max-w-3xl mt-6 mx-auto">
+      <Card>
+        <CardContent>
+          <LeadFormManagementForm manager={manager} />
+        </CardContent>
+        <CardFooter>
           <Button
             onClick={handleUpdate}
             className="md:w-auto w-full"
@@ -78,7 +83,8 @@ const UpdateLeadView = ({ id }: { id: number }) => {
             Update Customer
           </Button>
         </CardFooter>
-    </Card>
+      </Card>
+    </div>
   );
 };
 

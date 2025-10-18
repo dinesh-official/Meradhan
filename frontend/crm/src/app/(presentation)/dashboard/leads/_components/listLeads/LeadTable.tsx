@@ -5,9 +5,9 @@ import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { NewLeadPayload } from "@root/apiGateway";
 import LeadTableActions from "./actions/leadTableAction";
+import LeadStatusBadge from "@/global/elements/wrapper/badges/LeadStatusBadge";
+import SourceBadge from "@/global/elements/wrapper/badges/SourceBadge";
 // import LeadTableActions from "./actions/LeadTableActions";
-
-
 
 interface LeadsTableProps {
   data: NewLeadPayload[];
@@ -49,21 +49,24 @@ function LeadTable({ data, pageSize = 10, isLoading }: LeadsTableProps) {
           ),
         },
         {
-          key: "leadSource",
-          label: "Source",
-        },
-        {
           key: "bondType",
           label: "Bond Type",
         },
         {
           key: "status",
           label: "Status",
-          cell: (row) => <StatusBadge value={row.status} />,
+          cell: (row) => <LeadStatusBadge value={row.status} />,
+        },
+        {
+          key: "leadSource",
+          label: "Lead Source",
+          cell: (row) => (
+            <SourceBadge value={row.leadSource.replaceAll("_", " ")} />
+          ),
         },
         {
           key: "exInvestmentAmount",
-          label: "Expected Investment",
+          label: "Exp. Investment",
           cell: (row) => (
             <span>
               {typeof row.exInvestmentAmount === "number"

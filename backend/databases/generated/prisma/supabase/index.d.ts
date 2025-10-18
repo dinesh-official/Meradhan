@@ -2400,10 +2400,12 @@ export namespace Prisma {
 
   export type CRMUserDataModelCountOutputType = {
     CustomersAuthDataModel: number
+    LeadsModel: number
   }
 
   export type CRMUserDataModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     CustomersAuthDataModel?: boolean | CRMUserDataModelCountOutputTypeCountCustomersAuthDataModelArgs
+    LeadsModel?: boolean | CRMUserDataModelCountOutputTypeCountLeadsModelArgs
   }
 
   // Custom InputTypes
@@ -2422,6 +2424,13 @@ export namespace Prisma {
    */
   export type CRMUserDataModelCountOutputTypeCountCustomersAuthDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CustomersAuthDataModelWhereInput
+  }
+
+  /**
+   * CRMUserDataModelCountOutputType without action
+   */
+  export type CRMUserDataModelCountOutputTypeCountLeadsModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LeadsModelWhereInput
   }
 
 
@@ -2995,6 +3004,7 @@ export namespace Prisma {
     updatedAt?: boolean
     createdBy?: boolean
     CustomersAuthDataModel?: boolean | CRMUserDataModel$CustomersAuthDataModelArgs<ExtArgs>
+    LeadsModel?: boolean | CRMUserDataModel$LeadsModelArgs<ExtArgs>
     _count?: boolean | CRMUserDataModelCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cRMUserDataModel"]>
 
@@ -3043,6 +3053,7 @@ export namespace Prisma {
   export type CRMUserDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phoneNo" | "avatar" | "lastLogin" | "role" | "accountStatus" | "createdAt" | "updatedAt" | "createdBy", ExtArgs["result"]["cRMUserDataModel"]>
   export type CRMUserDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     CustomersAuthDataModel?: boolean | CRMUserDataModel$CustomersAuthDataModelArgs<ExtArgs>
+    LeadsModel?: boolean | CRMUserDataModel$LeadsModelArgs<ExtArgs>
     _count?: boolean | CRMUserDataModelCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CRMUserDataModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3052,6 +3063,7 @@ export namespace Prisma {
     name: "CRMUserDataModel"
     objects: {
       CustomersAuthDataModel: Prisma.$CustomersAuthDataModelPayload<ExtArgs>[]
+      LeadsModel: Prisma.$LeadsModelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3460,6 +3472,7 @@ export namespace Prisma {
   export interface Prisma__CRMUserDataModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     CustomersAuthDataModel<T extends CRMUserDataModel$CustomersAuthDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CRMUserDataModel$CustomersAuthDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersAuthDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    LeadsModel<T extends CRMUserDataModel$LeadsModelArgs<ExtArgs> = {}>(args?: Subset<T, CRMUserDataModel$LeadsModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadsModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3909,6 +3922,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CustomersAuthDataModelScalarFieldEnum | CustomersAuthDataModelScalarFieldEnum[]
+  }
+
+  /**
+   * CRMUserDataModel.LeadsModel
+   */
+  export type CRMUserDataModel$LeadsModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LeadsModel
+     */
+    select?: LeadsModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LeadsModel
+     */
+    omit?: LeadsModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
+    where?: LeadsModelWhereInput
+    orderBy?: LeadsModelOrderByWithRelationInput | LeadsModelOrderByWithRelationInput[]
+    cursor?: LeadsModelWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LeadsModelScalarFieldEnum | LeadsModelScalarFieldEnum[]
   }
 
   /**
@@ -15297,12 +15334,14 @@ export namespace Prisma {
     id: number | null
     exInvestmentAmount: number | null
     createdBy: number | null
+    cRMUserDataModelId: number | null
   }
 
   export type LeadsModelSumAggregateOutputType = {
     id: number | null
     exInvestmentAmount: number | null
     createdBy: number | null
+    cRMUserDataModelId: number | null
   }
 
   export type LeadsModelMinAggregateOutputType = {
@@ -15319,6 +15358,7 @@ export namespace Prisma {
     createdBy: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    cRMUserDataModelId: number | null
   }
 
   export type LeadsModelMaxAggregateOutputType = {
@@ -15335,6 +15375,7 @@ export namespace Prisma {
     createdBy: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    cRMUserDataModelId: number | null
   }
 
   export type LeadsModelCountAggregateOutputType = {
@@ -15351,6 +15392,7 @@ export namespace Prisma {
     createdBy: number
     createdAt: number
     updatedAt: number
+    cRMUserDataModelId: number
     _all: number
   }
 
@@ -15359,12 +15401,14 @@ export namespace Prisma {
     id?: true
     exInvestmentAmount?: true
     createdBy?: true
+    cRMUserDataModelId?: true
   }
 
   export type LeadsModelSumAggregateInputType = {
     id?: true
     exInvestmentAmount?: true
     createdBy?: true
+    cRMUserDataModelId?: true
   }
 
   export type LeadsModelMinAggregateInputType = {
@@ -15381,6 +15425,7 @@ export namespace Prisma {
     createdBy?: true
     createdAt?: true
     updatedAt?: true
+    cRMUserDataModelId?: true
   }
 
   export type LeadsModelMaxAggregateInputType = {
@@ -15397,6 +15442,7 @@ export namespace Prisma {
     createdBy?: true
     createdAt?: true
     updatedAt?: true
+    cRMUserDataModelId?: true
   }
 
   export type LeadsModelCountAggregateInputType = {
@@ -15413,6 +15459,7 @@ export namespace Prisma {
     createdBy?: true
     createdAt?: true
     updatedAt?: true
+    cRMUserDataModelId?: true
     _all?: true
   }
 
@@ -15516,6 +15563,7 @@ export namespace Prisma {
     createdBy: number
     createdAt: Date
     updatedAt: Date
+    cRMUserDataModelId: number | null
     _count: LeadsModelCountAggregateOutputType | null
     _avg: LeadsModelAvgAggregateOutputType | null
     _sum: LeadsModelSumAggregateOutputType | null
@@ -15551,6 +15599,8 @@ export namespace Prisma {
     createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    cRMUserDataModelId?: boolean
+    assignTo?: boolean | LeadsModel$assignToArgs<ExtArgs>
   }, ExtArgs["result"]["leadsModel"]>
 
   export type LeadsModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15567,6 +15617,8 @@ export namespace Prisma {
     createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    cRMUserDataModelId?: boolean
+    assignTo?: boolean | LeadsModel$assignToArgs<ExtArgs>
   }, ExtArgs["result"]["leadsModel"]>
 
   export type LeadsModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15583,6 +15635,8 @@ export namespace Prisma {
     createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    cRMUserDataModelId?: boolean
+    assignTo?: boolean | LeadsModel$assignToArgs<ExtArgs>
   }, ExtArgs["result"]["leadsModel"]>
 
   export type LeadsModelSelectScalar = {
@@ -15599,13 +15653,25 @@ export namespace Prisma {
     createdBy?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    cRMUserDataModelId?: boolean
   }
 
-  export type LeadsModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "emailAddress" | "phoneNo" | "companyName" | "leadSource" | "bondType" | "status" | "exInvestmentAmount" | "note" | "createdBy" | "createdAt" | "updatedAt", ExtArgs["result"]["leadsModel"]>
+  export type LeadsModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "emailAddress" | "phoneNo" | "companyName" | "leadSource" | "bondType" | "status" | "exInvestmentAmount" | "note" | "createdBy" | "createdAt" | "updatedAt" | "cRMUserDataModelId", ExtArgs["result"]["leadsModel"]>
+  export type LeadsModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assignTo?: boolean | LeadsModel$assignToArgs<ExtArgs>
+  }
+  export type LeadsModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assignTo?: boolean | LeadsModel$assignToArgs<ExtArgs>
+  }
+  export type LeadsModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assignTo?: boolean | LeadsModel$assignToArgs<ExtArgs>
+  }
 
   export type $LeadsModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LeadsModel"
-    objects: {}
+    objects: {
+      assignTo: Prisma.$CRMUserDataModelPayload<ExtArgs> | null
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       fullName: string
@@ -15623,6 +15689,7 @@ export namespace Prisma {
        */
       createdAt: Date
       updatedAt: Date
+      cRMUserDataModelId: number | null
     }, ExtArgs["result"]["leadsModel"]>
     composites: {}
   }
@@ -16017,6 +16084,7 @@ export namespace Prisma {
    */
   export interface Prisma__LeadsModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    assignTo<T extends LeadsModel$assignToArgs<ExtArgs> = {}>(args?: Subset<T, LeadsModel$assignToArgs<ExtArgs>>): Prisma__CRMUserDataModelClient<$Result.GetResult<Prisma.$CRMUserDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -16059,6 +16127,7 @@ export namespace Prisma {
     readonly createdBy: FieldRef<"LeadsModel", 'Int'>
     readonly createdAt: FieldRef<"LeadsModel", 'DateTime'>
     readonly updatedAt: FieldRef<"LeadsModel", 'DateTime'>
+    readonly cRMUserDataModelId: FieldRef<"LeadsModel", 'Int'>
   }
     
 
@@ -16075,6 +16144,10 @@ export namespace Prisma {
      * Omit specific fields from the LeadsModel
      */
     omit?: LeadsModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
     /**
      * Filter, which LeadsModel to fetch.
      */
@@ -16094,6 +16167,10 @@ export namespace Prisma {
      */
     omit?: LeadsModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
+    /**
      * Filter, which LeadsModel to fetch.
      */
     where: LeadsModelWhereUniqueInput
@@ -16111,6 +16188,10 @@ export namespace Prisma {
      * Omit specific fields from the LeadsModel
      */
     omit?: LeadsModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
     /**
      * Filter, which LeadsModel to fetch.
      */
@@ -16160,6 +16241,10 @@ export namespace Prisma {
      */
     omit?: LeadsModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
+    /**
      * Filter, which LeadsModel to fetch.
      */
     where?: LeadsModelWhereInput
@@ -16208,6 +16293,10 @@ export namespace Prisma {
      */
     omit?: LeadsModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
+    /**
      * Filter, which LeadsModels to fetch.
      */
     where?: LeadsModelWhereInput
@@ -16251,6 +16340,10 @@ export namespace Prisma {
      */
     omit?: LeadsModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
+    /**
      * The data needed to create a LeadsModel.
      */
     data: XOR<LeadsModelCreateInput, LeadsModelUncheckedCreateInput>
@@ -16284,6 +16377,10 @@ export namespace Prisma {
      */
     data: LeadsModelCreateManyInput | LeadsModelCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -16298,6 +16395,10 @@ export namespace Prisma {
      * Omit specific fields from the LeadsModel
      */
     omit?: LeadsModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
     /**
      * The data needed to update a LeadsModel.
      */
@@ -16350,6 +16451,10 @@ export namespace Prisma {
      * Limit how many LeadsModels to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -16364,6 +16469,10 @@ export namespace Prisma {
      * Omit specific fields from the LeadsModel
      */
     omit?: LeadsModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
     /**
      * The filter to search for the LeadsModel to update in case it exists.
      */
@@ -16391,6 +16500,10 @@ export namespace Prisma {
      */
     omit?: LeadsModelOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
+    /**
      * Filter which LeadsModel to delete.
      */
     where: LeadsModelWhereUniqueInput
@@ -16411,6 +16524,25 @@ export namespace Prisma {
   }
 
   /**
+   * LeadsModel.assignTo
+   */
+  export type LeadsModel$assignToArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CRMUserDataModel
+     */
+    select?: CRMUserDataModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CRMUserDataModel
+     */
+    omit?: CRMUserDataModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CRMUserDataModelInclude<ExtArgs> | null
+    where?: CRMUserDataModelWhereInput
+  }
+
+  /**
    * LeadsModel without action
    */
   export type LeadsModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -16422,6 +16554,10 @@ export namespace Prisma {
      * Omit specific fields from the LeadsModel
      */
     omit?: LeadsModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LeadsModelInclude<ExtArgs> | null
   }
 
 
@@ -22588,7 +22724,8 @@ export namespace Prisma {
     note: 'note',
     createdBy: 'createdBy',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    cRMUserDataModelId: 'cRMUserDataModelId'
   };
 
   export type LeadsModelScalarFieldEnum = (typeof LeadsModelScalarFieldEnum)[keyof typeof LeadsModelScalarFieldEnum]
@@ -22971,6 +23108,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CRMUserDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CRMUserDataModel"> | number | null
     CustomersAuthDataModel?: CustomersAuthDataModelListRelationFilter
+    LeadsModel?: LeadsModelListRelationFilter
   }
 
   export type CRMUserDataModelOrderByWithRelationInput = {
@@ -22986,6 +23124,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     createdBy?: SortOrderInput | SortOrder
     CustomersAuthDataModel?: CustomersAuthDataModelOrderByRelationAggregateInput
+    LeadsModel?: LeadsModelOrderByRelationAggregateInput
   }
 
   export type CRMUserDataModelWhereUniqueInput = Prisma.AtLeast<{
@@ -23004,6 +23143,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CRMUserDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CRMUserDataModel"> | number | null
     CustomersAuthDataModel?: CustomersAuthDataModelListRelationFilter
+    LeadsModel?: LeadsModelListRelationFilter
   }, "id" | "email">
 
   export type CRMUserDataModelOrderByWithAggregationInput = {
@@ -23965,6 +24105,8 @@ export namespace Prisma {
     createdBy?: IntFilter<"LeadsModel"> | number
     createdAt?: DateTimeFilter<"LeadsModel"> | Date | string
     updatedAt?: DateTimeFilter<"LeadsModel"> | Date | string
+    cRMUserDataModelId?: IntNullableFilter<"LeadsModel"> | number | null
+    assignTo?: XOR<CRMUserDataModelNullableScalarRelationFilter, CRMUserDataModelWhereInput> | null
   }
 
   export type LeadsModelOrderByWithRelationInput = {
@@ -23981,6 +24123,8 @@ export namespace Prisma {
     createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    cRMUserDataModelId?: SortOrderInput | SortOrder
+    assignTo?: CRMUserDataModelOrderByWithRelationInput
   }
 
   export type LeadsModelWhereUniqueInput = Prisma.AtLeast<{
@@ -24000,6 +24144,8 @@ export namespace Prisma {
     createdBy?: IntFilter<"LeadsModel"> | number
     createdAt?: DateTimeFilter<"LeadsModel"> | Date | string
     updatedAt?: DateTimeFilter<"LeadsModel"> | Date | string
+    cRMUserDataModelId?: IntNullableFilter<"LeadsModel"> | number | null
+    assignTo?: XOR<CRMUserDataModelNullableScalarRelationFilter, CRMUserDataModelWhereInput> | null
   }, "id">
 
   export type LeadsModelOrderByWithAggregationInput = {
@@ -24016,6 +24162,7 @@ export namespace Prisma {
     createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    cRMUserDataModelId?: SortOrderInput | SortOrder
     _count?: LeadsModelCountOrderByAggregateInput
     _avg?: LeadsModelAvgOrderByAggregateInput
     _max?: LeadsModelMaxOrderByAggregateInput
@@ -24040,6 +24187,7 @@ export namespace Prisma {
     createdBy?: IntWithAggregatesFilter<"LeadsModel"> | number
     createdAt?: DateTimeWithAggregatesFilter<"LeadsModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"LeadsModel"> | Date | string
+    cRMUserDataModelId?: IntNullableWithAggregatesFilter<"LeadsModel"> | number | null
   }
 
   export type LeadFollowUpNotesModelWhereInput = {
@@ -24490,6 +24638,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     createdBy?: number | null
     CustomersAuthDataModel?: CustomersAuthDataModelCreateNestedManyWithoutRelationshipManagerInput
+    LeadsModel?: LeadsModelCreateNestedManyWithoutAssignToInput
   }
 
   export type CRMUserDataModelUncheckedCreateInput = {
@@ -24505,6 +24654,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     createdBy?: number | null
     CustomersAuthDataModel?: CustomersAuthDataModelUncheckedCreateNestedManyWithoutRelationshipManagerInput
+    LeadsModel?: LeadsModelUncheckedCreateNestedManyWithoutAssignToInput
   }
 
   export type CRMUserDataModelUpdateInput = {
@@ -24519,6 +24669,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     CustomersAuthDataModel?: CustomersAuthDataModelUpdateManyWithoutRelationshipManagerNestedInput
+    LeadsModel?: LeadsModelUpdateManyWithoutAssignToNestedInput
   }
 
   export type CRMUserDataModelUncheckedUpdateInput = {
@@ -24534,6 +24685,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     CustomersAuthDataModel?: CustomersAuthDataModelUncheckedUpdateManyWithoutRelationshipManagerNestedInput
+    LeadsModel?: LeadsModelUncheckedUpdateManyWithoutAssignToNestedInput
   }
 
   export type CRMUserDataModelCreateManyInput = {
@@ -25596,6 +25748,7 @@ export namespace Prisma {
     createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    assignTo?: CRMUserDataModelCreateNestedOneWithoutLeadsModelInput
   }
 
   export type LeadsModelUncheckedCreateInput = {
@@ -25612,6 +25765,7 @@ export namespace Prisma {
     createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    cRMUserDataModelId?: number | null
   }
 
   export type LeadsModelUpdateInput = {
@@ -25627,6 +25781,7 @@ export namespace Prisma {
     createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignTo?: CRMUserDataModelUpdateOneWithoutLeadsModelNestedInput
   }
 
   export type LeadsModelUncheckedUpdateInput = {
@@ -25643,6 +25798,7 @@ export namespace Prisma {
     createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LeadsModelCreateManyInput = {
@@ -25659,6 +25815,7 @@ export namespace Prisma {
     createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    cRMUserDataModelId?: number | null
   }
 
   export type LeadsModelUpdateManyMutationInput = {
@@ -25690,6 +25847,7 @@ export namespace Prisma {
     createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LeadFollowUpNotesModelCreateInput = {
@@ -26271,12 +26429,22 @@ export namespace Prisma {
     none?: CustomersAuthDataModelWhereInput
   }
 
+  export type LeadsModelListRelationFilter = {
+    every?: LeadsModelWhereInput
+    some?: LeadsModelWhereInput
+    none?: LeadsModelWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
   export type CustomersAuthDataModelOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type LeadsModelOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27215,12 +27383,14 @@ export namespace Prisma {
     createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    cRMUserDataModelId?: SortOrder
   }
 
   export type LeadsModelAvgOrderByAggregateInput = {
     id?: SortOrder
     exInvestmentAmount?: SortOrder
     createdBy?: SortOrder
+    cRMUserDataModelId?: SortOrder
   }
 
   export type LeadsModelMaxOrderByAggregateInput = {
@@ -27237,6 +27407,7 @@ export namespace Prisma {
     createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    cRMUserDataModelId?: SortOrder
   }
 
   export type LeadsModelMinOrderByAggregateInput = {
@@ -27253,12 +27424,14 @@ export namespace Prisma {
     createdBy?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    cRMUserDataModelId?: SortOrder
   }
 
   export type LeadsModelSumOrderByAggregateInput = {
     id?: SortOrder
     exInvestmentAmount?: SortOrder
     createdBy?: SortOrder
+    cRMUserDataModelId?: SortOrder
   }
 
   export type EnumLeadSourceWithAggregatesFilter<$PrismaModel = never> = {
@@ -27626,11 +27799,25 @@ export namespace Prisma {
     connect?: CustomersAuthDataModelWhereUniqueInput | CustomersAuthDataModelWhereUniqueInput[]
   }
 
+  export type LeadsModelCreateNestedManyWithoutAssignToInput = {
+    create?: XOR<LeadsModelCreateWithoutAssignToInput, LeadsModelUncheckedCreateWithoutAssignToInput> | LeadsModelCreateWithoutAssignToInput[] | LeadsModelUncheckedCreateWithoutAssignToInput[]
+    connectOrCreate?: LeadsModelCreateOrConnectWithoutAssignToInput | LeadsModelCreateOrConnectWithoutAssignToInput[]
+    createMany?: LeadsModelCreateManyAssignToInputEnvelope
+    connect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+  }
+
   export type CustomersAuthDataModelUncheckedCreateNestedManyWithoutRelationshipManagerInput = {
     create?: XOR<CustomersAuthDataModelCreateWithoutRelationshipManagerInput, CustomersAuthDataModelUncheckedCreateWithoutRelationshipManagerInput> | CustomersAuthDataModelCreateWithoutRelationshipManagerInput[] | CustomersAuthDataModelUncheckedCreateWithoutRelationshipManagerInput[]
     connectOrCreate?: CustomersAuthDataModelCreateOrConnectWithoutRelationshipManagerInput | CustomersAuthDataModelCreateOrConnectWithoutRelationshipManagerInput[]
     createMany?: CustomersAuthDataModelCreateManyRelationshipManagerInputEnvelope
     connect?: CustomersAuthDataModelWhereUniqueInput | CustomersAuthDataModelWhereUniqueInput[]
+  }
+
+  export type LeadsModelUncheckedCreateNestedManyWithoutAssignToInput = {
+    create?: XOR<LeadsModelCreateWithoutAssignToInput, LeadsModelUncheckedCreateWithoutAssignToInput> | LeadsModelCreateWithoutAssignToInput[] | LeadsModelUncheckedCreateWithoutAssignToInput[]
+    connectOrCreate?: LeadsModelCreateOrConnectWithoutAssignToInput | LeadsModelCreateOrConnectWithoutAssignToInput[]
+    createMany?: LeadsModelCreateManyAssignToInputEnvelope
+    connect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -27679,6 +27866,20 @@ export namespace Prisma {
     deleteMany?: CustomersAuthDataModelScalarWhereInput | CustomersAuthDataModelScalarWhereInput[]
   }
 
+  export type LeadsModelUpdateManyWithoutAssignToNestedInput = {
+    create?: XOR<LeadsModelCreateWithoutAssignToInput, LeadsModelUncheckedCreateWithoutAssignToInput> | LeadsModelCreateWithoutAssignToInput[] | LeadsModelUncheckedCreateWithoutAssignToInput[]
+    connectOrCreate?: LeadsModelCreateOrConnectWithoutAssignToInput | LeadsModelCreateOrConnectWithoutAssignToInput[]
+    upsert?: LeadsModelUpsertWithWhereUniqueWithoutAssignToInput | LeadsModelUpsertWithWhereUniqueWithoutAssignToInput[]
+    createMany?: LeadsModelCreateManyAssignToInputEnvelope
+    set?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    disconnect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    delete?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    connect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    update?: LeadsModelUpdateWithWhereUniqueWithoutAssignToInput | LeadsModelUpdateWithWhereUniqueWithoutAssignToInput[]
+    updateMany?: LeadsModelUpdateManyWithWhereWithoutAssignToInput | LeadsModelUpdateManyWithWhereWithoutAssignToInput[]
+    deleteMany?: LeadsModelScalarWhereInput | LeadsModelScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -27699,6 +27900,20 @@ export namespace Prisma {
     update?: CustomersAuthDataModelUpdateWithWhereUniqueWithoutRelationshipManagerInput | CustomersAuthDataModelUpdateWithWhereUniqueWithoutRelationshipManagerInput[]
     updateMany?: CustomersAuthDataModelUpdateManyWithWhereWithoutRelationshipManagerInput | CustomersAuthDataModelUpdateManyWithWhereWithoutRelationshipManagerInput[]
     deleteMany?: CustomersAuthDataModelScalarWhereInput | CustomersAuthDataModelScalarWhereInput[]
+  }
+
+  export type LeadsModelUncheckedUpdateManyWithoutAssignToNestedInput = {
+    create?: XOR<LeadsModelCreateWithoutAssignToInput, LeadsModelUncheckedCreateWithoutAssignToInput> | LeadsModelCreateWithoutAssignToInput[] | LeadsModelUncheckedCreateWithoutAssignToInput[]
+    connectOrCreate?: LeadsModelCreateOrConnectWithoutAssignToInput | LeadsModelCreateOrConnectWithoutAssignToInput[]
+    upsert?: LeadsModelUpsertWithWhereUniqueWithoutAssignToInput | LeadsModelUpsertWithWhereUniqueWithoutAssignToInput[]
+    createMany?: LeadsModelCreateManyAssignToInputEnvelope
+    set?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    disconnect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    delete?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    connect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
+    update?: LeadsModelUpdateWithWhereUniqueWithoutAssignToInput | LeadsModelUpdateWithWhereUniqueWithoutAssignToInput[]
+    updateMany?: LeadsModelUpdateManyWithWhereWithoutAssignToInput | LeadsModelUpdateManyWithWhereWithoutAssignToInput[]
+    deleteMany?: LeadsModelScalarWhereInput | LeadsModelScalarWhereInput[]
   }
 
   export type CRMUserDataModelCreateNestedOneWithoutCustomersAuthDataModelInput = {
@@ -28290,6 +28505,12 @@ export namespace Prisma {
     deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
   }
 
+  export type CRMUserDataModelCreateNestedOneWithoutLeadsModelInput = {
+    create?: XOR<CRMUserDataModelCreateWithoutLeadsModelInput, CRMUserDataModelUncheckedCreateWithoutLeadsModelInput>
+    connectOrCreate?: CRMUserDataModelCreateOrConnectWithoutLeadsModelInput
+    connect?: CRMUserDataModelWhereUniqueInput
+  }
+
   export type EnumLeadSourceFieldUpdateOperationsInput = {
     set?: $Enums.LeadSource
   }
@@ -28300,6 +28521,16 @@ export namespace Prisma {
 
   export type EnumLeadStatusFieldUpdateOperationsInput = {
     set?: $Enums.LeadStatus
+  }
+
+  export type CRMUserDataModelUpdateOneWithoutLeadsModelNestedInput = {
+    create?: XOR<CRMUserDataModelCreateWithoutLeadsModelInput, CRMUserDataModelUncheckedCreateWithoutLeadsModelInput>
+    connectOrCreate?: CRMUserDataModelCreateOrConnectWithoutLeadsModelInput
+    upsert?: CRMUserDataModelUpsertWithoutLeadsModelInput
+    disconnect?: CRMUserDataModelWhereInput | boolean
+    delete?: CRMUserDataModelWhereInput | boolean
+    connect?: CRMUserDataModelWhereUniqueInput
+    update?: XOR<XOR<CRMUserDataModelUpdateToOneWithWhereWithoutLeadsModelInput, CRMUserDataModelUpdateWithoutLeadsModelInput>, CRMUserDataModelUncheckedUpdateWithoutLeadsModelInput>
   }
 
   export type CustomerProfileDataModelCreateNestedManyWithoutNseInput = {
@@ -28982,6 +29213,47 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type LeadsModelCreateWithoutAssignToInput = {
+    fullName: string
+    emailAddress: string
+    phoneNo: string
+    companyName: string
+    leadSource: $Enums.LeadSource
+    bondType: $Enums.BondType
+    status: $Enums.LeadStatus
+    exInvestmentAmount?: number | null
+    note?: string | null
+    createdBy: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type LeadsModelUncheckedCreateWithoutAssignToInput = {
+    id?: number
+    fullName: string
+    emailAddress: string
+    phoneNo: string
+    companyName: string
+    leadSource: $Enums.LeadSource
+    bondType: $Enums.BondType
+    status: $Enums.LeadStatus
+    exInvestmentAmount?: number | null
+    note?: string | null
+    createdBy: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type LeadsModelCreateOrConnectWithoutAssignToInput = {
+    where: LeadsModelWhereUniqueInput
+    create: XOR<LeadsModelCreateWithoutAssignToInput, LeadsModelUncheckedCreateWithoutAssignToInput>
+  }
+
+  export type LeadsModelCreateManyAssignToInputEnvelope = {
+    data: LeadsModelCreateManyAssignToInput | LeadsModelCreateManyAssignToInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CustomersAuthDataModelUpsertWithWhereUniqueWithoutRelationshipManagerInput = {
     where: CustomersAuthDataModelWhereUniqueInput
     update: XOR<CustomersAuthDataModelUpdateWithoutRelationshipManagerInput, CustomersAuthDataModelUncheckedUpdateWithoutRelationshipManagerInput>
@@ -29016,6 +29288,42 @@ export namespace Prisma {
     cRMUserDataModelId?: IntNullableFilter<"CustomersAuthDataModel"> | number | null
   }
 
+  export type LeadsModelUpsertWithWhereUniqueWithoutAssignToInput = {
+    where: LeadsModelWhereUniqueInput
+    update: XOR<LeadsModelUpdateWithoutAssignToInput, LeadsModelUncheckedUpdateWithoutAssignToInput>
+    create: XOR<LeadsModelCreateWithoutAssignToInput, LeadsModelUncheckedCreateWithoutAssignToInput>
+  }
+
+  export type LeadsModelUpdateWithWhereUniqueWithoutAssignToInput = {
+    where: LeadsModelWhereUniqueInput
+    data: XOR<LeadsModelUpdateWithoutAssignToInput, LeadsModelUncheckedUpdateWithoutAssignToInput>
+  }
+
+  export type LeadsModelUpdateManyWithWhereWithoutAssignToInput = {
+    where: LeadsModelScalarWhereInput
+    data: XOR<LeadsModelUpdateManyMutationInput, LeadsModelUncheckedUpdateManyWithoutAssignToInput>
+  }
+
+  export type LeadsModelScalarWhereInput = {
+    AND?: LeadsModelScalarWhereInput | LeadsModelScalarWhereInput[]
+    OR?: LeadsModelScalarWhereInput[]
+    NOT?: LeadsModelScalarWhereInput | LeadsModelScalarWhereInput[]
+    id?: IntFilter<"LeadsModel"> | number
+    fullName?: StringFilter<"LeadsModel"> | string
+    emailAddress?: StringFilter<"LeadsModel"> | string
+    phoneNo?: StringFilter<"LeadsModel"> | string
+    companyName?: StringFilter<"LeadsModel"> | string
+    leadSource?: EnumLeadSourceFilter<"LeadsModel"> | $Enums.LeadSource
+    bondType?: EnumBondTypeFilter<"LeadsModel"> | $Enums.BondType
+    status?: EnumLeadStatusFilter<"LeadsModel"> | $Enums.LeadStatus
+    exInvestmentAmount?: IntNullableFilter<"LeadsModel"> | number | null
+    note?: StringNullableFilter<"LeadsModel"> | string | null
+    createdBy?: IntFilter<"LeadsModel"> | number
+    createdAt?: DateTimeFilter<"LeadsModel"> | Date | string
+    updatedAt?: DateTimeFilter<"LeadsModel"> | Date | string
+    cRMUserDataModelId?: IntNullableFilter<"LeadsModel"> | number | null
+  }
+
   export type CRMUserDataModelCreateWithoutCustomersAuthDataModelInput = {
     name: string
     email: string
@@ -29027,6 +29335,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    LeadsModel?: LeadsModelCreateNestedManyWithoutAssignToInput
   }
 
   export type CRMUserDataModelUncheckedCreateWithoutCustomersAuthDataModelInput = {
@@ -29041,6 +29350,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    LeadsModel?: LeadsModelUncheckedCreateNestedManyWithoutAssignToInput
   }
 
   export type CRMUserDataModelCreateOrConnectWithoutCustomersAuthDataModelInput = {
@@ -29135,6 +29445,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    LeadsModel?: LeadsModelUpdateManyWithoutAssignToNestedInput
   }
 
   export type CRMUserDataModelUncheckedUpdateWithoutCustomersAuthDataModelInput = {
@@ -29149,6 +29460,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    LeadsModel?: LeadsModelUncheckedUpdateManyWithoutAssignToNestedInput
   }
 
   export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutUtilityInput = {
@@ -30622,6 +30934,80 @@ export namespace Prisma {
     data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutPermanentAddressInput>
   }
 
+  export type CRMUserDataModelCreateWithoutLeadsModelInput = {
+    name: string
+    email: string
+    phoneNo: string
+    avatar?: string | null
+    lastLogin?: Date | string | null
+    role?: $Enums.CrmUserROLE
+    accountStatus?: $Enums.AccountStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    CustomersAuthDataModel?: CustomersAuthDataModelCreateNestedManyWithoutRelationshipManagerInput
+  }
+
+  export type CRMUserDataModelUncheckedCreateWithoutLeadsModelInput = {
+    id?: number
+    name: string
+    email: string
+    phoneNo: string
+    avatar?: string | null
+    lastLogin?: Date | string | null
+    role?: $Enums.CrmUserROLE
+    accountStatus?: $Enums.AccountStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    CustomersAuthDataModel?: CustomersAuthDataModelUncheckedCreateNestedManyWithoutRelationshipManagerInput
+  }
+
+  export type CRMUserDataModelCreateOrConnectWithoutLeadsModelInput = {
+    where: CRMUserDataModelWhereUniqueInput
+    create: XOR<CRMUserDataModelCreateWithoutLeadsModelInput, CRMUserDataModelUncheckedCreateWithoutLeadsModelInput>
+  }
+
+  export type CRMUserDataModelUpsertWithoutLeadsModelInput = {
+    update: XOR<CRMUserDataModelUpdateWithoutLeadsModelInput, CRMUserDataModelUncheckedUpdateWithoutLeadsModelInput>
+    create: XOR<CRMUserDataModelCreateWithoutLeadsModelInput, CRMUserDataModelUncheckedCreateWithoutLeadsModelInput>
+    where?: CRMUserDataModelWhereInput
+  }
+
+  export type CRMUserDataModelUpdateToOneWithWhereWithoutLeadsModelInput = {
+    where?: CRMUserDataModelWhereInput
+    data: XOR<CRMUserDataModelUpdateWithoutLeadsModelInput, CRMUserDataModelUncheckedUpdateWithoutLeadsModelInput>
+  }
+
+  export type CRMUserDataModelUpdateWithoutLeadsModelInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumCrmUserROLEFieldUpdateOperationsInput | $Enums.CrmUserROLE
+    accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    CustomersAuthDataModel?: CustomersAuthDataModelUpdateManyWithoutRelationshipManagerNestedInput
+  }
+
+  export type CRMUserDataModelUncheckedUpdateWithoutLeadsModelInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumCrmUserROLEFieldUpdateOperationsInput | $Enums.CrmUserROLE
+    accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    CustomersAuthDataModel?: CustomersAuthDataModelUncheckedUpdateManyWithoutRelationshipManagerNestedInput
+  }
+
   export type CustomerProfileDataModelCreateWithoutNseInput = {
     userName: string
     firstName: string
@@ -31286,6 +31672,22 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type LeadsModelCreateManyAssignToInput = {
+    id?: number
+    fullName: string
+    emailAddress: string
+    phoneNo: string
+    companyName: string
+    leadSource: $Enums.LeadSource
+    bondType: $Enums.BondType
+    status: $Enums.LeadStatus
+    exInvestmentAmount?: number | null
+    note?: string | null
+    createdBy: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type CustomersAuthDataModelUpdateWithoutRelationshipManagerInput = {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
@@ -31325,6 +31727,53 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolFieldUpdateOperationsInput | boolean
     termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LeadsModelUpdateWithoutAssignToInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    leadSource?: EnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource
+    bondType?: EnumBondTypeFieldUpdateOperationsInput | $Enums.BondType
+    status?: EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
+    exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LeadsModelUncheckedUpdateWithoutAssignToInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    leadSource?: EnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource
+    bondType?: EnumBondTypeFieldUpdateOperationsInput | $Enums.BondType
+    status?: EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
+    exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LeadsModelUncheckedUpdateManyWithoutAssignToInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    leadSource?: EnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource
+    bondType?: EnumBondTypeFieldUpdateOperationsInput | $Enums.BondType
+    status?: EnumLeadStatusFieldUpdateOperationsInput | $Enums.LeadStatus
+    exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -38,5 +38,5 @@ export const useLeadFilterApiHook = (filterState: TLeadFilterListHook) => {
       return response.data;
     },
   });
-  return {fetchLeadsQuery};
+  return { fetchLeadsQuery };
 };

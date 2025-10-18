@@ -9,6 +9,7 @@ export interface ILeadsManagerInterface {
         data: LeadsModel[],
         meta: META_DATA_PAGINATION
     }>;
+    
     createNewLead(createdBy: number, data: z.infer<typeof appSchema.crm.leads.createNewLeadSchema>): Promise<LeadsModel>
     updateLead(leadId: number, data: z.infer<typeof appSchema.crm.leads.updateLeadSchema>): Promise<LeadsModel>
     deleteLead(leadId: number): Promise<boolean>

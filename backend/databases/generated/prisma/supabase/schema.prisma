@@ -11,6 +11,7 @@ model CRMUserDataModel {
   updatedAt              DateTime                 @updatedAt
   createdBy              Int?
   CustomersAuthDataModel CustomersAuthDataModel[]
+  LeadsModel             LeadsModel[]
 
   @@index([email])
   @@map("crm_users")
@@ -417,11 +418,13 @@ model LeadsModel {
   status             LeadStatus
   exInvestmentAmount Int?
   note               String?
+  assignTo           CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
   createdBy          Int
 
   /// Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  cRMUserDataModelId Int?
 
   @@map("leads")
 }

@@ -19,11 +19,11 @@ interface LeadsSearchFilterBarProps {
   sourceValue?: string;
   onSourceChange?: (value: string) => void;
   statusOptions?: SelectOption[];
-  sourceOptions?:SelectOption[];
+  sourceOptions?: SelectOption[];
   placeholder?: string;
 }
 
-const filterStatus: SelectOption[]= [
+const filterStatus: SelectOption[] = [
   { label: "All Status", value: "ALL" },
   { label: "New", value: "NEW" },
   { label: "Contacted", value: "CONTACTED" },
@@ -33,10 +33,10 @@ const filterStatus: SelectOption[]= [
 ];
 
 const filterSourceOptions: SelectOption[] = [
-  { label: "All Source", value: "ALL" },
-  { label: "New", value: "WEBSITE" },
-  { label: "New", value: "REFERRAL" },
-  { label: "social", value: "SOCIAL" },
+  { label: "All Sources", value: "ALL" },
+  { label: "Website", value: "WEBSITE" },
+  { label: "Referral", value: "REFERRAL" },
+  { label: "Social", value: "SOCIAL" },
   { label: "Advertisement", value: "ADVERTISEMENT" },
   { label: "Event", value: "EVENT" },
   { label: "Cold Call", value: "COLD_CALL" },
@@ -63,8 +63,8 @@ const LeadsSearchFilterBar: React.FC<LeadsSearchFilterBarProps> = ({
           placeholder={placeholder}
           type="search"
           value={searchValue}
-          onChange={(e)=>{
-            onSearchChange?.(e.target.value)
+          onChange={(e) => {
+            onSearchChange?.(e.target.value);
           }}
         />
         <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">

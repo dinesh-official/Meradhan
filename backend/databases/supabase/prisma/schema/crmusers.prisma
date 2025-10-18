@@ -11,6 +11,7 @@ model CRMUserDataModel {
   updatedAt              DateTime                 @updatedAt
   createdBy              Int?
   CustomersAuthDataModel CustomersAuthDataModel[]
+  LeadsModel             LeadsModel[]
 
   @@index([email])
   @@map("crm_users")

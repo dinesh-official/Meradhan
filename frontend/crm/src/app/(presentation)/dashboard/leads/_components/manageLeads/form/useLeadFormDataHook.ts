@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { ZodError } from "zod";
 import { leadFormDataSchema } from "./leadFormData.schema"; // ensure path/name matches your file
-import { LeadFormData } from "./leadForm";
+import { ILeadDataFormHook, LeadFormData } from "./leadForm";
 import {
   bonds,
   source,
@@ -12,6 +12,7 @@ import { useLeadFollowUpApiHook } from "./useLeadApiHook";
 import { appSchema } from "@root/schema";
 import { parseError } from "@/core/error/parseError";
 import { toast } from "sonner";
+import { CrmUsersProfile } from "@root/apiGateway";
 
 export const initLeadData: LeadFormData = {
   fullName: "",
@@ -27,12 +28,16 @@ export const initLeadData: LeadFormData = {
 };
 
 export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
+
   const [data, setData] = useState<LeadFormData>(initial);
   const [errors, setErrors] = useState<
     Partial<Record<keyof LeadFormData, string[]>>
   >({});
+
+  const [relationManager, setRelationManager] = useState<CrmUsersProfile | undefined>(undefined)
+
   const leadsApi = useLeadFollowUpApiHook();
-  const { createLeadMutation ,updateLeadMutation} = leadsApi;
+  const { createLeadMutation } = leadsApi;
   /** Update a single field and clear its error (if any) */
   const setLeadData = useCallback(
     <K extends keyof LeadFormData>(key: K, value: LeadFormData[K]) => {
@@ -47,15 +52,15 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
     []
   );
   const setLeadDataMany = useCallback((patch: Partial<LeadFormData>) => {
-  setData(prev => ({ ...prev, ...patch }));
-  setErrors(prev => {
-    const copy = { ...prev };
-    (Object.keys(patch) as (keyof LeadFormData)[]).forEach(k => {
-      if (copy[k]) delete copy[k];
+    setData(prev => ({ ...prev, ...patch }));
+    setErrors(prev => {
+      const copy = { ...prev };
+      (Object.keys(patch) as (keyof LeadFormData)[]).forEach(k => {
+        if (copy[k]) delete copy[k];
+      });
+      return copy;
     });
-    return copy;
-  });
-}, []);
+  }, []);
 
   /** Validate a single field against the Zod schema */
   const validateField = useCallback(
@@ -88,7 +93,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
       createLeadMutation.mutate(payload);
       return true;
     } catch (error) {
-     console.log("error hai in validateUserData", error);
+      console.log("error hai in validateUserData", error);
       const err = parseError<ZodError>(error);
       if (err.issues.length) {
         toast.error(err.issues[0].message);
@@ -97,9 +102,9 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
       }
       return false;
     }
-  }, [data,createLeadMutation]);
+  }, [data, createLeadMutation]);
 
- 
+
   /** Reset state and errors */
   const resetLeadData = useCallback(() => {
     setData(initial ?? initLeadData);
@@ -115,5 +120,9 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
     resetLeadData,
     validateField,
     validateLeadData,
+    relationManager: {
+      relationManager,
+      setRelationManager
+    }
   };
 };
