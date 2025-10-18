@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,11 +16,13 @@ type LeadFollowUpNotesProps = {
   manager: IFollowUpNoteFormHook;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // leadId: number;
 };
 const LeadFollowUpNotes = ({
   manager,
   open,
   onOpenChange,
+  // leadId,
 }: LeadFollowUpNotesProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -33,8 +34,8 @@ const LeadFollowUpNotes = ({
           id="notes"
           placeholder="enter follow-up notes"
           className="mt-1"
-          value={manager.state.notes}
-          onChange={(e) => manager.setFollowUpNoteData("notes", e.target.value)}
+          value={manager.state.text}
+          onChange={(e) => manager.setFollowUpNoteData("text", e.target.value)}
         />
         <div className="flex  flex-row gap-5">
           <Input

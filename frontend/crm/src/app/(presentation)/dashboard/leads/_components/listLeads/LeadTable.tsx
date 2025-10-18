@@ -1,13 +1,11 @@
 "use client";
 
-import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { NewLeadPayload } from "@root/apiGateway";
 import LeadTableActions from "./actions/leadTableAction";
 import LeadStatusBadge from "@/global/elements/wrapper/badges/LeadStatusBadge";
 import SourceBadge from "@/global/elements/wrapper/badges/SourceBadge";
-// import LeadTableActions from "./actions/LeadTableActions";
 
 interface LeadsTableProps {
   data: NewLeadPayload[];

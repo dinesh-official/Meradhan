@@ -3,15 +3,20 @@
 import { useState, useCallback } from "react";
 import { ZodError } from "zod";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
-import { FollowUpNoteFormData, IFollowUpNoteFormHook } from "./followUpFormData";
+import {
+  FollowUpNoteFormData,
+  IFollowUpNoteFormHook,
+} from "./followUpFormData";
 import { followUpNoteSchema } from "./leadFollowUpFormData.schema";
+import { useFollowUpApiHook } from "./useFollowUpApiHook";
 
 const initData: FollowUpNoteFormData = {
-  notes: "",
+  text: "",
   nextFollowUpDate: "",
 };
 
 export const useFollowUpNoteFormHook = (
+  leadId: number,
   initialState: FollowUpNoteFormData = initData
 ): IFollowUpNoteFormHook => {
   const [data, setData] = useState<FollowUpNoteFormData>(initialState);
@@ -19,6 +24,8 @@ export const useFollowUpNoteFormHook = (
     Partial<Record<keyof FollowUpNoteFormData, string[]>>
   >({});
 
+  const followUpApi = useFollowUpApiHook();
+  const { createFollowUpMutation } = followUpApi;
   /** Update a specific field */
   const setFollowUpNoteData = useCallback(
     <K extends keyof FollowUpNoteFormData>(
@@ -62,10 +69,11 @@ export const useFollowUpNoteFormHook = (
 
   /** Validate the entire form */
   const validateFollowUpNoteData = useCallback((): boolean => {
-    console.log('validateFollowUpNoteData', data)
+    console.log("validateFollowUpNoteData", data);
     try {
-      followUpNoteSchema.parse(data);
+      const parsed = followUpNoteSchema.parse(data);
       setErrors({});
+      createFollowUpMutation.mutate({ leadId, data: parsed });
       return true;
     } catch (err) {
       if (err instanceof ZodError) {
@@ -73,7 +81,7 @@ export const useFollowUpNoteFormHook = (
       }
       return false;
     }
-  }, [data]);
+  }, [data, leadId, createFollowUpMutation]);
 
   /** Reset all fields and errors */
   const resetFollowUpNoteData = useCallback(() => {
@@ -87,6 +95,7 @@ export const useFollowUpNoteFormHook = (
     setFollowUpNoteData,
     resetFollowUpNoteData,
     validateField,
+    createFollowUpMutation,
     validateFollowUpNoteData,
   };
 };

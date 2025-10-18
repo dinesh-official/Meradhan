@@ -46,7 +46,7 @@ export class CrmFollowUpApi implements TCrmFollowUp {
     config?: AxiosRequestConfig
   ): ReturnType<TCrmFollowUp["createFollowUp"]> {
     return this.apiClient.post<CreateNewFollowUpResponse>(
-      `/crm/lead`,
+      `/crm/lead/followup/${leadId}`,
       data,
       config
     );
