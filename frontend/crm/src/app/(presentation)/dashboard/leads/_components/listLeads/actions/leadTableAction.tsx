@@ -16,7 +16,7 @@ import Swal from "sweetalert2";
 import { useLeadTableActionHook } from "./useLeadTableActionHook";
 
 const LeadTableActions = ({ lead }: { lead: NewLeadPayload }) => {
-  const manager = useFollowUpNoteFormHook();
+const manager = useFollowUpNoteFormHook(lead.id);
   const [followUpOpen, setFollowUpOpen] = useState(false);
   const { handleLeadUpdate,deleteLeadMutation } = useLeadTableActionHook({
     leadId: lead.id,
@@ -65,6 +65,7 @@ const LeadTableActions = ({ lead }: { lead: NewLeadPayload }) => {
         </DropdownMenuContent>
       </DropdownMenu>
       <LeadFollowUpNotes
+      leadId={lead.id}
         manager={manager}
         open={followUpOpen}
         onOpenChange={setFollowUpOpen}

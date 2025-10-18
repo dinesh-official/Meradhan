@@ -21,4 +21,5 @@ export interface IFollowUpNoteFormHook {
   ) => void;
 
   validateFollowUpNoteData: () => boolean;
+  createFollowUpMutation: UseMutationResult
 }

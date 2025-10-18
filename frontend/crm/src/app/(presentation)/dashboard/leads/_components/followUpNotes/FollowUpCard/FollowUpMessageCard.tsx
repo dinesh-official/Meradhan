@@ -7,18 +7,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Trash2 } from "lucide-react";
+import { useFollowUpApiHook } from "../useFollowUpApiHook";
 
 interface FollowUpMessageCard {
   name: string;
   message: string;
   date: string;
+  leadFollowUpId: number;
 }
 const FollowUpMessageCard = (followUPMessageFormData: FollowUpMessageCard) => {
+  const { deleteFollowUpNotes } = useFollowUpApiHook();
   return (
-    <Card className="bg-gray-100 border-0" >
+    <Card className="bg-gray-100 border-0">
       <CardHeader className=" items-center">
         <CardTitle className="">{followUPMessageFormData.name}</CardTitle>
-        <CardAction><Trash2 className="h-4 w-4 text-red-600 cursor-pointer"/></CardAction>
+        <CardAction
+          onClick={() => {
+            deleteFollowUpNotes.mutate(followUPMessageFormData.leadFollowUpId);
+          }}
+        >
+          <Trash2 className="h-4 w-4 text-red-600 cursor-pointer" />
+        </CardAction>
       </CardHeader>
       <CardContent>
         <p className="text-gray-700 text-sm">

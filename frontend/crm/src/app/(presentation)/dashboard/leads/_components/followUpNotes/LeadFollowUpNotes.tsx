@@ -4,25 +4,51 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import FollowUpMessageCard from "./FollowUpCard/FollowUpMessageCard";
 import { IFollowUpNoteFormHook } from "./followUpFormData";
+import apiGateway, { NewFollowUpPayload } from "@root/apiGateway";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { useQuery } from "@tanstack/react-query";
 
 type LeadFollowUpNotesProps = {
   manager: IFollowUpNoteFormHook;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  leadId: number;
 };
 const LeadFollowUpNotes = ({
   manager,
   open,
   onOpenChange,
+  leadId,
 }: LeadFollowUpNotesProps) => {
+  const [followUps, setFollowUps] = useState<NewFollowUpPayload[]>([]);
+
+  const leadFollowUpApi = useMemo(
+    () => new apiGateway.crm.crmFollowup.CrmFollowUpApi(apiClientCaller),
+    []
+  );
+
+  const fetchFollowUps = async () => {
+    const res = await leadFollowUpApi.getAllFollowUpById(leadId);
+    const list = res.data?.data || [];
+    setFollowUps(Array.isArray(list) ? (list as NewFollowUpPayload[]) : []);
+  };
+
+  const { isLoading: isLoadingFollowUps } = useQuery({
+    queryKey: ["followUpsNotes", leadId],
+    enabled: Number.isFinite(leadId) && open, // <- remove `&& open` if you want it to fetch even when dialog is closed
+    queryFn: fetchFollowUps,
+    refetchOnWindowFocus: false,
+  });
+
+  // ✅ Extract actual array
+  console.log("foolowUps", followUps);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -33,8 +59,8 @@ const LeadFollowUpNotes = ({
           id="notes"
           placeholder="enter follow-up notes"
           className="mt-1"
-          value={manager.state.notes}
-          onChange={(e) => manager.setFollowUpNoteData("notes", e.target.value)}
+          value={manager.state.text}
+          onChange={(e) => manager.setFollowUpNoteData("text", e.target.value)}
         />
         <div className="flex  flex-row gap-5">
           <Input
@@ -56,31 +82,31 @@ const LeadFollowUpNotes = ({
         <div>
           <p className="font-medium text-sm mb-2 ">Follow-up History</p>
           <div className="max-h-64 overflow-auto flex flex-col gap-3">
-            <FollowUpMessageCard
-              name="Hemant Bhatnagar"
-              message="Followed up regarding document submission."
-              date="13 Oct 2025"
-            />
-            <FollowUpMessageCard
-              name="Hemant Bhatnagar"
-              message="Followed up regarding document submission."
-              date="13 Oct 2025"
-            />
-            <FollowUpMessageCard
-              name="Hemant Bhatnagar"
-              message="Followed up regarding document submission."
-              date="13 Oct 2025"
-            />
-            <FollowUpMessageCard
-              name="Hemant Bhatnagar"
-              message="Followed up regarding document submission."
-              date="13 Oct 2025"
-            />
-            <FollowUpMessageCard
-              name="Hemant Bhatnagar"
-              message="Followed up regarding document submission."
-              date="13 Oct 2025"
-            />
+            {isLoadingFollowUps ? (
+              <p className="text-sm text-muted-foreground">
+                Loading follow-ups...
+              </p>
+            ) : followUps.length > 0 ? (
+              <div className="max-h-64 overflow-auto flex flex-col gap-3">
+                {followUps.map((note: NewFollowUpPayload) => (
+                  <FollowUpMessageCard
+                    key={note.id}
+                    leadFollowUpId={note.id}
+                    name={note.createdByName}
+                    message={note.text}
+                    date={new Date(note.createdAt).toLocaleDateString("en-US", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No follow-ups added yet.
+              </p>
+            )}
           </div>
         </div>
       </DialogContent>
