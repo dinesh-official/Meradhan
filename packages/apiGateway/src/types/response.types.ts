@@ -181,7 +181,7 @@ export type CustomerByIdPayload = {
   avatar: string | null;
   VerifiedBy: number | null;
   createdBy: number | null;
-
+  createdAt: string; // ISO Date
   id: number;
   updatedAt: string; // ISO
 
