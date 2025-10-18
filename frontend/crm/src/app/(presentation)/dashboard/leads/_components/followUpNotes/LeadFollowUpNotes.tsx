@@ -13,10 +13,18 @@ import React from "react";
 import FollowUpMessageCard from "./FollowUpCard/FollowUpMessageCard";
 import { IFollowUpNoteFormHook } from "./followUpFormData";
 
-const LeadFollowUpNotes = ({ manager }: { manager: IFollowUpNoteFormHook }) => {
+type LeadFollowUpNotesProps = {
+  manager: IFollowUpNoteFormHook;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+const LeadFollowUpNotes = ({
+  manager,
+  open,
+  onOpenChange,
+}: LeadFollowUpNotesProps) => {
   return (
-    <Dialog>
-      <DialogTrigger>Open</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Follow-Up Note</DialogTitle>
@@ -47,30 +55,33 @@ const LeadFollowUpNotes = ({ manager }: { manager: IFollowUpNoteFormHook }) => {
         </div>
         <div>
           <p className="font-medium text-sm mb-2 ">Follow-up History</p>
-          <div  className="max-h-64 overflow-auto flex flex-col gap-3" >
-             <FollowUpMessageCard
-            name="Hemant Bhatnagar"
-            message="Followed up regarding document submission."
-            date="13 Oct 2025"
-          />
-          <FollowUpMessageCard
-            name="Hemant Bhatnagar"
-            message="Followed up regarding document submission."
-            date="13 Oct 2025"
-          /><FollowUpMessageCard
-            name="Hemant Bhatnagar"
-            message="Followed up regarding document submission."
-            date="13 Oct 2025"
-          /><FollowUpMessageCard
-            name="Hemant Bhatnagar"
-            message="Followed up regarding document submission."
-            date="13 Oct 2025"
-          /><FollowUpMessageCard
-            name="Hemant Bhatnagar"
-            message="Followed up regarding document submission."
-            date="13 Oct 2025"
-          />
-         </div>
+          <div className="max-h-64 overflow-auto flex flex-col gap-3">
+            <FollowUpMessageCard
+              name="Hemant Bhatnagar"
+              message="Followed up regarding document submission."
+              date="13 Oct 2025"
+            />
+            <FollowUpMessageCard
+              name="Hemant Bhatnagar"
+              message="Followed up regarding document submission."
+              date="13 Oct 2025"
+            />
+            <FollowUpMessageCard
+              name="Hemant Bhatnagar"
+              message="Followed up regarding document submission."
+              date="13 Oct 2025"
+            />
+            <FollowUpMessageCard
+              name="Hemant Bhatnagar"
+              message="Followed up regarding document submission."
+              date="13 Oct 2025"
+            />
+            <FollowUpMessageCard
+              name="Hemant Bhatnagar"
+              message="Followed up regarding document submission."
+              date="13 Oct 2025"
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

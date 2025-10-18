@@ -14,7 +14,6 @@ import { useLeadFilterListHook } from "./_components/listLeads/useLeadFilterList
 import { useLeadFilterApiHook } from "./_components/listLeads/useLeadFilterApiHook";
 
 function LeadsView() {
-  const manager = useFollowUpNoteFormHook();
   const filterManager = useLeadFilterListHook();
   const filterApiManager = useLeadFilterApiHook(filterManager);
   const isShowPagination = () => {
@@ -39,7 +38,6 @@ function LeadsView() {
           </Link>
         }
       />
-      <LeadFollowUpNotes manager={manager} />
       <Card className="mt-5">
         <LeadsSearchFilterBar
           placeholder="Search leads..."

@@ -56,7 +56,7 @@ export class CrmLeadApi implements TCrmLeadInterface {
     leadId: number,
     config?: AxiosRequestConfig
   ): ReturnType<TCrmLeadInterface["getNewLeadById"]> {
-    return this.apiClient.post<GetNewLeadByIdResponse>(
+    return this.apiClient.get<GetNewLeadByIdResponse>(
       `/crm/lead/${leadId}`,
       config
     );

@@ -11,7 +11,7 @@ export const useLeadFilterApiHook = (filterState: TLeadFilterListHook) => {
 
   const fetchLeadsQuery = useQuery({
     queryKey: [
-      "fetchLeadsQuery",
+      "fetchLeadQuery",
       state.paginationIndex,
       state.search,
       state.sourceFilter,

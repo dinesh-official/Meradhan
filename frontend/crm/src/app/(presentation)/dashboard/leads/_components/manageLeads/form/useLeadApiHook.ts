@@ -1,3 +1,4 @@
+import { queryClient } from "@/core/config/reactQuery";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
@@ -8,7 +9,9 @@ import z from "zod";
 
 export const useLeadFollowUpApiHook = () => {
   const router = useRouter();
-  const leadFollowUpApi = new apiGateway.crm.crmLeads.CrmLead(apiClientCaller);
+  const leadFollowUpApi = new apiGateway.crm.crmLeads.CrmLeadApi(
+    apiClientCaller
+  );
 
   const createLeadMutation = useMutation({
     mutationKey: ["createLeadMutation"],
@@ -33,7 +36,35 @@ export const useLeadFollowUpApiHook = () => {
     },
   });
 
+  const updateLeadMutation = useMutation({
+    mutationKey: ["updateLead"],
+    mutationFn: async (payload: {
+    data: z.infer<(typeof appSchema.crm.leads)["updateLeadSchema"]>;
+      leadId: number;
+    }) => {
+      const response = await leadFollowUpApi.updateNewLeadById(
+        payload.leadId,
+        payload.data
+      );
+
+      return response.data;
+    },
+    onSuccess() {
+      toast.success("User added Successfully");
+       queryClient.invalidateQueries({ queryKey: ["fetchLeadQuery"] });
+      router.back();
+    },
+    onError(error) {
+      console.log("error", error);
+      if (error instanceof ApiError) {
+        toast.error(error.response?.data?.message);
+      } else {
+        toast.error(error.message);
+      }
+    },
+  });
   return {
+    updateLeadMutation,
     createLeadMutation,
   };
 };

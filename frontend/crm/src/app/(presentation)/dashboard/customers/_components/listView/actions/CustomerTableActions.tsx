@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CustomerProfile } from "@root/apiGateway";
 import { MoreHorizontal } from "lucide-react";
-import { useCustomerTableActions } from "./customerTableActionHook";
+import { useCustomerTableActions } from "./useCustomerTableActionHook";
 import Swal from "sweetalert2";
 
 const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {

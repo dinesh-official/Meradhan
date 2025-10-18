@@ -56,15 +56,13 @@ export type CrmUserBase = {
   role: Role;
   createdAt: string;
   updatedAt: string;
-  accountStatus: AccountStatus
+  accountStatus: AccountStatus;
   createdBy: number;
 };
 
 export type CrmUserAccountStatus = "SUSPENDED" | "ACTIVE";
 
-export type CrmUsersProfile = CrmUserBase & {
-
-};
+export type CrmUsersProfile = CrmUserBase & {};
 
 export type PaginationMeta = {
   total: number;
@@ -157,7 +155,7 @@ export type DetailCustomerUtility = {
   termsAccepted: boolean;
   lastLogin: string | null; // ISO string or null
   whatsAppNotificationAllow: boolean;
-  relationshipManager: CrmUsersProfile | null
+  relationshipManager: CrmUsersProfile | null;
 };
 // Customer By ID Payload
 export type CustomerByIdPayload = {
@@ -258,15 +256,40 @@ export type UpdateCustomerResponse = BaseResponseData<UpdateCustomerPayload>;
 
 //CRM LEADS TYPES
 
+export type SourceType =
+  | "WEBSITE"
+  | "REFERRAL"
+  | "SOCIAL"
+  | "ADVERTISEMENT"
+  | "EVENT"
+  | "COLD_CALL"
+  | "EMAIL"
+  | "OTHER";
+
+export type StatusType =
+  | "NEW"
+  | "CONTACTED"
+  | "QUALIFIED"
+  | "UNQUALIFIED"
+  | "CONVERTED";
+
+export type BondType =
+  | "GOVERNMENT"
+  | "CORPORATE"
+  | "TAX_FREE"
+  | "SOVEREIGN_GOLD_BOND"
+  | "PSU"
+  | "OTHER";
+
 export type NewLeadPayload = {
   id: number;
   fullName: string;
   emailAddress: string;
   phoneNo: string;
   companyName: string;
-  leadSource: string;
-  bondType: string;
-  status: string;
+  leadSource: SourceType;
+  bondType: BondType;
+  status: StatusType;
   exInvestmentAmount: number | null;
   note: string | null;
   createdBy: number;
@@ -307,16 +330,15 @@ export type NewFollowUpPayload = {
   updatedAt: string; // ISO Date
 };
 
-export type CreateNewFollowUpResponse =
-  BaseResponseData<NewFollowUpPayload>;
+export type CreateNewFollowUpResponse = BaseResponseData<NewFollowUpPayload>;
 
 // /crm/lead/followup/:leadId
-export type GetAllFollowUpsByIdResponse =
-  BaseResponseData<NewFollowUpPayload[]>
-
+export type GetAllFollowUpsByIdResponse = BaseResponseData<
+  NewFollowUpPayload[]
+>;
 
 ///crm/lead/followup/:followId
-export type DeleteFollowUpByIdResponse = BaseResponseData<boolean>
+export type DeleteFollowUpByIdResponse = BaseResponseData<boolean>;
 
 ///crm/lead/followup/:followUpId
-export type UpdateFollowUpByIdResponse = BaseResponseData<NewFollowUpPayload>
+export type UpdateFollowUpByIdResponse = BaseResponseData<NewFollowUpPayload>;
