@@ -34,17 +34,17 @@ export class OtpVerificationService implements IOtpVerificationService {
             console.log("====================");
         }
         const value = await hashingUtils.hashPassword(otp)
-        await this.store.setKey(`${this.storeKey}:${identifier}`, value, expirySeconds);
+        await this.store.setKey(`${this.storeKey}:${identifier}`, { otp: value }, expirySeconds);
         const token = tokenUtils.generateToken<{ identifier: string }>({ identifier }, expirySeconds)
         return { token, otp };
     }
 
     async verifyOtp(token: string, otp: string): ReturnType<IOtpVerificationService['verifyOtp']> {
         const tokenData = tokenUtils.verifyToken<{ identifier: string }>(token)
-        const record = await this.store.getKey<string>(`${this.storeKey}:${tokenData.identifier}`)
+        const record = await this.store.getKey<{ otp: string }>(`${this.storeKey}:${tokenData.identifier}`)
         if (!record) throw new AppError("The provided OTP is no longer valid.");
 
-        const isValid = await hashingUtils.comparePassword(otp, record);
+        const isValid = await hashingUtils.comparePassword(otp, record.otp);
         if (!isValid) throw new AppError("Invalid OTP. Please try again.");
         await this.store.deleteKey(`${this.storeKey}:${tokenData.identifier}`)
         return isValid;

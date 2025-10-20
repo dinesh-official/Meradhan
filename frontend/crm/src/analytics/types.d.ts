@@ -1,19 +1,6 @@
+import { ActivityTypes } from "./analytics";
 
-export const ActivityTypes = [
-  "login",
-  'logout', 
-  "page_view",
-  "auto_logout",
-  "click",
-  "scroll_depth",
-  "otp_request",
-  "page_duration",
-  "create_entry",
-  "delete_entry",
-  "update_entry",
-  "refresh",
-  "activity"
-] as const;
+
 
 export type ActivityType = (typeof ActivityTypes)[number];
 

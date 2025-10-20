@@ -19,7 +19,7 @@ export class CustomerPersonalInformationManager {
           occupationType: data.occupationType,
           qualification: data.qualification,
           residentialStatus: data.residentialStatus,
-          CustomerProfileDataModel: {
+          customerProfileDataModel: {
             connect: { id: customerProfileId },
           },
         },
@@ -56,7 +56,7 @@ export class CustomerPersonalInformationManager {
   ) {
     const customerPersonalInformation =
       await db.dataBase.customerPersonalInfoModel.findFirst({
-        where: { CustomerProfileDataModel: { some: { id: customerProfileId } } },
+        where: { customerProfileDataModel: { id: customerProfileId } },
       });
     if (!customerPersonalInformation) {
       throw new AppError(

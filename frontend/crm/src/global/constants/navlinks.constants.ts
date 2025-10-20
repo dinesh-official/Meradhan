@@ -111,8 +111,14 @@ export const NAV_ITEMS: NavItem[] = [
                         allowOnly: ['edit:rfq'],
                     },
                     {
+                        label: 'Participants',
+                        path: '/dashboard/rfqs/nse/participants',
+                        module: 'rfq',
+                        allowOnly: ['view:rfq'],
+                    },
+                    {
                         label: 'Add Participant',
-                        path: '/dashboard/rfqs/nse/participant/create',
+                        path: '/dashboard/rfqs/nse/participants/create',
                         module: 'rfq',
                         allowOnly: ['create:rfq'],
                     },

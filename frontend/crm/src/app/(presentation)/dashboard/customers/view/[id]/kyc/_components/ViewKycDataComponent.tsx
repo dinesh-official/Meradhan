@@ -20,7 +20,7 @@ import { genMediaUrl } from "@/global/utils/url.utils";
 
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   return (
-    <div className="flex flex-col gap-5 relative">
+    <div className="flex flex-col gap-5 relative mt-5">
       <div className="grid xl:grid-cols-2 gap-5">
         <CustomerOverViewCard
           name={`${data.firstName} ${data.middleName} ${data.lastName}`}

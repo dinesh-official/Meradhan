@@ -20,6 +20,7 @@ import {
   CustomDetails,
 } from "./types";
 import { useMaxScrollPercent } from "./hooks/useMaxScrollPercent";
+import { useCurrentUserData } from "@/global/stores/useCurrentUserData.store";
 
 type GeoData = {
   ip?: string;
@@ -121,15 +122,22 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         details,
         time: new Date().toLocaleTimeString(),
       };
-      console.log("%c[TRACK]", "color: #4ade80", entry);
       setActivities((prev) => [entry, ...prev.slice(0, 19)]);
       track(type, details);
     },
     []
   );
 
+  const { user } = useCurrentUserData();
+
   const trackActivity = useCallback(
     async (type: ActivityType, data: Record<string, unknown> = {}) => {
+      if (user) {
+        localStorage.setItem("name", user.name);
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("role", user.role);
+      }
+
       if (!type) return;
       const payload = {
         url: pathname,
@@ -145,11 +153,16 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         token: cookies.token,
         maxScrollPercent: maxScrollPercent,
         ipData: await getUserIpData(),
+        user: {
+          name: user?.name || localStorage.getItem("name"),
+          email: user?.email || localStorage.getItem("email"),
+          role: user?.role || localStorage.getItem("role"),
+        },
         ...data,
       };
       logActivity(type, payload);
     },
-    [pathname, searchParams, cookies, logActivity, maxScrollPercent]
+    [pathname, searchParams, cookies, logActivity, maxScrollPercent, user]
   );
 
   /** -------------------------------
@@ -163,7 +176,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
     }, 300); // small delay ensures title & DOM are ready
 
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   /** -------------------------------
@@ -195,7 +208,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
     clickCount.current = 0;
     pageStart.current = Date.now();
     lastPath.current = pathname;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   /** -------------------------------
@@ -213,7 +226,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
     };
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** -------------------------------
@@ -243,7 +256,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         window.removeEventListener(event, resetIdleTimer)
       );
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -1,6 +1,9 @@
 model NseDataSet {
-    id                       Int                        @id @default(autoincrement())
-    CustomerProfileDataModel CustomerProfileDataModel[]
+    id Int @id @default(autoincrement())
+
+    // One-to-one relationship with CustomerProfileDataModel
+    customerProfileDataModelId Int                      @unique
+    customerProfileDataModel   CustomerProfileDataModel @relation(fields: [customerProfileDataModelId], references: [id],onDelete:Cascade )
 
     participant                 NseCbricsParticipantModel @relation(fields: [nseCbricsParticipantModelId], references: [id])
     nseCbricsParticipantModelId Int
@@ -9,9 +12,11 @@ model NseDataSet {
 }
 
 model NseCbricsParticipantModel {
-    id      Int    @unique
-    loginId String @unique
+    key Int @id @default(autoincrement())
 
+    id             Int       @unique
+    loginId        String    @unique
+    userId         Int       @unique
     actualStatus   Int
     workflowStatus Int
     firstName      String

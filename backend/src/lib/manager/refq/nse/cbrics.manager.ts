@@ -2,6 +2,7 @@ import { db, type CustomersBankAccountModel, type CustomersDematAccountModel } f
 import { NseCBRICS } from "@lib/provider/RFQ/nse/NseCBRICS";
 import { getStateCode } from "@lib/provider/RFQ/nse/values";
 import { AppError } from "@utils/error/AppError";
+import { removeCountryCode } from "@utils/filters/convert";
 
 export class ParticipantManager {
 
@@ -34,12 +35,12 @@ export class ParticipantManager {
             contactPerson: `${user.firstName} ${user.middleName} ${user.lastName}`,
             firstName: `${user.firstName} ${user.middleName} ${user.lastName}`,
             loginId: user.userName,
-            mobileList: [user.middleName],
+            mobileList: [removeCountryCode(user.phoneNo)],
             panNo: user.panCard!.panCardNo,
             emailList: [user.emailAddress],
             stateCode: getStateCode(user.currentAddress!.state)!,
             regAddress: user.currentAddress!.fullAddress,
-            telephone: user.phoneNo,
+            telephone: removeCountryCode(user.phoneNo),
             expiryDate: null,
             leiCode: null,
             custodian: null,
@@ -68,14 +69,14 @@ export class ParticipantManager {
                 id: user.id
             },
             data: {
-                nse: {
+                nseDataSet: {
                     create: {
                         participant: {
                             create: {
                                 actualStatus: participant.actualStatus,
                                 contactPerson: participant.contactPerson,
                                 custodian: participant.custodian,
-
+                                userId: userId,
                                 firstName: participant.firstName,
                                 id: participant.id,
                                 loginId: participant.loginId,
@@ -129,7 +130,7 @@ export class ParticipantManager {
                 }
             },
             include: {
-                nse: {
+                nseDataSet: {
                     include: {
                         participant: true
                     }
@@ -138,7 +139,7 @@ export class ParticipantManager {
 
         })
 
-        return saveToMyDb.nse!.participant;
+        return saveToMyDb.nseDataSet!.participant;
     }
 
     public async updateParticipant(userId: number) {
@@ -150,7 +151,7 @@ export class ParticipantManager {
                 currentAddress: true,
                 bankAccounts: true,
                 dematAccounts: true,
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
@@ -170,18 +171,18 @@ export class ParticipantManager {
 
         // send to cbrics
         const participant = await this.cbrics.updateUnregisteredParticipant({
-            id: user.nse!.participant.id,
+            id: user.nseDataSet!.participant.id,
             address: user.currentAddress!.line1,
             address2: user.currentAddress?.line2 || undefined,
             address3: user.currentAddress?.line3 || undefined,
             contactPerson: `${user.firstName} ${user.middleName} ${user.lastName}`,
             firstName: `${user.firstName} ${user.middleName} ${user.lastName}`,
-            mobileList: [user.middleName],
+            mobileList: [removeCountryCode(user.phoneNo)],
             panNo: user.panCard!.panCardNo,
             emailList: [user.emailAddress],
             stateCode: getStateCode(user.currentAddress!.state)!,
             regAddress: user.currentAddress!.fullAddress,
-            telephone: user.phoneNo,
+            telephone: removeCountryCode(user.phoneNo),
             expiryDate: null,
             leiCode: null,
             custodian: null,
@@ -210,7 +211,7 @@ export class ParticipantManager {
         await db.dataBase.nSEBankAccount.deleteMany({
             where: {
                 id: {
-                    in: user.nse?.participant.bankAccountList.map((e) => e.id)
+                    in: user.nseDataSet?.participant.bankAccountList.map((e) => e.id)
                 }
             }
         });
@@ -219,7 +220,7 @@ export class ParticipantManager {
         await db.dataBase.nSEDpAccount.deleteMany({
             where: {
                 id: {
-                    in: user.nse?.participant.dpAccountList.map((e) => e.id)
+                    in: user.nseDataSet?.participant.dpAccountList.map((e) => e.id)
                 }
             }
         });
@@ -228,7 +229,7 @@ export class ParticipantManager {
         // save to our db 
         const saveToMyDb = await db.dataBase.nseCbricsParticipantModel.update({
             where: {
-                id: user.nse!.participant.id,
+                id: user.nseDataSet!.participant.id,
             },
             data: {
                 actualStatus: participant.actualStatus,
@@ -292,11 +293,15 @@ export class ParticipantManager {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: userId },
             select: {
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
                                 id: true
+                            },
+                            include: {
+                                bankAccountList: true,
+                                dpAccountList: true
                             }
                         }
                     }
@@ -304,18 +309,35 @@ export class ParticipantManager {
             }
 
         });
-        if (!user?.nse?.participant.id) {
+        if (!user?.nseDataSet?.participant.id) {
             throw new AppError("No participant Found");
         }
 
         // send to cbrics
-        const participant = await this.cbrics.getUnregisteredParticipantById(user.nse.participant.id);
+        const participant = await this.cbrics.getUnregisteredParticipantById(user.nseDataSet.participant.id);
 
+        /// delete old nse Bank Accounts form local
+        await db.dataBase.nSEBankAccount.deleteMany({
+            where: {
+                id: {
+                    in: user.nseDataSet?.participant.bankAccountList.map((e) => e.id)
+                }
+            }
+        });
+
+        /// delete old nse dp Accounts form local
+        await db.dataBase.nSEDpAccount.deleteMany({
+            where: {
+                id: {
+                    in: user.nseDataSet?.participant.dpAccountList.map((e) => e.id)
+                }
+            }
+        });
 
         // save to our db 
         const updateToMyDb = await db.dataBase.nseCbricsParticipantModel.update({
             where: {
-                id: user.nse.participant.id
+                id: user.nseDataSet.participant.id
             },
             data: {
                 actualStatus: participant.actualStatus,
@@ -382,7 +404,7 @@ export class ParticipantManager {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: userId },
             select: {
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
@@ -395,7 +417,7 @@ export class ParticipantManager {
             }
 
         });
-        if (!user?.nse?.participant.id) {
+        if (!user?.nseDataSet?.participant.id) {
             throw new AppError("No participant Found");
         }
         const addedBank = await this.cbrics.addUnregisteredBankAccount({
@@ -403,7 +425,7 @@ export class ParticipantManager {
             bankName: bank.bankName,
             isDefault: bank.isPrimary ? "Y" : "N",
             bankAccountNo: bank.accountNumber,
-            participantCode: user.nse.participant.loginId,
+            participantCode: user.nseDataSet.participant.loginId,
         })
         await this.syncParticipant(userId);
         return addedBank;
@@ -414,7 +436,7 @@ export class ParticipantManager {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: userId },
             select: {
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
@@ -427,13 +449,13 @@ export class ParticipantManager {
             }
 
         });
-        if (!user?.nse?.participant.id) {
+        if (!user?.nseDataSet?.participant.id) {
             throw new AppError("No participant Found");
         }
         const addedBank = await this.cbrics.markDefaultUnregisteredBankAccount({
             bankIFSC: bank.ifscCode,
             bankAccountNo: bank.accountNumber,
-            participantCode: user.nse.participant.loginId,
+            participantCode: user.nseDataSet.participant.loginId,
         })
         await this.syncParticipant(userId);
         return addedBank;
@@ -444,7 +466,7 @@ export class ParticipantManager {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: userId },
             select: {
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
@@ -457,13 +479,13 @@ export class ParticipantManager {
             }
 
         });
-        if (!user?.nse?.participant.id) {
+        if (!user?.nseDataSet?.participant.id) {
             throw new AppError("No participant Found");
         }
         const addedBank = await this.cbrics.updateUnregisteredBankAccountStatus({
             bankIFSC: bank.ifscCode,
             bankAccountNo: bank.accountNumber,
-            participantCode: user.nse.participant.loginId,
+            participantCode: user.nseDataSet.participant.loginId,
             status: "D"
         })
         await this.syncParticipant(userId);
@@ -475,7 +497,7 @@ export class ParticipantManager {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: userId },
             select: {
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
@@ -488,12 +510,12 @@ export class ParticipantManager {
             }
 
         });
-        if (!user?.nse?.participant.id) {
+        if (!user?.nseDataSet?.participant.id) {
             throw new AppError("No participant Found");
         }
 
         const addedDpAccount = await this.cbrics.addUnregisteredDpAccount({
-            participantCode: user.nse.participant.loginId,
+            participantCode: user.nseDataSet.participant.loginId,
             benId: dpAccount.clientId,
             dpType: dpAccount.depositoryName,
             isDefault: dpAccount.isPrimary ? "Y" : "N",
@@ -509,7 +531,7 @@ export class ParticipantManager {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: userId },
             select: {
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
@@ -523,12 +545,12 @@ export class ParticipantManager {
 
         });
 
-        if (!user?.nse?.participant.id) {
+        if (!user?.nseDataSet?.participant.id) {
             throw new AppError("No participant Found");
         }
 
         const addedDpAccount = await this.cbrics.markDefaultUnregisteredDpAccount({
-            participantCode: user.nse.participant.loginId,
+            participantCode: user.nseDataSet.participant.loginId,
             benId: dpAccount.clientId,
             dpType: dpAccount.depositoryName,
             dpId: dpAccount.dpId,
@@ -542,7 +564,7 @@ export class ParticipantManager {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: userId },
             select: {
-                nse: {
+                nseDataSet: {
                     select: {
                         participant: {
                             select: {
@@ -556,12 +578,12 @@ export class ParticipantManager {
 
         });
 
-        if (!user?.nse?.participant.id) {
+        if (!user?.nseDataSet?.participant.id) {
             throw new AppError("No participant Found");
         }
 
         const addedDpAccount = await this.cbrics.updateUnregisteredDpAccountStatus({
-            participantCode: user.nse.participant.loginId,
+            participantCode: user.nseDataSet.participant.loginId,
             benId: dpAccount.clientId,
             dpType: dpAccount.depositoryName,
             dpId: dpAccount.dpId,

@@ -35,39 +35,39 @@ export type CustomersAuthDataModel = $Result.DefaultSelection<Prisma.$CustomersA
 export type CustomerProfileDataModel = $Result.DefaultSelection<Prisma.$CustomerProfileDataModelPayload>
 /**
  * Model CustomerPersonalInfoModel
- * Stores customer's personal information and identity documents
+ * Stores customer's personal information and identity documents (1:1)
  */
 export type CustomerPersonalInfoModel = $Result.DefaultSelection<Prisma.$CustomerPersonalInfoModelPayload>
 /**
  * Model AADHAARCardModel
- * Aadhaar card (identity proof) data model
+ * Aadhaar card (identity proof) data model (1:1)
  */
 export type AADHAARCardModel = $Result.DefaultSelection<Prisma.$AADHAARCardModelPayload>
 /**
  * Model PanCardModel
- * PAN card (tax identity proof) data model
+ * PAN card (tax identity proof) data model (1:1)
  */
 export type PanCardModel = $Result.DefaultSelection<Prisma.$PanCardModelPayload>
 /**
- * Model CustomersBankAccountModel
- * Bank account information linked to a customer
- */
-export type CustomersBankAccountModel = $Result.DefaultSelection<Prisma.$CustomersBankAccountModelPayload>
-/**
- * Model CustomersDematAccountModel
- * Demat / Broker account data (for trading accounts)
- */
-export type CustomersDematAccountModel = $Result.DefaultSelection<Prisma.$CustomersDematAccountModelPayload>
-/**
  * Model CustomersRiskProfileModel
- * Risk profile of a customer (e.g., low / medium / high risk)
+ * Risk profile of a customer (1:1)
  */
 export type CustomersRiskProfileModel = $Result.DefaultSelection<Prisma.$CustomersRiskProfileModelPayload>
 /**
  * Model AddressModel
- * Address model (used for both current and permanent addresses)
+ * Address model (1:1 used for both current and permanent)
  */
 export type AddressModel = $Result.DefaultSelection<Prisma.$AddressModelPayload>
+/**
+ * Model CustomersBankAccountModel
+ * Bank account information linked to a customer (1-to-many)
+ */
+export type CustomersBankAccountModel = $Result.DefaultSelection<Prisma.$CustomersBankAccountModelPayload>
+/**
+ * Model CustomersDematAccountModel
+ * Demat / Broker account data (1-to-many)
+ */
+export type CustomersDematAccountModel = $Result.DefaultSelection<Prisma.$CustomersDematAccountModelPayload>
 /**
  * Model LeadsModel
  * 
@@ -467,26 +467,6 @@ export class PrismaClient<
   get panCardModel(): Prisma.PanCardModelDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.customersBankAccountModel`: Exposes CRUD operations for the **CustomersBankAccountModel** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more CustomersBankAccountModels
-    * const customersBankAccountModels = await prisma.customersBankAccountModel.findMany()
-    * ```
-    */
-  get customersBankAccountModel(): Prisma.CustomersBankAccountModelDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.customersDematAccountModel`: Exposes CRUD operations for the **CustomersDematAccountModel** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more CustomersDematAccountModels
-    * const customersDematAccountModels = await prisma.customersDematAccountModel.findMany()
-    * ```
-    */
-  get customersDematAccountModel(): Prisma.CustomersDematAccountModelDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.customersRiskProfileModel`: Exposes CRUD operations for the **CustomersRiskProfileModel** model.
     * Example usage:
     * ```ts
@@ -505,6 +485,26 @@ export class PrismaClient<
     * ```
     */
   get addressModel(): Prisma.AddressModelDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.customersBankAccountModel`: Exposes CRUD operations for the **CustomersBankAccountModel** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CustomersBankAccountModels
+    * const customersBankAccountModels = await prisma.customersBankAccountModel.findMany()
+    * ```
+    */
+  get customersBankAccountModel(): Prisma.CustomersBankAccountModelDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.customersDematAccountModel`: Exposes CRUD operations for the **CustomersDematAccountModel** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CustomersDematAccountModels
+    * const customersDematAccountModels = await prisma.customersDematAccountModel.findMany()
+    * ```
+    */
+  get customersDematAccountModel(): Prisma.CustomersDematAccountModelDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.leadsModel`: Exposes CRUD operations for the **LeadsModel** model.
@@ -1022,10 +1022,10 @@ export namespace Prisma {
     CustomerPersonalInfoModel: 'CustomerPersonalInfoModel',
     AADHAARCardModel: 'AADHAARCardModel',
     PanCardModel: 'PanCardModel',
-    CustomersBankAccountModel: 'CustomersBankAccountModel',
-    CustomersDematAccountModel: 'CustomersDematAccountModel',
     CustomersRiskProfileModel: 'CustomersRiskProfileModel',
     AddressModel: 'AddressModel',
+    CustomersBankAccountModel: 'CustomersBankAccountModel',
+    CustomersDematAccountModel: 'CustomersDematAccountModel',
     LeadsModel: 'LeadsModel',
     LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
     NseDataSet: 'NseDataSet',
@@ -1051,7 +1051,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersBankAccountModel" | "customersDematAccountModel" | "customersRiskProfileModel" | "addressModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt"
+      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1573,154 +1573,6 @@ export namespace Prisma {
           }
         }
       }
-      CustomersBankAccountModel: {
-        payload: Prisma.$CustomersBankAccountModelPayload<ExtArgs>
-        fields: Prisma.CustomersBankAccountModelFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.CustomersBankAccountModelFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.CustomersBankAccountModelFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
-          }
-          findFirst: {
-            args: Prisma.CustomersBankAccountModelFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.CustomersBankAccountModelFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
-          }
-          findMany: {
-            args: Prisma.CustomersBankAccountModelFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>[]
-          }
-          create: {
-            args: Prisma.CustomersBankAccountModelCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
-          }
-          createMany: {
-            args: Prisma.CustomersBankAccountModelCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.CustomersBankAccountModelCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>[]
-          }
-          delete: {
-            args: Prisma.CustomersBankAccountModelDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
-          }
-          update: {
-            args: Prisma.CustomersBankAccountModelUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
-          }
-          deleteMany: {
-            args: Prisma.CustomersBankAccountModelDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.CustomersBankAccountModelUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.CustomersBankAccountModelUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>[]
-          }
-          upsert: {
-            args: Prisma.CustomersBankAccountModelUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
-          }
-          aggregate: {
-            args: Prisma.CustomersBankAccountModelAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateCustomersBankAccountModel>
-          }
-          groupBy: {
-            args: Prisma.CustomersBankAccountModelGroupByArgs<ExtArgs>
-            result: $Utils.Optional<CustomersBankAccountModelGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.CustomersBankAccountModelCountArgs<ExtArgs>
-            result: $Utils.Optional<CustomersBankAccountModelCountAggregateOutputType> | number
-          }
-        }
-      }
-      CustomersDematAccountModel: {
-        payload: Prisma.$CustomersDematAccountModelPayload<ExtArgs>
-        fields: Prisma.CustomersDematAccountModelFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.CustomersDematAccountModelFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.CustomersDematAccountModelFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
-          }
-          findFirst: {
-            args: Prisma.CustomersDematAccountModelFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.CustomersDematAccountModelFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
-          }
-          findMany: {
-            args: Prisma.CustomersDematAccountModelFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>[]
-          }
-          create: {
-            args: Prisma.CustomersDematAccountModelCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
-          }
-          createMany: {
-            args: Prisma.CustomersDematAccountModelCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.CustomersDematAccountModelCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>[]
-          }
-          delete: {
-            args: Prisma.CustomersDematAccountModelDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
-          }
-          update: {
-            args: Prisma.CustomersDematAccountModelUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
-          }
-          deleteMany: {
-            args: Prisma.CustomersDematAccountModelDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.CustomersDematAccountModelUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.CustomersDematAccountModelUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>[]
-          }
-          upsert: {
-            args: Prisma.CustomersDematAccountModelUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
-          }
-          aggregate: {
-            args: Prisma.CustomersDematAccountModelAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateCustomersDematAccountModel>
-          }
-          groupBy: {
-            args: Prisma.CustomersDematAccountModelGroupByArgs<ExtArgs>
-            result: $Utils.Optional<CustomersDematAccountModelGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.CustomersDematAccountModelCountArgs<ExtArgs>
-            result: $Utils.Optional<CustomersDematAccountModelCountAggregateOutputType> | number
-          }
-        }
-      }
       CustomersRiskProfileModel: {
         payload: Prisma.$CustomersRiskProfileModelPayload<ExtArgs>
         fields: Prisma.CustomersRiskProfileModelFieldRefs
@@ -1866,6 +1718,154 @@ export namespace Prisma {
           count: {
             args: Prisma.AddressModelCountArgs<ExtArgs>
             result: $Utils.Optional<AddressModelCountAggregateOutputType> | number
+          }
+        }
+      }
+      CustomersBankAccountModel: {
+        payload: Prisma.$CustomersBankAccountModelPayload<ExtArgs>
+        fields: Prisma.CustomersBankAccountModelFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CustomersBankAccountModelFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CustomersBankAccountModelFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
+          }
+          findFirst: {
+            args: Prisma.CustomersBankAccountModelFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CustomersBankAccountModelFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
+          }
+          findMany: {
+            args: Prisma.CustomersBankAccountModelFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>[]
+          }
+          create: {
+            args: Prisma.CustomersBankAccountModelCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
+          }
+          createMany: {
+            args: Prisma.CustomersBankAccountModelCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CustomersBankAccountModelCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>[]
+          }
+          delete: {
+            args: Prisma.CustomersBankAccountModelDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
+          }
+          update: {
+            args: Prisma.CustomersBankAccountModelUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
+          }
+          deleteMany: {
+            args: Prisma.CustomersBankAccountModelDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CustomersBankAccountModelUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CustomersBankAccountModelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>[]
+          }
+          upsert: {
+            args: Prisma.CustomersBankAccountModelUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersBankAccountModelPayload>
+          }
+          aggregate: {
+            args: Prisma.CustomersBankAccountModelAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCustomersBankAccountModel>
+          }
+          groupBy: {
+            args: Prisma.CustomersBankAccountModelGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CustomersBankAccountModelGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CustomersBankAccountModelCountArgs<ExtArgs>
+            result: $Utils.Optional<CustomersBankAccountModelCountAggregateOutputType> | number
+          }
+        }
+      }
+      CustomersDematAccountModel: {
+        payload: Prisma.$CustomersDematAccountModelPayload<ExtArgs>
+        fields: Prisma.CustomersDematAccountModelFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CustomersDematAccountModelFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CustomersDematAccountModelFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
+          }
+          findFirst: {
+            args: Prisma.CustomersDematAccountModelFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CustomersDematAccountModelFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
+          }
+          findMany: {
+            args: Prisma.CustomersDematAccountModelFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>[]
+          }
+          create: {
+            args: Prisma.CustomersDematAccountModelCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
+          }
+          createMany: {
+            args: Prisma.CustomersDematAccountModelCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CustomersDematAccountModelCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>[]
+          }
+          delete: {
+            args: Prisma.CustomersDematAccountModelDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
+          }
+          update: {
+            args: Prisma.CustomersDematAccountModelUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
+          }
+          deleteMany: {
+            args: Prisma.CustomersDematAccountModelDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CustomersDematAccountModelUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CustomersDematAccountModelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>[]
+          }
+          upsert: {
+            args: Prisma.CustomersDematAccountModelUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomersDematAccountModelPayload>
+          }
+          aggregate: {
+            args: Prisma.CustomersDematAccountModelAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCustomersDematAccountModel>
+          }
+          groupBy: {
+            args: Prisma.CustomersDematAccountModelGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CustomersDematAccountModelGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CustomersDematAccountModelCountArgs<ExtArgs>
+            result: $Utils.Optional<CustomersDematAccountModelCountAggregateOutputType> | number
           }
         }
       }
@@ -2490,10 +2490,10 @@ export namespace Prisma {
     customerPersonalInfoModel?: CustomerPersonalInfoModelOmit
     aADHAARCardModel?: AADHAARCardModelOmit
     panCardModel?: PanCardModelOmit
-    customersBankAccountModel?: CustomersBankAccountModelOmit
-    customersDematAccountModel?: CustomersDematAccountModelOmit
     customersRiskProfileModel?: CustomersRiskProfileModelOmit
     addressModel?: AddressModelOmit
+    customersBankAccountModel?: CustomersBankAccountModelOmit
+    customersDematAccountModel?: CustomersDematAccountModelOmit
     leadsModel?: LeadsModelOmit
     leadFollowUpNotesModel?: LeadFollowUpNotesModelOmit
     nseDataSet?: NseDataSetOmit
@@ -2617,37 +2617,6 @@ export namespace Prisma {
 
 
   /**
-   * Count Type CustomersAuthDataModelCountOutputType
-   */
-
-  export type CustomersAuthDataModelCountOutputType = {
-    CustomerProfileDataModel: number
-  }
-
-  export type CustomersAuthDataModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | CustomersAuthDataModelCountOutputTypeCountCustomerProfileDataModelArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * CustomersAuthDataModelCountOutputType without action
-   */
-  export type CustomersAuthDataModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersAuthDataModelCountOutputType
-     */
-    select?: CustomersAuthDataModelCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * CustomersAuthDataModelCountOutputType without action
-   */
-  export type CustomersAuthDataModelCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
-  }
-
-
-  /**
    * Count Type CustomerProfileDataModelCountOutputType
    */
 
@@ -2684,201 +2653,6 @@ export namespace Prisma {
    */
   export type CustomerProfileDataModelCountOutputTypeCountDematAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CustomersDematAccountModelWhereInput
-  }
-
-
-  /**
-   * Count Type CustomerPersonalInfoModelCountOutputType
-   */
-
-  export type CustomerPersonalInfoModelCountOutputType = {
-    CustomerProfileDataModel: number
-  }
-
-  export type CustomerPersonalInfoModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | CustomerPersonalInfoModelCountOutputTypeCountCustomerProfileDataModelArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * CustomerPersonalInfoModelCountOutputType without action
-   */
-  export type CustomerPersonalInfoModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomerPersonalInfoModelCountOutputType
-     */
-    select?: CustomerPersonalInfoModelCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * CustomerPersonalInfoModelCountOutputType without action
-   */
-  export type CustomerPersonalInfoModelCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
-  }
-
-
-  /**
-   * Count Type AADHAARCardModelCountOutputType
-   */
-
-  export type AADHAARCardModelCountOutputType = {
-    CustomerProfileDataModel: number
-  }
-
-  export type AADHAARCardModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | AADHAARCardModelCountOutputTypeCountCustomerProfileDataModelArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * AADHAARCardModelCountOutputType without action
-   */
-  export type AADHAARCardModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AADHAARCardModelCountOutputType
-     */
-    select?: AADHAARCardModelCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * AADHAARCardModelCountOutputType without action
-   */
-  export type AADHAARCardModelCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
-  }
-
-
-  /**
-   * Count Type PanCardModelCountOutputType
-   */
-
-  export type PanCardModelCountOutputType = {
-    CustomerProfileDataModel: number
-  }
-
-  export type PanCardModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | PanCardModelCountOutputTypeCountCustomerProfileDataModelArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * PanCardModelCountOutputType without action
-   */
-  export type PanCardModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PanCardModelCountOutputType
-     */
-    select?: PanCardModelCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * PanCardModelCountOutputType without action
-   */
-  export type PanCardModelCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
-  }
-
-
-  /**
-   * Count Type CustomersRiskProfileModelCountOutputType
-   */
-
-  export type CustomersRiskProfileModelCountOutputType = {
-    CustomerProfileDataModel: number
-  }
-
-  export type CustomersRiskProfileModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | CustomersRiskProfileModelCountOutputTypeCountCustomerProfileDataModelArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * CustomersRiskProfileModelCountOutputType without action
-   */
-  export type CustomersRiskProfileModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModelCountOutputType
-     */
-    select?: CustomersRiskProfileModelCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * CustomersRiskProfileModelCountOutputType without action
-   */
-  export type CustomersRiskProfileModelCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
-  }
-
-
-  /**
-   * Count Type AddressModelCountOutputType
-   */
-
-  export type AddressModelCountOutputType = {
-    currentAddressOf: number
-    permanentAddressOf: number
-  }
-
-  export type AddressModelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    currentAddressOf?: boolean | AddressModelCountOutputTypeCountCurrentAddressOfArgs
-    permanentAddressOf?: boolean | AddressModelCountOutputTypeCountPermanentAddressOfArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * AddressModelCountOutputType without action
-   */
-  export type AddressModelCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModelCountOutputType
-     */
-    select?: AddressModelCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * AddressModelCountOutputType without action
-   */
-  export type AddressModelCountOutputTypeCountCurrentAddressOfArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
-  }
-
-  /**
-   * AddressModelCountOutputType without action
-   */
-  export type AddressModelCountOutputTypeCountPermanentAddressOfArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
-  }
-
-
-  /**
-   * Count Type NseDataSetCountOutputType
-   */
-
-  export type NseDataSetCountOutputType = {
-    CustomerProfileDataModel: number
-  }
-
-  export type NseDataSetCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | NseDataSetCountOutputTypeCountCustomerProfileDataModelArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * NseDataSetCountOutputType without action
-   */
-  export type NseDataSetCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the NseDataSetCountOutputType
-     */
-    select?: NseDataSetCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * NseDataSetCountOutputType without action
-   */
-  export type NseDataSetCountOutputTypeCountCustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerProfileDataModelWhereInput
   }
 
 
@@ -5236,9 +5010,9 @@ export namespace Prisma {
     whatsAppNotificationAllow: boolean | null
     termsAccepted: boolean | null
     lastLogin: Date | null
+    cRMUserDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    cRMUserDataModelId: number | null
   }
 
   export type CustomersAuthDataModelMaxAggregateOutputType = {
@@ -5251,9 +5025,9 @@ export namespace Prisma {
     whatsAppNotificationAllow: boolean | null
     termsAccepted: boolean | null
     lastLogin: Date | null
+    cRMUserDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    cRMUserDataModelId: number | null
   }
 
   export type CustomersAuthDataModelCountAggregateOutputType = {
@@ -5266,9 +5040,9 @@ export namespace Prisma {
     whatsAppNotificationAllow: number
     termsAccepted: number
     lastLogin: number
+    cRMUserDataModelId: number
     createdAt: number
     updatedAt: number
-    cRMUserDataModelId: number
     _all: number
   }
 
@@ -5293,9 +5067,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: true
     termsAccepted?: true
     lastLogin?: true
+    cRMUserDataModelId?: true
     createdAt?: true
     updatedAt?: true
-    cRMUserDataModelId?: true
   }
 
   export type CustomersAuthDataModelMaxAggregateInputType = {
@@ -5308,9 +5082,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: true
     termsAccepted?: true
     lastLogin?: true
+    cRMUserDataModelId?: true
     createdAt?: true
     updatedAt?: true
-    cRMUserDataModelId?: true
   }
 
   export type CustomersAuthDataModelCountAggregateInputType = {
@@ -5323,9 +5097,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: true
     termsAccepted?: true
     lastLogin?: true
+    cRMUserDataModelId?: true
     createdAt?: true
     updatedAt?: true
-    cRMUserDataModelId?: true
     _all?: true
   }
 
@@ -5425,9 +5199,9 @@ export namespace Prisma {
     whatsAppNotificationAllow: boolean
     termsAccepted: boolean
     lastLogin: Date | null
+    cRMUserDataModelId: number | null
     createdAt: Date
     updatedAt: Date
-    cRMUserDataModelId: number | null
     _count: CustomersAuthDataModelCountAggregateOutputType | null
     _avg: CustomersAuthDataModelAvgAggregateOutputType | null
     _sum: CustomersAuthDataModelSumAggregateOutputType | null
@@ -5459,12 +5233,11 @@ export namespace Prisma {
     whatsAppNotificationAllow?: boolean
     termsAccepted?: boolean
     lastLogin?: boolean
+    cRMUserDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    cRMUserDataModelId?: boolean
     relationshipManager?: boolean | CustomersAuthDataModel$relationshipManagerArgs<ExtArgs>
-    CustomerProfileDataModel?: boolean | CustomersAuthDataModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | CustomersAuthDataModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | CustomersAuthDataModel$customerProfileDataModelArgs<ExtArgs>
   }, ExtArgs["result"]["customersAuthDataModel"]>
 
   export type CustomersAuthDataModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5477,9 +5250,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: boolean
     termsAccepted?: boolean
     lastLogin?: boolean
+    cRMUserDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    cRMUserDataModelId?: boolean
     relationshipManager?: boolean | CustomersAuthDataModel$relationshipManagerArgs<ExtArgs>
   }, ExtArgs["result"]["customersAuthDataModel"]>
 
@@ -5493,9 +5266,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: boolean
     termsAccepted?: boolean
     lastLogin?: boolean
+    cRMUserDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    cRMUserDataModelId?: boolean
     relationshipManager?: boolean | CustomersAuthDataModel$relationshipManagerArgs<ExtArgs>
   }, ExtArgs["result"]["customersAuthDataModel"]>
 
@@ -5509,16 +5282,15 @@ export namespace Prisma {
     whatsAppNotificationAllow?: boolean
     termsAccepted?: boolean
     lastLogin?: boolean
+    cRMUserDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    cRMUserDataModelId?: boolean
   }
 
-  export type CustomersAuthDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "password" | "signinWith" | "accountStatus" | "isPhoneVerified" | "isEmailVerified" | "whatsAppNotificationAllow" | "termsAccepted" | "lastLogin" | "createdAt" | "updatedAt" | "cRMUserDataModelId", ExtArgs["result"]["customersAuthDataModel"]>
+  export type CustomersAuthDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "password" | "signinWith" | "accountStatus" | "isPhoneVerified" | "isEmailVerified" | "whatsAppNotificationAllow" | "termsAccepted" | "lastLogin" | "cRMUserDataModelId" | "createdAt" | "updatedAt", ExtArgs["result"]["customersAuthDataModel"]>
   export type CustomersAuthDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     relationshipManager?: boolean | CustomersAuthDataModel$relationshipManagerArgs<ExtArgs>
-    CustomerProfileDataModel?: boolean | CustomersAuthDataModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | CustomersAuthDataModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | CustomersAuthDataModel$customerProfileDataModelArgs<ExtArgs>
   }
   export type CustomersAuthDataModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     relationshipManager?: boolean | CustomersAuthDataModel$relationshipManagerArgs<ExtArgs>
@@ -5531,7 +5303,7 @@ export namespace Prisma {
     name: "CustomersAuthDataModel"
     objects: {
       relationshipManager: Prisma.$CRMUserDataModelPayload<ExtArgs> | null
-      CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
+      customerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5555,12 +5327,9 @@ export namespace Prisma {
       whatsAppNotificationAllow: boolean
       termsAccepted: boolean
       lastLogin: Date | null
-      /**
-       * Timestamps
-       */
+      cRMUserDataModelId: number | null
       createdAt: Date
       updatedAt: Date
-      cRMUserDataModelId: number | null
     }, ExtArgs["result"]["customersAuthDataModel"]>
     composites: {}
   }
@@ -5956,7 +5725,7 @@ export namespace Prisma {
   export interface Prisma__CustomersAuthDataModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     relationshipManager<T extends CustomersAuthDataModel$relationshipManagerArgs<ExtArgs> = {}>(args?: Subset<T, CustomersAuthDataModel$relationshipManagerArgs<ExtArgs>>): Prisma__CRMUserDataModelClient<$Result.GetResult<Prisma.$CRMUserDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    CustomerProfileDataModel<T extends CustomersAuthDataModel$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CustomersAuthDataModel$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerProfileDataModel<T extends CustomersAuthDataModel$customerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CustomersAuthDataModel$customerProfileDataModelArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5995,9 +5764,9 @@ export namespace Prisma {
     readonly whatsAppNotificationAllow: FieldRef<"CustomersAuthDataModel", 'Boolean'>
     readonly termsAccepted: FieldRef<"CustomersAuthDataModel", 'Boolean'>
     readonly lastLogin: FieldRef<"CustomersAuthDataModel", 'DateTime'>
+    readonly cRMUserDataModelId: FieldRef<"CustomersAuthDataModel", 'Int'>
     readonly createdAt: FieldRef<"CustomersAuthDataModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomersAuthDataModel", 'DateTime'>
-    readonly cRMUserDataModelId: FieldRef<"CustomersAuthDataModel", 'Int'>
   }
     
 
@@ -6413,9 +6182,9 @@ export namespace Prisma {
   }
 
   /**
-   * CustomersAuthDataModel.CustomerProfileDataModel
+   * CustomersAuthDataModel.customerProfileDataModel
    */
-  export type CustomersAuthDataModel$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CustomersAuthDataModel$customerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the CustomerProfileDataModel
      */
@@ -6429,11 +6198,6 @@ export namespace Prisma {
      */
     include?: CustomerProfileDataModelInclude<ExtArgs> | null
     where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
   }
 
   /**
@@ -6472,13 +6236,12 @@ export namespace Prisma {
     VerifiedBy: number | null
     customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
-    createdBy: number | null
     aADHAARCardModelId: number | null
     panCardModelId: number | null
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nseDataSetId: number | null
+    createdBy: number | null
   }
 
   export type CustomerProfileDataModelSumAggregateOutputType = {
@@ -6486,13 +6249,12 @@ export namespace Prisma {
     VerifiedBy: number | null
     customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
-    createdBy: number | null
     aADHAARCardModelId: number | null
     panCardModelId: number | null
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nseDataSetId: number | null
+    createdBy: number | null
   }
 
   export type CustomerProfileDataModelMinAggregateOutputType = {
@@ -6512,15 +6274,14 @@ export namespace Prisma {
     verifyDate: Date | null
     customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
-    createdBy: number | null
     aADHAARCardModelId: number | null
     panCardModelId: number | null
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nseDataSetId: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    createdBy: number | null
   }
 
   export type CustomerProfileDataModelMaxAggregateOutputType = {
@@ -6540,15 +6301,14 @@ export namespace Prisma {
     verifyDate: Date | null
     customersRiskProfileModelId: number | null
     customersAuthDataModelId: number | null
-    createdBy: number | null
     aADHAARCardModelId: number | null
     panCardModelId: number | null
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nseDataSetId: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    createdBy: number | null
   }
 
   export type CustomerProfileDataModelCountAggregateOutputType = {
@@ -6568,15 +6328,14 @@ export namespace Prisma {
     verifyDate: number
     customersRiskProfileModelId: number
     customersAuthDataModelId: number
-    createdBy: number
     aADHAARCardModelId: number
     panCardModelId: number
     customerPersonalInfoModelId: number
     currentAddressModelId: number
     permanentAddressModelId: number
-    nseDataSetId: number
     createdAt: number
     updatedAt: number
+    createdBy: number
     _all: number
   }
 
@@ -6586,13 +6345,12 @@ export namespace Prisma {
     VerifiedBy?: true
     customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
-    createdBy?: true
     aADHAARCardModelId?: true
     panCardModelId?: true
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nseDataSetId?: true
+    createdBy?: true
   }
 
   export type CustomerProfileDataModelSumAggregateInputType = {
@@ -6600,13 +6358,12 @@ export namespace Prisma {
     VerifiedBy?: true
     customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
-    createdBy?: true
     aADHAARCardModelId?: true
     panCardModelId?: true
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nseDataSetId?: true
+    createdBy?: true
   }
 
   export type CustomerProfileDataModelMinAggregateInputType = {
@@ -6626,15 +6383,14 @@ export namespace Prisma {
     verifyDate?: true
     customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
-    createdBy?: true
     aADHAARCardModelId?: true
     panCardModelId?: true
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nseDataSetId?: true
     createdAt?: true
     updatedAt?: true
+    createdBy?: true
   }
 
   export type CustomerProfileDataModelMaxAggregateInputType = {
@@ -6654,15 +6410,14 @@ export namespace Prisma {
     verifyDate?: true
     customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
-    createdBy?: true
     aADHAARCardModelId?: true
     panCardModelId?: true
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nseDataSetId?: true
     createdAt?: true
     updatedAt?: true
+    createdBy?: true
   }
 
   export type CustomerProfileDataModelCountAggregateInputType = {
@@ -6682,15 +6437,14 @@ export namespace Prisma {
     verifyDate?: true
     customersRiskProfileModelId?: true
     customersAuthDataModelId?: true
-    createdBy?: true
     aADHAARCardModelId?: true
     panCardModelId?: true
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
-    nseDataSetId?: true
     createdAt?: true
     updatedAt?: true
+    createdBy?: true
     _all?: true
   }
 
@@ -6797,15 +6551,14 @@ export namespace Prisma {
     verifyDate: Date | null
     customersRiskProfileModelId: number | null
     customersAuthDataModelId: number
-    createdBy: number | null
     aADHAARCardModelId: number | null
     panCardModelId: number | null
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
-    nseDataSetId: number | null
     createdAt: Date
     updatedAt: Date
+    createdBy: number | null
     _count: CustomerProfileDataModelCountAggregateOutputType | null
     _avg: CustomerProfileDataModelAvgAggregateOutputType | null
     _sum: CustomerProfileDataModelSumAggregateOutputType | null
@@ -6844,25 +6597,24 @@ export namespace Prisma {
     verifyDate?: boolean
     customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
-    createdBy?: boolean
     aADHAARCardModelId?: boolean
     panCardModelId?: boolean
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    createdBy?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
     personalInformation?: boolean | CustomerProfileDataModel$personalInformationArgs<ExtArgs>
-    bankAccounts?: boolean | CustomerProfileDataModel$bankAccountsArgs<ExtArgs>
-    dematAccounts?: boolean | CustomerProfileDataModel$dematAccountsArgs<ExtArgs>
     currentAddress?: boolean | CustomerProfileDataModel$currentAddressArgs<ExtArgs>
     permanentAddress?: boolean | CustomerProfileDataModel$permanentAddressArgs<ExtArgs>
-    nse?: boolean | CustomerProfileDataModel$nseArgs<ExtArgs>
+    bankAccounts?: boolean | CustomerProfileDataModel$bankAccountsArgs<ExtArgs>
+    dematAccounts?: boolean | CustomerProfileDataModel$dematAccountsArgs<ExtArgs>
+    nseDataSet?: boolean | CustomerProfileDataModel$nseDataSetArgs<ExtArgs>
     _count?: boolean | CustomerProfileDataModelCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customerProfileDataModel"]>
 
@@ -6883,15 +6635,14 @@ export namespace Prisma {
     verifyDate?: boolean
     customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
-    createdBy?: boolean
     aADHAARCardModelId?: boolean
     panCardModelId?: boolean
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    createdBy?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
@@ -6899,7 +6650,6 @@ export namespace Prisma {
     personalInformation?: boolean | CustomerProfileDataModel$personalInformationArgs<ExtArgs>
     currentAddress?: boolean | CustomerProfileDataModel$currentAddressArgs<ExtArgs>
     permanentAddress?: boolean | CustomerProfileDataModel$permanentAddressArgs<ExtArgs>
-    nse?: boolean | CustomerProfileDataModel$nseArgs<ExtArgs>
   }, ExtArgs["result"]["customerProfileDataModel"]>
 
   export type CustomerProfileDataModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6919,15 +6669,14 @@ export namespace Prisma {
     verifyDate?: boolean
     customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
-    createdBy?: boolean
     aADHAARCardModelId?: boolean
     panCardModelId?: boolean
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    createdBy?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
@@ -6935,7 +6684,6 @@ export namespace Prisma {
     personalInformation?: boolean | CustomerProfileDataModel$personalInformationArgs<ExtArgs>
     currentAddress?: boolean | CustomerProfileDataModel$currentAddressArgs<ExtArgs>
     permanentAddress?: boolean | CustomerProfileDataModel$permanentAddressArgs<ExtArgs>
-    nse?: boolean | CustomerProfileDataModel$nseArgs<ExtArgs>
   }, ExtArgs["result"]["customerProfileDataModel"]>
 
   export type CustomerProfileDataModelSelectScalar = {
@@ -6955,29 +6703,28 @@ export namespace Prisma {
     verifyDate?: boolean
     customersRiskProfileModelId?: boolean
     customersAuthDataModelId?: boolean
-    createdBy?: boolean
     aADHAARCardModelId?: boolean
     panCardModelId?: boolean
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
-    nseDataSetId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    createdBy?: boolean
   }
 
-  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "verifyDate" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "createdBy" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "nseDataSetId" | "createdAt" | "updatedAt", ExtArgs["result"]["customerProfileDataModel"]>
+  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "verifyDate" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "createdAt" | "updatedAt" | "createdBy", ExtArgs["result"]["customerProfileDataModel"]>
   export type CustomerProfileDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
     panCard?: boolean | CustomerProfileDataModel$panCardArgs<ExtArgs>
     personalInformation?: boolean | CustomerProfileDataModel$personalInformationArgs<ExtArgs>
-    bankAccounts?: boolean | CustomerProfileDataModel$bankAccountsArgs<ExtArgs>
-    dematAccounts?: boolean | CustomerProfileDataModel$dematAccountsArgs<ExtArgs>
     currentAddress?: boolean | CustomerProfileDataModel$currentAddressArgs<ExtArgs>
     permanentAddress?: boolean | CustomerProfileDataModel$permanentAddressArgs<ExtArgs>
-    nse?: boolean | CustomerProfileDataModel$nseArgs<ExtArgs>
+    bankAccounts?: boolean | CustomerProfileDataModel$bankAccountsArgs<ExtArgs>
+    dematAccounts?: boolean | CustomerProfileDataModel$dematAccountsArgs<ExtArgs>
+    nseDataSet?: boolean | CustomerProfileDataModel$nseDataSetArgs<ExtArgs>
     _count?: boolean | CustomerProfileDataModelCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerProfileDataModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6988,7 +6735,6 @@ export namespace Prisma {
     personalInformation?: boolean | CustomerProfileDataModel$personalInformationArgs<ExtArgs>
     currentAddress?: boolean | CustomerProfileDataModel$currentAddressArgs<ExtArgs>
     permanentAddress?: boolean | CustomerProfileDataModel$permanentAddressArgs<ExtArgs>
-    nse?: boolean | CustomerProfileDataModel$nseArgs<ExtArgs>
   }
   export type CustomerProfileDataModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
@@ -6998,7 +6744,6 @@ export namespace Prisma {
     personalInformation?: boolean | CustomerProfileDataModel$personalInformationArgs<ExtArgs>
     currentAddress?: boolean | CustomerProfileDataModel$currentAddressArgs<ExtArgs>
     permanentAddress?: boolean | CustomerProfileDataModel$permanentAddressArgs<ExtArgs>
-    nse?: boolean | CustomerProfileDataModel$nseArgs<ExtArgs>
   }
 
   export type $CustomerProfileDataModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7006,26 +6751,14 @@ export namespace Prisma {
     objects: {
       riskProfile: Prisma.$CustomersRiskProfileModelPayload<ExtArgs> | null
       utility: Prisma.$CustomersAuthDataModelPayload<ExtArgs>
-      /**
-       * Relation with Aadhaar Card details
-       */
       aadhaarCard: Prisma.$AADHAARCardModelPayload<ExtArgs> | null
-      /**
-       * Relation with PAN Card details
-       */
       panCard: Prisma.$PanCardModelPayload<ExtArgs> | null
       personalInformation: Prisma.$CustomerPersonalInfoModelPayload<ExtArgs> | null
-      /**
-       * Linked bank and demat accounts
-       */
-      bankAccounts: Prisma.$CustomersBankAccountModelPayload<ExtArgs>[]
-      dematAccounts: Prisma.$CustomersDematAccountModelPayload<ExtArgs>[]
-      /**
-       * Address relations (current and permanent)
-       */
       currentAddress: Prisma.$AddressModelPayload<ExtArgs> | null
       permanentAddress: Prisma.$AddressModelPayload<ExtArgs> | null
-      nse: Prisma.$NseDataSetPayload<ExtArgs> | null
+      bankAccounts: Prisma.$CustomersBankAccountModelPayload<ExtArgs>[]
+      dematAccounts: Prisma.$CustomersDematAccountModelPayload<ExtArgs>[]
+      nseDataSet: Prisma.$NseDataSetPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -7056,18 +6789,14 @@ export namespace Prisma {
       verifyDate: Date | null
       customersRiskProfileModelId: number | null
       customersAuthDataModelId: number
-      createdBy: number | null
       aADHAARCardModelId: number | null
       panCardModelId: number | null
       customerPersonalInfoModelId: number | null
       currentAddressModelId: number | null
       permanentAddressModelId: number | null
-      nseDataSetId: number | null
-      /**
-       * Metadata and audit fields
-       */
       createdAt: Date
       updatedAt: Date
+      createdBy: number | null
     }, ExtArgs["result"]["customerProfileDataModel"]>
     composites: {}
   }
@@ -7467,11 +7196,11 @@ export namespace Prisma {
     aadhaarCard<T extends CustomerProfileDataModel$aadhaarCardArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>>): Prisma__AADHAARCardModelClient<$Result.GetResult<Prisma.$AADHAARCardModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     panCard<T extends CustomerProfileDataModel$panCardArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$panCardArgs<ExtArgs>>): Prisma__PanCardModelClient<$Result.GetResult<Prisma.$PanCardModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     personalInformation<T extends CustomerProfileDataModel$personalInformationArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$personalInformationArgs<ExtArgs>>): Prisma__CustomerPersonalInfoModelClient<$Result.GetResult<Prisma.$CustomerPersonalInfoModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    bankAccounts<T extends CustomerProfileDataModel$bankAccountsArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$bankAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersBankAccountModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    dematAccounts<T extends CustomerProfileDataModel$dematAccountsArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$dematAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersDematAccountModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     currentAddress<T extends CustomerProfileDataModel$currentAddressArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$currentAddressArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     permanentAddress<T extends CustomerProfileDataModel$permanentAddressArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$permanentAddressArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    nse<T extends CustomerProfileDataModel$nseArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$nseArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    bankAccounts<T extends CustomerProfileDataModel$bankAccountsArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$bankAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersBankAccountModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    dematAccounts<T extends CustomerProfileDataModel$dematAccountsArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$dematAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersDematAccountModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    nseDataSet<T extends CustomerProfileDataModel$nseDataSetArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModel$nseDataSetArgs<ExtArgs>>): Prisma__NseDataSetClient<$Result.GetResult<Prisma.$NseDataSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7517,15 +7246,14 @@ export namespace Prisma {
     readonly verifyDate: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly customersRiskProfileModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly customersAuthDataModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
-    readonly createdBy: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly aADHAARCardModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly panCardModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly customerPersonalInfoModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly currentAddressModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly permanentAddressModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
-    readonly nseDataSetId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly createdAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
+    readonly createdBy: FieldRef<"CustomerProfileDataModel", 'Int'>
   }
     
 
@@ -7998,6 +7726,44 @@ export namespace Prisma {
   }
 
   /**
+   * CustomerProfileDataModel.currentAddress
+   */
+  export type CustomerProfileDataModel$currentAddressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    where?: AddressModelWhereInput
+  }
+
+  /**
+   * CustomerProfileDataModel.permanentAddress
+   */
+  export type CustomerProfileDataModel$permanentAddressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    where?: AddressModelWhereInput
+  }
+
+  /**
    * CustomerProfileDataModel.bankAccounts
    */
   export type CustomerProfileDataModel$bankAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8046,47 +7812,9 @@ export namespace Prisma {
   }
 
   /**
-   * CustomerProfileDataModel.currentAddress
+   * CustomerProfileDataModel.nseDataSet
    */
-  export type CustomerProfileDataModel$currentAddressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    where?: AddressModelWhereInput
-  }
-
-  /**
-   * CustomerProfileDataModel.permanentAddress
-   */
-  export type CustomerProfileDataModel$permanentAddressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    where?: AddressModelWhereInput
-  }
-
-  /**
-   * CustomerProfileDataModel.nse
-   */
-  export type CustomerProfileDataModel$nseArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CustomerProfileDataModel$nseDataSetArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the NseDataSet
      */
@@ -8407,8 +8135,7 @@ export namespace Prisma {
     dateOfBirth?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    CustomerProfileDataModel?: boolean | CustomerPersonalInfoModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | CustomerPersonalInfoModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs>
   }, ExtArgs["result"]["customerPersonalInfoModel"]>
 
   export type CustomerPersonalInfoModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -8470,8 +8197,7 @@ export namespace Prisma {
 
   export type CustomerPersonalInfoModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "SignatureUrl" | "maritalStatus" | "occupationType" | "annualGrossIncome" | "fatherOrSpouseName" | "relationshipWithPerson" | "mothersName" | "nationality" | "maidenName" | "residentialStatus" | "qualification" | "politicallyExposedPerson" | "dateOfBirth" | "createdAt" | "updatedAt", ExtArgs["result"]["customerPersonalInfoModel"]>
   export type CustomerPersonalInfoModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | CustomerPersonalInfoModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | CustomerPersonalInfoModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs>
   }
   export type CustomerPersonalInfoModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
   export type CustomerPersonalInfoModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -8479,17 +8205,11 @@ export namespace Prisma {
   export type $CustomerPersonalInfoModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CustomerPersonalInfoModel"
     objects: {
-      CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
+      customerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      /**
-       * Signature image URL
-       */
       SignatureUrl: string | null
-      /**
-       * Personal info
-       */
       maritalStatus: string
       occupationType: string
       annualGrossIncome: string
@@ -8502,9 +8222,6 @@ export namespace Prisma {
       qualification: string
       politicallyExposedPerson: string | null
       dateOfBirth: string | null
-      /**
-       * Timestamps
-       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -8901,7 +8618,7 @@ export namespace Prisma {
    */
   export interface Prisma__CustomerPersonalInfoModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    CustomerProfileDataModel<T extends CustomerPersonalInfoModel$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CustomerPersonalInfoModel$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerProfileDataModel<T extends CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9335,9 +9052,9 @@ export namespace Prisma {
   }
 
   /**
-   * CustomerPersonalInfoModel.CustomerProfileDataModel
+   * CustomerPersonalInfoModel.customerProfileDataModel
    */
-  export type CustomerPersonalInfoModel$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the CustomerProfileDataModel
      */
@@ -9351,11 +9068,6 @@ export namespace Prisma {
      */
     include?: CustomerProfileDataModelInclude<ExtArgs> | null
     where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
   }
 
   /**
@@ -9639,8 +9351,7 @@ export namespace Prisma {
     verifyDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    CustomerProfileDataModel?: boolean | AADHAARCardModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | AADHAARCardModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | AADHAARCardModel$customerProfileDataModelArgs<ExtArgs>
   }, ExtArgs["result"]["aADHAARCardModel"]>
 
   export type AADHAARCardModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -9693,8 +9404,7 @@ export namespace Prisma {
 
   export type AADHAARCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "fatherName" | "aadhaarNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "createdAt" | "updatedAt", ExtArgs["result"]["aADHAARCardModel"]>
   export type AADHAARCardModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | AADHAARCardModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | AADHAARCardModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | AADHAARCardModel$customerProfileDataModelArgs<ExtArgs>
   }
   export type AADHAARCardModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
   export type AADHAARCardModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -9702,35 +9412,20 @@ export namespace Prisma {
   export type $AADHAARCardModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AADHAARCardModel"
     objects: {
-      CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
+      customerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      /**
-       * Name details as per Aadhaar
-       */
       firstName: string
       middleName: string
       lastName: string
-      /**
-       * Father’s name for verification
-       */
       fatherName: string
-      /**
-       * Aadhaar details
-       */
       aadhaarNo: string
       dateOfBirth: string
       gender: $Enums.Gender
       image: string
-      /**
-       * Verification status
-       */
       isVerified: boolean
       verifyDate: Date
-      /**
-       * Timestamps
-       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["aADHAARCardModel"]>
@@ -10127,7 +9822,7 @@ export namespace Prisma {
    */
   export interface Prisma__AADHAARCardModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    CustomerProfileDataModel<T extends AADHAARCardModel$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, AADHAARCardModel$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerProfileDataModel<T extends AADHAARCardModel$customerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, AADHAARCardModel$customerProfileDataModelArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10558,9 +10253,9 @@ export namespace Prisma {
   }
 
   /**
-   * AADHAARCardModel.CustomerProfileDataModel
+   * AADHAARCardModel.customerProfileDataModel
    */
-  export type AADHAARCardModel$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AADHAARCardModel$customerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the CustomerProfileDataModel
      */
@@ -10574,11 +10269,6 @@ export namespace Prisma {
      */
     include?: CustomerProfileDataModelInclude<ExtArgs> | null
     where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
   }
 
   /**
@@ -10846,8 +10536,7 @@ export namespace Prisma {
     verifyDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    CustomerProfileDataModel?: boolean | PanCardModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | PanCardModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | PanCardModel$customerProfileDataModelArgs<ExtArgs>
   }, ExtArgs["result"]["panCardModel"]>
 
   export type PanCardModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10894,8 +10583,7 @@ export namespace Prisma {
 
   export type PanCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "panCardNo" | "dateOfBirth" | "gender" | "isVerified" | "verifyDate" | "createdAt" | "updatedAt", ExtArgs["result"]["panCardModel"]>
   export type PanCardModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | PanCardModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | PanCardModelCountOutputTypeDefaultArgs<ExtArgs>
+    customerProfileDataModel?: boolean | PanCardModel$customerProfileDataModelArgs<ExtArgs>
   }
   export type PanCardModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
   export type PanCardModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -10903,30 +10591,18 @@ export namespace Prisma {
   export type $PanCardModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "PanCardModel"
     objects: {
-      CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
+      customerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      /**
-       * Name details as per PAN
-       */
       firstName: string
       middleName: string
       lastName: string
-      /**
-       * PAN card details
-       */
       panCardNo: string
       dateOfBirth: string
       gender: $Enums.Gender
-      /**
-       * Verification status
-       */
       isVerified: boolean
       verifyDate: Date
-      /**
-       * Timestamps
-       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["panCardModel"]>
@@ -11323,7 +10999,7 @@ export namespace Prisma {
    */
   export interface Prisma__PanCardModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    CustomerProfileDataModel<T extends PanCardModel$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, PanCardModel$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerProfileDataModel<T extends PanCardModel$customerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, PanCardModel$customerProfileDataModelArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11752,9 +11428,9 @@ export namespace Prisma {
   }
 
   /**
-   * PanCardModel.CustomerProfileDataModel
+   * PanCardModel.customerProfileDataModel
    */
-  export type PanCardModel$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type PanCardModel$customerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the CustomerProfileDataModel
      */
@@ -11768,11 +11444,6 @@ export namespace Prisma {
      */
     include?: CustomerProfileDataModelInclude<ExtArgs> | null
     where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
   }
 
   /**
@@ -11791,6 +11462,2297 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: PanCardModelInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CustomersRiskProfileModel
+   */
+
+  export type AggregateCustomersRiskProfileModel = {
+    _count: CustomersRiskProfileModelCountAggregateOutputType | null
+    _avg: CustomersRiskProfileModelAvgAggregateOutputType | null
+    _sum: CustomersRiskProfileModelSumAggregateOutputType | null
+    _min: CustomersRiskProfileModelMinAggregateOutputType | null
+    _max: CustomersRiskProfileModelMaxAggregateOutputType | null
+  }
+
+  export type CustomersRiskProfileModelAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CustomersRiskProfileModelSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CustomersRiskProfileModelMinAggregateOutputType = {
+    id: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CustomersRiskProfileModelMaxAggregateOutputType = {
+    id: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CustomersRiskProfileModelCountAggregateOutputType = {
+    id: number
+    data: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CustomersRiskProfileModelAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type CustomersRiskProfileModelSumAggregateInputType = {
+    id?: true
+  }
+
+  export type CustomersRiskProfileModelMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CustomersRiskProfileModelMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CustomersRiskProfileModelCountAggregateInputType = {
+    id?: true
+    data?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CustomersRiskProfileModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomersRiskProfileModel to aggregate.
+     */
+    where?: CustomersRiskProfileModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomersRiskProfileModels to fetch.
+     */
+    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CustomersRiskProfileModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomersRiskProfileModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CustomersRiskProfileModels
+    **/
+    _count?: true | CustomersRiskProfileModelCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CustomersRiskProfileModelAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CustomersRiskProfileModelSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CustomersRiskProfileModelMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CustomersRiskProfileModelMaxAggregateInputType
+  }
+
+  export type GetCustomersRiskProfileModelAggregateType<T extends CustomersRiskProfileModelAggregateArgs> = {
+        [P in keyof T & keyof AggregateCustomersRiskProfileModel]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCustomersRiskProfileModel[P]>
+      : GetScalarType<T[P], AggregateCustomersRiskProfileModel[P]>
+  }
+
+
+
+
+  export type CustomersRiskProfileModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomersRiskProfileModelWhereInput
+    orderBy?: CustomersRiskProfileModelOrderByWithAggregationInput | CustomersRiskProfileModelOrderByWithAggregationInput[]
+    by: CustomersRiskProfileModelScalarFieldEnum[] | CustomersRiskProfileModelScalarFieldEnum
+    having?: CustomersRiskProfileModelScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CustomersRiskProfileModelCountAggregateInputType | true
+    _avg?: CustomersRiskProfileModelAvgAggregateInputType
+    _sum?: CustomersRiskProfileModelSumAggregateInputType
+    _min?: CustomersRiskProfileModelMinAggregateInputType
+    _max?: CustomersRiskProfileModelMaxAggregateInputType
+  }
+
+  export type CustomersRiskProfileModelGroupByOutputType = {
+    id: number
+    data: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: CustomersRiskProfileModelCountAggregateOutputType | null
+    _avg: CustomersRiskProfileModelAvgAggregateOutputType | null
+    _sum: CustomersRiskProfileModelSumAggregateOutputType | null
+    _min: CustomersRiskProfileModelMinAggregateOutputType | null
+    _max: CustomersRiskProfileModelMaxAggregateOutputType | null
+  }
+
+  type GetCustomersRiskProfileModelGroupByPayload<T extends CustomersRiskProfileModelGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CustomersRiskProfileModelGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CustomersRiskProfileModelGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CustomersRiskProfileModelGroupByOutputType[P]>
+            : GetScalarType<T[P], CustomersRiskProfileModelGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CustomersRiskProfileModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    customerProfileDataModel?: boolean | CustomersRiskProfileModel$customerProfileDataModelArgs<ExtArgs>
+  }, ExtArgs["result"]["customersRiskProfileModel"]>
+
+  export type CustomersRiskProfileModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["customersRiskProfileModel"]>
+
+  export type CustomersRiskProfileModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["customersRiskProfileModel"]>
+
+  export type CustomersRiskProfileModelSelectScalar = {
+    id?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CustomersRiskProfileModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "data" | "createdAt" | "updatedAt", ExtArgs["result"]["customersRiskProfileModel"]>
+  export type CustomersRiskProfileModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customerProfileDataModel?: boolean | CustomersRiskProfileModel$customerProfileDataModelArgs<ExtArgs>
+  }
+  export type CustomersRiskProfileModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CustomersRiskProfileModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $CustomersRiskProfileModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CustomersRiskProfileModel"
+    objects: {
+      customerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      data: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["customersRiskProfileModel"]>
+    composites: {}
+  }
+
+  type CustomersRiskProfileModelGetPayload<S extends boolean | null | undefined | CustomersRiskProfileModelDefaultArgs> = $Result.GetResult<Prisma.$CustomersRiskProfileModelPayload, S>
+
+  type CustomersRiskProfileModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CustomersRiskProfileModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CustomersRiskProfileModelCountAggregateInputType | true
+    }
+
+  export interface CustomersRiskProfileModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CustomersRiskProfileModel'], meta: { name: 'CustomersRiskProfileModel' } }
+    /**
+     * Find zero or one CustomersRiskProfileModel that matches the filter.
+     * @param {CustomersRiskProfileModelFindUniqueArgs} args - Arguments to find a CustomersRiskProfileModel
+     * @example
+     * // Get one CustomersRiskProfileModel
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CustomersRiskProfileModelFindUniqueArgs>(args: SelectSubset<T, CustomersRiskProfileModelFindUniqueArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CustomersRiskProfileModel that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CustomersRiskProfileModelFindUniqueOrThrowArgs} args - Arguments to find a CustomersRiskProfileModel
+     * @example
+     * // Get one CustomersRiskProfileModel
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CustomersRiskProfileModelFindUniqueOrThrowArgs>(args: SelectSubset<T, CustomersRiskProfileModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CustomersRiskProfileModel that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomersRiskProfileModelFindFirstArgs} args - Arguments to find a CustomersRiskProfileModel
+     * @example
+     * // Get one CustomersRiskProfileModel
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CustomersRiskProfileModelFindFirstArgs>(args?: SelectSubset<T, CustomersRiskProfileModelFindFirstArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CustomersRiskProfileModel that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomersRiskProfileModelFindFirstOrThrowArgs} args - Arguments to find a CustomersRiskProfileModel
+     * @example
+     * // Get one CustomersRiskProfileModel
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CustomersRiskProfileModelFindFirstOrThrowArgs>(args?: SelectSubset<T, CustomersRiskProfileModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CustomersRiskProfileModels that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomersRiskProfileModelFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CustomersRiskProfileModels
+     * const customersRiskProfileModels = await prisma.customersRiskProfileModel.findMany()
+     * 
+     * // Get first 10 CustomersRiskProfileModels
+     * const customersRiskProfileModels = await prisma.customersRiskProfileModel.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const customersRiskProfileModelWithIdOnly = await prisma.customersRiskProfileModel.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CustomersRiskProfileModelFindManyArgs>(args?: SelectSubset<T, CustomersRiskProfileModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CustomersRiskProfileModel.
+     * @param {CustomersRiskProfileModelCreateArgs} args - Arguments to create a CustomersRiskProfileModel.
+     * @example
+     * // Create one CustomersRiskProfileModel
+     * const CustomersRiskProfileModel = await prisma.customersRiskProfileModel.create({
+     *   data: {
+     *     // ... data to create a CustomersRiskProfileModel
+     *   }
+     * })
+     * 
+     */
+    create<T extends CustomersRiskProfileModelCreateArgs>(args: SelectSubset<T, CustomersRiskProfileModelCreateArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CustomersRiskProfileModels.
+     * @param {CustomersRiskProfileModelCreateManyArgs} args - Arguments to create many CustomersRiskProfileModels.
+     * @example
+     * // Create many CustomersRiskProfileModels
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CustomersRiskProfileModelCreateManyArgs>(args?: SelectSubset<T, CustomersRiskProfileModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CustomersRiskProfileModels and returns the data saved in the database.
+     * @param {CustomersRiskProfileModelCreateManyAndReturnArgs} args - Arguments to create many CustomersRiskProfileModels.
+     * @example
+     * // Create many CustomersRiskProfileModels
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CustomersRiskProfileModels and only return the `id`
+     * const customersRiskProfileModelWithIdOnly = await prisma.customersRiskProfileModel.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CustomersRiskProfileModelCreateManyAndReturnArgs>(args?: SelectSubset<T, CustomersRiskProfileModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CustomersRiskProfileModel.
+     * @param {CustomersRiskProfileModelDeleteArgs} args - Arguments to delete one CustomersRiskProfileModel.
+     * @example
+     * // Delete one CustomersRiskProfileModel
+     * const CustomersRiskProfileModel = await prisma.customersRiskProfileModel.delete({
+     *   where: {
+     *     // ... filter to delete one CustomersRiskProfileModel
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CustomersRiskProfileModelDeleteArgs>(args: SelectSubset<T, CustomersRiskProfileModelDeleteArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CustomersRiskProfileModel.
+     * @param {CustomersRiskProfileModelUpdateArgs} args - Arguments to update one CustomersRiskProfileModel.
+     * @example
+     * // Update one CustomersRiskProfileModel
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CustomersRiskProfileModelUpdateArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpdateArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CustomersRiskProfileModels.
+     * @param {CustomersRiskProfileModelDeleteManyArgs} args - Arguments to filter CustomersRiskProfileModels to delete.
+     * @example
+     * // Delete a few CustomersRiskProfileModels
+     * const { count } = await prisma.customersRiskProfileModel.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CustomersRiskProfileModelDeleteManyArgs>(args?: SelectSubset<T, CustomersRiskProfileModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CustomersRiskProfileModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomersRiskProfileModelUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CustomersRiskProfileModels
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CustomersRiskProfileModelUpdateManyArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CustomersRiskProfileModels and returns the data updated in the database.
+     * @param {CustomersRiskProfileModelUpdateManyAndReturnArgs} args - Arguments to update many CustomersRiskProfileModels.
+     * @example
+     * // Update many CustomersRiskProfileModels
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CustomersRiskProfileModels and only return the `id`
+     * const customersRiskProfileModelWithIdOnly = await prisma.customersRiskProfileModel.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CustomersRiskProfileModelUpdateManyAndReturnArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CustomersRiskProfileModel.
+     * @param {CustomersRiskProfileModelUpsertArgs} args - Arguments to update or create a CustomersRiskProfileModel.
+     * @example
+     * // Update or create a CustomersRiskProfileModel
+     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.upsert({
+     *   create: {
+     *     // ... data to create a CustomersRiskProfileModel
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CustomersRiskProfileModel we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CustomersRiskProfileModelUpsertArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpsertArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CustomersRiskProfileModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomersRiskProfileModelCountArgs} args - Arguments to filter CustomersRiskProfileModels to count.
+     * @example
+     * // Count the number of CustomersRiskProfileModels
+     * const count = await prisma.customersRiskProfileModel.count({
+     *   where: {
+     *     // ... the filter for the CustomersRiskProfileModels we want to count
+     *   }
+     * })
+    **/
+    count<T extends CustomersRiskProfileModelCountArgs>(
+      args?: Subset<T, CustomersRiskProfileModelCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CustomersRiskProfileModelCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CustomersRiskProfileModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomersRiskProfileModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CustomersRiskProfileModelAggregateArgs>(args: Subset<T, CustomersRiskProfileModelAggregateArgs>): Prisma.PrismaPromise<GetCustomersRiskProfileModelAggregateType<T>>
+
+    /**
+     * Group by CustomersRiskProfileModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomersRiskProfileModelGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CustomersRiskProfileModelGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CustomersRiskProfileModelGroupByArgs['orderBy'] }
+        : { orderBy?: CustomersRiskProfileModelGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CustomersRiskProfileModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCustomersRiskProfileModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CustomersRiskProfileModel model
+   */
+  readonly fields: CustomersRiskProfileModelFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CustomersRiskProfileModel.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CustomersRiskProfileModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    customerProfileDataModel<T extends CustomersRiskProfileModel$customerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CustomersRiskProfileModel$customerProfileDataModelArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CustomersRiskProfileModel model
+   */
+  interface CustomersRiskProfileModelFieldRefs {
+    readonly id: FieldRef<"CustomersRiskProfileModel", 'Int'>
+    readonly data: FieldRef<"CustomersRiskProfileModel", 'Json'>
+    readonly createdAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
+    readonly updatedAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CustomersRiskProfileModel findUnique
+   */
+  export type CustomersRiskProfileModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomersRiskProfileModel to fetch.
+     */
+    where: CustomersRiskProfileModelWhereUniqueInput
+  }
+
+  /**
+   * CustomersRiskProfileModel findUniqueOrThrow
+   */
+  export type CustomersRiskProfileModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomersRiskProfileModel to fetch.
+     */
+    where: CustomersRiskProfileModelWhereUniqueInput
+  }
+
+  /**
+   * CustomersRiskProfileModel findFirst
+   */
+  export type CustomersRiskProfileModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomersRiskProfileModel to fetch.
+     */
+    where?: CustomersRiskProfileModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomersRiskProfileModels to fetch.
+     */
+    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomersRiskProfileModels.
+     */
+    cursor?: CustomersRiskProfileModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomersRiskProfileModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomersRiskProfileModels.
+     */
+    distinct?: CustomersRiskProfileModelScalarFieldEnum | CustomersRiskProfileModelScalarFieldEnum[]
+  }
+
+  /**
+   * CustomersRiskProfileModel findFirstOrThrow
+   */
+  export type CustomersRiskProfileModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomersRiskProfileModel to fetch.
+     */
+    where?: CustomersRiskProfileModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomersRiskProfileModels to fetch.
+     */
+    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomersRiskProfileModels.
+     */
+    cursor?: CustomersRiskProfileModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomersRiskProfileModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomersRiskProfileModels.
+     */
+    distinct?: CustomersRiskProfileModelScalarFieldEnum | CustomersRiskProfileModelScalarFieldEnum[]
+  }
+
+  /**
+   * CustomersRiskProfileModel findMany
+   */
+  export type CustomersRiskProfileModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomersRiskProfileModels to fetch.
+     */
+    where?: CustomersRiskProfileModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomersRiskProfileModels to fetch.
+     */
+    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CustomersRiskProfileModels.
+     */
+    cursor?: CustomersRiskProfileModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomersRiskProfileModels.
+     */
+    skip?: number
+    distinct?: CustomersRiskProfileModelScalarFieldEnum | CustomersRiskProfileModelScalarFieldEnum[]
+  }
+
+  /**
+   * CustomersRiskProfileModel create
+   */
+  export type CustomersRiskProfileModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CustomersRiskProfileModel.
+     */
+    data: XOR<CustomersRiskProfileModelCreateInput, CustomersRiskProfileModelUncheckedCreateInput>
+  }
+
+  /**
+   * CustomersRiskProfileModel createMany
+   */
+  export type CustomersRiskProfileModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CustomersRiskProfileModels.
+     */
+    data: CustomersRiskProfileModelCreateManyInput | CustomersRiskProfileModelCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CustomersRiskProfileModel createManyAndReturn
+   */
+  export type CustomersRiskProfileModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * The data used to create many CustomersRiskProfileModels.
+     */
+    data: CustomersRiskProfileModelCreateManyInput | CustomersRiskProfileModelCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CustomersRiskProfileModel update
+   */
+  export type CustomersRiskProfileModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CustomersRiskProfileModel.
+     */
+    data: XOR<CustomersRiskProfileModelUpdateInput, CustomersRiskProfileModelUncheckedUpdateInput>
+    /**
+     * Choose, which CustomersRiskProfileModel to update.
+     */
+    where: CustomersRiskProfileModelWhereUniqueInput
+  }
+
+  /**
+   * CustomersRiskProfileModel updateMany
+   */
+  export type CustomersRiskProfileModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CustomersRiskProfileModels.
+     */
+    data: XOR<CustomersRiskProfileModelUpdateManyMutationInput, CustomersRiskProfileModelUncheckedUpdateManyInput>
+    /**
+     * Filter which CustomersRiskProfileModels to update
+     */
+    where?: CustomersRiskProfileModelWhereInput
+    /**
+     * Limit how many CustomersRiskProfileModels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CustomersRiskProfileModel updateManyAndReturn
+   */
+  export type CustomersRiskProfileModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * The data used to update CustomersRiskProfileModels.
+     */
+    data: XOR<CustomersRiskProfileModelUpdateManyMutationInput, CustomersRiskProfileModelUncheckedUpdateManyInput>
+    /**
+     * Filter which CustomersRiskProfileModels to update
+     */
+    where?: CustomersRiskProfileModelWhereInput
+    /**
+     * Limit how many CustomersRiskProfileModels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CustomersRiskProfileModel upsert
+   */
+  export type CustomersRiskProfileModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CustomersRiskProfileModel to update in case it exists.
+     */
+    where: CustomersRiskProfileModelWhereUniqueInput
+    /**
+     * In case the CustomersRiskProfileModel found by the `where` argument doesn't exist, create a new CustomersRiskProfileModel with this data.
+     */
+    create: XOR<CustomersRiskProfileModelCreateInput, CustomersRiskProfileModelUncheckedCreateInput>
+    /**
+     * In case the CustomersRiskProfileModel was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CustomersRiskProfileModelUpdateInput, CustomersRiskProfileModelUncheckedUpdateInput>
+  }
+
+  /**
+   * CustomersRiskProfileModel delete
+   */
+  export type CustomersRiskProfileModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+    /**
+     * Filter which CustomersRiskProfileModel to delete.
+     */
+    where: CustomersRiskProfileModelWhereUniqueInput
+  }
+
+  /**
+   * CustomersRiskProfileModel deleteMany
+   */
+  export type CustomersRiskProfileModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomersRiskProfileModels to delete
+     */
+    where?: CustomersRiskProfileModelWhereInput
+    /**
+     * Limit how many CustomersRiskProfileModels to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CustomersRiskProfileModel.customerProfileDataModel
+   */
+  export type CustomersRiskProfileModel$customerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerProfileDataModel
+     */
+    select?: CustomerProfileDataModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerProfileDataModel
+     */
+    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerProfileDataModelInclude<ExtArgs> | null
+    where?: CustomerProfileDataModelWhereInput
+  }
+
+  /**
+   * CustomersRiskProfileModel without action
+   */
+  export type CustomersRiskProfileModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomersRiskProfileModel
+     */
+    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomersRiskProfileModel
+     */
+    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AddressModel
+   */
+
+  export type AggregateAddressModel = {
+    _count: AddressModelCountAggregateOutputType | null
+    _avg: AddressModelAvgAggregateOutputType | null
+    _sum: AddressModelSumAggregateOutputType | null
+    _min: AddressModelMinAggregateOutputType | null
+    _max: AddressModelMaxAggregateOutputType | null
+  }
+
+  export type AddressModelAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type AddressModelSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type AddressModelMinAggregateOutputType = {
+    id: number | null
+    line1: string | null
+    line2: string | null
+    line3: string | null
+    postOffice: string | null
+    cityOrDistrict: string | null
+    state: string | null
+    pinCode: string | null
+    country: string | null
+    fullAddress: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AddressModelMaxAggregateOutputType = {
+    id: number | null
+    line1: string | null
+    line2: string | null
+    line3: string | null
+    postOffice: string | null
+    cityOrDistrict: string | null
+    state: string | null
+    pinCode: string | null
+    country: string | null
+    fullAddress: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AddressModelCountAggregateOutputType = {
+    id: number
+    line1: number
+    line2: number
+    line3: number
+    postOffice: number
+    cityOrDistrict: number
+    state: number
+    pinCode: number
+    country: number
+    fullAddress: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AddressModelAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type AddressModelSumAggregateInputType = {
+    id?: true
+  }
+
+  export type AddressModelMinAggregateInputType = {
+    id?: true
+    line1?: true
+    line2?: true
+    line3?: true
+    postOffice?: true
+    cityOrDistrict?: true
+    state?: true
+    pinCode?: true
+    country?: true
+    fullAddress?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AddressModelMaxAggregateInputType = {
+    id?: true
+    line1?: true
+    line2?: true
+    line3?: true
+    postOffice?: true
+    cityOrDistrict?: true
+    state?: true
+    pinCode?: true
+    country?: true
+    fullAddress?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AddressModelCountAggregateInputType = {
+    id?: true
+    line1?: true
+    line2?: true
+    line3?: true
+    postOffice?: true
+    cityOrDistrict?: true
+    state?: true
+    pinCode?: true
+    country?: true
+    fullAddress?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AddressModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AddressModel to aggregate.
+     */
+    where?: AddressModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AddressModels to fetch.
+     */
+    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AddressModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AddressModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AddressModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AddressModels
+    **/
+    _count?: true | AddressModelCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AddressModelAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AddressModelSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AddressModelMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AddressModelMaxAggregateInputType
+  }
+
+  export type GetAddressModelAggregateType<T extends AddressModelAggregateArgs> = {
+        [P in keyof T & keyof AggregateAddressModel]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAddressModel[P]>
+      : GetScalarType<T[P], AggregateAddressModel[P]>
+  }
+
+
+
+
+  export type AddressModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AddressModelWhereInput
+    orderBy?: AddressModelOrderByWithAggregationInput | AddressModelOrderByWithAggregationInput[]
+    by: AddressModelScalarFieldEnum[] | AddressModelScalarFieldEnum
+    having?: AddressModelScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AddressModelCountAggregateInputType | true
+    _avg?: AddressModelAvgAggregateInputType
+    _sum?: AddressModelSumAggregateInputType
+    _min?: AddressModelMinAggregateInputType
+    _max?: AddressModelMaxAggregateInputType
+  }
+
+  export type AddressModelGroupByOutputType = {
+    id: number
+    line1: string
+    line2: string | null
+    line3: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt: Date
+    updatedAt: Date
+    _count: AddressModelCountAggregateOutputType | null
+    _avg: AddressModelAvgAggregateOutputType | null
+    _sum: AddressModelSumAggregateOutputType | null
+    _min: AddressModelMinAggregateOutputType | null
+    _max: AddressModelMaxAggregateOutputType | null
+  }
+
+  type GetAddressModelGroupByPayload<T extends AddressModelGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AddressModelGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AddressModelGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AddressModelGroupByOutputType[P]>
+            : GetScalarType<T[P], AddressModelGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AddressModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    line1?: boolean
+    line2?: boolean
+    line3?: boolean
+    postOffice?: boolean
+    cityOrDistrict?: boolean
+    state?: boolean
+    pinCode?: boolean
+    country?: boolean
+    fullAddress?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    currentAddressOf?: boolean | AddressModel$currentAddressOfArgs<ExtArgs>
+    permanentAddressOf?: boolean | AddressModel$permanentAddressOfArgs<ExtArgs>
+  }, ExtArgs["result"]["addressModel"]>
+
+  export type AddressModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    line1?: boolean
+    line2?: boolean
+    line3?: boolean
+    postOffice?: boolean
+    cityOrDistrict?: boolean
+    state?: boolean
+    pinCode?: boolean
+    country?: boolean
+    fullAddress?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["addressModel"]>
+
+  export type AddressModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    line1?: boolean
+    line2?: boolean
+    line3?: boolean
+    postOffice?: boolean
+    cityOrDistrict?: boolean
+    state?: boolean
+    pinCode?: boolean
+    country?: boolean
+    fullAddress?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["addressModel"]>
+
+  export type AddressModelSelectScalar = {
+    id?: boolean
+    line1?: boolean
+    line2?: boolean
+    line3?: boolean
+    postOffice?: boolean
+    cityOrDistrict?: boolean
+    state?: boolean
+    pinCode?: boolean
+    country?: boolean
+    fullAddress?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AddressModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "line1" | "line2" | "line3" | "postOffice" | "cityOrDistrict" | "state" | "pinCode" | "country" | "fullAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["addressModel"]>
+  export type AddressModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    currentAddressOf?: boolean | AddressModel$currentAddressOfArgs<ExtArgs>
+    permanentAddressOf?: boolean | AddressModel$permanentAddressOfArgs<ExtArgs>
+  }
+  export type AddressModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type AddressModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $AddressModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AddressModel"
+    objects: {
+      currentAddressOf: Prisma.$CustomerProfileDataModelPayload<ExtArgs> | null
+      permanentAddressOf: Prisma.$CustomerProfileDataModelPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      line1: string
+      line2: string | null
+      line3: string | null
+      postOffice: string
+      cityOrDistrict: string
+      state: string
+      pinCode: string
+      country: string
+      fullAddress: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["addressModel"]>
+    composites: {}
+  }
+
+  type AddressModelGetPayload<S extends boolean | null | undefined | AddressModelDefaultArgs> = $Result.GetResult<Prisma.$AddressModelPayload, S>
+
+  type AddressModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AddressModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AddressModelCountAggregateInputType | true
+    }
+
+  export interface AddressModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AddressModel'], meta: { name: 'AddressModel' } }
+    /**
+     * Find zero or one AddressModel that matches the filter.
+     * @param {AddressModelFindUniqueArgs} args - Arguments to find a AddressModel
+     * @example
+     * // Get one AddressModel
+     * const addressModel = await prisma.addressModel.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AddressModelFindUniqueArgs>(args: SelectSubset<T, AddressModelFindUniqueArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AddressModel that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AddressModelFindUniqueOrThrowArgs} args - Arguments to find a AddressModel
+     * @example
+     * // Get one AddressModel
+     * const addressModel = await prisma.addressModel.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AddressModelFindUniqueOrThrowArgs>(args: SelectSubset<T, AddressModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AddressModel that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AddressModelFindFirstArgs} args - Arguments to find a AddressModel
+     * @example
+     * // Get one AddressModel
+     * const addressModel = await prisma.addressModel.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AddressModelFindFirstArgs>(args?: SelectSubset<T, AddressModelFindFirstArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AddressModel that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AddressModelFindFirstOrThrowArgs} args - Arguments to find a AddressModel
+     * @example
+     * // Get one AddressModel
+     * const addressModel = await prisma.addressModel.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AddressModelFindFirstOrThrowArgs>(args?: SelectSubset<T, AddressModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AddressModels that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AddressModelFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AddressModels
+     * const addressModels = await prisma.addressModel.findMany()
+     * 
+     * // Get first 10 AddressModels
+     * const addressModels = await prisma.addressModel.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const addressModelWithIdOnly = await prisma.addressModel.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AddressModelFindManyArgs>(args?: SelectSubset<T, AddressModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AddressModel.
+     * @param {AddressModelCreateArgs} args - Arguments to create a AddressModel.
+     * @example
+     * // Create one AddressModel
+     * const AddressModel = await prisma.addressModel.create({
+     *   data: {
+     *     // ... data to create a AddressModel
+     *   }
+     * })
+     * 
+     */
+    create<T extends AddressModelCreateArgs>(args: SelectSubset<T, AddressModelCreateArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AddressModels.
+     * @param {AddressModelCreateManyArgs} args - Arguments to create many AddressModels.
+     * @example
+     * // Create many AddressModels
+     * const addressModel = await prisma.addressModel.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AddressModelCreateManyArgs>(args?: SelectSubset<T, AddressModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AddressModels and returns the data saved in the database.
+     * @param {AddressModelCreateManyAndReturnArgs} args - Arguments to create many AddressModels.
+     * @example
+     * // Create many AddressModels
+     * const addressModel = await prisma.addressModel.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AddressModels and only return the `id`
+     * const addressModelWithIdOnly = await prisma.addressModel.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AddressModelCreateManyAndReturnArgs>(args?: SelectSubset<T, AddressModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AddressModel.
+     * @param {AddressModelDeleteArgs} args - Arguments to delete one AddressModel.
+     * @example
+     * // Delete one AddressModel
+     * const AddressModel = await prisma.addressModel.delete({
+     *   where: {
+     *     // ... filter to delete one AddressModel
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AddressModelDeleteArgs>(args: SelectSubset<T, AddressModelDeleteArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AddressModel.
+     * @param {AddressModelUpdateArgs} args - Arguments to update one AddressModel.
+     * @example
+     * // Update one AddressModel
+     * const addressModel = await prisma.addressModel.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AddressModelUpdateArgs>(args: SelectSubset<T, AddressModelUpdateArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AddressModels.
+     * @param {AddressModelDeleteManyArgs} args - Arguments to filter AddressModels to delete.
+     * @example
+     * // Delete a few AddressModels
+     * const { count } = await prisma.addressModel.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AddressModelDeleteManyArgs>(args?: SelectSubset<T, AddressModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AddressModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AddressModelUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AddressModels
+     * const addressModel = await prisma.addressModel.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AddressModelUpdateManyArgs>(args: SelectSubset<T, AddressModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AddressModels and returns the data updated in the database.
+     * @param {AddressModelUpdateManyAndReturnArgs} args - Arguments to update many AddressModels.
+     * @example
+     * // Update many AddressModels
+     * const addressModel = await prisma.addressModel.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AddressModels and only return the `id`
+     * const addressModelWithIdOnly = await prisma.addressModel.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AddressModelUpdateManyAndReturnArgs>(args: SelectSubset<T, AddressModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AddressModel.
+     * @param {AddressModelUpsertArgs} args - Arguments to update or create a AddressModel.
+     * @example
+     * // Update or create a AddressModel
+     * const addressModel = await prisma.addressModel.upsert({
+     *   create: {
+     *     // ... data to create a AddressModel
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AddressModel we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AddressModelUpsertArgs>(args: SelectSubset<T, AddressModelUpsertArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AddressModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AddressModelCountArgs} args - Arguments to filter AddressModels to count.
+     * @example
+     * // Count the number of AddressModels
+     * const count = await prisma.addressModel.count({
+     *   where: {
+     *     // ... the filter for the AddressModels we want to count
+     *   }
+     * })
+    **/
+    count<T extends AddressModelCountArgs>(
+      args?: Subset<T, AddressModelCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AddressModelCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AddressModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AddressModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AddressModelAggregateArgs>(args: Subset<T, AddressModelAggregateArgs>): Prisma.PrismaPromise<GetAddressModelAggregateType<T>>
+
+    /**
+     * Group by AddressModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AddressModelGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AddressModelGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AddressModelGroupByArgs['orderBy'] }
+        : { orderBy?: AddressModelGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AddressModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAddressModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AddressModel model
+   */
+  readonly fields: AddressModelFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AddressModel.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AddressModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    currentAddressOf<T extends AddressModel$currentAddressOfArgs<ExtArgs> = {}>(args?: Subset<T, AddressModel$currentAddressOfArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    permanentAddressOf<T extends AddressModel$permanentAddressOfArgs<ExtArgs> = {}>(args?: Subset<T, AddressModel$permanentAddressOfArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AddressModel model
+   */
+  interface AddressModelFieldRefs {
+    readonly id: FieldRef<"AddressModel", 'Int'>
+    readonly line1: FieldRef<"AddressModel", 'String'>
+    readonly line2: FieldRef<"AddressModel", 'String'>
+    readonly line3: FieldRef<"AddressModel", 'String'>
+    readonly postOffice: FieldRef<"AddressModel", 'String'>
+    readonly cityOrDistrict: FieldRef<"AddressModel", 'String'>
+    readonly state: FieldRef<"AddressModel", 'String'>
+    readonly pinCode: FieldRef<"AddressModel", 'String'>
+    readonly country: FieldRef<"AddressModel", 'String'>
+    readonly fullAddress: FieldRef<"AddressModel", 'String'>
+    readonly createdAt: FieldRef<"AddressModel", 'DateTime'>
+    readonly updatedAt: FieldRef<"AddressModel", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AddressModel findUnique
+   */
+  export type AddressModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * Filter, which AddressModel to fetch.
+     */
+    where: AddressModelWhereUniqueInput
+  }
+
+  /**
+   * AddressModel findUniqueOrThrow
+   */
+  export type AddressModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * Filter, which AddressModel to fetch.
+     */
+    where: AddressModelWhereUniqueInput
+  }
+
+  /**
+   * AddressModel findFirst
+   */
+  export type AddressModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * Filter, which AddressModel to fetch.
+     */
+    where?: AddressModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AddressModels to fetch.
+     */
+    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AddressModels.
+     */
+    cursor?: AddressModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AddressModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AddressModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AddressModels.
+     */
+    distinct?: AddressModelScalarFieldEnum | AddressModelScalarFieldEnum[]
+  }
+
+  /**
+   * AddressModel findFirstOrThrow
+   */
+  export type AddressModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * Filter, which AddressModel to fetch.
+     */
+    where?: AddressModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AddressModels to fetch.
+     */
+    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AddressModels.
+     */
+    cursor?: AddressModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AddressModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AddressModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AddressModels.
+     */
+    distinct?: AddressModelScalarFieldEnum | AddressModelScalarFieldEnum[]
+  }
+
+  /**
+   * AddressModel findMany
+   */
+  export type AddressModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * Filter, which AddressModels to fetch.
+     */
+    where?: AddressModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AddressModels to fetch.
+     */
+    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AddressModels.
+     */
+    cursor?: AddressModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AddressModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AddressModels.
+     */
+    skip?: number
+    distinct?: AddressModelScalarFieldEnum | AddressModelScalarFieldEnum[]
+  }
+
+  /**
+   * AddressModel create
+   */
+  export type AddressModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AddressModel.
+     */
+    data: XOR<AddressModelCreateInput, AddressModelUncheckedCreateInput>
+  }
+
+  /**
+   * AddressModel createMany
+   */
+  export type AddressModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AddressModels.
+     */
+    data: AddressModelCreateManyInput | AddressModelCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AddressModel createManyAndReturn
+   */
+  export type AddressModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * The data used to create many AddressModels.
+     */
+    data: AddressModelCreateManyInput | AddressModelCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AddressModel update
+   */
+  export type AddressModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AddressModel.
+     */
+    data: XOR<AddressModelUpdateInput, AddressModelUncheckedUpdateInput>
+    /**
+     * Choose, which AddressModel to update.
+     */
+    where: AddressModelWhereUniqueInput
+  }
+
+  /**
+   * AddressModel updateMany
+   */
+  export type AddressModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AddressModels.
+     */
+    data: XOR<AddressModelUpdateManyMutationInput, AddressModelUncheckedUpdateManyInput>
+    /**
+     * Filter which AddressModels to update
+     */
+    where?: AddressModelWhereInput
+    /**
+     * Limit how many AddressModels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AddressModel updateManyAndReturn
+   */
+  export type AddressModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * The data used to update AddressModels.
+     */
+    data: XOR<AddressModelUpdateManyMutationInput, AddressModelUncheckedUpdateManyInput>
+    /**
+     * Filter which AddressModels to update
+     */
+    where?: AddressModelWhereInput
+    /**
+     * Limit how many AddressModels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AddressModel upsert
+   */
+  export type AddressModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AddressModel to update in case it exists.
+     */
+    where: AddressModelWhereUniqueInput
+    /**
+     * In case the AddressModel found by the `where` argument doesn't exist, create a new AddressModel with this data.
+     */
+    create: XOR<AddressModelCreateInput, AddressModelUncheckedCreateInput>
+    /**
+     * In case the AddressModel was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AddressModelUpdateInput, AddressModelUncheckedUpdateInput>
+  }
+
+  /**
+   * AddressModel delete
+   */
+  export type AddressModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
+    /**
+     * Filter which AddressModel to delete.
+     */
+    where: AddressModelWhereUniqueInput
+  }
+
+  /**
+   * AddressModel deleteMany
+   */
+  export type AddressModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AddressModels to delete
+     */
+    where?: AddressModelWhereInput
+    /**
+     * Limit how many AddressModels to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AddressModel.currentAddressOf
+   */
+  export type AddressModel$currentAddressOfArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerProfileDataModel
+     */
+    select?: CustomerProfileDataModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerProfileDataModel
+     */
+    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerProfileDataModelInclude<ExtArgs> | null
+    where?: CustomerProfileDataModelWhereInput
+  }
+
+  /**
+   * AddressModel.permanentAddressOf
+   */
+  export type AddressModel$permanentAddressOfArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerProfileDataModel
+     */
+    select?: CustomerProfileDataModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerProfileDataModel
+     */
+    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerProfileDataModelInclude<ExtArgs> | null
+    where?: CustomerProfileDataModelWhereInput
+  }
+
+  /**
+   * AddressModel without action
+   */
+  export type AddressModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AddressModel
+     */
+    select?: AddressModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AddressModel
+     */
+    omit?: AddressModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AddressModelInclude<ExtArgs> | null
   }
 
 
@@ -12131,25 +14093,16 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      /**
-       * Basic account info
-       */
       accountHolderName: string
       bankAccountType: string
       accountNumber: string
       ifscCode: string
       bankName: string
       branch: string
-      /**
-       * Status flags
-       */
       isPrimary: boolean
       isVerified: boolean
       verifyDate: Date
       customerProfileDataModelId: number | null
-      /**
-       * Timestamps
-       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customersBankAccountModel"]>
@@ -13392,31 +15345,19 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      /**
-       * Depository info
-       */
       depositoryName: $Enums.DepositoryName
       dpId: string
       clientId: string
       accountType: $Enums.DematAccountType
       depositoryParticipantName: string
-      /**
-       * PAN details linked to this account
-       */
       primaryPanNumber: string
       sndPanNumber: string | null
       trdPanNumber: string | null
       accountHolderName: string
-      /**
-       * Status flags
-       */
       isPrimary: boolean
       isVerified: boolean
       verifyDate: Date
       customerProfileDataModelId: number | null
-      /**
-       * Timestamps
-       */
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customersDematAccountModel"]>
@@ -14289,2334 +16230,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CustomersDematAccountModelInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model CustomersRiskProfileModel
-   */
-
-  export type AggregateCustomersRiskProfileModel = {
-    _count: CustomersRiskProfileModelCountAggregateOutputType | null
-    _avg: CustomersRiskProfileModelAvgAggregateOutputType | null
-    _sum: CustomersRiskProfileModelSumAggregateOutputType | null
-    _min: CustomersRiskProfileModelMinAggregateOutputType | null
-    _max: CustomersRiskProfileModelMaxAggregateOutputType | null
-  }
-
-  export type CustomersRiskProfileModelAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type CustomersRiskProfileModelSumAggregateOutputType = {
-    id: number | null
-  }
-
-  export type CustomersRiskProfileModelMinAggregateOutputType = {
-    id: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type CustomersRiskProfileModelMaxAggregateOutputType = {
-    id: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type CustomersRiskProfileModelCountAggregateOutputType = {
-    id: number
-    data: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type CustomersRiskProfileModelAvgAggregateInputType = {
-    id?: true
-  }
-
-  export type CustomersRiskProfileModelSumAggregateInputType = {
-    id?: true
-  }
-
-  export type CustomersRiskProfileModelMinAggregateInputType = {
-    id?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type CustomersRiskProfileModelMaxAggregateInputType = {
-    id?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type CustomersRiskProfileModelCountAggregateInputType = {
-    id?: true
-    data?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type CustomersRiskProfileModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which CustomersRiskProfileModel to aggregate.
-     */
-    where?: CustomersRiskProfileModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of CustomersRiskProfileModels to fetch.
-     */
-    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: CustomersRiskProfileModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` CustomersRiskProfileModels.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned CustomersRiskProfileModels
-    **/
-    _count?: true | CustomersRiskProfileModelCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: CustomersRiskProfileModelAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: CustomersRiskProfileModelSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: CustomersRiskProfileModelMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: CustomersRiskProfileModelMaxAggregateInputType
-  }
-
-  export type GetCustomersRiskProfileModelAggregateType<T extends CustomersRiskProfileModelAggregateArgs> = {
-        [P in keyof T & keyof AggregateCustomersRiskProfileModel]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateCustomersRiskProfileModel[P]>
-      : GetScalarType<T[P], AggregateCustomersRiskProfileModel[P]>
-  }
-
-
-
-
-  export type CustomersRiskProfileModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomersRiskProfileModelWhereInput
-    orderBy?: CustomersRiskProfileModelOrderByWithAggregationInput | CustomersRiskProfileModelOrderByWithAggregationInput[]
-    by: CustomersRiskProfileModelScalarFieldEnum[] | CustomersRiskProfileModelScalarFieldEnum
-    having?: CustomersRiskProfileModelScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: CustomersRiskProfileModelCountAggregateInputType | true
-    _avg?: CustomersRiskProfileModelAvgAggregateInputType
-    _sum?: CustomersRiskProfileModelSumAggregateInputType
-    _min?: CustomersRiskProfileModelMinAggregateInputType
-    _max?: CustomersRiskProfileModelMaxAggregateInputType
-  }
-
-  export type CustomersRiskProfileModelGroupByOutputType = {
-    id: number
-    data: JsonValue[]
-    createdAt: Date
-    updatedAt: Date
-    _count: CustomersRiskProfileModelCountAggregateOutputType | null
-    _avg: CustomersRiskProfileModelAvgAggregateOutputType | null
-    _sum: CustomersRiskProfileModelSumAggregateOutputType | null
-    _min: CustomersRiskProfileModelMinAggregateOutputType | null
-    _max: CustomersRiskProfileModelMaxAggregateOutputType | null
-  }
-
-  type GetCustomersRiskProfileModelGroupByPayload<T extends CustomersRiskProfileModelGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<CustomersRiskProfileModelGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof CustomersRiskProfileModelGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], CustomersRiskProfileModelGroupByOutputType[P]>
-            : GetScalarType<T[P], CustomersRiskProfileModelGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type CustomersRiskProfileModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    data?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    CustomerProfileDataModel?: boolean | CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | CustomersRiskProfileModelCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["customersRiskProfileModel"]>
-
-  export type CustomersRiskProfileModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    data?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["customersRiskProfileModel"]>
-
-  export type CustomersRiskProfileModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    data?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["customersRiskProfileModel"]>
-
-  export type CustomersRiskProfileModelSelectScalar = {
-    id?: boolean
-    data?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type CustomersRiskProfileModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "data" | "createdAt" | "updatedAt", ExtArgs["result"]["customersRiskProfileModel"]>
-  export type CustomersRiskProfileModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs>
-    _count?: boolean | CustomersRiskProfileModelCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type CustomersRiskProfileModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type CustomersRiskProfileModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-
-  export type $CustomersRiskProfileModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "CustomersRiskProfileModel"
-    objects: {
-      CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      data: Prisma.JsonValue[]
-      /**
-       * Timestamps
-       */
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["customersRiskProfileModel"]>
-    composites: {}
-  }
-
-  type CustomersRiskProfileModelGetPayload<S extends boolean | null | undefined | CustomersRiskProfileModelDefaultArgs> = $Result.GetResult<Prisma.$CustomersRiskProfileModelPayload, S>
-
-  type CustomersRiskProfileModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<CustomersRiskProfileModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: CustomersRiskProfileModelCountAggregateInputType | true
-    }
-
-  export interface CustomersRiskProfileModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CustomersRiskProfileModel'], meta: { name: 'CustomersRiskProfileModel' } }
-    /**
-     * Find zero or one CustomersRiskProfileModel that matches the filter.
-     * @param {CustomersRiskProfileModelFindUniqueArgs} args - Arguments to find a CustomersRiskProfileModel
-     * @example
-     * // Get one CustomersRiskProfileModel
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends CustomersRiskProfileModelFindUniqueArgs>(args: SelectSubset<T, CustomersRiskProfileModelFindUniqueArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one CustomersRiskProfileModel that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {CustomersRiskProfileModelFindUniqueOrThrowArgs} args - Arguments to find a CustomersRiskProfileModel
-     * @example
-     * // Get one CustomersRiskProfileModel
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends CustomersRiskProfileModelFindUniqueOrThrowArgs>(args: SelectSubset<T, CustomersRiskProfileModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first CustomersRiskProfileModel that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CustomersRiskProfileModelFindFirstArgs} args - Arguments to find a CustomersRiskProfileModel
-     * @example
-     * // Get one CustomersRiskProfileModel
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends CustomersRiskProfileModelFindFirstArgs>(args?: SelectSubset<T, CustomersRiskProfileModelFindFirstArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first CustomersRiskProfileModel that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CustomersRiskProfileModelFindFirstOrThrowArgs} args - Arguments to find a CustomersRiskProfileModel
-     * @example
-     * // Get one CustomersRiskProfileModel
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends CustomersRiskProfileModelFindFirstOrThrowArgs>(args?: SelectSubset<T, CustomersRiskProfileModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more CustomersRiskProfileModels that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CustomersRiskProfileModelFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all CustomersRiskProfileModels
-     * const customersRiskProfileModels = await prisma.customersRiskProfileModel.findMany()
-     * 
-     * // Get first 10 CustomersRiskProfileModels
-     * const customersRiskProfileModels = await prisma.customersRiskProfileModel.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const customersRiskProfileModelWithIdOnly = await prisma.customersRiskProfileModel.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends CustomersRiskProfileModelFindManyArgs>(args?: SelectSubset<T, CustomersRiskProfileModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a CustomersRiskProfileModel.
-     * @param {CustomersRiskProfileModelCreateArgs} args - Arguments to create a CustomersRiskProfileModel.
-     * @example
-     * // Create one CustomersRiskProfileModel
-     * const CustomersRiskProfileModel = await prisma.customersRiskProfileModel.create({
-     *   data: {
-     *     // ... data to create a CustomersRiskProfileModel
-     *   }
-     * })
-     * 
-     */
-    create<T extends CustomersRiskProfileModelCreateArgs>(args: SelectSubset<T, CustomersRiskProfileModelCreateArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many CustomersRiskProfileModels.
-     * @param {CustomersRiskProfileModelCreateManyArgs} args - Arguments to create many CustomersRiskProfileModels.
-     * @example
-     * // Create many CustomersRiskProfileModels
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends CustomersRiskProfileModelCreateManyArgs>(args?: SelectSubset<T, CustomersRiskProfileModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many CustomersRiskProfileModels and returns the data saved in the database.
-     * @param {CustomersRiskProfileModelCreateManyAndReturnArgs} args - Arguments to create many CustomersRiskProfileModels.
-     * @example
-     * // Create many CustomersRiskProfileModels
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many CustomersRiskProfileModels and only return the `id`
-     * const customersRiskProfileModelWithIdOnly = await prisma.customersRiskProfileModel.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends CustomersRiskProfileModelCreateManyAndReturnArgs>(args?: SelectSubset<T, CustomersRiskProfileModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a CustomersRiskProfileModel.
-     * @param {CustomersRiskProfileModelDeleteArgs} args - Arguments to delete one CustomersRiskProfileModel.
-     * @example
-     * // Delete one CustomersRiskProfileModel
-     * const CustomersRiskProfileModel = await prisma.customersRiskProfileModel.delete({
-     *   where: {
-     *     // ... filter to delete one CustomersRiskProfileModel
-     *   }
-     * })
-     * 
-     */
-    delete<T extends CustomersRiskProfileModelDeleteArgs>(args: SelectSubset<T, CustomersRiskProfileModelDeleteArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one CustomersRiskProfileModel.
-     * @param {CustomersRiskProfileModelUpdateArgs} args - Arguments to update one CustomersRiskProfileModel.
-     * @example
-     * // Update one CustomersRiskProfileModel
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends CustomersRiskProfileModelUpdateArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpdateArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more CustomersRiskProfileModels.
-     * @param {CustomersRiskProfileModelDeleteManyArgs} args - Arguments to filter CustomersRiskProfileModels to delete.
-     * @example
-     * // Delete a few CustomersRiskProfileModels
-     * const { count } = await prisma.customersRiskProfileModel.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends CustomersRiskProfileModelDeleteManyArgs>(args?: SelectSubset<T, CustomersRiskProfileModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more CustomersRiskProfileModels.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CustomersRiskProfileModelUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many CustomersRiskProfileModels
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends CustomersRiskProfileModelUpdateManyArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more CustomersRiskProfileModels and returns the data updated in the database.
-     * @param {CustomersRiskProfileModelUpdateManyAndReturnArgs} args - Arguments to update many CustomersRiskProfileModels.
-     * @example
-     * // Update many CustomersRiskProfileModels
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more CustomersRiskProfileModels and only return the `id`
-     * const customersRiskProfileModelWithIdOnly = await prisma.customersRiskProfileModel.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends CustomersRiskProfileModelUpdateManyAndReturnArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one CustomersRiskProfileModel.
-     * @param {CustomersRiskProfileModelUpsertArgs} args - Arguments to update or create a CustomersRiskProfileModel.
-     * @example
-     * // Update or create a CustomersRiskProfileModel
-     * const customersRiskProfileModel = await prisma.customersRiskProfileModel.upsert({
-     *   create: {
-     *     // ... data to create a CustomersRiskProfileModel
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the CustomersRiskProfileModel we want to update
-     *   }
-     * })
-     */
-    upsert<T extends CustomersRiskProfileModelUpsertArgs>(args: SelectSubset<T, CustomersRiskProfileModelUpsertArgs<ExtArgs>>): Prisma__CustomersRiskProfileModelClient<$Result.GetResult<Prisma.$CustomersRiskProfileModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of CustomersRiskProfileModels.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CustomersRiskProfileModelCountArgs} args - Arguments to filter CustomersRiskProfileModels to count.
-     * @example
-     * // Count the number of CustomersRiskProfileModels
-     * const count = await prisma.customersRiskProfileModel.count({
-     *   where: {
-     *     // ... the filter for the CustomersRiskProfileModels we want to count
-     *   }
-     * })
-    **/
-    count<T extends CustomersRiskProfileModelCountArgs>(
-      args?: Subset<T, CustomersRiskProfileModelCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], CustomersRiskProfileModelCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a CustomersRiskProfileModel.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CustomersRiskProfileModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends CustomersRiskProfileModelAggregateArgs>(args: Subset<T, CustomersRiskProfileModelAggregateArgs>): Prisma.PrismaPromise<GetCustomersRiskProfileModelAggregateType<T>>
-
-    /**
-     * Group by CustomersRiskProfileModel.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CustomersRiskProfileModelGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends CustomersRiskProfileModelGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: CustomersRiskProfileModelGroupByArgs['orderBy'] }
-        : { orderBy?: CustomersRiskProfileModelGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, CustomersRiskProfileModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCustomersRiskProfileModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the CustomersRiskProfileModel model
-   */
-  readonly fields: CustomersRiskProfileModelFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for CustomersRiskProfileModel.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__CustomersRiskProfileModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    CustomerProfileDataModel<T extends CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the CustomersRiskProfileModel model
-   */
-  interface CustomersRiskProfileModelFieldRefs {
-    readonly id: FieldRef<"CustomersRiskProfileModel", 'Int'>
-    readonly data: FieldRef<"CustomersRiskProfileModel", 'Json[]'>
-    readonly createdAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
-    readonly updatedAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * CustomersRiskProfileModel findUnique
-   */
-  export type CustomersRiskProfileModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * Filter, which CustomersRiskProfileModel to fetch.
-     */
-    where: CustomersRiskProfileModelWhereUniqueInput
-  }
-
-  /**
-   * CustomersRiskProfileModel findUniqueOrThrow
-   */
-  export type CustomersRiskProfileModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * Filter, which CustomersRiskProfileModel to fetch.
-     */
-    where: CustomersRiskProfileModelWhereUniqueInput
-  }
-
-  /**
-   * CustomersRiskProfileModel findFirst
-   */
-  export type CustomersRiskProfileModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * Filter, which CustomersRiskProfileModel to fetch.
-     */
-    where?: CustomersRiskProfileModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of CustomersRiskProfileModels to fetch.
-     */
-    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for CustomersRiskProfileModels.
-     */
-    cursor?: CustomersRiskProfileModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` CustomersRiskProfileModels.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of CustomersRiskProfileModels.
-     */
-    distinct?: CustomersRiskProfileModelScalarFieldEnum | CustomersRiskProfileModelScalarFieldEnum[]
-  }
-
-  /**
-   * CustomersRiskProfileModel findFirstOrThrow
-   */
-  export type CustomersRiskProfileModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * Filter, which CustomersRiskProfileModel to fetch.
-     */
-    where?: CustomersRiskProfileModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of CustomersRiskProfileModels to fetch.
-     */
-    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for CustomersRiskProfileModels.
-     */
-    cursor?: CustomersRiskProfileModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` CustomersRiskProfileModels.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of CustomersRiskProfileModels.
-     */
-    distinct?: CustomersRiskProfileModelScalarFieldEnum | CustomersRiskProfileModelScalarFieldEnum[]
-  }
-
-  /**
-   * CustomersRiskProfileModel findMany
-   */
-  export type CustomersRiskProfileModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * Filter, which CustomersRiskProfileModels to fetch.
-     */
-    where?: CustomersRiskProfileModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of CustomersRiskProfileModels to fetch.
-     */
-    orderBy?: CustomersRiskProfileModelOrderByWithRelationInput | CustomersRiskProfileModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing CustomersRiskProfileModels.
-     */
-    cursor?: CustomersRiskProfileModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` CustomersRiskProfileModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` CustomersRiskProfileModels.
-     */
-    skip?: number
-    distinct?: CustomersRiskProfileModelScalarFieldEnum | CustomersRiskProfileModelScalarFieldEnum[]
-  }
-
-  /**
-   * CustomersRiskProfileModel create
-   */
-  export type CustomersRiskProfileModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * The data needed to create a CustomersRiskProfileModel.
-     */
-    data: XOR<CustomersRiskProfileModelCreateInput, CustomersRiskProfileModelUncheckedCreateInput>
-  }
-
-  /**
-   * CustomersRiskProfileModel createMany
-   */
-  export type CustomersRiskProfileModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many CustomersRiskProfileModels.
-     */
-    data: CustomersRiskProfileModelCreateManyInput | CustomersRiskProfileModelCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * CustomersRiskProfileModel createManyAndReturn
-   */
-  export type CustomersRiskProfileModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * The data used to create many CustomersRiskProfileModels.
-     */
-    data: CustomersRiskProfileModelCreateManyInput | CustomersRiskProfileModelCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * CustomersRiskProfileModel update
-   */
-  export type CustomersRiskProfileModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * The data needed to update a CustomersRiskProfileModel.
-     */
-    data: XOR<CustomersRiskProfileModelUpdateInput, CustomersRiskProfileModelUncheckedUpdateInput>
-    /**
-     * Choose, which CustomersRiskProfileModel to update.
-     */
-    where: CustomersRiskProfileModelWhereUniqueInput
-  }
-
-  /**
-   * CustomersRiskProfileModel updateMany
-   */
-  export type CustomersRiskProfileModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update CustomersRiskProfileModels.
-     */
-    data: XOR<CustomersRiskProfileModelUpdateManyMutationInput, CustomersRiskProfileModelUncheckedUpdateManyInput>
-    /**
-     * Filter which CustomersRiskProfileModels to update
-     */
-    where?: CustomersRiskProfileModelWhereInput
-    /**
-     * Limit how many CustomersRiskProfileModels to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * CustomersRiskProfileModel updateManyAndReturn
-   */
-  export type CustomersRiskProfileModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * The data used to update CustomersRiskProfileModels.
-     */
-    data: XOR<CustomersRiskProfileModelUpdateManyMutationInput, CustomersRiskProfileModelUncheckedUpdateManyInput>
-    /**
-     * Filter which CustomersRiskProfileModels to update
-     */
-    where?: CustomersRiskProfileModelWhereInput
-    /**
-     * Limit how many CustomersRiskProfileModels to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * CustomersRiskProfileModel upsert
-   */
-  export type CustomersRiskProfileModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * The filter to search for the CustomersRiskProfileModel to update in case it exists.
-     */
-    where: CustomersRiskProfileModelWhereUniqueInput
-    /**
-     * In case the CustomersRiskProfileModel found by the `where` argument doesn't exist, create a new CustomersRiskProfileModel with this data.
-     */
-    create: XOR<CustomersRiskProfileModelCreateInput, CustomersRiskProfileModelUncheckedCreateInput>
-    /**
-     * In case the CustomersRiskProfileModel was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<CustomersRiskProfileModelUpdateInput, CustomersRiskProfileModelUncheckedUpdateInput>
-  }
-
-  /**
-   * CustomersRiskProfileModel delete
-   */
-  export type CustomersRiskProfileModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-    /**
-     * Filter which CustomersRiskProfileModel to delete.
-     */
-    where: CustomersRiskProfileModelWhereUniqueInput
-  }
-
-  /**
-   * CustomersRiskProfileModel deleteMany
-   */
-  export type CustomersRiskProfileModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which CustomersRiskProfileModels to delete
-     */
-    where?: CustomersRiskProfileModelWhereInput
-    /**
-     * Limit how many CustomersRiskProfileModels to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * CustomersRiskProfileModel.CustomerProfileDataModel
-   */
-  export type CustomersRiskProfileModel$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomerProfileDataModel
-     */
-    select?: CustomerProfileDataModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomerProfileDataModel
-     */
-    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomerProfileDataModelInclude<ExtArgs> | null
-    where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
-  }
-
-  /**
-   * CustomersRiskProfileModel without action
-   */
-  export type CustomersRiskProfileModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomersRiskProfileModel
-     */
-    select?: CustomersRiskProfileModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomersRiskProfileModel
-     */
-    omit?: CustomersRiskProfileModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomersRiskProfileModelInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model AddressModel
-   */
-
-  export type AggregateAddressModel = {
-    _count: AddressModelCountAggregateOutputType | null
-    _avg: AddressModelAvgAggregateOutputType | null
-    _sum: AddressModelSumAggregateOutputType | null
-    _min: AddressModelMinAggregateOutputType | null
-    _max: AddressModelMaxAggregateOutputType | null
-  }
-
-  export type AddressModelAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type AddressModelSumAggregateOutputType = {
-    id: number | null
-  }
-
-  export type AddressModelMinAggregateOutputType = {
-    id: number | null
-    line1: string | null
-    line2: string | null
-    line3: string | null
-    postOffice: string | null
-    cityOrDistrict: string | null
-    state: string | null
-    pinCode: string | null
-    country: string | null
-    fullAddress: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type AddressModelMaxAggregateOutputType = {
-    id: number | null
-    line1: string | null
-    line2: string | null
-    line3: string | null
-    postOffice: string | null
-    cityOrDistrict: string | null
-    state: string | null
-    pinCode: string | null
-    country: string | null
-    fullAddress: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type AddressModelCountAggregateOutputType = {
-    id: number
-    line1: number
-    line2: number
-    line3: number
-    postOffice: number
-    cityOrDistrict: number
-    state: number
-    pinCode: number
-    country: number
-    fullAddress: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type AddressModelAvgAggregateInputType = {
-    id?: true
-  }
-
-  export type AddressModelSumAggregateInputType = {
-    id?: true
-  }
-
-  export type AddressModelMinAggregateInputType = {
-    id?: true
-    line1?: true
-    line2?: true
-    line3?: true
-    postOffice?: true
-    cityOrDistrict?: true
-    state?: true
-    pinCode?: true
-    country?: true
-    fullAddress?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type AddressModelMaxAggregateInputType = {
-    id?: true
-    line1?: true
-    line2?: true
-    line3?: true
-    postOffice?: true
-    cityOrDistrict?: true
-    state?: true
-    pinCode?: true
-    country?: true
-    fullAddress?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type AddressModelCountAggregateInputType = {
-    id?: true
-    line1?: true
-    line2?: true
-    line3?: true
-    postOffice?: true
-    cityOrDistrict?: true
-    state?: true
-    pinCode?: true
-    country?: true
-    fullAddress?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type AddressModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AddressModel to aggregate.
-     */
-    where?: AddressModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AddressModels to fetch.
-     */
-    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: AddressModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AddressModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AddressModels.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned AddressModels
-    **/
-    _count?: true | AddressModelCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: AddressModelAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: AddressModelSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: AddressModelMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: AddressModelMaxAggregateInputType
-  }
-
-  export type GetAddressModelAggregateType<T extends AddressModelAggregateArgs> = {
-        [P in keyof T & keyof AggregateAddressModel]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateAddressModel[P]>
-      : GetScalarType<T[P], AggregateAddressModel[P]>
-  }
-
-
-
-
-  export type AddressModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AddressModelWhereInput
-    orderBy?: AddressModelOrderByWithAggregationInput | AddressModelOrderByWithAggregationInput[]
-    by: AddressModelScalarFieldEnum[] | AddressModelScalarFieldEnum
-    having?: AddressModelScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: AddressModelCountAggregateInputType | true
-    _avg?: AddressModelAvgAggregateInputType
-    _sum?: AddressModelSumAggregateInputType
-    _min?: AddressModelMinAggregateInputType
-    _max?: AddressModelMaxAggregateInputType
-  }
-
-  export type AddressModelGroupByOutputType = {
-    id: number
-    line1: string
-    line2: string | null
-    line3: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt: Date
-    updatedAt: Date
-    _count: AddressModelCountAggregateOutputType | null
-    _avg: AddressModelAvgAggregateOutputType | null
-    _sum: AddressModelSumAggregateOutputType | null
-    _min: AddressModelMinAggregateOutputType | null
-    _max: AddressModelMaxAggregateOutputType | null
-  }
-
-  type GetAddressModelGroupByPayload<T extends AddressModelGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<AddressModelGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof AddressModelGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], AddressModelGroupByOutputType[P]>
-            : GetScalarType<T[P], AddressModelGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type AddressModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    line1?: boolean
-    line2?: boolean
-    line3?: boolean
-    postOffice?: boolean
-    cityOrDistrict?: boolean
-    state?: boolean
-    pinCode?: boolean
-    country?: boolean
-    fullAddress?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    currentAddressOf?: boolean | AddressModel$currentAddressOfArgs<ExtArgs>
-    permanentAddressOf?: boolean | AddressModel$permanentAddressOfArgs<ExtArgs>
-    _count?: boolean | AddressModelCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["addressModel"]>
-
-  export type AddressModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    line1?: boolean
-    line2?: boolean
-    line3?: boolean
-    postOffice?: boolean
-    cityOrDistrict?: boolean
-    state?: boolean
-    pinCode?: boolean
-    country?: boolean
-    fullAddress?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["addressModel"]>
-
-  export type AddressModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    line1?: boolean
-    line2?: boolean
-    line3?: boolean
-    postOffice?: boolean
-    cityOrDistrict?: boolean
-    state?: boolean
-    pinCode?: boolean
-    country?: boolean
-    fullAddress?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["addressModel"]>
-
-  export type AddressModelSelectScalar = {
-    id?: boolean
-    line1?: boolean
-    line2?: boolean
-    line3?: boolean
-    postOffice?: boolean
-    cityOrDistrict?: boolean
-    state?: boolean
-    pinCode?: boolean
-    country?: boolean
-    fullAddress?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type AddressModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "line1" | "line2" | "line3" | "postOffice" | "cityOrDistrict" | "state" | "pinCode" | "country" | "fullAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["addressModel"]>
-  export type AddressModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    currentAddressOf?: boolean | AddressModel$currentAddressOfArgs<ExtArgs>
-    permanentAddressOf?: boolean | AddressModel$permanentAddressOfArgs<ExtArgs>
-    _count?: boolean | AddressModelCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type AddressModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type AddressModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-
-  export type $AddressModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "AddressModel"
-    objects: {
-      /**
-       * Reverse relations (used by personal info)
-       */
-      currentAddressOf: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
-      permanentAddressOf: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      /**
-       * Address lines
-       */
-      line1: string
-      line2: string | null
-      line3: string | null
-      /**
-       * Location details
-       */
-      postOffice: string
-      cityOrDistrict: string
-      state: string
-      pinCode: string
-      country: string
-      /**
-       * Full address text
-       */
-      fullAddress: string
-      /**
-       * Timestamps
-       */
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["addressModel"]>
-    composites: {}
-  }
-
-  type AddressModelGetPayload<S extends boolean | null | undefined | AddressModelDefaultArgs> = $Result.GetResult<Prisma.$AddressModelPayload, S>
-
-  type AddressModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<AddressModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: AddressModelCountAggregateInputType | true
-    }
-
-  export interface AddressModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AddressModel'], meta: { name: 'AddressModel' } }
-    /**
-     * Find zero or one AddressModel that matches the filter.
-     * @param {AddressModelFindUniqueArgs} args - Arguments to find a AddressModel
-     * @example
-     * // Get one AddressModel
-     * const addressModel = await prisma.addressModel.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends AddressModelFindUniqueArgs>(args: SelectSubset<T, AddressModelFindUniqueArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one AddressModel that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {AddressModelFindUniqueOrThrowArgs} args - Arguments to find a AddressModel
-     * @example
-     * // Get one AddressModel
-     * const addressModel = await prisma.addressModel.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends AddressModelFindUniqueOrThrowArgs>(args: SelectSubset<T, AddressModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AddressModel that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AddressModelFindFirstArgs} args - Arguments to find a AddressModel
-     * @example
-     * // Get one AddressModel
-     * const addressModel = await prisma.addressModel.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends AddressModelFindFirstArgs>(args?: SelectSubset<T, AddressModelFindFirstArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AddressModel that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AddressModelFindFirstOrThrowArgs} args - Arguments to find a AddressModel
-     * @example
-     * // Get one AddressModel
-     * const addressModel = await prisma.addressModel.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends AddressModelFindFirstOrThrowArgs>(args?: SelectSubset<T, AddressModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more AddressModels that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AddressModelFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all AddressModels
-     * const addressModels = await prisma.addressModel.findMany()
-     * 
-     * // Get first 10 AddressModels
-     * const addressModels = await prisma.addressModel.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const addressModelWithIdOnly = await prisma.addressModel.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends AddressModelFindManyArgs>(args?: SelectSubset<T, AddressModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a AddressModel.
-     * @param {AddressModelCreateArgs} args - Arguments to create a AddressModel.
-     * @example
-     * // Create one AddressModel
-     * const AddressModel = await prisma.addressModel.create({
-     *   data: {
-     *     // ... data to create a AddressModel
-     *   }
-     * })
-     * 
-     */
-    create<T extends AddressModelCreateArgs>(args: SelectSubset<T, AddressModelCreateArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many AddressModels.
-     * @param {AddressModelCreateManyArgs} args - Arguments to create many AddressModels.
-     * @example
-     * // Create many AddressModels
-     * const addressModel = await prisma.addressModel.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends AddressModelCreateManyArgs>(args?: SelectSubset<T, AddressModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many AddressModels and returns the data saved in the database.
-     * @param {AddressModelCreateManyAndReturnArgs} args - Arguments to create many AddressModels.
-     * @example
-     * // Create many AddressModels
-     * const addressModel = await prisma.addressModel.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many AddressModels and only return the `id`
-     * const addressModelWithIdOnly = await prisma.addressModel.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends AddressModelCreateManyAndReturnArgs>(args?: SelectSubset<T, AddressModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a AddressModel.
-     * @param {AddressModelDeleteArgs} args - Arguments to delete one AddressModel.
-     * @example
-     * // Delete one AddressModel
-     * const AddressModel = await prisma.addressModel.delete({
-     *   where: {
-     *     // ... filter to delete one AddressModel
-     *   }
-     * })
-     * 
-     */
-    delete<T extends AddressModelDeleteArgs>(args: SelectSubset<T, AddressModelDeleteArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one AddressModel.
-     * @param {AddressModelUpdateArgs} args - Arguments to update one AddressModel.
-     * @example
-     * // Update one AddressModel
-     * const addressModel = await prisma.addressModel.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends AddressModelUpdateArgs>(args: SelectSubset<T, AddressModelUpdateArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more AddressModels.
-     * @param {AddressModelDeleteManyArgs} args - Arguments to filter AddressModels to delete.
-     * @example
-     * // Delete a few AddressModels
-     * const { count } = await prisma.addressModel.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends AddressModelDeleteManyArgs>(args?: SelectSubset<T, AddressModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AddressModels.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AddressModelUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many AddressModels
-     * const addressModel = await prisma.addressModel.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends AddressModelUpdateManyArgs>(args: SelectSubset<T, AddressModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AddressModels and returns the data updated in the database.
-     * @param {AddressModelUpdateManyAndReturnArgs} args - Arguments to update many AddressModels.
-     * @example
-     * // Update many AddressModels
-     * const addressModel = await prisma.addressModel.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more AddressModels and only return the `id`
-     * const addressModelWithIdOnly = await prisma.addressModel.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends AddressModelUpdateManyAndReturnArgs>(args: SelectSubset<T, AddressModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one AddressModel.
-     * @param {AddressModelUpsertArgs} args - Arguments to update or create a AddressModel.
-     * @example
-     * // Update or create a AddressModel
-     * const addressModel = await prisma.addressModel.upsert({
-     *   create: {
-     *     // ... data to create a AddressModel
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the AddressModel we want to update
-     *   }
-     * })
-     */
-    upsert<T extends AddressModelUpsertArgs>(args: SelectSubset<T, AddressModelUpsertArgs<ExtArgs>>): Prisma__AddressModelClient<$Result.GetResult<Prisma.$AddressModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of AddressModels.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AddressModelCountArgs} args - Arguments to filter AddressModels to count.
-     * @example
-     * // Count the number of AddressModels
-     * const count = await prisma.addressModel.count({
-     *   where: {
-     *     // ... the filter for the AddressModels we want to count
-     *   }
-     * })
-    **/
-    count<T extends AddressModelCountArgs>(
-      args?: Subset<T, AddressModelCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], AddressModelCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a AddressModel.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AddressModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends AddressModelAggregateArgs>(args: Subset<T, AddressModelAggregateArgs>): Prisma.PrismaPromise<GetAddressModelAggregateType<T>>
-
-    /**
-     * Group by AddressModel.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AddressModelGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends AddressModelGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: AddressModelGroupByArgs['orderBy'] }
-        : { orderBy?: AddressModelGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, AddressModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAddressModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the AddressModel model
-   */
-  readonly fields: AddressModelFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for AddressModel.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__AddressModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    currentAddressOf<T extends AddressModel$currentAddressOfArgs<ExtArgs> = {}>(args?: Subset<T, AddressModel$currentAddressOfArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    permanentAddressOf<T extends AddressModel$permanentAddressOfArgs<ExtArgs> = {}>(args?: Subset<T, AddressModel$permanentAddressOfArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the AddressModel model
-   */
-  interface AddressModelFieldRefs {
-    readonly id: FieldRef<"AddressModel", 'Int'>
-    readonly line1: FieldRef<"AddressModel", 'String'>
-    readonly line2: FieldRef<"AddressModel", 'String'>
-    readonly line3: FieldRef<"AddressModel", 'String'>
-    readonly postOffice: FieldRef<"AddressModel", 'String'>
-    readonly cityOrDistrict: FieldRef<"AddressModel", 'String'>
-    readonly state: FieldRef<"AddressModel", 'String'>
-    readonly pinCode: FieldRef<"AddressModel", 'String'>
-    readonly country: FieldRef<"AddressModel", 'String'>
-    readonly fullAddress: FieldRef<"AddressModel", 'String'>
-    readonly createdAt: FieldRef<"AddressModel", 'DateTime'>
-    readonly updatedAt: FieldRef<"AddressModel", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * AddressModel findUnique
-   */
-  export type AddressModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * Filter, which AddressModel to fetch.
-     */
-    where: AddressModelWhereUniqueInput
-  }
-
-  /**
-   * AddressModel findUniqueOrThrow
-   */
-  export type AddressModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * Filter, which AddressModel to fetch.
-     */
-    where: AddressModelWhereUniqueInput
-  }
-
-  /**
-   * AddressModel findFirst
-   */
-  export type AddressModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * Filter, which AddressModel to fetch.
-     */
-    where?: AddressModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AddressModels to fetch.
-     */
-    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for AddressModels.
-     */
-    cursor?: AddressModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AddressModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AddressModels.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of AddressModels.
-     */
-    distinct?: AddressModelScalarFieldEnum | AddressModelScalarFieldEnum[]
-  }
-
-  /**
-   * AddressModel findFirstOrThrow
-   */
-  export type AddressModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * Filter, which AddressModel to fetch.
-     */
-    where?: AddressModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AddressModels to fetch.
-     */
-    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for AddressModels.
-     */
-    cursor?: AddressModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AddressModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AddressModels.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of AddressModels.
-     */
-    distinct?: AddressModelScalarFieldEnum | AddressModelScalarFieldEnum[]
-  }
-
-  /**
-   * AddressModel findMany
-   */
-  export type AddressModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * Filter, which AddressModels to fetch.
-     */
-    where?: AddressModelWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AddressModels to fetch.
-     */
-    orderBy?: AddressModelOrderByWithRelationInput | AddressModelOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing AddressModels.
-     */
-    cursor?: AddressModelWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AddressModels from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AddressModels.
-     */
-    skip?: number
-    distinct?: AddressModelScalarFieldEnum | AddressModelScalarFieldEnum[]
-  }
-
-  /**
-   * AddressModel create
-   */
-  export type AddressModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * The data needed to create a AddressModel.
-     */
-    data: XOR<AddressModelCreateInput, AddressModelUncheckedCreateInput>
-  }
-
-  /**
-   * AddressModel createMany
-   */
-  export type AddressModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many AddressModels.
-     */
-    data: AddressModelCreateManyInput | AddressModelCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AddressModel createManyAndReturn
-   */
-  export type AddressModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * The data used to create many AddressModels.
-     */
-    data: AddressModelCreateManyInput | AddressModelCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AddressModel update
-   */
-  export type AddressModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * The data needed to update a AddressModel.
-     */
-    data: XOR<AddressModelUpdateInput, AddressModelUncheckedUpdateInput>
-    /**
-     * Choose, which AddressModel to update.
-     */
-    where: AddressModelWhereUniqueInput
-  }
-
-  /**
-   * AddressModel updateMany
-   */
-  export type AddressModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update AddressModels.
-     */
-    data: XOR<AddressModelUpdateManyMutationInput, AddressModelUncheckedUpdateManyInput>
-    /**
-     * Filter which AddressModels to update
-     */
-    where?: AddressModelWhereInput
-    /**
-     * Limit how many AddressModels to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AddressModel updateManyAndReturn
-   */
-  export type AddressModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * The data used to update AddressModels.
-     */
-    data: XOR<AddressModelUpdateManyMutationInput, AddressModelUncheckedUpdateManyInput>
-    /**
-     * Filter which AddressModels to update
-     */
-    where?: AddressModelWhereInput
-    /**
-     * Limit how many AddressModels to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AddressModel upsert
-   */
-  export type AddressModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * The filter to search for the AddressModel to update in case it exists.
-     */
-    where: AddressModelWhereUniqueInput
-    /**
-     * In case the AddressModel found by the `where` argument doesn't exist, create a new AddressModel with this data.
-     */
-    create: XOR<AddressModelCreateInput, AddressModelUncheckedCreateInput>
-    /**
-     * In case the AddressModel was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<AddressModelUpdateInput, AddressModelUncheckedUpdateInput>
-  }
-
-  /**
-   * AddressModel delete
-   */
-  export type AddressModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
-    /**
-     * Filter which AddressModel to delete.
-     */
-    where: AddressModelWhereUniqueInput
-  }
-
-  /**
-   * AddressModel deleteMany
-   */
-  export type AddressModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AddressModels to delete
-     */
-    where?: AddressModelWhereInput
-    /**
-     * Limit how many AddressModels to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * AddressModel.currentAddressOf
-   */
-  export type AddressModel$currentAddressOfArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomerProfileDataModel
-     */
-    select?: CustomerProfileDataModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomerProfileDataModel
-     */
-    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomerProfileDataModelInclude<ExtArgs> | null
-    where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
-  }
-
-  /**
-   * AddressModel.permanentAddressOf
-   */
-  export type AddressModel$permanentAddressOfArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomerProfileDataModel
-     */
-    select?: CustomerProfileDataModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomerProfileDataModel
-     */
-    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomerProfileDataModelInclude<ExtArgs> | null
-    where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
-  }
-
-  /**
-   * AddressModel without action
-   */
-  export type AddressModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AddressModel
-     */
-    select?: AddressModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AddressModel
-     */
-    omit?: AddressModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AddressModelInclude<ExtArgs> | null
   }
 
 
@@ -18956,26 +18569,31 @@ export namespace Prisma {
 
   export type NseDataSetAvgAggregateOutputType = {
     id: number | null
+    customerProfileDataModelId: number | null
     nseCbricsParticipantModelId: number | null
   }
 
   export type NseDataSetSumAggregateOutputType = {
     id: number | null
+    customerProfileDataModelId: number | null
     nseCbricsParticipantModelId: number | null
   }
 
   export type NseDataSetMinAggregateOutputType = {
     id: number | null
+    customerProfileDataModelId: number | null
     nseCbricsParticipantModelId: number | null
   }
 
   export type NseDataSetMaxAggregateOutputType = {
     id: number | null
+    customerProfileDataModelId: number | null
     nseCbricsParticipantModelId: number | null
   }
 
   export type NseDataSetCountAggregateOutputType = {
     id: number
+    customerProfileDataModelId: number
     nseCbricsParticipantModelId: number
     _all: number
   }
@@ -18983,26 +18601,31 @@ export namespace Prisma {
 
   export type NseDataSetAvgAggregateInputType = {
     id?: true
+    customerProfileDataModelId?: true
     nseCbricsParticipantModelId?: true
   }
 
   export type NseDataSetSumAggregateInputType = {
     id?: true
+    customerProfileDataModelId?: true
     nseCbricsParticipantModelId?: true
   }
 
   export type NseDataSetMinAggregateInputType = {
     id?: true
+    customerProfileDataModelId?: true
     nseCbricsParticipantModelId?: true
   }
 
   export type NseDataSetMaxAggregateInputType = {
     id?: true
+    customerProfileDataModelId?: true
     nseCbricsParticipantModelId?: true
   }
 
   export type NseDataSetCountAggregateInputType = {
     id?: true
+    customerProfileDataModelId?: true
     nseCbricsParticipantModelId?: true
     _all?: true
   }
@@ -19095,6 +18718,7 @@ export namespace Prisma {
 
   export type NseDataSetGroupByOutputType = {
     id: number
+    customerProfileDataModelId: number
     nseCbricsParticipantModelId: number
     _count: NseDataSetCountAggregateOutputType | null
     _avg: NseDataSetAvgAggregateOutputType | null
@@ -19119,50 +18743,57 @@ export namespace Prisma {
 
   export type NseDataSetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    customerProfileDataModelId?: boolean
     nseCbricsParticipantModelId?: boolean
-    CustomerProfileDataModel?: boolean | NseDataSet$CustomerProfileDataModelArgs<ExtArgs>
+    customerProfileDataModel?: boolean | CustomerProfileDataModelDefaultArgs<ExtArgs>
     participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
-    _count?: boolean | NseDataSetCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["nseDataSet"]>
 
   export type NseDataSetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    customerProfileDataModelId?: boolean
     nseCbricsParticipantModelId?: boolean
+    customerProfileDataModel?: boolean | CustomerProfileDataModelDefaultArgs<ExtArgs>
     participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["nseDataSet"]>
 
   export type NseDataSetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    customerProfileDataModelId?: boolean
     nseCbricsParticipantModelId?: boolean
+    customerProfileDataModel?: boolean | CustomerProfileDataModelDefaultArgs<ExtArgs>
     participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["nseDataSet"]>
 
   export type NseDataSetSelectScalar = {
     id?: boolean
+    customerProfileDataModelId?: boolean
     nseCbricsParticipantModelId?: boolean
   }
 
-  export type NseDataSetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "nseCbricsParticipantModelId", ExtArgs["result"]["nseDataSet"]>
+  export type NseDataSetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "customerProfileDataModelId" | "nseCbricsParticipantModelId", ExtArgs["result"]["nseDataSet"]>
   export type NseDataSetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    CustomerProfileDataModel?: boolean | NseDataSet$CustomerProfileDataModelArgs<ExtArgs>
+    customerProfileDataModel?: boolean | CustomerProfileDataModelDefaultArgs<ExtArgs>
     participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
-    _count?: boolean | NseDataSetCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type NseDataSetIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customerProfileDataModel?: boolean | CustomerProfileDataModelDefaultArgs<ExtArgs>
     participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
   }
   export type NseDataSetIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customerProfileDataModel?: boolean | CustomerProfileDataModelDefaultArgs<ExtArgs>
     participant?: boolean | NseCbricsParticipantModelDefaultArgs<ExtArgs>
   }
 
   export type $NseDataSetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "NseDataSet"
     objects: {
-      CustomerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>[]
+      customerProfileDataModel: Prisma.$CustomerProfileDataModelPayload<ExtArgs>
       participant: Prisma.$NseCbricsParticipantModelPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      customerProfileDataModelId: number
       nseCbricsParticipantModelId: number
     }, ExtArgs["result"]["nseDataSet"]>
     composites: {}
@@ -19558,7 +19189,7 @@ export namespace Prisma {
    */
   export interface Prisma__NseDataSetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    CustomerProfileDataModel<T extends NseDataSet$CustomerProfileDataModelArgs<ExtArgs> = {}>(args?: Subset<T, NseDataSet$CustomerProfileDataModelArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerProfileDataModel<T extends CustomerProfileDataModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerProfileDataModelDefaultArgs<ExtArgs>>): Prisma__CustomerProfileDataModelClient<$Result.GetResult<Prisma.$CustomerProfileDataModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     participant<T extends NseCbricsParticipantModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, NseCbricsParticipantModelDefaultArgs<ExtArgs>>): Prisma__NseCbricsParticipantModelClient<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -19590,6 +19221,7 @@ export namespace Prisma {
    */
   interface NseDataSetFieldRefs {
     readonly id: FieldRef<"NseDataSet", 'Int'>
+    readonly customerProfileDataModelId: FieldRef<"NseDataSet", 'Int'>
     readonly nseCbricsParticipantModelId: FieldRef<"NseDataSet", 'Int'>
   }
     
@@ -19987,30 +19619,6 @@ export namespace Prisma {
   }
 
   /**
-   * NseDataSet.CustomerProfileDataModel
-   */
-  export type NseDataSet$CustomerProfileDataModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomerProfileDataModel
-     */
-    select?: CustomerProfileDataModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomerProfileDataModel
-     */
-    omit?: CustomerProfileDataModelOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomerProfileDataModelInclude<ExtArgs> | null
-    where?: CustomerProfileDataModelWhereInput
-    orderBy?: CustomerProfileDataModelOrderByWithRelationInput | CustomerProfileDataModelOrderByWithRelationInput[]
-    cursor?: CustomerProfileDataModelWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerProfileDataModelScalarFieldEnum | CustomerProfileDataModelScalarFieldEnum[]
-  }
-
-  /**
    * NseDataSet without action
    */
   export type NseDataSetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -20042,22 +19650,28 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelAvgAggregateOutputType = {
+    key: number | null
     id: number | null
+    userId: number | null
     actualStatus: number | null
     workflowStatus: number | null
     panVerStatus: number | null
   }
 
   export type NseCbricsParticipantModelSumAggregateOutputType = {
+    key: number | null
     id: number | null
+    userId: number | null
     actualStatus: number | null
     workflowStatus: number | null
     panVerStatus: number | null
   }
 
   export type NseCbricsParticipantModelMinAggregateOutputType = {
+    key: number | null
     id: number | null
     loginId: string | null
+    userId: number | null
     actualStatus: number | null
     workflowStatus: number | null
     firstName: string | null
@@ -20081,8 +19695,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelMaxAggregateOutputType = {
+    key: number | null
     id: number | null
     loginId: string | null
+    userId: number | null
     actualStatus: number | null
     workflowStatus: number | null
     firstName: string | null
@@ -20106,8 +19722,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelCountAggregateOutputType = {
+    key: number
     id: number
     loginId: number
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: number
@@ -20135,22 +19753,28 @@ export namespace Prisma {
 
 
   export type NseCbricsParticipantModelAvgAggregateInputType = {
+    key?: true
     id?: true
+    userId?: true
     actualStatus?: true
     workflowStatus?: true
     panVerStatus?: true
   }
 
   export type NseCbricsParticipantModelSumAggregateInputType = {
+    key?: true
     id?: true
+    userId?: true
     actualStatus?: true
     workflowStatus?: true
     panVerStatus?: true
   }
 
   export type NseCbricsParticipantModelMinAggregateInputType = {
+    key?: true
     id?: true
     loginId?: true
+    userId?: true
     actualStatus?: true
     workflowStatus?: true
     firstName?: true
@@ -20174,8 +19798,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelMaxAggregateInputType = {
+    key?: true
     id?: true
     loginId?: true
+    userId?: true
     actualStatus?: true
     workflowStatus?: true
     firstName?: true
@@ -20199,8 +19825,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelCountAggregateInputType = {
+    key?: true
     id?: true
     loginId?: true
+    userId?: true
     actualStatus?: true
     workflowStatus?: true
     firstName?: true
@@ -20313,8 +19941,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelGroupByOutputType = {
+    key: number
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -20359,8 +19989,10 @@ export namespace Prisma {
 
 
   export type NseCbricsParticipantModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
     id?: boolean
     loginId?: boolean
+    userId?: boolean
     actualStatus?: boolean
     workflowStatus?: boolean
     firstName?: boolean
@@ -20390,8 +20022,10 @@ export namespace Prisma {
   }, ExtArgs["result"]["nseCbricsParticipantModel"]>
 
   export type NseCbricsParticipantModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
     id?: boolean
     loginId?: boolean
+    userId?: boolean
     actualStatus?: boolean
     workflowStatus?: boolean
     firstName?: boolean
@@ -20417,8 +20051,10 @@ export namespace Prisma {
   }, ExtArgs["result"]["nseCbricsParticipantModel"]>
 
   export type NseCbricsParticipantModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
     id?: boolean
     loginId?: boolean
+    userId?: boolean
     actualStatus?: boolean
     workflowStatus?: boolean
     firstName?: boolean
@@ -20444,8 +20080,10 @@ export namespace Prisma {
   }, ExtArgs["result"]["nseCbricsParticipantModel"]>
 
   export type NseCbricsParticipantModelSelectScalar = {
+    key?: boolean
     id?: boolean
     loginId?: boolean
+    userId?: boolean
     actualStatus?: boolean
     workflowStatus?: boolean
     firstName?: boolean
@@ -20470,7 +20108,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type NseCbricsParticipantModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "loginId" | "actualStatus" | "workflowStatus" | "firstName" | "panNo" | "custodian" | "contactPerson" | "mobileList" | "emailList" | "telephone" | "fax" | "address" | "address2" | "address3" | "stateCode" | "regAddress" | "leiCode" | "expiryDate" | "panVerStatus" | "panVerRemarks" | "remarks" | "createdAt" | "updatedAt", ExtArgs["result"]["nseCbricsParticipantModel"]>
+  export type NseCbricsParticipantModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"key" | "id" | "loginId" | "userId" | "actualStatus" | "workflowStatus" | "firstName" | "panNo" | "custodian" | "contactPerson" | "mobileList" | "emailList" | "telephone" | "fax" | "address" | "address2" | "address3" | "stateCode" | "regAddress" | "leiCode" | "expiryDate" | "panVerStatus" | "panVerRemarks" | "remarks" | "createdAt" | "updatedAt", ExtArgs["result"]["nseCbricsParticipantModel"]>
   export type NseCbricsParticipantModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     bankAccountList?: boolean | NseCbricsParticipantModel$bankAccountListArgs<ExtArgs>
     dpAccountList?: boolean | NseCbricsParticipantModel$dpAccountListArgs<ExtArgs>
@@ -20488,8 +20126,10 @@ export namespace Prisma {
       NSEDATASET: Prisma.$NseDataSetPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
+      key: number
       id: number
       loginId: string
+      userId: number
       actualStatus: number
       workflowStatus: number
       firstName: string
@@ -20598,8 +20238,8 @@ export namespace Prisma {
      * // Get first 10 NseCbricsParticipantModels
      * const nseCbricsParticipantModels = await prisma.nseCbricsParticipantModel.findMany({ take: 10 })
      * 
-     * // Only select the `id`
-     * const nseCbricsParticipantModelWithIdOnly = await prisma.nseCbricsParticipantModel.findMany({ select: { id: true } })
+     * // Only select the `key`
+     * const nseCbricsParticipantModelWithKeyOnly = await prisma.nseCbricsParticipantModel.findMany({ select: { key: true } })
      * 
      */
     findMany<T extends NseCbricsParticipantModelFindManyArgs>(args?: SelectSubset<T, NseCbricsParticipantModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NseCbricsParticipantModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -20643,9 +20283,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Create many NseCbricsParticipantModels and only return the `id`
-     * const nseCbricsParticipantModelWithIdOnly = await prisma.nseCbricsParticipantModel.createManyAndReturn({
-     *   select: { id: true },
+     * // Create many NseCbricsParticipantModels and only return the `key`
+     * const nseCbricsParticipantModelWithKeyOnly = await prisma.nseCbricsParticipantModel.createManyAndReturn({
+     *   select: { key: true },
      *   data: [
      *     // ... provide data here
      *   ]
@@ -20734,9 +20374,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more NseCbricsParticipantModels and only return the `id`
-     * const nseCbricsParticipantModelWithIdOnly = await prisma.nseCbricsParticipantModel.updateManyAndReturn({
-     *   select: { id: true },
+     * // Update zero or more NseCbricsParticipantModels and only return the `key`
+     * const nseCbricsParticipantModelWithKeyOnly = await prisma.nseCbricsParticipantModel.updateManyAndReturn({
+     *   select: { key: true },
      *   where: {
      *     // ... provide filter here
      *   },
@@ -20941,8 +20581,10 @@ export namespace Prisma {
    * Fields of the NseCbricsParticipantModel model
    */
   interface NseCbricsParticipantModelFieldRefs {
+    readonly key: FieldRef<"NseCbricsParticipantModel", 'Int'>
     readonly id: FieldRef<"NseCbricsParticipantModel", 'Int'>
     readonly loginId: FieldRef<"NseCbricsParticipantModel", 'String'>
+    readonly userId: FieldRef<"NseCbricsParticipantModel", 'Int'>
     readonly actualStatus: FieldRef<"NseCbricsParticipantModel", 'Int'>
     readonly workflowStatus: FieldRef<"NseCbricsParticipantModel", 'Int'>
     readonly firstName: FieldRef<"NseCbricsParticipantModel", 'String'>
@@ -24967,9 +24609,9 @@ export namespace Prisma {
     whatsAppNotificationAllow: 'whatsAppNotificationAllow',
     termsAccepted: 'termsAccepted',
     lastLogin: 'lastLogin',
+    cRMUserDataModelId: 'cRMUserDataModelId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    cRMUserDataModelId: 'cRMUserDataModelId'
+    updatedAt: 'updatedAt'
   };
 
   export type CustomersAuthDataModelScalarFieldEnum = (typeof CustomersAuthDataModelScalarFieldEnum)[keyof typeof CustomersAuthDataModelScalarFieldEnum]
@@ -24992,15 +24634,14 @@ export namespace Prisma {
     verifyDate: 'verifyDate',
     customersRiskProfileModelId: 'customersRiskProfileModelId',
     customersAuthDataModelId: 'customersAuthDataModelId',
-    createdBy: 'createdBy',
     aADHAARCardModelId: 'aADHAARCardModelId',
     panCardModelId: 'panCardModelId',
     customerPersonalInfoModelId: 'customerPersonalInfoModelId',
     currentAddressModelId: 'currentAddressModelId',
     permanentAddressModelId: 'permanentAddressModelId',
-    nseDataSetId: 'nseDataSetId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    createdBy: 'createdBy'
   };
 
   export type CustomerProfileDataModelScalarFieldEnum = (typeof CustomerProfileDataModelScalarFieldEnum)[keyof typeof CustomerProfileDataModelScalarFieldEnum]
@@ -25064,6 +24705,34 @@ export namespace Prisma {
   export type PanCardModelScalarFieldEnum = (typeof PanCardModelScalarFieldEnum)[keyof typeof PanCardModelScalarFieldEnum]
 
 
+  export const CustomersRiskProfileModelScalarFieldEnum: {
+    id: 'id',
+    data: 'data',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CustomersRiskProfileModelScalarFieldEnum = (typeof CustomersRiskProfileModelScalarFieldEnum)[keyof typeof CustomersRiskProfileModelScalarFieldEnum]
+
+
+  export const AddressModelScalarFieldEnum: {
+    id: 'id',
+    line1: 'line1',
+    line2: 'line2',
+    line3: 'line3',
+    postOffice: 'postOffice',
+    cityOrDistrict: 'cityOrDistrict',
+    state: 'state',
+    pinCode: 'pinCode',
+    country: 'country',
+    fullAddress: 'fullAddress',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AddressModelScalarFieldEnum = (typeof AddressModelScalarFieldEnum)[keyof typeof AddressModelScalarFieldEnum]
+
+
   export const CustomersBankAccountModelScalarFieldEnum: {
     id: 'id',
     accountHolderName: 'accountHolderName',
@@ -25105,34 +24774,6 @@ export namespace Prisma {
   export type CustomersDematAccountModelScalarFieldEnum = (typeof CustomersDematAccountModelScalarFieldEnum)[keyof typeof CustomersDematAccountModelScalarFieldEnum]
 
 
-  export const CustomersRiskProfileModelScalarFieldEnum: {
-    id: 'id',
-    data: 'data',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type CustomersRiskProfileModelScalarFieldEnum = (typeof CustomersRiskProfileModelScalarFieldEnum)[keyof typeof CustomersRiskProfileModelScalarFieldEnum]
-
-
-  export const AddressModelScalarFieldEnum: {
-    id: 'id',
-    line1: 'line1',
-    line2: 'line2',
-    line3: 'line3',
-    postOffice: 'postOffice',
-    cityOrDistrict: 'cityOrDistrict',
-    state: 'state',
-    pinCode: 'pinCode',
-    country: 'country',
-    fullAddress: 'fullAddress',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type AddressModelScalarFieldEnum = (typeof AddressModelScalarFieldEnum)[keyof typeof AddressModelScalarFieldEnum]
-
-
   export const LeadsModelScalarFieldEnum: {
     id: 'id',
     fullName: 'fullName',
@@ -25169,6 +24810,7 @@ export namespace Prisma {
 
   export const NseDataSetScalarFieldEnum: {
     id: 'id',
+    customerProfileDataModelId: 'customerProfileDataModelId',
     nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
   };
 
@@ -25176,8 +24818,10 @@ export namespace Prisma {
 
 
   export const NseCbricsParticipantModelScalarFieldEnum: {
+    key: 'key',
     id: 'id',
     loginId: 'loginId',
+    userId: 'userId',
     actualStatus: 'actualStatus',
     workflowStatus: 'workflowStatus',
     firstName: 'firstName',
@@ -25474,13 +25118,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Json[]'
-   */
-  export type ListJsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json[]'>
-    
-
-
-  /**
    * Reference to a field of type 'LeadSource'
    */
   export type EnumLeadSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadSource'>
@@ -25720,11 +25357,11 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolFilter<"CustomersAuthDataModel"> | boolean
     termsAccepted?: BoolFilter<"CustomersAuthDataModel"> | boolean
     lastLogin?: DateTimeNullableFilter<"CustomersAuthDataModel"> | Date | string | null
+    cRMUserDataModelId?: IntNullableFilter<"CustomersAuthDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersAuthDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersAuthDataModel"> | Date | string
-    cRMUserDataModelId?: IntNullableFilter<"CustomersAuthDataModel"> | number | null
     relationshipManager?: XOR<CRMUserDataModelNullableScalarRelationFilter, CRMUserDataModelWhereInput> | null
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }
 
   export type CustomersAuthDataModelOrderByWithRelationInput = {
@@ -25737,11 +25374,11 @@ export namespace Prisma {
     whatsAppNotificationAllow?: SortOrder
     termsAccepted?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
+    cRMUserDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    cRMUserDataModelId?: SortOrderInput | SortOrder
     relationshipManager?: CRMUserDataModelOrderByWithRelationInput
-    CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
+    customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
   }
 
   export type CustomersAuthDataModelWhereUniqueInput = Prisma.AtLeast<{
@@ -25757,11 +25394,11 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolFilter<"CustomersAuthDataModel"> | boolean
     termsAccepted?: BoolFilter<"CustomersAuthDataModel"> | boolean
     lastLogin?: DateTimeNullableFilter<"CustomersAuthDataModel"> | Date | string | null
+    cRMUserDataModelId?: IntNullableFilter<"CustomersAuthDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersAuthDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersAuthDataModel"> | Date | string
-    cRMUserDataModelId?: IntNullableFilter<"CustomersAuthDataModel"> | number | null
     relationshipManager?: XOR<CRMUserDataModelNullableScalarRelationFilter, CRMUserDataModelWhereInput> | null
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }, "id">
 
   export type CustomersAuthDataModelOrderByWithAggregationInput = {
@@ -25774,9 +25411,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: SortOrder
     termsAccepted?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
+    cRMUserDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    cRMUserDataModelId?: SortOrderInput | SortOrder
     _count?: CustomersAuthDataModelCountOrderByAggregateInput
     _avg?: CustomersAuthDataModelAvgOrderByAggregateInput
     _max?: CustomersAuthDataModelMaxOrderByAggregateInput
@@ -25797,9 +25434,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolWithAggregatesFilter<"CustomersAuthDataModel"> | boolean
     termsAccepted?: BoolWithAggregatesFilter<"CustomersAuthDataModel"> | boolean
     lastLogin?: DateTimeNullableWithAggregatesFilter<"CustomersAuthDataModel"> | Date | string | null
+    cRMUserDataModelId?: IntNullableWithAggregatesFilter<"CustomersAuthDataModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomersAuthDataModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersAuthDataModel"> | Date | string
-    cRMUserDataModelId?: IntNullableWithAggregatesFilter<"CustomersAuthDataModel"> | number | null
   }
 
   export type CustomerProfileDataModelWhereInput = {
@@ -25822,25 +25459,24 @@ export namespace Prisma {
     verifyDate?: DateTimeNullableFilter<"CustomerProfileDataModel"> | Date | string | null
     customersRiskProfileModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     customersAuthDataModelId?: IntFilter<"CustomerProfileDataModel"> | number
-    createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     aADHAARCardModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     panCardModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    nseDataSetId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
+    createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
     utility?: XOR<CustomersAuthDataModelScalarRelationFilter, CustomersAuthDataModelWhereInput>
     aadhaarCard?: XOR<AADHAARCardModelNullableScalarRelationFilter, AADHAARCardModelWhereInput> | null
     panCard?: XOR<PanCardModelNullableScalarRelationFilter, PanCardModelWhereInput> | null
     personalInformation?: XOR<CustomerPersonalInfoModelNullableScalarRelationFilter, CustomerPersonalInfoModelWhereInput> | null
-    bankAccounts?: CustomersBankAccountModelListRelationFilter
-    dematAccounts?: CustomersDematAccountModelListRelationFilter
     currentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
     permanentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
-    nse?: XOR<NseDataSetNullableScalarRelationFilter, NseDataSetWhereInput> | null
+    bankAccounts?: CustomersBankAccountModelListRelationFilter
+    dematAccounts?: CustomersDematAccountModelListRelationFilter
+    nseDataSet?: XOR<NseDataSetNullableScalarRelationFilter, NseDataSetWhereInput> | null
   }
 
   export type CustomerProfileDataModelOrderByWithRelationInput = {
@@ -25860,31 +25496,37 @@ export namespace Prisma {
     verifyDate?: SortOrderInput | SortOrder
     customersRiskProfileModelId?: SortOrderInput | SortOrder
     customersAuthDataModelId?: SortOrder
-    createdBy?: SortOrderInput | SortOrder
     aADHAARCardModelId?: SortOrderInput | SortOrder
     panCardModelId?: SortOrderInput | SortOrder
     customerPersonalInfoModelId?: SortOrderInput | SortOrder
     currentAddressModelId?: SortOrderInput | SortOrder
     permanentAddressModelId?: SortOrderInput | SortOrder
-    nseDataSetId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    createdBy?: SortOrderInput | SortOrder
     riskProfile?: CustomersRiskProfileModelOrderByWithRelationInput
     utility?: CustomersAuthDataModelOrderByWithRelationInput
     aadhaarCard?: AADHAARCardModelOrderByWithRelationInput
     panCard?: PanCardModelOrderByWithRelationInput
     personalInformation?: CustomerPersonalInfoModelOrderByWithRelationInput
-    bankAccounts?: CustomersBankAccountModelOrderByRelationAggregateInput
-    dematAccounts?: CustomersDematAccountModelOrderByRelationAggregateInput
     currentAddress?: AddressModelOrderByWithRelationInput
     permanentAddress?: AddressModelOrderByWithRelationInput
-    nse?: NseDataSetOrderByWithRelationInput
+    bankAccounts?: CustomersBankAccountModelOrderByRelationAggregateInput
+    dematAccounts?: CustomersDematAccountModelOrderByRelationAggregateInput
+    nseDataSet?: NseDataSetOrderByWithRelationInput
   }
 
   export type CustomerProfileDataModelWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     userName?: string
     emailAddress?: string
+    customersRiskProfileModelId?: number
+    customersAuthDataModelId?: number
+    aADHAARCardModelId?: number
+    panCardModelId?: number
+    customerPersonalInfoModelId?: number
+    currentAddressModelId?: number
+    permanentAddressModelId?: number
     AND?: CustomerProfileDataModelWhereInput | CustomerProfileDataModelWhereInput[]
     OR?: CustomerProfileDataModelWhereInput[]
     NOT?: CustomerProfileDataModelWhereInput | CustomerProfileDataModelWhereInput[]
@@ -25899,28 +25541,20 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFilter<"CustomerProfileDataModel"> | $Enums.KYCStatus
     VerifiedBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     verifyDate?: DateTimeNullableFilter<"CustomerProfileDataModel"> | Date | string | null
-    customersRiskProfileModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    customersAuthDataModelId?: IntFilter<"CustomerProfileDataModel"> | number
-    createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    aADHAARCardModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    panCardModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    nseDataSetId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
+    createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
     utility?: XOR<CustomersAuthDataModelScalarRelationFilter, CustomersAuthDataModelWhereInput>
     aadhaarCard?: XOR<AADHAARCardModelNullableScalarRelationFilter, AADHAARCardModelWhereInput> | null
     panCard?: XOR<PanCardModelNullableScalarRelationFilter, PanCardModelWhereInput> | null
     personalInformation?: XOR<CustomerPersonalInfoModelNullableScalarRelationFilter, CustomerPersonalInfoModelWhereInput> | null
-    bankAccounts?: CustomersBankAccountModelListRelationFilter
-    dematAccounts?: CustomersDematAccountModelListRelationFilter
     currentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
     permanentAddress?: XOR<AddressModelNullableScalarRelationFilter, AddressModelWhereInput> | null
-    nse?: XOR<NseDataSetNullableScalarRelationFilter, NseDataSetWhereInput> | null
-  }, "id" | "userName" | "emailAddress">
+    bankAccounts?: CustomersBankAccountModelListRelationFilter
+    dematAccounts?: CustomersDematAccountModelListRelationFilter
+    nseDataSet?: XOR<NseDataSetNullableScalarRelationFilter, NseDataSetWhereInput> | null
+  }, "id" | "userName" | "emailAddress" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId">
 
   export type CustomerProfileDataModelOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25939,15 +25573,14 @@ export namespace Prisma {
     verifyDate?: SortOrderInput | SortOrder
     customersRiskProfileModelId?: SortOrderInput | SortOrder
     customersAuthDataModelId?: SortOrder
-    createdBy?: SortOrderInput | SortOrder
     aADHAARCardModelId?: SortOrderInput | SortOrder
     panCardModelId?: SortOrderInput | SortOrder
     customerPersonalInfoModelId?: SortOrderInput | SortOrder
     currentAddressModelId?: SortOrderInput | SortOrder
     permanentAddressModelId?: SortOrderInput | SortOrder
-    nseDataSetId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    createdBy?: SortOrderInput | SortOrder
     _count?: CustomerProfileDataModelCountOrderByAggregateInput
     _avg?: CustomerProfileDataModelAvgOrderByAggregateInput
     _max?: CustomerProfileDataModelMaxOrderByAggregateInput
@@ -25975,15 +25608,14 @@ export namespace Prisma {
     verifyDate?: DateTimeNullableWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string | null
     customersRiskProfileModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     customersAuthDataModelId?: IntWithAggregatesFilter<"CustomerProfileDataModel"> | number
-    createdBy?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     aADHAARCardModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     panCardModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     customerPersonalInfoModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
-    nseDataSetId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
+    createdBy?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
   }
 
   export type CustomerPersonalInfoModelWhereInput = {
@@ -26006,7 +25638,7 @@ export namespace Prisma {
     dateOfBirth?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     createdAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }
 
   export type CustomerPersonalInfoModelOrderByWithRelationInput = {
@@ -26026,7 +25658,7 @@ export namespace Prisma {
     dateOfBirth?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
+    customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
   }
 
   export type CustomerPersonalInfoModelWhereUniqueInput = Prisma.AtLeast<{
@@ -26049,7 +25681,7 @@ export namespace Prisma {
     dateOfBirth?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     createdAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }, "id">
 
   export type CustomerPersonalInfoModelOrderByWithAggregationInput = {
@@ -26115,7 +25747,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     createdAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }
 
   export type AADHAARCardModelOrderByWithRelationInput = {
@@ -26132,7 +25764,7 @@ export namespace Prisma {
     verifyDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
+    customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
   }
 
   export type AADHAARCardModelWhereUniqueInput = Prisma.AtLeast<{
@@ -26152,7 +25784,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     createdAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }, "id">
 
   export type AADHAARCardModelOrderByWithAggregationInput = {
@@ -26210,7 +25842,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFilter<"PanCardModel"> | Date | string
     createdAt?: DateTimeFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"PanCardModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }
 
   export type PanCardModelOrderByWithRelationInput = {
@@ -26225,7 +25857,7 @@ export namespace Prisma {
     verifyDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
+    customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
   }
 
   export type PanCardModelWhereUniqueInput = Prisma.AtLeast<{
@@ -26243,7 +25875,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFilter<"PanCardModel"> | Date | string
     createdAt?: DateTimeFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"PanCardModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
   }, "id">
 
   export type PanCardModelOrderByWithAggregationInput = {
@@ -26280,6 +25912,153 @@ export namespace Prisma {
     verifyDate?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
+  }
+
+  export type CustomersRiskProfileModelWhereInput = {
+    AND?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
+    OR?: CustomersRiskProfileModelWhereInput[]
+    NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
+    id?: IntFilter<"CustomersRiskProfileModel"> | number
+    data?: JsonFilter<"CustomersRiskProfileModel">
+    createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
+  }
+
+  export type CustomersRiskProfileModelOrderByWithRelationInput = {
+    id?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
+  }
+
+  export type CustomersRiskProfileModelWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
+    OR?: CustomersRiskProfileModelWhereInput[]
+    NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
+    data?: JsonFilter<"CustomersRiskProfileModel">
+    createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
+    customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
+  }, "id">
+
+  export type CustomersRiskProfileModelOrderByWithAggregationInput = {
+    id?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CustomersRiskProfileModelCountOrderByAggregateInput
+    _avg?: CustomersRiskProfileModelAvgOrderByAggregateInput
+    _max?: CustomersRiskProfileModelMaxOrderByAggregateInput
+    _min?: CustomersRiskProfileModelMinOrderByAggregateInput
+    _sum?: CustomersRiskProfileModelSumOrderByAggregateInput
+  }
+
+  export type CustomersRiskProfileModelScalarWhereWithAggregatesInput = {
+    AND?: CustomersRiskProfileModelScalarWhereWithAggregatesInput | CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
+    OR?: CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
+    NOT?: CustomersRiskProfileModelScalarWhereWithAggregatesInput | CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"CustomersRiskProfileModel"> | number
+    data?: JsonWithAggregatesFilter<"CustomersRiskProfileModel">
+    createdAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
+  }
+
+  export type AddressModelWhereInput = {
+    AND?: AddressModelWhereInput | AddressModelWhereInput[]
+    OR?: AddressModelWhereInput[]
+    NOT?: AddressModelWhereInput | AddressModelWhereInput[]
+    id?: IntFilter<"AddressModel"> | number
+    line1?: StringFilter<"AddressModel"> | string
+    line2?: StringNullableFilter<"AddressModel"> | string | null
+    line3?: StringNullableFilter<"AddressModel"> | string | null
+    postOffice?: StringFilter<"AddressModel"> | string
+    cityOrDistrict?: StringFilter<"AddressModel"> | string
+    state?: StringFilter<"AddressModel"> | string
+    pinCode?: StringFilter<"AddressModel"> | string
+    country?: StringFilter<"AddressModel"> | string
+    fullAddress?: StringFilter<"AddressModel"> | string
+    createdAt?: DateTimeFilter<"AddressModel"> | Date | string
+    updatedAt?: DateTimeFilter<"AddressModel"> | Date | string
+    currentAddressOf?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
+    permanentAddressOf?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
+  }
+
+  export type AddressModelOrderByWithRelationInput = {
+    id?: SortOrder
+    line1?: SortOrder
+    line2?: SortOrderInput | SortOrder
+    line3?: SortOrderInput | SortOrder
+    postOffice?: SortOrder
+    cityOrDistrict?: SortOrder
+    state?: SortOrder
+    pinCode?: SortOrder
+    country?: SortOrder
+    fullAddress?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    currentAddressOf?: CustomerProfileDataModelOrderByWithRelationInput
+    permanentAddressOf?: CustomerProfileDataModelOrderByWithRelationInput
+  }
+
+  export type AddressModelWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: AddressModelWhereInput | AddressModelWhereInput[]
+    OR?: AddressModelWhereInput[]
+    NOT?: AddressModelWhereInput | AddressModelWhereInput[]
+    line1?: StringFilter<"AddressModel"> | string
+    line2?: StringNullableFilter<"AddressModel"> | string | null
+    line3?: StringNullableFilter<"AddressModel"> | string | null
+    postOffice?: StringFilter<"AddressModel"> | string
+    cityOrDistrict?: StringFilter<"AddressModel"> | string
+    state?: StringFilter<"AddressModel"> | string
+    pinCode?: StringFilter<"AddressModel"> | string
+    country?: StringFilter<"AddressModel"> | string
+    fullAddress?: StringFilter<"AddressModel"> | string
+    createdAt?: DateTimeFilter<"AddressModel"> | Date | string
+    updatedAt?: DateTimeFilter<"AddressModel"> | Date | string
+    currentAddressOf?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
+    permanentAddressOf?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
+  }, "id">
+
+  export type AddressModelOrderByWithAggregationInput = {
+    id?: SortOrder
+    line1?: SortOrder
+    line2?: SortOrderInput | SortOrder
+    line3?: SortOrderInput | SortOrder
+    postOffice?: SortOrder
+    cityOrDistrict?: SortOrder
+    state?: SortOrder
+    pinCode?: SortOrder
+    country?: SortOrder
+    fullAddress?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AddressModelCountOrderByAggregateInput
+    _avg?: AddressModelAvgOrderByAggregateInput
+    _max?: AddressModelMaxOrderByAggregateInput
+    _min?: AddressModelMinOrderByAggregateInput
+    _sum?: AddressModelSumOrderByAggregateInput
+  }
+
+  export type AddressModelScalarWhereWithAggregatesInput = {
+    AND?: AddressModelScalarWhereWithAggregatesInput | AddressModelScalarWhereWithAggregatesInput[]
+    OR?: AddressModelScalarWhereWithAggregatesInput[]
+    NOT?: AddressModelScalarWhereWithAggregatesInput | AddressModelScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"AddressModel"> | number
+    line1?: StringWithAggregatesFilter<"AddressModel"> | string
+    line2?: StringNullableWithAggregatesFilter<"AddressModel"> | string | null
+    line3?: StringNullableWithAggregatesFilter<"AddressModel"> | string | null
+    postOffice?: StringWithAggregatesFilter<"AddressModel"> | string
+    cityOrDistrict?: StringWithAggregatesFilter<"AddressModel"> | string
+    state?: StringWithAggregatesFilter<"AddressModel"> | string
+    pinCode?: StringWithAggregatesFilter<"AddressModel"> | string
+    country?: StringWithAggregatesFilter<"AddressModel"> | string
+    fullAddress?: StringWithAggregatesFilter<"AddressModel"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"AddressModel"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AddressModel"> | Date | string
   }
 
   export type CustomersBankAccountModelWhereInput = {
@@ -26491,153 +26270,6 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
   }
 
-  export type CustomersRiskProfileModelWhereInput = {
-    AND?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
-    OR?: CustomersRiskProfileModelWhereInput[]
-    NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
-    id?: IntFilter<"CustomersRiskProfileModel"> | number
-    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
-    createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
-    updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
-  }
-
-  export type CustomersRiskProfileModelOrderByWithRelationInput = {
-    id?: SortOrder
-    data?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
-  }
-
-  export type CustomersRiskProfileModelWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
-    OR?: CustomersRiskProfileModelWhereInput[]
-    NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
-    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
-    createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
-    updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
-  }, "id">
-
-  export type CustomersRiskProfileModelOrderByWithAggregationInput = {
-    id?: SortOrder
-    data?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: CustomersRiskProfileModelCountOrderByAggregateInput
-    _avg?: CustomersRiskProfileModelAvgOrderByAggregateInput
-    _max?: CustomersRiskProfileModelMaxOrderByAggregateInput
-    _min?: CustomersRiskProfileModelMinOrderByAggregateInput
-    _sum?: CustomersRiskProfileModelSumOrderByAggregateInput
-  }
-
-  export type CustomersRiskProfileModelScalarWhereWithAggregatesInput = {
-    AND?: CustomersRiskProfileModelScalarWhereWithAggregatesInput | CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
-    OR?: CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
-    NOT?: CustomersRiskProfileModelScalarWhereWithAggregatesInput | CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"CustomersRiskProfileModel"> | number
-    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
-    createdAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
-  }
-
-  export type AddressModelWhereInput = {
-    AND?: AddressModelWhereInput | AddressModelWhereInput[]
-    OR?: AddressModelWhereInput[]
-    NOT?: AddressModelWhereInput | AddressModelWhereInput[]
-    id?: IntFilter<"AddressModel"> | number
-    line1?: StringFilter<"AddressModel"> | string
-    line2?: StringNullableFilter<"AddressModel"> | string | null
-    line3?: StringNullableFilter<"AddressModel"> | string | null
-    postOffice?: StringFilter<"AddressModel"> | string
-    cityOrDistrict?: StringFilter<"AddressModel"> | string
-    state?: StringFilter<"AddressModel"> | string
-    pinCode?: StringFilter<"AddressModel"> | string
-    country?: StringFilter<"AddressModel"> | string
-    fullAddress?: StringFilter<"AddressModel"> | string
-    createdAt?: DateTimeFilter<"AddressModel"> | Date | string
-    updatedAt?: DateTimeFilter<"AddressModel"> | Date | string
-    currentAddressOf?: CustomerProfileDataModelListRelationFilter
-    permanentAddressOf?: CustomerProfileDataModelListRelationFilter
-  }
-
-  export type AddressModelOrderByWithRelationInput = {
-    id?: SortOrder
-    line1?: SortOrder
-    line2?: SortOrderInput | SortOrder
-    line3?: SortOrderInput | SortOrder
-    postOffice?: SortOrder
-    cityOrDistrict?: SortOrder
-    state?: SortOrder
-    pinCode?: SortOrder
-    country?: SortOrder
-    fullAddress?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    currentAddressOf?: CustomerProfileDataModelOrderByRelationAggregateInput
-    permanentAddressOf?: CustomerProfileDataModelOrderByRelationAggregateInput
-  }
-
-  export type AddressModelWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: AddressModelWhereInput | AddressModelWhereInput[]
-    OR?: AddressModelWhereInput[]
-    NOT?: AddressModelWhereInput | AddressModelWhereInput[]
-    line1?: StringFilter<"AddressModel"> | string
-    line2?: StringNullableFilter<"AddressModel"> | string | null
-    line3?: StringNullableFilter<"AddressModel"> | string | null
-    postOffice?: StringFilter<"AddressModel"> | string
-    cityOrDistrict?: StringFilter<"AddressModel"> | string
-    state?: StringFilter<"AddressModel"> | string
-    pinCode?: StringFilter<"AddressModel"> | string
-    country?: StringFilter<"AddressModel"> | string
-    fullAddress?: StringFilter<"AddressModel"> | string
-    createdAt?: DateTimeFilter<"AddressModel"> | Date | string
-    updatedAt?: DateTimeFilter<"AddressModel"> | Date | string
-    currentAddressOf?: CustomerProfileDataModelListRelationFilter
-    permanentAddressOf?: CustomerProfileDataModelListRelationFilter
-  }, "id">
-
-  export type AddressModelOrderByWithAggregationInput = {
-    id?: SortOrder
-    line1?: SortOrder
-    line2?: SortOrderInput | SortOrder
-    line3?: SortOrderInput | SortOrder
-    postOffice?: SortOrder
-    cityOrDistrict?: SortOrder
-    state?: SortOrder
-    pinCode?: SortOrder
-    country?: SortOrder
-    fullAddress?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: AddressModelCountOrderByAggregateInput
-    _avg?: AddressModelAvgOrderByAggregateInput
-    _max?: AddressModelMaxOrderByAggregateInput
-    _min?: AddressModelMinOrderByAggregateInput
-    _sum?: AddressModelSumOrderByAggregateInput
-  }
-
-  export type AddressModelScalarWhereWithAggregatesInput = {
-    AND?: AddressModelScalarWhereWithAggregatesInput | AddressModelScalarWhereWithAggregatesInput[]
-    OR?: AddressModelScalarWhereWithAggregatesInput[]
-    NOT?: AddressModelScalarWhereWithAggregatesInput | AddressModelScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"AddressModel"> | number
-    line1?: StringWithAggregatesFilter<"AddressModel"> | string
-    line2?: StringNullableWithAggregatesFilter<"AddressModel"> | string | null
-    line3?: StringNullableWithAggregatesFilter<"AddressModel"> | string | null
-    postOffice?: StringWithAggregatesFilter<"AddressModel"> | string
-    cityOrDistrict?: StringWithAggregatesFilter<"AddressModel"> | string
-    state?: StringWithAggregatesFilter<"AddressModel"> | string
-    pinCode?: StringWithAggregatesFilter<"AddressModel"> | string
-    country?: StringWithAggregatesFilter<"AddressModel"> | string
-    fullAddress?: StringWithAggregatesFilter<"AddressModel"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"AddressModel"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"AddressModel"> | Date | string
-  }
-
   export type LeadsModelWhereInput = {
     AND?: LeadsModelWhereInput | LeadsModelWhereInput[]
     OR?: LeadsModelWhereInput[]
@@ -26814,30 +26446,34 @@ export namespace Prisma {
     OR?: NseDataSetWhereInput[]
     NOT?: NseDataSetWhereInput | NseDataSetWhereInput[]
     id?: IntFilter<"NseDataSet"> | number
+    customerProfileDataModelId?: IntFilter<"NseDataSet"> | number
     nseCbricsParticipantModelId?: IntFilter<"NseDataSet"> | number
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelScalarRelationFilter, CustomerProfileDataModelWhereInput>
     participant?: XOR<NseCbricsParticipantModelScalarRelationFilter, NseCbricsParticipantModelWhereInput>
   }
 
   export type NseDataSetOrderByWithRelationInput = {
     id?: SortOrder
+    customerProfileDataModelId?: SortOrder
     nseCbricsParticipantModelId?: SortOrder
-    CustomerProfileDataModel?: CustomerProfileDataModelOrderByRelationAggregateInput
+    customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
     participant?: NseCbricsParticipantModelOrderByWithRelationInput
   }
 
   export type NseDataSetWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    customerProfileDataModelId?: number
     AND?: NseDataSetWhereInput | NseDataSetWhereInput[]
     OR?: NseDataSetWhereInput[]
     NOT?: NseDataSetWhereInput | NseDataSetWhereInput[]
     nseCbricsParticipantModelId?: IntFilter<"NseDataSet"> | number
-    CustomerProfileDataModel?: CustomerProfileDataModelListRelationFilter
+    customerProfileDataModel?: XOR<CustomerProfileDataModelScalarRelationFilter, CustomerProfileDataModelWhereInput>
     participant?: XOR<NseCbricsParticipantModelScalarRelationFilter, NseCbricsParticipantModelWhereInput>
-  }, "id">
+  }, "id" | "customerProfileDataModelId">
 
   export type NseDataSetOrderByWithAggregationInput = {
     id?: SortOrder
+    customerProfileDataModelId?: SortOrder
     nseCbricsParticipantModelId?: SortOrder
     _count?: NseDataSetCountOrderByAggregateInput
     _avg?: NseDataSetAvgOrderByAggregateInput
@@ -26851,6 +26487,7 @@ export namespace Prisma {
     OR?: NseDataSetScalarWhereWithAggregatesInput[]
     NOT?: NseDataSetScalarWhereWithAggregatesInput | NseDataSetScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"NseDataSet"> | number
+    customerProfileDataModelId?: IntWithAggregatesFilter<"NseDataSet"> | number
     nseCbricsParticipantModelId?: IntWithAggregatesFilter<"NseDataSet"> | number
   }
 
@@ -26858,8 +26495,10 @@ export namespace Prisma {
     AND?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
     OR?: NseCbricsParticipantModelWhereInput[]
     NOT?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
+    key?: IntFilter<"NseCbricsParticipantModel"> | number
     id?: IntFilter<"NseCbricsParticipantModel"> | number
     loginId?: StringFilter<"NseCbricsParticipantModel"> | string
+    userId?: IntFilter<"NseCbricsParticipantModel"> | number
     actualStatus?: IntFilter<"NseCbricsParticipantModel"> | number
     workflowStatus?: IntFilter<"NseCbricsParticipantModel"> | number
     firstName?: StringFilter<"NseCbricsParticipantModel"> | string
@@ -26888,8 +26527,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelOrderByWithRelationInput = {
+    key?: SortOrder
     id?: SortOrder
     loginId?: SortOrder
+    userId?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     firstName?: SortOrder
@@ -26918,8 +26559,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelWhereUniqueInput = Prisma.AtLeast<{
+    key?: number
     id?: number
     loginId?: string
+    userId?: number
     AND?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
     OR?: NseCbricsParticipantModelWhereInput[]
     NOT?: NseCbricsParticipantModelWhereInput | NseCbricsParticipantModelWhereInput[]
@@ -26948,11 +26591,13 @@ export namespace Prisma {
     bankAccountList?: NSEBankAccountListRelationFilter
     dpAccountList?: NSEDpAccountListRelationFilter
     NSEDATASET?: NseDataSetListRelationFilter
-  }, "id" | "loginId">
+  }, "key" | "id" | "loginId" | "userId">
 
   export type NseCbricsParticipantModelOrderByWithAggregationInput = {
+    key?: SortOrder
     id?: SortOrder
     loginId?: SortOrder
+    userId?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     firstName?: SortOrder
@@ -26986,8 +26631,10 @@ export namespace Prisma {
     AND?: NseCbricsParticipantModelScalarWhereWithAggregatesInput | NseCbricsParticipantModelScalarWhereWithAggregatesInput[]
     OR?: NseCbricsParticipantModelScalarWhereWithAggregatesInput[]
     NOT?: NseCbricsParticipantModelScalarWhereWithAggregatesInput | NseCbricsParticipantModelScalarWhereWithAggregatesInput[]
+    key?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
     id?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
     loginId?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
+    userId?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
     actualStatus?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
     workflowStatus?: IntWithAggregatesFilter<"NseCbricsParticipantModel"> | number
     firstName?: StringWithAggregatesFilter<"NseCbricsParticipantModel"> | string
@@ -27437,7 +27084,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     relationshipManager?: CRMUserDataModelCreateNestedOneWithoutCustomersAuthDataModelInput
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutUtilityInput
+    customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutUtilityInput
   }
 
   export type CustomersAuthDataModelUncheckedCreateInput = {
@@ -27450,10 +27097,10 @@ export namespace Prisma {
     whatsAppNotificationAllow?: boolean
     termsAccepted?: boolean
     lastLogin?: Date | string | null
+    cRMUserDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    cRMUserDataModelId?: number | null
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutUtilityInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutUtilityInput
   }
 
   export type CustomersAuthDataModelUpdateInput = {
@@ -27468,7 +27115,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     relationshipManager?: CRMUserDataModelUpdateOneWithoutCustomersAuthDataModelNestedInput
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutUtilityNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutUtilityNestedInput
   }
 
   export type CustomersAuthDataModelUncheckedUpdateInput = {
@@ -27481,10 +27128,10 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolFieldUpdateOperationsInput | boolean
     termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutUtilityNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutUtilityNestedInput
   }
 
   export type CustomersAuthDataModelCreateManyInput = {
@@ -27497,9 +27144,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: boolean
     termsAccepted?: boolean
     lastLogin?: Date | string | null
+    cRMUserDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    cRMUserDataModelId?: number | null
   }
 
   export type CustomersAuthDataModelUpdateManyMutationInput = {
@@ -27525,9 +27172,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolFieldUpdateOperationsInput | boolean
     termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type CustomerProfileDataModelCreateInput = {
@@ -27544,19 +27191,19 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateInput = {
@@ -27576,17 +27223,17 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUpdateInput = {
@@ -27603,19 +27250,19 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateInput = {
@@ -27635,17 +27282,17 @@ export namespace Prisma {
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelCreateManyInput = {
@@ -27665,15 +27312,14 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
   }
 
   export type CustomerProfileDataModelUpdateManyMutationInput = {
@@ -27690,9 +27336,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type CustomerProfileDataModelUncheckedUpdateManyInput = {
@@ -27712,15 +27358,14 @@ export namespace Prisma {
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type CustomerPersonalInfoModelCreateInput = {
@@ -27739,7 +27384,7 @@ export namespace Prisma {
     dateOfBirth?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutPersonalInformationInput
+    customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutPersonalInformationInput
   }
 
   export type CustomerPersonalInfoModelUncheckedCreateInput = {
@@ -27759,7 +27404,7 @@ export namespace Prisma {
     dateOfBirth?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutPersonalInformationInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutPersonalInformationInput
   }
 
   export type CustomerPersonalInfoModelUpdateInput = {
@@ -27778,7 +27423,7 @@ export namespace Prisma {
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutPersonalInformationNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutPersonalInformationNestedInput
   }
 
   export type CustomerPersonalInfoModelUncheckedUpdateInput = {
@@ -27798,7 +27443,7 @@ export namespace Prisma {
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutPersonalInformationNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutPersonalInformationNestedInput
   }
 
   export type CustomerPersonalInfoModelCreateManyInput = {
@@ -27870,7 +27515,7 @@ export namespace Prisma {
     verifyDate: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutAadhaarCardInput
+    customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutAadhaarCardInput
   }
 
   export type AADHAARCardModelUncheckedCreateInput = {
@@ -27887,7 +27532,7 @@ export namespace Prisma {
     verifyDate: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutAadhaarCardInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutAadhaarCardInput
   }
 
   export type AADHAARCardModelUpdateInput = {
@@ -27903,7 +27548,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutAadhaarCardNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutAadhaarCardNestedInput
   }
 
   export type AADHAARCardModelUncheckedUpdateInput = {
@@ -27920,7 +27565,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutAadhaarCardNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutAadhaarCardNestedInput
   }
 
   export type AADHAARCardModelCreateManyInput = {
@@ -27981,7 +27626,7 @@ export namespace Prisma {
     verifyDate: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutPanCardInput
+    customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutPanCardInput
   }
 
   export type PanCardModelUncheckedCreateInput = {
@@ -27996,7 +27641,7 @@ export namespace Prisma {
     verifyDate: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutPanCardInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutPanCardInput
   }
 
   export type PanCardModelUpdateInput = {
@@ -28010,7 +27655,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutPanCardNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutPanCardNestedInput
   }
 
   export type PanCardModelUncheckedUpdateInput = {
@@ -28025,7 +27670,7 @@ export namespace Prisma {
     verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutPanCardNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutPanCardNestedInput
   }
 
   export type PanCardModelCreateManyInput = {
@@ -28065,6 +27710,166 @@ export namespace Prisma {
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomersRiskProfileModelCreateInput = {
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutRiskProfileInput
+  }
+
+  export type CustomersRiskProfileModelUncheckedCreateInput = {
+    id?: number
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutRiskProfileInput
+  }
+
+  export type CustomersRiskProfileModelUpdateInput = {
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutRiskProfileNestedInput
+  }
+
+  export type CustomersRiskProfileModelUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutRiskProfileNestedInput
+  }
+
+  export type CustomersRiskProfileModelCreateManyInput = {
+    id?: number
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CustomersRiskProfileModelUpdateManyMutationInput = {
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomersRiskProfileModelUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AddressModelCreateInput = {
+    line1: string
+    line2?: string | null
+    line3?: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    currentAddressOf?: CustomerProfileDataModelCreateNestedOneWithoutCurrentAddressInput
+    permanentAddressOf?: CustomerProfileDataModelCreateNestedOneWithoutPermanentAddressInput
+  }
+
+  export type AddressModelUncheckedCreateInput = {
+    id?: number
+    line1: string
+    line2?: string | null
+    line3?: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    currentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutCurrentAddressInput
+    permanentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutPermanentAddressInput
+  }
+
+  export type AddressModelUpdateInput = {
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currentAddressOf?: CustomerProfileDataModelUpdateOneWithoutCurrentAddressNestedInput
+    permanentAddressOf?: CustomerProfileDataModelUpdateOneWithoutPermanentAddressNestedInput
+  }
+
+  export type AddressModelUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currentAddressOf?: CustomerProfileDataModelUncheckedUpdateOneWithoutCurrentAddressNestedInput
+    permanentAddressOf?: CustomerProfileDataModelUncheckedUpdateOneWithoutPermanentAddressNestedInput
+  }
+
+  export type AddressModelCreateManyInput = {
+    id?: number
+    line1: string
+    line2?: string | null
+    line3?: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AddressModelUpdateManyMutationInput = {
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AddressModelUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -28306,166 +28111,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type CustomersRiskProfileModelCreateInput = {
-    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutRiskProfileInput
-  }
-
-  export type CustomersRiskProfileModelUncheckedCreateInput = {
-    id?: number
-    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutRiskProfileInput
-  }
-
-  export type CustomersRiskProfileModelUpdateInput = {
-    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutRiskProfileNestedInput
-  }
-
-  export type CustomersRiskProfileModelUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileNestedInput
-  }
-
-  export type CustomersRiskProfileModelCreateManyInput = {
-    id?: number
-    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomersRiskProfileModelUpdateManyMutationInput = {
-    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomersRiskProfileModelUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AddressModelCreateInput = {
-    line1: string
-    line2?: string | null
-    line3?: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    currentAddressOf?: CustomerProfileDataModelCreateNestedManyWithoutCurrentAddressInput
-    permanentAddressOf?: CustomerProfileDataModelCreateNestedManyWithoutPermanentAddressInput
-  }
-
-  export type AddressModelUncheckedCreateInput = {
-    id?: number
-    line1: string
-    line2?: string | null
-    line3?: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    currentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutCurrentAddressInput
-    permanentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutPermanentAddressInput
-  }
-
-  export type AddressModelUpdateInput = {
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    currentAddressOf?: CustomerProfileDataModelUpdateManyWithoutCurrentAddressNestedInput
-    permanentAddressOf?: CustomerProfileDataModelUpdateManyWithoutPermanentAddressNestedInput
-  }
-
-  export type AddressModelUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    currentAddressOf?: CustomerProfileDataModelUncheckedUpdateManyWithoutCurrentAddressNestedInput
-    permanentAddressOf?: CustomerProfileDataModelUncheckedUpdateManyWithoutPermanentAddressNestedInput
-  }
-
-  export type AddressModelCreateManyInput = {
-    id?: number
-    line1: string
-    line2?: string | null
-    line3?: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type AddressModelUpdateManyMutationInput = {
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AddressModelUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type LeadsModelCreateInput = {
     fullName: string
     emailAddress: string
@@ -28656,29 +28301,30 @@ export namespace Prisma {
   }
 
   export type NseDataSetCreateInput = {
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutNseInput
+    customerProfileDataModel: CustomerProfileDataModelCreateNestedOneWithoutNseDataSetInput
     participant: NseCbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput
   }
 
   export type NseDataSetUncheckedCreateInput = {
     id?: number
+    customerProfileDataModelId: number
     nseCbricsParticipantModelId: number
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutNseInput
   }
 
   export type NseDataSetUpdateInput = {
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutNseNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneRequiredWithoutNseDataSetNestedInput
     participant?: NseCbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput
   }
 
   export type NseDataSetUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    customerProfileDataModelId?: IntFieldUpdateOperationsInput | number
     nseCbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutNseNestedInput
   }
 
   export type NseDataSetCreateManyInput = {
     id?: number
+    customerProfileDataModelId: number
     nseCbricsParticipantModelId: number
   }
 
@@ -28688,12 +28334,14 @@ export namespace Prisma {
 
   export type NseDataSetUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    customerProfileDataModelId?: IntFieldUpdateOperationsInput | number
     nseCbricsParticipantModelId?: IntFieldUpdateOperationsInput | number
   }
 
   export type NseCbricsParticipantModelCreateInput = {
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -28722,8 +28370,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedCreateInput = {
+    key?: number
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -28754,6 +28404,7 @@ export namespace Prisma {
   export type NseCbricsParticipantModelUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -28782,8 +28433,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedUpdateInput = {
+    key?: IntFieldUpdateOperationsInput | number
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -28812,8 +28465,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelCreateManyInput = {
+    key?: number
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -28841,6 +28496,7 @@ export namespace Prisma {
   export type NseCbricsParticipantModelUpdateManyMutationInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -28866,8 +28522,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedUpdateManyInput = {
+    key?: IntFieldUpdateOperationsInput | number
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -29539,14 +29197,9 @@ export namespace Prisma {
     isNot?: CRMUserDataModelWhereInput | null
   }
 
-  export type CustomerProfileDataModelListRelationFilter = {
-    every?: CustomerProfileDataModelWhereInput
-    some?: CustomerProfileDataModelWhereInput
-    none?: CustomerProfileDataModelWhereInput
-  }
-
-  export type CustomerProfileDataModelOrderByRelationAggregateInput = {
-    _count?: SortOrder
+  export type CustomerProfileDataModelNullableScalarRelationFilter = {
+    is?: CustomerProfileDataModelWhereInput | null
+    isNot?: CustomerProfileDataModelWhereInput | null
   }
 
   export type CustomersAuthDataModelCountOrderByAggregateInput = {
@@ -29559,9 +29212,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: SortOrder
     termsAccepted?: SortOrder
     lastLogin?: SortOrder
+    cRMUserDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    cRMUserDataModelId?: SortOrder
   }
 
   export type CustomersAuthDataModelAvgOrderByAggregateInput = {
@@ -29579,9 +29232,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: SortOrder
     termsAccepted?: SortOrder
     lastLogin?: SortOrder
+    cRMUserDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    cRMUserDataModelId?: SortOrder
   }
 
   export type CustomersAuthDataModelMinOrderByAggregateInput = {
@@ -29594,9 +29247,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: SortOrder
     termsAccepted?: SortOrder
     lastLogin?: SortOrder
+    cRMUserDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    cRMUserDataModelId?: SortOrder
   }
 
   export type CustomersAuthDataModelSumOrderByAggregateInput = {
@@ -29668,6 +29321,11 @@ export namespace Prisma {
     isNot?: CustomerPersonalInfoModelWhereInput | null
   }
 
+  export type AddressModelNullableScalarRelationFilter = {
+    is?: AddressModelWhereInput | null
+    isNot?: AddressModelWhereInput | null
+  }
+
   export type CustomersBankAccountModelListRelationFilter = {
     every?: CustomersBankAccountModelWhereInput
     some?: CustomersBankAccountModelWhereInput
@@ -29678,11 +29336,6 @@ export namespace Prisma {
     every?: CustomersDematAccountModelWhereInput
     some?: CustomersDematAccountModelWhereInput
     none?: CustomersDematAccountModelWhereInput
-  }
-
-  export type AddressModelNullableScalarRelationFilter = {
-    is?: AddressModelWhereInput | null
-    isNot?: AddressModelWhereInput | null
   }
 
   export type NseDataSetNullableScalarRelationFilter = {
@@ -29715,15 +29368,14 @@ export namespace Prisma {
     verifyDate?: SortOrder
     customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
-    createdBy?: SortOrder
     aADHAARCardModelId?: SortOrder
     panCardModelId?: SortOrder
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nseDataSetId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    createdBy?: SortOrder
   }
 
   export type CustomerProfileDataModelAvgOrderByAggregateInput = {
@@ -29731,13 +29383,12 @@ export namespace Prisma {
     VerifiedBy?: SortOrder
     customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
-    createdBy?: SortOrder
     aADHAARCardModelId?: SortOrder
     panCardModelId?: SortOrder
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nseDataSetId?: SortOrder
+    createdBy?: SortOrder
   }
 
   export type CustomerProfileDataModelMaxOrderByAggregateInput = {
@@ -29757,15 +29408,14 @@ export namespace Prisma {
     verifyDate?: SortOrder
     customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
-    createdBy?: SortOrder
     aADHAARCardModelId?: SortOrder
     panCardModelId?: SortOrder
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nseDataSetId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    createdBy?: SortOrder
   }
 
   export type CustomerProfileDataModelMinOrderByAggregateInput = {
@@ -29785,15 +29435,14 @@ export namespace Prisma {
     verifyDate?: SortOrder
     customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
-    createdBy?: SortOrder
     aADHAARCardModelId?: SortOrder
     panCardModelId?: SortOrder
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nseDataSetId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    createdBy?: SortOrder
   }
 
   export type CustomerProfileDataModelSumOrderByAggregateInput = {
@@ -29801,13 +29450,12 @@ export namespace Prisma {
     VerifiedBy?: SortOrder
     customersRiskProfileModelId?: SortOrder
     customersAuthDataModelId?: SortOrder
-    createdBy?: SortOrder
     aADHAARCardModelId?: SortOrder
     panCardModelId?: SortOrder
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
-    nseDataSetId?: SortOrder
+    createdBy?: SortOrder
   }
 
   export type EnumGenderWithAggregatesFilter<$PrismaModel = never> = {
@@ -30011,9 +29659,84 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type CustomerProfileDataModelNullableScalarRelationFilter = {
-    is?: CustomerProfileDataModelWhereInput | null
-    isNot?: CustomerProfileDataModelWhereInput | null
+  export type CustomersRiskProfileModelCountOrderByAggregateInput = {
+    id?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CustomersRiskProfileModelAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type CustomersRiskProfileModelMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CustomersRiskProfileModelMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CustomersRiskProfileModelSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type AddressModelCountOrderByAggregateInput = {
+    id?: SortOrder
+    line1?: SortOrder
+    line2?: SortOrder
+    line3?: SortOrder
+    postOffice?: SortOrder
+    cityOrDistrict?: SortOrder
+    state?: SortOrder
+    pinCode?: SortOrder
+    country?: SortOrder
+    fullAddress?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AddressModelAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type AddressModelMaxOrderByAggregateInput = {
+    id?: SortOrder
+    line1?: SortOrder
+    line2?: SortOrder
+    line3?: SortOrder
+    postOffice?: SortOrder
+    cityOrDistrict?: SortOrder
+    state?: SortOrder
+    pinCode?: SortOrder
+    country?: SortOrder
+    fullAddress?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AddressModelMinOrderByAggregateInput = {
+    id?: SortOrder
+    line1?: SortOrder
+    line2?: SortOrder
+    line3?: SortOrder
+    postOffice?: SortOrder
+    cityOrDistrict?: SortOrder
+    state?: SortOrder
+    pinCode?: SortOrder
+    country?: SortOrder
+    fullAddress?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AddressModelSumOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type CustomersBankAccountModelCountOrderByAggregateInput = {
@@ -30173,100 +29896,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDematAccountTypeFilter<$PrismaModel>
     _max?: NestedEnumDematAccountTypeFilter<$PrismaModel>
-  }
-  export type JsonNullableListFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableListFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableListFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableListFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableListFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableListFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel> | null
-    has?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    hasEvery?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel>
-    hasSome?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
-
-  export type CustomersRiskProfileModelCountOrderByAggregateInput = {
-    id?: SortOrder
-    data?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type CustomersRiskProfileModelAvgOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type CustomersRiskProfileModelMaxOrderByAggregateInput = {
-    id?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type CustomersRiskProfileModelMinOrderByAggregateInput = {
-    id?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type CustomersRiskProfileModelSumOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type AddressModelCountOrderByAggregateInput = {
-    id?: SortOrder
-    line1?: SortOrder
-    line2?: SortOrder
-    line3?: SortOrder
-    postOffice?: SortOrder
-    cityOrDistrict?: SortOrder
-    state?: SortOrder
-    pinCode?: SortOrder
-    country?: SortOrder
-    fullAddress?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type AddressModelAvgOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type AddressModelMaxOrderByAggregateInput = {
-    id?: SortOrder
-    line1?: SortOrder
-    line2?: SortOrder
-    line3?: SortOrder
-    postOffice?: SortOrder
-    cityOrDistrict?: SortOrder
-    state?: SortOrder
-    pinCode?: SortOrder
-    country?: SortOrder
-    fullAddress?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type AddressModelMinOrderByAggregateInput = {
-    id?: SortOrder
-    line1?: SortOrder
-    line2?: SortOrder
-    line3?: SortOrder
-    postOffice?: SortOrder
-    cityOrDistrict?: SortOrder
-    state?: SortOrder
-    pinCode?: SortOrder
-    country?: SortOrder
-    fullAddress?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type AddressModelSumOrderByAggregateInput = {
-    id?: SortOrder
   }
 
   export type EnumLeadSourceFilter<$PrismaModel = never> = {
@@ -30430,6 +30059,11 @@ export namespace Prisma {
     createdByID?: SortOrder
   }
 
+  export type CustomerProfileDataModelScalarRelationFilter = {
+    is?: CustomerProfileDataModelWhereInput
+    isNot?: CustomerProfileDataModelWhereInput
+  }
+
   export type NseCbricsParticipantModelScalarRelationFilter = {
     is?: NseCbricsParticipantModelWhereInput
     isNot?: NseCbricsParticipantModelWhereInput
@@ -30437,26 +30071,31 @@ export namespace Prisma {
 
   export type NseDataSetCountOrderByAggregateInput = {
     id?: SortOrder
+    customerProfileDataModelId?: SortOrder
     nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NseDataSetAvgOrderByAggregateInput = {
     id?: SortOrder
+    customerProfileDataModelId?: SortOrder
     nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NseDataSetMaxOrderByAggregateInput = {
     id?: SortOrder
+    customerProfileDataModelId?: SortOrder
     nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NseDataSetMinOrderByAggregateInput = {
     id?: SortOrder
+    customerProfileDataModelId?: SortOrder
     nseCbricsParticipantModelId?: SortOrder
   }
 
   export type NseDataSetSumOrderByAggregateInput = {
     id?: SortOrder
+    customerProfileDataModelId?: SortOrder
     nseCbricsParticipantModelId?: SortOrder
   }
 
@@ -30499,8 +30138,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelCountOrderByAggregateInput = {
+    key?: SortOrder
     id?: SortOrder
     loginId?: SortOrder
+    userId?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     firstName?: SortOrder
@@ -30526,15 +30167,19 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelAvgOrderByAggregateInput = {
+    key?: SortOrder
     id?: SortOrder
+    userId?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     panVerStatus?: SortOrder
   }
 
   export type NseCbricsParticipantModelMaxOrderByAggregateInput = {
+    key?: SortOrder
     id?: SortOrder
     loginId?: SortOrder
+    userId?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     firstName?: SortOrder
@@ -30558,8 +30203,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelMinOrderByAggregateInput = {
+    key?: SortOrder
     id?: SortOrder
     loginId?: SortOrder
+    userId?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     firstName?: SortOrder
@@ -30583,7 +30230,9 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelSumOrderByAggregateInput = {
+    key?: SortOrder
     id?: SortOrder
+    userId?: SortOrder
     actualStatus?: SortOrder
     workflowStatus?: SortOrder
     panVerStatus?: SortOrder
@@ -30921,18 +30570,16 @@ export namespace Prisma {
     connect?: CRMUserDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelCreateNestedManyWithoutUtilityInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput> | CustomerProfileDataModelCreateWithoutUtilityInput[] | CustomerProfileDataModelUncheckedCreateWithoutUtilityInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput | CustomerProfileDataModelCreateOrConnectWithoutUtilityInput[]
-    createMany?: CustomerProfileDataModelCreateManyUtilityInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelCreateNestedOneWithoutUtilityInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutUtilityInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput> | CustomerProfileDataModelCreateWithoutUtilityInput[] | CustomerProfileDataModelUncheckedCreateWithoutUtilityInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput | CustomerProfileDataModelCreateOrConnectWithoutUtilityInput[]
-    createMany?: CustomerProfileDataModelCreateManyUtilityInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelUncheckedCreateNestedOneWithoutUtilityInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
   export type EnumSIGNIN_WITHFieldUpdateOperationsInput = {
@@ -30953,32 +30600,24 @@ export namespace Prisma {
     update?: XOR<XOR<CRMUserDataModelUpdateToOneWithWhereWithoutCustomersAuthDataModelInput, CRMUserDataModelUpdateWithoutCustomersAuthDataModelInput>, CRMUserDataModelUncheckedUpdateWithoutCustomersAuthDataModelInput>
   }
 
-  export type CustomerProfileDataModelUpdateManyWithoutUtilityNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput> | CustomerProfileDataModelCreateWithoutUtilityInput[] | CustomerProfileDataModelUncheckedCreateWithoutUtilityInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput | CustomerProfileDataModelCreateOrConnectWithoutUtilityInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutUtilityInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutUtilityInput[]
-    createMany?: CustomerProfileDataModelCreateManyUtilityInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutUtilityInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutUtilityInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutUtilityInput | CustomerProfileDataModelUpdateManyWithWhereWithoutUtilityInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUpdateOneWithoutUtilityNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput
+    upsert?: CustomerProfileDataModelUpsertWithoutUtilityInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutUtilityInput, CustomerProfileDataModelUpdateWithoutUtilityInput>, CustomerProfileDataModelUncheckedUpdateWithoutUtilityInput>
   }
 
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutUtilityNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput> | CustomerProfileDataModelCreateWithoutUtilityInput[] | CustomerProfileDataModelUncheckedCreateWithoutUtilityInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput | CustomerProfileDataModelCreateOrConnectWithoutUtilityInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutUtilityInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutUtilityInput[]
-    createMany?: CustomerProfileDataModelCreateManyUtilityInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutUtilityInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutUtilityInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutUtilityInput | CustomerProfileDataModelUpdateManyWithWhereWithoutUtilityInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUncheckedUpdateOneWithoutUtilityNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutUtilityInput
+    upsert?: CustomerProfileDataModelUpsertWithoutUtilityInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutUtilityInput, CustomerProfileDataModelUpdateWithoutUtilityInput>, CustomerProfileDataModelUncheckedUpdateWithoutUtilityInput>
   }
 
   export type CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput = {
@@ -31011,6 +30650,18 @@ export namespace Prisma {
     connect?: CustomerPersonalInfoModelWhereUniqueInput
   }
 
+  export type AddressModelCreateNestedOneWithoutCurrentAddressOfInput = {
+    create?: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
+    connectOrCreate?: AddressModelCreateOrConnectWithoutCurrentAddressOfInput
+    connect?: AddressModelWhereUniqueInput
+  }
+
+  export type AddressModelCreateNestedOneWithoutPermanentAddressOfInput = {
+    create?: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
+    connectOrCreate?: AddressModelCreateOrConnectWithoutPermanentAddressOfInput
+    connect?: AddressModelWhereUniqueInput
+  }
+
   export type CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput = {
     create?: XOR<CustomersBankAccountModelCreateWithoutCustomerProfileDataModelInput, CustomersBankAccountModelUncheckedCreateWithoutCustomerProfileDataModelInput> | CustomersBankAccountModelCreateWithoutCustomerProfileDataModelInput[] | CustomersBankAccountModelUncheckedCreateWithoutCustomerProfileDataModelInput[]
     connectOrCreate?: CustomersBankAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput | CustomersBankAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput[]
@@ -31023,18 +30674,6 @@ export namespace Prisma {
     connectOrCreate?: CustomersDematAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput | CustomersDematAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput[]
     createMany?: CustomersDematAccountModelCreateManyCustomerProfileDataModelInputEnvelope
     connect?: CustomersDematAccountModelWhereUniqueInput | CustomersDematAccountModelWhereUniqueInput[]
-  }
-
-  export type AddressModelCreateNestedOneWithoutCurrentAddressOfInput = {
-    create?: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
-    connectOrCreate?: AddressModelCreateOrConnectWithoutCurrentAddressOfInput
-    connect?: AddressModelWhereUniqueInput
-  }
-
-  export type AddressModelCreateNestedOneWithoutPermanentAddressOfInput = {
-    create?: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
-    connectOrCreate?: AddressModelCreateOrConnectWithoutPermanentAddressOfInput
-    connect?: AddressModelWhereUniqueInput
   }
 
   export type NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput = {
@@ -31055,6 +30694,12 @@ export namespace Prisma {
     connectOrCreate?: CustomersDematAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput | CustomersDematAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput[]
     createMany?: CustomersDematAccountModelCreateManyCustomerProfileDataModelInputEnvelope
     connect?: CustomersDematAccountModelWhereUniqueInput | CustomersDematAccountModelWhereUniqueInput[]
+  }
+
+  export type NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput = {
+    create?: XOR<NseDataSetCreateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput>
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutCustomerProfileDataModelInput
+    connect?: NseDataSetWhereUniqueInput
   }
 
   export type EnumGenderFieldUpdateOperationsInput = {
@@ -31117,6 +30762,26 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerPersonalInfoModelUpdateToOneWithWhereWithoutCustomerProfileDataModelInput, CustomerPersonalInfoModelUpdateWithoutCustomerProfileDataModelInput>, CustomerPersonalInfoModelUncheckedUpdateWithoutCustomerProfileDataModelInput>
   }
 
+  export type AddressModelUpdateOneWithoutCurrentAddressOfNestedInput = {
+    create?: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
+    connectOrCreate?: AddressModelCreateOrConnectWithoutCurrentAddressOfInput
+    upsert?: AddressModelUpsertWithoutCurrentAddressOfInput
+    disconnect?: AddressModelWhereInput | boolean
+    delete?: AddressModelWhereInput | boolean
+    connect?: AddressModelWhereUniqueInput
+    update?: XOR<XOR<AddressModelUpdateToOneWithWhereWithoutCurrentAddressOfInput, AddressModelUpdateWithoutCurrentAddressOfInput>, AddressModelUncheckedUpdateWithoutCurrentAddressOfInput>
+  }
+
+  export type AddressModelUpdateOneWithoutPermanentAddressOfNestedInput = {
+    create?: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
+    connectOrCreate?: AddressModelCreateOrConnectWithoutPermanentAddressOfInput
+    upsert?: AddressModelUpsertWithoutPermanentAddressOfInput
+    disconnect?: AddressModelWhereInput | boolean
+    delete?: AddressModelWhereInput | boolean
+    connect?: AddressModelWhereUniqueInput
+    update?: XOR<XOR<AddressModelUpdateToOneWithWhereWithoutPermanentAddressOfInput, AddressModelUpdateWithoutPermanentAddressOfInput>, AddressModelUncheckedUpdateWithoutPermanentAddressOfInput>
+  }
+
   export type CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput = {
     create?: XOR<CustomersBankAccountModelCreateWithoutCustomerProfileDataModelInput, CustomersBankAccountModelUncheckedCreateWithoutCustomerProfileDataModelInput> | CustomersBankAccountModelCreateWithoutCustomerProfileDataModelInput[] | CustomersBankAccountModelUncheckedCreateWithoutCustomerProfileDataModelInput[]
     connectOrCreate?: CustomersBankAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput | CustomersBankAccountModelCreateOrConnectWithoutCustomerProfileDataModelInput[]
@@ -31143,26 +30808,6 @@ export namespace Prisma {
     update?: CustomersDematAccountModelUpdateWithWhereUniqueWithoutCustomerProfileDataModelInput | CustomersDematAccountModelUpdateWithWhereUniqueWithoutCustomerProfileDataModelInput[]
     updateMany?: CustomersDematAccountModelUpdateManyWithWhereWithoutCustomerProfileDataModelInput | CustomersDematAccountModelUpdateManyWithWhereWithoutCustomerProfileDataModelInput[]
     deleteMany?: CustomersDematAccountModelScalarWhereInput | CustomersDematAccountModelScalarWhereInput[]
-  }
-
-  export type AddressModelUpdateOneWithoutCurrentAddressOfNestedInput = {
-    create?: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
-    connectOrCreate?: AddressModelCreateOrConnectWithoutCurrentAddressOfInput
-    upsert?: AddressModelUpsertWithoutCurrentAddressOfInput
-    disconnect?: AddressModelWhereInput | boolean
-    delete?: AddressModelWhereInput | boolean
-    connect?: AddressModelWhereUniqueInput
-    update?: XOR<XOR<AddressModelUpdateToOneWithWhereWithoutCurrentAddressOfInput, AddressModelUpdateWithoutCurrentAddressOfInput>, AddressModelUncheckedUpdateWithoutCurrentAddressOfInput>
-  }
-
-  export type AddressModelUpdateOneWithoutPermanentAddressOfNestedInput = {
-    create?: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
-    connectOrCreate?: AddressModelCreateOrConnectWithoutPermanentAddressOfInput
-    upsert?: AddressModelUpsertWithoutPermanentAddressOfInput
-    disconnect?: AddressModelWhereInput | boolean
-    delete?: AddressModelWhereInput | boolean
-    connect?: AddressModelWhereUniqueInput
-    update?: XOR<XOR<AddressModelUpdateToOneWithWhereWithoutPermanentAddressOfInput, AddressModelUpdateWithoutPermanentAddressOfInput>, AddressModelUncheckedUpdateWithoutPermanentAddressOfInput>
   }
 
   export type NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput = {
@@ -31203,130 +30848,206 @@ export namespace Prisma {
     deleteMany?: CustomersDematAccountModelScalarWhereInput | CustomersDematAccountModelScalarWhereInput[]
   }
 
-  export type CustomerProfileDataModelCreateNestedManyWithoutPersonalInformationInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput> | CustomerProfileDataModelCreateWithoutPersonalInformationInput[] | CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput | CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput[]
-    createMany?: CustomerProfileDataModelCreateManyPersonalInformationInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput = {
+    create?: XOR<NseDataSetCreateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput>
+    connectOrCreate?: NseDataSetCreateOrConnectWithoutCustomerProfileDataModelInput
+    upsert?: NseDataSetUpsertWithoutCustomerProfileDataModelInput
+    disconnect?: NseDataSetWhereInput | boolean
+    delete?: NseDataSetWhereInput | boolean
+    connect?: NseDataSetWhereUniqueInput
+    update?: XOR<XOR<NseDataSetUpdateToOneWithWhereWithoutCustomerProfileDataModelInput, NseDataSetUpdateWithoutCustomerProfileDataModelInput>, NseDataSetUncheckedUpdateWithoutCustomerProfileDataModelInput>
   }
 
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutPersonalInformationInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput> | CustomerProfileDataModelCreateWithoutPersonalInformationInput[] | CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput | CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput[]
-    createMany?: CustomerProfileDataModelCreateManyPersonalInformationInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelCreateNestedOneWithoutPersonalInformationInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUpdateManyWithoutPersonalInformationNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput> | CustomerProfileDataModelCreateWithoutPersonalInformationInput[] | CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput | CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutPersonalInformationInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutPersonalInformationInput[]
-    createMany?: CustomerProfileDataModelCreateManyPersonalInformationInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutPersonalInformationInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutPersonalInformationInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutPersonalInformationInput | CustomerProfileDataModelUpdateManyWithWhereWithoutPersonalInformationInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUncheckedCreateNestedOneWithoutPersonalInformationInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutPersonalInformationNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput> | CustomerProfileDataModelCreateWithoutPersonalInformationInput[] | CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput | CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutPersonalInformationInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutPersonalInformationInput[]
-    createMany?: CustomerProfileDataModelCreateManyPersonalInformationInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutPersonalInformationInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutPersonalInformationInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutPersonalInformationInput | CustomerProfileDataModelUpdateManyWithWhereWithoutPersonalInformationInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUpdateOneWithoutPersonalInformationNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput
+    upsert?: CustomerProfileDataModelUpsertWithoutPersonalInformationInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutPersonalInformationInput, CustomerProfileDataModelUpdateWithoutPersonalInformationInput>, CustomerProfileDataModelUncheckedUpdateWithoutPersonalInformationInput>
   }
 
-  export type CustomerProfileDataModelCreateNestedManyWithoutAadhaarCardInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput> | CustomerProfileDataModelCreateWithoutAadhaarCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput | CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyAadhaarCardInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelUncheckedUpdateOneWithoutPersonalInformationNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput
+    upsert?: CustomerProfileDataModelUpsertWithoutPersonalInformationInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutPersonalInformationInput, CustomerProfileDataModelUpdateWithoutPersonalInformationInput>, CustomerProfileDataModelUncheckedUpdateWithoutPersonalInformationInput>
   }
 
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutAadhaarCardInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput> | CustomerProfileDataModelCreateWithoutAadhaarCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput | CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyAadhaarCardInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelCreateNestedOneWithoutAadhaarCardInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUpdateManyWithoutAadhaarCardNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput> | CustomerProfileDataModelCreateWithoutAadhaarCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput | CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutAadhaarCardInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutAadhaarCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyAadhaarCardInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutAadhaarCardInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutAadhaarCardInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutAadhaarCardInput | CustomerProfileDataModelUpdateManyWithWhereWithoutAadhaarCardInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUncheckedCreateNestedOneWithoutAadhaarCardInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutAadhaarCardNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput> | CustomerProfileDataModelCreateWithoutAadhaarCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput | CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutAadhaarCardInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutAadhaarCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyAadhaarCardInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutAadhaarCardInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutAadhaarCardInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutAadhaarCardInput | CustomerProfileDataModelUpdateManyWithWhereWithoutAadhaarCardInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUpdateOneWithoutAadhaarCardNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput
+    upsert?: CustomerProfileDataModelUpsertWithoutAadhaarCardInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutAadhaarCardInput, CustomerProfileDataModelUpdateWithoutAadhaarCardInput>, CustomerProfileDataModelUncheckedUpdateWithoutAadhaarCardInput>
   }
 
-  export type CustomerProfileDataModelCreateNestedManyWithoutPanCardInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput> | CustomerProfileDataModelCreateWithoutPanCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutPanCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput | CustomerProfileDataModelCreateOrConnectWithoutPanCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyPanCardInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelUncheckedUpdateOneWithoutAadhaarCardNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput
+    upsert?: CustomerProfileDataModelUpsertWithoutAadhaarCardInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutAadhaarCardInput, CustomerProfileDataModelUpdateWithoutAadhaarCardInput>, CustomerProfileDataModelUncheckedUpdateWithoutAadhaarCardInput>
   }
 
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutPanCardInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput> | CustomerProfileDataModelCreateWithoutPanCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutPanCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput | CustomerProfileDataModelCreateOrConnectWithoutPanCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyPanCardInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelCreateNestedOneWithoutPanCardInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUpdateManyWithoutPanCardNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput> | CustomerProfileDataModelCreateWithoutPanCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutPanCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput | CustomerProfileDataModelCreateOrConnectWithoutPanCardInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutPanCardInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutPanCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyPanCardInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutPanCardInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutPanCardInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutPanCardInput | CustomerProfileDataModelUpdateManyWithWhereWithoutPanCardInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUncheckedCreateNestedOneWithoutPanCardInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutPanCardNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput> | CustomerProfileDataModelCreateWithoutPanCardInput[] | CustomerProfileDataModelUncheckedCreateWithoutPanCardInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput | CustomerProfileDataModelCreateOrConnectWithoutPanCardInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutPanCardInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutPanCardInput[]
-    createMany?: CustomerProfileDataModelCreateManyPanCardInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutPanCardInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutPanCardInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutPanCardInput | CustomerProfileDataModelUpdateManyWithWhereWithoutPanCardInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUpdateOneWithoutPanCardNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput
+    upsert?: CustomerProfileDataModelUpsertWithoutPanCardInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutPanCardInput, CustomerProfileDataModelUpdateWithoutPanCardInput>, CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput>
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateOneWithoutPanCardNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPanCardInput
+    upsert?: CustomerProfileDataModelUpsertWithoutPanCardInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutPanCardInput, CustomerProfileDataModelUpdateWithoutPanCardInput>, CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput>
+  }
+
+  export type CustomerProfileDataModelCreateNestedOneWithoutRiskProfileInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateNestedOneWithoutRiskProfileInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
+  }
+
+  export type CustomerProfileDataModelUpdateOneWithoutRiskProfileNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput
+    upsert?: CustomerProfileDataModelUpsertWithoutRiskProfileInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutRiskProfileInput, CustomerProfileDataModelUpdateWithoutRiskProfileInput>, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateOneWithoutRiskProfileNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput
+    upsert?: CustomerProfileDataModelUpsertWithoutRiskProfileInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutRiskProfileInput, CustomerProfileDataModelUpdateWithoutRiskProfileInput>, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
+  }
+
+  export type CustomerProfileDataModelCreateNestedOneWithoutCurrentAddressInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
+  }
+
+  export type CustomerProfileDataModelCreateNestedOneWithoutPermanentAddressInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateNestedOneWithoutCurrentAddressInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateNestedOneWithoutPermanentAddressInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
+  }
+
+  export type CustomerProfileDataModelUpdateOneWithoutCurrentAddressNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput
+    upsert?: CustomerProfileDataModelUpsertWithoutCurrentAddressInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutCurrentAddressInput, CustomerProfileDataModelUpdateWithoutCurrentAddressInput>, CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput>
+  }
+
+  export type CustomerProfileDataModelUpdateOneWithoutPermanentAddressNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput
+    upsert?: CustomerProfileDataModelUpsertWithoutPermanentAddressInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutPermanentAddressInput, CustomerProfileDataModelUpdateWithoutPermanentAddressInput>, CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput>
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateOneWithoutCurrentAddressNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput
+    upsert?: CustomerProfileDataModelUpsertWithoutCurrentAddressInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutCurrentAddressInput, CustomerProfileDataModelUpdateWithoutCurrentAddressInput>, CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput>
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateOneWithoutPermanentAddressNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput
+    upsert?: CustomerProfileDataModelUpsertWithoutPermanentAddressInput
+    disconnect?: CustomerProfileDataModelWhereInput | boolean
+    delete?: CustomerProfileDataModelWhereInput | boolean
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutPermanentAddressInput, CustomerProfileDataModelUpdateWithoutPermanentAddressInput>, CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput>
   }
 
   export type CustomerProfileDataModelCreateNestedOneWithoutBankAccountsInput = {
@@ -31369,141 +31090,6 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutDematAccountsInput, CustomerProfileDataModelUpdateWithoutDematAccountsInput>, CustomerProfileDataModelUncheckedUpdateWithoutDematAccountsInput>
   }
 
-  export type CustomersRiskProfileModelCreatedataInput = {
-    set: InputJsonValue[]
-  }
-
-  export type CustomerProfileDataModelCreateNestedManyWithoutRiskProfileInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
-    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-  }
-
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutRiskProfileInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
-    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-  }
-
-  export type CustomersRiskProfileModelUpdatedataInput = {
-    set?: InputJsonValue[]
-    push?: InputJsonValue | InputJsonValue[]
-  }
-
-  export type CustomerProfileDataModelUpdateManyWithoutRiskProfileNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput[]
-    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput | CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput> | CustomerProfileDataModelCreateWithoutRiskProfileInput[] | CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput | CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput[]
-    createMany?: CustomerProfileDataModelCreateManyRiskProfileInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput | CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-  }
-
-  export type CustomerProfileDataModelCreateNestedManyWithoutCurrentAddressInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput> | CustomerProfileDataModelCreateWithoutCurrentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyCurrentAddressInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-  }
-
-  export type CustomerProfileDataModelCreateNestedManyWithoutPermanentAddressInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput> | CustomerProfileDataModelCreateWithoutPermanentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyPermanentAddressInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-  }
-
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutCurrentAddressInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput> | CustomerProfileDataModelCreateWithoutCurrentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyCurrentAddressInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-  }
-
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutPermanentAddressInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput> | CustomerProfileDataModelCreateWithoutPermanentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyPermanentAddressInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-  }
-
-  export type CustomerProfileDataModelUpdateManyWithoutCurrentAddressNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput> | CustomerProfileDataModelCreateWithoutCurrentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutCurrentAddressInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutCurrentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyCurrentAddressInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutCurrentAddressInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutCurrentAddressInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutCurrentAddressInput | CustomerProfileDataModelUpdateManyWithWhereWithoutCurrentAddressInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-  }
-
-  export type CustomerProfileDataModelUpdateManyWithoutPermanentAddressNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput> | CustomerProfileDataModelCreateWithoutPermanentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutPermanentAddressInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutPermanentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyPermanentAddressInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutPermanentAddressInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutPermanentAddressInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutPermanentAddressInput | CustomerProfileDataModelUpdateManyWithWhereWithoutPermanentAddressInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutCurrentAddressNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput> | CustomerProfileDataModelCreateWithoutCurrentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutCurrentAddressInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutCurrentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyCurrentAddressInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutCurrentAddressInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutCurrentAddressInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutCurrentAddressInput | CustomerProfileDataModelUpdateManyWithWhereWithoutCurrentAddressInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutPermanentAddressNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput> | CustomerProfileDataModelCreateWithoutPermanentAddressInput[] | CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput | CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutPermanentAddressInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutPermanentAddressInput[]
-    createMany?: CustomerProfileDataModelCreateManyPermanentAddressInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutPermanentAddressInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutPermanentAddressInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutPermanentAddressInput | CustomerProfileDataModelUpdateManyWithWhereWithoutPermanentAddressInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-  }
-
   export type CRMUserDataModelCreateNestedOneWithoutLeadsModelInput = {
     create?: XOR<CRMUserDataModelCreateWithoutLeadsModelInput, CRMUserDataModelUncheckedCreateWithoutLeadsModelInput>
     connectOrCreate?: CRMUserDataModelCreateOrConnectWithoutLeadsModelInput
@@ -31532,11 +31118,10 @@ export namespace Prisma {
     update?: XOR<XOR<CRMUserDataModelUpdateToOneWithWhereWithoutLeadsModelInput, CRMUserDataModelUpdateWithoutLeadsModelInput>, CRMUserDataModelUncheckedUpdateWithoutLeadsModelInput>
   }
 
-  export type CustomerProfileDataModelCreateNestedManyWithoutNseInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutNseInput, CustomerProfileDataModelUncheckedCreateWithoutNseInput> | CustomerProfileDataModelCreateWithoutNseInput[] | CustomerProfileDataModelUncheckedCreateWithoutNseInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutNseInput | CustomerProfileDataModelCreateOrConnectWithoutNseInput[]
-    createMany?: CustomerProfileDataModelCreateManyNseInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
+  export type CustomerProfileDataModelCreateNestedOneWithoutNseDataSetInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutNseDataSetInput, CustomerProfileDataModelUncheckedCreateWithoutNseDataSetInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutNseDataSetInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
   }
 
   export type NseCbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput = {
@@ -31545,25 +31130,12 @@ export namespace Prisma {
     connect?: NseCbricsParticipantModelWhereUniqueInput
   }
 
-  export type CustomerProfileDataModelUncheckedCreateNestedManyWithoutNseInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutNseInput, CustomerProfileDataModelUncheckedCreateWithoutNseInput> | CustomerProfileDataModelCreateWithoutNseInput[] | CustomerProfileDataModelUncheckedCreateWithoutNseInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutNseInput | CustomerProfileDataModelCreateOrConnectWithoutNseInput[]
-    createMany?: CustomerProfileDataModelCreateManyNseInputEnvelope
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-  }
-
-  export type CustomerProfileDataModelUpdateManyWithoutNseNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutNseInput, CustomerProfileDataModelUncheckedCreateWithoutNseInput> | CustomerProfileDataModelCreateWithoutNseInput[] | CustomerProfileDataModelUncheckedCreateWithoutNseInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutNseInput | CustomerProfileDataModelCreateOrConnectWithoutNseInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutNseInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutNseInput[]
-    createMany?: CustomerProfileDataModelCreateManyNseInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutNseInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutNseInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutNseInput | CustomerProfileDataModelUpdateManyWithWhereWithoutNseInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
+  export type CustomerProfileDataModelUpdateOneRequiredWithoutNseDataSetNestedInput = {
+    create?: XOR<CustomerProfileDataModelCreateWithoutNseDataSetInput, CustomerProfileDataModelUncheckedCreateWithoutNseDataSetInput>
+    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutNseDataSetInput
+    upsert?: CustomerProfileDataModelUpsertWithoutNseDataSetInput
+    connect?: CustomerProfileDataModelWhereUniqueInput
+    update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutNseDataSetInput, CustomerProfileDataModelUpdateWithoutNseDataSetInput>, CustomerProfileDataModelUncheckedUpdateWithoutNseDataSetInput>
   }
 
   export type NseCbricsParticipantModelUpdateOneRequiredWithoutNSEDATASETNestedInput = {
@@ -31572,20 +31144,6 @@ export namespace Prisma {
     upsert?: NseCbricsParticipantModelUpsertWithoutNSEDATASETInput
     connect?: NseCbricsParticipantModelWhereUniqueInput
     update?: XOR<XOR<NseCbricsParticipantModelUpdateToOneWithWhereWithoutNSEDATASETInput, NseCbricsParticipantModelUpdateWithoutNSEDATASETInput>, NseCbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput>
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutNseNestedInput = {
-    create?: XOR<CustomerProfileDataModelCreateWithoutNseInput, CustomerProfileDataModelUncheckedCreateWithoutNseInput> | CustomerProfileDataModelCreateWithoutNseInput[] | CustomerProfileDataModelUncheckedCreateWithoutNseInput[]
-    connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutNseInput | CustomerProfileDataModelCreateOrConnectWithoutNseInput[]
-    upsert?: CustomerProfileDataModelUpsertWithWhereUniqueWithoutNseInput | CustomerProfileDataModelUpsertWithWhereUniqueWithoutNseInput[]
-    createMany?: CustomerProfileDataModelCreateManyNseInputEnvelope
-    set?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    disconnect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    delete?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    connect?: CustomerProfileDataModelWhereUniqueInput | CustomerProfileDataModelWhereUniqueInput[]
-    update?: CustomerProfileDataModelUpdateWithWhereUniqueWithoutNseInput | CustomerProfileDataModelUpdateWithWhereUniqueWithoutNseInput[]
-    updateMany?: CustomerProfileDataModelUpdateManyWithWhereWithoutNseInput | CustomerProfileDataModelUpdateManyWithWhereWithoutNseInput[]
-    deleteMany?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
   }
 
   export type NseCbricsParticipantModelCreatemobileListInput = {
@@ -32231,7 +31789,7 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutUtilityInput
+    customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutUtilityInput
   }
 
   export type CustomersAuthDataModelUncheckedCreateWithoutRelationshipManagerInput = {
@@ -32246,7 +31804,7 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutUtilityInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutUtilityInput
   }
 
   export type CustomersAuthDataModelCreateOrConnectWithoutRelationshipManagerInput = {
@@ -32329,9 +31887,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolFilter<"CustomersAuthDataModel"> | boolean
     termsAccepted?: BoolFilter<"CustomersAuthDataModel"> | boolean
     lastLogin?: DateTimeNullableFilter<"CustomersAuthDataModel"> | Date | string | null
+    cRMUserDataModelId?: IntNullableFilter<"CustomersAuthDataModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersAuthDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersAuthDataModel"> | Date | string
-    cRMUserDataModelId?: IntNullableFilter<"CustomersAuthDataModel"> | number | null
   }
 
   export type LeadsModelUpsertWithWhereUniqueWithoutAssignToInput = {
@@ -32418,18 +31976,18 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutUtilityInput = {
@@ -32448,27 +32006,22 @@ export namespace Prisma {
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelCreateOrConnectWithoutUtilityInput = {
     where: CustomerProfileDataModelWhereUniqueInput
     create: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput>
-  }
-
-  export type CustomerProfileDataModelCreateManyUtilityInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyUtilityInput | CustomerProfileDataModelCreateManyUtilityInput[]
-    skipDuplicates?: boolean
   }
 
   export type CRMUserDataModelUpsertWithoutCustomersAuthDataModelInput = {
@@ -32511,62 +32064,83 @@ export namespace Prisma {
     LeadsModel?: LeadsModelUncheckedUpdateManyWithoutAssignToNestedInput
   }
 
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutUtilityInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpsertWithoutUtilityInput = {
     update: XOR<CustomerProfileDataModelUpdateWithoutUtilityInput, CustomerProfileDataModelUncheckedUpdateWithoutUtilityInput>
     create: XOR<CustomerProfileDataModelCreateWithoutUtilityInput, CustomerProfileDataModelUncheckedCreateWithoutUtilityInput>
+    where?: CustomerProfileDataModelWhereInput
   }
 
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutUtilityInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutUtilityInput = {
+    where?: CustomerProfileDataModelWhereInput
     data: XOR<CustomerProfileDataModelUpdateWithoutUtilityInput, CustomerProfileDataModelUncheckedUpdateWithoutUtilityInput>
   }
 
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutUtilityInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutUtilityInput>
+  export type CustomerProfileDataModelUpdateWithoutUtilityInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
-  export type CustomerProfileDataModelScalarWhereInput = {
-    AND?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-    OR?: CustomerProfileDataModelScalarWhereInput[]
-    NOT?: CustomerProfileDataModelScalarWhereInput | CustomerProfileDataModelScalarWhereInput[]
-    id?: IntFilter<"CustomerProfileDataModel"> | number
-    userName?: StringFilter<"CustomerProfileDataModel"> | string
-    firstName?: StringFilter<"CustomerProfileDataModel"> | string
-    middleName?: StringFilter<"CustomerProfileDataModel"> | string
-    lastName?: StringFilter<"CustomerProfileDataModel"> | string
-    gender?: EnumGenderFilter<"CustomerProfileDataModel"> | $Enums.Gender
-    emailAddress?: StringFilter<"CustomerProfileDataModel"> | string
-    phoneNo?: StringFilter<"CustomerProfileDataModel"> | string
-    whatsAppNo?: StringNullableFilter<"CustomerProfileDataModel"> | string | null
-    avatar?: StringNullableFilter<"CustomerProfileDataModel"> | string | null
-    userType?: EnumUserAccountTypeFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFilter<"CustomerProfileDataModel"> | $Enums.KYCStatus
-    VerifiedBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    verifyDate?: DateTimeNullableFilter<"CustomerProfileDataModel"> | Date | string | null
-    customersRiskProfileModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    customersAuthDataModelId?: IntFilter<"CustomerProfileDataModel"> | number
-    createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    aADHAARCardModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    panCardModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    nseDataSetId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
-    createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
-    updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
+  export type CustomerProfileDataModelUncheckedUpdateWithoutUtilityInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomersRiskProfileModelCreateWithoutCustomerProfileDataModelInput = {
-    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
+    data: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type CustomersRiskProfileModelUncheckedCreateWithoutCustomerProfileDataModelInput = {
     id?: number
-    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
+    data: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32600,9 +32174,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: boolean
     termsAccepted?: boolean
     lastLogin?: Date | string | null
+    cRMUserDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    cRMUserDataModelId?: number | null
   }
 
   export type CustomersAuthDataModelCreateOrConnectWithoutCustomerProfileDataModelInput = {
@@ -32720,6 +32294,78 @@ export namespace Prisma {
     create: XOR<CustomerPersonalInfoModelCreateWithoutCustomerProfileDataModelInput, CustomerPersonalInfoModelUncheckedCreateWithoutCustomerProfileDataModelInput>
   }
 
+  export type AddressModelCreateWithoutCurrentAddressOfInput = {
+    line1: string
+    line2?: string | null
+    line3?: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    permanentAddressOf?: CustomerProfileDataModelCreateNestedOneWithoutPermanentAddressInput
+  }
+
+  export type AddressModelUncheckedCreateWithoutCurrentAddressOfInput = {
+    id?: number
+    line1: string
+    line2?: string | null
+    line3?: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    permanentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutPermanentAddressInput
+  }
+
+  export type AddressModelCreateOrConnectWithoutCurrentAddressOfInput = {
+    where: AddressModelWhereUniqueInput
+    create: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
+  }
+
+  export type AddressModelCreateWithoutPermanentAddressOfInput = {
+    line1: string
+    line2?: string | null
+    line3?: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    currentAddressOf?: CustomerProfileDataModelCreateNestedOneWithoutCurrentAddressInput
+  }
+
+  export type AddressModelUncheckedCreateWithoutPermanentAddressOfInput = {
+    id?: number
+    line1: string
+    line2?: string | null
+    line3?: string | null
+    postOffice: string
+    cityOrDistrict: string
+    state: string
+    pinCode: string
+    country: string
+    fullAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    currentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutCurrentAddressInput
+  }
+
+  export type AddressModelCreateOrConnectWithoutPermanentAddressOfInput = {
+    where: AddressModelWhereUniqueInput
+    create: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
+  }
+
   export type CustomersBankAccountModelCreateWithoutCustomerProfileDataModelInput = {
     accountHolderName: string
     bankAccountType: string
@@ -32804,78 +32450,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type AddressModelCreateWithoutCurrentAddressOfInput = {
-    line1: string
-    line2?: string | null
-    line3?: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    permanentAddressOf?: CustomerProfileDataModelCreateNestedManyWithoutPermanentAddressInput
-  }
-
-  export type AddressModelUncheckedCreateWithoutCurrentAddressOfInput = {
-    id?: number
-    line1: string
-    line2?: string | null
-    line3?: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    permanentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutPermanentAddressInput
-  }
-
-  export type AddressModelCreateOrConnectWithoutCurrentAddressOfInput = {
-    where: AddressModelWhereUniqueInput
-    create: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
-  }
-
-  export type AddressModelCreateWithoutPermanentAddressOfInput = {
-    line1: string
-    line2?: string | null
-    line3?: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    currentAddressOf?: CustomerProfileDataModelCreateNestedManyWithoutCurrentAddressInput
-  }
-
-  export type AddressModelUncheckedCreateWithoutPermanentAddressOfInput = {
-    id?: number
-    line1: string
-    line2?: string | null
-    line3?: string | null
-    postOffice: string
-    cityOrDistrict: string
-    state: string
-    pinCode: string
-    country: string
-    fullAddress: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    currentAddressOf?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutCurrentAddressInput
-  }
-
-  export type AddressModelCreateOrConnectWithoutPermanentAddressOfInput = {
-    where: AddressModelWhereUniqueInput
-    create: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
-  }
-
   export type NseDataSetCreateWithoutCustomerProfileDataModelInput = {
     participant: NseCbricsParticipantModelCreateNestedOneWithoutNSEDATASETInput
   }
@@ -32902,14 +32476,14 @@ export namespace Prisma {
   }
 
   export type CustomersRiskProfileModelUpdateWithoutCustomerProfileDataModelInput = {
-    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
+    data?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CustomersRiskProfileModelUncheckedUpdateWithoutCustomerProfileDataModelInput = {
     id?: IntFieldUpdateOperationsInput | number
-    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
+    data?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32949,9 +32523,9 @@ export namespace Prisma {
     whatsAppNotificationAllow?: BoolFieldUpdateOperationsInput | boolean
     termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    cRMUserDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type AADHAARCardModelUpsertWithoutCustomerProfileDataModelInput = {
@@ -33082,6 +32656,90 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AddressModelUpsertWithoutCurrentAddressOfInput = {
+    update: XOR<AddressModelUpdateWithoutCurrentAddressOfInput, AddressModelUncheckedUpdateWithoutCurrentAddressOfInput>
+    create: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
+    where?: AddressModelWhereInput
+  }
+
+  export type AddressModelUpdateToOneWithWhereWithoutCurrentAddressOfInput = {
+    where?: AddressModelWhereInput
+    data: XOR<AddressModelUpdateWithoutCurrentAddressOfInput, AddressModelUncheckedUpdateWithoutCurrentAddressOfInput>
+  }
+
+  export type AddressModelUpdateWithoutCurrentAddressOfInput = {
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    permanentAddressOf?: CustomerProfileDataModelUpdateOneWithoutPermanentAddressNestedInput
+  }
+
+  export type AddressModelUncheckedUpdateWithoutCurrentAddressOfInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    permanentAddressOf?: CustomerProfileDataModelUncheckedUpdateOneWithoutPermanentAddressNestedInput
+  }
+
+  export type AddressModelUpsertWithoutPermanentAddressOfInput = {
+    update: XOR<AddressModelUpdateWithoutPermanentAddressOfInput, AddressModelUncheckedUpdateWithoutPermanentAddressOfInput>
+    create: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
+    where?: AddressModelWhereInput
+  }
+
+  export type AddressModelUpdateToOneWithWhereWithoutPermanentAddressOfInput = {
+    where?: AddressModelWhereInput
+    data: XOR<AddressModelUpdateWithoutPermanentAddressOfInput, AddressModelUncheckedUpdateWithoutPermanentAddressOfInput>
+  }
+
+  export type AddressModelUpdateWithoutPermanentAddressOfInput = {
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currentAddressOf?: CustomerProfileDataModelUpdateOneWithoutCurrentAddressNestedInput
+  }
+
+  export type AddressModelUncheckedUpdateWithoutPermanentAddressOfInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    line1?: StringFieldUpdateOperationsInput | string
+    line2?: NullableStringFieldUpdateOperationsInput | string | null
+    line3?: NullableStringFieldUpdateOperationsInput | string | null
+    postOffice?: StringFieldUpdateOperationsInput | string
+    cityOrDistrict?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    pinCode?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    fullAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currentAddressOf?: CustomerProfileDataModelUncheckedUpdateOneWithoutCurrentAddressNestedInput
+  }
+
   export type CustomersBankAccountModelUpsertWithWhereUniqueWithoutCustomerProfileDataModelInput = {
     where: CustomersBankAccountModelWhereUniqueInput
     update: XOR<CustomersBankAccountModelUpdateWithoutCustomerProfileDataModelInput, CustomersBankAccountModelUncheckedUpdateWithoutCustomerProfileDataModelInput>
@@ -33155,90 +32813,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
   }
 
-  export type AddressModelUpsertWithoutCurrentAddressOfInput = {
-    update: XOR<AddressModelUpdateWithoutCurrentAddressOfInput, AddressModelUncheckedUpdateWithoutCurrentAddressOfInput>
-    create: XOR<AddressModelCreateWithoutCurrentAddressOfInput, AddressModelUncheckedCreateWithoutCurrentAddressOfInput>
-    where?: AddressModelWhereInput
-  }
-
-  export type AddressModelUpdateToOneWithWhereWithoutCurrentAddressOfInput = {
-    where?: AddressModelWhereInput
-    data: XOR<AddressModelUpdateWithoutCurrentAddressOfInput, AddressModelUncheckedUpdateWithoutCurrentAddressOfInput>
-  }
-
-  export type AddressModelUpdateWithoutCurrentAddressOfInput = {
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    permanentAddressOf?: CustomerProfileDataModelUpdateManyWithoutPermanentAddressNestedInput
-  }
-
-  export type AddressModelUncheckedUpdateWithoutCurrentAddressOfInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    permanentAddressOf?: CustomerProfileDataModelUncheckedUpdateManyWithoutPermanentAddressNestedInput
-  }
-
-  export type AddressModelUpsertWithoutPermanentAddressOfInput = {
-    update: XOR<AddressModelUpdateWithoutPermanentAddressOfInput, AddressModelUncheckedUpdateWithoutPermanentAddressOfInput>
-    create: XOR<AddressModelCreateWithoutPermanentAddressOfInput, AddressModelUncheckedCreateWithoutPermanentAddressOfInput>
-    where?: AddressModelWhereInput
-  }
-
-  export type AddressModelUpdateToOneWithWhereWithoutPermanentAddressOfInput = {
-    where?: AddressModelWhereInput
-    data: XOR<AddressModelUpdateWithoutPermanentAddressOfInput, AddressModelUncheckedUpdateWithoutPermanentAddressOfInput>
-  }
-
-  export type AddressModelUpdateWithoutPermanentAddressOfInput = {
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    currentAddressOf?: CustomerProfileDataModelUpdateManyWithoutCurrentAddressNestedInput
-  }
-
-  export type AddressModelUncheckedUpdateWithoutPermanentAddressOfInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    line1?: StringFieldUpdateOperationsInput | string
-    line2?: NullableStringFieldUpdateOperationsInput | string | null
-    line3?: NullableStringFieldUpdateOperationsInput | string | null
-    postOffice?: StringFieldUpdateOperationsInput | string
-    cityOrDistrict?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    pinCode?: StringFieldUpdateOperationsInput | string
-    country?: StringFieldUpdateOperationsInput | string
-    fullAddress?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    currentAddressOf?: CustomerProfileDataModelUncheckedUpdateManyWithoutCurrentAddressNestedInput
-  }
-
   export type NseDataSetUpsertWithoutCustomerProfileDataModelInput = {
     update: XOR<NseDataSetUpdateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedUpdateWithoutCustomerProfileDataModelInput>
     create: XOR<NseDataSetCreateWithoutCustomerProfileDataModelInput, NseDataSetUncheckedCreateWithoutCustomerProfileDataModelInput>
@@ -33273,18 +32847,18 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput = {
@@ -33304,16 +32878,16 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     panCardModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelCreateOrConnectWithoutPersonalInformationInput = {
@@ -33321,25 +32895,72 @@ export namespace Prisma {
     create: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput>
   }
 
-  export type CustomerProfileDataModelCreateManyPersonalInformationInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyPersonalInformationInput | CustomerProfileDataModelCreateManyPersonalInformationInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutPersonalInformationInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpsertWithoutPersonalInformationInput = {
     update: XOR<CustomerProfileDataModelUpdateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedUpdateWithoutPersonalInformationInput>
     create: XOR<CustomerProfileDataModelCreateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedCreateWithoutPersonalInformationInput>
+    where?: CustomerProfileDataModelWhereInput
   }
 
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutPersonalInformationInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutPersonalInformationInput = {
+    where?: CustomerProfileDataModelWhereInput
     data: XOR<CustomerProfileDataModelUpdateWithoutPersonalInformationInput, CustomerProfileDataModelUncheckedUpdateWithoutPersonalInformationInput>
   }
 
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutPersonalInformationInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutPersonalInformationInput>
+  export type CustomerProfileDataModelUpdateWithoutPersonalInformationInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutPersonalInformationInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelCreateWithoutAadhaarCardInput = {
@@ -33356,18 +32977,18 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput = {
@@ -33387,16 +33008,16 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelCreateOrConnectWithoutAadhaarCardInput = {
@@ -33404,25 +33025,72 @@ export namespace Prisma {
     create: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput>
   }
 
-  export type CustomerProfileDataModelCreateManyAadhaarCardInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyAadhaarCardInput | CustomerProfileDataModelCreateManyAadhaarCardInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutAadhaarCardInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpsertWithoutAadhaarCardInput = {
     update: XOR<CustomerProfileDataModelUpdateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedUpdateWithoutAadhaarCardInput>
     create: XOR<CustomerProfileDataModelCreateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedCreateWithoutAadhaarCardInput>
+    where?: CustomerProfileDataModelWhereInput
   }
 
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutAadhaarCardInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutAadhaarCardInput = {
+    where?: CustomerProfileDataModelWhereInput
     data: XOR<CustomerProfileDataModelUpdateWithoutAadhaarCardInput, CustomerProfileDataModelUncheckedUpdateWithoutAadhaarCardInput>
   }
 
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutAadhaarCardInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutAadhaarCardInput>
+  export type CustomerProfileDataModelUpdateWithoutAadhaarCardInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutAadhaarCardInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelCreateWithoutPanCardInput = {
@@ -33439,18 +33107,18 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutPanCardInput = {
@@ -33470,16 +33138,16 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelCreateOrConnectWithoutPanCardInput = {
@@ -33487,25 +33155,462 @@ export namespace Prisma {
     create: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput>
   }
 
-  export type CustomerProfileDataModelCreateManyPanCardInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyPanCardInput | CustomerProfileDataModelCreateManyPanCardInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutPanCardInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpsertWithoutPanCardInput = {
     update: XOR<CustomerProfileDataModelUpdateWithoutPanCardInput, CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput>
     create: XOR<CustomerProfileDataModelCreateWithoutPanCardInput, CustomerProfileDataModelUncheckedCreateWithoutPanCardInput>
+    where?: CustomerProfileDataModelWhereInput
   }
 
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutPanCardInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutPanCardInput = {
+    where?: CustomerProfileDataModelWhereInput
     data: XOR<CustomerProfileDataModelUpdateWithoutPanCardInput, CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput>
   }
 
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutPanCardInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutPanCardInput>
+  export type CustomerProfileDataModelUpdateWithoutPanCardInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelCreateWithoutRiskProfileInput = {
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    verifyDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
+    permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput = {
+    id?: number
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    verifyDate?: Date | string | null
+    customersAuthDataModelId: number
+    aADHAARCardModelId?: number | null
+    panCardModelId?: number | null
+    customerPersonalInfoModelId?: number | null
+    currentAddressModelId?: number | null
+    permanentAddressModelId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
+  }
+
+  export type CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput = {
+    where: CustomerProfileDataModelWhereUniqueInput
+    create: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+  }
+
+  export type CustomerProfileDataModelUpsertWithoutRiskProfileInput = {
+    update: XOR<CustomerProfileDataModelUpdateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
+    create: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
+    where?: CustomerProfileDataModelWhereInput
+  }
+
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutRiskProfileInput = {
+    where?: CustomerProfileDataModelWhereInput
+    data: XOR<CustomerProfileDataModelUpdateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
+  }
+
+  export type CustomerProfileDataModelUpdateWithoutRiskProfileInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelCreateWithoutCurrentAddressInput = {
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    verifyDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput = {
+    id?: number
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    verifyDate?: Date | string | null
+    customersRiskProfileModelId?: number | null
+    customersAuthDataModelId: number
+    aADHAARCardModelId?: number | null
+    panCardModelId?: number | null
+    customerPersonalInfoModelId?: number | null
+    permanentAddressModelId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
+  }
+
+  export type CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput = {
+    where: CustomerProfileDataModelWhereUniqueInput
+    create: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
+  }
+
+  export type CustomerProfileDataModelCreateWithoutPermanentAddressInput = {
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    verifyDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
+    currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+  }
+
+  export type CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput = {
+    id?: number
+    userName: string
+    firstName: string
+    middleName: string
+    lastName: string
+    gender: $Enums.Gender
+    emailAddress: string
+    phoneNo: string
+    whatsAppNo?: string | null
+    avatar?: string | null
+    userType?: $Enums.UserAccountType
+    kycStatus?: $Enums.KYCStatus
+    VerifiedBy?: number | null
+    verifyDate?: Date | string | null
+    customersRiskProfileModelId?: number | null
+    customersAuthDataModelId: number
+    aADHAARCardModelId?: number | null
+    panCardModelId?: number | null
+    customerPersonalInfoModelId?: number | null
+    currentAddressModelId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
+  }
+
+  export type CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput = {
+    where: CustomerProfileDataModelWhereUniqueInput
+    create: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
+  }
+
+  export type CustomerProfileDataModelUpsertWithoutCurrentAddressInput = {
+    update: XOR<CustomerProfileDataModelUpdateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput>
+    create: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
+    where?: CustomerProfileDataModelWhereInput
+  }
+
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutCurrentAddressInput = {
+    where?: CustomerProfileDataModelWhereInput
+    data: XOR<CustomerProfileDataModelUpdateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput>
+  }
+
+  export type CustomerProfileDataModelUpdateWithoutCurrentAddressInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUpsertWithoutPermanentAddressInput = {
+    update: XOR<CustomerProfileDataModelUpdateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput>
+    create: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
+    where?: CustomerProfileDataModelWhereInput
+  }
+
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutPermanentAddressInput = {
+    where?: CustomerProfileDataModelWhereInput
+    data: XOR<CustomerProfileDataModelUpdateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput>
+  }
+
+  export type CustomerProfileDataModelUpdateWithoutPermanentAddressInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelCreateWithoutBankAccountsInput = {
@@ -33522,18 +33627,18 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutBankAccountsInput = {
@@ -33553,16 +33658,16 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelCreateOrConnectWithoutBankAccountsInput = {
@@ -33595,18 +33700,18 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutBankAccountsInput = {
@@ -33626,16 +33731,16 @@ export namespace Prisma {
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelCreateWithoutDematAccountsInput = {
@@ -33652,18 +33757,18 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelUncheckedCreateWithoutDematAccountsInput = {
@@ -33683,16 +33788,16 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
+    nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
 
   export type CustomerProfileDataModelCreateOrConnectWithoutDematAccountsInput = {
@@ -33725,18 +33830,18 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
     currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
     permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    nseDataSet?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CustomerProfileDataModelUncheckedUpdateWithoutDematAccountsInput = {
@@ -33756,265 +33861,16 @@ export namespace Prisma {
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelCreateWithoutRiskProfileInput = {
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    createdBy?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
-    permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
-  }
-
-  export type CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
-  }
-
-  export type CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    create: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
-  }
-
-  export type CustomerProfileDataModelCreateManyRiskProfileInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyRiskProfileInput | CustomerProfileDataModelCreateManyRiskProfileInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutRiskProfileInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    update: XOR<CustomerProfileDataModelUpdateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
-    create: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
-  }
-
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutRiskProfileInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    data: XOR<CustomerProfileDataModelUpdateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput>
-  }
-
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutRiskProfileInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileInput>
-  }
-
-  export type CustomerProfileDataModelCreateWithoutCurrentAddressInput = {
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    createdBy?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
-  }
-
-  export type CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
-  }
-
-  export type CustomerProfileDataModelCreateOrConnectWithoutCurrentAddressInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    create: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
-  }
-
-  export type CustomerProfileDataModelCreateManyCurrentAddressInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyCurrentAddressInput | CustomerProfileDataModelCreateManyCurrentAddressInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CustomerProfileDataModelCreateWithoutPermanentAddressInput = {
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    createdBy?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
-    nse?: NseDataSetCreateNestedOneWithoutCustomerProfileDataModelInput
-  }
-
-  export type CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
-  }
-
-  export type CustomerProfileDataModelCreateOrConnectWithoutPermanentAddressInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    create: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
-  }
-
-  export type CustomerProfileDataModelCreateManyPermanentAddressInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyPermanentAddressInput | CustomerProfileDataModelCreateManyPermanentAddressInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutCurrentAddressInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    update: XOR<CustomerProfileDataModelUpdateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput>
-    create: XOR<CustomerProfileDataModelCreateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutCurrentAddressInput>
-  }
-
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutCurrentAddressInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    data: XOR<CustomerProfileDataModelUpdateWithoutCurrentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput>
-  }
-
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutCurrentAddressInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutCurrentAddressInput>
-  }
-
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutPermanentAddressInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    update: XOR<CustomerProfileDataModelUpdateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput>
-    create: XOR<CustomerProfileDataModelCreateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedCreateWithoutPermanentAddressInput>
-  }
-
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutPermanentAddressInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    data: XOR<CustomerProfileDataModelUpdateWithoutPermanentAddressInput, CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput>
-  }
-
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutPermanentAddressInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutPermanentAddressInput>
+    nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
 
   export type CRMUserDataModelCreateWithoutLeadsModelInput = {
@@ -34091,7 +33947,7 @@ export namespace Prisma {
     CustomersAuthDataModel?: CustomersAuthDataModelUncheckedUpdateManyWithoutRelationshipManagerNestedInput
   }
 
-  export type CustomerProfileDataModelCreateWithoutNseInput = {
+  export type CustomerProfileDataModelCreateWithoutNseDataSetInput = {
     userName: string
     firstName: string
     middleName: string
@@ -34105,21 +33961,21 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
-    createdBy?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     personalInformation?: CustomerPersonalInfoModelCreateNestedOneWithoutCustomerProfileDataModelInput
-    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
-    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
     currentAddress?: AddressModelCreateNestedOneWithoutCurrentAddressOfInput
     permanentAddress?: AddressModelCreateNestedOneWithoutPermanentAddressOfInput
+    bankAccounts?: CustomersBankAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
+    dematAccounts?: CustomersDematAccountModelCreateNestedManyWithoutCustomerProfileDataModelInput
   }
 
-  export type CustomerProfileDataModelUncheckedCreateWithoutNseInput = {
+  export type CustomerProfileDataModelUncheckedCreateWithoutNseDataSetInput = {
     id?: number
     userName: string
     firstName: string
@@ -34136,7 +33992,6 @@ export namespace Prisma {
     verifyDate?: Date | string | null
     customersRiskProfileModelId?: number | null
     customersAuthDataModelId: number
-    createdBy?: number | null
     aADHAARCardModelId?: number | null
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
@@ -34144,23 +33999,20 @@ export namespace Prisma {
     permanentAddressModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    createdBy?: number | null
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
   }
 
-  export type CustomerProfileDataModelCreateOrConnectWithoutNseInput = {
+  export type CustomerProfileDataModelCreateOrConnectWithoutNseDataSetInput = {
     where: CustomerProfileDataModelWhereUniqueInput
-    create: XOR<CustomerProfileDataModelCreateWithoutNseInput, CustomerProfileDataModelUncheckedCreateWithoutNseInput>
-  }
-
-  export type CustomerProfileDataModelCreateManyNseInputEnvelope = {
-    data: CustomerProfileDataModelCreateManyNseInput | CustomerProfileDataModelCreateManyNseInput[]
-    skipDuplicates?: boolean
+    create: XOR<CustomerProfileDataModelCreateWithoutNseDataSetInput, CustomerProfileDataModelUncheckedCreateWithoutNseDataSetInput>
   }
 
   export type NseCbricsParticipantModelCreateWithoutNSEDATASETInput = {
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -34188,8 +34040,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput = {
+    key?: number
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -34221,20 +34075,72 @@ export namespace Prisma {
     create: XOR<NseCbricsParticipantModelCreateWithoutNSEDATASETInput, NseCbricsParticipantModelUncheckedCreateWithoutNSEDATASETInput>
   }
 
-  export type CustomerProfileDataModelUpsertWithWhereUniqueWithoutNseInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    update: XOR<CustomerProfileDataModelUpdateWithoutNseInput, CustomerProfileDataModelUncheckedUpdateWithoutNseInput>
-    create: XOR<CustomerProfileDataModelCreateWithoutNseInput, CustomerProfileDataModelUncheckedCreateWithoutNseInput>
+  export type CustomerProfileDataModelUpsertWithoutNseDataSetInput = {
+    update: XOR<CustomerProfileDataModelUpdateWithoutNseDataSetInput, CustomerProfileDataModelUncheckedUpdateWithoutNseDataSetInput>
+    create: XOR<CustomerProfileDataModelCreateWithoutNseDataSetInput, CustomerProfileDataModelUncheckedCreateWithoutNseDataSetInput>
+    where?: CustomerProfileDataModelWhereInput
   }
 
-  export type CustomerProfileDataModelUpdateWithWhereUniqueWithoutNseInput = {
-    where: CustomerProfileDataModelWhereUniqueInput
-    data: XOR<CustomerProfileDataModelUpdateWithoutNseInput, CustomerProfileDataModelUncheckedUpdateWithoutNseInput>
+  export type CustomerProfileDataModelUpdateToOneWithWhereWithoutNseDataSetInput = {
+    where?: CustomerProfileDataModelWhereInput
+    data: XOR<CustomerProfileDataModelUpdateWithoutNseDataSetInput, CustomerProfileDataModelUncheckedUpdateWithoutNseDataSetInput>
   }
 
-  export type CustomerProfileDataModelUpdateManyWithWhereWithoutNseInput = {
-    where: CustomerProfileDataModelScalarWhereInput
-    data: XOR<CustomerProfileDataModelUpdateManyMutationInput, CustomerProfileDataModelUncheckedUpdateManyWithoutNseInput>
+  export type CustomerProfileDataModelUpdateWithoutNseDataSetInput = {
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
+    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
+    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
+    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
+    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
+  }
+
+  export type CustomerProfileDataModelUncheckedUpdateWithoutNseDataSetInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userName?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    emailAddress?: StringFieldUpdateOperationsInput | string
+    phoneNo?: StringFieldUpdateOperationsInput | string
+    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
+    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
+    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
+    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
+    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
   }
 
   export type NseCbricsParticipantModelUpsertWithoutNSEDATASETInput = {
@@ -34251,6 +34157,7 @@ export namespace Prisma {
   export type NseCbricsParticipantModelUpdateWithoutNSEDATASETInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -34278,8 +34185,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedUpdateWithoutNSEDATASETInput = {
+    key?: IntFieldUpdateOperationsInput | number
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -34373,12 +34282,12 @@ export namespace Prisma {
   }
 
   export type NseDataSetCreateWithoutParticipantInput = {
-    CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedManyWithoutNseInput
+    customerProfileDataModel: CustomerProfileDataModelCreateNestedOneWithoutNseDataSetInput
   }
 
   export type NseDataSetUncheckedCreateWithoutParticipantInput = {
     id?: number
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedManyWithoutNseInput
+    customerProfileDataModelId: number
   }
 
   export type NseDataSetCreateOrConnectWithoutParticipantInput = {
@@ -34476,12 +34385,14 @@ export namespace Prisma {
     OR?: NseDataSetScalarWhereInput[]
     NOT?: NseDataSetScalarWhereInput | NseDataSetScalarWhereInput[]
     id?: IntFilter<"NseDataSet"> | number
+    customerProfileDataModelId?: IntFilter<"NseDataSet"> | number
     nseCbricsParticipantModelId?: IntFilter<"NseDataSet"> | number
   }
 
   export type NseCbricsParticipantModelCreateWithoutBankAccountListInput = {
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -34509,8 +34420,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedCreateWithoutBankAccountListInput = {
+    key?: number
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -34556,6 +34469,7 @@ export namespace Prisma {
   export type NseCbricsParticipantModelUpdateWithoutBankAccountListInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -34583,8 +34497,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedUpdateWithoutBankAccountListInput = {
+    key?: IntFieldUpdateOperationsInput | number
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -34614,6 +34530,7 @@ export namespace Prisma {
   export type NseCbricsParticipantModelCreateWithoutDpAccountListInput = {
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -34641,8 +34558,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedCreateWithoutDpAccountListInput = {
+    key?: number
     id: number
     loginId: string
+    userId: number
     actualStatus: number
     workflowStatus: number
     firstName: string
@@ -34688,6 +34607,7 @@ export namespace Prisma {
   export type NseCbricsParticipantModelUpdateWithoutDpAccountListInput = {
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -34715,8 +34635,10 @@ export namespace Prisma {
   }
 
   export type NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput = {
+    key?: IntFieldUpdateOperationsInput | number
     id?: IntFieldUpdateOperationsInput | number
     loginId?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
     actualStatus?: IntFieldUpdateOperationsInput | number
     workflowStatus?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
@@ -34784,7 +34706,7 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutUtilityNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutUtilityNestedInput
   }
 
   export type CustomersAuthDataModelUncheckedUpdateWithoutRelationshipManagerInput = {
@@ -34799,7 +34721,7 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutUtilityNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutUtilityNestedInput
   }
 
   export type CustomersAuthDataModelUncheckedUpdateManyWithoutRelationshipManagerInput = {
@@ -34859,117 +34781,6 @@ export namespace Prisma {
     exInvestmentAmount?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdBy?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomerProfileDataModelCreateManyUtilityInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutUtilityInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutUtilityInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutUtilityInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -35104,783 +34915,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type CustomerProfileDataModelCreateManyPersonalInformationInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    currentAddressModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutPersonalInformationInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
-    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutPersonalInformationInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutPersonalInformationInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomerProfileDataModelCreateManyAadhaarCardInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutAadhaarCardInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
-    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutAadhaarCardInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutAadhaarCardInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomerProfileDataModelCreateManyPanCardInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutPanCardInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
-    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutPanCardInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomerProfileDataModelCreateManyRiskProfileInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutRiskProfileInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
-    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutRiskProfileInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutRiskProfileInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomerProfileDataModelCreateManyCurrentAddressInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    permanentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelCreateManyPermanentAddressInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    nseDataSetId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutCurrentAddressInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
-    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutCurrentAddressInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutCurrentAddressInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutPermanentAddressInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
-    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    nse?: NseDataSetUpdateOneWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutPermanentAddressInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutPermanentAddressInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    nseDataSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CustomerProfileDataModelCreateManyNseInput = {
-    id?: number
-    userName: string
-    firstName: string
-    middleName: string
-    lastName: string
-    gender: $Enums.Gender
-    emailAddress: string
-    phoneNo: string
-    whatsAppNo?: string | null
-    avatar?: string | null
-    userType?: $Enums.UserAccountType
-    kycStatus?: $Enums.KYCStatus
-    VerifiedBy?: number | null
-    verifyDate?: Date | string | null
-    customersRiskProfileModelId?: number | null
-    customersAuthDataModelId: number
-    createdBy?: number | null
-    aADHAARCardModelId?: number | null
-    panCardModelId?: number | null
-    customerPersonalInfoModelId?: number | null
-    currentAddressModelId?: number | null
-    permanentAddressModelId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type CustomerProfileDataModelUpdateWithoutNseInput = {
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
-    aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    personalInformation?: CustomerPersonalInfoModelUpdateOneWithoutCustomerProfileDataModelNestedInput
-    bankAccounts?: CustomersBankAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUpdateManyWithoutCustomerProfileDataModelNestedInput
-    currentAddress?: AddressModelUpdateOneWithoutCurrentAddressOfNestedInput
-    permanentAddress?: AddressModelUpdateOneWithoutPermanentAddressOfNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateWithoutNseInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-    dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
-  }
-
-  export type CustomerProfileDataModelUncheckedUpdateManyWithoutNseInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userName?: StringFieldUpdateOperationsInput | string
-    firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
-    lastName?: StringFieldUpdateOperationsInput | string
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
-    whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
-    kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
-    VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    customersRiskProfileModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customersAuthDataModelId?: IntFieldUpdateOperationsInput | number
-    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
-    aADHAARCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type NSEBankAccountCreateManyNSECbricsParticipantModelInput = {
     id?: number
     bankName: string
@@ -35907,6 +34941,7 @@ export namespace Prisma {
 
   export type NseDataSetCreateManyParticipantInput = {
     id?: number
+    customerProfileDataModelId: number
   }
 
   export type NSEBankAccountUpdateWithoutNSECbricsParticipantModelInput = {
@@ -35980,16 +35015,17 @@ export namespace Prisma {
   }
 
   export type NseDataSetUpdateWithoutParticipantInput = {
-    CustomerProfileDataModel?: CustomerProfileDataModelUpdateManyWithoutNseNestedInput
+    customerProfileDataModel?: CustomerProfileDataModelUpdateOneRequiredWithoutNseDataSetNestedInput
   }
 
   export type NseDataSetUncheckedUpdateWithoutParticipantInput = {
     id?: IntFieldUpdateOperationsInput | number
-    CustomerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateManyWithoutNseNestedInput
+    customerProfileDataModelId?: IntFieldUpdateOperationsInput | number
   }
 
   export type NseDataSetUncheckedUpdateManyWithoutParticipantInput = {
     id?: IntFieldUpdateOperationsInput | number
+    customerProfileDataModelId?: IntFieldUpdateOperationsInput | number
   }
 
 

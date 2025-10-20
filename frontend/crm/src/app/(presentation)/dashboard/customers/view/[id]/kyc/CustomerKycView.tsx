@@ -38,7 +38,7 @@ function CustomerKycView({ id }: { id: number }) {
   return (
     <div className="flex flex-col gap-5">
       <PageInfoBar
-        title="KYC Data - Vikas Kukreja"
+        title={"KYC Data - " + data.firstName }
         description="Comprehensive KYC information and document verification status"
         showBack
       />

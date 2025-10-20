@@ -23,8 +23,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "axios": "^1.12.2",
     "@root/schema": "file:../schema",
+    "axios": "^1.12.2",
+    "backend": "file:../../backend",
     "zod": "^4.1.11"
   }
 }

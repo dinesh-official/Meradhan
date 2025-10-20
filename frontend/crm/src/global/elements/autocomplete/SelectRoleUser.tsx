@@ -25,7 +25,7 @@ import { ASSETS_URL } from "@/global/constants/domains";
 interface ContactSelectProps {
   onSelect?: (contact: CrmUsersProfile | null) => void;
   value?: CrmUsersProfile;
-  role: CrmUsersProfile["role"];
+  role?: CrmUsersProfile["role"];
   placeholder?: string;
 }
 

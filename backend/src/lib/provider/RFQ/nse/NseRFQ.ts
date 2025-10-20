@@ -1,4 +1,3 @@
-import logger from "@utils/logger/logger";
 import axios, { Axios, AxiosError } from "axios";
 import { cacheStorage } from "../../../../queues/redis/queues";
 import type {
@@ -102,7 +101,7 @@ export class NseRfq {
                 'Accept': 'application/json, text/javascript, */*; q=0.01',
                 'Accept-Language': 'en-US,en;q=0.5',
                 'X-Requested-With': 'XMLHttpRequest',
-                'Origin': 'https://bricsonline.nseindia.com',
+                'Origin': 'https://bricsonlinereguat.nseindia.com',
                 'DNT': '1',
                 'Connection': 'keep-alive',
                 'Sec-Fetch-Dest': 'empty',
@@ -132,43 +131,35 @@ export class NseRfq {
     // 🧠 Get or Refresh Login Key
     public async getLoginKey(forceRefresh = false): Promise<string> {
         if (!forceRefresh) {
-            const cached = await cacheStorage.get<string>(this.loginStoreKey);
+            const data = await cacheStorage.get<{ loginKey: string }>(this.loginStoreKey);
+            if (data) return data.loginKey;
+        }
 
-            if (cached) return cached;
-        }
         const { loginKey } = await this.login();
-        if (loginKey) {
-            await cacheStorage.set(this.loginStoreKey, loginKey, 1000); // TTL 1000s
-        }
+        await cacheStorage.set(this.loginStoreKey, { loginKey }, 600);
 
         return loginKey;
     }
-
     // 🔁 Universal Auto-Retry Wrapper
     private async withReLoginRetry<T>(
-        apiCall: (loginKey: string, retry?: boolean) => Promise<T>,
-        retryAttempt = false
+        apiCall: (loginKey: string) => Promise<T>,
+        attempt: number = 1
     ): Promise<T> {
         try {
-            console.log("Get Login");
-
-            const key = await this.getLoginKey();
+            const key = await this.getLoginKey(attempt > 1);
             return await apiCall(key);
         } catch (error) {
-            if (axios.isAxiosError(error) && this.isLoginExpired(error)) {
-                // Prevent infinite loop: retry only once
-                if (retryAttempt) {
-                    console.error("Login expired again after retry. Aborting to prevent infinite loop.");
-                    throw error;
-                }
-
-                console.warn("Login expired. Attempting re-login...");
-                logger.logError(error.message, error);
-
-                const newKey = await this.getLoginKey(true);
-                return await apiCall(newKey, true);
+            if (
+                axios.isAxiosError(error) &&
+                this.isLoginExpired(error) &&
+                attempt < 2 // allow only one retry
+            ) {
+                console.warn(`Login expired. Retrying... (Attempt ${attempt + 1}/2)`);
+                return this.withReLoginRetry(apiCall, attempt + 1);
             }
 
+            // Log final error for debugging
+            console.error("API call failed after max retries:");
             throw error;
         }
     }
@@ -635,3 +626,11 @@ export class NseRfq {
         });
     }
 }
+
+
+const cb = new NseRfq();
+const data = await cb.getLoginKey();
+console.log(data);
+const l = await cb.logout();
+console.log(l);
+

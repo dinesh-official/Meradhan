@@ -31,7 +31,7 @@ router.get("/api/crm/tracking/list", async (req, res) => {
     try {
         const {
             page = "1",
-            limit = "20",
+            limit = "10",
             search,
             userId,
             type,
@@ -73,7 +73,7 @@ router.get("/api/crm/tracking/list", async (req, res) => {
                 omit: {
                     token: true
                 },
-                
+
             }),
             db.dataBase.crmAuditLogs.count({ where }),
 

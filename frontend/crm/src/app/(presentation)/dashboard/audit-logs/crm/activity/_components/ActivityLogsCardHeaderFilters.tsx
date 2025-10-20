@@ -1,4 +1,6 @@
 "use client";
+
+import { ActivityTypes } from "@/analytics/analytics";
 import { Button } from "@/components/ui/button";
 import {
   CardAction,
@@ -14,38 +16,83 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
+import { CrmUsersProfile } from "@root/apiGateway";
 import { File, Search } from "lucide-react";
+import React from "react";
 
-function ActivityLogsCardHeaderFilters() {
+interface ActivityLogsCardHeaderFiltersProps {
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  selectedActivityType?: string;
+  onActivityTypeChange: (value: string) => void;
+  onExport?: () => void;
+  user?: CrmUsersProfile;
+  setUser: (e: CrmUsersProfile) => void;
+}
+
+function ActivityLogsCardHeaderFilters({
+  searchValue,
+  onSearchChange,
+  selectedActivityType,
+  onActivityTypeChange,
+  onExport,
+  setUser,
+  user,
+}: ActivityLogsCardHeaderFiltersProps) {
   return (
     <CardHeader>
       <CardTitle>Activity History</CardTitle>
       <CardDescription>
         Complete log of all user actions and system events
       </CardDescription>
+
       <CardAction>
         <Button
-          variant={`secondary`}
+          variant="secondary"
           className="lg:flex justify-center items-center hidden"
+          onClick={onExport}
         >
-          <File /> Export Logs
+          <File className="mr-2 h-4 w-4" /> Export Logs
         </Button>
       </CardAction>
-      <div className="flex gap-5 mt-2">
+
+      <div className="flex gap-5 mt-2 flex-wrap">
+        {/* 🔍 Search Input */}
         <div className="relative">
-          <Input className="peer ps-9 w-80" placeholder="Search Activity" />
+          <Input
+            className="peer ps-9 w-80"
+            placeholder="Search Activity"
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
             <Search size={16} aria-hidden="true" />
           </div>
         </div>
-        <Select>
-          <SelectTrigger className="w-[150px]">
+        <div className="w-72">
+          <SelectRoleUser
+            value={user}
+            onSelect={(user) => {
+              if (user) setUser(user);
+            }}
+          />
+        </div>
+        {/* ⚙️ Activity Type Selector */}
+        <Select
+          value={selectedActivityType}
+          onValueChange={(value) => onActivityTypeChange(value)}
+        >
+          <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="All Activity" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="light">Light</SelectItem>
-            <SelectItem value="dark">Dark</SelectItem>
-            <SelectItem value="system">System</SelectItem>
+            <SelectItem value="all">All Activity</SelectItem>
+            {ActivityTypes.map((type) => (
+              <SelectItem value={type} key={type}>
+                {type.toUpperCase()}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

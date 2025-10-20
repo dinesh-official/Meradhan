@@ -1,7 +1,3 @@
-// ------------------------------
-// Customers MODELS SECTION
-// ------------------------------
-
 /// Stores authentication and account-related data for customers
 model CustomersAuthDataModel {
     id Int @id @default(autoincrement())
@@ -22,13 +18,14 @@ model CustomersAuthDataModel {
     termsAccepted             Boolean   @default(false)
     lastLogin                 DateTime?
 
-    relationshipManager      CRMUserDataModel?          @relation(fields: [cRMUserDataModelId], references: [id])
-    CustomerProfileDataModel CustomerProfileDataModel[]
+    relationshipManager CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
+    cRMUserDataModelId  Int?
 
-    /// Timestamps
-    createdAt          DateTime @default(now())
-    updatedAt          DateTime @updatedAt
-    cRMUserDataModelId Int?
+    // One-to-one relation with CustomerProfileDataModel
+    customerProfileDataModel CustomerProfileDataModel?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@map("customers_auth_data")
 }
@@ -58,60 +55,48 @@ model CustomerProfileDataModel {
     VerifiedBy Int?
     verifyDate DateTime?
 
-    riskProfile                 CustomersRiskProfileModel? @relation(fields: [customersRiskProfileModelId], references: [id])
-    customersRiskProfileModelId Int?
+    // One-to-one relations
+    riskProfile                 CustomersRiskProfileModel? @relation(fields: [customersRiskProfileModelId], references: [id], onDelete: Cascade)
+    customersRiskProfileModelId Int?                       @unique
 
-    utility                  CustomersAuthDataModel @relation(fields: [customersAuthDataModelId], references: [id])
-    customersAuthDataModelId Int
+    utility                  CustomersAuthDataModel @relation(fields: [customersAuthDataModelId], references: [id], onDelete: Cascade)
+    customersAuthDataModelId Int                    @unique
 
-    createdBy Int?
+    aadhaarCard        AADHAARCardModel? @relation(fields: [aADHAARCardModelId], references: [id], onDelete: Cascade)
+    aADHAARCardModelId Int?              @unique
 
-    // data set 
+    panCard        PanCardModel? @relation(fields: [panCardModelId], references: [id], onDelete: Cascade)
+    panCardModelId Int?          @unique
 
-    /// Relation with Aadhaar Card details
-    aadhaarCard        AADHAARCardModel? @relation(fields: [aADHAARCardModelId], references: [id])
-    aADHAARCardModelId Int?
+    personalInformation         CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id], onDelete: Cascade)
+    customerPersonalInfoModelId Int?                       @unique
 
-    /// Relation with PAN Card details
-    panCard        PanCardModel? @relation(fields: [panCardModelId], references: [id])
-    panCardModelId Int?
+    currentAddress        AddressModel? @relation("CurrentAddress", fields: [currentAddressModelId], references: [id], onDelete: Cascade)
+    currentAddressModelId Int?          @unique
 
-    // profile info
-    personalInformation         CustomerPersonalInfoModel? @relation(fields: [customerPersonalInfoModelId], references: [id])
-    customerPersonalInfoModelId Int?
+    permanentAddress        AddressModel? @relation("PermanentAddress", fields: [permanentAddressModelId], references: [id], onDelete: Cascade)
+    permanentAddressModelId Int?          @unique
 
-    /// Linked bank and demat accounts
+    // Linked accounts
     bankAccounts  CustomersBankAccountModel[]
     dematAccounts CustomersDematAccountModel[]
 
-    /// Address relations (current and permanent)
-    currentAddress        AddressModel? @relation("CurrentAddress", fields: [currentAddressModelId], references: [id])
-    currentAddressModelId Int?
+    nseDataSet NseDataSet?
 
-    permanentAddress        AddressModel? @relation("PermanentAddress", fields: [permanentAddressModelId], references: [id])
-    permanentAddressModelId Int?
-
-    nse          NseDataSet? @relation(fields: [nseDataSetId], references: [id])
-    nseDataSetId Int?
-
-    /// Metadata and audit fields
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    createdBy Int?
 
-    /// Commonly searched fields for faster queries
     @@index([emailAddress, userName])
-    /// Map to actual database table name
     @@map("customers_profile_data")
 }
 
-/// Stores customer's personal information and identity documents
+/// Stores customer's personal information and identity documents (1:1)
 model CustomerPersonalInfoModel {
     id Int @id @default(autoincrement())
 
-    /// Signature image URL
     SignatureUrl String?
 
-    /// Personal info
     maritalStatus            String
     occupationType           String
     annualGrossIncome        String
@@ -125,77 +110,106 @@ model CustomerPersonalInfoModel {
     politicallyExposedPerson String?
     dateOfBirth              String?
 
-    /// Timestamps
-    createdAt                DateTime                   @default(now())
-    updatedAt                DateTime                   @updatedAt
-    CustomerProfileDataModel CustomerProfileDataModel[]
+    // 1-to-1 back reference
+    customerProfileDataModel CustomerProfileDataModel?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@map("customers_personal_info")
 }
 
-/// Aadhaar card (identity proof) data model
+/// Aadhaar card (identity proof) data model (1:1)
 model AADHAARCardModel {
     id Int @id @default(autoincrement())
 
-    /// Name details as per Aadhaar
-    firstName  String
-    middleName String
-    lastName   String
-
-    /// Father’s name for verification
-    fatherName String
-
-    /// Aadhaar details
+    firstName   String
+    middleName  String
+    lastName    String
+    fatherName  String
     aadhaarNo   String
     dateOfBirth String
     gender      Gender
     image       String
 
-    /// Verification status
     isVerified Boolean  @default(false)
     verifyDate DateTime
 
-    CustomerProfileDataModel CustomerProfileDataModel[]
+    // 1-to-1 back reference
+    customerProfileDataModel CustomerProfileDataModel?
 
-    /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@map("aadhaar_cards")
 }
 
-/// PAN card (tax identity proof) data model
+/// PAN card (tax identity proof) data model (1:1)
 model PanCardModel {
     id Int @id @default(autoincrement())
 
-    /// Name details as per PAN
-    firstName  String
-    middleName String
-    lastName   String
-
-    /// PAN card details
+    firstName   String
+    middleName  String
+    lastName    String
     panCardNo   String
     dateOfBirth String
     gender      Gender
 
-    /// Verification status
     isVerified Boolean  @default(false)
     verifyDate DateTime
 
-    CustomerProfileDataModel CustomerProfileDataModel[]
+    // 1-to-1 back reference
+    customerProfileDataModel CustomerProfileDataModel?
 
-    /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@map("pan_cards")
 }
 
-/// Bank account information linked to a customer
+/// Risk profile of a customer (1:1)
+model CustomersRiskProfileModel {
+    id Int @id @default(autoincrement())
+
+    data Json
+
+    // 1-to-1 back reference
+    customerProfileDataModel CustomerProfileDataModel?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("customers_risk_profiles")
+}
+
+/// Address model (1:1 used for both current and permanent)
+model AddressModel {
+    id Int @id @default(autoincrement())
+
+    line1          String
+    line2          String?
+    line3          String?
+    postOffice     String
+    cityOrDistrict String
+    state          String
+    pinCode        String
+    country        String
+    fullAddress    String
+
+    // Reverse relations (1:1)
+    currentAddressOf   CustomerProfileDataModel? @relation("CurrentAddress")
+    permanentAddressOf CustomerProfileDataModel? @relation("PermanentAddress")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("addresses")
+}
+
+/// Bank account information linked to a customer (1-to-many)
 model CustomersBankAccountModel {
     id Int @id @default(autoincrement())
 
-    /// Basic account info
     accountHolderName String
     bankAccountType   String
     accountNumber     String
@@ -203,7 +217,6 @@ model CustomersBankAccountModel {
     bankName          String
     branch            String
 
-    /// Status flags
     isPrimary  Boolean  @default(false)
     isVerified Boolean  @default(false)
     verifyDate DateTime
@@ -211,31 +224,27 @@ model CustomersBankAccountModel {
     CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
     customerProfileDataModelId Int?
 
-    /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@map("customers_bank_accounts")
 }
 
-/// Demat / Broker account data (for trading accounts)
+/// Demat / Broker account data (1-to-many)
 model CustomersDematAccountModel {
     id Int @id @default(autoincrement())
 
-    /// Depository info
     depositoryName            DepositoryName
     dpId                      String
     clientId                  String
     accountType               DematAccountType
     depositoryParticipantName String
 
-    /// PAN details linked to this account
     primaryPanNumber  String
     sndPanNumber      String?
     trdPanNumber      String?
     accountHolderName String
 
-    /// Status flags
     isPrimary  Boolean  @default(false)
     isVerified Boolean  @default(false)
     verifyDate DateTime
@@ -243,53 +252,8 @@ model CustomersDematAccountModel {
     CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
     customerProfileDataModelId Int?
 
-    /// Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@map("customers_demat_accounts")
-}
-
-/// Risk profile of a customer (e.g., low / medium / high risk)
-model CustomersRiskProfileModel {
-    id Int @id @default(autoincrement())
-
-    data Json[]
-
-    /// Timestamps
-    createdAt                DateTime                   @default(now())
-    updatedAt                DateTime                   @updatedAt
-    CustomerProfileDataModel CustomerProfileDataModel[]
-
-    @@map("customers_risk_profiles")
-}
-
-/// Address model (used for both current and permanent addresses)
-model AddressModel {
-    id Int @id @default(autoincrement())
-
-    /// Address lines
-    line1 String
-    line2 String?
-    line3 String?
-
-    /// Location details
-    postOffice     String
-    cityOrDistrict String
-    state          String
-    pinCode        String
-    country        String
-
-    /// Full address text
-    fullAddress String
-
-    /// Reverse relations (used by personal info)
-    currentAddressOf   CustomerProfileDataModel[] @relation("CurrentAddress")
-    permanentAddressOf CustomerProfileDataModel[] @relation("PermanentAddress")
-
-    /// Timestamps
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@map("addresses")
 }

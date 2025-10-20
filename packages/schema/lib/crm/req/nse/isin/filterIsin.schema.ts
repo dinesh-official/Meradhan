@@ -19,3 +19,4 @@ export const isinFilterSchema = z.object({
 });
 
 export type Filter = z.infer<typeof isinFilterSchema>;
+

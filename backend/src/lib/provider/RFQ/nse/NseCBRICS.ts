@@ -68,7 +68,7 @@ export class NseCBRICS {
                 'Accept': 'application/json, text/javascript, */*; q=0.01',
                 'Accept-Language': 'en-US,en;q=0.5',
                 'X-Requested-With': 'XMLHttpRequest',
-                'Origin': 'https://bricsonline.nseindia.com',
+                'Origin': 'https://bricsonlinereguat.nseindia.com',
                 'DNT': '1',
                 'Connection': 'keep-alive',
                 'Sec-Fetch-Dest': 'empty',
@@ -97,39 +97,49 @@ export class NseCBRICS {
 
     public async getLoginKey(forceRefresh = false): Promise<string> {
         if (!forceRefresh) {
-            const cached = await cacheStorage.get<string>(this.loginStoreKey);
-            if (cached) return cached;
+            const data = await cacheStorage.get<{ loginKey: string }>(this.loginStoreKey);
+            if (data) return data.loginKey;
         }
 
         const { loginKey } = await this.login();
-        await cacheStorage.set(this.loginStoreKey, loginKey, 1000);
+        await cacheStorage.set(this.loginStoreKey, { loginKey }, 600);
+
         return loginKey;
     }
 
-    private isLoginExpired(error: AxiosError<{ message?: string }>): boolean {
-        const msg = (error.response?.data)?.message ?? error.message;
+    private isLoginExpired(error: AxiosError<{ messages?: string[] }>): boolean {
+        const msg = (error.response?.data)?.messages ?? error.message;
         const status = error.response?.status;
         return (
             status === 401 ||
-            msg.includes("Invalid loginKey") ||
+            msg.includes("Login Required") ||
             msg.includes("Session expired")
         );
     }
 
     private async withReLoginRetry<T>(
-        apiCall: (loginKey: string) => Promise<T>
+        apiCall: (loginKey: string) => Promise<T>,
+        attempt: number = 1
     ): Promise<T> {
         try {
-            const key = await this.getLoginKey();
+            const key = await this.getLoginKey(attempt > 1); // force relogin only if retry
             return await apiCall(key);
         } catch (error) {
-            if (axios.isAxiosError(error) && this.isLoginExpired(error)) {
-                const newKey = await this.getLoginKey(true);
-                return await apiCall(newKey);
+            if (
+                axios.isAxiosError(error) &&
+                this.isLoginExpired(error) &&
+                attempt < 2 // allow only one retry
+            ) {
+                console.warn(`Login expired. Retrying... (Attempt ${attempt + 1}/2)`);
+                return this.withReLoginRetry(apiCall, attempt + 1);
             }
+
+            // Log final error for debugging
+            console.error("API call failed after max retries:");
             throw error;
         }
     }
+
 
     public async logout() {
         return this.withReLoginRetry(async (loginKey) => {
@@ -497,12 +507,5 @@ export class NseCBRICS {
         });
     }
 }
-
-const cb = new NseCBRICS();
-
-const data = await cb.login();
-console.log(data);
-const l = await cb.logout();
-console.log(l);
 
 

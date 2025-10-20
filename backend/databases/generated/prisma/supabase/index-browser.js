@@ -154,9 +154,9 @@ exports.Prisma.CustomersAuthDataModelScalarFieldEnum = {
   whatsAppNotificationAllow: 'whatsAppNotificationAllow',
   termsAccepted: 'termsAccepted',
   lastLogin: 'lastLogin',
+  cRMUserDataModelId: 'cRMUserDataModelId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  cRMUserDataModelId: 'cRMUserDataModelId'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
@@ -176,15 +176,14 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   verifyDate: 'verifyDate',
   customersRiskProfileModelId: 'customersRiskProfileModelId',
   customersAuthDataModelId: 'customersAuthDataModelId',
-  createdBy: 'createdBy',
   aADHAARCardModelId: 'aADHAARCardModelId',
   panCardModelId: 'panCardModelId',
   customerPersonalInfoModelId: 'customerPersonalInfoModelId',
   currentAddressModelId: 'currentAddressModelId',
   permanentAddressModelId: 'permanentAddressModelId',
-  nseDataSetId: 'nseDataSetId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  createdBy: 'createdBy'
 };
 
 exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {
@@ -236,6 +235,28 @@ exports.Prisma.PanCardModelScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CustomersRiskProfileModelScalarFieldEnum = {
+  id: 'id',
+  data: 'data',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AddressModelScalarFieldEnum = {
+  id: 'id',
+  line1: 'line1',
+  line2: 'line2',
+  line3: 'line3',
+  postOffice: 'postOffice',
+  cityOrDistrict: 'cityOrDistrict',
+  state: 'state',
+  pinCode: 'pinCode',
+  country: 'country',
+  fullAddress: 'fullAddress',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.CustomersBankAccountModelScalarFieldEnum = {
   id: 'id',
   accountHolderName: 'accountHolderName',
@@ -271,28 +292,6 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.CustomersRiskProfileModelScalarFieldEnum = {
-  id: 'id',
-  data: 'data',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.AddressModelScalarFieldEnum = {
-  id: 'id',
-  line1: 'line1',
-  line2: 'line2',
-  line3: 'line3',
-  postOffice: 'postOffice',
-  cityOrDistrict: 'cityOrDistrict',
-  state: 'state',
-  pinCode: 'pinCode',
-  country: 'country',
-  fullAddress: 'fullAddress',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.LeadsModelScalarFieldEnum = {
   id: 'id',
   fullName: 'fullName',
@@ -323,12 +322,15 @@ exports.Prisma.LeadFollowUpNotesModelScalarFieldEnum = {
 
 exports.Prisma.NseDataSetScalarFieldEnum = {
   id: 'id',
+  customerProfileDataModelId: 'customerProfileDataModelId',
   nseCbricsParticipantModelId: 'nseCbricsParticipantModelId'
 };
 
 exports.Prisma.NseCbricsParticipantModelScalarFieldEnum = {
+  key: 'key',
   id: 'id',
   loginId: 'loginId',
+  userId: 'userId',
   actualStatus: 'actualStatus',
   workflowStatus: 'workflowStatus',
   firstName: 'firstName',
@@ -509,10 +511,10 @@ exports.Prisma.ModelName = {
   CustomerPersonalInfoModel: 'CustomerPersonalInfoModel',
   AADHAARCardModel: 'AADHAARCardModel',
   PanCardModel: 'PanCardModel',
-  CustomersBankAccountModel: 'CustomersBankAccountModel',
-  CustomersDematAccountModel: 'CustomersDematAccountModel',
   CustomersRiskProfileModel: 'CustomersRiskProfileModel',
   AddressModel: 'AddressModel',
+  CustomersBankAccountModel: 'CustomersBankAccountModel',
+  CustomersDematAccountModel: 'CustomersDematAccountModel',
   LeadsModel: 'LeadsModel',
   LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
   NseDataSet: 'NseDataSet',

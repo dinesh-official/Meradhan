@@ -5,13 +5,14 @@ import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@lib/p
 import logger from "@utils/logger/logger";
 import dotenv from "dotenv";
 import { cacheStorage } from "./src/queues/redis/queues";
+import auditlogsRouter from "./src/resource/auditlogs/auditlogs.route";
 import authRoutes from "./src/resource/auth/auth.route";
 import customersRoutes from "./src/resource/crm/customers/customers.routes";
 import followUpRouter from "./src/resource/crm/leads/followup/leadsFollowUp.routes";
 import leadsRoutes from "./src/resource/crm/leads/leads.routes";
-import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
+import participantsRouter from "./src/resource/crm/refq/nse/cbrics/participants.route";
 import nseIsinRoute from "./src/resource/crm/refq/nse/isin/nseisin.routes";
-import auditlogsRouter from "./src/resource/auditlogs/auditlogs.route";
+import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
 dotenv.config({ debug: false });
 const monitoring = new PrometheusMonitorProvider()
 const responseTimeMonitor = new PrometheusResponseTimeMonitor()
@@ -34,8 +35,10 @@ server.addRoutes([
     leadsRoutes,
     followUpRouter,
     nseIsinRoute,
-    auditlogsRouter
+    auditlogsRouter,
+    participantsRouter
 ]);
+
 
 // Connect to databases and start server
 checkConnectToDatabases()
@@ -46,3 +49,5 @@ checkConnectToDatabases()
         logger.logError("Error connecting to databases:", error);
         process.exit(1);
     });
+
+

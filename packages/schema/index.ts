@@ -4,6 +4,10 @@ import * as leadSchema from "./lib/crm/leads.schema";
 
 import * as customerSchema from "./lib/customers/customers.schema";
 import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
+import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";
+import * as auditlogs from "./lib/crm/auditlogs.schema";
+
+
 
 import * as Enum from "./lib/enums"
 
@@ -14,9 +18,11 @@ export const appSchema = {
    crm: {
       user: userSchema,
       leads: leadSchema,
+      auditlogs,
       rfq: {
          nse: {
-            isin: nseIsinSchema
+            isin: nseIsinSchema,
+            getParticipants
          }
       }
    },

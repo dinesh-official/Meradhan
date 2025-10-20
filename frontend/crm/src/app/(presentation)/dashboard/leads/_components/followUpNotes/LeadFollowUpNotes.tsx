@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import FollowUpMessageCard from "./FollowUpCard/FollowUpMessageCard";
 import { IFollowUpNoteFormHook } from "./hooks/followUpFormData";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 type LeadFollowUpNotesProps = {
   manager: IFollowUpNoteFormHook;
@@ -94,13 +95,7 @@ const LeadFollowUpNotes = ({
                     leadFollowUpId={note.id}
                     name={note.createdByName}
                     message={note.text}
-                    date={new Date(
-                      note.nextDate || note.createdAt
-                    ).toLocaleDateString("en-US", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    date={dateTimeUtils.formatDateTime(note.nextDate || note.createdAt,"DD MMMM YYYY hh:mm AA")}
                   />
                 ))}
               </div>
