@@ -4,23 +4,23 @@ import LoginForm from "./LoginForm";
 
 function LoginPage() {
   return (
-    <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
+    <div className="relative w-full h-screen flex justify-center items-center overflow-hidden bg-[#f4f7fa]">
       {/* Background image */}
-      <div className="absolute inset-0">
+      {/* <div className="absolute inset-0">
         <Image
-          src="/images/dubai-city.jpg" // 👉 Replace with your desired background image path
+          src="/images/dubai-city.jpg" 
           alt="background"
           fill
           className="object-cover"
           priority
         />
-        {/* Color overlay */}
+
         <div className="absolute inset-0 bg-black/10 backdrop-brightness-50" />
-      </div>
+      </div> */}
 
       {/* Main content */}
       <div className="relative z-10 flex flex-col justify-center items-center gap-4 w-full px-4">
-        <Card className="w-full max-w-[400px] bg-white backdrop-blur-xl shadow-2xl border border-white/20 rounded-2xl">
+        <Card className="w-full max-w-[400px] bg-white backdrop-blur-xl  border border-gray-400/20 rounded-2xl">
           <CardContent className="p-6">
             <Image
               alt="logo"

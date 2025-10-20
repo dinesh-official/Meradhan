@@ -628,9 +628,9 @@ export class NseRfq {
 }
 
 
-const cb = new NseRfq();
-const data = await cb.getLoginKey();
-console.log(data);
-const l = await cb.logout();
-console.log(l);
+// const cb = new NseRfq();
+// const data = await cb.getLoginKey();
+// console.log(data);
+// const l = await cb.logout();
+// console.log(l);
 

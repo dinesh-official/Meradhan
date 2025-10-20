@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AtSignIcon } from "lucide-react";
+import { AtSignIcon, Mail } from "lucide-react";
 import React from "react";
 
 function EmailInputStep({
@@ -22,14 +22,14 @@ function EmailInputStep({
         <div className="relative">
           <Input
             className="peer ps-9"
-            placeholder="Email"
+            placeholder="Enter your email address"
             type="email"
             value={value}
             disabled={isLoading}
             onChange={(e) => onChangeAction?.(e.target.value)}
           />
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
-            <AtSignIcon size={16} aria-hidden="true" />
+            <Mail size={16} aria-hidden="true" />
           </div>
         </div>
       </div>
