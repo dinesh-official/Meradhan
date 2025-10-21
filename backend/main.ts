@@ -15,14 +15,14 @@ import nseIsinRoute from "./src/resource/crm/refq/nse/isin/nseisin.routes";
 import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
 dotenv.config({ debug: false });
 const monitoring = new PrometheusMonitorProvider()
-const responseTimeMonitor = new PrometheusResponseTimeMonitor()
+const response_time_monitor = new PrometheusResponseTimeMonitor()
 
 
 // Initialize server
 const server = new ExpressServer(config.port, {
     serverMonitor: monitoring,
     responseTimeHandler(data) {
-        responseTimeMonitor.recordResponseTime(data.method, data.url, data.duration, data.statusCode);
+        response_time_monitor.recordResponseTime(data.method, data.url, data.duration, data.statusCode);
     },
 });
 logger.logInfo((await cacheStorage.isConnected()).toString());

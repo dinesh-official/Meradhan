@@ -14,7 +14,7 @@ function LoginPage() {
           className="object-cover"
           priority
         />
-
+<HiHome />
         <div className="absolute inset-0 bg-black/10 backdrop-brightness-50" />
       </div> */}
 

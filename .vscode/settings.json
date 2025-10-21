@@ -76,5 +76,29 @@
     "monitoring": "atom",
     "fileUpload": "examples",
     "postgress": "database"
-  }
+  },
+  "auto-correct.dictionary": [
+    {
+      "languages": ["*"],
+      "words": {
+        "hte": "the",
+        "mispell": "misspell",
+        "mispelled": "misspelled",
+        "{despa,sepe}rat{e,es,ed,ing,ely,ion,ions,or}": "{despe,sepa}rat{}"
+      },
+      "useLargeList": false
+    },
+    {
+      "languages": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+      ],
+      "words": {
+        "cosnt": "const",
+        "functoin": "function"
+      }
+    }
+  ]
 }
