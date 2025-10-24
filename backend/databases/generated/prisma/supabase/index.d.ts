@@ -103,6 +103,11 @@ export type NSEDpAccount = $Result.DefaultSelection<Prisma.$NSEDpAccountPayload>
  * 
  */
 export type NseIsinSecurityReceipt = $Result.DefaultSelection<Prisma.$NseIsinSecurityReceiptPayload>
+/**
+ * Model NSERfqModel
+ * 
+ */
+export type NSERfqModel = $Result.DefaultSelection<Prisma.$NSERfqModelPayload>
 
 /**
  * Enums
@@ -228,6 +233,57 @@ export const DefaultSelect: {
 
 export type DefaultSelect = (typeof DefaultSelect)[keyof typeof DefaultSelect]
 
+
+export const DealType: {
+  D: 'D',
+  B: 'B'
+};
+
+export type DealType = (typeof DealType)[keyof typeof DealType]
+
+
+export const BuySell: {
+  B: 'B',
+  S: 'S',
+  X: 'X'
+};
+
+export type BuySell = (typeof BuySell)[keyof typeof BuySell]
+
+
+export const QuoteType: {
+  Y: 'Y',
+  B: 'B'
+};
+
+export type QuoteType = (typeof QuoteType)[keyof typeof QuoteType]
+
+
+export const YieldType: {
+  YTM: 'YTM',
+  YTP: 'YTP',
+  YTC: 'YTC'
+};
+
+export type YieldType = (typeof YieldType)[keyof typeof YieldType]
+
+
+export const CalcMethod: {
+  M: 'M',
+  O: 'O'
+};
+
+export type CalcMethod = (typeof CalcMethod)[keyof typeof CalcMethod]
+
+
+export const RFQStatus: {
+  P: 'P',
+  W: 'W',
+  T: 'T'
+};
+
+export type RFQStatus = (typeof RFQStatus)[keyof typeof RFQStatus]
+
 }
 
 export type CrmUserROLE = $Enums.CrmUserROLE
@@ -277,6 +333,30 @@ export const BondType: typeof $Enums.BondType
 export type DefaultSelect = $Enums.DefaultSelect
 
 export const DefaultSelect: typeof $Enums.DefaultSelect
+
+export type DealType = $Enums.DealType
+
+export const DealType: typeof $Enums.DealType
+
+export type BuySell = $Enums.BuySell
+
+export const BuySell: typeof $Enums.BuySell
+
+export type QuoteType = $Enums.QuoteType
+
+export const QuoteType: typeof $Enums.QuoteType
+
+export type YieldType = $Enums.YieldType
+
+export const YieldType: typeof $Enums.YieldType
+
+export type CalcMethod = $Enums.CalcMethod
+
+export const CalcMethod: typeof $Enums.CalcMethod
+
+export type RFQStatus = $Enums.RFQStatus
+
+export const RFQStatus: typeof $Enums.RFQStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -575,6 +655,16 @@ export class PrismaClient<
     * ```
     */
   get nseIsinSecurityReceipt(): Prisma.NseIsinSecurityReceiptDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.nSERfqModel`: Exposes CRUD operations for the **NSERfqModel** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NSERfqModels
+    * const nSERfqModels = await prisma.nSERfqModel.findMany()
+    * ```
+    */
+  get nSERfqModel(): Prisma.NSERfqModelDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1032,7 +1122,8 @@ export namespace Prisma {
     NseCbricsParticipantModel: 'NseCbricsParticipantModel',
     NSEBankAccount: 'NSEBankAccount',
     NSEDpAccount: 'NSEDpAccount',
-    NseIsinSecurityReceipt: 'NseIsinSecurityReceipt'
+    NseIsinSecurityReceipt: 'NseIsinSecurityReceipt',
+    NSERfqModel: 'NSERfqModel'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1051,7 +1142,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt"
+      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "nSERfqModel"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2387,6 +2478,80 @@ export namespace Prisma {
           }
         }
       }
+      NSERfqModel: {
+        payload: Prisma.$NSERfqModelPayload<ExtArgs>
+        fields: Prisma.NSERfqModelFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NSERfqModelFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NSERfqModelFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+          }
+          findFirst: {
+            args: Prisma.NSERfqModelFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NSERfqModelFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+          }
+          findMany: {
+            args: Prisma.NSERfqModelFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>[]
+          }
+          create: {
+            args: Prisma.NSERfqModelCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+          }
+          createMany: {
+            args: Prisma.NSERfqModelCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NSERfqModelCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>[]
+          }
+          delete: {
+            args: Prisma.NSERfqModelDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+          }
+          update: {
+            args: Prisma.NSERfqModelUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+          }
+          deleteMany: {
+            args: Prisma.NSERfqModelDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NSERfqModelUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NSERfqModelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>[]
+          }
+          upsert: {
+            args: Prisma.NSERfqModelUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+          }
+          aggregate: {
+            args: Prisma.NSERfqModelAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNSERfqModel>
+          }
+          groupBy: {
+            args: Prisma.NSERfqModelGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NSERfqModelGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NSERfqModelCountArgs<ExtArgs>
+            result: $Utils.Optional<NSERfqModelCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2501,6 +2666,7 @@ export namespace Prisma {
     nSEBankAccount?: NSEBankAccountOmit
     nSEDpAccount?: NSEDpAccountOmit
     nseIsinSecurityReceipt?: NseIsinSecurityReceiptOmit
+    nSERfqModel?: NSERfqModelOmit
   }
 
   /* Types for Logging */
@@ -24556,6 +24722,1568 @@ export namespace Prisma {
 
 
   /**
+   * Model NSERfqModel
+   */
+
+  export type AggregateNSERfqModel = {
+    _count: NSERfqModelCountAggregateOutputType | null
+    _avg: NSERfqModelAvgAggregateOutputType | null
+    _sum: NSERfqModelSumAggregateOutputType | null
+    _min: NSERfqModelMinAggregateOutputType | null
+    _max: NSERfqModelMaxAggregateOutputType | null
+  }
+
+  export type NSERfqModelAvgAggregateOutputType = {
+    key: number | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yield: number | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldSell: number | null
+    priceSell: number | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    access: number | null
+    groupList: number | null
+    tradedValue: number | null
+    confirmedValue: number | null
+  }
+
+  export type NSERfqModelSumAggregateOutputType = {
+    key: number | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yield: number | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldSell: number | null
+    priceSell: number | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    access: number | null
+    groupList: number[]
+    tradedValue: number | null
+    confirmedValue: number | null
+  }
+
+  export type NSERfqModelMinAggregateOutputType = {
+    key: number | null
+    number: string | null
+    segment: string | null
+    isin: string | null
+    date: string | null
+    participantCode: string | null
+    dealType: $Enums.DealType | null
+    clientCode: string | null
+    buySell: $Enums.BuySell | null
+    quoteType: $Enums.QuoteType | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yieldType: $Enums.YieldType | null
+    yield: number | null
+    calcMethod: $Enums.CalcMethod | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldTypeSell: $Enums.YieldType | null
+    yieldSell: number | null
+    calcMethodSell: $Enums.CalcMethod | null
+    priceSell: number | null
+    gtdFlag: string | null
+    endTime: string | null
+    quoteNegotiable: string | null
+    valueNegotiable: string | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    anonymous: string | null
+    access: number | null
+    category: string | null
+    rating: string | null
+    remarks: string | null
+    status: $Enums.RFQStatus | null
+    userLogin: string | null
+    tradedValue: number | null
+    confirmedValue: number | null
+    clientRegType: string | null
+    quoteTime: string | null
+  }
+
+  export type NSERfqModelMaxAggregateOutputType = {
+    key: number | null
+    number: string | null
+    segment: string | null
+    isin: string | null
+    date: string | null
+    participantCode: string | null
+    dealType: $Enums.DealType | null
+    clientCode: string | null
+    buySell: $Enums.BuySell | null
+    quoteType: $Enums.QuoteType | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yieldType: $Enums.YieldType | null
+    yield: number | null
+    calcMethod: $Enums.CalcMethod | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldTypeSell: $Enums.YieldType | null
+    yieldSell: number | null
+    calcMethodSell: $Enums.CalcMethod | null
+    priceSell: number | null
+    gtdFlag: string | null
+    endTime: string | null
+    quoteNegotiable: string | null
+    valueNegotiable: string | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    anonymous: string | null
+    access: number | null
+    category: string | null
+    rating: string | null
+    remarks: string | null
+    status: $Enums.RFQStatus | null
+    userLogin: string | null
+    tradedValue: number | null
+    confirmedValue: number | null
+    clientRegType: string | null
+    quoteTime: string | null
+  }
+
+  export type NSERfqModelCountAggregateOutputType = {
+    key: number
+    number: number
+    segment: number
+    isin: number
+    date: number
+    participantCode: number
+    dealType: number
+    clientCode: number
+    buySell: number
+    quoteType: number
+    settlementType: number
+    value: number
+    quantity: number
+    yieldType: number
+    yield: number
+    calcMethod: number
+    price: number
+    valueSell: number
+    quantitySell: number
+    yieldTypeSell: number
+    yieldSell: number
+    calcMethodSell: number
+    priceSell: number
+    gtdFlag: number
+    endTime: number
+    quoteNegotiable: number
+    valueNegotiable: number
+    minFillValue: number
+    valueStepSize: number
+    anonymous: number
+    access: number
+    groupList: number
+    participantList: number
+    category: number
+    rating: number
+    remarks: number
+    status: number
+    userLogin: number
+    tradedValue: number
+    confirmedValue: number
+    clientRegType: number
+    quoteTime: number
+    _all: number
+  }
+
+
+  export type NSERfqModelAvgAggregateInputType = {
+    key?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yield?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldSell?: true
+    priceSell?: true
+    minFillValue?: true
+    valueStepSize?: true
+    access?: true
+    groupList?: true
+    tradedValue?: true
+    confirmedValue?: true
+  }
+
+  export type NSERfqModelSumAggregateInputType = {
+    key?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yield?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldSell?: true
+    priceSell?: true
+    minFillValue?: true
+    valueStepSize?: true
+    access?: true
+    groupList?: true
+    tradedValue?: true
+    confirmedValue?: true
+  }
+
+  export type NSERfqModelMinAggregateInputType = {
+    key?: true
+    number?: true
+    segment?: true
+    isin?: true
+    date?: true
+    participantCode?: true
+    dealType?: true
+    clientCode?: true
+    buySell?: true
+    quoteType?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yieldType?: true
+    yield?: true
+    calcMethod?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldTypeSell?: true
+    yieldSell?: true
+    calcMethodSell?: true
+    priceSell?: true
+    gtdFlag?: true
+    endTime?: true
+    quoteNegotiable?: true
+    valueNegotiable?: true
+    minFillValue?: true
+    valueStepSize?: true
+    anonymous?: true
+    access?: true
+    category?: true
+    rating?: true
+    remarks?: true
+    status?: true
+    userLogin?: true
+    tradedValue?: true
+    confirmedValue?: true
+    clientRegType?: true
+    quoteTime?: true
+  }
+
+  export type NSERfqModelMaxAggregateInputType = {
+    key?: true
+    number?: true
+    segment?: true
+    isin?: true
+    date?: true
+    participantCode?: true
+    dealType?: true
+    clientCode?: true
+    buySell?: true
+    quoteType?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yieldType?: true
+    yield?: true
+    calcMethod?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldTypeSell?: true
+    yieldSell?: true
+    calcMethodSell?: true
+    priceSell?: true
+    gtdFlag?: true
+    endTime?: true
+    quoteNegotiable?: true
+    valueNegotiable?: true
+    minFillValue?: true
+    valueStepSize?: true
+    anonymous?: true
+    access?: true
+    category?: true
+    rating?: true
+    remarks?: true
+    status?: true
+    userLogin?: true
+    tradedValue?: true
+    confirmedValue?: true
+    clientRegType?: true
+    quoteTime?: true
+  }
+
+  export type NSERfqModelCountAggregateInputType = {
+    key?: true
+    number?: true
+    segment?: true
+    isin?: true
+    date?: true
+    participantCode?: true
+    dealType?: true
+    clientCode?: true
+    buySell?: true
+    quoteType?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yieldType?: true
+    yield?: true
+    calcMethod?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldTypeSell?: true
+    yieldSell?: true
+    calcMethodSell?: true
+    priceSell?: true
+    gtdFlag?: true
+    endTime?: true
+    quoteNegotiable?: true
+    valueNegotiable?: true
+    minFillValue?: true
+    valueStepSize?: true
+    anonymous?: true
+    access?: true
+    groupList?: true
+    participantList?: true
+    category?: true
+    rating?: true
+    remarks?: true
+    status?: true
+    userLogin?: true
+    tradedValue?: true
+    confirmedValue?: true
+    clientRegType?: true
+    quoteTime?: true
+    _all?: true
+  }
+
+  export type NSERfqModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NSERfqModel to aggregate.
+     */
+    where?: NSERfqModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NSERfqModels to fetch.
+     */
+    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NSERfqModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NSERfqModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NSERfqModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NSERfqModels
+    **/
+    _count?: true | NSERfqModelCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: NSERfqModelAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: NSERfqModelSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NSERfqModelMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NSERfqModelMaxAggregateInputType
+  }
+
+  export type GetNSERfqModelAggregateType<T extends NSERfqModelAggregateArgs> = {
+        [P in keyof T & keyof AggregateNSERfqModel]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNSERfqModel[P]>
+      : GetScalarType<T[P], AggregateNSERfqModel[P]>
+  }
+
+
+
+
+  export type NSERfqModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NSERfqModelWhereInput
+    orderBy?: NSERfqModelOrderByWithAggregationInput | NSERfqModelOrderByWithAggregationInput[]
+    by: NSERfqModelScalarFieldEnum[] | NSERfqModelScalarFieldEnum
+    having?: NSERfqModelScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NSERfqModelCountAggregateInputType | true
+    _avg?: NSERfqModelAvgAggregateInputType
+    _sum?: NSERfqModelSumAggregateInputType
+    _min?: NSERfqModelMinAggregateInputType
+    _max?: NSERfqModelMaxAggregateInputType
+  }
+
+  export type NSERfqModelGroupByOutputType = {
+    key: number
+    number: string
+    segment: string
+    isin: string
+    date: string
+    participantCode: string
+    dealType: $Enums.DealType
+    clientCode: string
+    buySell: $Enums.BuySell
+    quoteType: $Enums.QuoteType
+    settlementType: number
+    value: number
+    quantity: number | null
+    yieldType: $Enums.YieldType
+    yield: number
+    calcMethod: $Enums.CalcMethod
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldTypeSell: $Enums.YieldType | null
+    yieldSell: number | null
+    calcMethodSell: $Enums.CalcMethod | null
+    priceSell: number | null
+    gtdFlag: string | null
+    endTime: string | null
+    quoteNegotiable: string | null
+    valueNegotiable: string | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    anonymous: string | null
+    access: number
+    groupList: number[]
+    participantList: string[]
+    category: string | null
+    rating: string | null
+    remarks: string | null
+    status: $Enums.RFQStatus
+    userLogin: string
+    tradedValue: number
+    confirmedValue: number
+    clientRegType: string
+    quoteTime: string
+    _count: NSERfqModelCountAggregateOutputType | null
+    _avg: NSERfqModelAvgAggregateOutputType | null
+    _sum: NSERfqModelSumAggregateOutputType | null
+    _min: NSERfqModelMinAggregateOutputType | null
+    _max: NSERfqModelMaxAggregateOutputType | null
+  }
+
+  type GetNSERfqModelGroupByPayload<T extends NSERfqModelGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NSERfqModelGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NSERfqModelGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NSERfqModelGroupByOutputType[P]>
+            : GetScalarType<T[P], NSERfqModelGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NSERfqModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    date?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    clientRegType?: boolean
+    quoteTime?: boolean
+  }, ExtArgs["result"]["nSERfqModel"]>
+
+  export type NSERfqModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    date?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    clientRegType?: boolean
+    quoteTime?: boolean
+  }, ExtArgs["result"]["nSERfqModel"]>
+
+  export type NSERfqModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    date?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    clientRegType?: boolean
+    quoteTime?: boolean
+  }, ExtArgs["result"]["nSERfqModel"]>
+
+  export type NSERfqModelSelectScalar = {
+    key?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    date?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    clientRegType?: boolean
+    quoteTime?: boolean
+  }
+
+  export type NSERfqModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"key" | "number" | "segment" | "isin" | "date" | "participantCode" | "dealType" | "clientCode" | "buySell" | "quoteType" | "settlementType" | "value" | "quantity" | "yieldType" | "yield" | "calcMethod" | "price" | "valueSell" | "quantitySell" | "yieldTypeSell" | "yieldSell" | "calcMethodSell" | "priceSell" | "gtdFlag" | "endTime" | "quoteNegotiable" | "valueNegotiable" | "minFillValue" | "valueStepSize" | "anonymous" | "access" | "groupList" | "participantList" | "category" | "rating" | "remarks" | "status" | "userLogin" | "tradedValue" | "confirmedValue" | "clientRegType" | "quoteTime", ExtArgs["result"]["nSERfqModel"]>
+
+  export type $NSERfqModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NSERfqModel"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      key: number
+      number: string
+      segment: string
+      isin: string
+      date: string
+      participantCode: string
+      dealType: $Enums.DealType
+      clientCode: string
+      buySell: $Enums.BuySell
+      quoteType: $Enums.QuoteType
+      settlementType: number
+      value: number
+      quantity: number | null
+      yieldType: $Enums.YieldType
+      yield: number
+      calcMethod: $Enums.CalcMethod
+      price: number | null
+      valueSell: number | null
+      quantitySell: number | null
+      yieldTypeSell: $Enums.YieldType | null
+      yieldSell: number | null
+      calcMethodSell: $Enums.CalcMethod | null
+      priceSell: number | null
+      gtdFlag: string | null
+      endTime: string | null
+      quoteNegotiable: string | null
+      valueNegotiable: string | null
+      minFillValue: number | null
+      valueStepSize: number | null
+      anonymous: string | null
+      access: number
+      groupList: number[]
+      participantList: string[]
+      category: string | null
+      rating: string | null
+      remarks: string | null
+      status: $Enums.RFQStatus
+      userLogin: string
+      tradedValue: number
+      confirmedValue: number
+      clientRegType: string
+      quoteTime: string
+    }, ExtArgs["result"]["nSERfqModel"]>
+    composites: {}
+  }
+
+  type NSERfqModelGetPayload<S extends boolean | null | undefined | NSERfqModelDefaultArgs> = $Result.GetResult<Prisma.$NSERfqModelPayload, S>
+
+  type NSERfqModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NSERfqModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NSERfqModelCountAggregateInputType | true
+    }
+
+  export interface NSERfqModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NSERfqModel'], meta: { name: 'NSERfqModel' } }
+    /**
+     * Find zero or one NSERfqModel that matches the filter.
+     * @param {NSERfqModelFindUniqueArgs} args - Arguments to find a NSERfqModel
+     * @example
+     * // Get one NSERfqModel
+     * const nSERfqModel = await prisma.nSERfqModel.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NSERfqModelFindUniqueArgs>(args: SelectSubset<T, NSERfqModelFindUniqueArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one NSERfqModel that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NSERfqModelFindUniqueOrThrowArgs} args - Arguments to find a NSERfqModel
+     * @example
+     * // Get one NSERfqModel
+     * const nSERfqModel = await prisma.nSERfqModel.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NSERfqModelFindUniqueOrThrowArgs>(args: SelectSubset<T, NSERfqModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NSERfqModel that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NSERfqModelFindFirstArgs} args - Arguments to find a NSERfqModel
+     * @example
+     * // Get one NSERfqModel
+     * const nSERfqModel = await prisma.nSERfqModel.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NSERfqModelFindFirstArgs>(args?: SelectSubset<T, NSERfqModelFindFirstArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NSERfqModel that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NSERfqModelFindFirstOrThrowArgs} args - Arguments to find a NSERfqModel
+     * @example
+     * // Get one NSERfqModel
+     * const nSERfqModel = await prisma.nSERfqModel.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NSERfqModelFindFirstOrThrowArgs>(args?: SelectSubset<T, NSERfqModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more NSERfqModels that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NSERfqModelFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NSERfqModels
+     * const nSERfqModels = await prisma.nSERfqModel.findMany()
+     * 
+     * // Get first 10 NSERfqModels
+     * const nSERfqModels = await prisma.nSERfqModel.findMany({ take: 10 })
+     * 
+     * // Only select the `key`
+     * const nSERfqModelWithKeyOnly = await prisma.nSERfqModel.findMany({ select: { key: true } })
+     * 
+     */
+    findMany<T extends NSERfqModelFindManyArgs>(args?: SelectSubset<T, NSERfqModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a NSERfqModel.
+     * @param {NSERfqModelCreateArgs} args - Arguments to create a NSERfqModel.
+     * @example
+     * // Create one NSERfqModel
+     * const NSERfqModel = await prisma.nSERfqModel.create({
+     *   data: {
+     *     // ... data to create a NSERfqModel
+     *   }
+     * })
+     * 
+     */
+    create<T extends NSERfqModelCreateArgs>(args: SelectSubset<T, NSERfqModelCreateArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many NSERfqModels.
+     * @param {NSERfqModelCreateManyArgs} args - Arguments to create many NSERfqModels.
+     * @example
+     * // Create many NSERfqModels
+     * const nSERfqModel = await prisma.nSERfqModel.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NSERfqModelCreateManyArgs>(args?: SelectSubset<T, NSERfqModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NSERfqModels and returns the data saved in the database.
+     * @param {NSERfqModelCreateManyAndReturnArgs} args - Arguments to create many NSERfqModels.
+     * @example
+     * // Create many NSERfqModels
+     * const nSERfqModel = await prisma.nSERfqModel.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NSERfqModels and only return the `key`
+     * const nSERfqModelWithKeyOnly = await prisma.nSERfqModel.createManyAndReturn({
+     *   select: { key: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NSERfqModelCreateManyAndReturnArgs>(args?: SelectSubset<T, NSERfqModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a NSERfqModel.
+     * @param {NSERfqModelDeleteArgs} args - Arguments to delete one NSERfqModel.
+     * @example
+     * // Delete one NSERfqModel
+     * const NSERfqModel = await prisma.nSERfqModel.delete({
+     *   where: {
+     *     // ... filter to delete one NSERfqModel
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NSERfqModelDeleteArgs>(args: SelectSubset<T, NSERfqModelDeleteArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one NSERfqModel.
+     * @param {NSERfqModelUpdateArgs} args - Arguments to update one NSERfqModel.
+     * @example
+     * // Update one NSERfqModel
+     * const nSERfqModel = await prisma.nSERfqModel.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NSERfqModelUpdateArgs>(args: SelectSubset<T, NSERfqModelUpdateArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more NSERfqModels.
+     * @param {NSERfqModelDeleteManyArgs} args - Arguments to filter NSERfqModels to delete.
+     * @example
+     * // Delete a few NSERfqModels
+     * const { count } = await prisma.nSERfqModel.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NSERfqModelDeleteManyArgs>(args?: SelectSubset<T, NSERfqModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NSERfqModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NSERfqModelUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NSERfqModels
+     * const nSERfqModel = await prisma.nSERfqModel.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NSERfqModelUpdateManyArgs>(args: SelectSubset<T, NSERfqModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NSERfqModels and returns the data updated in the database.
+     * @param {NSERfqModelUpdateManyAndReturnArgs} args - Arguments to update many NSERfqModels.
+     * @example
+     * // Update many NSERfqModels
+     * const nSERfqModel = await prisma.nSERfqModel.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more NSERfqModels and only return the `key`
+     * const nSERfqModelWithKeyOnly = await prisma.nSERfqModel.updateManyAndReturn({
+     *   select: { key: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NSERfqModelUpdateManyAndReturnArgs>(args: SelectSubset<T, NSERfqModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one NSERfqModel.
+     * @param {NSERfqModelUpsertArgs} args - Arguments to update or create a NSERfqModel.
+     * @example
+     * // Update or create a NSERfqModel
+     * const nSERfqModel = await prisma.nSERfqModel.upsert({
+     *   create: {
+     *     // ... data to create a NSERfqModel
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NSERfqModel we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NSERfqModelUpsertArgs>(args: SelectSubset<T, NSERfqModelUpsertArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of NSERfqModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NSERfqModelCountArgs} args - Arguments to filter NSERfqModels to count.
+     * @example
+     * // Count the number of NSERfqModels
+     * const count = await prisma.nSERfqModel.count({
+     *   where: {
+     *     // ... the filter for the NSERfqModels we want to count
+     *   }
+     * })
+    **/
+    count<T extends NSERfqModelCountArgs>(
+      args?: Subset<T, NSERfqModelCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NSERfqModelCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NSERfqModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NSERfqModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NSERfqModelAggregateArgs>(args: Subset<T, NSERfqModelAggregateArgs>): Prisma.PrismaPromise<GetNSERfqModelAggregateType<T>>
+
+    /**
+     * Group by NSERfqModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NSERfqModelGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NSERfqModelGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NSERfqModelGroupByArgs['orderBy'] }
+        : { orderBy?: NSERfqModelGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NSERfqModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNSERfqModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NSERfqModel model
+   */
+  readonly fields: NSERfqModelFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NSERfqModel.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NSERfqModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NSERfqModel model
+   */
+  interface NSERfqModelFieldRefs {
+    readonly key: FieldRef<"NSERfqModel", 'Int'>
+    readonly number: FieldRef<"NSERfqModel", 'String'>
+    readonly segment: FieldRef<"NSERfqModel", 'String'>
+    readonly isin: FieldRef<"NSERfqModel", 'String'>
+    readonly date: FieldRef<"NSERfqModel", 'String'>
+    readonly participantCode: FieldRef<"NSERfqModel", 'String'>
+    readonly dealType: FieldRef<"NSERfqModel", 'DealType'>
+    readonly clientCode: FieldRef<"NSERfqModel", 'String'>
+    readonly buySell: FieldRef<"NSERfqModel", 'BuySell'>
+    readonly quoteType: FieldRef<"NSERfqModel", 'QuoteType'>
+    readonly settlementType: FieldRef<"NSERfqModel", 'Int'>
+    readonly value: FieldRef<"NSERfqModel", 'Float'>
+    readonly quantity: FieldRef<"NSERfqModel", 'Int'>
+    readonly yieldType: FieldRef<"NSERfqModel", 'YieldType'>
+    readonly yield: FieldRef<"NSERfqModel", 'Float'>
+    readonly calcMethod: FieldRef<"NSERfqModel", 'CalcMethod'>
+    readonly price: FieldRef<"NSERfqModel", 'Float'>
+    readonly valueSell: FieldRef<"NSERfqModel", 'Float'>
+    readonly quantitySell: FieldRef<"NSERfqModel", 'Int'>
+    readonly yieldTypeSell: FieldRef<"NSERfqModel", 'YieldType'>
+    readonly yieldSell: FieldRef<"NSERfqModel", 'Float'>
+    readonly calcMethodSell: FieldRef<"NSERfqModel", 'CalcMethod'>
+    readonly priceSell: FieldRef<"NSERfqModel", 'Float'>
+    readonly gtdFlag: FieldRef<"NSERfqModel", 'String'>
+    readonly endTime: FieldRef<"NSERfqModel", 'String'>
+    readonly quoteNegotiable: FieldRef<"NSERfqModel", 'String'>
+    readonly valueNegotiable: FieldRef<"NSERfqModel", 'String'>
+    readonly minFillValue: FieldRef<"NSERfqModel", 'Float'>
+    readonly valueStepSize: FieldRef<"NSERfqModel", 'Float'>
+    readonly anonymous: FieldRef<"NSERfqModel", 'String'>
+    readonly access: FieldRef<"NSERfqModel", 'Int'>
+    readonly groupList: FieldRef<"NSERfqModel", 'Int[]'>
+    readonly participantList: FieldRef<"NSERfqModel", 'String[]'>
+    readonly category: FieldRef<"NSERfqModel", 'String'>
+    readonly rating: FieldRef<"NSERfqModel", 'String'>
+    readonly remarks: FieldRef<"NSERfqModel", 'String'>
+    readonly status: FieldRef<"NSERfqModel", 'RFQStatus'>
+    readonly userLogin: FieldRef<"NSERfqModel", 'String'>
+    readonly tradedValue: FieldRef<"NSERfqModel", 'Float'>
+    readonly confirmedValue: FieldRef<"NSERfqModel", 'Float'>
+    readonly clientRegType: FieldRef<"NSERfqModel", 'String'>
+    readonly quoteTime: FieldRef<"NSERfqModel", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NSERfqModel findUnique
+   */
+  export type NSERfqModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * Filter, which NSERfqModel to fetch.
+     */
+    where: NSERfqModelWhereUniqueInput
+  }
+
+  /**
+   * NSERfqModel findUniqueOrThrow
+   */
+  export type NSERfqModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * Filter, which NSERfqModel to fetch.
+     */
+    where: NSERfqModelWhereUniqueInput
+  }
+
+  /**
+   * NSERfqModel findFirst
+   */
+  export type NSERfqModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * Filter, which NSERfqModel to fetch.
+     */
+    where?: NSERfqModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NSERfqModels to fetch.
+     */
+    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NSERfqModels.
+     */
+    cursor?: NSERfqModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NSERfqModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NSERfqModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NSERfqModels.
+     */
+    distinct?: NSERfqModelScalarFieldEnum | NSERfqModelScalarFieldEnum[]
+  }
+
+  /**
+   * NSERfqModel findFirstOrThrow
+   */
+  export type NSERfqModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * Filter, which NSERfqModel to fetch.
+     */
+    where?: NSERfqModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NSERfqModels to fetch.
+     */
+    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NSERfqModels.
+     */
+    cursor?: NSERfqModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NSERfqModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NSERfqModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NSERfqModels.
+     */
+    distinct?: NSERfqModelScalarFieldEnum | NSERfqModelScalarFieldEnum[]
+  }
+
+  /**
+   * NSERfqModel findMany
+   */
+  export type NSERfqModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * Filter, which NSERfqModels to fetch.
+     */
+    where?: NSERfqModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NSERfqModels to fetch.
+     */
+    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NSERfqModels.
+     */
+    cursor?: NSERfqModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NSERfqModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NSERfqModels.
+     */
+    skip?: number
+    distinct?: NSERfqModelScalarFieldEnum | NSERfqModelScalarFieldEnum[]
+  }
+
+  /**
+   * NSERfqModel create
+   */
+  export type NSERfqModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * The data needed to create a NSERfqModel.
+     */
+    data: XOR<NSERfqModelCreateInput, NSERfqModelUncheckedCreateInput>
+  }
+
+  /**
+   * NSERfqModel createMany
+   */
+  export type NSERfqModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NSERfqModels.
+     */
+    data: NSERfqModelCreateManyInput | NSERfqModelCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NSERfqModel createManyAndReturn
+   */
+  export type NSERfqModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * The data used to create many NSERfqModels.
+     */
+    data: NSERfqModelCreateManyInput | NSERfqModelCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NSERfqModel update
+   */
+  export type NSERfqModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * The data needed to update a NSERfqModel.
+     */
+    data: XOR<NSERfqModelUpdateInput, NSERfqModelUncheckedUpdateInput>
+    /**
+     * Choose, which NSERfqModel to update.
+     */
+    where: NSERfqModelWhereUniqueInput
+  }
+
+  /**
+   * NSERfqModel updateMany
+   */
+  export type NSERfqModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NSERfqModels.
+     */
+    data: XOR<NSERfqModelUpdateManyMutationInput, NSERfqModelUncheckedUpdateManyInput>
+    /**
+     * Filter which NSERfqModels to update
+     */
+    where?: NSERfqModelWhereInput
+    /**
+     * Limit how many NSERfqModels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NSERfqModel updateManyAndReturn
+   */
+  export type NSERfqModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * The data used to update NSERfqModels.
+     */
+    data: XOR<NSERfqModelUpdateManyMutationInput, NSERfqModelUncheckedUpdateManyInput>
+    /**
+     * Filter which NSERfqModels to update
+     */
+    where?: NSERfqModelWhereInput
+    /**
+     * Limit how many NSERfqModels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NSERfqModel upsert
+   */
+  export type NSERfqModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * The filter to search for the NSERfqModel to update in case it exists.
+     */
+    where: NSERfqModelWhereUniqueInput
+    /**
+     * In case the NSERfqModel found by the `where` argument doesn't exist, create a new NSERfqModel with this data.
+     */
+    create: XOR<NSERfqModelCreateInput, NSERfqModelUncheckedCreateInput>
+    /**
+     * In case the NSERfqModel was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NSERfqModelUpdateInput, NSERfqModelUncheckedUpdateInput>
+  }
+
+  /**
+   * NSERfqModel delete
+   */
+  export type NSERfqModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+    /**
+     * Filter which NSERfqModel to delete.
+     */
+    where: NSERfqModelWhereUniqueInput
+  }
+
+  /**
+   * NSERfqModel deleteMany
+   */
+  export type NSERfqModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NSERfqModels to delete
+     */
+    where?: NSERfqModelWhereInput
+    /**
+     * Limit how many NSERfqModels to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * NSERfqModel without action
+   */
+  export type NSERfqModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NSERfqModel
+     */
+    select?: NSERfqModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NSERfqModel
+     */
+    omit?: NSERfqModelOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -24897,6 +26625,54 @@ export namespace Prisma {
   export type NseIsinSecurityReceiptScalarFieldEnum = (typeof NseIsinSecurityReceiptScalarFieldEnum)[keyof typeof NseIsinSecurityReceiptScalarFieldEnum]
 
 
+  export const NSERfqModelScalarFieldEnum: {
+    key: 'key',
+    number: 'number',
+    segment: 'segment',
+    isin: 'isin',
+    date: 'date',
+    participantCode: 'participantCode',
+    dealType: 'dealType',
+    clientCode: 'clientCode',
+    buySell: 'buySell',
+    quoteType: 'quoteType',
+    settlementType: 'settlementType',
+    value: 'value',
+    quantity: 'quantity',
+    yieldType: 'yieldType',
+    yield: 'yield',
+    calcMethod: 'calcMethod',
+    price: 'price',
+    valueSell: 'valueSell',
+    quantitySell: 'quantitySell',
+    yieldTypeSell: 'yieldTypeSell',
+    yieldSell: 'yieldSell',
+    calcMethodSell: 'calcMethodSell',
+    priceSell: 'priceSell',
+    gtdFlag: 'gtdFlag',
+    endTime: 'endTime',
+    quoteNegotiable: 'quoteNegotiable',
+    valueNegotiable: 'valueNegotiable',
+    minFillValue: 'minFillValue',
+    valueStepSize: 'valueStepSize',
+    anonymous: 'anonymous',
+    access: 'access',
+    groupList: 'groupList',
+    participantList: 'participantList',
+    category: 'category',
+    rating: 'rating',
+    remarks: 'remarks',
+    status: 'status',
+    userLogin: 'userLogin',
+    tradedValue: 'tradedValue',
+    confirmedValue: 'confirmedValue',
+    clientRegType: 'clientRegType',
+    quoteTime: 'quoteTime'
+  };
+
+  export type NSERfqModelScalarFieldEnum = (typeof NSERfqModelScalarFieldEnum)[keyof typeof NSERfqModelScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -25184,6 +26960,90 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DealType'
+   */
+  export type EnumDealTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DealType'>
+    
+
+
+  /**
+   * Reference to a field of type 'DealType[]'
+   */
+  export type ListEnumDealTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DealType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'BuySell'
+   */
+  export type EnumBuySellFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BuySell'>
+    
+
+
+  /**
+   * Reference to a field of type 'BuySell[]'
+   */
+  export type ListEnumBuySellFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BuySell[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'QuoteType'
+   */
+  export type EnumQuoteTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuoteType'>
+    
+
+
+  /**
+   * Reference to a field of type 'QuoteType[]'
+   */
+  export type ListEnumQuoteTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuoteType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'YieldType'
+   */
+  export type EnumYieldTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'YieldType'>
+    
+
+
+  /**
+   * Reference to a field of type 'YieldType[]'
+   */
+  export type ListEnumYieldTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'YieldType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'CalcMethod'
+   */
+  export type EnumCalcMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalcMethod'>
+    
+
+
+  /**
+   * Reference to a field of type 'CalcMethod[]'
+   */
+  export type ListEnumCalcMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CalcMethod[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RFQStatus'
+   */
+  export type EnumRFQStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RFQStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'RFQStatus[]'
+   */
+  export type ListEnumRFQStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RFQStatus[]'>
     
   /**
    * Deep Input Types
@@ -26900,6 +28760,245 @@ export namespace Prisma {
     description?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
     type?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
     issuer?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
+  }
+
+  export type NSERfqModelWhereInput = {
+    AND?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
+    OR?: NSERfqModelWhereInput[]
+    NOT?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
+    key?: IntFilter<"NSERfqModel"> | number
+    number?: StringFilter<"NSERfqModel"> | string
+    segment?: StringFilter<"NSERfqModel"> | string
+    isin?: StringFilter<"NSERfqModel"> | string
+    date?: StringFilter<"NSERfqModel"> | string
+    participantCode?: StringFilter<"NSERfqModel"> | string
+    dealType?: EnumDealTypeFilter<"NSERfqModel"> | $Enums.DealType
+    clientCode?: StringFilter<"NSERfqModel"> | string
+    buySell?: EnumBuySellFilter<"NSERfqModel"> | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFilter<"NSERfqModel"> | $Enums.QuoteType
+    settlementType?: IntFilter<"NSERfqModel"> | number
+    value?: FloatFilter<"NSERfqModel"> | number
+    quantity?: IntNullableFilter<"NSERfqModel"> | number | null
+    yieldType?: EnumYieldTypeFilter<"NSERfqModel"> | $Enums.YieldType
+    yield?: FloatFilter<"NSERfqModel"> | number
+    calcMethod?: EnumCalcMethodFilter<"NSERfqModel"> | $Enums.CalcMethod
+    price?: FloatNullableFilter<"NSERfqModel"> | number | null
+    valueSell?: FloatNullableFilter<"NSERfqModel"> | number | null
+    quantitySell?: IntNullableFilter<"NSERfqModel"> | number | null
+    yieldTypeSell?: EnumYieldTypeNullableFilter<"NSERfqModel"> | $Enums.YieldType | null
+    yieldSell?: FloatNullableFilter<"NSERfqModel"> | number | null
+    calcMethodSell?: EnumCalcMethodNullableFilter<"NSERfqModel"> | $Enums.CalcMethod | null
+    priceSell?: FloatNullableFilter<"NSERfqModel"> | number | null
+    gtdFlag?: StringNullableFilter<"NSERfqModel"> | string | null
+    endTime?: StringNullableFilter<"NSERfqModel"> | string | null
+    quoteNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
+    valueNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
+    minFillValue?: FloatNullableFilter<"NSERfqModel"> | number | null
+    valueStepSize?: FloatNullableFilter<"NSERfqModel"> | number | null
+    anonymous?: StringNullableFilter<"NSERfqModel"> | string | null
+    access?: IntFilter<"NSERfqModel"> | number
+    groupList?: IntNullableListFilter<"NSERfqModel">
+    participantList?: StringNullableListFilter<"NSERfqModel">
+    category?: StringNullableFilter<"NSERfqModel"> | string | null
+    rating?: StringNullableFilter<"NSERfqModel"> | string | null
+    remarks?: StringNullableFilter<"NSERfqModel"> | string | null
+    status?: EnumRFQStatusFilter<"NSERfqModel"> | $Enums.RFQStatus
+    userLogin?: StringFilter<"NSERfqModel"> | string
+    tradedValue?: FloatFilter<"NSERfqModel"> | number
+    confirmedValue?: FloatFilter<"NSERfqModel"> | number
+    clientRegType?: StringFilter<"NSERfqModel"> | string
+    quoteTime?: StringFilter<"NSERfqModel"> | string
+  }
+
+  export type NSERfqModelOrderByWithRelationInput = {
+    key?: SortOrder
+    number?: SortOrder
+    segment?: SortOrder
+    isin?: SortOrder
+    date?: SortOrder
+    participantCode?: SortOrder
+    dealType?: SortOrder
+    clientCode?: SortOrder
+    buySell?: SortOrder
+    quoteType?: SortOrder
+    settlementType?: SortOrder
+    value?: SortOrder
+    quantity?: SortOrderInput | SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    calcMethod?: SortOrder
+    price?: SortOrderInput | SortOrder
+    valueSell?: SortOrderInput | SortOrder
+    quantitySell?: SortOrderInput | SortOrder
+    yieldTypeSell?: SortOrderInput | SortOrder
+    yieldSell?: SortOrderInput | SortOrder
+    calcMethodSell?: SortOrderInput | SortOrder
+    priceSell?: SortOrderInput | SortOrder
+    gtdFlag?: SortOrderInput | SortOrder
+    endTime?: SortOrderInput | SortOrder
+    quoteNegotiable?: SortOrderInput | SortOrder
+    valueNegotiable?: SortOrderInput | SortOrder
+    minFillValue?: SortOrderInput | SortOrder
+    valueStepSize?: SortOrderInput | SortOrder
+    anonymous?: SortOrderInput | SortOrder
+    access?: SortOrder
+    groupList?: SortOrder
+    participantList?: SortOrder
+    category?: SortOrderInput | SortOrder
+    rating?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    status?: SortOrder
+    userLogin?: SortOrder
+    tradedValue?: SortOrder
+    confirmedValue?: SortOrder
+    clientRegType?: SortOrder
+    quoteTime?: SortOrder
+  }
+
+  export type NSERfqModelWhereUniqueInput = Prisma.AtLeast<{
+    key?: number
+    number?: string
+    AND?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
+    OR?: NSERfqModelWhereInput[]
+    NOT?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
+    segment?: StringFilter<"NSERfqModel"> | string
+    isin?: StringFilter<"NSERfqModel"> | string
+    date?: StringFilter<"NSERfqModel"> | string
+    participantCode?: StringFilter<"NSERfqModel"> | string
+    dealType?: EnumDealTypeFilter<"NSERfqModel"> | $Enums.DealType
+    clientCode?: StringFilter<"NSERfqModel"> | string
+    buySell?: EnumBuySellFilter<"NSERfqModel"> | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFilter<"NSERfqModel"> | $Enums.QuoteType
+    settlementType?: IntFilter<"NSERfqModel"> | number
+    value?: FloatFilter<"NSERfqModel"> | number
+    quantity?: IntNullableFilter<"NSERfqModel"> | number | null
+    yieldType?: EnumYieldTypeFilter<"NSERfqModel"> | $Enums.YieldType
+    yield?: FloatFilter<"NSERfqModel"> | number
+    calcMethod?: EnumCalcMethodFilter<"NSERfqModel"> | $Enums.CalcMethod
+    price?: FloatNullableFilter<"NSERfqModel"> | number | null
+    valueSell?: FloatNullableFilter<"NSERfqModel"> | number | null
+    quantitySell?: IntNullableFilter<"NSERfqModel"> | number | null
+    yieldTypeSell?: EnumYieldTypeNullableFilter<"NSERfqModel"> | $Enums.YieldType | null
+    yieldSell?: FloatNullableFilter<"NSERfqModel"> | number | null
+    calcMethodSell?: EnumCalcMethodNullableFilter<"NSERfqModel"> | $Enums.CalcMethod | null
+    priceSell?: FloatNullableFilter<"NSERfqModel"> | number | null
+    gtdFlag?: StringNullableFilter<"NSERfqModel"> | string | null
+    endTime?: StringNullableFilter<"NSERfqModel"> | string | null
+    quoteNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
+    valueNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
+    minFillValue?: FloatNullableFilter<"NSERfqModel"> | number | null
+    valueStepSize?: FloatNullableFilter<"NSERfqModel"> | number | null
+    anonymous?: StringNullableFilter<"NSERfqModel"> | string | null
+    access?: IntFilter<"NSERfqModel"> | number
+    groupList?: IntNullableListFilter<"NSERfqModel">
+    participantList?: StringNullableListFilter<"NSERfqModel">
+    category?: StringNullableFilter<"NSERfqModel"> | string | null
+    rating?: StringNullableFilter<"NSERfqModel"> | string | null
+    remarks?: StringNullableFilter<"NSERfqModel"> | string | null
+    status?: EnumRFQStatusFilter<"NSERfqModel"> | $Enums.RFQStatus
+    userLogin?: StringFilter<"NSERfqModel"> | string
+    tradedValue?: FloatFilter<"NSERfqModel"> | number
+    confirmedValue?: FloatFilter<"NSERfqModel"> | number
+    clientRegType?: StringFilter<"NSERfqModel"> | string
+    quoteTime?: StringFilter<"NSERfqModel"> | string
+  }, "key" | "number">
+
+  export type NSERfqModelOrderByWithAggregationInput = {
+    key?: SortOrder
+    number?: SortOrder
+    segment?: SortOrder
+    isin?: SortOrder
+    date?: SortOrder
+    participantCode?: SortOrder
+    dealType?: SortOrder
+    clientCode?: SortOrder
+    buySell?: SortOrder
+    quoteType?: SortOrder
+    settlementType?: SortOrder
+    value?: SortOrder
+    quantity?: SortOrderInput | SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    calcMethod?: SortOrder
+    price?: SortOrderInput | SortOrder
+    valueSell?: SortOrderInput | SortOrder
+    quantitySell?: SortOrderInput | SortOrder
+    yieldTypeSell?: SortOrderInput | SortOrder
+    yieldSell?: SortOrderInput | SortOrder
+    calcMethodSell?: SortOrderInput | SortOrder
+    priceSell?: SortOrderInput | SortOrder
+    gtdFlag?: SortOrderInput | SortOrder
+    endTime?: SortOrderInput | SortOrder
+    quoteNegotiable?: SortOrderInput | SortOrder
+    valueNegotiable?: SortOrderInput | SortOrder
+    minFillValue?: SortOrderInput | SortOrder
+    valueStepSize?: SortOrderInput | SortOrder
+    anonymous?: SortOrderInput | SortOrder
+    access?: SortOrder
+    groupList?: SortOrder
+    participantList?: SortOrder
+    category?: SortOrderInput | SortOrder
+    rating?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    status?: SortOrder
+    userLogin?: SortOrder
+    tradedValue?: SortOrder
+    confirmedValue?: SortOrder
+    clientRegType?: SortOrder
+    quoteTime?: SortOrder
+    _count?: NSERfqModelCountOrderByAggregateInput
+    _avg?: NSERfqModelAvgOrderByAggregateInput
+    _max?: NSERfqModelMaxOrderByAggregateInput
+    _min?: NSERfqModelMinOrderByAggregateInput
+    _sum?: NSERfqModelSumOrderByAggregateInput
+  }
+
+  export type NSERfqModelScalarWhereWithAggregatesInput = {
+    AND?: NSERfqModelScalarWhereWithAggregatesInput | NSERfqModelScalarWhereWithAggregatesInput[]
+    OR?: NSERfqModelScalarWhereWithAggregatesInput[]
+    NOT?: NSERfqModelScalarWhereWithAggregatesInput | NSERfqModelScalarWhereWithAggregatesInput[]
+    key?: IntWithAggregatesFilter<"NSERfqModel"> | number
+    number?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    segment?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    isin?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    date?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    participantCode?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    dealType?: EnumDealTypeWithAggregatesFilter<"NSERfqModel"> | $Enums.DealType
+    clientCode?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    buySell?: EnumBuySellWithAggregatesFilter<"NSERfqModel"> | $Enums.BuySell
+    quoteType?: EnumQuoteTypeWithAggregatesFilter<"NSERfqModel"> | $Enums.QuoteType
+    settlementType?: IntWithAggregatesFilter<"NSERfqModel"> | number
+    value?: FloatWithAggregatesFilter<"NSERfqModel"> | number
+    quantity?: IntNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    yieldType?: EnumYieldTypeWithAggregatesFilter<"NSERfqModel"> | $Enums.YieldType
+    yield?: FloatWithAggregatesFilter<"NSERfqModel"> | number
+    calcMethod?: EnumCalcMethodWithAggregatesFilter<"NSERfqModel"> | $Enums.CalcMethod
+    price?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    valueSell?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    quantitySell?: IntNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    yieldTypeSell?: EnumYieldTypeNullableWithAggregatesFilter<"NSERfqModel"> | $Enums.YieldType | null
+    yieldSell?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    calcMethodSell?: EnumCalcMethodNullableWithAggregatesFilter<"NSERfqModel"> | $Enums.CalcMethod | null
+    priceSell?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    gtdFlag?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    endTime?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    quoteNegotiable?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    valueNegotiable?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    minFillValue?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    valueStepSize?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
+    anonymous?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    access?: IntWithAggregatesFilter<"NSERfqModel"> | number
+    groupList?: IntNullableListFilter<"NSERfqModel">
+    participantList?: StringNullableListFilter<"NSERfqModel">
+    category?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    rating?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    remarks?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
+    status?: EnumRFQStatusWithAggregatesFilter<"NSERfqModel"> | $Enums.RFQStatus
+    userLogin?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    tradedValue?: FloatWithAggregatesFilter<"NSERfqModel"> | number
+    confirmedValue?: FloatWithAggregatesFilter<"NSERfqModel"> | number
+    clientRegType?: StringWithAggregatesFilter<"NSERfqModel"> | string
+    quoteTime?: StringWithAggregatesFilter<"NSERfqModel"> | string
   }
 
   export type CrmAuditLogsCreateInput = {
@@ -28812,6 +30911,318 @@ export namespace Prisma {
     issuer?: StringFieldUpdateOperationsInput | string
   }
 
+  export type NSERfqModelCreateInput = {
+    number: string
+    segment: string
+    isin: string
+    date: string
+    participantCode: string
+    dealType: $Enums.DealType
+    clientCode: string
+    buySell: $Enums.BuySell
+    quoteType: $Enums.QuoteType
+    settlementType: number
+    value: number
+    quantity?: number | null
+    yieldType: $Enums.YieldType
+    yield: number
+    calcMethod: $Enums.CalcMethod
+    price?: number | null
+    valueSell?: number | null
+    quantitySell?: number | null
+    yieldTypeSell?: $Enums.YieldType | null
+    yieldSell?: number | null
+    calcMethodSell?: $Enums.CalcMethod | null
+    priceSell?: number | null
+    gtdFlag?: string | null
+    endTime?: string | null
+    quoteNegotiable?: string | null
+    valueNegotiable?: string | null
+    minFillValue?: number | null
+    valueStepSize?: number | null
+    anonymous?: string | null
+    access: number
+    groupList?: NSERfqModelCreategroupListInput | number[]
+    participantList?: NSERfqModelCreateparticipantListInput | string[]
+    category?: string | null
+    rating?: string | null
+    remarks?: string | null
+    status: $Enums.RFQStatus
+    userLogin: string
+    tradedValue: number
+    confirmedValue: number
+    clientRegType: string
+    quoteTime: string
+  }
+
+  export type NSERfqModelUncheckedCreateInput = {
+    key?: number
+    number: string
+    segment: string
+    isin: string
+    date: string
+    participantCode: string
+    dealType: $Enums.DealType
+    clientCode: string
+    buySell: $Enums.BuySell
+    quoteType: $Enums.QuoteType
+    settlementType: number
+    value: number
+    quantity?: number | null
+    yieldType: $Enums.YieldType
+    yield: number
+    calcMethod: $Enums.CalcMethod
+    price?: number | null
+    valueSell?: number | null
+    quantitySell?: number | null
+    yieldTypeSell?: $Enums.YieldType | null
+    yieldSell?: number | null
+    calcMethodSell?: $Enums.CalcMethod | null
+    priceSell?: number | null
+    gtdFlag?: string | null
+    endTime?: string | null
+    quoteNegotiable?: string | null
+    valueNegotiable?: string | null
+    minFillValue?: number | null
+    valueStepSize?: number | null
+    anonymous?: string | null
+    access: number
+    groupList?: NSERfqModelCreategroupListInput | number[]
+    participantList?: NSERfqModelCreateparticipantListInput | string[]
+    category?: string | null
+    rating?: string | null
+    remarks?: string | null
+    status: $Enums.RFQStatus
+    userLogin: string
+    tradedValue: number
+    confirmedValue: number
+    clientRegType: string
+    quoteTime: string
+  }
+
+  export type NSERfqModelUpdateInput = {
+    number?: StringFieldUpdateOperationsInput | string
+    segment?: StringFieldUpdateOperationsInput | string
+    isin?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    participantCode?: StringFieldUpdateOperationsInput | string
+    dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
+    clientCode?: StringFieldUpdateOperationsInput | string
+    buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
+    settlementType?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    quantity?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
+    yield?: FloatFieldUpdateOperationsInput | number
+    calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    quantitySell?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldTypeSell?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    endTime?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    access?: IntFieldUpdateOperationsInput | number
+    groupList?: NSERfqModelUpdategroupListInput | number[]
+    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    rating?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
+    userLogin?: StringFieldUpdateOperationsInput | string
+    tradedValue?: FloatFieldUpdateOperationsInput | number
+    confirmedValue?: FloatFieldUpdateOperationsInput | number
+    clientRegType?: StringFieldUpdateOperationsInput | string
+    quoteTime?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type NSERfqModelUncheckedUpdateInput = {
+    key?: IntFieldUpdateOperationsInput | number
+    number?: StringFieldUpdateOperationsInput | string
+    segment?: StringFieldUpdateOperationsInput | string
+    isin?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    participantCode?: StringFieldUpdateOperationsInput | string
+    dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
+    clientCode?: StringFieldUpdateOperationsInput | string
+    buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
+    settlementType?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    quantity?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
+    yield?: FloatFieldUpdateOperationsInput | number
+    calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    quantitySell?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldTypeSell?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    endTime?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    access?: IntFieldUpdateOperationsInput | number
+    groupList?: NSERfqModelUpdategroupListInput | number[]
+    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    rating?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
+    userLogin?: StringFieldUpdateOperationsInput | string
+    tradedValue?: FloatFieldUpdateOperationsInput | number
+    confirmedValue?: FloatFieldUpdateOperationsInput | number
+    clientRegType?: StringFieldUpdateOperationsInput | string
+    quoteTime?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type NSERfqModelCreateManyInput = {
+    key?: number
+    number: string
+    segment: string
+    isin: string
+    date: string
+    participantCode: string
+    dealType: $Enums.DealType
+    clientCode: string
+    buySell: $Enums.BuySell
+    quoteType: $Enums.QuoteType
+    settlementType: number
+    value: number
+    quantity?: number | null
+    yieldType: $Enums.YieldType
+    yield: number
+    calcMethod: $Enums.CalcMethod
+    price?: number | null
+    valueSell?: number | null
+    quantitySell?: number | null
+    yieldTypeSell?: $Enums.YieldType | null
+    yieldSell?: number | null
+    calcMethodSell?: $Enums.CalcMethod | null
+    priceSell?: number | null
+    gtdFlag?: string | null
+    endTime?: string | null
+    quoteNegotiable?: string | null
+    valueNegotiable?: string | null
+    minFillValue?: number | null
+    valueStepSize?: number | null
+    anonymous?: string | null
+    access: number
+    groupList?: NSERfqModelCreategroupListInput | number[]
+    participantList?: NSERfqModelCreateparticipantListInput | string[]
+    category?: string | null
+    rating?: string | null
+    remarks?: string | null
+    status: $Enums.RFQStatus
+    userLogin: string
+    tradedValue: number
+    confirmedValue: number
+    clientRegType: string
+    quoteTime: string
+  }
+
+  export type NSERfqModelUpdateManyMutationInput = {
+    number?: StringFieldUpdateOperationsInput | string
+    segment?: StringFieldUpdateOperationsInput | string
+    isin?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    participantCode?: StringFieldUpdateOperationsInput | string
+    dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
+    clientCode?: StringFieldUpdateOperationsInput | string
+    buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
+    settlementType?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    quantity?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
+    yield?: FloatFieldUpdateOperationsInput | number
+    calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    quantitySell?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldTypeSell?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    endTime?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    access?: IntFieldUpdateOperationsInput | number
+    groupList?: NSERfqModelUpdategroupListInput | number[]
+    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    rating?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
+    userLogin?: StringFieldUpdateOperationsInput | string
+    tradedValue?: FloatFieldUpdateOperationsInput | number
+    confirmedValue?: FloatFieldUpdateOperationsInput | number
+    clientRegType?: StringFieldUpdateOperationsInput | string
+    quoteTime?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type NSERfqModelUncheckedUpdateManyInput = {
+    key?: IntFieldUpdateOperationsInput | number
+    number?: StringFieldUpdateOperationsInput | string
+    segment?: StringFieldUpdateOperationsInput | string
+    isin?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    participantCode?: StringFieldUpdateOperationsInput | string
+    dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
+    clientCode?: StringFieldUpdateOperationsInput | string
+    buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
+    settlementType?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    quantity?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
+    yield?: FloatFieldUpdateOperationsInput | number
+    calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    quantitySell?: NullableIntFieldUpdateOperationsInput | number | null
+    yieldTypeSell?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
+    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    endTime?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    access?: IntFieldUpdateOperationsInput | number
+    groupList?: NSERfqModelUpdategroupListInput | number[]
+    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    rating?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
+    userLogin?: StringFieldUpdateOperationsInput | string
+    tradedValue?: FloatFieldUpdateOperationsInput | number
+    confirmedValue?: FloatFieldUpdateOperationsInput | number
+    clientRegType?: StringFieldUpdateOperationsInput | string
+    quoteTime?: StringFieldUpdateOperationsInput | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -30440,6 +32851,346 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type EnumDealTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDealTypeFilter<$PrismaModel> | $Enums.DealType
+  }
+
+  export type EnumBuySellFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel>
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    not?: NestedEnumBuySellFilter<$PrismaModel> | $Enums.BuySell
+  }
+
+  export type EnumQuoteTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.QuoteType | EnumQuoteTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumQuoteTypeFilter<$PrismaModel> | $Enums.QuoteType
+  }
+
+  export type EnumYieldTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeFilter<$PrismaModel> | $Enums.YieldType
+  }
+
+  export type EnumCalcMethodFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumCalcMethodFilter<$PrismaModel> | $Enums.CalcMethod
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type EnumYieldTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYieldTypeNullableFilter<$PrismaModel> | $Enums.YieldType | null
+  }
+
+  export type EnumCalcMethodNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCalcMethodNullableFilter<$PrismaModel> | $Enums.CalcMethod | null
+  }
+
+  export type IntNullableListFilter<$PrismaModel = never> = {
+    equals?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    has?: number | IntFieldRefInput<$PrismaModel> | null
+    hasEvery?: number[] | ListIntFieldRefInput<$PrismaModel>
+    hasSome?: number[] | ListIntFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type EnumRFQStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQStatusFilter<$PrismaModel> | $Enums.RFQStatus
+  }
+
+  export type NSERfqModelCountOrderByAggregateInput = {
+    key?: SortOrder
+    number?: SortOrder
+    segment?: SortOrder
+    isin?: SortOrder
+    date?: SortOrder
+    participantCode?: SortOrder
+    dealType?: SortOrder
+    clientCode?: SortOrder
+    buySell?: SortOrder
+    quoteType?: SortOrder
+    settlementType?: SortOrder
+    value?: SortOrder
+    quantity?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    calcMethod?: SortOrder
+    price?: SortOrder
+    valueSell?: SortOrder
+    quantitySell?: SortOrder
+    yieldTypeSell?: SortOrder
+    yieldSell?: SortOrder
+    calcMethodSell?: SortOrder
+    priceSell?: SortOrder
+    gtdFlag?: SortOrder
+    endTime?: SortOrder
+    quoteNegotiable?: SortOrder
+    valueNegotiable?: SortOrder
+    minFillValue?: SortOrder
+    valueStepSize?: SortOrder
+    anonymous?: SortOrder
+    access?: SortOrder
+    groupList?: SortOrder
+    participantList?: SortOrder
+    category?: SortOrder
+    rating?: SortOrder
+    remarks?: SortOrder
+    status?: SortOrder
+    userLogin?: SortOrder
+    tradedValue?: SortOrder
+    confirmedValue?: SortOrder
+    clientRegType?: SortOrder
+    quoteTime?: SortOrder
+  }
+
+  export type NSERfqModelAvgOrderByAggregateInput = {
+    key?: SortOrder
+    settlementType?: SortOrder
+    value?: SortOrder
+    quantity?: SortOrder
+    yield?: SortOrder
+    price?: SortOrder
+    valueSell?: SortOrder
+    quantitySell?: SortOrder
+    yieldSell?: SortOrder
+    priceSell?: SortOrder
+    minFillValue?: SortOrder
+    valueStepSize?: SortOrder
+    access?: SortOrder
+    groupList?: SortOrder
+    tradedValue?: SortOrder
+    confirmedValue?: SortOrder
+  }
+
+  export type NSERfqModelMaxOrderByAggregateInput = {
+    key?: SortOrder
+    number?: SortOrder
+    segment?: SortOrder
+    isin?: SortOrder
+    date?: SortOrder
+    participantCode?: SortOrder
+    dealType?: SortOrder
+    clientCode?: SortOrder
+    buySell?: SortOrder
+    quoteType?: SortOrder
+    settlementType?: SortOrder
+    value?: SortOrder
+    quantity?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    calcMethod?: SortOrder
+    price?: SortOrder
+    valueSell?: SortOrder
+    quantitySell?: SortOrder
+    yieldTypeSell?: SortOrder
+    yieldSell?: SortOrder
+    calcMethodSell?: SortOrder
+    priceSell?: SortOrder
+    gtdFlag?: SortOrder
+    endTime?: SortOrder
+    quoteNegotiable?: SortOrder
+    valueNegotiable?: SortOrder
+    minFillValue?: SortOrder
+    valueStepSize?: SortOrder
+    anonymous?: SortOrder
+    access?: SortOrder
+    category?: SortOrder
+    rating?: SortOrder
+    remarks?: SortOrder
+    status?: SortOrder
+    userLogin?: SortOrder
+    tradedValue?: SortOrder
+    confirmedValue?: SortOrder
+    clientRegType?: SortOrder
+    quoteTime?: SortOrder
+  }
+
+  export type NSERfqModelMinOrderByAggregateInput = {
+    key?: SortOrder
+    number?: SortOrder
+    segment?: SortOrder
+    isin?: SortOrder
+    date?: SortOrder
+    participantCode?: SortOrder
+    dealType?: SortOrder
+    clientCode?: SortOrder
+    buySell?: SortOrder
+    quoteType?: SortOrder
+    settlementType?: SortOrder
+    value?: SortOrder
+    quantity?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    calcMethod?: SortOrder
+    price?: SortOrder
+    valueSell?: SortOrder
+    quantitySell?: SortOrder
+    yieldTypeSell?: SortOrder
+    yieldSell?: SortOrder
+    calcMethodSell?: SortOrder
+    priceSell?: SortOrder
+    gtdFlag?: SortOrder
+    endTime?: SortOrder
+    quoteNegotiable?: SortOrder
+    valueNegotiable?: SortOrder
+    minFillValue?: SortOrder
+    valueStepSize?: SortOrder
+    anonymous?: SortOrder
+    access?: SortOrder
+    category?: SortOrder
+    rating?: SortOrder
+    remarks?: SortOrder
+    status?: SortOrder
+    userLogin?: SortOrder
+    tradedValue?: SortOrder
+    confirmedValue?: SortOrder
+    clientRegType?: SortOrder
+    quoteTime?: SortOrder
+  }
+
+  export type NSERfqModelSumOrderByAggregateInput = {
+    key?: SortOrder
+    settlementType?: SortOrder
+    value?: SortOrder
+    quantity?: SortOrder
+    yield?: SortOrder
+    price?: SortOrder
+    valueSell?: SortOrder
+    quantitySell?: SortOrder
+    yieldSell?: SortOrder
+    priceSell?: SortOrder
+    minFillValue?: SortOrder
+    valueStepSize?: SortOrder
+    access?: SortOrder
+    groupList?: SortOrder
+    tradedValue?: SortOrder
+    confirmedValue?: SortOrder
+  }
+
+  export type EnumDealTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDealTypeWithAggregatesFilter<$PrismaModel> | $Enums.DealType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDealTypeFilter<$PrismaModel>
+    _max?: NestedEnumDealTypeFilter<$PrismaModel>
+  }
+
+  export type EnumBuySellWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel>
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    not?: NestedEnumBuySellWithAggregatesFilter<$PrismaModel> | $Enums.BuySell
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBuySellFilter<$PrismaModel>
+    _max?: NestedEnumBuySellFilter<$PrismaModel>
+  }
+
+  export type EnumQuoteTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.QuoteType | EnumQuoteTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumQuoteTypeWithAggregatesFilter<$PrismaModel> | $Enums.QuoteType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumQuoteTypeFilter<$PrismaModel>
+    _max?: NestedEnumQuoteTypeFilter<$PrismaModel>
+  }
+
+  export type EnumYieldTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeWithAggregatesFilter<$PrismaModel> | $Enums.YieldType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumYieldTypeFilter<$PrismaModel>
+    _max?: NestedEnumYieldTypeFilter<$PrismaModel>
+  }
+
+  export type EnumCalcMethodWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumCalcMethodWithAggregatesFilter<$PrismaModel> | $Enums.CalcMethod
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCalcMethodFilter<$PrismaModel>
+    _max?: NestedEnumCalcMethodFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type EnumYieldTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYieldTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.YieldType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumYieldTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumYieldTypeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumCalcMethodNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCalcMethodNullableWithAggregatesFilter<$PrismaModel> | $Enums.CalcMethod | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumCalcMethodNullableFilter<$PrismaModel>
+    _max?: NestedEnumCalcMethodNullableFilter<$PrismaModel>
+  }
+
+  export type EnumRFQStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQStatusWithAggregatesFilter<$PrismaModel> | $Enums.RFQStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRFQStatusFilter<$PrismaModel>
+    _max?: NestedEnumRFQStatusFilter<$PrismaModel>
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -31334,6 +34085,64 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type NSERfqModelCreategroupListInput = {
+    set: number[]
+  }
+
+  export type NSERfqModelCreateparticipantListInput = {
+    set: string[]
+  }
+
+  export type EnumDealTypeFieldUpdateOperationsInput = {
+    set?: $Enums.DealType
+  }
+
+  export type EnumBuySellFieldUpdateOperationsInput = {
+    set?: $Enums.BuySell
+  }
+
+  export type EnumQuoteTypeFieldUpdateOperationsInput = {
+    set?: $Enums.QuoteType
+  }
+
+  export type EnumYieldTypeFieldUpdateOperationsInput = {
+    set?: $Enums.YieldType
+  }
+
+  export type EnumCalcMethodFieldUpdateOperationsInput = {
+    set?: $Enums.CalcMethod
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableEnumYieldTypeFieldUpdateOperationsInput = {
+    set?: $Enums.YieldType | null
+  }
+
+  export type NullableEnumCalcMethodFieldUpdateOperationsInput = {
+    set?: $Enums.CalcMethod | null
+  }
+
+  export type NSERfqModelUpdategroupListInput = {
+    set?: number[]
+    push?: number | number[]
+  }
+
+  export type NSERfqModelUpdateparticipantListInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type EnumRFQStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RFQStatus
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -31776,6 +34585,158 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDealTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDealTypeFilter<$PrismaModel> | $Enums.DealType
+  }
+
+  export type NestedEnumBuySellFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel>
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    not?: NestedEnumBuySellFilter<$PrismaModel> | $Enums.BuySell
+  }
+
+  export type NestedEnumQuoteTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.QuoteType | EnumQuoteTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumQuoteTypeFilter<$PrismaModel> | $Enums.QuoteType
+  }
+
+  export type NestedEnumYieldTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeFilter<$PrismaModel> | $Enums.YieldType
+  }
+
+  export type NestedEnumCalcMethodFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumCalcMethodFilter<$PrismaModel> | $Enums.CalcMethod
+  }
+
+  export type NestedEnumYieldTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYieldTypeNullableFilter<$PrismaModel> | $Enums.YieldType | null
+  }
+
+  export type NestedEnumCalcMethodNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCalcMethodNullableFilter<$PrismaModel> | $Enums.CalcMethod | null
+  }
+
+  export type NestedEnumRFQStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQStatusFilter<$PrismaModel> | $Enums.RFQStatus
+  }
+
+  export type NestedEnumDealTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDealTypeWithAggregatesFilter<$PrismaModel> | $Enums.DealType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDealTypeFilter<$PrismaModel>
+    _max?: NestedEnumDealTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBuySellWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel>
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel>
+    not?: NestedEnumBuySellWithAggregatesFilter<$PrismaModel> | $Enums.BuySell
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBuySellFilter<$PrismaModel>
+    _max?: NestedEnumBuySellFilter<$PrismaModel>
+  }
+
+  export type NestedEnumQuoteTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.QuoteType | EnumQuoteTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.QuoteType[] | ListEnumQuoteTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumQuoteTypeWithAggregatesFilter<$PrismaModel> | $Enums.QuoteType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumQuoteTypeFilter<$PrismaModel>
+    _max?: NestedEnumQuoteTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumYieldTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeWithAggregatesFilter<$PrismaModel> | $Enums.YieldType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumYieldTypeFilter<$PrismaModel>
+    _max?: NestedEnumYieldTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumCalcMethodWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumCalcMethodWithAggregatesFilter<$PrismaModel> | $Enums.CalcMethod
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCalcMethodFilter<$PrismaModel>
+    _max?: NestedEnumCalcMethodFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumYieldTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYieldTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.YieldType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumYieldTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumYieldTypeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumCalcMethodNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CalcMethod | EnumCalcMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCalcMethodNullableWithAggregatesFilter<$PrismaModel> | $Enums.CalcMethod | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumCalcMethodNullableFilter<$PrismaModel>
+    _max?: NestedEnumCalcMethodNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRFQStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQStatusWithAggregatesFilter<$PrismaModel> | $Enums.RFQStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRFQStatusFilter<$PrismaModel>
+    _max?: NestedEnumRFQStatusFilter<$PrismaModel>
   }
 
   export type CustomersAuthDataModelCreateWithoutRelationshipManagerInput = {

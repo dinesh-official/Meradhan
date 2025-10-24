@@ -394,6 +394,51 @@ exports.Prisma.NseIsinSecurityReceiptScalarFieldEnum = {
   issuer: 'issuer'
 };
 
+exports.Prisma.NSERfqModelScalarFieldEnum = {
+  key: 'key',
+  number: 'number',
+  segment: 'segment',
+  isin: 'isin',
+  date: 'date',
+  participantCode: 'participantCode',
+  dealType: 'dealType',
+  clientCode: 'clientCode',
+  buySell: 'buySell',
+  quoteType: 'quoteType',
+  settlementType: 'settlementType',
+  value: 'value',
+  quantity: 'quantity',
+  yieldType: 'yieldType',
+  yield: 'yield',
+  calcMethod: 'calcMethod',
+  price: 'price',
+  valueSell: 'valueSell',
+  quantitySell: 'quantitySell',
+  yieldTypeSell: 'yieldTypeSell',
+  yieldSell: 'yieldSell',
+  calcMethodSell: 'calcMethodSell',
+  priceSell: 'priceSell',
+  gtdFlag: 'gtdFlag',
+  endTime: 'endTime',
+  quoteNegotiable: 'quoteNegotiable',
+  valueNegotiable: 'valueNegotiable',
+  minFillValue: 'minFillValue',
+  valueStepSize: 'valueStepSize',
+  anonymous: 'anonymous',
+  access: 'access',
+  groupList: 'groupList',
+  participantList: 'participantList',
+  category: 'category',
+  rating: 'rating',
+  remarks: 'remarks',
+  status: 'status',
+  userLogin: 'userLogin',
+  tradedValue: 'tradedValue',
+  confirmedValue: 'confirmedValue',
+  clientRegType: 'clientRegType',
+  quoteTime: 'quoteTime'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -503,6 +548,39 @@ exports.DefaultSelect = exports.$Enums.DefaultSelect = {
   N: 'N'
 };
 
+exports.DealType = exports.$Enums.DealType = {
+  D: 'D',
+  B: 'B'
+};
+
+exports.BuySell = exports.$Enums.BuySell = {
+  B: 'B',
+  S: 'S',
+  X: 'X'
+};
+
+exports.QuoteType = exports.$Enums.QuoteType = {
+  Y: 'Y',
+  B: 'B'
+};
+
+exports.YieldType = exports.$Enums.YieldType = {
+  YTM: 'YTM',
+  YTP: 'YTP',
+  YTC: 'YTC'
+};
+
+exports.CalcMethod = exports.$Enums.CalcMethod = {
+  M: 'M',
+  O: 'O'
+};
+
+exports.RFQStatus = exports.$Enums.RFQStatus = {
+  P: 'P',
+  W: 'W',
+  T: 'T'
+};
+
 exports.Prisma.ModelName = {
   CrmAuditLogs: 'CrmAuditLogs',
   CRMUserDataModel: 'CRMUserDataModel',
@@ -521,7 +599,8 @@ exports.Prisma.ModelName = {
   NseCbricsParticipantModel: 'NseCbricsParticipantModel',
   NSEBankAccount: 'NSEBankAccount',
   NSEDpAccount: 'NSEDpAccount',
-  NseIsinSecurityReceipt: 'NseIsinSecurityReceipt'
+  NseIsinSecurityReceipt: 'NseIsinSecurityReceipt',
+  NSERfqModel: 'NSERfqModel'
 };
 
 /**

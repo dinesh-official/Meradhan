@@ -1,12 +1,12 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 import Table from "../../Table";
 import NseRFQSearchFilterBar from "./_components/NseRFQSearchFilterBar";
-import CardPagination from "@/global/elements/table/CardPagination";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 function NscRfqView() {
   return (
@@ -22,6 +22,7 @@ function NscRfqView() {
           </Link>
         }
       />
+
       <Card>
         <NseRFQSearchFilterBar />
         <CardContent>

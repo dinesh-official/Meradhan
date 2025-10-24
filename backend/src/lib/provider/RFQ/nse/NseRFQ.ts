@@ -73,6 +73,7 @@ import type {
     WithdrawRfqRequest,
     WithdrawRfqResponse,
 } from "./rfq.types";
+import { AppError } from "@utils/error/AppError";
 
 // :: NOTE - 
 // All dates, times and datetimes are represented as strings and in Indian standard time.
@@ -113,7 +114,7 @@ export class NseRfq {
 
     // 🔐 Login API
     private async login() {
-        const { data } = await this.client.post<{
+        const { data, headers } = await this.client.post<{
             lastLogin: number;
             brokerEnablementType: string;
             loginKey: string;
@@ -123,9 +124,14 @@ export class NseRfq {
             broker: boolean;
             status: string;
         }>("/login", this.credentials);
-        console.log(data);
-
-        return data;
+        const loginKey = headers?.["set-cookie"]?.find((c) => c.includes("LoginKey"))?.split("=")[1]?.split(";")[0];
+        if (data.status == "F") {
+            throw new AppError("Nse Rqf Login Failed");
+        }
+        return {
+            ...data,
+            loginKey: data.loginKey || loginKey?.toString()
+        };
     }
 
     // 🧠 Get or Refresh Login Key
@@ -137,8 +143,7 @@ export class NseRfq {
 
         const { loginKey } = await this.login();
         await cacheStorage.set(this.loginStoreKey, { loginKey }, 600);
-
-        return loginKey;
+        return loginKey || "";
     }
     // 🔁 Universal Auto-Retry Wrapper
     private async withReLoginRetry<T>(
@@ -588,6 +593,8 @@ export class NseRfq {
                 payload,
                 { headers: { loginKey } }
             );
+
+            
             return data;
         });
     }

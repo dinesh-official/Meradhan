@@ -4,6 +4,10 @@ export const isinFilterSchema = z.object({
     symbol: z.string().optional(),
     description: z.string().optional(),
     issuer: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+
+
 
     filtIssueCategory: z
         .enum(["CB", "CP", "CD", "SD", "GS"])

@@ -10,6 +10,8 @@ export const CALC_METHODS = ["M", "O"] as const;
 
 export const nseRFQFormDataSchema = z.object({
   segment: z.enum(SEGMENTS, { message: "Segment is required" }),
+  particempt: z.enum(SEGMENTS, { message: "particempt is required" }).optional(),
+
   isin: z
     .string()
     .min(1, "ISIN is required")

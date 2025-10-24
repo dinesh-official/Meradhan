@@ -41,8 +41,10 @@ export class AuthApi implements TAuthApiInterface {
     return await this.apiClient.post("/auth/verify-otp", data, config);
   }
 
-  async logout(config?: AxiosRequestConfig) {
-    return await this.apiClient.post("/auth/logout", undefined, config);
+  async logout(
+    config?: AxiosRequestConfig
+  ): ReturnType<TAuthApiInterface["logout"]> {
+    return await this.apiClient.post("/auth/logout", config);
   }
 
   async getSession(

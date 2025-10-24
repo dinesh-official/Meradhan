@@ -15,7 +15,7 @@ import 'server-only';
  * - Allows full axios-like usage (get, post, put, patch, delete)
  * - Designed for Next.js Server Components / Route Handlers
  */
-class ApiServerCaller implements IApiCaller {
+export class ApiServerCaller implements IApiCaller {
   private instance: AxiosInstance;
 
   constructor(baseURL: string) {

@@ -20,6 +20,7 @@ interface InputFieldProps {
   /** Optional container class */
   className?: string;
   error?: string;
+  readonly?:boolean
 }
 
 export function InputField({
@@ -34,6 +35,7 @@ export function InputField({
   onChangeAction,
   className,
   error,
+  readonly
 }: InputFieldProps) {
   const [internalValue, setInternalValue] = React.useState(defaultValue || "");
   const isControlled = value !== undefined;
@@ -57,9 +59,10 @@ export function InputField({
         disabled={disabled}
         value={isControlled ? value : internalValue}
         onChange={handleChange}
+        readOnly={readonly}
         className="mt-2"
       />
-      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+      {error && <p className="mt-1 text-xs text-destructive text-left">{error}</p>}
     </div>
   );
 }

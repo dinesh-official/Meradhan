@@ -2,24 +2,38 @@ import { FormCheckbox } from "@/global/elements/inputs/FormCheckbox";
 import { InputField } from "@/global/elements/inputs/InputField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
 import { INseRFQFormHook } from "./NseFormData";
-import {
-  NseRFQFormData,
-  YIELD_TYPES
-} from "./nseRfqFormData.schema";
+import { NseRFQFormData, YIELD_TYPES } from "./nseRfqFormData.schema";
+import NseIsinPicker from "@/global/elements/autocomplete/NseIsinPicker";
+import { SelectNseParticipant } from "@/global/elements/autocomplete/SelectNseParticipant";
+import { Label } from "@/components/ui/label";
 
 const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
   return (
     <div className="flex flex-col gap-4 relative">
       <h5 className="font-bold">RFQ Information</h5>
       <div className="grid md:grid-cols-2  gap-4">
-        <InputField
-          id="isin"
-          label="ISIN"
-          placeholder="Enter ISIN"
-          value={manager.state.isin}
-          onChangeAction={(e) => manager.setRFQData("isin", e)}
-          error={manager.errors.isin?.[0]}
-        />
+        <NseIsinPicker>
+          <InputField
+            id="isin"
+            label="ISIN"
+            placeholder="Enter ISIN"
+            value={manager.state.isin}
+            onChangeAction={(e) => manager.setRFQData("isin", e)}
+            error={manager.errors.isin?.[0]}
+          />
+        </NseIsinPicker>
+        <div className="flex flex-col gap-2">
+          <Label>Participant</Label>
+          <SelectNseParticipant
+            onSelect={(e) => {
+              if (e) manager.participant.setParticipant(e);
+            }}
+            placeholder="Select Participant"
+            value={manager.participant.participant}
+          />
+        </div>
+      </div>
+      <div className="grid md:grid-cols-3  gap-4">
         <SelectField
           label="Segment"
           placeholder="Select Segment"
@@ -39,8 +53,6 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
           }
           error={manager.errors.segment?.[0]}
         />
-      </div>
-      <div className="grid md:grid-cols-3  gap-4">
         <SelectField
           label="Buy/Sell"
           placeholder="Select Buy/Sell"
@@ -125,7 +137,7 @@ const NewRfqInfoForm = ({ manager }: { manager: INseRFQFormHook }) => {
         )}
         <InputField
           id="rfqsize"
-          label="RFQ Size"
+          label="RFQ Size (Value in Crores)"
           placeholder="RFQ Size (Value in Crores)"
           value={manager.state.rfqSize}
           onChangeAction={(e) => manager.setRFQData("rfqSize", e)}

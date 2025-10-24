@@ -48,6 +48,7 @@ import type {
     UpdateUnregisteredDpAccountStatusResponse,
     UpiPaymentInitiationRequest,
 } from "./cbrics.types";
+import { AppError } from "@utils/error/AppError";
 
 export class NseCBRICS {
     private loginStoreKey = "NSE_CBRICS_LOGIN_KEY";
@@ -83,7 +84,7 @@ export class NseCBRICS {
     // ────────────────────────────────────────────────────────────────
 
     async login() {
-        const { data } = await this.client.post<{
+        const { data, headers } = await this.client.post<{
             firstName: string;
             lastLogin: number;
             ownerCode: string;
@@ -92,7 +93,15 @@ export class NseCBRICS {
             login: string;
             status: string;
         }>("/login", this.credentials);
-        return data;
+
+        const loginKey = headers?.["set-cookie"]?.find((c) => c.includes("LoginKey"))?.split("=")[1]?.split(";")[0];
+        if (data.status == "F") {
+            throw new AppError("Nse Cbrics Login Failed");
+        }
+        return {
+            ...data,
+            loginKey: data.loginKey || loginKey?.toString()
+        };
     }
 
     public async getLoginKey(forceRefresh = false): Promise<string> {
@@ -104,7 +113,7 @@ export class NseCBRICS {
         const { loginKey } = await this.login();
         await cacheStorage.set(this.loginStoreKey, { loginKey }, 600);
 
-        return loginKey;
+        return loginKey || "";
     }
 
     private isLoginExpired(error: AxiosError<{ messages?: string[] }>): boolean {

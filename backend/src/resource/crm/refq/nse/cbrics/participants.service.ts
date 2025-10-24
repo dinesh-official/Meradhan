@@ -16,11 +16,11 @@ export class CbricsParticipantService {
 
         const whereClause: DataBaseSchema.NseCbricsParticipantModelWhereInput = {};
 
-        if (workflowStatus !== undefined) {
+        if (workflowStatus != undefined) {
             whereClause.workflowStatus = Number(workflowStatus);
         }
 
-        if (statusCode !== undefined) {
+        if (statusCode != undefined) {
             whereClause.actualStatus = Number(statusCode);
         }
 
@@ -31,6 +31,8 @@ export class CbricsParticipantService {
                 { contactPerson: { contains: search, mode: "insensitive" } },
             ];
         }
+        console.log(whereClause);
+
 
         const [data, total] = await Promise.all([
             db.dataBase.nseCbricsParticipantModel.findMany({
@@ -43,6 +45,7 @@ export class CbricsParticipantService {
                 },
                 orderBy: { createdAt: "desc" },
             }),
+
             db.dataBase.nseCbricsParticipantModel.count({ where: whereClause }),
         ]);
 

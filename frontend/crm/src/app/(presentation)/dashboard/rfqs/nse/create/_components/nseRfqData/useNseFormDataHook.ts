@@ -1,6 +1,7 @@
 "use client";
 
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
+import { ParticipantData } from "@root/apiGateway";
 import { useState } from "react";
 import { ZodError } from "zod";
 import {
@@ -29,9 +30,12 @@ export const initNseRFQData: NseRFQFormData = {
   yield: "",
   calcMethod: CALC_METHODS[0],
   price: "",
+  particempt: undefined
 };
 
 export const useRFQFormDataHook = (initial: NseRFQFormData = initNseRFQData) => {
+  const [participant, setParticipant] = useState<ParticipantData | undefined>(undefined);
+
   const [data, setData] = useState<NseRFQFormData>(initial);
   const [errors, setErrors] = useState<
     Partial<Record<keyof NseRFQFormData, string[]>>
@@ -96,5 +100,9 @@ export const useRFQFormDataHook = (initial: NseRFQFormData = initNseRFQData) => 
     resetRFQData,
     validateField,
     validateRFQData,
+    participant: {
+      participant,
+      setParticipant
+    }
   };
 };

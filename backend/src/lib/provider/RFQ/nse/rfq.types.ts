@@ -707,9 +707,9 @@ export interface GetAllRfqResponse {
     segment: string;
     date: string;
     quoteTime: string;
-    access: string;
+    access?: number;
     rating: string | null;
-    quoteType: string;
+    quoteType: "Y" | "B"; 
     tradedValue: number;
     participantList: string[] | null;
     calcMethod: "M" | "O";
@@ -722,12 +722,12 @@ export interface GetAllRfqResponse {
     participantCode: string;
     value: number;
     settlementType: number;
-    buySell: string;
+    buySell: "B" | "S";
     clientRegType: "R" | "I" | "U";
     quantity: number;
     groupList: number[] | null;
     settlementDate: string;
-    dealType: string;
+    dealType: "D" | "B";
     valueNegotiable: "Y" | null;
     userLogin: string;
     clientCode: string;
@@ -758,7 +758,7 @@ export interface GetMarketWatchRfqResponse {
     quoteTime: string;
     isin: string;
     buySell: "B" | "S";
-    quoteType: string;
+    quoteType: "Y" | "B"; 
     settlementType: number;
     settlementDate: string;
     value: number;
@@ -773,7 +773,7 @@ export interface GetMarketWatchRfqResponse {
     valueNegotiable: "Y" | null;
     minFillValue: number | null;
     valueStepSize: number | null;
-    dealType: string;
+    dealType: "D" | "B";
     anonymous: "Y" | null;
     access: number;
     category: string | null;
@@ -817,7 +817,7 @@ export interface CreateOpenRfqResponse {
     scriptDesc: string;
     openIsinList?: string[];
     buySell: "B" | "S" | "X";
-    quoteType: string;
+    quoteType: "Y" | "B"; 
     value: number;
     gtdFlag?: string | null;
     endTime?: string | null;
@@ -894,7 +894,7 @@ export interface UpdateOpenRfqResponse {
     scriptDesc: string;
     openIsinList?: string[];
     buySell: string;
-    quoteType: string;
+    quoteType: "Y" | "B"; 
     value: number;
     gtdFlag?: string;
     endTime?: string | null;
@@ -934,7 +934,7 @@ export interface WithdrawRfqResponse {
     openIsinList?: string[];
 
     buySell: string; // "B" | "S"
-    quoteType: string; // "B" | "Y" etc.
+    quoteType: "Y" | "B"; 
     settlementType?: number;
     settlementDate?: string;
 
@@ -2020,7 +2020,7 @@ export interface RfqOpenRecord {
     buySell: "B" | "S";
 
     /** Quote Type — e.g., B = Best, etc. */
-    quoteType: string;
+    quoteType: "Y" | "B"; 
 
     /** RFQ total buy value */
     value: number | null;

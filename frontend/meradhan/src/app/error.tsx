@@ -17,14 +17,14 @@ export default function Error({
   // Only render in development mode
   if (process.env.NODE_ENV != "development") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 text-gray-700">
+      <div className="flex flex-col items-center justify-center gap-3 min-h-screen px-4 text-gray-700">
         {/* Error Image */}
         <Image
           width={100}
           height={100}
-          src="/icons/warning.png" // replace with your image path
+          src="/under-maintenance.svg" // replace with your image path
           alt="Error"
-          className="w-24 h-24 mb-4"
+          className="w-40 h-auto mb-6"
         />
 
         {/* Title */}

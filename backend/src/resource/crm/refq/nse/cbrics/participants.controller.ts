@@ -9,6 +9,8 @@ export class CbricsParticipantController {
     async handleGetParticipants(req: Request, res: Response) {
         // safeParse gives you non-throwing validation
         const result = appSchema.crm.rfq.nse.getParticipants.GetParticipantsZ.parse(req.query);
+        console.log(result);
+        
         const data = await this.participantService.getParticipants(result);
         res.sendResponse({
             statusCode: HttpStatus.OK,
