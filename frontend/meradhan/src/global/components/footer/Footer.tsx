@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import { FaInstagramSquare } from "react-icons/fa";
 import {
@@ -26,19 +27,59 @@ function Footer() {
               <h5 className="text-xl">MeraDhan</h5>
               <ul className="flex text-xl gap-4 text-primary">
                 <li>
-                  <FaFacebook />
+                  <Link
+                    href="https://www.facebook.com/MeraDhanCo/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Facebook"
+                  >
+                    <FaFacebook />
+                  </Link>
                 </li>
                 <li>
-                  <FaInstagramSquare />
+                  <Link
+                    href="https://www.instagram.com/meradhan/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Instagram"
+                  >
+                    <FaInstagramSquare />
+                  </Link>
                 </li>
                 <li>
-                  <FaPinterest />
+                  <Link
+                    href="https://in.pinterest.com/meradhanco/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Pinterest"
+                  >
+                    <FaPinterest />
+                  </Link>
                 </li>
                 <li>
-                  <FaLinkedin />
+                  <Link
+                    href="https://www.linkedin.com/company/meradhan/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="LinkedIn"
+                  >
+                    <FaLinkedin />
+                  </Link>
                 </li>
                 <li>
-                  <FaXTwitter />
+                  <Link
+                    href="https://x.com/MeraDhanCo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Twitter (X)"
+                  >
+                    <FaXTwitter />
+                  </Link>
                 </li>
               </ul>
               <div className="flex flex-col gap-3">
@@ -70,19 +111,75 @@ function Footer() {
               <div>
                 <h6 className="font-base text-lg">Company</h6>
                 <ul className="text-sm flex flex-col gap-3 mt-3">
-                  <li>About Us</li>
-                  <li>Disclaimer</li>
-                  <li>Contact Us</li>
+                  <li>
+                    <Link
+                      href="/about-us"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      About Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/disclaimer"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Disclaimer
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/contact-us"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Contact Us
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
                 <h6 className="font-base text-lg">Resources</h6>
                 <ul className="text-sm flex flex-col gap-3  mt-3">
-                  <li>Blog</li>
-                  <li>News</li>
-                  <li>Economic Calendar</li>
-                  <li>Glossary</li>
-                  <li>FAQs</li>
+                  <li>
+                    <Link
+                      href="/blog"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/news"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      News
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/economic-calendar"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Economic Calendar
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/glossary"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Glossary
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/faqs"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      FAQs
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </div>
