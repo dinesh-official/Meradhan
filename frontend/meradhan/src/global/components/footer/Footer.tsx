@@ -27,19 +27,59 @@ function Footer() {
               <h5 className="text-xl">MeraDhan</h5>
               <ul className="flex text-xl gap-4 text-primary">
                 <li>
-                  <FaFacebook />
+                  <Link
+                    href="https://www.facebook.com/MeraDhanCo/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Facebook"
+                  >
+                    <FaFacebook />
+                  </Link>
                 </li>
                 <li>
-                  <FaInstagramSquare />
+                  <Link
+                    href="https://www.instagram.com/meradhan/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Instagram"
+                  >
+                    <FaInstagramSquare />
+                  </Link>
                 </li>
                 <li>
-                  <FaPinterest />
+                  <Link
+                    href="https://in.pinterest.com/meradhanco/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Pinterest"
+                  >
+                    <FaPinterest />
+                  </Link>
                 </li>
                 <li>
-                  <FaLinkedin />
+                  <Link
+                    href="https://www.linkedin.com/company/meradhan/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="LinkedIn"
+                  >
+                    <FaLinkedin />
+                  </Link>
                 </li>
                 <li>
-                  <FaXTwitter />
+                  <Link
+                    href="https://x.com/MeraDhanCo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#F25C4C] transition-colors duration-200"
+                    aria-label="Twitter (X)"
+                  >
+                    <FaXTwitter />
+                  </Link>
                 </li>
               </ul>
               <div className="flex flex-col gap-3">
