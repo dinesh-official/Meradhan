@@ -11,11 +11,6 @@ import {
 
 export const description = "A pie chart with no separator";
 
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-];
-
 const chartConfig = {
   visitors: {
     label: "Visitors",
@@ -30,7 +25,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ReturnCalcChart() {
+interface ReturnCalcChartProps {
+  amount: number;
+  interest: number;
+}
+export function ReturnCalcChart({ amount, interest }: ReturnCalcChartProps) {
+    const chartData = [
+    { name: "Investment", value: amount, fill: "var(--color-chrome)" },
+    { name: "Interest", value: interest, fill: "var(--color-safari)" },
+  ];
   return (
     <div>
       <ChartContainer config={chartConfig} className="mx-auto aspect-square  w-60">
@@ -39,12 +42,8 @@ export function ReturnCalcChart() {
             cursor={false}
             content={<ChartTooltipContent hideLabel  />}
           />
-          <Pie
-            data={chartData}
-            dataKey="visitors"
-            nameKey="browser"
-            stroke="0"
-          />
+                 <Pie data={chartData} dataKey="value" nameKey="name" stroke="0" />
+
         </PieChart>
       </ChartContainer>
       <div className="flex md:flex-col flex-row  gap-3 md:px-10">
