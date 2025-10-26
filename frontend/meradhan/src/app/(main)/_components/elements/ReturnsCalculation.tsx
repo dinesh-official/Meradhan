@@ -2,10 +2,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useMemo, useState } from "react";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { ReturnCalcChart } from "./ReturnCalcChart";
-import { useMemo, useState } from "react";
-type Frequency = "Monthly" | "Quarterly" | "Half-Yearly" | "Yearly";
 
 const inr = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -44,20 +43,20 @@ function ReturnsCalculation() {
     setRate(clamp(Number(v.replace(/[^\d.]/g, "")) || 0, 0, 100));
 
   return (
-    <div className="grid lg:grid-cols-2 gap-10 mt-8">
-      <div className="flex flex-col gap-10 ">
+    <div className="gap-10 grid lg:grid-cols-2 mt-8">
+      <div className="flex flex-col gap-10">
         <div>
-          <div className="flex justify-between mb-4 items-center">
+          <div className="flex justify-between items-center mb-4">
             <p>Investment Amount</p>
             <Input
-              className="bg-white border-gray-200  md:w-60 w-32"
+              className="bg-white border-gray-200 w-32 md:w-60"
               value={amount}
               onChange={(e) => onAmountInput(e.target.value)}
             />
           </div>
           <div>
             <label className="range_label">
-              <Input
+              <input
                 type="range"
                 name="amount_range"
                 className="range-input"
@@ -71,23 +70,23 @@ function ReturnsCalculation() {
           </div>
         </div>
         <div>
-          <div className="flex justify-between mb-4 items-center">
+          <div className="flex justify-between items-center mb-4">
             <p>Tenure</p>
             <div className="relative">
               <Input
                 value={tenure}
                 onChange={(e) => onTenureInput(e.target.value)}
-                className="peer pe-12 bg-white  md:w-60 w-32 border-gray-200 "
+                className="peer bg-white pe-12 border-gray-200 w-32 md:w-60"
                 type="text"
               />
-              <span className="pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-sm  peer-disabled:opacity-50">
+              <span className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 pe-3 text-sm pointer-events-none end-0">
                 Year
               </span>
             </div>
           </div>
           <div>
             <label className="range_label">
-              <Input
+              <input
                 type="range"
                 min={1}
                 max={40}
@@ -100,16 +99,16 @@ function ReturnsCalculation() {
           </div>
         </div>
         <div>
-          <div className="flex justify-between  mb-4 items-center">
+          <div className="flex justify-between items-center mb-4">
             <p>Return Rate</p>
             <div className="relative">
               <Input
                 value={rate}
                 onChange={(e) => onRateInput(e.target.value)}
-                className="peer pe-12 bg-white  md:w-60 w-32 border-gray-200 "
+                className="peer bg-white pe-12 border-gray-200 w-32 md:w-60"
                 type="text"
               />
-              <span className="pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-sm  peer-disabled:opacity-50">
+              <span className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 pe-3 text-sm pointer-events-none end-0">
                 %
               </span>
             </div>
@@ -131,9 +130,9 @@ function ReturnsCalculation() {
       </div>
       <Card className="border-0">
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="gap-5 grid md:grid-cols-2">
             <div className="flex flex-col gap-6">
-              <h1 className="text-3xl flex items-center">
+              <h1 className="flex items-center text-3xl">
                 <PiCurrencyInrBold />{" "}
                 {inr.format(total).replace("₹", "").trim()}
               </h1>
@@ -144,7 +143,7 @@ function ReturnsCalculation() {
                 <Label className="font-normal text-gray-600">
                   Investment Amount
                 </Label>
-                <p className="text-lg flex items-center ">
+                <p className="flex items-center text-lg">
                   <PiCurrencyInrBold />
                   {inr.format(amount).replace("₹", "").trim()}
                 </p>
@@ -153,7 +152,7 @@ function ReturnsCalculation() {
                 <Label className="font-normal text-gray-600">
                   Interest Amount
                 </Label>
-                <p className="text-lg flex items-center">
+                <p className="flex items-center text-lg">
                   <PiCurrencyInrBold />{" "}
                   {inr.format(interest).replace("₹", "").trim()}
                 </p>

@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { Plus } from "lucide-react";
 import { FaStar } from "react-icons/fa";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { RiShareFill } from "react-icons/ri";
@@ -72,7 +71,7 @@ export function BondListCard({
                     className="bg-white border-gray-200 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
                     checkClass="text-white"
                   />
-                  <p className="text-sm text-gray-800">Add to Compare</p>
+                  <span className="text-sm text-gray-800">Add to Compare</span>
                 </label>
               )}
               {onlyShare && (

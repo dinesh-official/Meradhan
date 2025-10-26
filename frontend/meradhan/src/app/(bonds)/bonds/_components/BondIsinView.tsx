@@ -10,7 +10,7 @@ export default function BondIsinView() {
       <BondInfoHeader />
       <div className="grid lg:grid-cols-6 gap-8 py-10">
         <div className="lg:col-span-4">
-          <div className="grid md:grid-cols-3  gap-5">
+          <div className="grid md:grid-cols-3 gap-5">
             <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>
             <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>
             <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>

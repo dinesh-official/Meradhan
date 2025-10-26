@@ -1,8 +1,8 @@
 "use client";
+import { CustomArrow } from "@/app/(main)/_components/elements/TestimonialsSlide";
 import Link from "next/link";
-import React, { JSX } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Carousel, { ArrowProps, ResponsiveType } from "react-multi-carousel";
+import { JSX } from "react";
+import Carousel, { ResponsiveType } from "react-multi-carousel";
 
 const responsive: ResponsiveType = {
   superLargeDesktop: {
@@ -23,45 +23,22 @@ const responsive: ResponsiveType = {
   },
 };
 
-// Custom Left Arrow
-const CustomLeftArrow: React.FC<ArrowProps> = ({ onClick }) => {
-  return (
-    <button
-      onClick={onClick}
-      className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10  p-2 cursor-pointer"
-      aria-label="Previous Slide"
-    >
-      <FaChevronLeft size={18} className="text-gray-400" />
-    </button>
-  );
-};
-
-// Custom Right Arrow
-const CustomRightArrow: React.FC<ArrowProps> = ({ onClick }) => {
-  return (
-    <button
-      onClick={onClick}
-      className="absolute right-0 top-1/2 z-40 transform -translate-y-1/2   p-2 cursor-pointer "
-      aria-label="Next Slide"
-    >
-      <FaChevronRight size={18} className="text-gray-400" />
-    </button>
-  );
-};
-
-const CategorySlider = ({category}:{ category: {
+const CategorySlider = ({
+  category,
+}: {
+  category: {
     icon: JSX.Element;
     name: string;
     href: string;
-}[]
+  }[];
 }) => {
   return (
     <div className="relative mt-8">
       <Carousel
         responsive={responsive}
         arrows={true}
-        customLeftArrow={<CustomLeftArrow />}
-        customRightArrow={<CustomRightArrow />}
+        customLeftArrow={<CustomArrow side="LEFT" />}
+        customRightArrow={<CustomArrow side="RIGHT" />}
         showDots={false}
         autoPlay
         infinite
@@ -70,12 +47,12 @@ const CategorySlider = ({category}:{ category: {
           <Link
             href={e.href}
             key={index}
-            className="flex justify-center items-center flex-col gap-3 select-none"
+            className="flex flex-col justify-center items-center gap-3 select-none"
           >
-            <div className="flex justify-center items-center bg-primary hover:bg-secondary transition-all cursor-pointer rounded-full w-14 h-14 text-white">
-            {e.icon}
+            <div className="flex justify-center items-center bg-primary hover:bg-secondary rounded-full w-14 h-14 text-white transition-all cursor-pointer">
+              {e.icon}
             </div>
-            <p className="text-sm" >{e.name}</p>
+            <p className="text-sm">{e.name}</p>
           </Link>
         ))}
       </Carousel>

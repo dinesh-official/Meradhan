@@ -19,7 +19,7 @@ export default async function RootLayout({
       <body
         className={`${poppins.className} ${quicksand.variable} antialiased`}
       >
-        <NextTopLoader />
+        <NextTopLoader color="#002c59" />
         <Client>{children}</Client>
       </body>
     </html>

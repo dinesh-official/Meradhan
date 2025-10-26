@@ -9,11 +9,10 @@ import {
 import Footer from "@/global/components/footer/Footer";
 import NewsLetter from "@/global/components/footer/NewsLetter";
 import NavBar from "@/global/components/navbar/NavBar";
-import React from "react";
-import ListNseData from "./_components/ListNseData";
 import ListFilter from "./_components/ListFilter";
+import ListNseData from "./_components/ListNseData";
 
-export const nseData = [
+ const nseData = [
   {
     date: "21 Jul 2025",
     exchange: "NSE",
@@ -72,7 +71,7 @@ const page = () => {
   return (
     <div className="h-[100vh]">
       <NavBar />
-      <div className="max-w-[70%] mx-auto mt-[1rem] mb-[4rem] ">
+      <div className="mx-auto mt-[1rem] mb-[4rem] max-w-[70%]">
         <div className="mb-4">
           <Breadcrumb>
             <BreadcrumbList>
@@ -88,13 +87,13 @@ const page = () => {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <div className="flex flex-col items-center justify-center text-center gap-4"></div>
-        <h3 className="text-3xl md:text-4xl font-medium text-gray-900">
+        <div className="flex flex-col justify-center items-center gap-4 text-center"></div>
+        <h3 className="font-medium text-gray-900 text-3xl md:text-4xl">
           Regulatory{" "}
-          <span className="text-[#F25C4C] font-semibold">Circulars</span>
+          <span className="font-semibold text-[#F25C4C]">Circulars</span>
         </h3>
 
-        <p className="text-gray-600 text-[16px] md:text-[17px] leading-relaxed max-w-[700px]">
+        <p className="max-w-[700px] text-[16px] text-gray-600 md:text-[17px] leading-relaxed">
           Stay updated with the latest SEBI, NSE and BSE circulars impacting the
           bond and fixed income markets—all in one place.
         </p>

@@ -30,20 +30,22 @@ interface ReturnCalcChartProps {
   interest: number;
 }
 export function ReturnCalcChart({ amount, interest }: ReturnCalcChartProps) {
-    const chartData = [
+  const chartData = [
     { name: "Investment", value: amount, fill: "var(--color-chrome)" },
     { name: "Interest", value: interest, fill: "var(--color-safari)" },
   ];
   return (
     <div>
-      <ChartContainer config={chartConfig} className="mx-auto aspect-square  w-60">
+      <ChartContainer
+        config={chartConfig}
+        className="mx-auto aspect-square  w-60"
+      >
         <PieChart>
           <ChartTooltip
             cursor={false}
-            content={<ChartTooltipContent hideLabel  />}
+            content={<ChartTooltipContent hideLabel />}
           />
-                 <Pie data={chartData} dataKey="value" nameKey="name" stroke="0" />
-
+          <Pie data={chartData} dataKey="value" nameKey="name" stroke="0" />
         </PieChart>
       </ChartContainer>
       <div className="flex md:flex-col flex-row  gap-3 md:px-10">

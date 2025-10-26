@@ -10,13 +10,15 @@ function NavBar() {
       <div className="container mx-auto h-full">
         <div className="flex justify-between items-center h-full ">
           {/* Logo */}
-          <Image
-            src={`/logo/mera-dhan-logo.svg`}
-            width={400}
-            height={200}
-            alt="meradhan"
-            className="w-auto md:h-12 h-10"
-          />
+          <Link href={`/`}>
+            <Image
+              src={`/logo/mera-dhan-logo.svg`}
+              width={400}
+              height={200}
+              alt="meradhan"
+              className="w-auto h-10"
+            />
+          </Link>
 
           {/* Menu Items */}
           <div className="lg:flex hidden justify-center items-center gap-7 ">

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
 import { FaInstagramSquare } from "react-icons/fa";
@@ -10,19 +11,24 @@ import {
 } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 
-function Footer() {
+function Footer({ lightModded }: { lightModded?: boolean }) {
   return (
     <div>
-      <div className="bg-[#f5f5f5] py-12">
-        <div className="container">
-          <p className="text-sm text-center lg:px-28">
+      <div className={cn("bg-[#f5f5f5] py-12", lightModded && "bg-white")}>
+        <div className={!lightModded ? "container" : "px-8"}>
+          <p
+            className={cn(
+              "text-sm text-center lg:px-28",
+              lightModded && "lg:px-0"
+            )}
+          >
             Disclaimer : The content on this website is for informational and
             educational purposes only. MeraDhan does not provide investment,
             legal, or tax advice. Please consult a registered financial advisor
             before making any investment decisions.
           </p>
 
-          <div className="grid lg:grid-cols-2 mt-14">
+          <div className={cn("grid lg:grid-cols-2 mt-14", lightModded && "border-t border-gray-200 pt-7")}>
             <div className="flex flex-col gap-6">
               <h5 className="text-xl">MeraDhan</h5>
               <ul className="flex text-xl gap-4 text-primary">
@@ -186,7 +192,7 @@ function Footer() {
           </div>
         </div>
       </div>
-      <div className="container">
+      <div className={!lightModded ? "container" : "border-t px-8 border-gray-200"}>
         <div className="py-6 text-sm flex md:justify-between justify-center gap-2 md:items-center items-center md:flex-row flex-col ">
           <p>© 2025 MeraDhan. All Rights Reserved</p>
           <div className="flex  items-center gap-4">

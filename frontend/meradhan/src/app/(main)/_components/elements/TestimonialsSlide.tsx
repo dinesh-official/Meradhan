@@ -1,5 +1,6 @@
 "use client";
 import StarRating from "@/global/elements/StarRating";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -24,27 +25,26 @@ const responsive: ResponsiveType = {
 };
 
 // Custom Left Arrow
-const CustomLeftArrow: React.FC<ArrowProps> = ({ onClick }) => {
-  return (
-    <button
-      onClick={onClick}
-      className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10  p-2 cursor-pointer"
-      aria-label="Previous Slide"
-    >
-      <FaChevronLeft size={18} className="text-gray-400" />
-    </button>
-  );
-};
 
 // Custom Right Arrow
-const CustomRightArrow: React.FC<ArrowProps> = ({ onClick }) => {
+export const CustomArrow: React.FC<ArrowProps & { side: "LEFT" | "RIGHT" }> = ({
+  onClick,
+  side,
+}) => {
   return (
     <button
       onClick={onClick}
-      className="absolute right-0 top-1/2 z-40 transform -translate-y-1/2   p-2 cursor-pointer "
+      className={cn(
+        "absolute top-1/2 z-40 transform -translate-y-1/2   py-2 cursor-pointer ",
+        side == "LEFT" ? "left-0" : "right-0 "
+      )}
       aria-label="Next Slide"
     >
-      <FaChevronRight size={18} className="text-gray-400" />
+      {side == "LEFT" ? (
+        <FaChevronLeft size={18} className="text-gray-400" />
+      ) : (
+        <FaChevronRight size={18} className="text-gray-400" />
+      )}
     </button>
   );
 };
@@ -55,10 +55,11 @@ const TestimonialsSlide = () => {
       <Carousel
         responsive={responsive}
         arrows={true}
-        customLeftArrow={<CustomLeftArrow />}
-        customRightArrow={<CustomRightArrow />}
+        customLeftArrow={<CustomArrow side="LEFT" />}
+        customRightArrow={<CustomArrow side="RIGHT" />}
         showDots={false}
         autoPlay
+        infinite
         partialVisible={false}
       >
         <Testimonial />

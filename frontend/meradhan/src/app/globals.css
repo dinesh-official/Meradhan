@@ -180,3 +180,33 @@ input[type="range"]::-moz-range-thumb {
   anchor-name: --thumb;
   view-timeline: --thumb-view inline;
 }
+
+.react-multiple-carousel__arrow--left {
+  left: 0 !important;
+}
+
+.react-multiple-carousel__arrow--right {
+  right: 0 !important;
+}
+
+.react-multi-carousel-dot-list {
+  bottom: -50px !important; /* Move dots lower or higher */
+}
+
+.react-multi-carousel-dot button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-slate-200); /* gray-300 */
+  transition: all 0.3s ease;
+  margin: 0 5px;
+}
+
+.react-multi-carousel-dot--active button {
+  background: var(--color-primary); /* gray-900 */
+}
+
+*:focus {
+  outline: none !important;
+}

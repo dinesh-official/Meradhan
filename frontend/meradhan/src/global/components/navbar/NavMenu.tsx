@@ -16,7 +16,6 @@ function NavMenu() {
               <IoMdArrowDropdown className="transition-all duration-200 group-hover:rotate-180" />
             )}
           </div>
-
           {/* Level 1 Dropdown */}
           {item.children && <NavMenuList item={item} />}
         </div>
@@ -42,7 +41,9 @@ function NavMenuList({
             // Base styles
             "absolute bg-white border border-gray-100   rounded-md w-52 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out transform group-hover:translate-y-1",
             // Position: open below if root, open right if nested
-            isNested ? "left-full top-0 -ml-1 right-0 -mt-2" : "top-full left-0 mt-1"
+            isNested
+              ? "left-full top-0 -ml-1 right-0 -mt-1"
+              : "top-full left-0 mt-3"
           )}
         >
           <ul className="">
@@ -50,22 +51,21 @@ function NavMenuList({
               <li
                 key={j}
                 className={cn(
-                  "relative group/item text-gray-700 hover:bg-primary/10 hover:text-primary transition text-sm  whitespace-nowrap",
+                  "relative flex justify-between items-center group/item text-gray-700 hover:bg-primary/10 hover:text-primary transition text-sm  whitespace-nowrap",
                   subItem.children && "pr-6"
                 )}
               >
                 {/* Menu Item + Right Arrow */}
-                <div className="flex justify-between items-center">
-                  <Link
-                    href={subItem.href || "#"}
-                    className="px-4 py-2 block w-full"
-                  >
-                    {subItem.title}
-                  </Link>
-                  {subItem.children && (
-                    <IoMdArrowDropdown className="rotate-[-90deg] text-gray-400 group-hover/item:text-primary transition-all duration-200" />
-                  )}
-                </div>
+
+                <Link
+                  href={subItem.href || "#"}
+                  className="px-4 py-2 block w-full"
+                >
+                  {subItem.title}
+                </Link>
+                {subItem.children && (
+                  <IoMdArrowDropdown className="rotate-[-90deg] text-gray-400 group-hover/item:text-primary transition-all duration-200" />
+                )}
 
                 {/* Nested Dropdown — Opens to the Right */}
                 {subItem.children && (

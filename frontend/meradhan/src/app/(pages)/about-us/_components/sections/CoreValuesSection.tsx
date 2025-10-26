@@ -38,21 +38,21 @@ const coreValues = [
 
 const CoreValuesSection = () => {
   return (
-   <section className="max-w-[70%] mt-[4rem] items-center justify-center gap-4 m-auto px-5  text-gray-800 leading-relaxed space-y-6">
+   <section className="justify-center items-center gap-4 space-y-6 m-auto mt-[4rem] px-5 max-w-[70%] text-gray-800 leading-relaxed">
           <h4
             className={cn(
-              "text-3xl md:text-4xl font-medium text-black",
+              "font-medium text-black text-3xl md:text-4xl",
               quicksand.className
             )}
           >
-            Core <span className="text-[#F25C4C] font-semibold">Values</span>
+            Core <span className="font-semibold text-[#F25C4C]">Values</span>
           </h4>
   
-          <div className="mt-8 space-y-10">
+          <div className="space-y-10 mt-8">
             {coreValues.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col md:flex-row items-center gap-6"
+                className="flex md:flex-row flex-col items-center gap-6"
               >
                 <div className="flex-shrink-0">
                   <Image
@@ -60,11 +60,11 @@ const CoreValuesSection = () => {
                     alt={item.title}
                     width={100}
                     height={100}
-                    className="h-[90px] w-[90px] md:h-[110px] md:w-[110px]"
+                    className="w-[90px] md:w-[110px] h-[90px] md:h-[110px]"
                   />
                 </div>
-                <div className="flex flex-col gap-2 text-center md:text-left">
-                  <h4 className="text-lg md:text-xl font-semibold">
+                <div className="flex flex-col gap-2 md:text-left text-center">
+                  <h4 className="font-semibold text-lg md:text-xl">
                     {item.title}
                   </h4>
                   <p className="text-gray-700 text-sm md:text-base">

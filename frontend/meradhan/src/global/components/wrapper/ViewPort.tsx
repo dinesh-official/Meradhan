@@ -11,7 +11,7 @@ function ViewPort({
   headerOnly?: boolean;
 }) {
   return (
-    <div className="" >
+    <div>
       <NavBar />
       {children}
       {!headerOnly && (
