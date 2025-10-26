@@ -1,34 +1,88 @@
 "use client";
-import Footer from "@/global/components/footer/Footer";
-import AccountNavBar from "../_components/NavBar/AccountNavBar";
-import ActionSideBar from "../_components/NavBar/ActionSideBar";
+import { FaPercent, FaTag, FaUser } from "react-icons/fa";
+import { FaSackDollar } from "react-icons/fa6";
+import { PiCurrencyInrBold } from "react-icons/pi";
+import AccountViewPort from "../_components/wrapper/AccountViewPort";
+import DashBoardDataViewCard from "./_components/_cards/DashBoardDataViewCard";
+import { DashBoardSatsCard } from "./_components/_cards/DashBoardSatsCard";
+import OngoingDealsCard from "./_components/_cards/OngoingDealsCard";
 
-// Shadcn UI Tooltip Components
-
-function Page() {
+function DashBoardPage() {
   return (
-    <div>
-      <AccountNavBar />
-      <div className="flex">
-        {/* Sidebar */}
-        <ActionSideBar />
+    <AccountViewPort
 
-        {/* Main Content */}
-        <div className="w-full transition-all duration-300">
-          <div className="h-96"></div>
-          <div className="h-96"></div>
-          <div className="h-96"></div>
-          <div className="h-96"></div>
-          <div className="h-96"></div>
-          <div className="h-96"></div>
-          <div className="h-96"></div>
-          <div className="mb-12 lg:mb-0">
-            <Footer lightModded />
-          </div>
+      title={
+        <>
+          Welcome <span className="font-bold">Sourav Sourav!</span>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-5">
+        <div className="bg-gray-100 p-4 px-5 rounded">
+          <p>Explore your portfolio, offers, and deals — all in one place.</p>
         </div>
+
+        <div className="gap-5 grid md:grid-cols-2 lg:grid-cols-4">
+          <DashBoardSatsCard
+            title="My Investments"
+            icon={<FaSackDollar size={25} className="text-primary" />}
+          >
+            <p className="flex items-center font-medium text-primary text-3xl">
+              <PiCurrencyInrBold /> 0
+            </p>
+          </DashBoardSatsCard>
+          <DashBoardSatsCard
+            title="Interest Earned"
+            icon={<FaPercent size={18} className="text-primary" />}
+          >
+            <p className="flex items-center font-medium text-primary text-3xl">
+              <PiCurrencyInrBold /> 0
+            </p>
+          </DashBoardSatsCard>
+          <DashBoardSatsCard
+            title="My KYC"
+            icon={<FaUser size={19} className="text-secondary" />}
+            className="bg-accent text-secondary"
+          >
+            <p className="flex items-center font-medium text-secondary text-3xl">
+              <PiCurrencyInrBold /> 0
+            </p>
+          </DashBoardSatsCard>
+          <DashBoardSatsCard
+            title="My Offers"
+            icon={<FaTag size={20} className="text-primary" />}
+          >
+            <p className="flex items-center font-medium text-primary text-3xl">
+              Explore
+            </p>
+          </DashBoardSatsCard>
+        </div>
+        <div className="gap-5 grid lg:grid-cols-2">
+          <DashBoardDataViewCard
+            title={
+              <>
+                My <span className="text-secondary">Portfolio</span>
+              </>
+            }
+            isEmpty={true}
+            emptyMessage="No investments available yet"
+            ctaText="Explore All Bonds"
+          />
+
+          <DashBoardDataViewCard
+            title={
+              <>
+                My <span className="text-secondary">Orders</span>
+              </>
+            }
+            isEmpty={true}
+            emptyMessage="No orders found"
+          />
+        </div>
+        <OngoingDealsCard />
       </div>
-    </div>
+    </AccountViewPort>
   );
 }
 
-export default Page;
+export default DashBoardPage;

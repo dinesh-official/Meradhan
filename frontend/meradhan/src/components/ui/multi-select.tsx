@@ -74,7 +74,6 @@ export function MultiSelect({
       return new Map(prev).set(value, label);
     });
   }, []);
-  console.log(selectedValues, defaultValues);
 
   return (
     <MultiSelectContext
@@ -117,7 +116,7 @@ export function MultiSelectTrigger({
         )}
       >
         {children}
-        <IoChevronDownOutline className="size-4 shrink-0 opacity-50" />
+        <IoChevronDownOutline className="opacity-50 size-4 shrink-0" />
       </Button>
     </PopoverTrigger>
   );
@@ -145,7 +144,7 @@ export function MultiSelectValue({
   return (
     <div
       {...props}
-      className={cn("flex w-fit gap-1.5 overflow-hidden", className)}
+      className={cn("flex gap-1.5 w-fit overflow-hidden", className)}
     >
       {items.get([...selectedValues].find((value) => items.has(value)) ?? "")}
       <p
@@ -177,7 +176,7 @@ export function MultiSelectContent({
         </Command>
       </div>
       <PopoverContent
-        className="p-0 bg-secondary"
+        className="bg-secondary p-0"
         style={{ width: "var(--radix-popover-trigger-width)" }}
       >
         <Command {...props}>
@@ -215,8 +214,9 @@ export function MultiSelectItem({
     >
       <Checkbox
         checked={isSelected}
+        checkClass="text-secondary"
         className={cn(
-          "mr-2 size-4 data-[state=checked]:bg-white bg-white border-0  data-[state=checked]:text-secondary"
+          "bg-white data-[state=checked]:bg-white mr-2 border-0 size-4 data-[state=checked]:text-secondary"
         )}
       />
       {children}

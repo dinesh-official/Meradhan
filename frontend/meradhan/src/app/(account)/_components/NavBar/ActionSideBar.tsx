@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, ReactNode, useEffect } from "react";
+import { FC, memo, ReactNode, useEffect } from "react";
 import { FaChartPie, FaUser } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { HiRectangleStack } from "react-icons/hi2";
@@ -16,6 +16,7 @@ import { Menu, X } from "lucide-react";
 import { create } from "zustand";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 // -------------------------
 // Zustand store
@@ -106,9 +107,10 @@ interface SidebarItemProps {
   icon: ReactNode;
   label: string;
   href?: string;
+  isActive?: boolean;
 }
 
-const SidebarItem: FC<SidebarItemProps> = ({ icon, label, href }) => {
+const SidebarItem: FC<SidebarItemProps> = ({ icon, label, href, isActive }) => {
   const { collapsed } = useSidebarStore();
 
   return (
@@ -120,9 +122,11 @@ const SidebarItem: FC<SidebarItemProps> = ({ icon, label, href }) => {
       <TooltipTrigger asChild disabled={!collapsed}>
         <Link
           href={href || "#"}
-          className={`flex items-center h-12 cursor-pointer hover:bg-white hover:text-primary transition-all duration-300 ${
-            collapsed ? "justify-center" : "gap-4 px-4"
-          }`}
+          className={cn(
+            `flex items-center hover:bg-white h-12 hover:text-primary transition-all duration-300 cursor-pointer`,
+            collapsed ? "justify-center" : "gap-4 px-4",
+            isActive && "bg-white text-primary"
+          )}
         >
           <span className="flex justify-center items-center w-6">{icon}</span>
           <span
@@ -142,8 +146,17 @@ const SidebarItem: FC<SidebarItemProps> = ({ icon, label, href }) => {
 // -------------------------
 // Main Sidebar Component
 // -------------------------
-const ActionSideBar: FC = () => {
+const ActionSideBar = ({ showSideBar = true }: { showSideBar?: boolean }) => {
   const { collapsed } = useSidebarStore();
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    return pathname === href;
+  };
+
+  if (!showSideBar && collapsed) {
+    return null;
+  }
 
   return (
     <div
@@ -153,11 +166,17 @@ const ActionSideBar: FC = () => {
     >
       <div className="flex flex-col pt-2">
         {accountMenuItems.map((item, i) => (
-          <SidebarItem key={i} icon={item.icon} label={item.label} href={item.href}  />
+          <SidebarItem
+            key={i}
+            icon={item.icon}
+            label={item.label}
+            href={item.href}
+            isActive={isActive(item.href || "")}
+          />
         ))}
       </div>
     </div>
   );
 };
 
-export default ActionSideBar;
+export default memo(ActionSideBar);

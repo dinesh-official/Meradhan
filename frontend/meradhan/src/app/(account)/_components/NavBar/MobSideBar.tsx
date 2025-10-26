@@ -11,6 +11,7 @@ import Image from "next/image";
 import { accountMenuItems } from "./ActionSideBar";
 import { cn } from "@/lib/utils"; // optional helper for class merging
 import Link from "next/link";
+import { memo } from "react";
 
 function MobSideBar() {
   return (
@@ -71,4 +72,4 @@ function MobSideBar() {
   );
 }
 
-export default MobSideBar;
+export default memo(MobSideBar);

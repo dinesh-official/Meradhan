@@ -8,21 +8,9 @@ import { FaStar } from "react-icons/fa";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { RiShareFill } from "react-icons/ri";
 import BondAddToWatchList from "./BondAddToWatchList";
+import { BondInfoLabel } from "./BondInfoLabel";
 
-function BondInfoLabel({
-  children,
-  title,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <Label className="text-gray-600 font-normal">{title}</Label>
-      {children}
-    </div>
-  );
-}
+
 
 export function BondListCard({
   gridMode,
@@ -33,7 +21,7 @@ export function BondListCard({
 }) {
   return (
     <Card
-      className={cn("odd:bg-muted odd:border-0 even:bg-white even:border-1")}
+      className={cn("even:bg-white odd:bg-muted even:border-1 odd:border-0")}
     >
       <CardContent>
         <div className="flex flex-col gap-4">
@@ -41,17 +29,17 @@ export function BondListCard({
             <p className="font-semibold text-primary text-sm">INE01YL07342</p>
             <Badge className="flex">
               <FaStar />
-              <span className="font-semibold ">A-</span>
+              <span className="font-semibold">A-</span>
             </Badge>
             <BondAddToWatchList />
           </div>
           <div className="flex flex-col gap-3">
-            <div className="flex justify-between ">
-              <p className="text-xl text-gray-700 line-clamp-1">
+            <div className="flex justify-between">
+              <p className="text-gray-700 text-xl line-clamp-1">
                 EARLYSALARY SERVICES PRIVATE LIMITED
               </p>
               {!gridMode && (
-                <div className="lg:flex hidden gap-5">
+                <div className="hidden lg:flex gap-5">
                   <Button variant={`outline`} className="bg-transparent">
                     View Details
                   </Button>
@@ -61,27 +49,27 @@ export function BondListCard({
             </div>
             <div
               className={cn(
-                "flex items-center gap-8 border-b pb-5",
+                "flex items-center gap-8 pb-5 border-b",
                 onlyShare && "gap-3"
               )}
             >
               {!onlyShare && (
-                <label className="flex items-center gap-2 select-none cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
                   <Checkbox
-                    className="bg-white border-gray-200 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
+                    className="bg-white data-[state=checked]:bg-secondary border-gray-200 data-[state=checked]:border-secondary"
                     checkClass="text-white"
                   />
-                  <span className="text-sm text-gray-800">Add to Compare</span>
+                  <span className="text-gray-800 text-sm">Add to Compare</span>
                 </label>
               )}
               {onlyShare && (
-                <Label className="text-gray-600 font-normal">Share this</Label>
+                <Label className="font-normal text-gray-600">Share this</Label>
               )}
               <RiShareFill className="text-gray-600 cursor-pointer" size={18} />
             </div>
             <div
               className={cn(
-                "grid lg:grid-cols-6 grid-cols-2 gap-4 pt-3",
+                "gap-4 grid grid-cols-2 lg:grid-cols-6 pt-3",
                 gridMode && "lg:grid-cols-2 "
               )}
             >
@@ -110,7 +98,7 @@ export function BondListCard({
 
               <div
                 className={cn(
-                  "grid grid-cols-2 gap-5 col-span-2 mt-2",
+                  "gap-5 grid grid-cols-2 col-span-2 mt-2",
                   !gridMode && "lg:hidden grid"
                 )}
               >

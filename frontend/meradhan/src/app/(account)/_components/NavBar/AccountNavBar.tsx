@@ -1,4 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+"use client";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,72 +15,129 @@ import { FaCartShopping } from "react-icons/fa6";
 import { MdLogout } from "react-icons/md";
 import { SideBarCollapseButton } from "./ActionSideBar";
 import MobSideBar from "./MobSideBar";
+import { memo } from "react";
+
 function AccountNavBar() {
   return (
-    <div className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18">
-      <div className="flex justify-between items-center px-6 h-full">
-        <div className="flex items-center gap-5 lg:gap-10">
+    <nav
+      className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18"
+      aria-label="Main Navigation Bar"
+    >
+      <div className="flex justify-between items-center px-4 md:px-6 h-full">
+        {/* Left Section: Logo and Sidebar Controls */}
+        <section
+          className="flex items-center gap-5 lg:gap-10"
+          aria-label="Navigation Controls"
+        >
           <SideBarCollapseButton />
           <MobSideBar />
-          <Link href={`/`}>
+
+          <Link
+            href="/"
+            aria-label="Go to homepage"
+            className="flex items-center"
+          >
             <Image
-              src={`/logo/mera-dhan-logo.svg`}
+              src="/logo/mera-dhan-logo.svg"
               width={400}
               height={200}
-              alt="meradhan"
+              alt="Mera Dhan Logo"
               className="w-auto h-8 lg:h-10"
+              priority
             />
           </Link>
-        </div>
+        </section>
 
-        {/* // Actions  */}
-        <div className="flex items-center gap-8">
-          <div className="right-0 bottom-0 z-40 fixed lg:relative flex justify-between lg:justify-end items-center gap-8 bg-white lg:bg-none shadow lg:shadow-none px-4 lg:px-0 py-2 lg:py-0 border-gray-100 lg:border-0 border-t w-full lg:w-auto">
-            <Button variant={`secondaryLight`} className="gap-3 w-24">
-              <FaUser /> KYC
+        {/* Right Section: User Actions */}
+        <section
+          className="flex items-center gap-8"
+          aria-label="User Actions Section"
+        >
+          {/* Action Buttons */}
+          <div className="right-0 bottom-0 z-40 fixed sm:relative flex justify-between sm:justify-end items-center gap-8 sm:gap-5 bg-white sm:bg-transparent shadow sm:shadow-none px-4 sm:px-0 py-2 lg:py-0 border-gray-100 sm:border-0 border-t w-full sm:w-auto">
+            {/* KYC Button */}
+            <Button
+              variant="secondaryLight"
+              className="gap-3 w-24"
+              aria-label="KYC Verification"
+            >
+              <FaUser aria-hidden="true" /> KYC
             </Button>
 
-            
-            <div className="flex items-center gap-10">
-              <button className="text-primary cursor-pointer">
-                <FaCartShopping size={20} />
+            {/* Icon Buttons */}
+            <div className="flex items-center gap-8 sm:gap-5 lg:gap-10">
+              <button
+                type="button"
+                className="hover:opacity-80 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-primary"
+                aria-label="View Cart"
+              >
+                <FaCartShopping size={20} aria-hidden="true" />
               </button>
-              <button className="text-primary cursor-pointer">
-                <FaSearch size={20} />
+
+              <button
+                type="button"
+                className="hover:opacity-80 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-primary"
+                aria-label="Search"
+              >
+                <FaSearch size={20} aria-hidden="true" />
               </button>
-              <button className="relative text-primary cursor-pointer">
-                <div className="-top-2.5 -right-1.5 absolute flex justify-center items-center bg-secondary rounded-full w-5 h-5 font-medium text-white text-xs">
+
+              <button
+                type="button"
+                className="relative hover:opacity-80 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-primary"
+              >
+                <span
+                  className="-top-1.5 -right-1 absolute flex justify-center items-center bg-secondary rounded-full w-5 h-5 font-medium text-white text-xs"
+                >
                   5
-                </div>
-                <FaBell size={20} />
+                </span>
+                <FaBell size={20} aria-hidden="true" />
               </button>
             </div>
           </div>
 
+          {/* Profile Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label="Open user menu"
+              >
+                <Avatar>
+                  {/* Add avatar image here if needed */}
+                  {/* <AvatarImage src="https://github.com/shadcn.png" alt="User profile picture" /> */}
+                  <AvatarFallback aria-hidden="true">SB</AvatarFallback>
+                </Avatar>
+              </button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent
               side="bottom"
               align="end"
               className="shadow-none"
+              aria-label="Profile Menu"
             >
-              <DropdownMenuItem>
-                <FaUser /> Profile
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex items-center gap-2">
+                  <FaUser aria-hidden="true" /> Profile
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <MdLogout /> Logout
+
+              <DropdownMenuItem asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 w-full text-left"
+                  aria-label="Logout"
+                >
+                  <MdLogout aria-hidden="true" /> Logout
+                </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </section>
       </div>
-    </div>
+    </nav>
   );
 }
 
-export default AccountNavBar;
+export default memo(AccountNavBar);

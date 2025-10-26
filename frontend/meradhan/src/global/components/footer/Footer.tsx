@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import React from "react";
+import React, { memo } from "react";
 import { FaInstagramSquare } from "react-icons/fa";
 import {
   FaFacebook,
@@ -18,7 +18,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
         <div className={!lightModded ? "container" : "px-8"}>
           <p
             className={cn(
-              "text-sm text-center lg:px-28",
+              "lg:px-28 text-sm text-center",
               lightModded && "lg:px-0"
             )}
           >
@@ -36,7 +36,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
           >
             <div className="flex flex-col gap-6">
               <h5 className="text-xl">MeraDhan</h5>
-              <ul className="flex text-xl gap-4 text-primary">
+              <ul className="flex gap-4 text-primary text-xl">
                 <li>
                   <Link
                     href="https://www.facebook.com/MeraDhanCo/"
@@ -94,8 +94,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                 </li>
               </ul>
               <div className="flex flex-col gap-3">
-                <div className="text-sm flex  gap-4">
-                  <div className="w-4 mt-1">
+                <div className="flex gap-4 text-sm">
+                  <div className="mt-1 w-4">
                     <FaLocationDot size={16} />
                   </div>
                   <p>
@@ -103,7 +103,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     - 400012, Maharashtra
                   </p>
                 </div>
-                <div className="text-sm flx  items-center flex gap-4">
+                <div className="flex items-center gap-4 text-sm flx">
                   <div className="w-4">
                     <MdEmail size={16} />
                   </div>
@@ -112,16 +112,16 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-5 mt-5">
+            <div className="gap-5 grid lg:grid-cols-3 mt-5">
               <div>
                 <h6 className="font-base text-lg">Explore</h6>
-                <ul className="text-sm flex flex-col gap-3 mt-3">
+                <ul className="flex flex-col gap-3 mt-3 text-sm">
                   <li>Bond Directory</li>
                 </ul>
               </div>
               <div>
                 <h6 className="font-base text-lg">Company</h6>
-                <ul className="text-sm flex flex-col gap-3 mt-3">
+                <ul className="flex flex-col gap-3 mt-3 text-sm">
                   <li>
                     <Link
                       href="/about-us"
@@ -150,7 +150,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
               </div>
               <div>
                 <h6 className="font-base text-lg">Resources</h6>
-                <ul className="text-sm flex flex-col gap-3  mt-3">
+                <ul className="flex flex-col gap-3 mt-3 text-sm">
                   <li>
                     <Link
                       href="/blog"
@@ -200,9 +200,9 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
       <div
         className={!lightModded ? "container" : "border-t px-8 border-gray-200"}
       >
-        <div className="py-6 text-sm flex md:justify-between justify-center gap-2 md:items-center items-center md:flex-row flex-col ">
+        <div className="flex md:flex-row flex-col justify-center md:justify-between items-center md:items-center gap-2 py-6 text-sm">
           <p>© 2025 MeraDhan. All Rights Reserved</p>
-          <div className="flex  items-center gap-4">
+          <div className="flex items-center gap-4">
             <p>Privacy Policy</p>
             <p>Terms of Use</p>
             <p>Cookie Policy</p>
@@ -213,4 +213,4 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
   );
 }
 
-export default Footer;
+export default memo(Footer);
