@@ -3,13 +3,13 @@ import React from 'react'
 const CookieContent = () => {
   return (
         <section className="flex justify-center w-full bg-white">
-        <div className="max-w-[80%] py-12 px-5 text-gray-800 leading-relaxed space-y-6">
+        <div className="max-w-[80%] py-12 px-5 text-gray-800 leading-relaxed space-y-6 text-[14px]">
           <p>
             Welcome to <strong>MeraDhan</strong>, a platform by BondNest Capital
             India Securities Private Limited.
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-900 mt-4">
+          <h3 className="text-xl text-gray-900 mt-4">
             What Are Cookies?
           </h3>
           <p>
@@ -20,7 +20,7 @@ const CookieContent = () => {
             you relevant ads and limit the number of times you see them.
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-900 mt-4">
+          <h3 className="text-xl text-gray-900 mt-4">
             How MeraDhan Uses Cookies
           </h3>
           <p>
@@ -36,7 +36,7 @@ const CookieContent = () => {
             experience and is not shared with anyone else.
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-900 mt-4">
+          <h3 className="text-xl  text-gray-900 mt-4">
             What Information Do Cookies Collect?
           </h3>
           <ul className="list-disc ml-6 space-y-2">
@@ -48,7 +48,7 @@ const CookieContent = () => {
             <li>Ads you click on</li>
           </ul>
 
-          <h3 className="text-xl font-semibold text-gray-900 mt-4">
+          <h3 className="text-xl text-gray-900 mt-4">
             How to Manage Cookies
           </h3>
           <p>
@@ -69,7 +69,7 @@ const CookieContent = () => {
             .
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-900 mt-4">
+          <h3 className="text-xl  text-gray-900 mt-4">
             Changes to This Policy
           </h3>
           <p>

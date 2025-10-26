@@ -36,7 +36,7 @@ export const MENU_ITEMS: MenuItem[] = [
   {
     title: "Tools",
 
-      children: [
+    children: [
       { title: "DhanGPT", href: "/dhangpt" },
       { title: "FD Calculator", href: "/fd-calculator" },
       { title: "XIRR Calculators", href: "/xirr-calculators" },
@@ -50,29 +50,36 @@ export const MENU_ITEMS: MenuItem[] = [
     title: "Resources",
     children: [
       {
-        title: "Product 1",
-        children: [
-          {
-            title: "Product 1",
-            href: "/about",
-          },
-          {
-            title: "Product 2",
-            href: "/blog",
-          },
-          {
-            title: "Product 3",
-            href: "/contact",
-          },
-        ],
-      },
-      {
-        title: "Product 2",
+        title: "Blog",
         href: "/blog",
       },
       {
-        title: "Product 3",
-        href: "/contact",
+        title: "News",
+        href: "/news",
+      },
+      {
+        title: "Economic Calendar",
+        href: "/economic-calendar",
+      },
+      {
+        title: "Research Reports",
+        href: "/news#",
+      },
+      {
+        title: "Glossary",
+        href: "/glossary",
+      },
+      {
+        title: "Issuer Notes",
+        href: "/issuer-notes",
+      },
+      {
+        title: "Regulatory Circulars",
+        href: "/regulatory-circulars",
+      },
+      {
+        title: "FAQs",
+        href: "/faqs",
       },
     ],
   },

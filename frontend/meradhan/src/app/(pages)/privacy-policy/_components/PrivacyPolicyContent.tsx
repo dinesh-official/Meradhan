@@ -3,7 +3,7 @@ import React from 'react'
 const PrivacyPolicyContent = () => {
   return (
        <section className="flex justify-center w-full bg-white">
-        <div className="max-w-[80%] py-12 px-5 text-gray-800 leading-relaxed space-y-6">
+        <div className="max-w-[80%] py-12 px-5 text-gray-800 leading-relaxed space-y-6 text-[14px]">
           <p>
             Thank you for visiting our website, <strong>www.meradhan.co</strong>{" "}
             (&ldquo;Platform&rdquo;).
@@ -59,7 +59,7 @@ const PrivacyPolicyContent = () => {
 
           <p>This Privacy Policy is governed by the laws of India.</p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl  text-primary mt-6">
             1. Information Collection
           </h3>
           <p>We may collect the following types of information:</p>
@@ -82,7 +82,7 @@ const PrivacyPolicyContent = () => {
             and that you have the rights and consent to share such information.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             2. Methods of Information Collection
           </h3>
           <ul className="list-disc list-inside space-y-1">
@@ -135,7 +135,7 @@ const PrivacyPolicyContent = () => {
             </li>
           </ul>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             3. Use of Information
           </h3>
           <p>
@@ -185,7 +185,7 @@ const PrivacyPolicyContent = () => {
             regulatory compliance.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             How We Use Your Information
           </h3>
           <p>
@@ -269,7 +269,7 @@ const PrivacyPolicyContent = () => {
             handled securely and transparently at all times.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             4. Security Measures
           </h3>
           <p>
@@ -286,7 +286,7 @@ const PrivacyPolicyContent = () => {
             access to their accounts.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             5. Data Storage and Retention
           </h3>
           <p>
@@ -302,7 +302,7 @@ const PrivacyPolicyContent = () => {
             longer retention.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             6. Cessation of Relationship and Data Deletion
           </h3>
           <p>
@@ -320,7 +320,7 @@ const PrivacyPolicyContent = () => {
             their accounts, and requests for reactivation may be declined.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             7. Social Media Interactions
           </h3>
           <p>
@@ -329,7 +329,7 @@ const PrivacyPolicyContent = () => {
             media accounts, you consent to such data collection.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             8. Do Not Call (DNC) Waiver
           </h3>
           <p>
@@ -338,7 +338,7 @@ const PrivacyPolicyContent = () => {
             your number is registered on a Do Not Call (DNC) registry.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             9. Liability Limitation
           </h3>
           <p>
@@ -347,7 +347,7 @@ const PrivacyPolicyContent = () => {
             incidental, or consequential damages.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             10. Opt-Out and Data Requests
           </h3>
           <p>
@@ -355,7 +355,7 @@ const PrivacyPolicyContent = () => {
             contact us at <strong>support@deradhan.co</strong>.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             11. Privacy Policy Updates
           </h3>
           <p>
@@ -363,7 +363,7 @@ const PrivacyPolicyContent = () => {
             Updated policies will take effect immediately upon posting.
           </p>
 
-          <h3 className="text-xl font-semibold text-primary mt-6">
+          <h3 className="text-xl   text-primary mt-6">
             12. Grievance Officer
           </h3>
           <p>
