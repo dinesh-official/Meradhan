@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import React from 'react'
 import TermsContent from './_components/TermsContent'
 
-const TeermsOfUse = () => {
+const TermsOfUse = () => {
   return (
       <div className="bg-primary h-72">
       <NavBar />
@@ -36,4 +36,4 @@ const TeermsOfUse = () => {
   )
 }
 
-export default TeermsOfUse
+export default TermsOfUse

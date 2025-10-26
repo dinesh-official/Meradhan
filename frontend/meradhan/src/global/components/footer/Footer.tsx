@@ -116,7 +116,14 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
               <div>
                 <h6 className="font-base text-lg">Explore</h6>
                 <ul className="flex flex-col gap-3 mt-3 text-sm">
-                  <li>Bond Directory</li>
+                  <li>
+                    <Link
+                      href="/bonds"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Bond Directory
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
@@ -203,9 +210,24 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
         <div className="flex md:flex-row flex-col justify-center md:justify-between items-center md:items-center gap-2 py-6 text-sm">
           <p>© 2025 MeraDhan. All Rights Reserved</p>
           <div className="flex items-center gap-4">
-            <p>Privacy Policy</p>
-            <p>Terms of Use</p>
-            <p>Cookie Policy</p>
+            <Link
+              href="/privacy-policy"
+              className="hover:text-primary transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms-of-use"
+              className="hover:text-primary transition-colors duration-200"
+            >
+              Terms of Use
+            </Link>
+            <Link
+              href="/cookie-policy"
+              className="hover:text-primary transition-colors duration-200"
+            >
+              Cookie Policy
+            </Link>
           </div>
         </div>
       </div>
