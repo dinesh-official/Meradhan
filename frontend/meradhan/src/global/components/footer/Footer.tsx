@@ -28,7 +28,12 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
             before making any investment decisions.
           </p>
 
-          <div className={cn("grid lg:grid-cols-2 mt-14", lightModded && "border-t border-gray-200 pt-7")}>
+          <div
+            className={cn(
+              "grid lg:grid-cols-2 mt-14",
+              lightModded && "border-t border-gray-200 pt-7"
+            )}
+          >
             <div className="flex flex-col gap-6">
               <h5 className="text-xl">MeraDhan</h5>
               <ul className="flex text-xl gap-4 text-primary">
@@ -192,7 +197,9 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
           </div>
         </div>
       </div>
-      <div className={!lightModded ? "container" : "border-t px-8 border-gray-200"}>
+      <div
+        className={!lightModded ? "container" : "border-t px-8 border-gray-200"}
+      >
         <div className="py-6 text-sm flex md:justify-between justify-center gap-2 md:items-center items-center md:flex-row flex-col ">
           <p>© 2025 MeraDhan. All Rights Reserved</p>
           <div className="flex  items-center gap-4">
