@@ -8,7 +8,7 @@ function PostCard({ listMode }: { listMode?: boolean }) {
   return (
     <div className="flex flex-col gap-4">
       <Image
-        src="/avatars/blogpage.png"
+        src="/assets/whatAreBonds.png"
         alt="Blog"
         width={1300}
         height={900}

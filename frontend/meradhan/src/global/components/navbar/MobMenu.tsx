@@ -11,6 +11,7 @@ import { AiOutlineMenu } from "react-icons/ai";
 import Image from "next/image";
 import { MENU_ITEMS } from "../../constants/menu.constants";
 import { IoMdArrowDropdown } from "react-icons/io";
+import Link from "next/link";
 
 interface MenuItemProps {
   item: (typeof MENU_ITEMS)[number];
@@ -19,8 +20,8 @@ interface MenuItemProps {
 
 function MobMenu() {
   return (
-    <Sheet  >
-      <SheetTrigger className="lg:hidden block" >
+    <Sheet>
+      <SheetTrigger className="lg:hidden block">
         <div className="cursor-pointer">
           <AiOutlineMenu size={30} />
         </div>
@@ -29,21 +30,27 @@ function MobMenu() {
         {/* Header */}
         <SheetHeader className="px-4 py-4  border-none flex-shrink-0">
           <SheetTitle>
-            <Image
-              src={`/logo/mera-dhan-logo.svg`}
-              width={400}
-              height={200}
-              alt="meradhan"
-              className="w-auto h-8"
-            />
+            <Link href={"/"}>
+              <Image
+                src={`/logo/mera-dhan-logo.svg`}
+                width={400}
+                height={200}
+                alt="meradhan"
+                className="w-auto h-8"
+              />
+            </Link>
           </SheetTitle>
         </SheetHeader>
 
         {/* Scrollable Menu */}
         <div className="flex-1 overflow-y-auto">
-          {MENU_ITEMS.map((item, i) => (
-            <MobileMenuItem key={i} item={item} />
-          ))}
+          {MENU_ITEMS.map((item, i) => {
+            console.log(item);
+
+            return (
+                <MobileMenuItem item={item} key={i}/>
+            );
+          })}
         </div>
 
         {/* Bottom Login / Signup Buttons */}
@@ -67,6 +74,8 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
   const [open, setOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
 
+  console.log("item",item)
+
   return (
     <div className="flex flex-col w-full border-t border-t-gray-200">
       {/* Menu Item Header */}
@@ -74,16 +83,26 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
         className={`flex items-center justify-between w-full px-4 py-3 text-gray-700 hover:text-primary transition-all cursor-pointer ${
           level > 0 ? `pl-${level * 4}` : ""
         }`}
-        onClick={() => hasChildren && setOpen(!open)}
       >
-        <span>{item.title}</span>
-        {hasChildren && (
-          <IoMdArrowDropdown
-            className={`transition-transform duration-200 ${
-              open ? "rotate-180" : "-rotate-90"
-            }`}
-          />
-        )}
+  {item.href ? (
+    <Link href={item.href} className="flex-1" onClick={() => setOpen(false)}>
+      {item.title}
+    </Link>
+  ) : (
+    <span className="flex-1" onClick={() => hasChildren && setOpen(!open)}>
+      {item.title}
+    </span>
+  )}
+
+  {hasChildren && (
+    <IoMdArrowDropdown
+      onClick={() => setOpen(!open)}
+      className={`transition-transform duration-200 ${
+        open ? "rotate-180" : "-rotate-90"
+      }`}
+    />
+  )}
+
       </div>
 
       {/* Nested Children */}

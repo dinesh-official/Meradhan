@@ -16,7 +16,7 @@ function BlogView() {
 
       <div className="flex flex-col gap-5 gap-y-8">
         <PostCard />
-        <div className="grid lg:grid-cols-3 gap-5 gap-y-8">
+        <div className="grid md:grid-cols-3 gap-5 gap-y-8">
           <PostCard listMode />
           <PostCard listMode />
           <PostCard listMode />

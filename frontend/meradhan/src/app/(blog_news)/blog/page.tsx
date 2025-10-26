@@ -11,7 +11,7 @@ import BlogView from "./BlogView";
 function page() {
   return (
     <ViewPort>
-      <div className="container">
+      <div className="container mb-[4rem] md:w-[80%]">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
