@@ -21,7 +21,7 @@ services: # Performance Tracking
     image: grafana/grafana
     container_name: grafana
     ports:
-      - "3001:3000" # Grafana UI
+      - "3300:3000" # Grafana UI
     restart: unless-stopped
     depends_on:
       - prometheus
