@@ -4,7 +4,7 @@
 # This script installs all dependencies for the project components using npm only
 
 set -e  # Exit on any error
-
+source ~/.bashrc
 echo "🚀 Starting MeraDhan setup (npm version)..."
 echo "========================================"
 
