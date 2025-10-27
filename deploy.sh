@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd MeradhanProject/
 ./setup.sh
 cd frontend/crm/
