@@ -1,7 +1,7 @@
 import { OtpVerificationService, type IOtpVerificationService } from "@lib/manager/OtpVerificationService.service";
 import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
-import { sendLoginOtpEmail } from "../../queues/services/emails/sendEmailOtp";
+import { sendLoginOtpEmail } from "../../queues/services/sender/sendEmailOtp";
 import { AuthRepo } from "./auth.repo";
 
 export class EmailAuthService {

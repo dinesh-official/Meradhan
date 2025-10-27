@@ -1,9 +1,9 @@
 import { config } from '@config/config';
 import nodemailer from 'nodemailer';
-import type { IEmailSenderGatewayInterface } from './emailTask.interface';
 
 
-export class EmailSenderGateway implements IEmailSenderGatewayInterface {
+
+export class EmailSenderGateway {
 
     private transporter: nodemailer.Transporter;
 

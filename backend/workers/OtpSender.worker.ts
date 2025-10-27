@@ -1,10 +1,10 @@
 import MeraDhanOtpEmail from "@emails/my-email";
 import { EmailSenderGateway } from "@lib/gateway/emailsender/emailSender.gateway";
+import { MobileOtpSenderGateway } from "@lib/gateway/mobileOtpSender/MobileOtpSender.gateway";
 import { render } from "@react-email/render";
 import type { Job } from "bull";
-import { emailOtpSenderQueue } from "../src/queues/redis/queues";
+import { emailOtpSenderQueue, mobileOtpSenderQueue } from "../src/queues/redis/queues";
 import { startQueueWorker } from "./startQueueWorker";
-
 
 startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
     const emailSend = new EmailSenderGateway()
@@ -20,4 +20,11 @@ startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
         html: emailHtml
     })
 
+})
+
+startQueueWorker(mobileOtpSenderQueue, async (job: Job) => {
+    const mobileSend = new MobileOtpSenderGateway()
+    const { mobile, otp, template } = job.data as { mobile: string, otp: string, template: "signup" | "login" | "verify" };
+    console.log("Sending SMS - " + mobile);
+    await mobileSend.sendMsg91(mobile, otp, template)
 })

@@ -4,11 +4,12 @@ import Bull from "bull";
 export const startQueueWorker = (
     queue: Bull.Queue,
     processor: (job: Bull.Job) => Promise<void>,
+    concurrency: number = 50
 ) => {
     logger.logInfo(`🚀 Starting worker for queue: ${queue.name}`);
 
     // Process jobs using the provided processor function
-    queue.process(async (job) => {
+    queue.process(concurrency, async (job) => {
         try {
             await processor(job);
         } catch (err) {

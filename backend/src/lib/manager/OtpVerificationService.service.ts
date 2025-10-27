@@ -1,6 +1,4 @@
 import { config } from "@config/config";
-import { EmailSenderGateway } from "@lib/gateway/emailsender/emailSender.gateway";
-import type { IEmailSenderGatewayInterface } from "@lib/gateway/emailsender/emailTask.interface";
 import { AppError } from "@utils/error/AppError";
 import { hashingUtils } from "@utils/hash/hashing.utils";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
@@ -18,12 +16,11 @@ export interface IOtpVerificationService {
 
 export class OtpVerificationService implements IOtpVerificationService {
 
-    private gateway: IEmailSenderGatewayInterface;
+
     private storeKey;
     private store: QueueStore;
     constructor(private useOf: "AUTH_OTP" | "EMAIL_VERIFY" = "AUTH_OTP") {
         this.store = QueueStore.getStore(); this.storeKey = useOf;
-        this.gateway = new EmailSenderGateway()
     }
 
     async generateOtpAndSend(identifier: string, length: number = 6, expirySeconds: number = 300): ReturnType<IOtpVerificationService['generateOtpAndSend']> {
