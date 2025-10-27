@@ -1,3 +1,4 @@
+pwd
 ./setup.sh
 cd frontend/crm/
 npm run lint
