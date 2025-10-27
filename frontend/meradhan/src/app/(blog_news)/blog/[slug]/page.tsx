@@ -36,10 +36,10 @@ function page() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex flex-col gap-5  py-10">
-          <div className="flex gap-5 justify-between items-center lg:flex-nowrap flex-wrap  ">
-            <div className="flex  gap-5 lg:justify-start lg:w-auto w-full justify-between items-center">
-              <Badge className="py-1.5 px-4 text-md bg-[#7fabd2] text-sm rounded-xl">
+        <div className="flex flex-col gap-5 py-10">
+          <div className="flex flex-wrap lg:flex-nowrap justify-between items-center gap-5">
+            <div className="flex justify-between lg:justify-start items-center gap-5 w-full lg:w-auto">
+              <Badge className="bg-[#7fabd2] px-4 py-1.5 rounded-xl text-md text-sm">
                 Educative
               </Badge>
               <div className="flex items-center gap-2 text-gray-500">
@@ -52,7 +52,7 @@ function page() {
                 <FaClock size={18} /> <p>5 min read</p>
               </div>
             </div>
-            <div className="flex lg:justify-end justify-between lg:w-auto w-full  gap-5 items-center">
+            <div className="flex justify-between lg:justify-end items-center gap-5 w-full lg:w-auto">
               <div className="flex items-center gap-2 text-gray-500">
                 <FaEye size={18} /> <p>9</p>
               </div>
@@ -63,7 +63,7 @@ function page() {
           </div>
           <h1
             className={cn(
-              "lg:text-4xl text-2xl font-medium",
+              "font-medium text-2xl lg:text-4xl",
               quicksand.className
             )}
           >
@@ -74,10 +74,10 @@ function page() {
             alt="Blog"
             width={1300}
             height={900}
-            className="w-full rounded-xl aspect-video object-cover"
+            className="rounded-xl w-full object-cover aspect-video"
           />
 
-          <div className="grid lg:grid-cols-3 gap-5">
+          <div className="gap-5 grid lg:grid-cols-3">
             <div className="lg:col-span-2">
               <p>
                 When you’re investing in bonds, one of the first things you
@@ -88,15 +88,35 @@ function page() {
               </p>
             </div>
             <div className="lg:col-span-1">
-              <div className=" w-full flex flex-col gap-4">
+              <div className="flex flex-col gap-4 w-full">
                 <AvatarDetailCard />
                 <div className="">
-                  <p className="text-sm text-gray-500 mb-5">
+                  <p className="mb-5 text-gray-500 text-sm">
                     Related Articles:
                   </p>
                   <div className="flex flex-col gap-5">
-                    <PostCard listMode />
-                    <PostCard listMode />
+                     <PostCard
+            listMode
+            src="/assets/bondYield.png"
+            badge="Educative"
+            createAt="24 Oct 2025"
+            heading="What Are Bonds? A Simple Guide for Indian Investors"
+            description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
+            name="Vikas Kukreja"
+            profilePic="/avatars/person.jpeg"
+            views="10"
+                    />
+                      <PostCard
+            listMode
+            src="/assets/bondYield.png"
+            badge="Educative"
+            createAt="24 Oct 2025"
+            heading="What Are Bonds? A Simple Guide for Indian Investors"
+            description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
+            name="Vikas Kukreja"
+            profilePic="/avatars/person.jpeg"
+            views="10"
+          />
                   </div>
                 </div>
               </div>

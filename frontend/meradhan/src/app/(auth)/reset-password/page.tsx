@@ -3,8 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
-import Link from "next/link";
-import { FaLock, FaUser } from "react-icons/fa";
+import { FaLock } from "react-icons/fa";
 
 function page() {
   return (
