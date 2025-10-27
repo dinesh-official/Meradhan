@@ -1,5 +1,4 @@
-git pull
-bash setup.sh
+./setup.sh
 cd frontend/crm/
 npm run lint
 npm run check
@@ -8,6 +7,6 @@ cd ../../
 cd backend
 npm run lint
 npm run check
-# pm2 start ecosystem.config.js
+pm2 restart ecosystem.config.js
 # pm2 restart all
-# pm2 save
+pm2 save
