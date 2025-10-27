@@ -6,7 +6,16 @@ import { cookies } from 'next/headers';
 
 export async function middleware(request: NextRequest) {
   const cookieStore = await cookies();
-
+  const auth = request.headers.get("authorization");
+  const validAuth = "Basic " + Buffer.from("admin:admin").toString("base64");
+  if (auth !== validAuth) {
+    return new Response("Unauthorized", {
+      status: 401,
+      headers: {
+        "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
+      },
+    });
+  }
   // Only protect /dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     try {
@@ -43,5 +52,5 @@ export async function middleware(request: NextRequest) {
 
 // Match all /dashboard paths including nested ones
 export const config = {
-  matcher: '/dashboard/:path*',
+  matcher: '/:path*',
 };
