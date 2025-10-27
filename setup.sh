@@ -94,10 +94,6 @@ main() {
     
     print_status "Current directory: $(pwd)"
     
-    # Check prerequisites
-    print_status "Checking prerequisites..."
-    check_node
-    
     echo ""
     print_status "Installing packages for all components..."
     echo "=========================================="
