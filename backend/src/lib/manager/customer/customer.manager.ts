@@ -23,7 +23,7 @@ export class CustomerProfileManager {
         data: {
           emailAddress: data.emailId,
           firstName: data.firstName,
-          middleName: data.middleName,
+          middleName: data.middleName || "",
           lastName: data.lastName,
           gender: data.gender,
           whatsAppNo: data.whatsAppNo || data.phoneNo,
@@ -66,6 +66,15 @@ export class CustomerProfileManager {
       await db.dataBase.customerProfileDataModel.findUnique({
         where: { emailAddress: emailAddress },
 
+      });
+
+    return customerProfile;
+  }
+
+  async getCustomerProfileByPhone(phoneNo: string) {
+    const customerProfile =
+      await db.dataBase.customerProfileDataModel.findFirst({
+        where: { phoneNo: phoneNo },
       });
 
     return customerProfile;
@@ -197,5 +206,18 @@ export class CustomerProfileManager {
     });
 
     return updatedCustomer;
+  }
+
+  async setLatestLoginTime(customerId: number) {
+    await db.dataBase.customerProfileDataModel.update({
+      where: { id: customerId },
+      data: {
+        utility: {
+          update: {
+            lastLogin: new Date(),
+          },
+        }
+      },
+    });
   }
 }

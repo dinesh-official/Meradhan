@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import { cacheStorage } from "./src/queues/redis/queues";
 import auditlogsRouter from "./src/resource/auditlogs/auditlogs.route";
 import authRoutes from "./src/resource/auth/auth.route";
+import customerAuthRoutes from "./src/resource/auth/customers/customerauth.route";
 import customersRoutes from "./src/resource/crm/customers/customers.routes";
 import followUpRouter from "./src/resource/crm/leads/followup/leadsFollowUp.routes";
 import leadsRoutes from "./src/resource/crm/leads/leads.routes";
@@ -36,7 +37,8 @@ server.addRoutes([
     followUpRouter,
     nseIsinRoute,
     auditlogsRouter,
-    participantsRouter
+    participantsRouter,
+    customerAuthRoutes
 ]);
 
 

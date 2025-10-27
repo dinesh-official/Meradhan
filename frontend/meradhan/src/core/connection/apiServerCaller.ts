@@ -1,4 +1,4 @@
-
+import { API_SERVER_URL } from '@/global/constants/domains';
 import { ApiError, IApiCaller } from '@root/apiGateway';
 import axios, {
   AxiosInstance,
@@ -15,10 +15,10 @@ import 'server-only';
  * - Allows full axios-like usage (get, post, put, patch, delete)
  * - Designed for Next.js Server Components / Route Handlers
  */
-export class ApiServerCaller implements IApiCaller {
+class ApiServerCaller implements IApiCaller {
   private instance: AxiosInstance;
 
-  constructor(baseURL: string) {
+  constructor(baseURL: string = API_SERVER_URL) {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
@@ -28,7 +28,7 @@ export class ApiServerCaller implements IApiCaller {
     this.instance.interceptors.response.use(
       (response) => response,
       (error) => {
-
+        
         if (axios.isAxiosError(error)) {
           return Promise.reject(
             new ApiError(
@@ -131,3 +131,7 @@ export class ApiServerCaller implements IApiCaller {
     return this.request<T>(url, { ...config, method: 'DELETE' });
   }
 }
+
+// Export a default singleton instance
+const apiServerCaller = new ApiServerCaller();
+export default apiServerCaller;

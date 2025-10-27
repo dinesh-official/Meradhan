@@ -4,6 +4,7 @@ export type * from "./src/core/api/crm/RFQ/nse/isin.response";
 export type * from "./src/core/api/crm/RFQ/nse/participants.response";
 export * from "./src/core/connection/apiCaller";
 export type * from "./src/core/connection/apiCaller.interface";
+
 export * from "./src/core/connection/error";
 export * from "./src/core/constants/role";
 export * from "./src/types/response.types";
@@ -21,6 +22,9 @@ import * as auditlogs from "./src/core/api/crm/auditlogs/auditlogs.api";
 import * as participants from "./src/core/api/crm/RFQ/nse/participants.api";
 import { RfqIsinApi } from "./src/core/api/crm/RFQ/nse/isin.api";
 
+import * as customerAuthApi from "./src/core/api/meradhan/customerauth.api"
+export type * from "./src/core/api/meradhan/customerauth.response";
+
 
 export default {
   auth,
@@ -35,4 +39,7 @@ export default {
       RfqIsinApi
     }
   },
+  meradhan: {
+    customerAuthApi
+  }
 };

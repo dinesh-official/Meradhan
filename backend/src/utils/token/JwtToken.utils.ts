@@ -8,8 +8,12 @@ class JwtTokenUtils implements ITokenUtils {
         return token;
     }
     verifyToken<T>(token: string): T {
-        const decoded = jwt.verify(token, config.jwtSecret) as T;
+       try {
+         const decoded = jwt.verify(token, config.jwtSecret) as T;
         return decoded;
+       } catch  {
+        throw new Error("Your session has expired. Please reattempt again.");
+       }
     }
 }
 

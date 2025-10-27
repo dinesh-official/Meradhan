@@ -6,9 +6,9 @@ import NavMenu from "./NavMenu";
 
 function NavBar() {
   return (
-    <div className="md:h-18 h-16 w-full shadow  shadow-black/10 bg-white sticky top-0 left-0 z-50 right-0">
-      <div className="container mx-auto h-full">
-        <div className="flex justify-between items-center h-full ">
+    <div className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18">
+      <div className="mx-auto h-full container">
+        <div className="flex justify-between items-center h-full">
           {/* Logo */}
           <Link href={`/`}>
             <Image
@@ -21,12 +21,14 @@ function NavBar() {
           </Link>
 
           {/* Menu Items */}
-          <div className="lg:flex hidden justify-center items-center gap-7 ">
+          <div className="hidden lg:flex justify-center items-center gap-7">
             <NavMenu />
             <Link href="/login" className="text-gray-700">
               Login
             </Link>
-            <Button className="px-5">Sign Up</Button>
+            <Link href={`/signup`}>
+              <Button className="px-5">Sign Up</Button>
+            </Link>
           </div>
           <MobMenu />
         </div>

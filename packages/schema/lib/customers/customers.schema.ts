@@ -24,13 +24,29 @@ export const findManyCustomerSchema = z.object({
   kycStatus: z.enum([...kycStatus]).optional(),
 });
 
+
+export const sendEmailOtpSchema = z.object({
+  email: z.email("Invalid email format."),
+  name: z.string().min(1, "Name is required."),
+});
+
+export const sendMobileOtpSchema = z.object({
+  mobile: z
+    .string()
+    .regex(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits."),
+});
+
+export const signUpWithCredentialsQuerySchema = z.object({
+  otp: z.string().min(1, "OTP is required."),
+  token: z.string().min(1, "Token is required.").optional(),
+});
+
+
 export const createNewCustomerSchema = z.object({
   firstName: z
     .string({ error: "First name is required" })
     .min(2, { message: "First name must be at least 2 characters long" }),
-  middleName: z
-    .string({ error: "Middle name is required" })
-    .min(1, { message: "Middle name cannot be empty" }),
+  middleName: z.string().optional(),
   lastName: z
     .string({ error: "Last name is required" })
     .min(2, { message: "Last name must be at least 2 characters long" }),
@@ -52,15 +68,15 @@ export const createNewCustomerSchema = z.object({
   }),
   isEmailVerified: z.boolean({
     error: "Email verification status is required",
-  }),
+  }).optional(),
   isPhoneVerified: z.boolean({
     error: "Phone verification status is required",
-  }),
+  }).optional(),
   kycStatus: z
     .enum(kycStatus, { error: "Invalid KYC status provided" })
     .optional(),
   status: AccountStatusEnum.optional(),
-  gender: GenderEnum,
+  gender: GenderEnum.optional(),
   password: z
     .string({
       error: "Password is required",

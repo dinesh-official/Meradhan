@@ -39,7 +39,7 @@ model CustomerProfileDataModel {
     firstName  String
     middleName String
     lastName   String
-    gender     Gender
+    gender     Gender?
 
     /// Contact details
     emailAddress String  @unique

@@ -44,8 +44,8 @@ console.log("=============================");
     res.status(500).json({
         status: false,
         code: "INTERNAL_ERROR",
-        message: "Something went wrong!",
-        error: err.message
+        error: "Something went wrong!",
+        message: err.message
     });
     return;
 };
