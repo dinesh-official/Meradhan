@@ -6,16 +6,17 @@ function Card({
   className,
   ...props
 }: React.ComponentProps<"div"> & { accountMode?: boolean }) {
+  const { accountMode, ...rest } = props;
+
   return (
     <div
       data-slot="card"
       className={cn(
         "flex flex-col gap-6 bg-card py-6 border rounded-lg text-card-foreground",
-        props.accountMode &&
-          "px-0 py-0 lg:py-6 border-0 border-gray-200 lg:border-1",
+        accountMode && "px-0 py-0 lg:py-6 border-0 border-gray-200 lg:border-1",
         className
       )}
-      {...props}
+      {...rest}
     />
   );
 }
@@ -24,15 +25,16 @@ function CardHeader({
   className,
   ...props
 }: React.ComponentProps<"div"> & { accountMode?: boolean }) {
+  const { accountMode, ...rest } = props;
   return (
     <div
       data-slot="card-header"
       className={cn(
         "@container/card-header items-start gap-2 grid has-data-[slot=card-action]:grid-cols-[1fr_auto] grid-rows-[auto_auto] auto-rows-min px-6 [.border-b]:pb-6",
-        props.accountMode && "px-0 lg:px-6",
+        accountMode && "px-0 lg:px-6",
         className
       )}
-      {...props}
+      {...rest}
     />
   );
 }
@@ -74,11 +76,13 @@ function CardContent({
   className,
   ...props
 }: React.ComponentProps<"div"> & { accountMode?: boolean }) {
+  const { accountMode, ...rest } = props;
+
   return (
     <div
       data-slot="card-content"
-      className={cn("px-6", props.accountMode && "px-0 lg:px-6", className)}
-      {...props}
+      className={cn("px-6", accountMode && "px-0 lg:px-6", className)}
+      {...rest}
     />
   );
 }
@@ -87,15 +91,17 @@ function CardFooter({
   className,
   ...props
 }: React.ComponentProps<"div"> & { accountMode?: boolean }) {
+  const { accountMode, ...rest } = props;
+
   return (
     <div
       data-slot="card-footer"
       className={cn(
         "flex items-center px-6 [.border-t]:pt-6",
-        props.accountMode && "px-0 lg:px-6",
+        accountMode && "px-0 lg:px-6",
         className
       )}
-      {...props}
+      {...rest}
     />
   );
 }

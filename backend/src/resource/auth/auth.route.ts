@@ -10,6 +10,4 @@ authRoutes.post("/api/auth/verify-otp", OtpVerifyLimiter, (req, res) => controll
 authRoutes.all("/api/auth/logout", (req, res) => controller.logout(req, res))
 authRoutes.all("/api/session", withAuthMiddleware, (req, res) => controller.session(req, res))
 
-
-
 export default authRoutes;
