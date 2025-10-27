@@ -3,7 +3,7 @@ cd MeradhanProject/
 cd frontend/crm/
 npm run lint
 npm run check
-# npm run build
+npm run build
 cd ../../
 cd backend
 npm run lint
