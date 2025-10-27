@@ -1,77 +1,39 @@
-import LabelInput from "@/app/(account)/_components/wrapper/LableInput";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { MdOutlineArrowRight } from "react-icons/md";
 import AccountViewPort from "../../_components/wrapper/AccountViewPort";
+import IdentityValidationAadharInfo from "./_components/IdentityValidation/panAndAadhar/IdentityValidationAadharInfo";
+import IdentityValidationAddSign from "./_components/IdentityValidation/sign/IdentityValidationAddSign";
+import IdentityValidationCaptureSelfie from "./_components/IdentityValidation/selfie/IdentityValidationCaptureSelfie";
+import IdentityValidationForm from "./_components/IdentityValidation/panAndAadhar/IdentityValidationForm";
+import IdentityValidationPanInfo from "./_components/IdentityValidation/panAndAadhar/IdentityValidationPanInfo";
+import IdentityValidationPreviewSign from "./_components/IdentityValidation/sign/IdentityValidationPreviewSign";
+import IdentityValidationSelfiePreview from "./_components/IdentityValidation/selfie/IdentityValidationSelfiePreview";
 import KycWorkSpace from "./_components/wrapper/KycWorkSpace";
+import PersonalDetailsForm from "./_components/PersonalDetails/PersonalDetailsForm";
+import AddBankAccountForm from "./_components/BankAccount/AddBankAccountForm";
+import VerifyBankAccount from "./_components/BankAccount/VerifyBankAccount";
+import AddDematAccountForm from "./_components/DematAccount/AddDematAccountForm";
+import VerifyDematAccount from "./_components/DematAccount/VerifyDematAccount";
+import RiskProfilingCard from "./_components/RiskProfiling/RiskProfilingCard";
+import KycESign from "./_components/E_Signature/KycESign";
+import FinishKyc from "./_components/Finish/FinishKyc";
 function KycPage() {
   return (
     <AccountViewPort showSideBar={false}>
       <KycWorkSpace>
-        <Card className="border-gray-200">
-          <CardHeader>
-            <CardTitle className="font-medium">Enter PAN Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="gap-5 grid lg:grid-cols-3">
-              <div className="gap-5 grid lg:grid-cols-2 lg:col-span-3">
-                <LabelInput label="PAN Number" required>
-                  <Input type="text" />
-                </LabelInput>
-                <LabelInput label="Date of Birth" required>
-                  <Input type="date" />
-                </LabelInput>
-              </div>
-              <LabelInput label="First Name" required>
-                <Input type="text" />
-              </LabelInput>
-              <LabelInput label="Middle Name" required>
-                <Input type="text" />
-              </LabelInput>
-              <LabelInput label="Last Name" required>
-                <Input type="text" />
-              </LabelInput>
-            </div>
-            <p className="mt-2 text-gray-500 text-xs">
-              * Full name must match exactly as on your PAN Card.
-            </p>
-            <div className="flex flex-col gap-3 mt-5">
-              <p className="flex items-center gap-3 text-sm">
-                <Checkbox
-                  checkClass="text-white"
-                  className="border border-gray-200"
-                />
-                I hereby confirm that I am not a Politically Exposed Person
-                (PEP) nor related to any PEP
-              </p>
-              <p className="flex items-start gap-3 text-sm">
-                <Checkbox
-                  checkClass="text-white"
-                  className="mt-[2px] border border-gray-200"
-                />
-                I hereby confirm that I am not a person and/or entity debarred
-                from accessing the securities market or dealing in securities,
-                as per directions or orders issued by the Securities and
-                Exchange Board of India (SEBI), any recognized stock exchange,
-                or other competent regulatory authorities from time to time.
-              </p>
-            </div>
-          </CardContent>
-          <CardFooter className="sm:flex-row flex-col gap-5 mt-5">
-            <Button className="w-full sm:w-auto">
-              Continue To verify <MdOutlineArrowRight />
-            </Button>
-            <Button variant={`link`}>Save & Exit</Button>
-          </CardFooter>
-        </Card>
+        <IdentityValidationForm/>
+        {/* <IdentityValidationPanInfo />
+        <IdentityValidationAadharInfo />
+        <IdentityValidationCaptureSelfie />
+        <IdentityValidationSelfiePreview />
+        <IdentityValidationAddSign />
+        <IdentityValidationPreviewSign />
+        <PersonalDetailsForm />
+        <AddBankAccountForm />
+        <VerifyBankAccount />
+        <AddDematAccountForm />
+        <VerifyDematAccount />
+        <RiskProfilingCard />
+        <KycESign />
+        <FinishKyc /> */}
       </KycWorkSpace>
     </AccountViewPort>
   );

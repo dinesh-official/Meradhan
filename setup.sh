@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# MeraDhan Setup Script
-# This script installs all dependencies for the project components
+# MeraDhan Setup Script (npm version)
+# This script installs all dependencies for the project components using npm only
 
 set -e  # Exit on any error
 
-echo "🚀 Starting MeraDhan setup..."
+echo "🚀 Starting MeraDhan setup (npm version)..."
 echo "========================================"
 
 # Colors for output
@@ -32,18 +32,7 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if bun is installed
-check_bun() {
-    if ! command -v bun &> /dev/null; then
-        print_error "Bun is not installed. Please install Bun first."
-        echo "Visit: https://bun.sh"
-        exit 1
-    else
-        print_success "Bun is installed: $(bun --version)"
-    fi
-}
-
-# Check if node and npm are installed
+# Check if Node and npm are installed
 check_node() {
     if ! command -v node &> /dev/null; then
         print_error "Node.js is not installed. Please install Node.js first."
@@ -64,72 +53,50 @@ check_node() {
 # Function to install dependencies with error handling
 install_dependencies() {
     local dir=$1
-    local package_manager=$2
-    local component_name=$3
-    local force_flag=$4
+    local component_name=$2
+    local force_flag=$3
     
     print_status "Installing dependencies for $component_name..."
     
     if [ -d "$dir" ]; then
         cd "$dir"
         
-        if [ "$package_manager" = "bun" ]; then
-            if bun install; then
-                print_success "$component_name dependencies installed successfully"
-            else
-                print_error "Failed to install $component_name dependencies"
-                exit 1
-            fi
-        elif [ "$package_manager" = "npm" ]; then
-            local npm_cmd="npm install"
-            if [ "$force_flag" = "force" ]; then
-                npm_cmd="npm install --force"
-                print_status "Using --force flag for $component_name"
-            fi
-            
-            if $npm_cmd; then
-                print_success "$component_name dependencies installed successfully"
-            else
-                print_error "Failed to install $component_name dependencies"
-                exit 1
-            fi
+        local npm_cmd="npm install"
+        if [ "$force_flag" = "force" ]; then
+            npm_cmd="npm install --force"
+            print_status "Using --force flag for $component_name"
         fi
         
-        cd ..
+        if $npm_cmd; then
+            print_success "$component_name dependencies installed successfully"
+        else
+            print_error "Failed to install $component_name dependencies"
+            exit 1
+        fi
+        
+        cd - > /dev/null
     else
         print_warning "Directory $dir not found, skipping $component_name"
     fi
 }
 
-
+# Function to setup Prisma in backend
 install_dependencies_prisma_backend() {
     local dir=$1
-    local package_manager=$2
-    local component_name=$3
-    local force_flag=$4
+    local component_name=$2
 
-# setup Prisma 
     print_status "Setting up Prisma for $component_name..."
     if [ -d "$dir" ]; then
         cd "$dir"
         
-        if [ "$package_manager" = "bun" ]; then
-            if bun prisma generate && bun prisma db push; then
-                print_success "Prisma setup completed for $component_name"
-            else
-                print_error "Failed to setup Prisma for $component_name"
-                exit 1
-            fi
-        elif [ "$package_manager" = "npm" ]; then
-            if npx prisma generate; then
-                print_success "Prisma setup completed for $component_name"
-            else
-                print_error "Failed to setup Prisma for $component_name"
-                exit 1
-            fi
+        if npx prisma generate; then
+            print_success "Prisma setup completed for $component_name"
+        else
+            print_error "Failed to setup Prisma for $component_name"
+            exit 1
         fi
         
-        cd ../../../
+        cd - > /dev/null
     else
         print_warning "Directory $dir not found, skipping Prisma setup for $component_name"
     fi
@@ -145,29 +112,28 @@ main() {
     
     # Check prerequisites
     print_status "Checking prerequisites..."
-    check_bun
     check_node
     
     echo ""
     print_status "Installing packages for all components..."
     echo "=========================================="
     
-    # Install schema dependencies first (other packages depend on it)
-    install_dependencies "packages/schema" "npm" "Schema Package"
-    cd ../
-    # Install apiclient dependencies (frontend depends on it)
-    install_dependencies "packages/apiGateway" "npm" "API Client"
-    cd ../
+    # Install schema dependencies first
+    install_dependencies "packages/schema" "Schema Package"
+    
+    # Install API Gateway dependencies
+    install_dependencies "packages/apiGateway" "API Client"
+    
     # Install backend dependencies
-    install_dependencies "backend" "npm" "Backend"
-    install_dependencies_prisma_backend "backend/databases/supabase" "npm" "Backend"
+    install_dependencies "backend" "Backend"
+    install_dependencies_prisma_backend "backend/databases/supabase" "Backend"
     
     # Install frontend dependencies
-    install_dependencies "frontend/crm" "npm" "Frontend (Next.js)" "force"
+    install_dependencies "frontend/crm" "Frontend (Next.js)" "force"
     
     echo ""
     print_success "🎉 All packages installed successfully!"
-    print_status "Or use the start script: ./scripts/start.sh"
+    print_status "You can now start the project using: ./scripts/start.sh"
 }
 
 # Run main function

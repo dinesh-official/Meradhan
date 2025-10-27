@@ -13,23 +13,25 @@ function page() {
         </>
       }
     >
-      <Card className="border-gray-200">
-        <CardHeader>
+      <Card accountMode className="relative gap-0">
+        <CardHeader accountMode>
           <ProfileViewCard />
-          <ProfileTabs
-            active={`Personal Details`}
-            tabs={[
-              "Personal Details",
-              "Bank Accounts",
-              "Demat Accounts",
-              "Risk Profile",
-              "My Watch List",
-              "Refer & Earn",
-            ]}
-          />
         </CardHeader>
-        <CardContent>
-          <div className="gap-5 grid md:grid-cols-3">
+        <CardContent accountMode>
+          <div className="top-16 md:top-18 z-40 sticky bg-white mt-4 lg:mt-2">
+            <ProfileTabs
+              active={`Personal Details`}
+              tabs={[
+                "Personal Details",
+                "Bank Accounts",
+                "Demat Accounts",
+                "Risk Profile",
+                "My Watch List",
+                "Refer & Earn",
+              ]}
+            />
+          </div>
+          <div className="gap-5 grid md:grid-cols-3 mt-5">
             <DataInfoLabel title="First Name">
               <p className="font-medium">Sourav</p>
             </DataInfoLabel>

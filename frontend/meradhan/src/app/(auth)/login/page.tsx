@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
 import Link from "next/link";
-import LoginForm from "../_components/LoginForm";
+import LoginForm from "./LoginForm";
 
 function page() {
   return (

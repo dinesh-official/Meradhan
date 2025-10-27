@@ -21,7 +21,7 @@ function ProfileViewCard() {
           </div>
         </div>
 
-        <div className="flex sm:flex-row flex-col justify-between md:justify-end items-center gap-3 lg:gap-5 w-full md:w-auto text-center">
+        <div className="flex sm:flex-row justify-between md:justify-end items-center gap-3 lg:gap-5 w-full md:w-auto text-center">
           <p className="flex items-center gap-2 font-medium text-secondary text-lg">
             KYC: Not Done <IoWarning />
           </p>
@@ -34,7 +34,7 @@ function ProfileViewCard() {
         </div>
       </div>
 
-      <div className="flex sm:flex-row flex-col sm:justify-between items-center gap-1 mt-4 mb-5 lg:mb-2 text-gray-600 text-xs">
+      <div className="flex sm:flex-row flex-col sm:justify-between items-center gap-1 mt-4 text-gray-600 text-xs">
         <p>Joined on: 21 Aug 2025 | 08:02 pm</p>
         <p>Last Login: No data available</p>
       </div>

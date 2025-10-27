@@ -7,14 +7,17 @@ function DataInfoLabel({
   children,
   showStatus,
   statusLabel,
-    status,
-  className
+  status,
+  className,
+  subtext,
 }: {
   title: string;
   children?: React.ReactNode;
+  subtext?: React.ReactNode;
+
   showStatus?: boolean;
   status?: "ERROR" | "SUCCESS" | "WARNING";
-        statusLabel?: string;
+  statusLabel?: string;
   className?: string;
 }) {
   const getStatus = (status: "ERROR" | "SUCCESS" | "WARNING") => {
@@ -40,6 +43,8 @@ function DataInfoLabel({
           </>
         )}
       </p>
+        {subtext}
+
       {children}
     </div>
   );
