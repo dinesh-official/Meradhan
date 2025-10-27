@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 # MeraDhan Setup Script (npm version)
 # This script installs all dependencies for the project components using npm only
@@ -33,22 +33,6 @@ print_error() {
 }
 
 # Check if Node and npm are installed
-check_node() {
-    if ! command -v node &> /dev/null; then
-        print_error "Node.js is not installed. Please install Node.js first."
-        echo "Visit: https://nodejs.org"
-        exit 1
-    else
-        print_success "Node.js is installed: $(node --version)"
-    fi
-
-    if ! command -v npm &> /dev/null; then
-        print_error "npm is not installed. Please install npm first."
-        exit 1
-    else
-        print_success "npm is installed: $(npm --version)"
-    fi
-}
 
 # Function to install dependencies with error handling
 install_dependencies() {
