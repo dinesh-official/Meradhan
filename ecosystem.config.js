@@ -32,8 +32,21 @@ module.exports = {
 
         // frontend
         {
-            name: "MeraDhan-Frontend",
+            name: "MeraDhan-CRM",
             cwd: "./frontend/crm",
+            script: "npm",
+            args: "run start",
+            autorestart: true,
+            restart_delay: 5000,
+            env: {
+                NODE_ENV: "production"
+            }
+        },
+
+        // frontend
+        {
+            name: "MeraDhan-Client",
+            cwd: "./frontend/meradhan",
             script: "npm",
             args: "run start",
             autorestart: true,

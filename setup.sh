@@ -110,6 +110,8 @@ main() {
     
     # Install frontend dependencies
     install_dependencies "frontend/crm" "Frontend (Next.js)" "force"
+    install_dependencies "frontend/meradhan" "Meradhan (Next.js)" "force"
+
     
     echo ""
     print_success "🎉 All packages installed successfully!"
