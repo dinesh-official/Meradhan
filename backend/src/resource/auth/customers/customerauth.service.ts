@@ -9,6 +9,7 @@ import { tokenUtils } from "@utils/token/JwtToken.utils";
 import type z from "zod";
 import { sendCustomerSigninOtpEmail } from "../../../queues/services/sender/sendEmailOtp";
 import { sendMobileOtp } from "../../../queues/services/sender/sendMobileOtp";
+import { generateUsername } from "@utils/generate/generateUsername";
 type I_IDENTIFIED = "email" | "phoneNo"
 export class CustomerAuthService {
     private customerProfileService = new CustomerProfileManager();
@@ -57,7 +58,7 @@ export class CustomerAuthService {
     }
 
     async signInWithCredentials(data: { identifier: I_IDENTIFIED, value: string, password: string }) {
-        
+
         const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput = data.identifier == "email" ? {
             emailAddress: data.value
         } : {
@@ -124,11 +125,13 @@ export class CustomerAuthService {
                 userName: user.firstName + " " + user.lastName
             });
         } else {
-            await sendMobileOtp({
-                mobile: user.phoneNo,
-                otp,
-                template: "login"
-            });
+            if (user.phoneNo) {
+                await sendMobileOtp({
+                    mobile: user.phoneNo,
+                    otp,
+                    template: "login"
+                });
+            }
         }
 
         return {
@@ -158,7 +161,7 @@ export class CustomerAuthService {
         }
 
         this.checkUserSigninWith(user, data.identifier);
-        const isValid = await this.optManager.verifyOtp("CUSTOMER_SIGNIN:" + user.id + ":" + data.identifier, data.otp);
+        const isValid = await this.optManager.verifyOtp(data.token, data.otp);
 
         // send otp to user worker
         if (!isValid) {
@@ -178,6 +181,86 @@ export class CustomerAuthService {
             token: authToken,
         };
     }
+
+
+    async socialLogin(data: {
+        email: string,
+        image: string,
+        name: string,
+        id: string,
+        provider: "GOOGLE" | "MICROSOFT" | "FACEBOOK"
+    }) {
+
+        const isExist = await db.dataBase.customerProfileDataModel.findFirst({
+            where: {
+                utility: {
+                    socialLoginId: data.id,
+                    signinWith: data.provider,
+                }
+            }
+        });
+
+
+
+        if (isExist) {
+            const authToken = tokenUtils.generateToken({
+                email: isExist.emailAddress,
+                mobile: isExist.phoneNo,
+                id: isExist.id,
+            }, '1d');
+            await this.customerProfileService.setLatestLoginTime(isExist.id);
+            return {
+                id: isExist.id,
+                email: isExist.emailAddress,
+                avatar: isExist.avatar,
+                token: authToken,
+            };
+        }
+
+        // create new if not exist
+        const isEmailExist = await db.dataBase.customerProfileDataModel.findFirst({
+            where: {
+                emailAddress: data.email,
+            }
+        });
+
+        if (isEmailExist) {
+            throw new AppError("The provided social email is already registered. Please login.", { code: "EMAIL_ALREADY_REGISTERED" });
+        }
+
+        const response = await db.dataBase.customerProfileDataModel.create({
+            data: {
+                firstName: data.name.split(" ")?.[0] || "",
+                lastName: data.name.split(" ")?.[1] || "",
+                emailAddress: data.email,
+                avatar: data.image,
+                middleName: "",
+                userName: generateUsername(),
+                utility: {
+                    create: {
+                        signinWith: data.provider,
+                        isEmailVerified: true,
+                        socialLoginId: data.id,
+                        lastLogin: new Date(),
+                        termsAccepted: true
+                    }
+                }
+            }
+        });
+        const authToken = tokenUtils.generateToken({
+            email: response.emailAddress,
+            mobile: response.phoneNo,
+            id: response.id,
+        }, '1d');
+        return {
+            id: response.id,
+            email: response.emailAddress,
+            avatar: response.avatar,
+            token: authToken,
+        };
+    }
+
+
 
     private checkUserSigninWith(user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
         include: {
@@ -203,6 +286,7 @@ export class CustomerAuthService {
             throw new AppError("This mobile number is not verified. Please login using your email ID and verify your phone number from the My Profile section.", { code: "PHONE_NOT_VERIFIED" });
         }
     }
+
 
     async throwEmailOrPhoneExists(emailOrMob: string) {
         const user = await this.customerProfileService.getCustomerProfileByEmail(emailOrMob);

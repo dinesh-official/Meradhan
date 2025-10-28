@@ -21,28 +21,28 @@ export default function MeraDhanOtpEmail({
       <Head />
       <Tailwind>
         <Body className="bg-gray-100 font-sans">
-          <Container className="max-w-[600px] mx-auto my-10 bg-white  ">
+          <Container className="bg-white mx-auto my-10 max-w-[600px]">
             {/* Header */}
-            <Img className="w-20 pt-10 h-20 mx-auto" height={80} width={80} src="https://media.licdn.com/dms/image/v2/D560BAQGLNi0ZEPEzlQ/company-logo_200_200/company-logo_200_200/0/1738677843041/meradhan_logo?e=2147483647&v=beta&t=AXmwoFeu-aA9tTpz0r-BZlS1Cz1pDPhJ84WWl3V5gkQ" />
+            <Img className="mx-auto pt-10 w-20 h-20" height={80} width={80} src="https://media.licdn.com/dms/image/v2/D560BAQGLNi0ZEPEzlQ/company-logo_200_200/company-logo_200_200/0/1738677843041/meradhan_logo?e=2147483647&v=beta&t=AXmwoFeu-aA9tTpz0r-BZlS1Cz1pDPhJ84WWl3V5gkQ" />
             {/* Body */}
-            <Section className="pb-8 text-center  px-10">
-              <Text className="text-xl font-semibold text-gray-800 mb-4">
+            <Section className="px-10 pb-8 text-center">
+              <Text className="mb-4 font-semibold text-gray-800 text-xl">
                 Email Verification Code
               </Text>
-              <Text className="text-gray-600 mb-6">
+              <Text className="mb-6 text-gray-600">
                 Hello <span className="font-semibold">{userName}</span>,
               </Text>
-              <Text className="text-gray-600 mb-4">
+              <Text className="mb-4 text-gray-600">
                 Use the following One-Time Password (OTP) to verify your email
                 address for <span className="font-medium">MeraDhan</span>:
               </Text>
 
               {/* OTP Box */}
-              <div className=" bg-[#002c59] max-w-[200px] mx-auto text-white text-3xl font-semibold tracking-[10px] py-4 px-8 text-center my-6">
+              <div className="bg-[#002c59] mx-auto my-6 px-8 py-4 max-w-[200px] font-semibold text-white text-3xl text-center tracking-[10px]">
                 {otpCode}
               </div>
 
-              <Text className="text-gray-600 mb-4">
+              <Text className="mb-4 text-gray-600">
                 This code is valid for the next{" "}
                 <span className="font-semibold">5 minutes</span>. Please do not
                 share it with anyone.

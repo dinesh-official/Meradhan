@@ -1,7 +1,7 @@
 import { useCookies } from "react-cookie";
 
 const useAppCookie = () => {
-     const [cookies, setCookie, removeCookie] = useCookies(['token','userId',"companyId"]);
+     const [cookies, setCookie, removeCookie] = useCookies(['token','userId']);
      return { cookies, setCookie, removeCookie };
   }
 

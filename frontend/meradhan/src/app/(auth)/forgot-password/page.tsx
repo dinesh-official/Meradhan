@@ -5,6 +5,7 @@ import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
+import ForgetPasswordForm from "./ForgetPasswordForm";
 
 function page() {
   return (
@@ -13,22 +14,12 @@ function page() {
         <div className="container">
           <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
             <CardContent className="flex flex-col gap-4 p-10 lg:p-14">
-              <h3 className="text-2xl">Forgot Password?</h3>
-              <p>Please enter your email to receive a password reset link.</p>
-              <div className="flex flex-col gap-3">
-                <div className="relative">
-                  <Input
-                    className="peer bg-muted py-5 ps-12 pe-12 border-none placeholder:text-[#7fabd2]"
-                    placeholder="Email ID"
-                    type="email"
-                  />
-                  <div className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 ps-4 text-[#7fabd2] pointer-events-none start-0">
-                    <FaUser size={16} aria-hidden="true" />
-                  </div>
-                </div>
-                <Button className="w-full">Send Email</Button>
+              <div className="flex flex-col gap-2">
+                <h3 className="text-2xl">Forgot Password?</h3>
+                <p>Please enter your email to receive a password reset link.</p>
               </div>
-              <div className="mt-2 text-center">
+              <ForgetPasswordForm />
+              <div className="flex justify-center items-center gap-2 mt-2 text-center">
                 Remember Password?
                 <Link className="font-semibold text-primary" href={"/login"}>
                   Login

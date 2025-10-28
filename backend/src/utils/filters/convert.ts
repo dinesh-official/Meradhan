@@ -1,4 +1,4 @@
-export function removeCountryCode(phoneNumber?: string): string {
+export function removeCountryCode(phoneNumber?: string | null|undefined): string {
   if (!phoneNumber) return "";
   // Remove all non-digit characters
   let digits: string = phoneNumber?.replace(/\D/g, '');

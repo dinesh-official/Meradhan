@@ -148,6 +148,7 @@ exports.Prisma.CustomersAuthDataModelScalarFieldEnum = {
   id: 'id',
   password: 'password',
   signinWith: 'signinWith',
+  socialLoginId: 'socialLoginId',
   accountStatus: 'accountStatus',
   isPhoneVerified: 'isPhoneVerified',
   isEmailVerified: 'isEmailVerified',

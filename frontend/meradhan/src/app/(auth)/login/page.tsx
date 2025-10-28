@@ -12,7 +12,7 @@ function page() {
           <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
             <CardContent className="flex flex-col gap-4 p-10 lg:p-14">
               <h3 className="text-2xl">Login</h3>
-              <p>Welcome Back!</p>
+
               <LoginForm />
               <div className="mt-2 text-center">
                 New User?{" "}

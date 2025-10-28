@@ -68,7 +68,14 @@ export const signInWithOtpSchema = z.object({
 });
 
 
-
+const ProviderEnum = z.enum(["GOOGLE", "MICROSOFT", "FACEBOOK"]);
+export const SocialLoginUserSchema = z.object({
+  email: z.email(),
+  image: z.string(),         // must be a valid URL (change to .string() if not a URL)
+  name: z.string().min(1),         // non-empty string
+  id: z.string().min(1),           // non-empty string (could be UUID pattern if needed)
+  provider: ProviderEnum
+});
 
 
 

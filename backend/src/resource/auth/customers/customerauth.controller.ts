@@ -102,6 +102,15 @@ export class CustomerAuthController {
     }
 
 
+    async signInSocialMedia(req: Request, res: Response) {
+        const socialLogin = appSchema.customer.SocialLoginUserSchema.parse(req.body);
+        const data = await this.customerAuthService.socialLogin(socialLogin);
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: data,
+        });
+    }
+
     async logout(req: Request, res: Response): Promise<void> {
         // Clear all cookies
         for (const cookieName in req.cookies) {

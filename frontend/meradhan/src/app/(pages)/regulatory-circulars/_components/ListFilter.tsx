@@ -19,28 +19,28 @@ const ListFilter = () => {
 
   return (
     <>
-      <div className="max-w-[70%] mx-auto  flex flex-col md:flex-row  mt-6 mb-8 items-center justify-center gap-4 text-center">
+      <div className="flex md:flex-row flex-col justify-center items-center gap-4 mt-6 mb-8 text-center">
         <div className="relative w-full">
           <Input
             placeholder="Search circular by title or number"
-            className="border border-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-md pr-10 text-[16px] h-[48px]"
+            className="pr-10 border border-gray-300 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-[48px] text-[16px]"
           />
           <Search
             size={20}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F25C4C] cursor-pointer"
+            className="top-1/2 right-3 absolute text-[#F25C4C] -translate-y-1/2 cursor-pointer"
           />
         </div>
-        <p className="text-gray-600 font-medium">OR</p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full ">
+        <p className="font-medium text-gray-600">OR</p>
+        <div className="flex sm:flex-row flex-col justify-center items-center gap-6 w-full">
           <div className="relative w-[50%]">
             <Input
               type="text"
               placeholder="From Date"
-              className="border border-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-md pr-10 text-[16px] h-[48px] appearance-none cursor-pointer"
+              className="pr-10 border border-gray-300 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-[48px] text-[16px] appearance-none cursor-pointer"
             />
             <Calendar
               size={20}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F25C4C] cursor-pointer"
+              className="top-1/2 right-3 absolute text-[#F25C4C] -translate-y-1/2 cursor-pointer"
             />
           </div>
 
@@ -48,18 +48,18 @@ const ListFilter = () => {
             <Input
               type="text"
               placeholder="To Date"
-              className="border border-gray-300 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-md pr-10 text-[16px] h-[48px] appearance-none cursor-pointer"
+              className="pr-10 border border-gray-300 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-[48px] text-[16px] appearance-none cursor-pointer"
             />
             <Calendar
               size={20}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F25C4C] cursor-pointer"
+              className="top-1/2 right-3 absolute text-[#F25C4C] -translate-y-1/2 cursor-pointer"
             />
           </div>
         </div>
       </div>
 
-      <div className="max-w-[70%] mx-auto">
-        <div className="flex items-center justify-between rounded-xl bg-[#ebf6ff] px-3 py-2">
+      <div className="mx-auto max-w-[70%]">
+        <div className="flex justify-between items-center bg-[#ebf6ff] px-3 py-2 rounded-xl">
           {/* Left: segments */}
           <div className="flex items-center gap-2">
             {segments.map((s) => (

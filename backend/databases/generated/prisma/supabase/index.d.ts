@@ -5171,6 +5171,7 @@ export namespace Prisma {
     id: number | null
     password: string | null
     signinWith: $Enums.SIGNIN_WITH | null
+    socialLoginId: string | null
     accountStatus: $Enums.AccountStatus | null
     isPhoneVerified: boolean | null
     isEmailVerified: boolean | null
@@ -5186,6 +5187,7 @@ export namespace Prisma {
     id: number | null
     password: string | null
     signinWith: $Enums.SIGNIN_WITH | null
+    socialLoginId: string | null
     accountStatus: $Enums.AccountStatus | null
     isPhoneVerified: boolean | null
     isEmailVerified: boolean | null
@@ -5201,6 +5203,7 @@ export namespace Prisma {
     id: number
     password: number
     signinWith: number
+    socialLoginId: number
     accountStatus: number
     isPhoneVerified: number
     isEmailVerified: number
@@ -5228,6 +5231,7 @@ export namespace Prisma {
     id?: true
     password?: true
     signinWith?: true
+    socialLoginId?: true
     accountStatus?: true
     isPhoneVerified?: true
     isEmailVerified?: true
@@ -5243,6 +5247,7 @@ export namespace Prisma {
     id?: true
     password?: true
     signinWith?: true
+    socialLoginId?: true
     accountStatus?: true
     isPhoneVerified?: true
     isEmailVerified?: true
@@ -5258,6 +5263,7 @@ export namespace Prisma {
     id?: true
     password?: true
     signinWith?: true
+    socialLoginId?: true
     accountStatus?: true
     isPhoneVerified?: true
     isEmailVerified?: true
@@ -5360,6 +5366,7 @@ export namespace Prisma {
     id: number
     password: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId: string | null
     accountStatus: $Enums.AccountStatus
     isPhoneVerified: boolean
     isEmailVerified: boolean
@@ -5394,6 +5401,7 @@ export namespace Prisma {
     id?: boolean
     password?: boolean
     signinWith?: boolean
+    socialLoginId?: boolean
     accountStatus?: boolean
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -5411,6 +5419,7 @@ export namespace Prisma {
     id?: boolean
     password?: boolean
     signinWith?: boolean
+    socialLoginId?: boolean
     accountStatus?: boolean
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -5427,6 +5436,7 @@ export namespace Prisma {
     id?: boolean
     password?: boolean
     signinWith?: boolean
+    socialLoginId?: boolean
     accountStatus?: boolean
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -5443,6 +5453,7 @@ export namespace Prisma {
     id?: boolean
     password?: boolean
     signinWith?: boolean
+    socialLoginId?: boolean
     accountStatus?: boolean
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -5454,7 +5465,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type CustomersAuthDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "password" | "signinWith" | "accountStatus" | "isPhoneVerified" | "isEmailVerified" | "whatsAppNotificationAllow" | "termsAccepted" | "lastLogin" | "cRMUserDataModelId" | "createdAt" | "updatedAt", ExtArgs["result"]["customersAuthDataModel"]>
+  export type CustomersAuthDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "password" | "signinWith" | "socialLoginId" | "accountStatus" | "isPhoneVerified" | "isEmailVerified" | "whatsAppNotificationAllow" | "termsAccepted" | "lastLogin" | "cRMUserDataModelId" | "createdAt" | "updatedAt", ExtArgs["result"]["customersAuthDataModel"]>
   export type CustomersAuthDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     relationshipManager?: boolean | CustomersAuthDataModel$relationshipManagerArgs<ExtArgs>
     customerProfileDataModel?: boolean | CustomersAuthDataModel$customerProfileDataModelArgs<ExtArgs>
@@ -5482,6 +5493,7 @@ export namespace Prisma {
        * Type of sign-in used (e.g., EMAIL, GOOGLE, etc.)
        */
       signinWith: $Enums.SIGNIN_WITH
+      socialLoginId: string | null
       /**
        * Account status (e.g., ACTIVE, INACTIVE, SUSPENDED)
        */
@@ -5925,6 +5937,7 @@ export namespace Prisma {
     readonly id: FieldRef<"CustomersAuthDataModel", 'Int'>
     readonly password: FieldRef<"CustomersAuthDataModel", 'String'>
     readonly signinWith: FieldRef<"CustomersAuthDataModel", 'SIGNIN_WITH'>
+    readonly socialLoginId: FieldRef<"CustomersAuthDataModel", 'String'>
     readonly accountStatus: FieldRef<"CustomersAuthDataModel", 'AccountStatus'>
     readonly isPhoneVerified: FieldRef<"CustomersAuthDataModel", 'Boolean'>
     readonly isEmailVerified: FieldRef<"CustomersAuthDataModel", 'Boolean'>
@@ -6709,7 +6722,7 @@ export namespace Prisma {
     lastName: string
     gender: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo: string | null
     whatsAppNo: string | null
     avatar: string | null
     userType: $Enums.UserAccountType
@@ -6941,7 +6954,7 @@ export namespace Prisma {
        * Contact details
        */
       emailAddress: string
-      phoneNo: string
+      phoneNo: string | null
       whatsAppNo: string | null
       /**
        * Profile visuals and type
@@ -26332,6 +26345,7 @@ export namespace Prisma {
     id: 'id',
     password: 'password',
     signinWith: 'signinWith',
+    socialLoginId: 'socialLoginId',
     accountStatus: 'accountStatus',
     isPhoneVerified: 'isPhoneVerified',
     isEmailVerified: 'isEmailVerified',
@@ -27212,6 +27226,7 @@ export namespace Prisma {
     id?: IntFilter<"CustomersAuthDataModel"> | number
     password?: StringNullableFilter<"CustomersAuthDataModel"> | string | null
     signinWith?: EnumSIGNIN_WITHFilter<"CustomersAuthDataModel"> | $Enums.SIGNIN_WITH
+    socialLoginId?: StringNullableFilter<"CustomersAuthDataModel"> | string | null
     accountStatus?: EnumAccountStatusFilter<"CustomersAuthDataModel"> | $Enums.AccountStatus
     isPhoneVerified?: BoolFilter<"CustomersAuthDataModel"> | boolean
     isEmailVerified?: BoolFilter<"CustomersAuthDataModel"> | boolean
@@ -27229,6 +27244,7 @@ export namespace Prisma {
     id?: SortOrder
     password?: SortOrderInput | SortOrder
     signinWith?: SortOrder
+    socialLoginId?: SortOrderInput | SortOrder
     accountStatus?: SortOrder
     isPhoneVerified?: SortOrder
     isEmailVerified?: SortOrder
@@ -27249,6 +27265,7 @@ export namespace Prisma {
     NOT?: CustomersAuthDataModelWhereInput | CustomersAuthDataModelWhereInput[]
     password?: StringNullableFilter<"CustomersAuthDataModel"> | string | null
     signinWith?: EnumSIGNIN_WITHFilter<"CustomersAuthDataModel"> | $Enums.SIGNIN_WITH
+    socialLoginId?: StringNullableFilter<"CustomersAuthDataModel"> | string | null
     accountStatus?: EnumAccountStatusFilter<"CustomersAuthDataModel"> | $Enums.AccountStatus
     isPhoneVerified?: BoolFilter<"CustomersAuthDataModel"> | boolean
     isEmailVerified?: BoolFilter<"CustomersAuthDataModel"> | boolean
@@ -27266,6 +27283,7 @@ export namespace Prisma {
     id?: SortOrder
     password?: SortOrderInput | SortOrder
     signinWith?: SortOrder
+    socialLoginId?: SortOrderInput | SortOrder
     accountStatus?: SortOrder
     isPhoneVerified?: SortOrder
     isEmailVerified?: SortOrder
@@ -27289,6 +27307,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"CustomersAuthDataModel"> | number
     password?: StringNullableWithAggregatesFilter<"CustomersAuthDataModel"> | string | null
     signinWith?: EnumSIGNIN_WITHWithAggregatesFilter<"CustomersAuthDataModel"> | $Enums.SIGNIN_WITH
+    socialLoginId?: StringNullableWithAggregatesFilter<"CustomersAuthDataModel"> | string | null
     accountStatus?: EnumAccountStatusWithAggregatesFilter<"CustomersAuthDataModel"> | $Enums.AccountStatus
     isPhoneVerified?: BoolWithAggregatesFilter<"CustomersAuthDataModel"> | boolean
     isEmailVerified?: BoolWithAggregatesFilter<"CustomersAuthDataModel"> | boolean
@@ -27311,7 +27330,7 @@ export namespace Prisma {
     lastName?: StringFilter<"CustomerProfileDataModel"> | string
     gender?: EnumGenderNullableFilter<"CustomerProfileDataModel"> | $Enums.Gender | null
     emailAddress?: StringFilter<"CustomerProfileDataModel"> | string
-    phoneNo?: StringFilter<"CustomerProfileDataModel"> | string
+    phoneNo?: StringNullableFilter<"CustomerProfileDataModel"> | string | null
     whatsAppNo?: StringNullableFilter<"CustomerProfileDataModel"> | string | null
     avatar?: StringNullableFilter<"CustomerProfileDataModel"> | string | null
     userType?: EnumUserAccountTypeFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
@@ -27348,7 +27367,7 @@ export namespace Prisma {
     lastName?: SortOrder
     gender?: SortOrderInput | SortOrder
     emailAddress?: SortOrder
-    phoneNo?: SortOrder
+    phoneNo?: SortOrderInput | SortOrder
     whatsAppNo?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     userType?: SortOrder
@@ -27425,7 +27444,7 @@ export namespace Prisma {
     lastName?: SortOrder
     gender?: SortOrderInput | SortOrder
     emailAddress?: SortOrder
-    phoneNo?: SortOrder
+    phoneNo?: SortOrderInput | SortOrder
     whatsAppNo?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     userType?: SortOrder
@@ -27460,7 +27479,7 @@ export namespace Prisma {
     lastName?: StringWithAggregatesFilter<"CustomerProfileDataModel"> | string
     gender?: EnumGenderNullableWithAggregatesFilter<"CustomerProfileDataModel"> | $Enums.Gender | null
     emailAddress?: StringWithAggregatesFilter<"CustomerProfileDataModel"> | string
-    phoneNo?: StringWithAggregatesFilter<"CustomerProfileDataModel"> | string
+    phoneNo?: StringNullableWithAggregatesFilter<"CustomerProfileDataModel"> | string | null
     whatsAppNo?: StringNullableWithAggregatesFilter<"CustomerProfileDataModel"> | string | null
     avatar?: StringNullableWithAggregatesFilter<"CustomerProfileDataModel"> | string | null
     userType?: EnumUserAccountTypeWithAggregatesFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
@@ -29175,6 +29194,7 @@ export namespace Prisma {
   export type CustomersAuthDataModelCreateInput = {
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -29191,6 +29211,7 @@ export namespace Prisma {
     id?: number
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -29206,6 +29227,7 @@ export namespace Prisma {
   export type CustomersAuthDataModelUpdateInput = {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -29222,6 +29244,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -29238,6 +29261,7 @@ export namespace Prisma {
     id?: number
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -29252,6 +29276,7 @@ export namespace Prisma {
   export type CustomersAuthDataModelUpdateManyMutationInput = {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -29266,6 +29291,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -29284,7 +29310,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -29314,7 +29340,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -29343,7 +29369,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -29373,7 +29399,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -29403,7 +29429,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -29429,7 +29455,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -29449,7 +29475,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -31618,6 +31644,7 @@ export namespace Prisma {
     id?: SortOrder
     password?: SortOrder
     signinWith?: SortOrder
+    socialLoginId?: SortOrder
     accountStatus?: SortOrder
     isPhoneVerified?: SortOrder
     isEmailVerified?: SortOrder
@@ -31638,6 +31665,7 @@ export namespace Prisma {
     id?: SortOrder
     password?: SortOrder
     signinWith?: SortOrder
+    socialLoginId?: SortOrder
     accountStatus?: SortOrder
     isPhoneVerified?: SortOrder
     isEmailVerified?: SortOrder
@@ -31653,6 +31681,7 @@ export namespace Prisma {
     id?: SortOrder
     password?: SortOrder
     signinWith?: SortOrder
+    socialLoginId?: SortOrder
     accountStatus?: SortOrder
     isPhoneVerified?: SortOrder
     isEmailVerified?: SortOrder
@@ -34781,6 +34810,7 @@ export namespace Prisma {
   export type CustomersAuthDataModelCreateWithoutRelationshipManagerInput = {
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -34796,6 +34826,7 @@ export namespace Prisma {
     id?: number
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -34881,6 +34912,7 @@ export namespace Prisma {
     id?: IntFilter<"CustomersAuthDataModel"> | number
     password?: StringNullableFilter<"CustomersAuthDataModel"> | string | null
     signinWith?: EnumSIGNIN_WITHFilter<"CustomersAuthDataModel"> | $Enums.SIGNIN_WITH
+    socialLoginId?: StringNullableFilter<"CustomersAuthDataModel"> | string | null
     accountStatus?: EnumAccountStatusFilter<"CustomersAuthDataModel"> | $Enums.AccountStatus
     isPhoneVerified?: BoolFilter<"CustomersAuthDataModel"> | boolean
     isEmailVerified?: BoolFilter<"CustomersAuthDataModel"> | boolean
@@ -34969,7 +35001,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -34998,7 +35030,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -35082,7 +35114,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -35111,7 +35143,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -35153,6 +35185,7 @@ export namespace Prisma {
   export type CustomersAuthDataModelCreateWithoutCustomerProfileDataModelInput = {
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -35168,6 +35201,7 @@ export namespace Prisma {
     id?: number
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -35502,6 +35536,7 @@ export namespace Prisma {
   export type CustomersAuthDataModelUpdateWithoutCustomerProfileDataModelInput = {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -35517,6 +35552,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -35840,7 +35876,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -35869,7 +35905,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -35913,7 +35949,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -35942,7 +35978,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -35970,7 +36006,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -35999,7 +36035,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36043,7 +36079,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36072,7 +36108,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36100,7 +36136,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36129,7 +36165,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36173,7 +36209,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36202,7 +36238,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36230,7 +36266,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36259,7 +36295,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36303,7 +36339,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36332,7 +36368,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36360,7 +36396,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36389,7 +36425,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36422,7 +36458,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36451,7 +36487,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36495,7 +36531,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36524,7 +36560,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36563,7 +36599,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36592,7 +36628,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36620,7 +36656,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36649,7 +36685,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36693,7 +36729,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36722,7 +36758,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36750,7 +36786,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36779,7 +36815,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36823,7 +36859,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36852,7 +36888,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -36954,7 +36990,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -36983,7 +37019,7 @@ export namespace Prisma {
     lastName: string
     gender?: $Enums.Gender | null
     emailAddress: string
-    phoneNo: string
+    phoneNo?: string | null
     whatsAppNo?: string | null
     avatar?: string | null
     userType?: $Enums.UserAccountType
@@ -37093,7 +37129,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -37122,7 +37158,7 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     emailAddress?: StringFieldUpdateOperationsInput | string
-    phoneNo?: StringFieldUpdateOperationsInput | string
+    phoneNo?: NullableStringFieldUpdateOperationsInput | string | null
     whatsAppNo?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     userType?: EnumUserAccountTypeFieldUpdateOperationsInput | $Enums.UserAccountType
@@ -37669,6 +37705,7 @@ export namespace Prisma {
     id?: number
     password?: string | null
     signinWith: $Enums.SIGNIN_WITH
+    socialLoginId?: string | null
     accountStatus?: $Enums.AccountStatus
     isPhoneVerified?: boolean
     isEmailVerified?: boolean
@@ -37698,6 +37735,7 @@ export namespace Prisma {
   export type CustomersAuthDataModelUpdateWithoutRelationshipManagerInput = {
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -37713,6 +37751,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -37728,6 +37767,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     password?: NullableStringFieldUpdateOperationsInput | string | null
     signinWith?: EnumSIGNIN_WITHFieldUpdateOperationsInput | $Enums.SIGNIN_WITH
+    socialLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     accountStatus?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean

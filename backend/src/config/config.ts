@@ -8,7 +8,8 @@ function getEnvVar(key: string, devDefault?: string): string {
 }
 
 export const config = {
-    hostUrl: getEnvVar("HOST_URL", "http://localhost:3000"),
+    hostUrl: getEnvVar("HOST_URL", "http://localhost:4000"),
+    clientUrl: getEnvVar("HOST_URL", "http://localhost:3000"),
     storageUrl: getEnvVar("STORAGE_URL", "http://localhost:3000"),
     jwtSecret: getEnvVar("JWT_SECRET", "your_jwt_secret"),
     port: parseInt(getEnvVar("PORT", "4000")),

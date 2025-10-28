@@ -8,8 +8,13 @@ import z from "zod";
 import { useTrackUserVerifyFlowStore } from "./useTrackUserVerifyFlowStore";
 import { useTimer } from "@/hooks/useTimer";
 import { AxiosError } from "axios";
+import { useRouter } from "nextjs-toploader/app";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import { COOKIE_OPTIONS } from "@/core/config/cookies.config";
 
 export const useSignUpAuthFlow = () => {
+    const router = useRouter();
+    const { setCookie } = useAppCookie();
     const {
         email,
         mobile,
@@ -105,8 +110,8 @@ export const useSignUpAuthFlow = () => {
                 return;
             }
             if (error instanceof AxiosError) {
-                setErrorMessage("email",  error.response?.data?.error || error.message);
-                toast.error( error.response?.data?.error || error.message);
+                setErrorMessage("email", error.response?.data?.error || error.message);
+                toast.error(error.response?.data?.error || error.message);
             }
             toast.error(error.message);
         },
@@ -125,6 +130,12 @@ export const useSignUpAuthFlow = () => {
                 return;
             }
             toast.error(error.message);
+        },
+        onSuccess(data) {
+            setAuthCookiesAndRedirect({
+                token: data.responseData.token,
+                id: data.responseData.id.toString(),
+            })
         },
     });
 
@@ -166,6 +177,22 @@ export const useSignUpAuthFlow = () => {
             payload,
         });
     };
+
+
+    const setAuthCookiesAndRedirect = ({ id, token }: { token: string, id: string }) => {
+        setCookie("token", token, COOKIE_OPTIONS);
+        setCookie("userId", id, COOKIE_OPTIONS);
+
+        // redirect to dashboard
+        if (localStorage.getItem("redirect")) {
+            router.replace(localStorage.getItem("redirect") as string);
+            localStorage.removeItem("redirect");
+        } else {
+            router.replace("/dashboard");
+        }
+
+    }
+
     return {
         sendVerifyOtp,
         isPending:

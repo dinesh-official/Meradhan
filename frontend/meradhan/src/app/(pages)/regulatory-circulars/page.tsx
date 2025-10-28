@@ -11,8 +11,11 @@ import NewsLetter from "@/global/components/footer/NewsLetter";
 import NavBar from "@/global/components/navbar/NavBar";
 import ListFilter from "./_components/ListFilter";
 import ListNseData from "./_components/ListNseData";
+import { cn } from "@/lib/utils";
+import { quicksand } from "@/global/font/font";
+import ViewPort from "@/global/components/wrapper/ViewPort";
 
- const nseData = [
+const nseData = [
   {
     date: "21 Jul 2025",
     exchange: "NSE",
@@ -69,42 +72,43 @@ import ListNseData from "./_components/ListNseData";
 
 const page = () => {
   return (
-    <div className="h-[100vh]">
-      <NavBar />
-      <div className="mx-auto mt-[1rem] mb-[4rem] max-w-[70%]">
-        <div className="mb-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/regulatory-circulars">
-                  Regulatory Circulars
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+    <ViewPort>
+      <div className="container">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/regulatory-circulars">
+                Regulatory Circulars
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="py-16">
+          <h1
+            className={cn(
+              "font-medium text-4xl text-center",
+              quicksand.className
+            )}
+          >
+            Regulatory
+            <span className="font-semibold text-secondary"> Circulars</span>
+          </h1>
+          <p className="mt-2 text-center">
+            Stay updated with the latest SEBI, NSE and BSE circulars impacting
+            the bond and fixed income markets—all in one place.
+          </p>
         </div>
-        <div className="flex flex-col justify-center items-center gap-4 text-center"></div>
-        <h3 className="font-medium text-gray-900 text-3xl md:text-4xl">
-          Regulatory{" "}
-          <span className="font-semibold text-[#F25C4C]">Circulars</span>
-        </h3>
 
-        <p className="max-w-[700px] text-[16px] text-gray-600 md:text-[17px] leading-relaxed">
-          Stay updated with the latest SEBI, NSE and BSE circulars impacting the
-          bond and fixed income markets—all in one place.
-        </p>
+        <ListFilter />
+
+        <ListNseData nseData={nseData} />
       </div>
-
-      <ListFilter />
-
-      <ListNseData nseData={nseData} />
-      <NewsLetter />
-      <Footer />
-    </div>
+    </ViewPort>
   );
 };
 
