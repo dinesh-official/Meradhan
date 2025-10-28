@@ -44,6 +44,7 @@ export const useSignUpFormDataState = () => {
     isAcceptedWhatsapp: false,
   });
 
+
   const [signUpFormError, setSignUpFormError] = useState<
     Record<keyof SignUPFormSchemaType, string>
   >({
