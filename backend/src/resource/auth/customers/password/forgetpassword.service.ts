@@ -3,6 +3,7 @@ import { db } from "@core/database/database";
 import { tokenUtils } from "@utils/token/JwtToken.utils";
 import { sendForgetPasswordEmail } from "../../../../queues/services/sender/sentNotfyemail";
 import { AppError } from "@utils/error/AppError";
+import { hashingUtils } from "@utils/hash/hashing.utils";
 
 export class ForgetPasswordService {
 
@@ -17,7 +18,7 @@ export class ForgetPasswordService {
         })
 
         if (!user) {
-            throw new AppError("User not found");
+            throw new AppError("User not exist on this email address");
         }
 
         if (user.utility.signinWith != "CREDENTIALS") {
@@ -26,8 +27,6 @@ export class ForgetPasswordService {
 
         const token = tokenUtils.generateToken(
             {
-                email: user.emailAddress,
-                mobile: user.phoneNo,
                 id: user.id,
             },
             '30m'
@@ -40,8 +39,42 @@ export class ForgetPasswordService {
             userName: user.firstName + " " + user.lastName
         })
 
-        return { status: true };
+        return true;
+    }
 
+    async resetPassword(data: { token: string, password: string }) {
+        const token = tokenUtils.verifyToken<{
+
+            id: string
+        }>(data.token);
+        const user = await db.dataBase.customerProfileDataModel.findUnique({
+            where: {
+                id: Number(token.id)
+            },
+            include: {
+                utility: true
+            }
+        })
+
+        if (!user) {
+            throw new AppError("User not exist on this reset link");
+        }
+
+        const hashedPassword = await hashingUtils.hashPassword(data.password);
+        await db.dataBase.customerProfileDataModel.update({
+            where: {
+                id: Number(token.id)
+            },
+            data: {
+                utility: {
+                    update: {
+                        password: hashedPassword
+                    }
+                }
+            }
+        })
+
+        return true;
     }
 
 }

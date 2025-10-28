@@ -77,6 +77,15 @@ export const SocialLoginUserSchema = z.object({
   provider: ProviderEnum
 });
 
+export const sendForgetPasswordSchema = z.object({
+  email: z.email(),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(4, "Enter your valid password."),
+  token: z.string().min(1, "Token is required."),
+});
+
 
 
 export const createNewCustomerSchema = z.object({
