@@ -156,7 +156,7 @@ export const useSignUpAuthFlow = () => {
         const token = currentStep == "email"
             ? sendAuthEmailOtpMutation.data?.responseData?.token
             : sendAuthMobileOtpMutation.data?.responseData?.token
-        console.log(token);
+
 
         singUpWithCredentialsMutation.mutate({
             params: {

@@ -1,19 +1,6 @@
+import { removeCountryCode } from '@utils/filters/convert';
 import axios from 'axios'
 export class MobileOtpSenderGateway {
-    private sanitizeMobile(mobile: string): string {
-        // Remove everything except numbers
-        let clean = mobile.replace(/\D/g, "");
-        // Keep only last 10 digits (most local mobile numbers globally use <= 10 digits)
-        if (clean.length > 10) {
-            clean = clean.slice(clean.length - 10);
-        }
-        // Validate
-        if (clean.length !== 10) {
-            throw new Error(`Invalid mobile number format: ${mobile}`);
-        }
-        return clean;
-    }
-
 
     async sendMsg91(mobile: string, otp: string | number, template: "signup" | "login" | "verify") {
         const templateID = {
@@ -28,7 +15,7 @@ export class MobileOtpSenderGateway {
         }
         >("https://control.msg91.com/api/v5/flow/", {
             template_id: templateID[template],
-            mobiles: "91" + this.sanitizeMobile(mobile),
+            mobiles: "91" + removeCountryCode(mobile),
             authkey: "441386Agy1HjWXw267ae06b8P1",
             otp: otp,
         });

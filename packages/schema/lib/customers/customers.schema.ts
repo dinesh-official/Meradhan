@@ -42,6 +42,36 @@ export const signUpWithCredentialsQuerySchema = z.object({
 });
 
 
+// Sign In Schemas
+export const signInWithEmailPhoneRequestSchema = z.object({
+  identity: z.enum(["email", "phoneNo"]),
+  value: z.string().min(1, "Enter email or phone number."),
+});
+
+export const signInWithCredentialsSchema = z.object({
+  identity: z.enum(["email", "phoneNo"]),
+  value: z.string().min(1, "Enter your valid email or phone number."),
+  password: z.string().min(4, "Enter your valid password."),
+});
+
+
+export const sendSignInOtpSchema = z.object({
+  identity: z.enum(["email", "phoneNo"]),
+  value: z.string().min(1, "Enter email or phone number."),
+});
+
+export const signInWithOtpSchema = z.object({
+  identity: z.enum(["email", "phoneNo"]),
+  value: z.string().min(1, "Enter email or phone number."),
+  otp: z.string().min(4, "OTP is required."),
+  token: z.string().min(1, "Token is required."),
+});
+
+
+
+
+
+
 export const createNewCustomerSchema = z.object({
   firstName: z
     .string({ error: "First name is required" })
@@ -53,10 +83,10 @@ export const createNewCustomerSchema = z.object({
   emailId: z.email({ message: "Please enter a valid email address" }),
   phoneNo: z
     .string({ error: "Phone number is required" })
-    .min(10, { message: "Phone number must be at least 10 digits long" }),
+    .min(10, { message: "Phone number must be at least 10 digits long" }).max(14, { message: "Phone number must be at most 14 digits long" }),
   whatsAppNo: z
     .string({ error: "WhatsApp number is required" })
-    .min(10, { message: "WhatsApp number must be at least 10 digits long" }),
+    .min(10, { message: "WhatsApp number must be at least 10 digits long" }).max(14, { message: "WhatsApp number must be at most 14 digits long" }),
   userType: z.enum(UserAccountType, {
     error: "User account type is required",
   }),

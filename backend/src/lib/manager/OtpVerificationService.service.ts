@@ -10,7 +10,7 @@ export interface OtpRecord {
 }
 
 export interface IOtpVerificationService {
-    generateOtpAndSend(identifier: string, length?: number, expirySeconds?: number): Promise<{ token: string, otp: string }>;
+    generateOtp(identifier: string, length?: number, expirySeconds?: number): Promise<{ token: string, otp: string }>;
     verifyOtp(token: string, otp: string): Promise<boolean>;
 }
 
@@ -23,7 +23,7 @@ export class OtpVerificationService implements IOtpVerificationService {
         this.store = QueueStore.getStore(); this.storeKey = useOf;
     }
 
-    async generateOtpAndSend(identifier: string, length: number = 6, expirySeconds: number = 300): ReturnType<IOtpVerificationService['generateOtpAndSend']> {
+    async generateOtp(identifier: string, length: number = 6, expirySeconds: number = 300): ReturnType<IOtpVerificationService['generateOtp']> {
         const otp = Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
         if (config.mode == "DEVELOPMENT") {
             console.log("====================");

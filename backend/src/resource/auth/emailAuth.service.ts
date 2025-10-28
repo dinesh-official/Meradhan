@@ -15,7 +15,7 @@ export class EmailAuthService {
 
     async sendAuthEmailOtp(email: string) {
         const user = await this.authRepo.getAuthUserByEmail(email);
-        const { token, otp } = await this.optManager.generateOtpAndSend(user.id.toString());
+        const { token, otp } = await this.optManager.generateOtp(user.id.toString());
         await sendLoginOtpEmail({
             email: user.email,
             userName: user.name,

@@ -1,6 +1,7 @@
-export function removeCountryCode(phoneNumber: string): string {
+export function removeCountryCode(phoneNumber?: string): string {
+  if (!phoneNumber) return "";
   // Remove all non-digit characters
-  let digits: string = phoneNumber.replace(/\D/g, '');
+  let digits: string = phoneNumber?.replace(/\D/g, '');
 
   // Common country codes (extend list as needed)
   const countryCodes: string[] = ['1', '44', '91', '61', '81', '86', '49', '33', '39', '7'];

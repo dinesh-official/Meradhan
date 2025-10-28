@@ -1,6 +1,7 @@
 import { db, KYCStatus } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
+import { removeCountryCode } from "@utils/filters/convert";
 import { generateUsername } from "@utils/generate/generateUsername";
 import { hashingUtils } from "@utils/hash/hashing.utils";
 import type z from "zod";
@@ -26,8 +27,8 @@ export class CustomerProfileManager {
           middleName: data.middleName || "",
           lastName: data.lastName,
           gender: data.gender,
-          whatsAppNo: data.whatsAppNo || data.phoneNo,
-          phoneNo: data.phoneNo,
+          whatsAppNo: (data.whatsAppNo && "+91" + removeCountryCode(data.whatsAppNo)) || "+91" + removeCountryCode(data.phoneNo),
+          phoneNo: "+91" + removeCountryCode(data.phoneNo),
           userName: generateUsername(),
           kycStatus: data.kycStatus,
           userType: data.userType,
@@ -120,8 +121,8 @@ export class CustomerProfileManager {
           middleName: data.middleName?.trim(),
           lastName: data.lastName?.trim(),
           emailAddress: data.emailId?.trim().toLowerCase(),
-          phoneNo: data.phoneNo?.trim(),
-          whatsAppNo: data.whatsAppNo?.trim(),
+          phoneNo: "+91" + removeCountryCode(data.phoneNo)?.trim(),
+          whatsAppNo: "+91" + removeCountryCode(data.whatsAppNo?.trim()),
           userType: data.userType,
           gender: data.gender,
           kycStatus: data.kycStatus,

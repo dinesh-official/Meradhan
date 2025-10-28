@@ -35,7 +35,7 @@ model CustomerProfileDataModel {
     id Int @id @default(autoincrement())
 
     /// Basic identity info
-    userName   String @unique
+    userName   String  @unique
     firstName  String
     middleName String
     lastName   String
@@ -43,7 +43,7 @@ model CustomerProfileDataModel {
 
     /// Contact details
     emailAddress String  @unique
-    phoneNo      String
+    phoneNo      String  @unique
     whatsAppNo   String?
 
     /// Profile visuals and type

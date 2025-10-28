@@ -13,7 +13,13 @@ import { useTrackUserVerifyFlowStore } from "../_hooks/useTrackUserVerifyFlowSto
 import CaptchaInput from "./CaptchaInput";
 import SignUpOtpInput from "./SignUpOtpInput";
 
-function VerifyOtpPopUp({ formData ,signUpFlowKyc}: { formData: SignUPFormDataHook['signUpFormData'] , signUpFlowKyc:ISignUpAuthFlow  }) {
+function VerifyOtpPopUp({
+  formData,
+  signUpFlowKyc,
+}: {
+  formData: SignUPFormDataHook["signUpFormData"];
+  signUpFlowKyc: ISignUpAuthFlow;
+}) {
   const {
     currentStep,
     email,
@@ -117,13 +123,12 @@ function VerifyOtpPopUp({ formData ,signUpFlowKyc}: { formData: SignUPFormDataHo
                   firstName: formData.firstName,
                   lastName: formData.lastName,
                   password: formData.password,
-                  phoneNo: formData.mobile,
+                  phoneNo: "+91" + formData.mobile,
                   termsAccepted: formData.isAcceptedTerms,
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   userType: formData.userType as any,
-                  whatsAppNo: formData.mobile,
-                  whatsAppNotificationAllow:
-                    formData.isAcceptedWhatsapp,
+                  whatsAppNo: "+91" + formData.mobile,
+                  whatsAppNotificationAllow: formData.isAcceptedWhatsapp,
                 })
               }
             >
@@ -137,10 +142,7 @@ function VerifyOtpPopUp({ formData ,signUpFlowKyc}: { formData: SignUPFormDataHo
                 flowManager.sendVerifyOtp({
                   emailId: formData.email,
                   mobile: formData.mobile,
-                  name:
-                    formData.firstName +
-                    " " +
-                    formData.lastName,
+                  name: formData.firstName + " " + formData.lastName,
                 })
               }
             >

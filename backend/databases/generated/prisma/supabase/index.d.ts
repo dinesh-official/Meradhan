@@ -135,7 +135,8 @@ export type AccountStatus = (typeof AccountStatus)[keyof typeof AccountStatus]
 export const SIGNIN_WITH: {
   CREDENTIALS: 'CREDENTIALS',
   GOOGLE: 'GOOGLE',
-  MICROSOFT: 'MICROSOFT'
+  MICROSOFT: 'MICROSOFT',
+  FACEBOOK: 'FACEBOOK'
 };
 
 export type SIGNIN_WITH = (typeof SIGNIN_WITH)[keyof typeof SIGNIN_WITH]
@@ -27380,6 +27381,7 @@ export namespace Prisma {
     id?: number
     userName?: string
     emailAddress?: string
+    phoneNo?: string
     customersRiskProfileModelId?: number
     customersAuthDataModelId?: number
     aADHAARCardModelId?: number
@@ -27394,7 +27396,6 @@ export namespace Prisma {
     middleName?: StringFilter<"CustomerProfileDataModel"> | string
     lastName?: StringFilter<"CustomerProfileDataModel"> | string
     gender?: EnumGenderNullableFilter<"CustomerProfileDataModel"> | $Enums.Gender | null
-    phoneNo?: StringFilter<"CustomerProfileDataModel"> | string
     whatsAppNo?: StringNullableFilter<"CustomerProfileDataModel"> | string | null
     avatar?: StringNullableFilter<"CustomerProfileDataModel"> | string | null
     userType?: EnumUserAccountTypeFilter<"CustomerProfileDataModel"> | $Enums.UserAccountType
@@ -27414,7 +27415,7 @@ export namespace Prisma {
     bankAccounts?: CustomersBankAccountModelListRelationFilter
     dematAccounts?: CustomersDematAccountModelListRelationFilter
     nseDataSet?: XOR<NseDataSetNullableScalarRelationFilter, NseDataSetWhereInput> | null
-  }, "id" | "userName" | "emailAddress" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId">
+  }, "id" | "userName" | "emailAddress" | "phoneNo" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId">
 
   export type CustomerProfileDataModelOrderByWithAggregationInput = {
     id?: SortOrder

@@ -479,7 +479,8 @@ exports.AccountStatus = exports.$Enums.AccountStatus = {
 exports.SIGNIN_WITH = exports.$Enums.SIGNIN_WITH = {
   CREDENTIALS: 'CREDENTIALS',
   GOOGLE: 'GOOGLE',
-  MICROSOFT: 'MICROSOFT'
+  MICROSOFT: 'MICROSOFT',
+  FACEBOOK: 'FACEBOOK'
 };
 
 exports.Gender = exports.$Enums.Gender = {

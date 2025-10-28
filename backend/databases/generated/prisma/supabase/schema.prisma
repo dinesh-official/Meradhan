@@ -74,7 +74,7 @@ model CustomerProfileDataModel {
 
   /// Contact details
   emailAddress String  @unique
-  phoneNo      String
+  phoneNo      String  @unique
   whatsAppNo   String?
 
   /// Profile visuals and type
@@ -319,6 +319,8 @@ enum SIGNIN_WITH {
   GOOGLE
   /// Microsoft account sign-in
   MICROSOFT
+  /// facebook account
+  FACEBOOK
 }
 
 /// Represents type of user account (based on entity type)
