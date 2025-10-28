@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 
 # MeraDhan Setup Script (npm version)
 # This script installs all dependencies for the project components using npm only
