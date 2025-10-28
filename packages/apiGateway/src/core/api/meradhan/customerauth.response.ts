@@ -23,3 +23,7 @@ export type ISignInSendOtpResponse = BaseResponseData<{
     lastName: string,
     token: string
 }>
+
+export type IResetPasswordResponse = BaseResponseData<{
+    message: string
+}>

@@ -1,9 +1,10 @@
 import { config } from "@config/config";
 import { db } from "@core/database/database";
-import { tokenUtils } from "@utils/token/JwtToken.utils";
-import { sendForgetPasswordEmail } from "../../../../queues/services/sender/sentNotfyemail";
 import { AppError } from "@utils/error/AppError";
 import { hashingUtils } from "@utils/hash/hashing.utils";
+import { tokenUtils } from "@utils/token/JwtToken.utils";
+import { cacheStorage } from "../../../../queues/redis/queues";
+import { sendForgetPasswordEmail, sendPasswordResetSuccessEmail } from "../../../../queues/services/sender/sentNotfyemail";
 
 export class ForgetPasswordService {
 
@@ -33,6 +34,7 @@ export class ForgetPasswordService {
         );
 
         const url = `${config.clientUrl}/reset-password?token=${token}`;
+        await cacheStorage.set("RESET_PASSWORD_TOKEN:" + user.id, token, 30 * 60);
         await sendForgetPasswordEmail({
             email: user.emailAddress,
             link: url,
@@ -60,6 +62,12 @@ export class ForgetPasswordService {
             throw new AppError("User not exist on this reset link");
         }
 
+        const checkToken = await cacheStorage.get("RESET_PASSWORD_TOKEN:" + user.id);
+
+        if (checkToken != data.token) {
+            throw new AppError("link is no longer valid please try again", { code: "LINK_EXPIRED" });
+        }
+
         const hashedPassword = await hashingUtils.hashPassword(data.password);
         await db.dataBase.customerProfileDataModel.update({
             where: {
@@ -72,8 +80,13 @@ export class ForgetPasswordService {
                     }
                 }
             }
-        })
+        });
 
+        await cacheStorage.delete("RESET_PASSWORD_TOKEN:" + user.id);
+        await sendPasswordResetSuccessEmail({
+            email: user.emailAddress,
+            userName: user.firstName + " " + user.lastName,
+        })
         return true;
     }
 

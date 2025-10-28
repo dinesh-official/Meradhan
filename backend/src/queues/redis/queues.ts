@@ -35,3 +35,8 @@ export const mobileOtpSenderQueue = new Bull(QueueNames.mobileOtpSend, {
 export const forgotPasswordLinkSenderQueue = new Bull(QueueNames.forgotPasswordEmail, {
     redis: config.redis
 });
+
+// Create Bull Queue for sending Welcome Emails
+export const successResetPasswordQueue = new Bull(QueueNames.welComeEmail, {
+    redis: config.redis
+});

@@ -2,7 +2,7 @@ import { appSchema } from "@root/schema";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
-import type { IAuthCompleteResponse, ISignInRequestResponse, ISignInSendOtpResponse, ISignupOtpVerifyResponse } from "./customerauth.response";
+import type { IAuthCompleteResponse, IResetPasswordResponse, ISignInRequestResponse, ISignInSendOtpResponse, ISignupOtpVerifyResponse } from "./customerauth.response";
 
 export class CustomerAuthApi {
     private schema = appSchema.customer;
@@ -45,6 +45,16 @@ export class CustomerAuthApi {
 
     async signInVerifyOtp(payload: z.infer<typeof this.schema.signInWithOtpSchema>, config?: AxiosRequestConfig) {
         const { data } = await this.apiClient.post<IAuthCompleteResponse>("/auth/customer/signin/with-otp", payload, config);
+        return data;
+    }
+
+    async sendForgetPasswordLink(payload: z.infer<typeof this.schema.sendForgetPasswordSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IResetPasswordResponse>("/auth/customer/send-forget-password", payload, config);
+        return data;
+    }
+    
+    async resetPassword(payload: z.infer<typeof this.schema.resetPasswordSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IResetPasswordResponse>("/auth/customer/reset-password", payload, config);
         return data;
     }
 }
