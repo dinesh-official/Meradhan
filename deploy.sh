@@ -15,7 +15,7 @@ echo "✅ Setup complete."
 # BACKEND
 # --------------------------
 echo "🧩 Checking backend..."
-cd ../../backend
+cd backend
 npm run lint
 npm run check
 echo "✅ Backend check complete."
@@ -30,7 +30,7 @@ pm2 restart MeraDhan-Worker
 # FRONTEND: CLIENT
 # --------------------------
 echo "🧩 Building Client frontend..."
-cd ../meradhan/
+cd ../frontend/meradhan/
 npm run lint
 npm run check
 npm run build
@@ -44,7 +44,7 @@ pm2 restart MeraDhan-Client
 # FRONTEND: CRM
 # --------------------------
 echo "🧩 Building CRM frontend..."
-cd frontend/crm/
+cd ../crm/
 npm run lint
 npm run check
 npm run build
