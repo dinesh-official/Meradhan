@@ -5,6 +5,7 @@ import { removeCountryCode } from "@utils/filters/convert";
 import { generateUsername } from "@utils/generate/generateUsername";
 import { hashingUtils } from "@utils/hash/hashing.utils";
 import type z from "zod";
+import { sendCustomerWelcomeEmail } from "../../../queues/services/sender/sentNotfyemail";
 
 
 export class CustomerProfileManager {
@@ -48,7 +49,11 @@ export class CustomerProfileManager {
           },
         },
       });
-
+    // send welcome email
+    await sendCustomerWelcomeEmail({
+      email: data.emailId,
+      userName: data.firstName
+    })
     return createdCustomerResponse;
   }
 
