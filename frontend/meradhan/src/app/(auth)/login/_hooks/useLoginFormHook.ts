@@ -66,7 +66,7 @@ export const useLoginFormHook = () => {
 
     // Timer setup for OTP resend coolDown
     const timer = useTimer({
-        duration: 5,
+        duration: 180,
         isCountdown: true,
         onFinish: () => dataStore.setAllowedResend(true),
     });
