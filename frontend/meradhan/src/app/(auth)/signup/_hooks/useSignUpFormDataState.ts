@@ -29,6 +29,8 @@ const formSchemaZod = z
     path: ["confirmPassword"],
   });
 
+
+
 export type SignUPFormSchemaType = z.infer<typeof formSchemaZod>;
 
 export const useSignUpFormDataState = () => {
