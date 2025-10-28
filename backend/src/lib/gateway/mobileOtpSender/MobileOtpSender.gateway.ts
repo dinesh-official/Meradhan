@@ -8,7 +8,7 @@ export class MobileOtpSenderGateway {
             "login": "6862803fd6fc05044526e1b2",
             "verify": "68627f8bd6fc0528ed5dd322"
         }
-
+        console.log(removeCountryCode(mobile));
         const response = await axios.post<{
             type: string
             request_id: string
