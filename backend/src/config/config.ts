@@ -36,8 +36,8 @@ export const config = {
     },
     redis: {
         username: getEnvVar("REDIS_USERNAME", "default"),
-        password: getEnvVar("REDIS_PASSWORD", "ufSQEyRoZjIjrIXv9lpRMs7Xsv45i4L0"),
-        host: getEnvVar("REDIS_HOST", "redis-19972.c212.ap-south-1-1.ec2.redns.redis-cloud.com"),
-        port: parseInt(getEnvVar("REDIS_PORT", "19972"))
+        password: getEnvVar("REDIS_PASSWORD", "sourav"),
+        host: getEnvVar("REDIS_HOST", "3.110.126.202"),
+        port: parseInt(getEnvVar("REDIS_PORT", "6379"))
     }
 };

@@ -1,6 +1,7 @@
 version: "3.8"
 
-services: # Performance Tracking
+services:
+  # Performance Tracking
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -10,13 +11,15 @@ services: # Performance Tracking
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     restart: unless-stopped
 
-  loki: # For Log Tracking
+  # Log Tracking
+  loki:
     image: grafana/loki:latest
     container_name: loki
     ports:
       - "3100:3100"
     restart: unless-stopped
 
+  # Visualization
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -26,3 +29,17 @@ services: # Performance Tracking
     depends_on:
       - prometheus
       - loki
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: ["redis-server", "--requirepass", "sourav"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:

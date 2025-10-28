@@ -26,6 +26,7 @@ function ForgetPasswordForm() {
 
   React.useEffect(() => {
     setErr("");
+    setSuccessMessage("");
   }, [emailId]);
 
   const authApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(

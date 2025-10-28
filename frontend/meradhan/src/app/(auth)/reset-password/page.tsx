@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
 import { FaLock } from "react-icons/fa";
+import ResetPasswordForm from "./ResetPasswordForm";
 
 function page() {
   return (
@@ -13,34 +14,7 @@ function page() {
           <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
             <CardContent className="flex flex-col gap-4 p-10 lg:p-14">
               <h3 className="text-2xl">Reset Password?</h3>
-              <div className="flex flex-col gap-3">
-                <div className="relative">
-                  <Input
-                    className="peer bg-muted py-5 ps-12 pe-12 border-none placeholder:text-[#7fabd2]"
-                    placeholder="Password*"
-                    type="email"
-                  />
-                  <div className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 ps-4 text-[#7fabd2] pointer-events-none start-0">
-                    <FaLock size={16} aria-hidden="true" />
-                  </div>
-                </div>
-                <div className="relative">
-                  <Input
-                    className="peer bg-muted py-5 ps-12 pe-12 border-none placeholder:text-[#7fabd2]"
-                    placeholder="Confirm Password*"
-                    type="email"
-                  />
-                  <div className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 ps-4 text-[#7fabd2] pointer-events-none start-0">
-                    <FaLock size={16} aria-hidden="true" />
-                  </div>
-                </div>
-                <p  className="text-sm lg:text-base" >
-                  *Password should be minimum of 8 characters, and must contain:
-                  one uppercase, one lowercase, one special character & one
-                  number
-                </p>
-                <Button className="w-full">Reset Password</Button>
-              </div>
+              <ResetPasswordForm />
             </CardContent>
             <div className="flex justify-center items-center bg-primary py-10 lg:py-10 w-full h-full">
               <Image
