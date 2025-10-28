@@ -33,10 +33,10 @@ export type SignUPFormSchemaType = z.infer<typeof formSchemaZod>;
 
 export const useSignUpFormDataState = () => {
   const [signUpFormData, setSignUpFormData] = useState<SignUPFormSchemaType>({
-    firstName: "Sourav",
-    lastName: "Bapari",
-    email: "hey.sourav.work@gmail.com",
-    mobile: "9382156026",
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobile: "",
     password: "",
     confirmPassword: "",
     userType: "INDIVIDUAL",
