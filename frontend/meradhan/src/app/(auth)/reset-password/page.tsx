@@ -1,12 +1,15 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
-import { FaLock } from "react-icons/fa";
 import ResetPasswordForm from "./ResetPasswordForm";
 
-function page() {
+export const revalidate = 0;
+async function page({
+  searchParams,
+}: {
+  searchParams: Promise<{ token: string }>;
+}) {
+  const { token } = await searchParams;
   return (
     <ViewPort headerOnly>
       <div className="flex justify-center items-center bg-muted py-10 min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-72px)]">
@@ -14,7 +17,7 @@ function page() {
           <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
             <CardContent className="flex flex-col gap-4 p-10 lg:p-14">
               <h3 className="text-2xl">Reset Password?</h3>
-              <ResetPasswordForm />
+              <ResetPasswordForm token={token} />
             </CardContent>
             <div className="flex justify-center items-center bg-primary py-10 lg:py-10 w-full h-full">
               <Image

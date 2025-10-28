@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "nextjs-toploader/app";
-import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import PasswordInput from "../_components/PasswordInput";
-import apiGateway, { ApiError } from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import apiGateway, { ApiError } from "@root/apiGateway";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "nextjs-toploader/app";
+import React, { useEffect, useState } from "react";
+import PasswordInput from "../_components/PasswordInput";
 
-function ResetPasswordForm() {
+function ResetPasswordForm({token}:{token: string}) {
   /** -----------------------------
    *  State Management
    *  ----------------------------- */
@@ -18,8 +17,7 @@ function ResetPasswordForm() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const query = useSearchParams();
-  const token = query.get("token") || "";
+
   const router = useRouter();
 
   /** -----------------------------
