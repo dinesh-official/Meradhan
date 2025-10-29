@@ -173,6 +173,7 @@ export const useSignUpAuthFlow = () => {
             params: {
                 otp,
                 token,
+                verifyBy: currentStep == "email" ? "email" : "mobile",
             },
             payload,
         });

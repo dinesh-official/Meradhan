@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   trailingSlash: false,
   transpilePackages: ["@root/apiGateway", "@root/schema"],
+
+  compress: false,
   devIndicators: {
     position: "bottom-left",
   },

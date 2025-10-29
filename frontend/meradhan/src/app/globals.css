@@ -122,7 +122,7 @@
     @apply bg-background text-foreground;
   }
   .container {
-    max-width: 1340px !important;
+    max-width: 1300px !important;
     margin-inline: auto;
     padding: 0px 20px !important;
   }

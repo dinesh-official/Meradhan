@@ -42,7 +42,7 @@ export class CustomerAuthController {
 
     // ✅ Signup with Credentials
     async signUpWithCredentials(req: Request, res: Response) {
-        const { otp, token } = appSchema.customer.signUpWithCredentialsQuerySchema.parse(req.query);
+        const { otp, token, verifyBy } = appSchema.customer.signUpWithCredentialsQuerySchema.parse(req.query);
         const isVerified = await this.optManager.verifyOtp(
             token || "",
             otp.toString()
@@ -51,7 +51,11 @@ export class CustomerAuthController {
             throw new AppError("The OTP provided is invalid.");
         }
         const data = appSchema.customer.createNewCustomerSchema.parse(req.body);
-        const user = await this.customerAuthService.signUpWithCredentials(data);
+        const user = await this.customerAuthService.signUpWithCredentials({
+            ...data,
+            isEmailVerified: verifyBy === "email",
+            isPhoneVerified: verifyBy === "mobile",
+        });
         res.cookie("token", user.token, cookieOptions);
         res.sendResponse({
             statusCode: HttpStatus.OK,
