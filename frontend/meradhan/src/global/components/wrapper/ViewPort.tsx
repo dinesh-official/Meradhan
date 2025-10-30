@@ -4,7 +4,7 @@ import NewsLetter from "../footer/NewsLetter";
 import NavBar from "../navbar/NavBar";
 import { getSession } from "./_server/getSession";
 
-export const revalidate = ;
+export const revalidate = 0;
 export async function ViewPort({
   children,
   headerOnly,
