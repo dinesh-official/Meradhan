@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
       {
         source: "/assets/media/:path*", // what user visits
         destination:
-          "https://bgzlloqonccvfegaxgcm.supabase.co/storage/v1/object/public/public_storage/:path*", // where it actually fetches
+          "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public/:path*", // where it actually fetches
       },
     ];
   },

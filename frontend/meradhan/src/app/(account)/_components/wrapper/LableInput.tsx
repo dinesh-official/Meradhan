@@ -11,7 +11,7 @@ function LabelInput({
 }: {
   label?: string;
   required?: boolean;
-  error?: string;
+  error?: string | undefined;
   children?: React.ReactNode;
   className?: string;
 }) {

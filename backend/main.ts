@@ -15,6 +15,7 @@ import leadsRoutes from "./src/resource/crm/leads/leads.routes";
 import participantsRouter from "./src/resource/crm/refq/nse/cbrics/participants.route";
 import nseIsinRoute from "./src/resource/crm/refq/nse/isin/nseisin.routes";
 import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
+import kycRoutes from "./src/resource/customer/kyc/kyc.routes";
 dotenv.config({ debug: false });
 const monitoring = new PrometheusMonitorProvider()
 const response_time_monitor = new PrometheusResponseTimeMonitor()
@@ -40,7 +41,8 @@ server.addRoutes([
     auditlogsRouter,
     participantsRouter,
     customerAuthRoutes,
-    customerResetPasswordAuthRoutes
+    customerResetPasswordAuthRoutes,
+    kycRoutes
 ]);
 
 

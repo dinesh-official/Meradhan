@@ -1,0 +1,316 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* 
+  ✅ Complete Zustand Store for KYC Multi-Step Data
+  Strongly Typed | Modular | Maintainable
+*/
+
+import { IPANKycVerifyResponse, ISignKycVerifyResponse } from "@root/apiGateway";
+import { appSchema } from "@root/schema";
+import z from "zod";
+import { create } from "zustand";
+const schema = appSchema.kyc;
+// ==========================
+// 🪪 Step 1: PAN & Identity Data
+// ==========================
+export interface PanData<T = unknown> extends z.infer<typeof schema.kycPanInfoDataSchema> {
+    response?: T;
+}
+
+export interface FileData<T> {
+    url: string;
+    response?: T;
+}
+
+export interface Step1Data {
+    pan: PanData<IPANKycVerifyResponse['responseData']>;
+    face: FileData<IPANKycVerifyResponse['responseData']>;
+    sign: FileData<ISignKycVerifyResponse['responseData']>;
+}
+
+// ==========================
+// 👨‍👩‍👧 Step 2: Personal Details
+// ==========================
+export interface PersonalData<T = unknown> extends z.infer<typeof schema.personalInfoSchema> {
+    response?: T;
+}
+
+// ==========================
+// 🏦 Step 3: Bank Details
+// ==========================
+export interface BankAccountData<T = unknown> extends z.infer<typeof schema.bankInfoSchema> {
+    isVerified?: boolean;
+    response?: T;
+}
+
+// ==========================
+// 🧾 Step 4: Depository Details
+// ==========================
+export interface DepositoryData<T = unknown> extends z.infer<typeof schema.dpAccountInfoSchema> {
+    response?: T;
+}
+
+// ==========================
+// 🧠 Step 5: Questionnaire
+// ==========================
+export type QuestionnaireData = z.infer<typeof schema.riskProfileDataSchema>;
+// ==========================
+// 🗂️ Root Type: KYC Data Storage
+// ==========================
+export interface KycDataStorage {
+    stepIndex: number;
+    step_1: Step1Data;
+    step_2: PersonalData;
+    step_3: BankAccountData[];
+    step_4: DepositoryData[];
+    step_5: QuestionnaireData;
+}
+
+// ==========================
+// 🧩 Initial Default Data
+// ==========================
+const initData: KycDataStorage = {
+    stepIndex: 0,
+    step_1: {
+        pan: {
+            panCardNo: "",
+            dateOfBirth: "",
+            firstName: "",
+            middleName: "",
+            lastName: "",
+            checkTerms1: false,
+            checkTerms2: false,
+        },
+        face: {
+            url: "",
+
+        },
+        sign: { url: "" },
+    },
+    step_2: {
+        maritalStatus: "",
+        fatSpuName: "",
+        reelWithPerson: "",
+        qualification: "",
+        occupationType: "",
+        annualGrossIncome: "",
+        motherName: "",
+        nationality: "",
+        residentialStatus: "",
+    },
+    step_3: [
+        {
+            bankAccountType: "",
+            bankName: "",
+            branchName: "",
+            ifscCode: "",
+            accountNumber: "",
+            isDefault: false,
+            checkTerms: false,
+            isVerified: false,
+            beneficiary_name: "",
+        },
+    ],
+    step_4: [
+        {
+            depositoryName: "",
+            dpId: "",
+            beneficiaryClientId: "",
+            depositoryParticipantName: "",
+            panNumber: [],
+            accountHolderName: "",
+            isDefault: false,
+            checkTerms: false,
+        },
+    ],
+    step_5: [
+        {
+            ans: "",
+            index: 0,
+            opt: [''],
+            qus: ""
+        },
+    ],
+};
+
+// ==========================
+// 🏗️ Zustand Store
+// ==========================
+export const useKycDataStorage = create<{
+    state: KycDataStorage;
+    setState: (state: KycDataStorage) => void;
+    updateStep: <K extends keyof KycDataStorage>(
+        step: K,
+        data: KycDataStorage[K]
+    ) => void;
+    reset: () => void;
+    setStepIndex: (index: number) => void;
+    nextLocalStep: () => void;
+    prevLocalStep: () => void;
+
+
+
+    setStep1PanData: (Key: keyof Step1Data['pan'], data: any) => void;
+    setStep1SelfieFaceData: (Key: keyof Step1Data['face'], data: any) => void;
+    setStep1SignData: (Key: keyof Step1Data['sign'], data: any) => void;
+    setStep2PersonalData: (Key: keyof PersonalData, data: any) => void;
+
+
+
+    // bank
+    addBankAccount: () => void;
+    updateBankAccount: (index: number, data: Partial<BankAccountData>) => void;
+    removeBankAccount: (index: number) => void;
+    setDefaultBankAccount: (index: number) => void;
+
+    // depository
+    addDepository: () => void;
+    updateDepository: (index: number, data: Partial<DepositoryData>) => void;
+    removeDepository: (index: number) => void;
+    setDefaultDepository: (index: number) => void;
+
+
+}>((set) => ({
+    state: initData,
+    setState: (newState) => set({ state: newState }),
+    updateStep: (step, data) =>
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                [step]: data,
+            },
+        })),
+
+    reset: () => set({ state: initData }),
+
+    setStepIndex(index) {
+        set((prev) => ({ state: { ...prev.state, stepIndex: index } }));
+    },
+
+    nextLocalStep() {
+        set((prev) => ({ state: { ...prev.state, stepIndex: prev.state.stepIndex + 1 } }));
+    },
+
+    prevLocalStep() {
+        set((prev) => ({ state: { ...prev.state, stepIndex: prev.state.stepIndex <= 0 ? 0 : prev.state.stepIndex - 1 } }));
+    },
+
+    setStep1PanData: (key, data) => set((prev) => ({ state: { ...prev.state, step_1: { ...prev.state.step_1, pan: { ...prev.state.step_1.pan, [key]: data } } } })),
+    setStep1SelfieFaceData(Key, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_1: {
+                    ...prev.state.step_1,
+                    face: {
+                        ...prev.state.step_1.face,
+                        [Key]: data,
+                    },
+                },
+            },
+        }));
+    },
+
+    setStep1SignData(Key, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_1: {
+                    ...prev.state.step_1,
+                    sign: {
+                        ...prev.state.step_1.sign,
+                        [Key]: data,
+                    },
+                },
+            },
+        }));
+    },
+
+    setStep2PersonalData(Key, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_2: {
+                    ...prev.state.step_2,
+                    [Key]: data,
+                },
+            },
+        }));
+    },
+
+    addBankAccount() {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_3: [
+                    ...prev.state.step_3,
+                    initData.step_3[0],
+                ],
+            },
+        }));
+    },
+    updateBankAccount(index, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_3: prev.state.step_3.map((item, i) => (i === index ? { ...item, ...data } : item)),
+            },
+        }));
+    },
+    removeBankAccount(index) {
+        set((prev) => {
+            const updatedBanks = prev.state.step_3.filter((_, i) => i !== index);
+            return ({
+                state: {
+                    ...prev.state,
+                    step_3: updatedBanks,
+                },
+            })
+        });
+    },
+
+    setDefaultBankAccount(index) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_3: prev.state.step_3.map((item, i) => (i === index ? { ...item, isDefault: true } : { ...item, isDefault: false })),
+            },
+        }));
+    },
+
+    addDepository() {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: [
+                    ...prev.state.step_4,
+                    initData.step_4[0],
+                ],
+            },
+        }));
+    },
+    updateDepository(index, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: prev.state.step_4.map((item, i) => (i === index ? { ...item, ...data } : item)),
+            },
+        }));
+    },
+    removeDepository(index) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: prev.state.step_4.filter((_, i) => i !== index),
+            },
+        }));
+    },
+
+    setDefaultDepository(index) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: prev.state.step_4.map((item, i) => (i === index ? { ...item, isDefault: true } : { ...item, isDefault: false })),
+            },
+        }));
+    },
+}));

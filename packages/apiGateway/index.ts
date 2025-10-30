@@ -26,6 +26,10 @@ import * as customerAuthApi from "./src/core/api/meradhan/customerauth.api"
 export type * from "./src/core/api/meradhan/customerauth.response";
 
 
+
+import * as customerKycApi from "./src/core/api/meradhan/kyc/Kyc.api"
+export type * from "./src/core/api/meradhan/kyc/Kyc.response";
+
 export default {
   auth,
   crm: {
@@ -40,6 +44,7 @@ export default {
     }
   },
   meradhan: {
-    customerAuthApi
+    customerAuthApi,
+    customerKycApi
   }
 };

@@ -1,0 +1,95 @@
+"use client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { MdOutlineArrowRight } from "react-icons/md";
+import BankViewCard from "./_elements/BankViewCard";
+import { AiFillPlusSquare } from "react-icons/ai";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
+import { useKycDataProvider } from "../../_context/KycDataProvider";
+
+function VerifyBankAccount() {
+  const {
+    setDefaultBankAccount,
+    state,
+    removeBankAccount,
+    prevLocalStep,
+    addBankAccount,
+  } = useKycDataStorage();
+  const data = state.step_3;
+  const { pushUserKycState } = useKycDataProvider();
+
+  return (
+    <Card accountMode>
+      <CardHeader accountMode>
+        <CardTitle className="font-medium">Verify Bank Account</CardTitle>
+      </CardHeader>
+      <CardContent accountMode>
+        {data.map((item, index) => (
+          <BankViewCard
+            bank={item}
+            key={item.accountNumber}
+            name={
+              state.step_1.pan.firstName +
+              " " +
+              state.step_1.pan.middleName +
+              " " +
+              state.step_1.pan.lastName
+            }
+            setDefault={() => {
+              setDefaultBankAccount(index);
+            }}
+            onDelete={() => {
+              removeBankAccount(index);
+              if (data.length === 1) {
+                addBankAccount();
+                prevLocalStep();
+              }
+            }}
+          />
+        ))}
+      </CardContent>
+      <CardFooter
+        accountMode
+        className="flex sm:flex-row flex-col-reverse justify-center sm:justify-between items-center gap-5 sm:text-left text-center"
+      >
+        <div className="flex sm:flex-row flex-col gap-5 w-full">
+          <Button className="w-full sm:w-auto">
+            Confirm & Continue <MdOutlineArrowRight />
+          </Button>
+          <Button
+            variant={`link`}
+            onClick={() => {
+              const ask = window.confirm(
+                "Are you sure you want to exit kyc process?"
+              );
+              if (ask) pushUserKycState({ exit: true });
+            }}
+          >
+            Save & Exit
+          </Button>
+        </div>
+        {data.length < 5 && (
+          <Button
+            variant={`link`}
+            onClick={() => {
+              addBankAccount();
+              prevLocalStep();
+            }}
+          >
+            <AiFillPlusSquare className="text-secondary text-xl" />
+            Add Bank Account{" "}
+            <span className="text-gray-500 text-xs">(max 5 accounts)</span>
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}
+
+export default VerifyBankAccount;

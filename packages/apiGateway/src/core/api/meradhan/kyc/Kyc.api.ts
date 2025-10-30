@@ -1,0 +1,67 @@
+import { appSchema } from "@root/schema";
+import type { IApiCaller } from "../../../connection/apiCaller.interface";
+import type { AxiosRequestConfig } from "axios";
+
+import type z from "zod";
+import type { I_IFSCResponse, IBankKycVerifyResponse, IPANKycRequestResponse, IPANKycVerifyResponse, ISelfireKycRequestResponse, ISelfireKycVerifyResponse, ISignKycRequestResponse, ISignKycVerifyResponse, IStoreKycGETResponse, IStoreKycSETResponse } from "./Kyc.response";
+
+export class CustomerKycApi {
+    private schema = appSchema.kyc;
+
+    constructor(private apiClient: IApiCaller) { }
+
+    async requestPanVerification(payload: z.infer<typeof this.schema.kycPanInfoDataSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IPANKycRequestResponse>("/customer/kyc/pan/request", payload, config);
+        return data;
+    }
+
+    async verifyPanVerification(payload: { kid: string }, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<IPANKycVerifyResponse>("/customer/kyc/pan/response/" + payload.kid, config);
+        return data;
+    }
+
+    async storeKycProgress(payload: { step: number, data: unknown }, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IStoreKycSETResponse>("/customer/kyc/store/" + payload.step, payload.data, config);
+        return data;
+    }
+
+    async getKycProgress(config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<IStoreKycGETResponse>("/customer/kyc/store/get", config);
+        return data;
+    }
+
+    // selfie
+    async requestSelfieVerification(payload: z.infer<typeof this.schema.selfieSignRequestSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<ISelfireKycRequestResponse>("/customer/kyc/selfie/request", payload, config);
+        return data;
+    }
+
+    async verifySelfieVerification(payload: { kid: string }, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<ISelfireKycVerifyResponse>("/customer/kyc/selfie/response/" + payload.kid, config);
+        return data;
+    }
+
+
+    // sign
+    async requestSignVerification(payload: z.infer<typeof this.schema.selfieSignRequestSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<ISignKycRequestResponse>("/customer/kyc/sign/request", payload, config);
+        return data;
+    }
+
+    async verifySignVerification(payload: { kid: string }, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<ISignKycVerifyResponse>("/customer/kyc/sign/response/" + payload.kid, config);
+        return data;
+    }
+
+
+    // ifsc code 
+    async verifyIfscCode(payload: { ifsc: string }, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<I_IFSCResponse>(`/bank/${payload.ifsc}`, config);
+        return data;
+    }
+
+    async verifyBankAccount(payload: z.infer<typeof this.schema.bankInfoSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IBankKycVerifyResponse>(`/customer/kyc/bank/verify`, payload, config);
+        return data;
+    }
+}

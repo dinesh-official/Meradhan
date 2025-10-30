@@ -10,6 +10,11 @@ declare global {
                 email: string;
                 token: string;
             };
+            customer?: {
+                id: number;
+                email: string;
+                token: string;
+            };
         }
         interface Response {
             sendResponse: (d: { statusCode: HttpStatus, success?: boolean, message?: string, responseData?: unknown }) => Response;

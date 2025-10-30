@@ -4,6 +4,8 @@ import { StepMenu } from "./elements/StepMenu";
 
 function KycWorkSpace({ children }: { children?: React.ReactNode }) {
   const { step } = useKycStepStore();
+
+
   return (
     <div className="lg:flex justify-start items-start gap-10">
       <div className="lg:min-w-72">

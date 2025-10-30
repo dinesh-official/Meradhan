@@ -293,6 +293,15 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.KYC_FLOWScalarFieldEnum = {
+  id: 'id',
+  userID: 'userID',
+  step: 'step',
+  data: 'data',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.LeadsModelScalarFieldEnum = {
   id: 'id',
   fullName: 'fullName',
@@ -449,6 +458,11 @@ exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -595,6 +609,7 @@ exports.Prisma.ModelName = {
   AddressModel: 'AddressModel',
   CustomersBankAccountModel: 'CustomersBankAccountModel',
   CustomersDematAccountModel: 'CustomersDematAccountModel',
+  KYC_FLOW: 'KYC_FLOW',
   LeadsModel: 'LeadsModel',
   LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
   NseDataSet: 'NseDataSet',

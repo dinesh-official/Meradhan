@@ -3,6 +3,8 @@ import * as userSchema from "./lib/crm/users.schema";
 import * as leadSchema from "./lib/crm/leads.schema";
 
 import * as customerSchema from "./lib/customers/customers.schema";
+import * as customerKycSchema from "./lib/customers/kyc.schema";
+
 import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";
 import * as auditlogs from "./lib/crm/auditlogs.schema";
@@ -27,5 +29,7 @@ export const appSchema = {
       }
    },
    Enum,
-   customer: customerSchema
+   customer: customerSchema,
+   kyc: customerKycSchema
+
 };

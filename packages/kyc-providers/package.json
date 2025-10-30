@@ -1,0 +1,19 @@
+{
+  "name": "kyc-providers",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "axios": "^1.13.1",
+    "uuid": "^13.0.0"
+  }
+}

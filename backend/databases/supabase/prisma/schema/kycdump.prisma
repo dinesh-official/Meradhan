@@ -1,0 +1,13 @@
+model KYC_FLOW {
+    id     Int   @id @default(autoincrement())
+    userID Int   @unique
+    step   Int   @default(1)
+    data   Json?
+
+    /// Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userID])
+    @@map("kyc_dump")
+}

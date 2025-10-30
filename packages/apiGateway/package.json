@@ -26,6 +26,7 @@
     "@root/schema": "file:../schema",
     "axios": "^1.12.2",
     "backend": "file:../../backend",
+    "kyc-providers": "file:../kyc-providers",
     "zod": "^4.1.11"
   }
 }

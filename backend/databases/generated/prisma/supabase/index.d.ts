@@ -69,6 +69,11 @@ export type CustomersBankAccountModel = $Result.DefaultSelection<Prisma.$Custome
  */
 export type CustomersDematAccountModel = $Result.DefaultSelection<Prisma.$CustomersDematAccountModelPayload>
 /**
+ * Model KYC_FLOW
+ * 
+ */
+export type KYC_FLOW = $Result.DefaultSelection<Prisma.$KYC_FLOWPayload>
+/**
  * Model LeadsModel
  * 
  */
@@ -586,6 +591,16 @@ export class PrismaClient<
     * ```
     */
   get customersDematAccountModel(): Prisma.CustomersDematAccountModelDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.kYC_FLOW`: Exposes CRUD operations for the **KYC_FLOW** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KYC_FLOWS
+    * const kYC_FLOWS = await prisma.kYC_FLOW.findMany()
+    * ```
+    */
+  get kYC_FLOW(): Prisma.KYC_FLOWDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.leadsModel`: Exposes CRUD operations for the **LeadsModel** model.
@@ -1117,6 +1132,7 @@ export namespace Prisma {
     AddressModel: 'AddressModel',
     CustomersBankAccountModel: 'CustomersBankAccountModel',
     CustomersDematAccountModel: 'CustomersDematAccountModel',
+    KYC_FLOW: 'KYC_FLOW',
     LeadsModel: 'LeadsModel',
     LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
     NseDataSet: 'NseDataSet',
@@ -1143,7 +1159,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "nSERfqModel"
+      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "nSERfqModel"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1961,6 +1977,80 @@ export namespace Prisma {
           }
         }
       }
+      KYC_FLOW: {
+        payload: Prisma.$KYC_FLOWPayload<ExtArgs>
+        fields: Prisma.KYC_FLOWFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KYC_FLOWFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KYC_FLOWFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>
+          }
+          findFirst: {
+            args: Prisma.KYC_FLOWFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KYC_FLOWFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>
+          }
+          findMany: {
+            args: Prisma.KYC_FLOWFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>[]
+          }
+          create: {
+            args: Prisma.KYC_FLOWCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>
+          }
+          createMany: {
+            args: Prisma.KYC_FLOWCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.KYC_FLOWCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>[]
+          }
+          delete: {
+            args: Prisma.KYC_FLOWDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>
+          }
+          update: {
+            args: Prisma.KYC_FLOWUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>
+          }
+          deleteMany: {
+            args: Prisma.KYC_FLOWDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KYC_FLOWUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.KYC_FLOWUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>[]
+          }
+          upsert: {
+            args: Prisma.KYC_FLOWUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KYC_FLOWPayload>
+          }
+          aggregate: {
+            args: Prisma.KYC_FLOWAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKYC_FLOW>
+          }
+          groupBy: {
+            args: Prisma.KYC_FLOWGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KYC_FLOWGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KYC_FLOWCountArgs<ExtArgs>
+            result: $Utils.Optional<KYC_FLOWCountAggregateOutputType> | number
+          }
+        }
+      }
       LeadsModel: {
         payload: Prisma.$LeadsModelPayload<ExtArgs>
         fields: Prisma.LeadsModelFieldRefs
@@ -2660,6 +2750,7 @@ export namespace Prisma {
     addressModel?: AddressModelOmit
     customersBankAccountModel?: CustomersBankAccountModelOmit
     customersDematAccountModel?: CustomersDematAccountModelOmit
+    kYC_FLOW?: KYC_FLOWOmit
     leadsModel?: LeadsModelOmit
     leadFollowUpNotesModel?: LeadFollowUpNotesModelOmit
     nseDataSet?: NseDataSetOmit
@@ -16414,6 +16505,1055 @@ export namespace Prisma {
 
 
   /**
+   * Model KYC_FLOW
+   */
+
+  export type AggregateKYC_FLOW = {
+    _count: KYC_FLOWCountAggregateOutputType | null
+    _avg: KYC_FLOWAvgAggregateOutputType | null
+    _sum: KYC_FLOWSumAggregateOutputType | null
+    _min: KYC_FLOWMinAggregateOutputType | null
+    _max: KYC_FLOWMaxAggregateOutputType | null
+  }
+
+  export type KYC_FLOWAvgAggregateOutputType = {
+    id: number | null
+    userID: number | null
+    step: number | null
+  }
+
+  export type KYC_FLOWSumAggregateOutputType = {
+    id: number | null
+    userID: number | null
+    step: number | null
+  }
+
+  export type KYC_FLOWMinAggregateOutputType = {
+    id: number | null
+    userID: number | null
+    step: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KYC_FLOWMaxAggregateOutputType = {
+    id: number | null
+    userID: number | null
+    step: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KYC_FLOWCountAggregateOutputType = {
+    id: number
+    userID: number
+    step: number
+    data: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type KYC_FLOWAvgAggregateInputType = {
+    id?: true
+    userID?: true
+    step?: true
+  }
+
+  export type KYC_FLOWSumAggregateInputType = {
+    id?: true
+    userID?: true
+    step?: true
+  }
+
+  export type KYC_FLOWMinAggregateInputType = {
+    id?: true
+    userID?: true
+    step?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KYC_FLOWMaxAggregateInputType = {
+    id?: true
+    userID?: true
+    step?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KYC_FLOWCountAggregateInputType = {
+    id?: true
+    userID?: true
+    step?: true
+    data?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type KYC_FLOWAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KYC_FLOW to aggregate.
+     */
+    where?: KYC_FLOWWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KYC_FLOWS to fetch.
+     */
+    orderBy?: KYC_FLOWOrderByWithRelationInput | KYC_FLOWOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: KYC_FLOWWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KYC_FLOWS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KYC_FLOWS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned KYC_FLOWS
+    **/
+    _count?: true | KYC_FLOWCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: KYC_FLOWAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: KYC_FLOWSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: KYC_FLOWMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: KYC_FLOWMaxAggregateInputType
+  }
+
+  export type GetKYC_FLOWAggregateType<T extends KYC_FLOWAggregateArgs> = {
+        [P in keyof T & keyof AggregateKYC_FLOW]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKYC_FLOW[P]>
+      : GetScalarType<T[P], AggregateKYC_FLOW[P]>
+  }
+
+
+
+
+  export type KYC_FLOWGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KYC_FLOWWhereInput
+    orderBy?: KYC_FLOWOrderByWithAggregationInput | KYC_FLOWOrderByWithAggregationInput[]
+    by: KYC_FLOWScalarFieldEnum[] | KYC_FLOWScalarFieldEnum
+    having?: KYC_FLOWScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KYC_FLOWCountAggregateInputType | true
+    _avg?: KYC_FLOWAvgAggregateInputType
+    _sum?: KYC_FLOWSumAggregateInputType
+    _min?: KYC_FLOWMinAggregateInputType
+    _max?: KYC_FLOWMaxAggregateInputType
+  }
+
+  export type KYC_FLOWGroupByOutputType = {
+    id: number
+    userID: number
+    step: number
+    data: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: KYC_FLOWCountAggregateOutputType | null
+    _avg: KYC_FLOWAvgAggregateOutputType | null
+    _sum: KYC_FLOWSumAggregateOutputType | null
+    _min: KYC_FLOWMinAggregateOutputType | null
+    _max: KYC_FLOWMaxAggregateOutputType | null
+  }
+
+  type GetKYC_FLOWGroupByPayload<T extends KYC_FLOWGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KYC_FLOWGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KYC_FLOWGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KYC_FLOWGroupByOutputType[P]>
+            : GetScalarType<T[P], KYC_FLOWGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KYC_FLOWSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userID?: boolean
+    step?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kYC_FLOW"]>
+
+  export type KYC_FLOWSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userID?: boolean
+    step?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kYC_FLOW"]>
+
+  export type KYC_FLOWSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userID?: boolean
+    step?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kYC_FLOW"]>
+
+  export type KYC_FLOWSelectScalar = {
+    id?: boolean
+    userID?: boolean
+    step?: boolean
+    data?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type KYC_FLOWOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userID" | "step" | "data" | "createdAt" | "updatedAt", ExtArgs["result"]["kYC_FLOW"]>
+
+  export type $KYC_FLOWPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KYC_FLOW"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userID: number
+      step: number
+      data: Prisma.JsonValue | null
+      /**
+       * Timestamps
+       */
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["kYC_FLOW"]>
+    composites: {}
+  }
+
+  type KYC_FLOWGetPayload<S extends boolean | null | undefined | KYC_FLOWDefaultArgs> = $Result.GetResult<Prisma.$KYC_FLOWPayload, S>
+
+  type KYC_FLOWCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KYC_FLOWFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KYC_FLOWCountAggregateInputType | true
+    }
+
+  export interface KYC_FLOWDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KYC_FLOW'], meta: { name: 'KYC_FLOW' } }
+    /**
+     * Find zero or one KYC_FLOW that matches the filter.
+     * @param {KYC_FLOWFindUniqueArgs} args - Arguments to find a KYC_FLOW
+     * @example
+     * // Get one KYC_FLOW
+     * const kYC_FLOW = await prisma.kYC_FLOW.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KYC_FLOWFindUniqueArgs>(args: SelectSubset<T, KYC_FLOWFindUniqueArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KYC_FLOW that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KYC_FLOWFindUniqueOrThrowArgs} args - Arguments to find a KYC_FLOW
+     * @example
+     * // Get one KYC_FLOW
+     * const kYC_FLOW = await prisma.kYC_FLOW.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KYC_FLOWFindUniqueOrThrowArgs>(args: SelectSubset<T, KYC_FLOWFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KYC_FLOW that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KYC_FLOWFindFirstArgs} args - Arguments to find a KYC_FLOW
+     * @example
+     * // Get one KYC_FLOW
+     * const kYC_FLOW = await prisma.kYC_FLOW.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KYC_FLOWFindFirstArgs>(args?: SelectSubset<T, KYC_FLOWFindFirstArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KYC_FLOW that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KYC_FLOWFindFirstOrThrowArgs} args - Arguments to find a KYC_FLOW
+     * @example
+     * // Get one KYC_FLOW
+     * const kYC_FLOW = await prisma.kYC_FLOW.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KYC_FLOWFindFirstOrThrowArgs>(args?: SelectSubset<T, KYC_FLOWFindFirstOrThrowArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KYC_FLOWS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KYC_FLOWFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KYC_FLOWS
+     * const kYC_FLOWS = await prisma.kYC_FLOW.findMany()
+     * 
+     * // Get first 10 KYC_FLOWS
+     * const kYC_FLOWS = await prisma.kYC_FLOW.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const kYC_FLOWWithIdOnly = await prisma.kYC_FLOW.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends KYC_FLOWFindManyArgs>(args?: SelectSubset<T, KYC_FLOWFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KYC_FLOW.
+     * @param {KYC_FLOWCreateArgs} args - Arguments to create a KYC_FLOW.
+     * @example
+     * // Create one KYC_FLOW
+     * const KYC_FLOW = await prisma.kYC_FLOW.create({
+     *   data: {
+     *     // ... data to create a KYC_FLOW
+     *   }
+     * })
+     * 
+     */
+    create<T extends KYC_FLOWCreateArgs>(args: SelectSubset<T, KYC_FLOWCreateArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KYC_FLOWS.
+     * @param {KYC_FLOWCreateManyArgs} args - Arguments to create many KYC_FLOWS.
+     * @example
+     * // Create many KYC_FLOWS
+     * const kYC_FLOW = await prisma.kYC_FLOW.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends KYC_FLOWCreateManyArgs>(args?: SelectSubset<T, KYC_FLOWCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many KYC_FLOWS and returns the data saved in the database.
+     * @param {KYC_FLOWCreateManyAndReturnArgs} args - Arguments to create many KYC_FLOWS.
+     * @example
+     * // Create many KYC_FLOWS
+     * const kYC_FLOW = await prisma.kYC_FLOW.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many KYC_FLOWS and only return the `id`
+     * const kYC_FLOWWithIdOnly = await prisma.kYC_FLOW.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends KYC_FLOWCreateManyAndReturnArgs>(args?: SelectSubset<T, KYC_FLOWCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a KYC_FLOW.
+     * @param {KYC_FLOWDeleteArgs} args - Arguments to delete one KYC_FLOW.
+     * @example
+     * // Delete one KYC_FLOW
+     * const KYC_FLOW = await prisma.kYC_FLOW.delete({
+     *   where: {
+     *     // ... filter to delete one KYC_FLOW
+     *   }
+     * })
+     * 
+     */
+    delete<T extends KYC_FLOWDeleteArgs>(args: SelectSubset<T, KYC_FLOWDeleteArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KYC_FLOW.
+     * @param {KYC_FLOWUpdateArgs} args - Arguments to update one KYC_FLOW.
+     * @example
+     * // Update one KYC_FLOW
+     * const kYC_FLOW = await prisma.kYC_FLOW.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends KYC_FLOWUpdateArgs>(args: SelectSubset<T, KYC_FLOWUpdateArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KYC_FLOWS.
+     * @param {KYC_FLOWDeleteManyArgs} args - Arguments to filter KYC_FLOWS to delete.
+     * @example
+     * // Delete a few KYC_FLOWS
+     * const { count } = await prisma.kYC_FLOW.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends KYC_FLOWDeleteManyArgs>(args?: SelectSubset<T, KYC_FLOWDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KYC_FLOWS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KYC_FLOWUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KYC_FLOWS
+     * const kYC_FLOW = await prisma.kYC_FLOW.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends KYC_FLOWUpdateManyArgs>(args: SelectSubset<T, KYC_FLOWUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KYC_FLOWS and returns the data updated in the database.
+     * @param {KYC_FLOWUpdateManyAndReturnArgs} args - Arguments to update many KYC_FLOWS.
+     * @example
+     * // Update many KYC_FLOWS
+     * const kYC_FLOW = await prisma.kYC_FLOW.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more KYC_FLOWS and only return the `id`
+     * const kYC_FLOWWithIdOnly = await prisma.kYC_FLOW.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends KYC_FLOWUpdateManyAndReturnArgs>(args: SelectSubset<T, KYC_FLOWUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one KYC_FLOW.
+     * @param {KYC_FLOWUpsertArgs} args - Arguments to update or create a KYC_FLOW.
+     * @example
+     * // Update or create a KYC_FLOW
+     * const kYC_FLOW = await prisma.kYC_FLOW.upsert({
+     *   create: {
+     *     // ... data to create a KYC_FLOW
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KYC_FLOW we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KYC_FLOWUpsertArgs>(args: SelectSubset<T, KYC_FLOWUpsertArgs<ExtArgs>>): Prisma__KYC_FLOWClient<$Result.GetResult<Prisma.$KYC_FLOWPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KYC_FLOWS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KYC_FLOWCountArgs} args - Arguments to filter KYC_FLOWS to count.
+     * @example
+     * // Count the number of KYC_FLOWS
+     * const count = await prisma.kYC_FLOW.count({
+     *   where: {
+     *     // ... the filter for the KYC_FLOWS we want to count
+     *   }
+     * })
+    **/
+    count<T extends KYC_FLOWCountArgs>(
+      args?: Subset<T, KYC_FLOWCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KYC_FLOWCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KYC_FLOW.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KYC_FLOWAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KYC_FLOWAggregateArgs>(args: Subset<T, KYC_FLOWAggregateArgs>): Prisma.PrismaPromise<GetKYC_FLOWAggregateType<T>>
+
+    /**
+     * Group by KYC_FLOW.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KYC_FLOWGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends KYC_FLOWGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KYC_FLOWGroupByArgs['orderBy'] }
+        : { orderBy?: KYC_FLOWGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KYC_FLOWGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKYC_FLOWGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KYC_FLOW model
+   */
+  readonly fields: KYC_FLOWFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KYC_FLOW.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KYC_FLOWClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KYC_FLOW model
+   */
+  interface KYC_FLOWFieldRefs {
+    readonly id: FieldRef<"KYC_FLOW", 'Int'>
+    readonly userID: FieldRef<"KYC_FLOW", 'Int'>
+    readonly step: FieldRef<"KYC_FLOW", 'Int'>
+    readonly data: FieldRef<"KYC_FLOW", 'Json'>
+    readonly createdAt: FieldRef<"KYC_FLOW", 'DateTime'>
+    readonly updatedAt: FieldRef<"KYC_FLOW", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * KYC_FLOW findUnique
+   */
+  export type KYC_FLOWFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * Filter, which KYC_FLOW to fetch.
+     */
+    where: KYC_FLOWWhereUniqueInput
+  }
+
+  /**
+   * KYC_FLOW findUniqueOrThrow
+   */
+  export type KYC_FLOWFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * Filter, which KYC_FLOW to fetch.
+     */
+    where: KYC_FLOWWhereUniqueInput
+  }
+
+  /**
+   * KYC_FLOW findFirst
+   */
+  export type KYC_FLOWFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * Filter, which KYC_FLOW to fetch.
+     */
+    where?: KYC_FLOWWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KYC_FLOWS to fetch.
+     */
+    orderBy?: KYC_FLOWOrderByWithRelationInput | KYC_FLOWOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KYC_FLOWS.
+     */
+    cursor?: KYC_FLOWWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KYC_FLOWS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KYC_FLOWS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KYC_FLOWS.
+     */
+    distinct?: KYC_FLOWScalarFieldEnum | KYC_FLOWScalarFieldEnum[]
+  }
+
+  /**
+   * KYC_FLOW findFirstOrThrow
+   */
+  export type KYC_FLOWFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * Filter, which KYC_FLOW to fetch.
+     */
+    where?: KYC_FLOWWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KYC_FLOWS to fetch.
+     */
+    orderBy?: KYC_FLOWOrderByWithRelationInput | KYC_FLOWOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KYC_FLOWS.
+     */
+    cursor?: KYC_FLOWWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KYC_FLOWS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KYC_FLOWS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KYC_FLOWS.
+     */
+    distinct?: KYC_FLOWScalarFieldEnum | KYC_FLOWScalarFieldEnum[]
+  }
+
+  /**
+   * KYC_FLOW findMany
+   */
+  export type KYC_FLOWFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * Filter, which KYC_FLOWS to fetch.
+     */
+    where?: KYC_FLOWWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KYC_FLOWS to fetch.
+     */
+    orderBy?: KYC_FLOWOrderByWithRelationInput | KYC_FLOWOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing KYC_FLOWS.
+     */
+    cursor?: KYC_FLOWWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KYC_FLOWS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KYC_FLOWS.
+     */
+    skip?: number
+    distinct?: KYC_FLOWScalarFieldEnum | KYC_FLOWScalarFieldEnum[]
+  }
+
+  /**
+   * KYC_FLOW create
+   */
+  export type KYC_FLOWCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * The data needed to create a KYC_FLOW.
+     */
+    data: XOR<KYC_FLOWCreateInput, KYC_FLOWUncheckedCreateInput>
+  }
+
+  /**
+   * KYC_FLOW createMany
+   */
+  export type KYC_FLOWCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KYC_FLOWS.
+     */
+    data: KYC_FLOWCreateManyInput | KYC_FLOWCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KYC_FLOW createManyAndReturn
+   */
+  export type KYC_FLOWCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * The data used to create many KYC_FLOWS.
+     */
+    data: KYC_FLOWCreateManyInput | KYC_FLOWCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KYC_FLOW update
+   */
+  export type KYC_FLOWUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * The data needed to update a KYC_FLOW.
+     */
+    data: XOR<KYC_FLOWUpdateInput, KYC_FLOWUncheckedUpdateInput>
+    /**
+     * Choose, which KYC_FLOW to update.
+     */
+    where: KYC_FLOWWhereUniqueInput
+  }
+
+  /**
+   * KYC_FLOW updateMany
+   */
+  export type KYC_FLOWUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KYC_FLOWS.
+     */
+    data: XOR<KYC_FLOWUpdateManyMutationInput, KYC_FLOWUncheckedUpdateManyInput>
+    /**
+     * Filter which KYC_FLOWS to update
+     */
+    where?: KYC_FLOWWhereInput
+    /**
+     * Limit how many KYC_FLOWS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KYC_FLOW updateManyAndReturn
+   */
+  export type KYC_FLOWUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * The data used to update KYC_FLOWS.
+     */
+    data: XOR<KYC_FLOWUpdateManyMutationInput, KYC_FLOWUncheckedUpdateManyInput>
+    /**
+     * Filter which KYC_FLOWS to update
+     */
+    where?: KYC_FLOWWhereInput
+    /**
+     * Limit how many KYC_FLOWS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KYC_FLOW upsert
+   */
+  export type KYC_FLOWUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * The filter to search for the KYC_FLOW to update in case it exists.
+     */
+    where: KYC_FLOWWhereUniqueInput
+    /**
+     * In case the KYC_FLOW found by the `where` argument doesn't exist, create a new KYC_FLOW with this data.
+     */
+    create: XOR<KYC_FLOWCreateInput, KYC_FLOWUncheckedCreateInput>
+    /**
+     * In case the KYC_FLOW was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KYC_FLOWUpdateInput, KYC_FLOWUncheckedUpdateInput>
+  }
+
+  /**
+   * KYC_FLOW delete
+   */
+  export type KYC_FLOWDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+    /**
+     * Filter which KYC_FLOW to delete.
+     */
+    where: KYC_FLOWWhereUniqueInput
+  }
+
+  /**
+   * KYC_FLOW deleteMany
+   */
+  export type KYC_FLOWDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KYC_FLOWS to delete
+     */
+    where?: KYC_FLOWWhereInput
+    /**
+     * Limit how many KYC_FLOWS to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KYC_FLOW without action
+   */
+  export type KYC_FLOWDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KYC_FLOW
+     */
+    select?: KYC_FLOWSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KYC_FLOW
+     */
+    omit?: KYC_FLOWOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model LeadsModel
    */
 
@@ -26517,6 +27657,18 @@ export namespace Prisma {
   export type CustomersDematAccountModelScalarFieldEnum = (typeof CustomersDematAccountModelScalarFieldEnum)[keyof typeof CustomersDematAccountModelScalarFieldEnum]
 
 
+  export const KYC_FLOWScalarFieldEnum: {
+    id: 'id',
+    userID: 'userID',
+    step: 'step',
+    data: 'data',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type KYC_FLOWScalarFieldEnum = (typeof KYC_FLOWScalarFieldEnum)[keyof typeof KYC_FLOWScalarFieldEnum]
+
+
   export const LeadsModelScalarFieldEnum: {
     id: 'id',
     fullName: 'fullName',
@@ -26701,6 +27853,14 @@ export namespace Prisma {
   };
 
   export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const QueryMode: {
@@ -28148,6 +29308,65 @@ export namespace Prisma {
     customerProfileDataModelId?: IntNullableWithAggregatesFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
+  }
+
+  export type KYC_FLOWWhereInput = {
+    AND?: KYC_FLOWWhereInput | KYC_FLOWWhereInput[]
+    OR?: KYC_FLOWWhereInput[]
+    NOT?: KYC_FLOWWhereInput | KYC_FLOWWhereInput[]
+    id?: IntFilter<"KYC_FLOW"> | number
+    userID?: IntFilter<"KYC_FLOW"> | number
+    step?: IntFilter<"KYC_FLOW"> | number
+    data?: JsonNullableFilter<"KYC_FLOW">
+    createdAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
+    updatedAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
+  }
+
+  export type KYC_FLOWOrderByWithRelationInput = {
+    id?: SortOrder
+    userID?: SortOrder
+    step?: SortOrder
+    data?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KYC_FLOWWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    userID?: number
+    AND?: KYC_FLOWWhereInput | KYC_FLOWWhereInput[]
+    OR?: KYC_FLOWWhereInput[]
+    NOT?: KYC_FLOWWhereInput | KYC_FLOWWhereInput[]
+    step?: IntFilter<"KYC_FLOW"> | number
+    data?: JsonNullableFilter<"KYC_FLOW">
+    createdAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
+    updatedAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
+  }, "id" | "userID">
+
+  export type KYC_FLOWOrderByWithAggregationInput = {
+    id?: SortOrder
+    userID?: SortOrder
+    step?: SortOrder
+    data?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: KYC_FLOWCountOrderByAggregateInput
+    _avg?: KYC_FLOWAvgOrderByAggregateInput
+    _max?: KYC_FLOWMaxOrderByAggregateInput
+    _min?: KYC_FLOWMinOrderByAggregateInput
+    _sum?: KYC_FLOWSumOrderByAggregateInput
+  }
+
+  export type KYC_FLOWScalarWhereWithAggregatesInput = {
+    AND?: KYC_FLOWScalarWhereWithAggregatesInput | KYC_FLOWScalarWhereWithAggregatesInput[]
+    OR?: KYC_FLOWScalarWhereWithAggregatesInput[]
+    NOT?: KYC_FLOWScalarWhereWithAggregatesInput | KYC_FLOWScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"KYC_FLOW"> | number
+    userID?: IntWithAggregatesFilter<"KYC_FLOW"> | number
+    step?: IntWithAggregatesFilter<"KYC_FLOW"> | number
+    data?: JsonNullableWithAggregatesFilter<"KYC_FLOW">
+    createdAt?: DateTimeWithAggregatesFilter<"KYC_FLOW"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"KYC_FLOW"> | Date | string
   }
 
   export type LeadsModelWhereInput = {
@@ -30233,6 +31452,66 @@ export namespace Prisma {
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KYC_FLOWCreateInput = {
+    userID: number
+    step?: number
+    data?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KYC_FLOWUncheckedCreateInput = {
+    id?: number
+    userID: number
+    step?: number
+    data?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KYC_FLOWUpdateInput = {
+    userID?: IntFieldUpdateOperationsInput | number
+    step?: IntFieldUpdateOperationsInput | number
+    data?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KYC_FLOWUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userID?: IntFieldUpdateOperationsInput | number
+    step?: IntFieldUpdateOperationsInput | number
+    data?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KYC_FLOWCreateManyInput = {
+    id?: number
+    userID: number
+    step?: number
+    data?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KYC_FLOWUpdateManyMutationInput = {
+    userID?: IntFieldUpdateOperationsInput | number
+    step?: IntFieldUpdateOperationsInput | number
+    data?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KYC_FLOWUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userID?: IntFieldUpdateOperationsInput | number
+    step?: IntFieldUpdateOperationsInput | number
+    data?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32354,6 +33633,92 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDematAccountTypeFilter<$PrismaModel>
     _max?: NestedEnumDematAccountTypeFilter<$PrismaModel>
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type KYC_FLOWCountOrderByAggregateInput = {
+    id?: SortOrder
+    userID?: SortOrder
+    step?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KYC_FLOWAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userID?: SortOrder
+    step?: SortOrder
+  }
+
+  export type KYC_FLOWMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userID?: SortOrder
+    step?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KYC_FLOWMinOrderByAggregateInput = {
+    id?: SortOrder
+    userID?: SortOrder
+    step?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KYC_FLOWSumOrderByAggregateInput = {
+    id?: SortOrder
+    userID?: SortOrder
+    step?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type EnumLeadSourceFilter<$PrismaModel = never> = {
@@ -34569,6 +35934,29 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDematAccountTypeFilter<$PrismaModel>
     _max?: NestedEnumDematAccountTypeFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedEnumLeadSourceFilter<$PrismaModel = never> = {

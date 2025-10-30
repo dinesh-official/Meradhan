@@ -75,4 +75,50 @@ export const dateTimeUtils = {
 
         return formatted;
     },
+
+
+
+    parseDate(input: Date | string): Date | null {
+        if (input instanceof Date) return input;
+        if (!input || typeof input !== "string") return null;
+
+        const str = input.trim();
+
+        // --- 1️⃣ ISO format (YYYY-MM-DD) ---
+        // Must match exactly to prevent confusion
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+            const [y, m, d] = str.split("-").map(Number);
+            return new Date(y, m - 1, d); // ✅ always local time, no UTC issue
+        }
+
+        // --- 2️⃣ DD/MM/YYYY or MM/DD/YYYY ---
+        const normalized = str.replace(/[.\-]/g, "/");
+        const parts = normalized.split("/");
+
+        if (parts.length === 3) {
+            const [a, b, c] = parts.map(Number);
+
+            if (a > 31 || b > 31) return null; // sanity check
+            if (a > 12 && b <= 12) {
+                // DD/MM/YYYY (common in India, UK)
+                return new Date(c, b - 1, a);
+            } else if (b > 12 && a <= 12) {
+                // MM/DD/YYYY
+                return new Date(c, a - 1, b);
+            } else if (a > 999) {
+                // YYYY/MM/DD
+                return new Date(a, b - 1, c);
+            } else {
+                // Ambiguous → assume DD/MM/YYYY
+                return new Date(c, b - 1, a);
+            }
+        }
+
+        // --- 3️⃣ Fallback: textual formats ("Nov 2, 2001") ---
+        const fallback = new Date(Date.parse(str));
+        if (!isNaN(fallback.getTime())) return fallback;
+
+        return null;
+    }
+
 };
