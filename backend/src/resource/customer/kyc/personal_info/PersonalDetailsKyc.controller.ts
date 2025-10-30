@@ -109,8 +109,17 @@ export class PersonalDetailsKycController {
     }
 
     async verifyBankAccount(req: Request, res: Response) {
-        const bank = appSchema.kyc.bankInfoSchema.parse(req.body); 
+        const bank = appSchema.kyc.bankInfoSchema.parse(req.body);
         const response = await this.panKycService.verifyBankAccount(bank);
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: response
+        })
+    }
+
+    async verifyDematAccount(req: Request, res: Response) {
+        const data = appSchema.kyc.dpAccountInfoSchema.parse(req.body);
+        const response = await this.panKycService.verifyDematAccount(data);
         res.sendResponse({
             statusCode: HttpStatus.OK,
             responseData: response

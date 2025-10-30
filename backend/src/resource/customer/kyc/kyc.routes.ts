@@ -21,6 +21,8 @@ kycRoutes.get("/api/customer/kyc/sign/response/:kid", customerAuthMiddleware, (r
 
 // bank
 kycRoutes.post("/api/customer/kyc/bank/verify", customerAuthMiddleware, (req, res) => controller.verifyBankAccount(req, res));
+kycRoutes.post("/api/customer/kyc/demat/verify", customerAuthMiddleware, (req, res) => controller.verifyDematAccount(req, res));
+
 
 // for storage
 kycRoutes.get("/api/customer/kyc/store/get", customerAuthMiddleware, (req, res) => storeKyc.getKycData(req, res));

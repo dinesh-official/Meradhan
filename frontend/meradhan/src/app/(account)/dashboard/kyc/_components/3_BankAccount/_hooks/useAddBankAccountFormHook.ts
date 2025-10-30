@@ -1,14 +1,14 @@
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
+import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
-import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import { ZodError } from "zod";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { KycDataStorage, useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import apiGateway, { ApiError } from "@root/apiGateway";
-import { useMutation } from "@tanstack/react-query";
-import Swal from "sweetalert2";
-import toast from "react-hot-toast";
 
 export const useAddBankAccountFormHook = () => {
     const { state, updateBankAccount, nextLocalStep } = useKycDataStorage();

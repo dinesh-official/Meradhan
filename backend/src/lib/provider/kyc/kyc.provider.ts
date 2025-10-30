@@ -1,6 +1,6 @@
 import AdmZip from "adm-zip";
 import * as fs from 'fs';
-import { DigioSDK, NSDLApi, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
+import { DigioSDK, NSDLApi, type DanRequest, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
 import os from "os";
 import * as path from 'path';
 import { putFileS3 } from '../fileUpload/s3FileUploader.provider';
@@ -114,5 +114,12 @@ export class KycProvider {
         const bankDetails = await this.digio.verifyBankAccount(payload);
         return bankDetails;
     }
+
+
+    async verifyDmateAccount(payload: DanRequest) {
+        const bankDetails = await this.nsdlApi.checkDANstatus(payload);
+        return bankDetails;
+    }
+
 
 }

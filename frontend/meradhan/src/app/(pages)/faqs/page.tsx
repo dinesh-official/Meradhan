@@ -7,58 +7,28 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { fetchFaqData } from "./_gql/faq.gql";
 
-export default function FAQPage() {
-  const faqs = [
-    {
-      q: "What is MeraDhan?",
-      a: "MeraDhan is a platform where you can learn about bonds and fixed income investments. You can also buy and sell bonds easily.",
-    },
-    {
-      q: "What is a bond?",
-      a: "A bond is a fixed-income instrument that represents a loan made by an investor to a borrower (typically corporate or governmental).",
-    },
-    {
-      q: "How is a bond different from a fixed deposit (FD)?",
-      a: "Unlike FDs, bonds can be traded before maturity and may offer better returns, but they also carry market and credit risk.",
-    },
-    {
-      q: "Are bonds safe to invest in?",
-      a: "Bonds are generally safer than equities, but the safety depends on the issuer’s creditworthiness and the bond’s rating.",
-    },
-    {
-      q: "What is MeraDhan?",
-      a: "MeraDhan is a platform where you can learn about bonds and fixed income investments. You can also buy and sell bonds easily.",
-    },
-    {
-      q: "What is a bond?",
-      a: "A bond is a fixed-income instrument that represents a loan made by an investor to a borrower (typically corporate or governmental).",
-    },
-    {
-      q: "How is a bond different from a fixed deposit (FD)?",
-      a: "Unlike FDs, bonds can be traded before maturity and may offer better returns, but they also carry market and credit risk.",
-    },
-    {
-      q: "Are bonds safe to invest in?",
-      a: "Bonds are generally safer than equities, but the safety depends on the issuer’s creditworthiness and the bond’s rating.",
-    },
-  ];
+export const revalidate = 0;
+
+export default async function FAQPage() {
+  const faqs = await fetchFaqData();
 
   return (
     <ViewPort>
       {/* Hero Section */}
       <div className="bg-primary h-72">
-        <div className="flex flex-col gap-6 items-center justify-center h-full container">
+        <div className="flex flex-col justify-center items-center gap-6 h-full container">
           <h1
             className={cn(
-              "md:text-4xl text-3xl text-center text-white font-medium",
+              "font-medium text-white text-3xl md:text-4xl text-center",
               quicksand.className
             )}
           >
             Frequently Asked{" "}
             <span className="font-semibold text-secondary">Questions</span>
           </h1>
-          <p className="text-white max-w-[800px] text-center">
+          <p className="max-w-[800px] text-white text-center">
             Find clear answers to commonly asked questions about MeraDhan, bond
             investing, and our platform’s features to help you make informed
             financial decisions.
@@ -68,12 +38,12 @@ export default function FAQPage() {
 
       {/* FAQ Section */}
       <div className="py-12">
-        <div className="container max-w-3xl">
+        <div className="max-w-3xl container">
           <Accordion type="single" collapsible defaultValue="item-0">
-            {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`item-${i}`} className="border-b-0">
-                <AccordionTrigger>{faq.q}</AccordionTrigger>
-                <AccordionContent>{faq.a}</AccordionContent>
+            {faqs?.faqS_connection.nodes.map((faq, i) => (
+              <AccordionItem key={faq.documentId} value={`item-${i}`} className="border-b-0">
+                <AccordionTrigger>{faq.Question}</AccordionTrigger>
+                <AccordionContent>{faq.Answer}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>

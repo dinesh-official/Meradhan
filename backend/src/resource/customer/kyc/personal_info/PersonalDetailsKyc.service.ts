@@ -3,6 +3,7 @@ import { KycProvider } from '@lib/provider/kyc/kyc.provider';
 import { appSchema } from '@root/schema';
 import { AppError } from '@utils/error/AppError';
 import type z from 'zod';
+
 export class PersonalDetailsKycService {
     private kycProvider = new KycProvider()
 
@@ -95,7 +96,7 @@ export class PersonalDetailsKycService {
     }
 
 
-    async fetchIfscInfo(ifsc:string) {
+    async fetchIfscInfo(ifsc: string) {
         const ifscCodes = await this.kycProvider.fetchIfscInfo(ifsc);
         return ifscCodes;
     }
@@ -109,5 +110,47 @@ export class PersonalDetailsKycService {
         return bankDetails;
     }
 
+
+    async verifyDematAccount(payload: z.infer<typeof appSchema.kyc.dpAccountInfoSchema>) {
+
+        const getPans = () => {
+            const pans = payload.panNumber;
+            let dataPan: {
+                fstHoldrPan: string,
+                scndHoldrPan?: string,
+                thrdHoldrPan?: string
+            };
+
+            dataPan = {
+                fstHoldrPan: pans[0]!,
+            };
+
+            if (pans?.[1]) {
+                dataPan = {
+                    ...dataPan,
+                    scndHoldrPan: pans[1],
+                };
+            }
+
+            if (pans?.[2]) {
+                dataPan = {
+                    ...dataPan,
+                    thrdHoldrPan: pans[2],
+                };
+            }
+            return dataPan;
+
+        };
+
+        const pans = getPans();
+
+        const dematDetails = await this.kycProvider.verifyDmateAccount({
+            clientId: payload.beneficiaryClientId,
+            dpId: payload.dpId,
+            transactionId: new Date().getTime().toString(),
+            ...pans,
+        });
+        return dematDetails;
+    }
 
 }

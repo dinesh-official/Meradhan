@@ -9,7 +9,7 @@ import {
 import React from "react";
 import { AiFillPlusSquare } from "react-icons/ai";
 import { MdOutlineArrowRight } from "react-icons/md";
-import DematAccountView from "./elements/DematAccountView";
+import DematAccountView from "./_elements/DematAccountView";
 
 function VerifyDematAccount() {
   return (
