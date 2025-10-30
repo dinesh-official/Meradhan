@@ -1,5 +1,4 @@
 import React from "react";
-import "server-only";
 import Footer from "../footer/Footer";
 import NewsLetter from "../footer/NewsLetter";
 import NavBar from "../navbar/NavBar";

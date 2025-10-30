@@ -5,7 +5,7 @@ import DhanGpt from "./_components/DhanGpt";
 const page = () => {
   return (
     <div>
-      <NavBar />
+
       <DhanGpt />
     </div>
   );

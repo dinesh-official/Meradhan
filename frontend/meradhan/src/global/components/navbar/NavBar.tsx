@@ -1,10 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
+import AuthActions from "./AuthActions";
 import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
-import { ISessionResponse } from "@root/apiGateway";
-import AuthActions from "./AuthActions";
 
 function NavBar({ session }: { session: ISessionResponse['responseData'] | null }) {
   return (
