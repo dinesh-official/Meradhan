@@ -100,6 +100,10 @@ main() {
     
     # Install schema dependencies first
     install_dependencies "packages/schema" "Schema Package"
+
+    # Install kyc-providers dependencies
+    install_dependencies "packages/kyc-providers" "Schema Package"
+
     
     # Install API Gateway dependencies
     install_dependencies "packages/apiGateway" "API Client"
