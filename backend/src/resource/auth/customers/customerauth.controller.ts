@@ -6,6 +6,8 @@ import type { Request, Response } from "express";
 import { sendCustomerSignupOtpEmail } from "../../../queues/services/sender/sendEmailOtp";
 import { sendMobileOtp } from "../../../queues/services/sender/sendMobileOtp";
 import { CustomerAuthService } from "./customerauth.service";
+import { cacheStorage } from "../../../queues/redis/queues";
+import { db } from "@core/database/database";
 
 
 
@@ -123,6 +125,43 @@ export class CustomerAuthController {
         res.sendResponse({
             statusCode: HttpStatus.OK,
             message: "logout successfully",
+        })
+    }
+
+    async session(req: Request, res: Response): Promise<void> {
+        const id = req.customer?.id;
+
+        if (!id) {
+            throw new AppError("Session not found");
+        }
+
+        const cashedUser = await cacheStorage.get(`USER_SESSION:${id}`);
+        if (cashedUser) {
+            res.sendResponse({
+                statusCode: HttpStatus.OK,
+                message: "session",
+                responseData: cashedUser
+            });
+            return;
+        }
+
+        const session = await db.dataBase.customerProfileDataModel.findUnique({
+            where: { id }, select: {
+                id: true,
+                firstName: true,
+                middleName: true,
+                lastName: true,
+                avatar: true,
+                emailAddress: true,
+                userName: true
+            }
+        });
+
+        await cacheStorage.set(`USER_SESSION:${id}`, session, 60);
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            message: "session",
+            responseData: session
         })
     }
 }

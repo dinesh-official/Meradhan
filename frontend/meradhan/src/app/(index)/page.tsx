@@ -1,4 +1,3 @@
-'use static'
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import BondsByCategories from "../../global/components/Bond/BondsByCategories";
 import CustomersTestimonials from "./_components/CustomersTestimonials";
