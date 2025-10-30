@@ -2,6 +2,7 @@ import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
 import Link from "next/link";
 
+export const revalidate = 0;
 export default function NotFound() {
   return (
     <ViewPort>
@@ -18,10 +19,10 @@ export default function NotFound() {
           className="w-96 h-auto"
         />
 
-        <p className="text-gray-600 max-w-md">
+        <p className="max-w-md text-gray-600">
           Oops! The page you’re looking for doesn’t exist or has been moved.
         </p>
-        <Link className="px-6 text-secondary rounded-xl" href={"/"}>
+        <Link className="px-6 rounded-xl text-secondary" href={"/"}>
           Go Back Home
         </Link>
       </div>

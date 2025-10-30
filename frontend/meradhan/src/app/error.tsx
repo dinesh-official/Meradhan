@@ -17,23 +17,23 @@ export default function Error({
   // Only render in development mode
   if (process.env.NODE_ENV != "development") {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 min-h-screen px-4 text-gray-700">
+      <div className="flex flex-col justify-center items-center gap-3 px-4 min-h-screen text-gray-700">
         {/* Error Image */}
         <Image
           width={100}
           height={100}
           src="/under-maintenance.svg" // replace with your image path
           alt="Error"
-          className="w-40 h-auto mb-6"
+          className="mb-6 w-40 h-auto"
         />
 
         {/* Title */}
-        <h1 className="text-2xl font-semibold mb-2">
+        <h1 className="mb-2 font-semibold text-2xl">
           Oops! Something went wrong.
         </h1>
 
         {/* Description */}
-        <p className="text-gray-600 mb-6 text-center max-w-96">
+        <p className="mb-6 max-w-96 text-gray-600 text-center">
           An unexpected error occurred. You can try again or go back home.
         </p>
 
@@ -41,7 +41,7 @@ export default function Error({
         <div className="flex gap-4">
           <button
             onClick={() => reset()}
-            className="font-semibold px-4 py-2 cursor-pointer"
+            className="px-4 py-2 font-semibold cursor-pointer"
           >
             Retry
           </button>
@@ -61,24 +61,24 @@ export default function Error({
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 text-gray-700 px-4">
-      <div className="text-center max-w-xl">
+    <div className="flex flex-col justify-center items-center bg-gray-100 px-4 min-h-screen text-gray-700">
+      <div className="max-w-xl text-center">
         {/* Error Title */}
-        <div className="text-3xl font-semibold text-gray-800">
+        <div className="font-semibold text-gray-800 text-3xl">
           Opp`s. {error.name}
         </div>
 
         {/* Description */}
-        <div className="mt-3 text-base text-gray-600">
+        <div className="mt-3 text-gray-600 text-base">
           We’re sorry, but an unexpected error has occurred. Please try again or
           return to the home page.
         </div>
 
         {/* Error Details */}
-        <div className="mt-5 text-gray-800 text-xs text-left border border-gray-50 shadow-gray-800">
+        <div className="shadow-gray-800 mt-5 border border-gray-50 text-gray-800 text-xs text-left">
           {/* Error Message Card */}
           <div className="relative bg-white/70 p-2">
-            <div className="font-semibold text-red-700 mb-2 text-sm">
+            <div className="mb-2 font-semibold text-red-700 text-sm">
               Error Message:
             </div>
             <div className="text-gray-700 text-xs">
@@ -91,18 +91,18 @@ export default function Error({
                   setCopiedMessage
                 )
               }
-              className="absolute top-1 right-1 bg-gray-100 text-xs px-2 py-1 hover:bg-gray-800 transition"
+              className="top-1 right-1 absolute bg-gray-100 hover:bg-gray-800 px-2 py-1 text-xs transition"
             >
               {copiedMessage ? "Copied!" : "Copy"}
             </button>
           </div>
 
           {/* Stack Trace Card */}
-          <div className="relative bg-gray-900 text-green-300 font-mono text-[11px] whitespace-pre-wrap overflow-auto max-h-72 p-2">
+          <div className="relative bg-gray-900 p-2 max-h-72 overflow-auto font-mono text-[11px] text-green-300 whitespace-pre-wrap">
             {error.stack}
             <button
               onClick={() => copyText(error.stack || "", setCopiedStack)}
-              className="absolute top-1 right-1 bg-gray-700 text-xs px-2 py-1 hover:bg-gray-800 transition"
+              className="top-1 right-1 absolute bg-gray-700 hover:bg-gray-800 px-2 py-1 text-xs transition"
             >
               {copiedStack ? "Copied!" : "Copy"}
             </button>
@@ -110,14 +110,14 @@ export default function Error({
         </div>
 
         {/* Buttons */}
-        <div className="mt-6 flex gap-2 justify-center">
+        <div className="flex justify-center gap-2 mt-6">
           <button
             onClick={() => reset()}
-            className="bg-gray-800 text-white px-5 py-2 cursor-pointer"
+            className="bg-gray-800 px-5 py-2 text-white cursor-pointer"
           >
             Try Again
           </button>
-          <Link href="/" className="bg-gray-600 text-white px-5 py-2">
+          <Link href="/" className="bg-gray-600 px-5 py-2 text-white">
             Go Home
           </Link>
         </div>
