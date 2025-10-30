@@ -17,6 +17,7 @@ import GlossaryPost from "./_components/glossaryPost";
 import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
 
 const GlossaryView = () => {
   const {
@@ -53,19 +54,10 @@ const GlossaryView = () => {
       {/* Glossary Section */}
       <div className="py-14">
         <div className="flex flex-col gap-3">
-          <h1
-            className={cn(
-              "font-medium text-4xl text-center",
-              quicksand.className
-            )}
-          >
+          <TopTitleDesc description="Simple explanations of bond and fixed-income terms">
             Fixed Income
             <span className="font-semibold text-secondary"> Glossary</span>
-          </h1>
-
-          <p className="text-center">
-            Simple explanations of bond and fixed-income terms
-          </p>
+          </TopTitleDesc>
 
           {/* Search Input */}
           <div className="relative mt-5 w-full">
