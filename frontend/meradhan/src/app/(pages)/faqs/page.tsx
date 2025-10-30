@@ -16,7 +16,6 @@ export default async function FAQPage() {
 
   return (
     <ViewPort>
-      {/* Hero Section */}
       <div className="bg-primary h-72">
         <div className="flex flex-col justify-center items-center gap-6 h-full container">
           <h1
@@ -36,12 +35,15 @@ export default async function FAQPage() {
         </div>
       </div>
 
-      {/* FAQ Section */}
       <div className="py-12">
         <div className="max-w-3xl container">
           <Accordion type="single" collapsible defaultValue="item-0">
             {faqs?.faqS_connection.nodes.map((faq, i) => (
-              <AccordionItem key={faq.documentId} value={`item-${i}`} className="border-b-0">
+              <AccordionItem
+                key={faq.documentId}
+                value={`item-${i}`}
+                className="border-b-0"
+              >
                 <AccordionTrigger>{faq.Question}</AccordionTrigger>
                 <AccordionContent>{faq.Answer}</AccordionContent>
               </AccordionItem>

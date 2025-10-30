@@ -13,9 +13,10 @@ import {
 import { cn } from "@/lib/utils";
 import { quicksand } from "@/global/font/font";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Loader, Search } from "lucide-react";
 import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
 import GlossaryPost from "./_components/glossaryPost";
+import Image from "next/image";
 
 const GlossaryView = () => {
   const {
@@ -29,9 +30,7 @@ const GlossaryView = () => {
     error,
   } = useGlossaryHook();
 
-  console.log( items,
-    loading,
-    error)
+  console.log(items, loading, error);
   return (
     <ViewPort>
       <div className="container">
@@ -96,11 +95,19 @@ const GlossaryView = () => {
 
           <div className="mt-6">
             {loading && (
-              <div className="text-sm text-muted-foreground">Loading…</div>
+              <div className="flex items-center justify-center m-[3rem]">
+                <Loader />
+              </div>
             )}
-            {error && (
-              <div className="text-sm text-red-600">
-                Failed to load glossary. {String(error.message ?? "")}
+            {!loading && !error && items.length === 0 && (
+              <div className=" m-auto p-[2rem] flex flex-col justify-center items-center gap-4">
+                <Image
+                  src={"/assets/sad-emoji.svg"}
+                  alt="sad emoji"
+                  height={72}
+                  width={72}
+                />
+                <p> No Glossary Found</p>
               </div>
             )}
             {items.map((items) => (

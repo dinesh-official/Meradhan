@@ -25,7 +25,7 @@ export const useGlossaryHook = () => {
   const variables = useMemo(
     () => ({
       pagination: { pageSize: 100000 },
-      filters: { Title: titleFilter }, // keep "Title" if your API expects it
+      filters: { Title: titleFilter },
     }),
     [titleFilter]
   );
