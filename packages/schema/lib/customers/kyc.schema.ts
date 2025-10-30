@@ -87,6 +87,7 @@ export const dpAccountInfoSchema = z.object({
         )
         .nonempty("At least one PAN number is required"),
     accountHolderName: z.string().min(1, "Account holder name is required"),
+    accountType: z.string().min(1, "Account type is required"),
     isDefault: z.boolean(),
     checkTerms: z
         .boolean()

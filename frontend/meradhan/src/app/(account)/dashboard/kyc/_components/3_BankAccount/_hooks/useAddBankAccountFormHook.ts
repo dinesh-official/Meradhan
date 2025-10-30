@@ -75,7 +75,7 @@ export const useAddBankAccountFormHook = () => {
             const existingAccount = state.step_3
                 .slice(0, -1) // exclude last item
                 .find((item) => item.accountNumber === bankData.accountNumber);
-            console.log(existingAccount);
+
             
             if (existingAccount) {
                 Swal.fire({

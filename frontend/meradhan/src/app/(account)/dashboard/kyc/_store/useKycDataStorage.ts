@@ -8,11 +8,13 @@ import { IPANKycVerifyResponse, ISignKycVerifyResponse } from "@root/apiGateway"
 import { appSchema } from "@root/schema";
 import z from "zod";
 import { create } from "zustand";
-const schema = appSchema.kyc;
+
+type schema = typeof appSchema.kyc;
+
 // ==========================
 // 🪪 Step 1: PAN & Identity Data
 // ==========================
-export interface PanData<T = unknown> extends z.infer<typeof schema.kycPanInfoDataSchema> {
+export interface PanData<T = unknown> extends z.infer<schema['kycPanInfoDataSchema']> {
     response?: T;
 }
 
@@ -22,22 +24,22 @@ export interface FileData<T> {
 }
 
 export interface Step1Data {
-    pan: PanData<IPANKycVerifyResponse['responseData']>;
-    face: FileData<IPANKycVerifyResponse['responseData']>;
-    sign: FileData<ISignKycVerifyResponse['responseData']>;
+    pan: PanData<IPANKycVerifyResponse["responseData"]>;
+    face: FileData<IPANKycVerifyResponse["responseData"]>;
+    sign: FileData<ISignKycVerifyResponse["responseData"]>;
 }
 
 // ==========================
 // 👨‍👩‍👧 Step 2: Personal Details
 // ==========================
-export interface PersonalData<T = unknown> extends z.infer<typeof schema.personalInfoSchema> {
+export interface PersonalData<T = unknown> extends z.infer<schema['personalInfoSchema']> {
     response?: T;
 }
 
 // ==========================
 // 🏦 Step 3: Bank Details
 // ==========================
-export interface BankAccountData<T = unknown> extends z.infer<typeof schema.bankInfoSchema> {
+export interface BankAccountData<T = unknown> extends z.infer<schema['bankInfoSchema']> {
     isVerified?: boolean;
     response?: T;
 }
@@ -45,14 +47,15 @@ export interface BankAccountData<T = unknown> extends z.infer<typeof schema.bank
 // ==========================
 // 🧾 Step 4: Depository Details
 // ==========================
-export interface DepositoryData<T = unknown> extends z.infer<typeof schema.dpAccountInfoSchema> {
+export interface DepositoryData<T = unknown> extends z.infer<schema['dpAccountInfoSchema']> {
     response?: T;
 }
 
 // ==========================
 // 🧠 Step 5: Questionnaire
 // ==========================
-export type QuestionnaireData = z.infer<typeof schema.riskProfileDataSchema>;
+export type QuestionnaireData = z.infer<schema['riskProfileDataSchema']>;
+
 // ==========================
 // 🗂️ Root Type: KYC Data Storage
 // ==========================
@@ -82,7 +85,6 @@ const initData: KycDataStorage = {
         },
         face: {
             url: "",
-
         },
         sign: { url: "" },
     },
@@ -116,8 +118,9 @@ const initData: KycDataStorage = {
             dpId: "",
             beneficiaryClientId: "",
             depositoryParticipantName: "",
-            panNumber: [],
+            panNumber: [""],
             accountHolderName: "",
+            accountType: "SINGLE",
             isDefault: false,
             checkTerms: false,
         },
@@ -126,8 +129,8 @@ const initData: KycDataStorage = {
         {
             ans: "",
             index: 0,
-            opt: [''],
-            qus: ""
+            opt: [""],
+            qus: "",
         },
     ],
 };
@@ -138,23 +141,17 @@ const initData: KycDataStorage = {
 export const useKycDataStorage = create<{
     state: KycDataStorage;
     setState: (state: KycDataStorage) => void;
-    updateStep: <K extends keyof KycDataStorage>(
-        step: K,
-        data: KycDataStorage[K]
-    ) => void;
+    updateStep: <K extends keyof KycDataStorage>(step: K, data: KycDataStorage[K]) => void;
     reset: () => void;
     setStepIndex: (index: number) => void;
     nextLocalStep: () => void;
     prevLocalStep: () => void;
 
-
-
-    setStep1PanData: (Key: keyof Step1Data['pan'], data: any) => void;
-    setStep1SelfieFaceData: (Key: keyof Step1Data['face'], data: any) => void;
-    setStep1SignData: (Key: keyof Step1Data['sign'], data: any) => void;
+    // step 1
+    setStep1PanData: (Key: keyof Step1Data["pan"], data: any) => void;
+    setStep1SelfieFaceData: (Key: keyof Step1Data["face"], data: any) => void;
+    setStep1SignData: (Key: keyof Step1Data["sign"], data: any) => void;
     setStep2PersonalData: (Key: keyof PersonalData, data: any) => void;
-
-
 
     // bank
     addBankAccount: () => void;
@@ -167,11 +164,15 @@ export const useKycDataStorage = create<{
     updateDepository: (index: number, data: Partial<DepositoryData>) => void;
     removeDepository: (index: number) => void;
     setDefaultDepository: (index: number) => void;
-
-
+    addDepositoryPan: (index: number) => void;
+    updateDepositoryPan: (index: number, subIndex: number, data: string) => void;
+    setDepositoryPan: (index: number, data: string[]) => void;
+    removeDepositoryPan: (index: number, subIndex: number) => void;
 }>((set) => ({
     state: initData,
+
     setState: (newState) => set({ state: newState }),
+
     updateStep: (step, data) =>
         set((prev) => ({
             state: {
@@ -191,10 +192,22 @@ export const useKycDataStorage = create<{
     },
 
     prevLocalStep() {
-        set((prev) => ({ state: { ...prev.state, stepIndex: prev.state.stepIndex <= 0 ? 0 : prev.state.stepIndex - 1 } }));
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                stepIndex: prev.state.stepIndex <= 0 ? 0 : prev.state.stepIndex - 1,
+            },
+        }));
     },
 
-    setStep1PanData: (key, data) => set((prev) => ({ state: { ...prev.state, step_1: { ...prev.state.step_1, pan: { ...prev.state.step_1.pan, [key]: data } } } })),
+    setStep1PanData: (key, data) =>
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_1: { ...prev.state.step_1, pan: { ...prev.state.step_1.pan, [key]: data } },
+            },
+        })),
+
     setStep1SelfieFaceData(Key, data) {
         set((prev) => ({
             state: {
@@ -237,17 +250,18 @@ export const useKycDataStorage = create<{
         }));
     },
 
+    // ==========================
+    // 🏦 BANK ACCOUNT HANDLERS
+    // ==========================
     addBankAccount() {
         set((prev) => ({
             state: {
                 ...prev.state,
-                step_3: [
-                    ...prev.state.step_3,
-                    initData.step_3[0],
-                ],
+                step_3: [...prev.state.step_3, { ...initData.step_3[0] }],
             },
         }));
     },
+
     updateBankAccount(index, data) {
         set((prev) => ({
             state: {
@@ -256,38 +270,39 @@ export const useKycDataStorage = create<{
             },
         }));
     },
+
     removeBankAccount(index) {
-        set((prev) => {
-            const updatedBanks = prev.state.step_3.filter((_, i) => i !== index);
-            return ({
-                state: {
-                    ...prev.state,
-                    step_3: updatedBanks,
-                },
-            })
-        });
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_3: prev.state.step_3.filter((_, i) => i !== index),
+            },
+        }));
     },
 
     setDefaultBankAccount(index) {
         set((prev) => ({
             state: {
                 ...prev.state,
-                step_3: prev.state.step_3.map((item, i) => (i === index ? { ...item, isDefault: true } : { ...item, isDefault: false })),
+                step_3: prev.state.step_3.map((item, i) =>
+                    i === index ? { ...item, isDefault: true } : { ...item, isDefault: false }
+                ),
             },
         }));
     },
 
+    // ==========================
+    // 🧾 DEPOSITORY HANDLERS
+    // ==========================
     addDepository() {
         set((prev) => ({
             state: {
                 ...prev.state,
-                step_4: [
-                    ...prev.state.step_4,
-                    initData.step_4[0],
-                ],
+                step_4: [...prev.state.step_4, { ...initData.step_4[0] }],
             },
         }));
     },
+
     updateDepository(index, data) {
         set((prev) => ({
             state: {
@@ -296,6 +311,7 @@ export const useKycDataStorage = create<{
             },
         }));
     },
+
     removeDepository(index) {
         set((prev) => ({
             state: {
@@ -305,11 +321,73 @@ export const useKycDataStorage = create<{
         }));
     },
 
+    setDepositoryPan(index, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: prev.state.step_4.map((item, i) =>
+                    i === index ? { ...item, panNumber: data } : item
+                ),
+            },
+        }));
+    },
+
     setDefaultDepository(index) {
         set((prev) => ({
             state: {
                 ...prev.state,
-                step_4: prev.state.step_4.map((item, i) => (i === index ? { ...item, isDefault: true } : { ...item, isDefault: false })),
+                step_4: prev.state.step_4.map((item, i) =>
+                    i === index ? { ...item, isDefault: true } : { ...item, isDefault: false }
+                ),
+            },
+        }));
+    },
+
+    // ✅ Corrected PAN Handlers
+    addDepositoryPan(index) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: prev.state.step_4.map((item, i) =>
+                    i === index
+                        ? {
+                            ...item,
+                            panNumber: [...item.panNumber, ""], // Add new empty PAN field
+                        }
+                        : item
+                ),
+            },
+        }));
+    },
+
+    updateDepositoryPan(index, subIndex, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: prev.state.step_4.map((item, i) => {
+                    if (i === index) {
+                        const updatedPan = [...item.panNumber];
+                        updatedPan[subIndex] = data;
+                        return { ...item, panNumber: updatedPan };
+                    }
+                    return item;
+                }),
+            },
+        }));
+    },
+
+    removeDepositoryPan(index, subIndex) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_4: prev.state.step_4.map((item, i) => {
+                    if (i === index) {
+                        const updatedPan = [...item.panNumber];
+                        updatedPan.splice(subIndex, 1);
+                        return { ...item, panNumber: updatedPan };
+                    }
+                    return item;
+                }),
             },
         }));
     },

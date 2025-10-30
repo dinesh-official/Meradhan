@@ -12,6 +12,7 @@ import BankViewCard from "./_elements/BankViewCard";
 import { AiFillPlusSquare } from "react-icons/ai";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycDataProvider } from "../../_context/KycDataProvider";
+import { useKycStepStore } from "../../_store/useKycStepStore";
 
 function VerifyBankAccount() {
   const {
@@ -20,9 +21,24 @@ function VerifyBankAccount() {
     removeBankAccount,
     prevLocalStep,
     addBankAccount,
+    setStepIndex,
   } = useKycDataStorage();
   const data = state.step_3;
   const { pushUserKycState } = useKycDataProvider();
+  const { nextStep } = useKycStepStore();
+
+  const isAllowToContinue = () => {
+    const defaltSelcted = data.filter((item) => !item.isDefault);
+    const allValid = data.filter((item) => !item.isVerified);
+
+    return defaltSelcted.length === 0 && allValid.length === 0;
+  };
+
+  const jumpNext = () => {
+    pushUserKycState();
+    setStepIndex(0);
+    nextStep();
+  };
 
   return (
     <Card accountMode>
@@ -59,7 +75,7 @@ function VerifyBankAccount() {
         className="flex sm:flex-row flex-col-reverse justify-center sm:justify-between items-center gap-5 sm:text-left text-center"
       >
         <div className="flex sm:flex-row flex-col gap-5 w-full">
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" disabled={!isAllowToContinue()} onClick={jumpNext} >
             Confirm & Continue <MdOutlineArrowRight />
           </Button>
           <Button
@@ -81,6 +97,7 @@ function VerifyBankAccount() {
               addBankAccount();
               prevLocalStep();
             }}
+            
           >
             <AiFillPlusSquare className="text-secondary text-xl" />
             Add Bank Account{" "}
