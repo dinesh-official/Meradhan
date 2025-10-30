@@ -5,23 +5,22 @@ export const blogsGql = `query Nodes($pagination: PaginationArg) {
   blogPosts_connection(pagination: $pagination) {
     nodes {
       Author {
-        Facebook_Link
-        Instagram_Link
-        LinkedIn_Link
-        Bio
-        MetaData {
-          Description
-          KeyWords
-          Priority
-          Og_Image {
-            url
-          }
-        }
         Name
-        documentId
-        publishedAt
-        updatedAt
+        Profile_Image {
+          url
+        }
       }
+      Description
+      Featured_Image {
+        url
+      }
+      Title
+      Views
+      Category {
+        Name
+      }
+      documentId
+      createdAt
     }
   }
 }`;
@@ -34,23 +33,22 @@ export type T_BLOGS_GQL_RESPONSE = {
 
 export type BLOGS_NODE = {
   Author?: {
-    Facebook_Link: string;
-    Instagram_Link: string;
-    LinkedIn_Link: string;
-    Bio?: string;
-    MetaData: {
-      Description?: string;
-      KeyWords?: string;
-      Priority: string;
-      Og_Image: {
-        url: string;
-      };
-    };
     Name: string;
-    documentId: string;
-    publishedAt: string;
-    updatedAt: string;
+    Profile_Image: {
+      url: string;
+    };
   };
+  Description: string;
+  Featured_Image: {
+    url: string;
+  };
+  Title: string;
+  Views: number;
+  Category?: {
+    Name: string;
+  };
+  documentId: string;
+  createdAt: string;
 };
 
 export const fetchBlogsData = async () => {
