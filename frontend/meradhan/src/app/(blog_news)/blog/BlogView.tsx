@@ -3,8 +3,11 @@ import BlogPageFIlterOrSort from "./_components/BlogPageFIlterOrSort";
 import { cn } from "@/lib/utils";
 import { quicksand } from "@/global/font/font";
 import PostCard from "../_components/PostCard";
+import { fetchBlogsData } from "./_gql/blogs.gql";
 
-function BlogView() {
+async function BlogView() {
+  const data = await fetchBlogsData();
+  console.log(data)
   return (
     <div>
       <div className="pt-10">
@@ -14,18 +17,18 @@ function BlogView() {
         <BlogPageFIlterOrSort />
       </div>
 
-     <div className="flex flex-col gap-5 gap-y-8">
+      <div className="flex flex-col gap-5 gap-y-8">
         <PostCard
-            listMode
-            src="/assets/bondYield.png"
-            badge="Educative"
-            createAt="24 Oct 2025"
-            heading="What Are Bonds? A Simple Guide for Indian Investors"
-            description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
-            name="Vikas Kukreja"
-            profilePic="/avatars/person.jpeg"
-            views="10"
-          />
+          listMode
+          src="/assets/bondYield.png"
+          badge="Educative"
+          createAt="24 Oct 2025"
+          heading="What Are Bonds? A Simple Guide for Indian Investors"
+          description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
+          name="Vikas Kukreja"
+          profilePic="/avatars/person.jpeg"
+          views="10"
+        />
         <div className="grid md:grid-cols-3 gap-5 gap-y-5">
           <PostCard
             listMode

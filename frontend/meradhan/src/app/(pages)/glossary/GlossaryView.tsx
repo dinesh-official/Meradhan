@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 
@@ -14,11 +14,24 @@ import { cn } from "@/lib/utils";
 import { quicksand } from "@/global/font/font";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
 import GlossaryPost from "./_components/glossaryPost";
-import { useGlossaryHook } from "./_components/useGlossaryHook";
-import { GLOSSARY_DATA } from "./_components/constant";
+
 const GlossaryView = () => {
-    const {alphabets,filteredGlossary, onAlphabetClick} = useGlossaryHook(GLOSSARY_DATA)
+  const {
+    alphabets,
+    selectedAlphabet,
+    onAlphabetClick,
+    search,
+    onSearchChange,
+    items,
+    loading,
+    error,
+  } = useGlossaryHook();
+
+  console.log( items,
+    loading,
+    error)
   return (
     <ViewPort>
       <div className="container">
@@ -54,6 +67,10 @@ const GlossaryView = () => {
                 className="peer pe-14 border border-gray-200 w-full py-5.5 px-5 placeholder:text-gray-500 "
                 placeholder="Search..."
                 type="text"
+                value={search}
+                onChange={(e) => {
+                  onSearchChange(e.target.value);
+                }}
               />
               <div
                 className="pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-4 text-xs text-muted-foreground tabular-nums peer-disabled:opacity-50"
@@ -69,10 +86,7 @@ const GlossaryView = () => {
                 <div
                   key={letter}
                   className="bg-muted min-w-10 min-h-10 flex justify-center items-center rounded-md select-none cursor-pointer"
-                  onClick={()=>{
-                    console.log(letter)
-                    onAlphabetClick(letter)
-                  }}
+                  onClick={() => onAlphabetClick(letter)}
                 >
                   <h3>{letter.toUpperCase()}</h3>
                 </div>
@@ -81,11 +95,19 @@ const GlossaryView = () => {
           </div>
 
           <div className="mt-6">
-            {filteredGlossary.map((items) => (
-              <div key={items.title}>
+            {loading && (
+              <div className="text-sm text-muted-foreground">Loading…</div>
+            )}
+            {error && (
+              <div className="text-sm text-red-600">
+                Failed to load glossary. {String(error.message ?? "")}
+              </div>
+            )}
+            {items.map((items) => (
+              <div key={items.documentId}>
                 <GlossaryPost
-                  heading={items.title}
-                  description={items.description}
+                  heading={items.Title}
+                  description={items.Explanation}
                 />
               </div>
             ))}
