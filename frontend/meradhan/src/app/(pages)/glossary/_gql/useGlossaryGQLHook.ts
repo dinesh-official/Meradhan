@@ -8,7 +8,7 @@ const alphabets = Array.from({ length: 26 }, (_, i) =>
 );
 
 export const useGlossaryHook = () => {
-  const [selectedAlphabet, setSelectedAlphabet] = useState("Z");
+  const [selectedAlphabet, setSelectedAlphabet] = useState("A");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
@@ -47,6 +47,14 @@ export const useGlossaryHook = () => {
   };
   const items = data?.glossaries_connection?.nodes ?? [];
 
+
+
+  const resetSearch = () => {
+    setSearch("");
+    setSelectedAlphabet("A");
+  };
+
+
   return {
     selectedAlphabet,
     search,
@@ -56,5 +64,6 @@ export const useGlossaryHook = () => {
     loading,
     alphabets,
     error,
+    resetSearch
   };
 };

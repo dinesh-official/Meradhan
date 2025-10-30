@@ -6,14 +6,11 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import Footer from "@/global/components/footer/Footer";
-import NewsLetter from "@/global/components/footer/NewsLetter";
-import NavBar from "@/global/components/navbar/NavBar";
+import ViewPort from "@/global/components/wrapper/ViewPort";
+import { quicksand } from "@/global/font/font";
+import { cn } from "@/lib/utils";
 import ListFilter from "./_components/ListFilter";
 import ListNseData from "./_components/ListNseData";
-import { cn } from "@/lib/utils";
-import { quicksand } from "@/global/font/font";
-import ViewPort from "@/global/components/wrapper/ViewPort";
 
 const nseData = [
   {

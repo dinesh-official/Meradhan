@@ -1,7 +1,6 @@
 "use client";
-import React from "react";
-import ViewPort from "@/global/components/wrapper/ViewPort";
 
+import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,119 +9,143 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { cn } from "@/lib/utils";
-import { quicksand } from "@/global/font/font";
 import { Input } from "@/components/ui/input";
-import { Loader, Search } from "lucide-react";
-import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
+import { quicksand } from "@/global/font/font";
+import { cn } from "@/lib/utils";
+import { Loader2, Search } from "lucide-react";
 import GlossaryPost from "./_components/glossaryPost";
+import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
 
 const GlossaryView = () => {
   const {
     alphabets,
-    selectedAlphabet,
     onAlphabetClick,
     search,
     onSearchChange,
     items,
     loading,
     error,
+    selectedAlphabet,
+    resetSearch, // Make sure your hook exports this or we handle it inline
   } = useGlossaryHook();
 
-  console.log(items, loading, error);
+  const handleReset = () => {
+    resetSearch();
+  };
+
   return (
-    <ViewPort>
-      <div className="container">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Issuer Notes</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <div className="container">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Issuer Notes</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        <div className="py-14">
-          <div className="flex flex-col gap-5">
-            <h1
-              className={cn(
-                "text-4xl text-center font-medium",
-                quicksand.className
-              )}
+      {/* Glossary Section */}
+      <div className="py-14">
+        <div className="flex flex-col gap-3">
+          <TopTitleDesc description="Simple explanations of bond and fixed-income terms">
+            Fixed Income
+            <span className="font-semibold text-secondary"> Glossary</span>
+          </TopTitleDesc>
+
+          {/* Search Input */}
+          <div className="relative mt-5 w-full">
+            <Input
+              className="peer px-5 py-4.5 border border-gray-200 w-full placeholder:text-gray-500 e-14"
+              placeholder="Search..."
+              type="text"
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+            <div
+              className="absolute inset-y-0 flex justify-center items-center pe-4 text-muted-foreground text-xs pointer-events-none end-0"
+              aria-live="polite"
+              role="status"
             >
-              Fixed Income
-              <span className="font-semibold text-secondary"> Glossary</span>
-            </h1>
-            <p className="text-center">
-              Simple explanations of bond and fixed-income terms
-            </p>
-
-            <div className="relative w-full">
-              <Input
-                className="peer pe-14 border border-gray-200 w-full py-5.5 px-5 placeholder:text-gray-500 "
-                placeholder="Search..."
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  onSearchChange(e.target.value);
-                }}
-              />
-              <div
-                className="pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-4 text-xs text-muted-foreground tabular-nums peer-disabled:opacity-50"
-                aria-live="polite"
-                role="status"
-              >
-                <Search className="text-secondary" />
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center mt-1 overflow-x-auto lg:gap-1 gap-3 ">
-              {alphabets.map((letter) => (
-                <div
-                  key={letter}
-                  className="bg-muted min-w-10 min-h-10 flex justify-center items-center rounded-md select-none cursor-pointer"
-                  onClick={() => onAlphabetClick(letter)}
-                >
-                  <h3>{letter.toUpperCase()}</h3>
-                </div>
-              ))}
+              <Search className="text-secondary" size={20} />
             </div>
           </div>
 
-          <div className="mt-6">
-            {loading && (
-              <div className="flex items-center justify-center m-[3rem]">
-                <Loader />
-              </div>
-            )}
-            {!loading && !error && items.length === 0 && (
-              <div className=" m-auto p-[2rem] flex flex-col justify-center items-center gap-4">
-                <Image
-                  src={"/assets/sad-emoji.svg"}
-                  alt="sad emoji"
-                  height={72}
-                  width={72}
-                />
-                <p> No Glossary Found</p>
-              </div>
-            )}
-            {items.map((items) => (
-              <div key={items.documentId}>
-                <GlossaryPost
-                  heading={items.Title}
-                  description={items.Explanation}
-                />
+          {/* Alphabet Filter */}
+          <div className="flex justify-between items-center gap-3 lg:gap-1 mt-1 overflow-x-auto">
+            {alphabets.map((letter) => (
+              <div
+                key={letter}
+                className={cn(
+                  "flex justify-center items-center bg-muted rounded min-w-9 min-h-9 font-medium text-sm transition-colors cursor-pointer select-none",
+                  letter.toLowerCase() === selectedAlphabet.toLowerCase()
+                    ? "bg-primary text-white"
+                    : "hover:bg-primary/10"
+                )}
+                onClick={() => onAlphabetClick(letter)}
+              >
+                <p>{letter.toUpperCase()}</p>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Glossary Results */}
+        <div className="mt-6 min-h-96">
+          {loading && (
+            <div className="flex justify-center items-center w-full h-96 text-muted-foreground text-sm">
+              <Loader2 className="animate-spin" size={30} />
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="flex justify-center items-center w-full h-96 text-red-500 text-sm">
+              <p>Error loading glossary. Please try again later.</p>
+            </div>
+          )}
+
+          {!loading && !error && items.length === 0 && (
+            <GlossaryViewNotFound onReset={handleReset} />
+          )}
+
+          {!loading &&
+            !error &&
+            items.length > 0 &&
+            items.map((item) => (
+              <GlossaryPost
+                heading={item.Title}
+                description={item.Explanation}
+                key={item.documentId}
+              />
+            ))}
+        </div>
       </div>
-    </ViewPort>
+    </div>
   );
 };
 
 export default GlossaryView;
+
+function GlossaryViewNotFound({ onReset }: { onReset: () => void }) {
+  return (
+    <div className="flex flex-col justify-center items-center gap-5 min-h-96 text-center">
+      <Image
+        src="/assets/sad-emoji.svg"
+        alt="No Data"
+        width={100}
+        height={100}
+        className="w-18 h-18"
+      />
+      <p className="font-medium">No Glossary Found</p>
+      <Button variant="outline" onClick={onReset}>
+        Reset Search
+      </Button>
+    </div>
+  );
+}
