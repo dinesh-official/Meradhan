@@ -13,7 +13,7 @@ import IsshuerNotesAddToWatchList from "../_components/IsshuerNotesAddToWatchLis
 import { cn } from "@/lib/utils";
 import { quicksand } from "@/global/font/font";
 import Image from "next/image";
-import { SortInfoBox } from "@/global/components/wrapper/SortInfoBox";
+import { SortInfoBox } from "@/global/components/wrapper/cards/SortInfoBox";
 
 function page() {
   return (
@@ -40,8 +40,8 @@ function page() {
         <div className="py-14">
           <div className="flex flex-col gap-5">
             {/* date actions  */}
-            <div className="flex gap-5 justify-between items-center lg:flex-nowrap flex-wrap  ">
-              <div className="flex  gap-8 lg:justify-start lg:w-auto w-full justify-between items-center">
+            <div className="flex flex-wrap lg:flex-nowrap justify-between items-center gap-5">
+              <div className="flex justify-between lg:justify-start items-center gap-8 w-full lg:w-auto">
                 <div className="flex items-center gap-2 text-gray-500">
                   <div>
                     <FaCalendarAlt size={18} />
@@ -55,9 +55,9 @@ function page() {
                   <FaEye size={18} /> <p>9</p>
                 </div>
               </div>
-              <div className="flex lg:justify-end justify-between lg:w-auto w-full  gap-5 items-center">
+              <div className="flex justify-between lg:justify-end items-center gap-5 w-full lg:w-auto">
                 <IsshuerNotesAddToWatchList />
-                <div className="flex items-center gap-2 text-white bg-secondary p-1 rounded-md cursor-pointer">
+                <div className="flex items-center gap-2 bg-secondary p-1 rounded-md text-white cursor-pointer">
                   <RiShareFill size={16} />
                 </div>
               </div>
@@ -65,12 +65,12 @@ function page() {
             {/* title logo  */}
             <div className="flex justify-between items-center mt-4">
               <div className="flex flex-col gap-5">
-                <h1 className={cn("text-4xl font-medium", quicksand.className)}>
+                <h1 className={cn("font-medium text-4xl", quicksand.className)}>
                   ICICI HOME FINANCE COMPANY LIMITED
                 </h1>
 
                 <div className="flex items-center gap-5">
-                  <div className="flex  items-center gap-3 bg-green-600 px-5 py-2 rounded-lg text-white">
+                  <div className="flex items-center gap-3 bg-green-600 px-5 py-2 rounded-lg text-white">
                     <FaStar /> <p>AAA</p>
                   </div>
                   <p className="text-gray-600">ICRA LIMITED</p>
@@ -82,12 +82,12 @@ function page() {
                   width={200}
                   height={200}
                   alt="No found"
-                  className="w-28 border  rounded-lg border- border-gray-200 p-3 aspect-square object-contain h-auto"
+                  className="p-3 border border- border-gray-200 rounded-lg w-28 h-auto object-contain aspect-square"
                 />
               </div>
             </div>
             {/* // cards  */}
-            <div className="grid md:grid-cols-4  gap-5">
+            <div className="gap-5 grid md:grid-cols-4">
               <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>
               <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>
               <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>
@@ -96,7 +96,7 @@ function page() {
           </div>
 
           {/* // content  */}
-          <div className="mt-10 flex flex-col gap-5">
+          <div className="flex flex-col gap-5 mt-10">
             <p>
               Lorem ipsum dolor sit amet consectetur adipisicing elit. A sunt
               magnam tempore delectus quo reiciendis placeat dolore aliquam
@@ -105,8 +105,8 @@ function page() {
             </p>
             <div>
               {/* // cards  */}
-              <p className="font-medium text-xl mb-3">Instrument Details</p>
-              <div className="grid md:grid-cols-4  gap-5">
+              <p className="mb-3 font-medium text-xl">Instrument Details</p>
+              <div className="gap-5 grid md:grid-cols-4">
                 <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>
                 <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>
                 <SortInfoBox title="Issue Price">99,000.00</SortInfoBox>

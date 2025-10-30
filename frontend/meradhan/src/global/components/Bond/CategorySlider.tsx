@@ -1,5 +1,5 @@
 "use client";
-import { CustomArrow } from "@/app/(main)/_components/elements/TestimonialsSlide";
+import { CustomArrow } from "@/app/(index)/_components/elements/TestimonialsSlide";
 import Link from "next/link";
 import { JSX } from "react";
 import Carousel, { ResponsiveType } from "react-multi-carousel";

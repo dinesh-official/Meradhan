@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
+import { ISessionResponse } from "@root/apiGateway";
+import AuthActions from "./AuthActions";
 
-function NavBar() {
+function NavBar({ session }: { session: ISessionResponse['responseData'] | null }) {
   return (
     <div className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18">
       <div className="mx-auto h-full container">
@@ -23,12 +25,7 @@ function NavBar() {
           {/* Menu Items */}
           <div className="hidden lg:flex justify-center items-center gap-7">
             <NavMenu />
-            <Link href="/login" className="text-gray-700">
-              Login
-            </Link>
-            <Link href={`/signup`}>
-              <Button className="px-5">Sign Up</Button>
-            </Link>
+            <AuthActions session={session} />
           </div>
           <MobMenu />
         </div>

@@ -6,8 +6,8 @@ export function SortInfoBox({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="odd:border even:bg-muted rounded-lg p-2.5 flex flex-col gap-[2px] text-center">
-      <p className="text-sm text-gray-500">{title}</p>
+    <div className="flex flex-col gap-[2px] even:bg-muted p-2.5 odd:border rounded-lg text-center">
+      <p className="text-gray-500 text-sm">{title}</p>
       <p className="font-medium text-lg">{children}</p>
     </div>
   );

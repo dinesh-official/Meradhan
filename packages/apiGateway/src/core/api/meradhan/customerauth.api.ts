@@ -2,7 +2,7 @@ import { appSchema } from "@root/schema";
 import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
-import type { IAuthCompleteResponse, IResetPasswordResponse, ISignInRequestResponse, ISignInSendOtpResponse, ISignupOtpVerifyResponse } from "./customerauth.response";
+import type { IAuthCompleteResponse, IResetPasswordResponse, ISessionResponse, ISignInRequestResponse, ISignInSendOtpResponse, ISignupOtpVerifyResponse } from "./customerauth.response";
 
 export class CustomerAuthApi {
     private schema = appSchema.customer;
@@ -55,6 +55,11 @@ export class CustomerAuthApi {
 
     async resetPassword(payload: z.infer<typeof this.schema.resetPasswordSchema>, config?: AxiosRequestConfig) {
         const { data } = await this.apiClient.post<IResetPasswordResponse>("/auth/customer/reset-password", payload, config);
+        return data;
+    }
+
+    async getSession(config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<ISessionResponse>(`/customer/session`, config);
         return data;
     }
 }

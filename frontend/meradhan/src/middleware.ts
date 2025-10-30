@@ -1,32 +1,71 @@
-
+import apiGateway from '@root/apiGateway';
 import { cookies } from 'next/headers';
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server';
+import apiServerCaller from './core/connection/apiServerCaller';
 
-// This function can be marked `async` if using `await` inside
+// Initialize Auth API client
+const authApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(apiServerCaller);
+
+// Helper: Generate Basic Auth header
+const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64");
+
+/**
+ * Next.js Middleware
+ * Handles:
+ *  1. Basic Authentication (production only)
+ *  2. Session validation via cookies and backend API
+ */
 export async function middleware(request: NextRequest) {
-  const auth = request.headers.get("authorization");
-  const validAuth = "Basic " + Buffer.from("admin:admin").toString("base64");
-  if (auth !== validAuth && process.env.NODE_ENV === "production") {
-    return new Response("Unauthorized", {
-      status: 401,
-      headers: {
-        "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
-      },
-    });
-  }
+  const { pathname, origin } = request.nextUrl;
 
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
-    const cookie = await cookies();
+  // ✅ 1. Basic Auth protection for production
+  if (process.env.NODE_ENV === "production") {
+    const authHeader = request.headers.get("authorization");
 
-    if (!cookie.get("token")) {
-      return NextResponse.redirect(new URL("/login", request.url));
+    if (authHeader !== BASIC_AUTH_HEADER) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
+        },
+      });
     }
   }
 
+  // ✅ 2. Protect /dashboard routes
+  if (pathname.startsWith("/dashboard")) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    // No token? Try to restore session
+    if (!token) {
+      try {
+        // Attempt session restore via API
+        await authApi.getSession();
+        return NextResponse.next();
+      } catch (error) {
+        const response = NextResponse.redirect(new URL("/logout", origin));
+        const allCookies = cookieStore.getAll();
+        for (const cookie of allCookies) {
+          response.cookies.set({
+            name: cookie.name,
+            value: "",
+            expires: new Date(0),
+            path: "/",
+          });
+        }
+        console.error("Session validation failed:", error);
+        // Redirect to login if session is invalid
+        return response;
+      }
+    }
+  }
+
+  // ✅ Default: Allow request to proceed
   return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
+// ✅ Match all paths (you can narrow this if needed)
 export const config = {
   matcher: '/:path*',
-}
+};

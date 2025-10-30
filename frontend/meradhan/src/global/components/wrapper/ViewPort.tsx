@@ -1,18 +1,23 @@
 import React from "react";
-import NavBar from "../navbar/NavBar";
-import NewsLetter from "../footer/NewsLetter";
+import "server-only";
 import Footer from "../footer/Footer";
+import NewsLetter from "../footer/NewsLetter";
+import NavBar from "../navbar/NavBar";
+import { getSession } from "./_server/getSession";
 
-function ViewPort({
+export const revalidate = 0;
+export async function ViewPort({
   children,
   headerOnly,
 }: {
   children?: React.ReactNode;
   headerOnly?: boolean;
 }) {
+  const session = await getSession();
+
   return (
     <div>
-      <NavBar />
+      <NavBar session={session} />
       {children}
       {!headerOnly && (
         <>
