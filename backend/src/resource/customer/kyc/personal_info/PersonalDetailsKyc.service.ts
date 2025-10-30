@@ -144,10 +144,10 @@ export class PersonalDetailsKycService {
 
         const pans = getPans();
 
-        const dematDetails = await this.kycProvider.verifyDmateAccount({
-            clientId: payload.beneficiaryClientId,
-            dpId: payload.dpId,
+        const dematDetails = await this.kycProvider.verifyDmateAccount(payload.depositoryName, {
             transactionId: new Date().getTime().toString(),
+            dpId: payload.dpId,
+            clientId: payload.beneficiaryClientId,
             ...pans,
         });
         return dematDetails;

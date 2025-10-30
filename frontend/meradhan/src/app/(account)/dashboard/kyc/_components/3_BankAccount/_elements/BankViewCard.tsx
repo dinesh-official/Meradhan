@@ -15,7 +15,7 @@ function BankViewCard({
   bank: KycDataStorage["step_3"][number];
   name: string;
   onDelete?: () => void;
-  setDefault: (e: boolean) => void;
+  setDefault: () => void;
 }) {
   const isNameMatched = dataMatcherUtils.areNamesMatched(
     dataMatcherUtils.splitFullName(bank.beneficiary_name),
@@ -72,7 +72,7 @@ function BankViewCard({
       <label className="flex lg:items-center gap-2 mt-3 text-sm">
         <Checkbox
           checked={bank.isDefault}
-          onClick={() => setDefault(!bank.isDefault)}
+          onClick={() => setDefault()}
         />
         <p>
           Set this account as default bank account for making future investments

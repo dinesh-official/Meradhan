@@ -64,7 +64,9 @@ export const bankInfoSchema = z.object({
 });
 
 export const dpAccountInfoSchema = z.object({
-    depositoryName: z.string().min(1, "Depository name is required"),
+    depositoryName: z.enum(["CDSL", "NSDL"], {
+        error: "Select a depository name",
+    }),
     dpId: z
         .string()
         .min(8, "DP ID must be at least 8 characters")
@@ -87,8 +89,9 @@ export const dpAccountInfoSchema = z.object({
         )
         .nonempty("At least one PAN number is required"),
     accountHolderName: z.string().min(1, "Account holder name is required"),
-    accountType: z.string().min(1, "Account type is required"),
+    accountType: z.enum(["SINGLE", "JOINT", "HUF"], { error: "Select an account type" }).optional(),
     isDefault: z.boolean(),
+    isVerified: z.boolean().default(false),
     checkTerms: z
         .boolean()
         .refine(val => val === true, { message: "You must agree to the terms" }),

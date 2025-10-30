@@ -4,6 +4,8 @@ import { DigioSDK, NSDLApi, type DanRequest, type DigioAadharPanData, type Digio
 import os from "os";
 import * as path from 'path';
 import { putFileS3 } from '../fileUpload/s3FileUploader.provider';
+import { AppError } from "@utils/error/AppError";
+import { AxiosError } from "axios";
 export class KycProvider {
     private digio = new DigioSDK()
     private nsdlApi = new NSDLApi(
@@ -116,9 +118,19 @@ export class KycProvider {
     }
 
 
-    async verifyDmateAccount(payload: DanRequest) {
-        const bankDetails = await this.nsdlApi.checkDANstatus(payload);
-        return bankDetails;
+    async verifyDmateAccount(type: "NSDL" | "CDSL", payload: DanRequest) {
+        try {
+            if (type == "NSDL") {
+                const nsdlDetails = await this.nsdlApi.checkDANstatus(payload);
+                return nsdlDetails;
+            }
+        } catch (error) {
+            if (error) {
+                throw new AppError((error as AxiosError<{ error: string }>)?.response?.data?.error || error.toString(), { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 });
+            }
+        }
+
+        throw new AppError("cdsl not supported. Please use NSDL", { code: "NOT_SUPPORTED", statusCode: 400 });
     }
 
 

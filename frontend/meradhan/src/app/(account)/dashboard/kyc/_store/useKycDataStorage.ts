@@ -114,7 +114,7 @@ const initData: KycDataStorage = {
     ],
     step_4: [
         {
-            depositoryName: "",
+            depositoryName: "NSDL",
             dpId: "",
             beneficiaryClientId: "",
             depositoryParticipantName: "",
@@ -123,14 +123,33 @@ const initData: KycDataStorage = {
             accountType: "SINGLE",
             isDefault: false,
             checkTerms: false,
+            isVerified: false,
         },
     ],
     step_5: [
         {
+            qus: "How many years of investment experience do you have?",
             ans: "",
             index: 0,
-            opt: [""],
-            qus: "",
+            opt: ["None", "Up to 1 year", "1 – 5 years", "More than 5 years"],
+        },
+        {
+            qus: "What is your investment goal?",
+            ans: "",
+            index: 1,
+            opt: ["Steady Income", "Capital Gains", "Short-term Parking", "Risk Diversification"],
+        },
+        {
+            qus: "What is your risk appetite?",
+            ans: "",
+            index: 2,
+            opt: ["Low Risk & Low Returns", "Moderate Risk & Moderate Returns", "High Risk & High Returns"],
+        },
+        {
+            qus: "What is your investment time horizon?",
+            ans: "",
+            index: 3,
+            opt: ["Up to 1 year", "1 – 3 years", "3 – 5 years", "More than 5 years"],
         },
     ],
 };
@@ -168,6 +187,9 @@ export const useKycDataStorage = create<{
     updateDepositoryPan: (index: number, subIndex: number, data: string) => void;
     setDepositoryPan: (index: number, data: string[]) => void;
     removeDepositoryPan: (index: number, subIndex: number) => void;
+
+
+    selectStep5RiskProfileAnswer: (index: number, answer: string) => void;
 }>((set) => ({
     state: initData,
 
@@ -388,6 +410,17 @@ export const useKycDataStorage = create<{
                     }
                     return item;
                 }),
+            },
+        }));
+    },
+
+    selectStep5RiskProfileAnswer(index, answer) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_5: prev.state.step_5.map((item, i) =>
+                    i === index ? { ...item, ans: answer } : item
+                ),
             },
         }));
     },

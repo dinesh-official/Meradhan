@@ -3,6 +3,7 @@ import * as crypto from "crypto";
 import type { DanRequest, DanResponse } from "./NSDLApi.response";
 
 
+
 export class NSDLApi {
     private readonly axiosInstance: AxiosInstance;
     private readonly requestorId: string;
@@ -12,9 +13,7 @@ export class NSDLApi {
     constructor(requestorId: string, secretKey: string, isProd: boolean = false) {
         this.requestorId = requestorId;
         this.secretKey = secretKey;
-        this.baseUrl = isProd
-            ? "https://www.eservices.nsdl.com"
-            : "https://eservices-test.nsdl.com";
+        this.baseUrl = "https://eservices-test.nsdl.com";
 
         this.axiosInstance = axios.create({
             baseURL: this.baseUrl,

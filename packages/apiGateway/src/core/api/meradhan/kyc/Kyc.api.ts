@@ -3,7 +3,7 @@ import type { IApiCaller } from "../../../connection/apiCaller.interface";
 import type { AxiosRequestConfig } from "axios";
 
 import type z from "zod";
-import type { I_IFSCResponse, IBankKycVerifyResponse, IPANKycRequestResponse, IPANKycVerifyResponse, ISelfireKycRequestResponse, ISelfireKycVerifyResponse, ISignKycRequestResponse, ISignKycVerifyResponse, IStoreKycGETResponse, IStoreKycSETResponse } from "./Kyc.response";
+import type { I_IFSCResponse, IBankKycVerifyResponse, IDmatKycVerifyResponse, IPANKycRequestResponse, IPANKycVerifyResponse, ISelfireKycRequestResponse, ISelfireKycVerifyResponse, ISignKycRequestResponse, ISignKycVerifyResponse, IStoreKycGETResponse, IStoreKycSETResponse } from "./Kyc.response";
 
 export class CustomerKycApi {
     private schema = appSchema.kyc;
@@ -62,6 +62,11 @@ export class CustomerKycApi {
 
     async verifyBankAccount(payload: z.infer<typeof this.schema.bankInfoSchema>, config?: AxiosRequestConfig) {
         const { data } = await this.apiClient.post<IBankKycVerifyResponse>(`/customer/kyc/bank/verify`, payload, config);
+        return data;
+    }
+
+    async verifyDematAccount(payload: z.infer<typeof this.schema.dpAccountInfoSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IDmatKycVerifyResponse>(`/customer/kyc/demat/verify`, payload, config);
         return data;
     }
 }

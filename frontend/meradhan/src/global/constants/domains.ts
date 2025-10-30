@@ -1,8 +1,6 @@
-// src/config/constants.js
-
 const isDev = process.env.NODE_ENV === "development"
 
-// ✅ Define base URLs in one place
+// Define base URLs in one place
 const BASES = {
   development: {
     HOST: "http://localhost:3000",
@@ -14,10 +12,10 @@ const BASES = {
   },
 }
 
-// ✅ Pick environment-specific config
+// Pick environment-specific config
 const BASE = isDev ? BASES.development : BASES.production
 
-// ✅ Export URLs consistently
+// Export URLs consistently
 export const HOST_URL = BASE.HOST
 export const API_LOCAL_URL = `${BASE.HOST}/api/server`
 export const API_SERVER_URL = `${BASE.SERVER}/api`

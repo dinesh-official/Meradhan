@@ -26,9 +26,10 @@ import {
 } from "../../_store/useKycDataStorage";
 import { useDematAccountFormHook } from "./_hooks/useDematAccountFormHook";
 function AddDematAccountForm() {
-  const { updateDepository, state } = useKycDataStorage();
+  const { updateDepository, state, removeDepository, nextLocalStep } =
+    useKycDataStorage();
   const data = state.step_4[state.step_4.length - 1];
-  const { handelSubmit, error } = useDematAccountFormHook();
+  const { handelSubmit, error, isPending } = useDematAccountFormHook();
 
   const updateData = (
     key: keyof KycDataStorage["step_4"][number],
@@ -60,8 +61,10 @@ function AddDematAccountForm() {
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="light">CDSL</SelectItem>
-                  <SelectItem value="dark">NSDL</SelectItem>
+                  <SelectItem value="CDSL" disabled>
+                    CDSL (under development)
+                  </SelectItem>
+                  <SelectItem value="NSDL">NSDL</SelectItem>
                 </SelectContent>
               </Select>
             </LabelInput>
@@ -121,7 +124,10 @@ function AddDematAccountForm() {
             </LabelInput>
 
             {/* <Input /> */}
-            <ManageDematPanInputs index={0} errors={error?.panNumber} />
+            <ManageDematPanInputs
+              index={state.step_4.length - 1}
+              errors={error?.panNumber}
+            />
 
             <LabelInput
               label="Account Holder Name"
@@ -149,12 +155,34 @@ function AddDematAccountForm() {
               onboarding, in accordance with applicable regulatory guidelines.
             </p>
           </label>
+          {error?.checkTerms?.[0] && (
+            <small className="text-red-600 text-xs">
+              {error?.checkTerms?.[0]}
+            </small>
+          )}
         </div>
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
-        <Button className="w-full sm:w-auto" onClick={handelSubmit}>
+        <Button
+          className="w-full sm:w-auto"
+          onClick={handelSubmit}
+          disabled={isPending}
+        >
           Confirm & Verify <MdOutlineArrowRight />
         </Button>
+        {state.step_4.length > 1 && (
+          <Button
+            variant={`link`}
+            className="w-full sm:w-auto"
+            disabled={isPending}
+            onClick={() => {
+              removeDepository(state.step_4.length - 1);
+              nextLocalStep();
+            }}
+          >
+            Cancel
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

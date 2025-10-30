@@ -1,10 +1,10 @@
 // next.config.ts
 import type { NextConfig } from "next";
 
-// ✅ Environment flag
+// Environment flag
 const isDev = process.env.NODE_ENV === "development";
 
-// ✅ Centralized base URLs for all environments
+// Centralized base URLs for all environments
 const BASES = {
   development: {
     API_SERVER: "http://localhost:4000/api",
@@ -18,10 +18,10 @@ const BASES = {
   },
 };
 
-// ✅ Select current environment base
+// Select current environment base
 const BASE = isDev ? BASES.development : BASES.production;
 
-// ✅ Next.js configuration
+// Next.js configuration
 const nextConfig: NextConfig = {
   trailingSlash: false,
   transpilePackages: ["@root/apiGateway", "@root/schema"],
