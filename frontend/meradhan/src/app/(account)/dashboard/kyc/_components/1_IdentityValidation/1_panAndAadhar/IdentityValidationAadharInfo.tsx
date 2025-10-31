@@ -15,7 +15,7 @@ import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 
 function IdentityValidationAadharInfo() {
   const { pushUserKycState } = useKycDataProvider();
-  const { state, setStepIndex,nextLocalStep } = useKycDataStorage();
+  const { state, nextLocalStep } = useKycDataStorage();
 
   const data = state.step_1.pan;
 

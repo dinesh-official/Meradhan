@@ -15,6 +15,7 @@ import { MdOutlineArrowRight } from "react-icons/md";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
+import { DatePicker } from "@/components/custom/DatePicker";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -51,8 +52,7 @@ function IdentityValidationForm() {
               required
               error={error?.dateOfBirth?.[0]}
             >
-              <Input
-                type="date"
+              <DatePicker
                 value={data.dateOfBirth}
                 onChange={(e) => setStep1PanData("dateOfBirth", e.target.value)}
               />
@@ -120,7 +120,7 @@ function IdentityValidationForm() {
           </label>
           <small className="text-red-600">{error?.checkTerms2?.[0]}</small>
 
-          <div className="space-y-3 text-sm" >
+          <div className="space-y-3 text-sm">
             <p>By continue:</p>
             <p>
               I hereby declare that I am a resident individual as per the

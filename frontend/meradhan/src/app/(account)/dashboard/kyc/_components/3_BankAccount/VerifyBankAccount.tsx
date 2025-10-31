@@ -7,13 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MdOutlineArrowRight } from "react-icons/md";
-import BankViewCard from "./_elements/BankViewCard";
-import { AiFillPlusSquare } from "react-icons/ai";
-import { useKycDataStorage } from "../../_store/useKycDataStorage";
-import { useKycDataProvider } from "../../_context/KycDataProvider";
-import { useKycStepStore } from "../../_store/useKycStepStore";
 import { FaPlusSquare } from "react-icons/fa";
+import { MdOutlineArrowRight } from "react-icons/md";
+import { useKycDataProvider } from "../../_context/KycDataProvider";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
+import { useKycStepStore } from "../../_store/useKycStepStore";
+import BankViewCard from "./_elements/BankViewCard";
 
 function VerifyBankAccount() {
   const {

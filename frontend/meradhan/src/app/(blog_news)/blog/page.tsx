@@ -12,7 +12,7 @@ import { fetchBlogsData } from "./_gql/blogs.gql";
 export const revalidate = 0;
 async function page() {
   const data = await fetchBlogsData();
-  const items = data?.blogPosts_connection.nodes;
+  // const items = data?.blogPosts_connection.nodes;
   return (
     <ViewPort>
       <div className="mb-[4rem] md:w-[80%] container">

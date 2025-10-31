@@ -37,8 +37,8 @@ model Bonds {
     dateOfAllotment DateTime?
     redemptionDate  DateTime?
     maturityDate    DateTime?
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
 
     sortedAt Int @default(0)
 

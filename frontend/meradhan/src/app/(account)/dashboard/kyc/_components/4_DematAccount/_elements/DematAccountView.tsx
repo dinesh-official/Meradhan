@@ -1,13 +1,11 @@
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { Checkbox } from "@/components/ui/checkbox";
-import React from "react";
-import { KycDataStorage } from "../../../_store/useKycDataStorage";
 import { IoMdTrash } from "react-icons/io";
-import { dataMatcherUtils } from "@/global/utils/matcher";
+import { KycDataStorage } from "../../../_store/useKycDataStorage";
 
 function DematAccountView({
   account,
-  name,
+  // name,
   setDefault,
   onDelete,
   myPan,
@@ -22,6 +20,7 @@ function DematAccountView({
   //   dataMatcherUtils.splitFullName(account.accountHolderName),
   //   dataMatcherUtils.splitFullName(name)
   // );
+
   return (
     <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
       <div className="gap-5 grid sm:grid-cols-2 xl:grid-cols-4">

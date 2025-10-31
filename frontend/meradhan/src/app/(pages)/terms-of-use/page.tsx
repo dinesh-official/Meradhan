@@ -3,6 +3,7 @@ import TermsOfUse from "./TermsOfUse";
 import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLAction";
 import { redirect } from "next/navigation";
 
+export const revalidate = 0;
 export async function generateMetadata() {
   return await slugBasedGQLMetaData("terms-of-use");
 }

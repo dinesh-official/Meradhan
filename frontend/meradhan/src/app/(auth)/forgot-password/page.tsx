@@ -1,10 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
 import Link from "next/link";
-import { FaUser } from "react-icons/fa";
 import ForgetPasswordForm from "./ForgetPasswordForm";
 
 function page() {

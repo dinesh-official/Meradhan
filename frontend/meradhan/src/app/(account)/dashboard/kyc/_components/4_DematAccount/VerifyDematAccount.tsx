@@ -7,14 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import React from "react";
-import { AiFillPlusSquare } from "react-icons/ai";
-import { MdOutlineArrowRight } from "react-icons/md";
-import DematAccountView from "./_elements/DematAccountView";
-import { useKycDataStorage } from "../../_store/useKycDataStorage";
-import { useKycDataProvider } from "../../_context/KycDataProvider";
-import { useKycStepStore } from "../../_store/useKycStepStore";
 import { FaPlusSquare } from "react-icons/fa";
+import { MdOutlineArrowRight } from "react-icons/md";
+import { useKycDataProvider } from "../../_context/KycDataProvider";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
+import { useKycStepStore } from "../../_store/useKycStepStore";
+import DematAccountView from "./_elements/DematAccountView";
 
 function VerifyDematAccount() {
   const {

@@ -1,5 +1,3 @@
-import React from "react";
-import PrivacyPolicyContent from "./_components/PrivacyPolicyContent";
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
 import { T_PAGE_DATA } from "@/graphql/PagesGQLAction";
 

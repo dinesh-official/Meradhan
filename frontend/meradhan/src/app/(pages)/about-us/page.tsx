@@ -6,6 +6,7 @@ import slugBasedPagesGQLData, {
 } from "@/graphql/PagesGQLAction";
 import { redirect } from "next/navigation";
 
+export const revalidate = 0;
 export async function generateMetadata() {
   return await slugBasedGQLMetaData("about-us");
 }

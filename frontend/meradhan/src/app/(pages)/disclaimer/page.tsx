@@ -3,7 +3,7 @@ import Disclaimer from "./Disclaimer";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import { redirect } from "next/navigation";
 import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLAction";
-
+export const revalidate = 0;
 export async function generateMetadata() {
   return await slugBasedGQLMetaData("disclaimer");
 }
