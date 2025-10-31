@@ -14,6 +14,7 @@ import DematAccountView from "./_elements/DematAccountView";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycStepStore } from "../../_store/useKycStepStore";
+import { FaPlusSquare } from "react-icons/fa";
 
 function VerifyDematAccount() {
   const {
@@ -45,7 +46,7 @@ function VerifyDematAccount() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Verify Demat Account</CardTitle>
+        <CardTitle className="font-normal">Verify Demat Account</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         {accounts.map((item, index) => {
@@ -107,7 +108,7 @@ function VerifyDematAccount() {
               prevLocalStep();
             }}
           >
-            <AiFillPlusSquare className="text-secondary text-xl" />
+            <FaPlusSquare className="text-secondary text-xl" />
             Add Demat Account{" "}
             <span className="text-gray-500 text-xs">(max 5 accounts)</span>
           </Button>

@@ -56,13 +56,15 @@ function AccountNavBar() {
           {/* Action Buttons */}
           <div className="right-0 bottom-0 z-40 fixed sm:relative flex justify-between sm:justify-end items-center gap-8 sm:gap-5 bg-white sm:bg-transparent shadow sm:shadow-none px-4 sm:px-0 py-2 lg:py-0 border-gray-100 sm:border-0 border-t w-full sm:w-auto">
             {/* KYC Button */}
-            <Button
-              variant="secondaryLight"
-              className="gap-3 w-24"
-              aria-label="KYC Verification"
-            >
-              <FaUser aria-hidden="true" /> KYC
-            </Button>
+            <Link href={`/dashboard/kyc`}>
+              <Button
+                variant="secondaryLight"
+                className="gap-3 w-24"
+                aria-label="KYC Verification"
+              >
+                <FaUser aria-hidden="true" /> KYC
+              </Button>
+            </Link>
 
             {/* Icon Buttons */}
             <div className="flex items-center gap-8 sm:gap-5 lg:gap-10">
@@ -86,9 +88,7 @@ function AccountNavBar() {
                 type="button"
                 className="relative hover:opacity-80 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-primary"
               >
-                <span
-                  className="-top-1.5 -right-1 absolute flex justify-center items-center bg-secondary rounded-full w-5 h-5 font-medium text-white text-xs"
-                >
+                <span className="-top-1.5 -right-1 absolute flex justify-center items-center bg-secondary rounded-full w-5 h-5 font-medium text-white text-xs">
                   5
                 </span>
                 <FaBell size={20} aria-hidden="true" />

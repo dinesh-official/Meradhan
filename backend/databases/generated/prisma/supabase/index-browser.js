@@ -130,6 +130,41 @@ exports.Prisma.CrmAuditLogsScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.BondsScalarFieldEnum = {
+  id: 'id',
+  isin: 'isin',
+  bondName: 'bondName',
+  instrumentName: 'instrumentName',
+  description: 'description',
+  issuePrice: 'issuePrice',
+  faceValue: 'faceValue',
+  couponRate: 'couponRate',
+  interestPaymentFrequency: 'interestPaymentFrequency',
+  putCallOptionDetails: 'putCallOptionDetails',
+  certificateNumbers: 'certificateNumbers',
+  totalIssueSize: 'totalIssueSize',
+  registrarDetails: 'registrarDetails',
+  physicalSecurityAddress: 'physicalSecurityAddress',
+  defaultedInRedemption: 'defaultedInRedemption',
+  debentureTrustee: 'debentureTrustee',
+  creditRatingInfo: 'creditRatingInfo',
+  remarks: 'remarks',
+  taxStatus: 'taxStatus',
+  creditRating: 'creditRating',
+  interestPaymentMode: 'interestPaymentMode',
+  isListed: 'isListed',
+  ratingAgencyName: 'ratingAgencyName',
+  ratingDate: 'ratingDate',
+  categories: 'categories',
+  sectorName: 'sectorName',
+  dateOfAllotment: 'dateOfAllotment',
+  redemptionDate: 'redemptionDate',
+  maturityDate: 'maturityDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  sortedAt: 'sortedAt'
+};
+
 exports.Prisma.CRMUserDataModelScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -479,6 +514,29 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.TAX_TYPE = exports.$Enums.TAX_TYPE = {
+  YES: 'YES',
+  NO: 'NO',
+  TAX_SAVING: 'TAX_SAVING',
+  TAX_EXEMPTION: 'TAX_EXEMPTION',
+  UNKNOWN: 'UNKNOWN'
+};
+
+exports.INTEREST_MODE = exports.$Enums.INTEREST_MODE = {
+  MONTHLY: 'MONTHLY',
+  QUARTERLY: 'QUARTERLY',
+  HALF_YEARLY: 'HALF_YEARLY',
+  YEARLY: 'YEARLY',
+  ON_MATURITY: 'ON_MATURITY',
+  UNKNOWN: 'UNKNOWN'
+};
+
+exports.IS_LISTED = exports.$Enums.IS_LISTED = {
+  YES: 'YES',
+  NO: 'NO',
+  UNKNOWN: 'UNKNOWN'
+};
+
 exports.CrmUserROLE = exports.$Enums.CrmUserROLE = {
   VIEWER: 'VIEWER',
   ADMIN: 'ADMIN',
@@ -600,6 +658,7 @@ exports.RFQStatus = exports.$Enums.RFQStatus = {
 
 exports.Prisma.ModelName = {
   CrmAuditLogs: 'CrmAuditLogs',
+  Bonds: 'Bonds',
   CRMUserDataModel: 'CRMUserDataModel',
   CustomersAuthDataModel: 'CustomersAuthDataModel',
   CustomerProfileDataModel: 'CustomerProfileDataModel',

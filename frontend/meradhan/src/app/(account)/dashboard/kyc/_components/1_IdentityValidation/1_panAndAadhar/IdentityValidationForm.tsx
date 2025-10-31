@@ -24,7 +24,7 @@ function IdentityValidationForm() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Enter PAN Details</CardTitle>
+        <CardTitle className="font-normal">Enter PAN Details</CardTitle>
       </CardHeader>
 
       <CardContent accountMode>
@@ -119,6 +119,29 @@ function IdentityValidationForm() {
             regulatory authorities from time to time.
           </label>
           <small className="text-red-600">{error?.checkTerms2?.[0]}</small>
+
+          <div className="space-y-3 text-sm" >
+            <p>By continue:</p>
+            <p>
+              I hereby declare that I am a resident individual as per the
+              applicable laws of India and not a Non-Resident Indian (NRI).
+            </p>
+            <p>
+              I hereby confirm to authorize MeraDhan to access and retrieve my
+              PAN and Aadhaar card details from DigiLocker for the purpose of
+              conducting SEBI-compliant KYC verification. I understand that this
+              information will be used solely for regulatory compliance and will
+              be securely stored in accordance with applicable laws and SEBI
+              guidelines.
+            </p>
+            <p>
+              I hereby provide my consent to MeraDhan to collect, use, store,
+              and process my personal data for Know Your Customer (KYC) purposes
+              in compliance with SEBI regulations. This includes retrieval of
+              KYC records from KYC Registration Agencies (KRAs), as may be
+              required, and share my details with KYC registration agencies.{" "}
+            </p>
+          </div>
         </div>
       </CardContent>
 

@@ -51,7 +51,7 @@ function IdentityValidationPanInfo() {
     <Card accountMode>
       {/* {JSON.stringify(data)} */}
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Confirm PAN Details</CardTitle>
+        <CardTitle className="font-normal">Confirm PAN Details</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="gap-5 grid md:grid-cols-2 lg:grid-cols-3">

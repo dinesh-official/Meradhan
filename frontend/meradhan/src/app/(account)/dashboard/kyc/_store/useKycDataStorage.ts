@@ -114,7 +114,7 @@ const initData: KycDataStorage = {
             branchName: "",
             ifscCode: "",
             accountNumber: "",
-            isDefault: false,
+            isDefault: true,
             checkTerms: false,
             isVerified: false,
             beneficiary_name: "",
@@ -128,8 +128,8 @@ const initData: KycDataStorage = {
             depositoryParticipantName: "",
             panNumber: [""],
             accountHolderName: "",
-            accountType: "SINGLE",
-            isDefault: false,
+            accountType: "SOLO",
+            isDefault: true,
             checkTerms: false,
             isVerified: false,
         },
@@ -292,7 +292,7 @@ export const useKycDataStorage = create<{
         set((prev) => ({
             state: {
                 ...prev.state,
-                step_3: [...prev.state.step_3, { ...initData.step_3[0] }],
+                step_3: [...prev.state.step_3, { ...initData.step_3[0], isDefault: false }],
             },
         }));
     },
@@ -333,7 +333,7 @@ export const useKycDataStorage = create<{
         set((prev) => ({
             state: {
                 ...prev.state,
-                step_4: [...prev.state.step_4, { ...initData.step_4[0] }],
+                step_4: [...prev.state.step_4, { ...initData.step_4[0], isDefault: false }],
             },
         }));
     },

@@ -107,7 +107,6 @@ function IdentityValidationAadharInfo() {
           disabled={!isNameMatched}
           onClick={() => {
             nextLocalStep();
-            setStepIndex(0);
             pushUserKycState();
           }}
         >

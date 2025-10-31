@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type CrmAuditLogs = $Result.DefaultSelection<Prisma.$CrmAuditLogsPayload>
 /**
+ * Model Bonds
+ * 
+ */
+export type Bonds = $Result.DefaultSelection<Prisma.$BondsPayload>
+/**
  * Model CRMUserDataModel
  * 
  */
@@ -118,7 +123,39 @@ export type NSERfqModel = $Result.DefaultSelection<Prisma.$NSERfqModelPayload>
  * Enums
  */
 export namespace $Enums {
-  export const CrmUserROLE: {
+  export const TAX_TYPE: {
+  YES: 'YES',
+  NO: 'NO',
+  TAX_SAVING: 'TAX_SAVING',
+  TAX_EXEMPTION: 'TAX_EXEMPTION',
+  UNKNOWN: 'UNKNOWN'
+};
+
+export type TAX_TYPE = (typeof TAX_TYPE)[keyof typeof TAX_TYPE]
+
+
+export const IS_LISTED: {
+  YES: 'YES',
+  NO: 'NO',
+  UNKNOWN: 'UNKNOWN'
+};
+
+export type IS_LISTED = (typeof IS_LISTED)[keyof typeof IS_LISTED]
+
+
+export const INTEREST_MODE: {
+  MONTHLY: 'MONTHLY',
+  QUARTERLY: 'QUARTERLY',
+  HALF_YEARLY: 'HALF_YEARLY',
+  YEARLY: 'YEARLY',
+  ON_MATURITY: 'ON_MATURITY',
+  UNKNOWN: 'UNKNOWN'
+};
+
+export type INTEREST_MODE = (typeof INTEREST_MODE)[keyof typeof INTEREST_MODE]
+
+
+export const CrmUserROLE: {
   VIEWER: 'VIEWER',
   ADMIN: 'ADMIN',
   SALES: 'SALES',
@@ -291,6 +328,18 @@ export const RFQStatus: {
 export type RFQStatus = (typeof RFQStatus)[keyof typeof RFQStatus]
 
 }
+
+export type TAX_TYPE = $Enums.TAX_TYPE
+
+export const TAX_TYPE: typeof $Enums.TAX_TYPE
+
+export type IS_LISTED = $Enums.IS_LISTED
+
+export const IS_LISTED: typeof $Enums.IS_LISTED
+
+export type INTEREST_MODE = $Enums.INTEREST_MODE
+
+export const INTEREST_MODE: typeof $Enums.INTEREST_MODE
 
 export type CrmUserROLE = $Enums.CrmUserROLE
 
@@ -491,6 +540,16 @@ export class PrismaClient<
     * ```
     */
   get crmAuditLogs(): Prisma.CrmAuditLogsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.bonds`: Exposes CRUD operations for the **Bonds** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Bonds
+    * const bonds = await prisma.bonds.findMany()
+    * ```
+    */
+  get bonds(): Prisma.BondsDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.cRMUserDataModel`: Exposes CRUD operations for the **CRMUserDataModel** model.
@@ -1122,6 +1181,7 @@ export namespace Prisma {
 
   export const ModelName: {
     CrmAuditLogs: 'CrmAuditLogs',
+    Bonds: 'Bonds',
     CRMUserDataModel: 'CRMUserDataModel',
     CustomersAuthDataModel: 'CustomersAuthDataModel',
     CustomerProfileDataModel: 'CustomerProfileDataModel',
@@ -1159,7 +1219,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "nSERfqModel"
+      modelProps: "crmAuditLogs" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "nSERfqModel"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1234,6 +1294,80 @@ export namespace Prisma {
           count: {
             args: Prisma.CrmAuditLogsCountArgs<ExtArgs>
             result: $Utils.Optional<CrmAuditLogsCountAggregateOutputType> | number
+          }
+        }
+      }
+      Bonds: {
+        payload: Prisma.$BondsPayload<ExtArgs>
+        fields: Prisma.BondsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BondsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BondsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>
+          }
+          findFirst: {
+            args: Prisma.BondsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BondsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>
+          }
+          findMany: {
+            args: Prisma.BondsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>[]
+          }
+          create: {
+            args: Prisma.BondsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>
+          }
+          createMany: {
+            args: Prisma.BondsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BondsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>[]
+          }
+          delete: {
+            args: Prisma.BondsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>
+          }
+          update: {
+            args: Prisma.BondsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>
+          }
+          deleteMany: {
+            args: Prisma.BondsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BondsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BondsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>[]
+          }
+          upsert: {
+            args: Prisma.BondsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BondsPayload>
+          }
+          aggregate: {
+            args: Prisma.BondsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBonds>
+          }
+          groupBy: {
+            args: Prisma.BondsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BondsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BondsCountArgs<ExtArgs>
+            result: $Utils.Optional<BondsCountAggregateOutputType> | number
           }
         }
       }
@@ -2740,6 +2874,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     crmAuditLogs?: CrmAuditLogsOmit
+    bonds?: BondsOmit
     cRMUserDataModel?: CRMUserDataModelOmit
     customersAuthDataModel?: CustomersAuthDataModelOmit
     customerProfileDataModel?: CustomerProfileDataModelOmit
@@ -4019,6 +4154,1405 @@ export namespace Prisma {
      * Omit specific fields from the CrmAuditLogs
      */
     omit?: CrmAuditLogsOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Bonds
+   */
+
+  export type AggregateBonds = {
+    _count: BondsCountAggregateOutputType | null
+    _avg: BondsAvgAggregateOutputType | null
+    _sum: BondsSumAggregateOutputType | null
+    _min: BondsMinAggregateOutputType | null
+    _max: BondsMaxAggregateOutputType | null
+  }
+
+  export type BondsAvgAggregateOutputType = {
+    id: number | null
+    issuePrice: number | null
+    faceValue: number | null
+    couponRate: number | null
+    totalIssueSize: number | null
+    sortedAt: number | null
+  }
+
+  export type BondsSumAggregateOutputType = {
+    id: number | null
+    issuePrice: number | null
+    faceValue: number | null
+    couponRate: number | null
+    totalIssueSize: number | null
+    sortedAt: number | null
+  }
+
+  export type BondsMinAggregateOutputType = {
+    id: number | null
+    isin: string | null
+    bondName: string | null
+    instrumentName: string | null
+    description: string | null
+    issuePrice: number | null
+    faceValue: number | null
+    couponRate: number | null
+    interestPaymentFrequency: string | null
+    putCallOptionDetails: string | null
+    certificateNumbers: string | null
+    totalIssueSize: number | null
+    registrarDetails: string | null
+    physicalSecurityAddress: string | null
+    defaultedInRedemption: string | null
+    debentureTrustee: string | null
+    creditRatingInfo: string | null
+    remarks: string | null
+    taxStatus: $Enums.TAX_TYPE | null
+    creditRating: string | null
+    interestPaymentMode: $Enums.INTEREST_MODE | null
+    isListed: $Enums.IS_LISTED | null
+    ratingAgencyName: string | null
+    ratingDate: Date | null
+    sectorName: string | null
+    dateOfAllotment: Date | null
+    redemptionDate: Date | null
+    maturityDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    sortedAt: number | null
+  }
+
+  export type BondsMaxAggregateOutputType = {
+    id: number | null
+    isin: string | null
+    bondName: string | null
+    instrumentName: string | null
+    description: string | null
+    issuePrice: number | null
+    faceValue: number | null
+    couponRate: number | null
+    interestPaymentFrequency: string | null
+    putCallOptionDetails: string | null
+    certificateNumbers: string | null
+    totalIssueSize: number | null
+    registrarDetails: string | null
+    physicalSecurityAddress: string | null
+    defaultedInRedemption: string | null
+    debentureTrustee: string | null
+    creditRatingInfo: string | null
+    remarks: string | null
+    taxStatus: $Enums.TAX_TYPE | null
+    creditRating: string | null
+    interestPaymentMode: $Enums.INTEREST_MODE | null
+    isListed: $Enums.IS_LISTED | null
+    ratingAgencyName: string | null
+    ratingDate: Date | null
+    sectorName: string | null
+    dateOfAllotment: Date | null
+    redemptionDate: Date | null
+    maturityDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    sortedAt: number | null
+  }
+
+  export type BondsCountAggregateOutputType = {
+    id: number
+    isin: number
+    bondName: number
+    instrumentName: number
+    description: number
+    issuePrice: number
+    faceValue: number
+    couponRate: number
+    interestPaymentFrequency: number
+    putCallOptionDetails: number
+    certificateNumbers: number
+    totalIssueSize: number
+    registrarDetails: number
+    physicalSecurityAddress: number
+    defaultedInRedemption: number
+    debentureTrustee: number
+    creditRatingInfo: number
+    remarks: number
+    taxStatus: number
+    creditRating: number
+    interestPaymentMode: number
+    isListed: number
+    ratingAgencyName: number
+    ratingDate: number
+    categories: number
+    sectorName: number
+    dateOfAllotment: number
+    redemptionDate: number
+    maturityDate: number
+    createdAt: number
+    updatedAt: number
+    sortedAt: number
+    _all: number
+  }
+
+
+  export type BondsAvgAggregateInputType = {
+    id?: true
+    issuePrice?: true
+    faceValue?: true
+    couponRate?: true
+    totalIssueSize?: true
+    sortedAt?: true
+  }
+
+  export type BondsSumAggregateInputType = {
+    id?: true
+    issuePrice?: true
+    faceValue?: true
+    couponRate?: true
+    totalIssueSize?: true
+    sortedAt?: true
+  }
+
+  export type BondsMinAggregateInputType = {
+    id?: true
+    isin?: true
+    bondName?: true
+    instrumentName?: true
+    description?: true
+    issuePrice?: true
+    faceValue?: true
+    couponRate?: true
+    interestPaymentFrequency?: true
+    putCallOptionDetails?: true
+    certificateNumbers?: true
+    totalIssueSize?: true
+    registrarDetails?: true
+    physicalSecurityAddress?: true
+    defaultedInRedemption?: true
+    debentureTrustee?: true
+    creditRatingInfo?: true
+    remarks?: true
+    taxStatus?: true
+    creditRating?: true
+    interestPaymentMode?: true
+    isListed?: true
+    ratingAgencyName?: true
+    ratingDate?: true
+    sectorName?: true
+    dateOfAllotment?: true
+    redemptionDate?: true
+    maturityDate?: true
+    createdAt?: true
+    updatedAt?: true
+    sortedAt?: true
+  }
+
+  export type BondsMaxAggregateInputType = {
+    id?: true
+    isin?: true
+    bondName?: true
+    instrumentName?: true
+    description?: true
+    issuePrice?: true
+    faceValue?: true
+    couponRate?: true
+    interestPaymentFrequency?: true
+    putCallOptionDetails?: true
+    certificateNumbers?: true
+    totalIssueSize?: true
+    registrarDetails?: true
+    physicalSecurityAddress?: true
+    defaultedInRedemption?: true
+    debentureTrustee?: true
+    creditRatingInfo?: true
+    remarks?: true
+    taxStatus?: true
+    creditRating?: true
+    interestPaymentMode?: true
+    isListed?: true
+    ratingAgencyName?: true
+    ratingDate?: true
+    sectorName?: true
+    dateOfAllotment?: true
+    redemptionDate?: true
+    maturityDate?: true
+    createdAt?: true
+    updatedAt?: true
+    sortedAt?: true
+  }
+
+  export type BondsCountAggregateInputType = {
+    id?: true
+    isin?: true
+    bondName?: true
+    instrumentName?: true
+    description?: true
+    issuePrice?: true
+    faceValue?: true
+    couponRate?: true
+    interestPaymentFrequency?: true
+    putCallOptionDetails?: true
+    certificateNumbers?: true
+    totalIssueSize?: true
+    registrarDetails?: true
+    physicalSecurityAddress?: true
+    defaultedInRedemption?: true
+    debentureTrustee?: true
+    creditRatingInfo?: true
+    remarks?: true
+    taxStatus?: true
+    creditRating?: true
+    interestPaymentMode?: true
+    isListed?: true
+    ratingAgencyName?: true
+    ratingDate?: true
+    categories?: true
+    sectorName?: true
+    dateOfAllotment?: true
+    redemptionDate?: true
+    maturityDate?: true
+    createdAt?: true
+    updatedAt?: true
+    sortedAt?: true
+    _all?: true
+  }
+
+  export type BondsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Bonds to aggregate.
+     */
+    where?: BondsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Bonds to fetch.
+     */
+    orderBy?: BondsOrderByWithRelationInput | BondsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BondsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Bonds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Bonds.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Bonds
+    **/
+    _count?: true | BondsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BondsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BondsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BondsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BondsMaxAggregateInputType
+  }
+
+  export type GetBondsAggregateType<T extends BondsAggregateArgs> = {
+        [P in keyof T & keyof AggregateBonds]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBonds[P]>
+      : GetScalarType<T[P], AggregateBonds[P]>
+  }
+
+
+
+
+  export type BondsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BondsWhereInput
+    orderBy?: BondsOrderByWithAggregationInput | BondsOrderByWithAggregationInput[]
+    by: BondsScalarFieldEnum[] | BondsScalarFieldEnum
+    having?: BondsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BondsCountAggregateInputType | true
+    _avg?: BondsAvgAggregateInputType
+    _sum?: BondsSumAggregateInputType
+    _min?: BondsMinAggregateInputType
+    _max?: BondsMaxAggregateInputType
+  }
+
+  export type BondsGroupByOutputType = {
+    id: number
+    isin: string
+    bondName: string
+    instrumentName: string
+    description: string
+    issuePrice: number
+    faceValue: number
+    couponRate: number
+    interestPaymentFrequency: string
+    putCallOptionDetails: string | null
+    certificateNumbers: string | null
+    totalIssueSize: number | null
+    registrarDetails: string | null
+    physicalSecurityAddress: string | null
+    defaultedInRedemption: string | null
+    debentureTrustee: string | null
+    creditRatingInfo: string | null
+    remarks: string | null
+    taxStatus: $Enums.TAX_TYPE
+    creditRating: string
+    interestPaymentMode: $Enums.INTEREST_MODE
+    isListed: $Enums.IS_LISTED
+    ratingAgencyName: string | null
+    ratingDate: Date | null
+    categories: string[]
+    sectorName: string | null
+    dateOfAllotment: Date | null
+    redemptionDate: Date | null
+    maturityDate: Date | null
+    createdAt: Date
+    updatedAt: Date
+    sortedAt: number
+    _count: BondsCountAggregateOutputType | null
+    _avg: BondsAvgAggregateOutputType | null
+    _sum: BondsSumAggregateOutputType | null
+    _min: BondsMinAggregateOutputType | null
+    _max: BondsMaxAggregateOutputType | null
+  }
+
+  type GetBondsGroupByPayload<T extends BondsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BondsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BondsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BondsGroupByOutputType[P]>
+            : GetScalarType<T[P], BondsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BondsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    isin?: boolean
+    bondName?: boolean
+    instrumentName?: boolean
+    description?: boolean
+    issuePrice?: boolean
+    faceValue?: boolean
+    couponRate?: boolean
+    interestPaymentFrequency?: boolean
+    putCallOptionDetails?: boolean
+    certificateNumbers?: boolean
+    totalIssueSize?: boolean
+    registrarDetails?: boolean
+    physicalSecurityAddress?: boolean
+    defaultedInRedemption?: boolean
+    debentureTrustee?: boolean
+    creditRatingInfo?: boolean
+    remarks?: boolean
+    taxStatus?: boolean
+    creditRating?: boolean
+    interestPaymentMode?: boolean
+    isListed?: boolean
+    ratingAgencyName?: boolean
+    ratingDate?: boolean
+    categories?: boolean
+    sectorName?: boolean
+    dateOfAllotment?: boolean
+    redemptionDate?: boolean
+    maturityDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sortedAt?: boolean
+  }, ExtArgs["result"]["bonds"]>
+
+  export type BondsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    isin?: boolean
+    bondName?: boolean
+    instrumentName?: boolean
+    description?: boolean
+    issuePrice?: boolean
+    faceValue?: boolean
+    couponRate?: boolean
+    interestPaymentFrequency?: boolean
+    putCallOptionDetails?: boolean
+    certificateNumbers?: boolean
+    totalIssueSize?: boolean
+    registrarDetails?: boolean
+    physicalSecurityAddress?: boolean
+    defaultedInRedemption?: boolean
+    debentureTrustee?: boolean
+    creditRatingInfo?: boolean
+    remarks?: boolean
+    taxStatus?: boolean
+    creditRating?: boolean
+    interestPaymentMode?: boolean
+    isListed?: boolean
+    ratingAgencyName?: boolean
+    ratingDate?: boolean
+    categories?: boolean
+    sectorName?: boolean
+    dateOfAllotment?: boolean
+    redemptionDate?: boolean
+    maturityDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sortedAt?: boolean
+  }, ExtArgs["result"]["bonds"]>
+
+  export type BondsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    isin?: boolean
+    bondName?: boolean
+    instrumentName?: boolean
+    description?: boolean
+    issuePrice?: boolean
+    faceValue?: boolean
+    couponRate?: boolean
+    interestPaymentFrequency?: boolean
+    putCallOptionDetails?: boolean
+    certificateNumbers?: boolean
+    totalIssueSize?: boolean
+    registrarDetails?: boolean
+    physicalSecurityAddress?: boolean
+    defaultedInRedemption?: boolean
+    debentureTrustee?: boolean
+    creditRatingInfo?: boolean
+    remarks?: boolean
+    taxStatus?: boolean
+    creditRating?: boolean
+    interestPaymentMode?: boolean
+    isListed?: boolean
+    ratingAgencyName?: boolean
+    ratingDate?: boolean
+    categories?: boolean
+    sectorName?: boolean
+    dateOfAllotment?: boolean
+    redemptionDate?: boolean
+    maturityDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sortedAt?: boolean
+  }, ExtArgs["result"]["bonds"]>
+
+  export type BondsSelectScalar = {
+    id?: boolean
+    isin?: boolean
+    bondName?: boolean
+    instrumentName?: boolean
+    description?: boolean
+    issuePrice?: boolean
+    faceValue?: boolean
+    couponRate?: boolean
+    interestPaymentFrequency?: boolean
+    putCallOptionDetails?: boolean
+    certificateNumbers?: boolean
+    totalIssueSize?: boolean
+    registrarDetails?: boolean
+    physicalSecurityAddress?: boolean
+    defaultedInRedemption?: boolean
+    debentureTrustee?: boolean
+    creditRatingInfo?: boolean
+    remarks?: boolean
+    taxStatus?: boolean
+    creditRating?: boolean
+    interestPaymentMode?: boolean
+    isListed?: boolean
+    ratingAgencyName?: boolean
+    ratingDate?: boolean
+    categories?: boolean
+    sectorName?: boolean
+    dateOfAllotment?: boolean
+    redemptionDate?: boolean
+    maturityDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sortedAt?: boolean
+  }
+
+  export type BondsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "isin" | "bondName" | "instrumentName" | "description" | "issuePrice" | "faceValue" | "couponRate" | "interestPaymentFrequency" | "putCallOptionDetails" | "certificateNumbers" | "totalIssueSize" | "registrarDetails" | "physicalSecurityAddress" | "defaultedInRedemption" | "debentureTrustee" | "creditRatingInfo" | "remarks" | "taxStatus" | "creditRating" | "interestPaymentMode" | "isListed" | "ratingAgencyName" | "ratingDate" | "categories" | "sectorName" | "dateOfAllotment" | "redemptionDate" | "maturityDate" | "createdAt" | "updatedAt" | "sortedAt", ExtArgs["result"]["bonds"]>
+
+  export type $BondsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Bonds"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      isin: string
+      bondName: string
+      instrumentName: string
+      description: string
+      issuePrice: number
+      faceValue: number
+      couponRate: number
+      interestPaymentFrequency: string
+      putCallOptionDetails: string | null
+      certificateNumbers: string | null
+      totalIssueSize: number | null
+      registrarDetails: string | null
+      physicalSecurityAddress: string | null
+      defaultedInRedemption: string | null
+      debentureTrustee: string | null
+      creditRatingInfo: string | null
+      remarks: string | null
+      taxStatus: $Enums.TAX_TYPE
+      creditRating: string
+      interestPaymentMode: $Enums.INTEREST_MODE
+      isListed: $Enums.IS_LISTED
+      ratingAgencyName: string | null
+      ratingDate: Date | null
+      categories: string[]
+      sectorName: string | null
+      /**
+       * Timestamps
+       */
+      dateOfAllotment: Date | null
+      redemptionDate: Date | null
+      maturityDate: Date | null
+      createdAt: Date
+      updatedAt: Date
+      sortedAt: number
+    }, ExtArgs["result"]["bonds"]>
+    composites: {}
+  }
+
+  type BondsGetPayload<S extends boolean | null | undefined | BondsDefaultArgs> = $Result.GetResult<Prisma.$BondsPayload, S>
+
+  type BondsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BondsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BondsCountAggregateInputType | true
+    }
+
+  export interface BondsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Bonds'], meta: { name: 'Bonds' } }
+    /**
+     * Find zero or one Bonds that matches the filter.
+     * @param {BondsFindUniqueArgs} args - Arguments to find a Bonds
+     * @example
+     * // Get one Bonds
+     * const bonds = await prisma.bonds.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BondsFindUniqueArgs>(args: SelectSubset<T, BondsFindUniqueArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Bonds that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BondsFindUniqueOrThrowArgs} args - Arguments to find a Bonds
+     * @example
+     * // Get one Bonds
+     * const bonds = await prisma.bonds.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BondsFindUniqueOrThrowArgs>(args: SelectSubset<T, BondsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Bonds that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BondsFindFirstArgs} args - Arguments to find a Bonds
+     * @example
+     * // Get one Bonds
+     * const bonds = await prisma.bonds.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BondsFindFirstArgs>(args?: SelectSubset<T, BondsFindFirstArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Bonds that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BondsFindFirstOrThrowArgs} args - Arguments to find a Bonds
+     * @example
+     * // Get one Bonds
+     * const bonds = await prisma.bonds.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BondsFindFirstOrThrowArgs>(args?: SelectSubset<T, BondsFindFirstOrThrowArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Bonds that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BondsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Bonds
+     * const bonds = await prisma.bonds.findMany()
+     * 
+     * // Get first 10 Bonds
+     * const bonds = await prisma.bonds.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const bondsWithIdOnly = await prisma.bonds.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BondsFindManyArgs>(args?: SelectSubset<T, BondsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Bonds.
+     * @param {BondsCreateArgs} args - Arguments to create a Bonds.
+     * @example
+     * // Create one Bonds
+     * const Bonds = await prisma.bonds.create({
+     *   data: {
+     *     // ... data to create a Bonds
+     *   }
+     * })
+     * 
+     */
+    create<T extends BondsCreateArgs>(args: SelectSubset<T, BondsCreateArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Bonds.
+     * @param {BondsCreateManyArgs} args - Arguments to create many Bonds.
+     * @example
+     * // Create many Bonds
+     * const bonds = await prisma.bonds.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BondsCreateManyArgs>(args?: SelectSubset<T, BondsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Bonds and returns the data saved in the database.
+     * @param {BondsCreateManyAndReturnArgs} args - Arguments to create many Bonds.
+     * @example
+     * // Create many Bonds
+     * const bonds = await prisma.bonds.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Bonds and only return the `id`
+     * const bondsWithIdOnly = await prisma.bonds.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BondsCreateManyAndReturnArgs>(args?: SelectSubset<T, BondsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Bonds.
+     * @param {BondsDeleteArgs} args - Arguments to delete one Bonds.
+     * @example
+     * // Delete one Bonds
+     * const Bonds = await prisma.bonds.delete({
+     *   where: {
+     *     // ... filter to delete one Bonds
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BondsDeleteArgs>(args: SelectSubset<T, BondsDeleteArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Bonds.
+     * @param {BondsUpdateArgs} args - Arguments to update one Bonds.
+     * @example
+     * // Update one Bonds
+     * const bonds = await prisma.bonds.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BondsUpdateArgs>(args: SelectSubset<T, BondsUpdateArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Bonds.
+     * @param {BondsDeleteManyArgs} args - Arguments to filter Bonds to delete.
+     * @example
+     * // Delete a few Bonds
+     * const { count } = await prisma.bonds.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BondsDeleteManyArgs>(args?: SelectSubset<T, BondsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Bonds.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BondsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Bonds
+     * const bonds = await prisma.bonds.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BondsUpdateManyArgs>(args: SelectSubset<T, BondsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Bonds and returns the data updated in the database.
+     * @param {BondsUpdateManyAndReturnArgs} args - Arguments to update many Bonds.
+     * @example
+     * // Update many Bonds
+     * const bonds = await prisma.bonds.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Bonds and only return the `id`
+     * const bondsWithIdOnly = await prisma.bonds.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BondsUpdateManyAndReturnArgs>(args: SelectSubset<T, BondsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Bonds.
+     * @param {BondsUpsertArgs} args - Arguments to update or create a Bonds.
+     * @example
+     * // Update or create a Bonds
+     * const bonds = await prisma.bonds.upsert({
+     *   create: {
+     *     // ... data to create a Bonds
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Bonds we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BondsUpsertArgs>(args: SelectSubset<T, BondsUpsertArgs<ExtArgs>>): Prisma__BondsClient<$Result.GetResult<Prisma.$BondsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Bonds.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BondsCountArgs} args - Arguments to filter Bonds to count.
+     * @example
+     * // Count the number of Bonds
+     * const count = await prisma.bonds.count({
+     *   where: {
+     *     // ... the filter for the Bonds we want to count
+     *   }
+     * })
+    **/
+    count<T extends BondsCountArgs>(
+      args?: Subset<T, BondsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BondsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Bonds.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BondsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BondsAggregateArgs>(args: Subset<T, BondsAggregateArgs>): Prisma.PrismaPromise<GetBondsAggregateType<T>>
+
+    /**
+     * Group by Bonds.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BondsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BondsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BondsGroupByArgs['orderBy'] }
+        : { orderBy?: BondsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BondsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBondsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Bonds model
+   */
+  readonly fields: BondsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Bonds.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BondsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Bonds model
+   */
+  interface BondsFieldRefs {
+    readonly id: FieldRef<"Bonds", 'Int'>
+    readonly isin: FieldRef<"Bonds", 'String'>
+    readonly bondName: FieldRef<"Bonds", 'String'>
+    readonly instrumentName: FieldRef<"Bonds", 'String'>
+    readonly description: FieldRef<"Bonds", 'String'>
+    readonly issuePrice: FieldRef<"Bonds", 'Float'>
+    readonly faceValue: FieldRef<"Bonds", 'Float'>
+    readonly couponRate: FieldRef<"Bonds", 'Float'>
+    readonly interestPaymentFrequency: FieldRef<"Bonds", 'String'>
+    readonly putCallOptionDetails: FieldRef<"Bonds", 'String'>
+    readonly certificateNumbers: FieldRef<"Bonds", 'String'>
+    readonly totalIssueSize: FieldRef<"Bonds", 'Float'>
+    readonly registrarDetails: FieldRef<"Bonds", 'String'>
+    readonly physicalSecurityAddress: FieldRef<"Bonds", 'String'>
+    readonly defaultedInRedemption: FieldRef<"Bonds", 'String'>
+    readonly debentureTrustee: FieldRef<"Bonds", 'String'>
+    readonly creditRatingInfo: FieldRef<"Bonds", 'String'>
+    readonly remarks: FieldRef<"Bonds", 'String'>
+    readonly taxStatus: FieldRef<"Bonds", 'TAX_TYPE'>
+    readonly creditRating: FieldRef<"Bonds", 'String'>
+    readonly interestPaymentMode: FieldRef<"Bonds", 'INTEREST_MODE'>
+    readonly isListed: FieldRef<"Bonds", 'IS_LISTED'>
+    readonly ratingAgencyName: FieldRef<"Bonds", 'String'>
+    readonly ratingDate: FieldRef<"Bonds", 'DateTime'>
+    readonly categories: FieldRef<"Bonds", 'String[]'>
+    readonly sectorName: FieldRef<"Bonds", 'String'>
+    readonly dateOfAllotment: FieldRef<"Bonds", 'DateTime'>
+    readonly redemptionDate: FieldRef<"Bonds", 'DateTime'>
+    readonly maturityDate: FieldRef<"Bonds", 'DateTime'>
+    readonly createdAt: FieldRef<"Bonds", 'DateTime'>
+    readonly updatedAt: FieldRef<"Bonds", 'DateTime'>
+    readonly sortedAt: FieldRef<"Bonds", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Bonds findUnique
+   */
+  export type BondsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * Filter, which Bonds to fetch.
+     */
+    where: BondsWhereUniqueInput
+  }
+
+  /**
+   * Bonds findUniqueOrThrow
+   */
+  export type BondsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * Filter, which Bonds to fetch.
+     */
+    where: BondsWhereUniqueInput
+  }
+
+  /**
+   * Bonds findFirst
+   */
+  export type BondsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * Filter, which Bonds to fetch.
+     */
+    where?: BondsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Bonds to fetch.
+     */
+    orderBy?: BondsOrderByWithRelationInput | BondsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Bonds.
+     */
+    cursor?: BondsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Bonds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Bonds.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Bonds.
+     */
+    distinct?: BondsScalarFieldEnum | BondsScalarFieldEnum[]
+  }
+
+  /**
+   * Bonds findFirstOrThrow
+   */
+  export type BondsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * Filter, which Bonds to fetch.
+     */
+    where?: BondsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Bonds to fetch.
+     */
+    orderBy?: BondsOrderByWithRelationInput | BondsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Bonds.
+     */
+    cursor?: BondsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Bonds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Bonds.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Bonds.
+     */
+    distinct?: BondsScalarFieldEnum | BondsScalarFieldEnum[]
+  }
+
+  /**
+   * Bonds findMany
+   */
+  export type BondsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * Filter, which Bonds to fetch.
+     */
+    where?: BondsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Bonds to fetch.
+     */
+    orderBy?: BondsOrderByWithRelationInput | BondsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Bonds.
+     */
+    cursor?: BondsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Bonds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Bonds.
+     */
+    skip?: number
+    distinct?: BondsScalarFieldEnum | BondsScalarFieldEnum[]
+  }
+
+  /**
+   * Bonds create
+   */
+  export type BondsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Bonds.
+     */
+    data: XOR<BondsCreateInput, BondsUncheckedCreateInput>
+  }
+
+  /**
+   * Bonds createMany
+   */
+  export type BondsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Bonds.
+     */
+    data: BondsCreateManyInput | BondsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Bonds createManyAndReturn
+   */
+  export type BondsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * The data used to create many Bonds.
+     */
+    data: BondsCreateManyInput | BondsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Bonds update
+   */
+  export type BondsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Bonds.
+     */
+    data: XOR<BondsUpdateInput, BondsUncheckedUpdateInput>
+    /**
+     * Choose, which Bonds to update.
+     */
+    where: BondsWhereUniqueInput
+  }
+
+  /**
+   * Bonds updateMany
+   */
+  export type BondsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Bonds.
+     */
+    data: XOR<BondsUpdateManyMutationInput, BondsUncheckedUpdateManyInput>
+    /**
+     * Filter which Bonds to update
+     */
+    where?: BondsWhereInput
+    /**
+     * Limit how many Bonds to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Bonds updateManyAndReturn
+   */
+  export type BondsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * The data used to update Bonds.
+     */
+    data: XOR<BondsUpdateManyMutationInput, BondsUncheckedUpdateManyInput>
+    /**
+     * Filter which Bonds to update
+     */
+    where?: BondsWhereInput
+    /**
+     * Limit how many Bonds to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Bonds upsert
+   */
+  export type BondsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Bonds to update in case it exists.
+     */
+    where: BondsWhereUniqueInput
+    /**
+     * In case the Bonds found by the `where` argument doesn't exist, create a new Bonds with this data.
+     */
+    create: XOR<BondsCreateInput, BondsUncheckedCreateInput>
+    /**
+     * In case the Bonds was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BondsUpdateInput, BondsUncheckedUpdateInput>
+  }
+
+  /**
+   * Bonds delete
+   */
+  export type BondsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
+    /**
+     * Filter which Bonds to delete.
+     */
+    where: BondsWhereUniqueInput
+  }
+
+  /**
+   * Bonds deleteMany
+   */
+  export type BondsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Bonds to delete
+     */
+    where?: BondsWhereInput
+    /**
+     * Limit how many Bonds to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Bonds without action
+   */
+  export type BondsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Bonds
+     */
+    select?: BondsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Bonds
+     */
+    omit?: BondsOmit<ExtArgs> | null
   }
 
 
@@ -27477,6 +29011,44 @@ export namespace Prisma {
   export type CrmAuditLogsScalarFieldEnum = (typeof CrmAuditLogsScalarFieldEnum)[keyof typeof CrmAuditLogsScalarFieldEnum]
 
 
+  export const BondsScalarFieldEnum: {
+    id: 'id',
+    isin: 'isin',
+    bondName: 'bondName',
+    instrumentName: 'instrumentName',
+    description: 'description',
+    issuePrice: 'issuePrice',
+    faceValue: 'faceValue',
+    couponRate: 'couponRate',
+    interestPaymentFrequency: 'interestPaymentFrequency',
+    putCallOptionDetails: 'putCallOptionDetails',
+    certificateNumbers: 'certificateNumbers',
+    totalIssueSize: 'totalIssueSize',
+    registrarDetails: 'registrarDetails',
+    physicalSecurityAddress: 'physicalSecurityAddress',
+    defaultedInRedemption: 'defaultedInRedemption',
+    debentureTrustee: 'debentureTrustee',
+    creditRatingInfo: 'creditRatingInfo',
+    remarks: 'remarks',
+    taxStatus: 'taxStatus',
+    creditRating: 'creditRating',
+    interestPaymentMode: 'interestPaymentMode',
+    isListed: 'isListed',
+    ratingAgencyName: 'ratingAgencyName',
+    ratingDate: 'ratingDate',
+    categories: 'categories',
+    sectorName: 'sectorName',
+    dateOfAllotment: 'dateOfAllotment',
+    redemptionDate: 'redemptionDate',
+    maturityDate: 'maturityDate',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    sortedAt: 'sortedAt'
+  };
+
+  export type BondsScalarFieldEnum = (typeof BondsScalarFieldEnum)[keyof typeof BondsScalarFieldEnum]
+
+
   export const CRMUserDataModelScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -27964,6 +29536,62 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TAX_TYPE'
+   */
+  export type EnumTAX_TYPEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TAX_TYPE'>
+    
+
+
+  /**
+   * Reference to a field of type 'TAX_TYPE[]'
+   */
+  export type ListEnumTAX_TYPEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TAX_TYPE[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'INTEREST_MODE'
+   */
+  export type EnumINTEREST_MODEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'INTEREST_MODE'>
+    
+
+
+  /**
+   * Reference to a field of type 'INTEREST_MODE[]'
+   */
+  export type ListEnumINTEREST_MODEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'INTEREST_MODE[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'IS_LISTED'
+   */
+  export type EnumIS_LISTEDFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IS_LISTED'>
+    
+
+
+  /**
+   * Reference to a field of type 'IS_LISTED[]'
+   */
+  export type ListEnumIS_LISTEDFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IS_LISTED[]'>
+    
+
+
+  /**
    * Reference to a field of type 'CrmUserROLE'
    */
   export type EnumCrmUserROLEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CrmUserROLE'>
@@ -28139,20 +29767,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
    * Reference to a field of type 'DealType'
    */
   export type EnumDealTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DealType'>
@@ -28301,6 +29915,195 @@ export namespace Prisma {
     url?: StringNullableWithAggregatesFilter<"CrmAuditLogs"> | string | null
     data?: JsonWithAggregatesFilter<"CrmAuditLogs">
     createdAt?: DateTimeWithAggregatesFilter<"CrmAuditLogs"> | Date | string
+  }
+
+  export type BondsWhereInput = {
+    AND?: BondsWhereInput | BondsWhereInput[]
+    OR?: BondsWhereInput[]
+    NOT?: BondsWhereInput | BondsWhereInput[]
+    id?: IntFilter<"Bonds"> | number
+    isin?: StringFilter<"Bonds"> | string
+    bondName?: StringFilter<"Bonds"> | string
+    instrumentName?: StringFilter<"Bonds"> | string
+    description?: StringFilter<"Bonds"> | string
+    issuePrice?: FloatFilter<"Bonds"> | number
+    faceValue?: FloatFilter<"Bonds"> | number
+    couponRate?: FloatFilter<"Bonds"> | number
+    interestPaymentFrequency?: StringFilter<"Bonds"> | string
+    putCallOptionDetails?: StringNullableFilter<"Bonds"> | string | null
+    certificateNumbers?: StringNullableFilter<"Bonds"> | string | null
+    totalIssueSize?: FloatNullableFilter<"Bonds"> | number | null
+    registrarDetails?: StringNullableFilter<"Bonds"> | string | null
+    physicalSecurityAddress?: StringNullableFilter<"Bonds"> | string | null
+    defaultedInRedemption?: StringNullableFilter<"Bonds"> | string | null
+    debentureTrustee?: StringNullableFilter<"Bonds"> | string | null
+    creditRatingInfo?: StringNullableFilter<"Bonds"> | string | null
+    remarks?: StringNullableFilter<"Bonds"> | string | null
+    taxStatus?: EnumTAX_TYPEFilter<"Bonds"> | $Enums.TAX_TYPE
+    creditRating?: StringFilter<"Bonds"> | string
+    interestPaymentMode?: EnumINTEREST_MODEFilter<"Bonds"> | $Enums.INTEREST_MODE
+    isListed?: EnumIS_LISTEDFilter<"Bonds"> | $Enums.IS_LISTED
+    ratingAgencyName?: StringNullableFilter<"Bonds"> | string | null
+    ratingDate?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    categories?: StringNullableListFilter<"Bonds">
+    sectorName?: StringNullableFilter<"Bonds"> | string | null
+    dateOfAllotment?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    redemptionDate?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    maturityDate?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    createdAt?: DateTimeFilter<"Bonds"> | Date | string
+    updatedAt?: DateTimeFilter<"Bonds"> | Date | string
+    sortedAt?: IntFilter<"Bonds"> | number
+  }
+
+  export type BondsOrderByWithRelationInput = {
+    id?: SortOrder
+    isin?: SortOrder
+    bondName?: SortOrder
+    instrumentName?: SortOrder
+    description?: SortOrder
+    issuePrice?: SortOrder
+    faceValue?: SortOrder
+    couponRate?: SortOrder
+    interestPaymentFrequency?: SortOrder
+    putCallOptionDetails?: SortOrderInput | SortOrder
+    certificateNumbers?: SortOrderInput | SortOrder
+    totalIssueSize?: SortOrderInput | SortOrder
+    registrarDetails?: SortOrderInput | SortOrder
+    physicalSecurityAddress?: SortOrderInput | SortOrder
+    defaultedInRedemption?: SortOrderInput | SortOrder
+    debentureTrustee?: SortOrderInput | SortOrder
+    creditRatingInfo?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    taxStatus?: SortOrder
+    creditRating?: SortOrder
+    interestPaymentMode?: SortOrder
+    isListed?: SortOrder
+    ratingAgencyName?: SortOrderInput | SortOrder
+    ratingDate?: SortOrderInput | SortOrder
+    categories?: SortOrder
+    sectorName?: SortOrderInput | SortOrder
+    dateOfAllotment?: SortOrderInput | SortOrder
+    redemptionDate?: SortOrderInput | SortOrder
+    maturityDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sortedAt?: SortOrder
+  }
+
+  export type BondsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    isin?: string
+    AND?: BondsWhereInput | BondsWhereInput[]
+    OR?: BondsWhereInput[]
+    NOT?: BondsWhereInput | BondsWhereInput[]
+    bondName?: StringFilter<"Bonds"> | string
+    instrumentName?: StringFilter<"Bonds"> | string
+    description?: StringFilter<"Bonds"> | string
+    issuePrice?: FloatFilter<"Bonds"> | number
+    faceValue?: FloatFilter<"Bonds"> | number
+    couponRate?: FloatFilter<"Bonds"> | number
+    interestPaymentFrequency?: StringFilter<"Bonds"> | string
+    putCallOptionDetails?: StringNullableFilter<"Bonds"> | string | null
+    certificateNumbers?: StringNullableFilter<"Bonds"> | string | null
+    totalIssueSize?: FloatNullableFilter<"Bonds"> | number | null
+    registrarDetails?: StringNullableFilter<"Bonds"> | string | null
+    physicalSecurityAddress?: StringNullableFilter<"Bonds"> | string | null
+    defaultedInRedemption?: StringNullableFilter<"Bonds"> | string | null
+    debentureTrustee?: StringNullableFilter<"Bonds"> | string | null
+    creditRatingInfo?: StringNullableFilter<"Bonds"> | string | null
+    remarks?: StringNullableFilter<"Bonds"> | string | null
+    taxStatus?: EnumTAX_TYPEFilter<"Bonds"> | $Enums.TAX_TYPE
+    creditRating?: StringFilter<"Bonds"> | string
+    interestPaymentMode?: EnumINTEREST_MODEFilter<"Bonds"> | $Enums.INTEREST_MODE
+    isListed?: EnumIS_LISTEDFilter<"Bonds"> | $Enums.IS_LISTED
+    ratingAgencyName?: StringNullableFilter<"Bonds"> | string | null
+    ratingDate?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    categories?: StringNullableListFilter<"Bonds">
+    sectorName?: StringNullableFilter<"Bonds"> | string | null
+    dateOfAllotment?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    redemptionDate?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    maturityDate?: DateTimeNullableFilter<"Bonds"> | Date | string | null
+    createdAt?: DateTimeFilter<"Bonds"> | Date | string
+    updatedAt?: DateTimeFilter<"Bonds"> | Date | string
+    sortedAt?: IntFilter<"Bonds"> | number
+  }, "id" | "isin">
+
+  export type BondsOrderByWithAggregationInput = {
+    id?: SortOrder
+    isin?: SortOrder
+    bondName?: SortOrder
+    instrumentName?: SortOrder
+    description?: SortOrder
+    issuePrice?: SortOrder
+    faceValue?: SortOrder
+    couponRate?: SortOrder
+    interestPaymentFrequency?: SortOrder
+    putCallOptionDetails?: SortOrderInput | SortOrder
+    certificateNumbers?: SortOrderInput | SortOrder
+    totalIssueSize?: SortOrderInput | SortOrder
+    registrarDetails?: SortOrderInput | SortOrder
+    physicalSecurityAddress?: SortOrderInput | SortOrder
+    defaultedInRedemption?: SortOrderInput | SortOrder
+    debentureTrustee?: SortOrderInput | SortOrder
+    creditRatingInfo?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    taxStatus?: SortOrder
+    creditRating?: SortOrder
+    interestPaymentMode?: SortOrder
+    isListed?: SortOrder
+    ratingAgencyName?: SortOrderInput | SortOrder
+    ratingDate?: SortOrderInput | SortOrder
+    categories?: SortOrder
+    sectorName?: SortOrderInput | SortOrder
+    dateOfAllotment?: SortOrderInput | SortOrder
+    redemptionDate?: SortOrderInput | SortOrder
+    maturityDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sortedAt?: SortOrder
+    _count?: BondsCountOrderByAggregateInput
+    _avg?: BondsAvgOrderByAggregateInput
+    _max?: BondsMaxOrderByAggregateInput
+    _min?: BondsMinOrderByAggregateInput
+    _sum?: BondsSumOrderByAggregateInput
+  }
+
+  export type BondsScalarWhereWithAggregatesInput = {
+    AND?: BondsScalarWhereWithAggregatesInput | BondsScalarWhereWithAggregatesInput[]
+    OR?: BondsScalarWhereWithAggregatesInput[]
+    NOT?: BondsScalarWhereWithAggregatesInput | BondsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Bonds"> | number
+    isin?: StringWithAggregatesFilter<"Bonds"> | string
+    bondName?: StringWithAggregatesFilter<"Bonds"> | string
+    instrumentName?: StringWithAggregatesFilter<"Bonds"> | string
+    description?: StringWithAggregatesFilter<"Bonds"> | string
+    issuePrice?: FloatWithAggregatesFilter<"Bonds"> | number
+    faceValue?: FloatWithAggregatesFilter<"Bonds"> | number
+    couponRate?: FloatWithAggregatesFilter<"Bonds"> | number
+    interestPaymentFrequency?: StringWithAggregatesFilter<"Bonds"> | string
+    putCallOptionDetails?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    certificateNumbers?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    totalIssueSize?: FloatNullableWithAggregatesFilter<"Bonds"> | number | null
+    registrarDetails?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    physicalSecurityAddress?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    defaultedInRedemption?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    debentureTrustee?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    creditRatingInfo?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    remarks?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    taxStatus?: EnumTAX_TYPEWithAggregatesFilter<"Bonds"> | $Enums.TAX_TYPE
+    creditRating?: StringWithAggregatesFilter<"Bonds"> | string
+    interestPaymentMode?: EnumINTEREST_MODEWithAggregatesFilter<"Bonds"> | $Enums.INTEREST_MODE
+    isListed?: EnumIS_LISTEDWithAggregatesFilter<"Bonds"> | $Enums.IS_LISTED
+    ratingAgencyName?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    ratingDate?: DateTimeNullableWithAggregatesFilter<"Bonds"> | Date | string | null
+    categories?: StringNullableListFilter<"Bonds">
+    sectorName?: StringNullableWithAggregatesFilter<"Bonds"> | string | null
+    dateOfAllotment?: DateTimeNullableWithAggregatesFilter<"Bonds"> | Date | string | null
+    redemptionDate?: DateTimeNullableWithAggregatesFilter<"Bonds"> | Date | string | null
+    maturityDate?: DateTimeNullableWithAggregatesFilter<"Bonds"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Bonds"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Bonds"> | Date | string
+    sortedAt?: IntWithAggregatesFilter<"Bonds"> | number
   }
 
   export type CRMUserDataModelWhereInput = {
@@ -30324,6 +32127,248 @@ export namespace Prisma {
     url?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BondsCreateInput = {
+    isin: string
+    bondName: string
+    instrumentName: string
+    description: string
+    issuePrice: number
+    faceValue: number
+    couponRate: number
+    interestPaymentFrequency: string
+    putCallOptionDetails?: string | null
+    certificateNumbers?: string | null
+    totalIssueSize?: number | null
+    registrarDetails?: string | null
+    physicalSecurityAddress?: string | null
+    defaultedInRedemption?: string | null
+    debentureTrustee?: string | null
+    creditRatingInfo?: string | null
+    remarks?: string | null
+    taxStatus: $Enums.TAX_TYPE
+    creditRating?: string
+    interestPaymentMode?: $Enums.INTEREST_MODE
+    isListed?: $Enums.IS_LISTED
+    ratingAgencyName?: string | null
+    ratingDate?: Date | string | null
+    categories?: BondsCreatecategoriesInput | string[]
+    sectorName?: string | null
+    dateOfAllotment?: Date | string | null
+    redemptionDate?: Date | string | null
+    maturityDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sortedAt?: number
+  }
+
+  export type BondsUncheckedCreateInput = {
+    id?: number
+    isin: string
+    bondName: string
+    instrumentName: string
+    description: string
+    issuePrice: number
+    faceValue: number
+    couponRate: number
+    interestPaymentFrequency: string
+    putCallOptionDetails?: string | null
+    certificateNumbers?: string | null
+    totalIssueSize?: number | null
+    registrarDetails?: string | null
+    physicalSecurityAddress?: string | null
+    defaultedInRedemption?: string | null
+    debentureTrustee?: string | null
+    creditRatingInfo?: string | null
+    remarks?: string | null
+    taxStatus: $Enums.TAX_TYPE
+    creditRating?: string
+    interestPaymentMode?: $Enums.INTEREST_MODE
+    isListed?: $Enums.IS_LISTED
+    ratingAgencyName?: string | null
+    ratingDate?: Date | string | null
+    categories?: BondsCreatecategoriesInput | string[]
+    sectorName?: string | null
+    dateOfAllotment?: Date | string | null
+    redemptionDate?: Date | string | null
+    maturityDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sortedAt?: number
+  }
+
+  export type BondsUpdateInput = {
+    isin?: StringFieldUpdateOperationsInput | string
+    bondName?: StringFieldUpdateOperationsInput | string
+    instrumentName?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    issuePrice?: FloatFieldUpdateOperationsInput | number
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    interestPaymentFrequency?: StringFieldUpdateOperationsInput | string
+    putCallOptionDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    certificateNumbers?: NullableStringFieldUpdateOperationsInput | string | null
+    totalIssueSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    registrarDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    physicalSecurityAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultedInRedemption?: NullableStringFieldUpdateOperationsInput | string | null
+    debentureTrustee?: NullableStringFieldUpdateOperationsInput | string | null
+    creditRatingInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    taxStatus?: EnumTAX_TYPEFieldUpdateOperationsInput | $Enums.TAX_TYPE
+    creditRating?: StringFieldUpdateOperationsInput | string
+    interestPaymentMode?: EnumINTEREST_MODEFieldUpdateOperationsInput | $Enums.INTEREST_MODE
+    isListed?: EnumIS_LISTEDFieldUpdateOperationsInput | $Enums.IS_LISTED
+    ratingAgencyName?: NullableStringFieldUpdateOperationsInput | string | null
+    ratingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    categories?: BondsUpdatecategoriesInput | string[]
+    sectorName?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfAllotment?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redemptionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maturityDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sortedAt?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type BondsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    isin?: StringFieldUpdateOperationsInput | string
+    bondName?: StringFieldUpdateOperationsInput | string
+    instrumentName?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    issuePrice?: FloatFieldUpdateOperationsInput | number
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    interestPaymentFrequency?: StringFieldUpdateOperationsInput | string
+    putCallOptionDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    certificateNumbers?: NullableStringFieldUpdateOperationsInput | string | null
+    totalIssueSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    registrarDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    physicalSecurityAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultedInRedemption?: NullableStringFieldUpdateOperationsInput | string | null
+    debentureTrustee?: NullableStringFieldUpdateOperationsInput | string | null
+    creditRatingInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    taxStatus?: EnumTAX_TYPEFieldUpdateOperationsInput | $Enums.TAX_TYPE
+    creditRating?: StringFieldUpdateOperationsInput | string
+    interestPaymentMode?: EnumINTEREST_MODEFieldUpdateOperationsInput | $Enums.INTEREST_MODE
+    isListed?: EnumIS_LISTEDFieldUpdateOperationsInput | $Enums.IS_LISTED
+    ratingAgencyName?: NullableStringFieldUpdateOperationsInput | string | null
+    ratingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    categories?: BondsUpdatecategoriesInput | string[]
+    sectorName?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfAllotment?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redemptionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maturityDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sortedAt?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type BondsCreateManyInput = {
+    id?: number
+    isin: string
+    bondName: string
+    instrumentName: string
+    description: string
+    issuePrice: number
+    faceValue: number
+    couponRate: number
+    interestPaymentFrequency: string
+    putCallOptionDetails?: string | null
+    certificateNumbers?: string | null
+    totalIssueSize?: number | null
+    registrarDetails?: string | null
+    physicalSecurityAddress?: string | null
+    defaultedInRedemption?: string | null
+    debentureTrustee?: string | null
+    creditRatingInfo?: string | null
+    remarks?: string | null
+    taxStatus: $Enums.TAX_TYPE
+    creditRating?: string
+    interestPaymentMode?: $Enums.INTEREST_MODE
+    isListed?: $Enums.IS_LISTED
+    ratingAgencyName?: string | null
+    ratingDate?: Date | string | null
+    categories?: BondsCreatecategoriesInput | string[]
+    sectorName?: string | null
+    dateOfAllotment?: Date | string | null
+    redemptionDate?: Date | string | null
+    maturityDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sortedAt?: number
+  }
+
+  export type BondsUpdateManyMutationInput = {
+    isin?: StringFieldUpdateOperationsInput | string
+    bondName?: StringFieldUpdateOperationsInput | string
+    instrumentName?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    issuePrice?: FloatFieldUpdateOperationsInput | number
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    interestPaymentFrequency?: StringFieldUpdateOperationsInput | string
+    putCallOptionDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    certificateNumbers?: NullableStringFieldUpdateOperationsInput | string | null
+    totalIssueSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    registrarDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    physicalSecurityAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultedInRedemption?: NullableStringFieldUpdateOperationsInput | string | null
+    debentureTrustee?: NullableStringFieldUpdateOperationsInput | string | null
+    creditRatingInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    taxStatus?: EnumTAX_TYPEFieldUpdateOperationsInput | $Enums.TAX_TYPE
+    creditRating?: StringFieldUpdateOperationsInput | string
+    interestPaymentMode?: EnumINTEREST_MODEFieldUpdateOperationsInput | $Enums.INTEREST_MODE
+    isListed?: EnumIS_LISTEDFieldUpdateOperationsInput | $Enums.IS_LISTED
+    ratingAgencyName?: NullableStringFieldUpdateOperationsInput | string | null
+    ratingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    categories?: BondsUpdatecategoriesInput | string[]
+    sectorName?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfAllotment?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redemptionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maturityDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sortedAt?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type BondsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    isin?: StringFieldUpdateOperationsInput | string
+    bondName?: StringFieldUpdateOperationsInput | string
+    instrumentName?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    issuePrice?: FloatFieldUpdateOperationsInput | number
+    faceValue?: FloatFieldUpdateOperationsInput | number
+    couponRate?: FloatFieldUpdateOperationsInput | number
+    interestPaymentFrequency?: StringFieldUpdateOperationsInput | string
+    putCallOptionDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    certificateNumbers?: NullableStringFieldUpdateOperationsInput | string | null
+    totalIssueSize?: NullableFloatFieldUpdateOperationsInput | number | null
+    registrarDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    physicalSecurityAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    defaultedInRedemption?: NullableStringFieldUpdateOperationsInput | string | null
+    debentureTrustee?: NullableStringFieldUpdateOperationsInput | string | null
+    creditRatingInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    taxStatus?: EnumTAX_TYPEFieldUpdateOperationsInput | $Enums.TAX_TYPE
+    creditRating?: StringFieldUpdateOperationsInput | string
+    interestPaymentMode?: EnumINTEREST_MODEFieldUpdateOperationsInput | $Enums.INTEREST_MODE
+    isListed?: EnumIS_LISTEDFieldUpdateOperationsInput | $Enums.IS_LISTED
+    ratingAgencyName?: NullableStringFieldUpdateOperationsInput | string | null
+    ratingDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    categories?: BondsUpdatecategoriesInput | string[]
+    sectorName?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfAllotment?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    redemptionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maturityDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sortedAt?: IntFieldUpdateOperationsInput | number
   }
 
   export type CRMUserDataModelCreateInput = {
@@ -32792,6 +34837,49 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type EnumTAX_TYPEFilter<$PrismaModel = never> = {
+    equals?: $Enums.TAX_TYPE | EnumTAX_TYPEFieldRefInput<$PrismaModel>
+    in?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    not?: NestedEnumTAX_TYPEFilter<$PrismaModel> | $Enums.TAX_TYPE
+  }
+
+  export type EnumINTEREST_MODEFilter<$PrismaModel = never> = {
+    equals?: $Enums.INTEREST_MODE | EnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    in?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    not?: NestedEnumINTEREST_MODEFilter<$PrismaModel> | $Enums.INTEREST_MODE
+  }
+
+  export type EnumIS_LISTEDFilter<$PrismaModel = never> = {
+    equals?: $Enums.IS_LISTED | EnumIS_LISTEDFieldRefInput<$PrismaModel>
+    in?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    notIn?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    not?: NestedEnumIS_LISTEDFilter<$PrismaModel> | $Enums.IS_LISTED
+  }
+
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -32801,6 +34889,211 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type BondsCountOrderByAggregateInput = {
+    id?: SortOrder
+    isin?: SortOrder
+    bondName?: SortOrder
+    instrumentName?: SortOrder
+    description?: SortOrder
+    issuePrice?: SortOrder
+    faceValue?: SortOrder
+    couponRate?: SortOrder
+    interestPaymentFrequency?: SortOrder
+    putCallOptionDetails?: SortOrder
+    certificateNumbers?: SortOrder
+    totalIssueSize?: SortOrder
+    registrarDetails?: SortOrder
+    physicalSecurityAddress?: SortOrder
+    defaultedInRedemption?: SortOrder
+    debentureTrustee?: SortOrder
+    creditRatingInfo?: SortOrder
+    remarks?: SortOrder
+    taxStatus?: SortOrder
+    creditRating?: SortOrder
+    interestPaymentMode?: SortOrder
+    isListed?: SortOrder
+    ratingAgencyName?: SortOrder
+    ratingDate?: SortOrder
+    categories?: SortOrder
+    sectorName?: SortOrder
+    dateOfAllotment?: SortOrder
+    redemptionDate?: SortOrder
+    maturityDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sortedAt?: SortOrder
+  }
+
+  export type BondsAvgOrderByAggregateInput = {
+    id?: SortOrder
+    issuePrice?: SortOrder
+    faceValue?: SortOrder
+    couponRate?: SortOrder
+    totalIssueSize?: SortOrder
+    sortedAt?: SortOrder
+  }
+
+  export type BondsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    isin?: SortOrder
+    bondName?: SortOrder
+    instrumentName?: SortOrder
+    description?: SortOrder
+    issuePrice?: SortOrder
+    faceValue?: SortOrder
+    couponRate?: SortOrder
+    interestPaymentFrequency?: SortOrder
+    putCallOptionDetails?: SortOrder
+    certificateNumbers?: SortOrder
+    totalIssueSize?: SortOrder
+    registrarDetails?: SortOrder
+    physicalSecurityAddress?: SortOrder
+    defaultedInRedemption?: SortOrder
+    debentureTrustee?: SortOrder
+    creditRatingInfo?: SortOrder
+    remarks?: SortOrder
+    taxStatus?: SortOrder
+    creditRating?: SortOrder
+    interestPaymentMode?: SortOrder
+    isListed?: SortOrder
+    ratingAgencyName?: SortOrder
+    ratingDate?: SortOrder
+    sectorName?: SortOrder
+    dateOfAllotment?: SortOrder
+    redemptionDate?: SortOrder
+    maturityDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sortedAt?: SortOrder
+  }
+
+  export type BondsMinOrderByAggregateInput = {
+    id?: SortOrder
+    isin?: SortOrder
+    bondName?: SortOrder
+    instrumentName?: SortOrder
+    description?: SortOrder
+    issuePrice?: SortOrder
+    faceValue?: SortOrder
+    couponRate?: SortOrder
+    interestPaymentFrequency?: SortOrder
+    putCallOptionDetails?: SortOrder
+    certificateNumbers?: SortOrder
+    totalIssueSize?: SortOrder
+    registrarDetails?: SortOrder
+    physicalSecurityAddress?: SortOrder
+    defaultedInRedemption?: SortOrder
+    debentureTrustee?: SortOrder
+    creditRatingInfo?: SortOrder
+    remarks?: SortOrder
+    taxStatus?: SortOrder
+    creditRating?: SortOrder
+    interestPaymentMode?: SortOrder
+    isListed?: SortOrder
+    ratingAgencyName?: SortOrder
+    ratingDate?: SortOrder
+    sectorName?: SortOrder
+    dateOfAllotment?: SortOrder
+    redemptionDate?: SortOrder
+    maturityDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sortedAt?: SortOrder
+  }
+
+  export type BondsSumOrderByAggregateInput = {
+    id?: SortOrder
+    issuePrice?: SortOrder
+    faceValue?: SortOrder
+    couponRate?: SortOrder
+    totalIssueSize?: SortOrder
+    sortedAt?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type EnumTAX_TYPEWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TAX_TYPE | EnumTAX_TYPEFieldRefInput<$PrismaModel>
+    in?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    not?: NestedEnumTAX_TYPEWithAggregatesFilter<$PrismaModel> | $Enums.TAX_TYPE
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTAX_TYPEFilter<$PrismaModel>
+    _max?: NestedEnumTAX_TYPEFilter<$PrismaModel>
+  }
+
+  export type EnumINTEREST_MODEWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.INTEREST_MODE | EnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    in?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    not?: NestedEnumINTEREST_MODEWithAggregatesFilter<$PrismaModel> | $Enums.INTEREST_MODE
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumINTEREST_MODEFilter<$PrismaModel>
+    _max?: NestedEnumINTEREST_MODEFilter<$PrismaModel>
+  }
+
+  export type EnumIS_LISTEDWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.IS_LISTED | EnumIS_LISTEDFieldRefInput<$PrismaModel>
+    in?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    notIn?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    not?: NestedEnumIS_LISTEDWithAggregatesFilter<$PrismaModel> | $Enums.IS_LISTED
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumIS_LISTEDFilter<$PrismaModel>
+    _max?: NestedEnumIS_LISTEDFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type EnumCrmUserROLEFilter<$PrismaModel = never> = {
@@ -32887,20 +35180,6 @@ export namespace Prisma {
   export type CRMUserDataModelSumOrderByAggregateInput = {
     id?: SortOrder
     createdBy?: SortOrder
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type EnumCrmUserROLEWithAggregatesFilter<$PrismaModel = never> = {
@@ -33951,14 +36230,6 @@ export namespace Prisma {
     nseCbricsParticipantModelId?: SortOrder
   }
 
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
-
   export type NSEBankAccountListRelationFilter = {
     every?: NSEBankAccountWhereInput
     some?: NSEBankAccountWhereInput
@@ -34214,17 +36485,6 @@ export namespace Prisma {
     nseCbricsParticipantModelId?: SortOrder
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type NseIsinSecurityReceiptCountOrderByAggregateInput = {
     id?: SortOrder
     symbol?: SortOrder
@@ -34276,22 +36536,6 @@ export namespace Prisma {
     faceValue?: SortOrder
   }
 
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
-  }
-
   export type EnumDealTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
     in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
@@ -34325,17 +36569,6 @@ export namespace Prisma {
     in?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
     notIn?: $Enums.CalcMethod[] | ListEnumCalcMethodFieldRefInput<$PrismaModel>
     not?: NestedEnumCalcMethodFilter<$PrismaModel> | $Enums.CalcMethod
-  }
-
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type EnumYieldTypeNullableFilter<$PrismaModel = never> = {
@@ -34586,22 +36819,6 @@ export namespace Prisma {
     _max?: NestedEnumCalcMethodFilter<$PrismaModel>
   }
 
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
   export type EnumYieldTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.YieldType | EnumYieldTypeFieldRefInput<$PrismaModel> | null
     in?: $Enums.YieldType[] | ListEnumYieldTypeFieldRefInput<$PrismaModel> | null
@@ -34660,6 +36877,47 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type BondsCreatecategoriesInput = {
+    set: string[]
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type EnumTAX_TYPEFieldUpdateOperationsInput = {
+    set?: $Enums.TAX_TYPE
+  }
+
+  export type EnumINTEREST_MODEFieldUpdateOperationsInput = {
+    set?: $Enums.INTEREST_MODE
+  }
+
+  export type EnumIS_LISTEDFieldUpdateOperationsInput = {
+    set?: $Enums.IS_LISTED
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type BondsUpdatecategoriesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
   export type CustomersAuthDataModelCreateNestedManyWithoutRelationshipManagerInput = {
     create?: XOR<CustomersAuthDataModelCreateWithoutRelationshipManagerInput, CustomersAuthDataModelUncheckedCreateWithoutRelationshipManagerInput> | CustomersAuthDataModelCreateWithoutRelationshipManagerInput[] | CustomersAuthDataModelUncheckedCreateWithoutRelationshipManagerInput[]
     connectOrCreate?: CustomersAuthDataModelCreateOrConnectWithoutRelationshipManagerInput | CustomersAuthDataModelCreateOrConnectWithoutRelationshipManagerInput[]
@@ -34686,10 +36944,6 @@ export namespace Prisma {
     connectOrCreate?: LeadsModelCreateOrConnectWithoutAssignToInput | LeadsModelCreateOrConnectWithoutAssignToInput[]
     createMany?: LeadsModelCreateManyAssignToInputEnvelope
     connect?: LeadsModelWhereUniqueInput | LeadsModelWhereUniqueInput[]
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
   }
 
   export type EnumCrmUserROLEFieldUpdateOperationsInput = {
@@ -35522,14 +37776,6 @@ export namespace Prisma {
     update?: XOR<XOR<NseCbricsParticipantModelUpdateToOneWithWhereWithoutDpAccountListInput, NseCbricsParticipantModelUpdateWithoutDpAccountListInput>, NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
   }
 
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type NSERfqModelCreategroupListInput = {
     set: number[]
   }
@@ -35556,14 +37802,6 @@ export namespace Prisma {
 
   export type EnumCalcMethodFieldUpdateOperationsInput = {
     set?: $Enums.CalcMethod
-  }
-
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type NullableEnumYieldTypeFieldUpdateOperationsInput = {
@@ -35774,6 +38012,27 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedEnumTAX_TYPEFilter<$PrismaModel = never> = {
+    equals?: $Enums.TAX_TYPE | EnumTAX_TYPEFieldRefInput<$PrismaModel>
+    in?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    not?: NestedEnumTAX_TYPEFilter<$PrismaModel> | $Enums.TAX_TYPE
+  }
+
+  export type NestedEnumINTEREST_MODEFilter<$PrismaModel = never> = {
+    equals?: $Enums.INTEREST_MODE | EnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    in?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    not?: NestedEnumINTEREST_MODEFilter<$PrismaModel> | $Enums.INTEREST_MODE
+  }
+
+  export type NestedEnumIS_LISTEDFilter<$PrismaModel = never> = {
+    equals?: $Enums.IS_LISTED | EnumIS_LISTEDFieldRefInput<$PrismaModel>
+    in?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    notIn?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    not?: NestedEnumIS_LISTEDFilter<$PrismaModel> | $Enums.IS_LISTED
+  }
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -35785,18 +38044,66 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type NestedEnumCrmUserROLEFilter<$PrismaModel = never> = {
-    equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
-    in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
-    notIn?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
-    not?: NestedEnumCrmUserROLEFilter<$PrismaModel> | $Enums.CrmUserROLE
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type NestedEnumAccountStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.AccountStatus | EnumAccountStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumAccountStatusFilter<$PrismaModel> | $Enums.AccountStatus
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTAX_TYPEWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TAX_TYPE | EnumTAX_TYPEFieldRefInput<$PrismaModel>
+    in?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
+    not?: NestedEnumTAX_TYPEWithAggregatesFilter<$PrismaModel> | $Enums.TAX_TYPE
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTAX_TYPEFilter<$PrismaModel>
+    _max?: NestedEnumTAX_TYPEFilter<$PrismaModel>
+  }
+
+  export type NestedEnumINTEREST_MODEWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.INTEREST_MODE | EnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    in?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.INTEREST_MODE[] | ListEnumINTEREST_MODEFieldRefInput<$PrismaModel>
+    not?: NestedEnumINTEREST_MODEWithAggregatesFilter<$PrismaModel> | $Enums.INTEREST_MODE
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumINTEREST_MODEFilter<$PrismaModel>
+    _max?: NestedEnumINTEREST_MODEFilter<$PrismaModel>
+  }
+
+  export type NestedEnumIS_LISTEDWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.IS_LISTED | EnumIS_LISTEDFieldRefInput<$PrismaModel>
+    in?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    notIn?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
+    not?: NestedEnumIS_LISTEDWithAggregatesFilter<$PrismaModel> | $Enums.IS_LISTED
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumIS_LISTEDFilter<$PrismaModel>
+    _max?: NestedEnumIS_LISTEDFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -35811,6 +38118,20 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumCrmUserROLEFilter<$PrismaModel = never> = {
+    equals?: $Enums.CrmUserROLE | EnumCrmUserROLEFieldRefInput<$PrismaModel>
+    in?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CrmUserROLE[] | ListEnumCrmUserROLEFieldRefInput<$PrismaModel>
+    not?: NestedEnumCrmUserROLEFilter<$PrismaModel> | $Enums.CrmUserROLE
+  }
+
+  export type NestedEnumAccountStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.AccountStatus | EnumAccountStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AccountStatus[] | ListEnumAccountStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumAccountStatusFilter<$PrismaModel> | $Enums.AccountStatus
   }
 
   export type NestedEnumCrmUserROLEWithAggregatesFilter<$PrismaModel = never> = {
@@ -36056,22 +38377,6 @@ export namespace Prisma {
     _max?: NestedEnumDefaultSelectFilter<$PrismaModel>
   }
 
-  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
-  }
-
   export type NestedEnumDealTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
     in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
@@ -36176,22 +38481,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumCalcMethodFilter<$PrismaModel>
     _max?: NestedEnumCalcMethodFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumYieldTypeNullableWithAggregatesFilter<$PrismaModel = never> = {

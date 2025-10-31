@@ -34,7 +34,7 @@ function DataInfoLabel({
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <p className="flex items-center gap-2 font-medium text-gray-600 text-sm">
+      <p className="flex items-center gap-2 font-medium text-gray-600 text-xs">
         {title}
         {showStatus && (
           <>

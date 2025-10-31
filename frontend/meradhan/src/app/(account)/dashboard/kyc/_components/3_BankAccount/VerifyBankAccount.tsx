@@ -13,6 +13,7 @@ import { AiFillPlusSquare } from "react-icons/ai";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycStepStore } from "../../_store/useKycStepStore";
+import { FaPlusSquare } from "react-icons/fa";
 
 function VerifyBankAccount() {
   const {
@@ -43,7 +44,7 @@ function VerifyBankAccount() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Verify Bank Account</CardTitle>
+        <CardTitle className="font-normal">Verify Bank Account</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         {data.map((item, index) => (
@@ -75,7 +76,11 @@ function VerifyBankAccount() {
         className="flex sm:flex-row flex-col-reverse justify-center sm:justify-between items-center gap-5 sm:text-left text-center"
       >
         <div className="flex sm:flex-row flex-col gap-5 w-full">
-          <Button className="w-full sm:w-auto" disabled={!isAllowToContinue()} onClick={jumpNext} >
+          <Button
+            className="w-full sm:w-auto"
+            disabled={!isAllowToContinue()}
+            onClick={jumpNext}
+          >
             Confirm & Continue <MdOutlineArrowRight />
           </Button>
           <Button
@@ -97,11 +102,10 @@ function VerifyBankAccount() {
               addBankAccount();
               prevLocalStep();
             }}
-            
           >
-            <AiFillPlusSquare className="text-secondary text-xl" />
+            <FaPlusSquare className="text-secondary text-xl" />
             Add Bank Account{" "}
-            <span className="text-gray-500 text-xs">(max 5 accounts)</span>
+            <span className="text-gray-500 text-xs">(Max 5 accounts)</span>
           </Button>
         )}
       </CardFooter>

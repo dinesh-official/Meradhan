@@ -23,7 +23,7 @@ function IdentityValidationPreviewSign() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Confirm Signature</CardTitle>
+        <CardTitle className="font-normal">Confirm Signature</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="flex items-center gap-5">

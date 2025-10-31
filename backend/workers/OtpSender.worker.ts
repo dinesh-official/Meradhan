@@ -20,6 +20,7 @@ startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
         html: emailHtml
     })
 
+    
 })
 
 startQueueWorker(mobileOtpSenderQueue, async (job: Job) => {
