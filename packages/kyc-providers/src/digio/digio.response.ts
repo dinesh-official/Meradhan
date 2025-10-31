@@ -17,6 +17,15 @@ export type TDigioWithTemplateResponse = {
     workflow_name: string
     auto_approved: boolean
     template_id: string
+    "signing_parties"?: Array<{
+        name: string
+        status: string
+        type: string
+        signature_type: string
+        identifier: string
+        reason: string
+        expire_on: string
+    }>
 }
 
 
@@ -56,7 +65,7 @@ export type DigioAadharPanData = {
                 current_address: string
                 permanent_address: string
                 file_url?: string
-                father_name?:string
+                father_name?: string
                 current_address_details: {
                     address: string
                     locality_or_post_office: string
@@ -219,12 +228,12 @@ interface AccessToken {
     created_at: string; // ISO timestamp
 }
 
-export interface DigioBankVerifyResponse  {
-  id: string
-  verified: boolean
-  verified_at: string
-  beneficiary_name_with_bank: string
-  fuzzy_match_result: boolean
-  fuzzy_match_score: number
-  validation_mode: string
+export interface DigioBankVerifyResponse {
+    id: string
+    verified: boolean
+    verified_at: string
+    beneficiary_name_with_bank: string
+    fuzzy_match_result: boolean
+    fuzzy_match_score: number
+    validation_mode: string
 }

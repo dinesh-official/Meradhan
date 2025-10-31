@@ -3,10 +3,12 @@ import {
   Card,
   CardContent
 } from "@/components/ui/card";
+
 import { FaCheckSquare } from "react-icons/fa";
 import { MdOutlineArrowRight } from "react-icons/md";
 
 function FinishKyc() {
+    
   return (
     <Card accountMode>
       <CardContent accountMode>

@@ -16532,6 +16532,7 @@ export namespace Prisma {
     id: number | null
     userID: number | null
     step: number | null
+    complete: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -16540,6 +16541,7 @@ export namespace Prisma {
     id: number | null
     userID: number | null
     step: number | null
+    complete: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -16549,6 +16551,7 @@ export namespace Prisma {
     userID: number
     step: number
     data: number
+    complete: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -16571,6 +16574,7 @@ export namespace Prisma {
     id?: true
     userID?: true
     step?: true
+    complete?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -16579,6 +16583,7 @@ export namespace Prisma {
     id?: true
     userID?: true
     step?: true
+    complete?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -16588,6 +16593,7 @@ export namespace Prisma {
     userID?: true
     step?: true
     data?: true
+    complete?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -16684,6 +16690,7 @@ export namespace Prisma {
     userID: number
     step: number
     data: JsonValue | null
+    complete: boolean
     createdAt: Date
     updatedAt: Date
     _count: KYC_FLOWCountAggregateOutputType | null
@@ -16712,6 +16719,7 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["kYC_FLOW"]>
@@ -16721,6 +16729,7 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["kYC_FLOW"]>
@@ -16730,6 +16739,7 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["kYC_FLOW"]>
@@ -16739,11 +16749,12 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type KYC_FLOWOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userID" | "step" | "data" | "createdAt" | "updatedAt", ExtArgs["result"]["kYC_FLOW"]>
+  export type KYC_FLOWOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userID" | "step" | "data" | "complete" | "createdAt" | "updatedAt", ExtArgs["result"]["kYC_FLOW"]>
 
   export type $KYC_FLOWPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KYC_FLOW"
@@ -16753,6 +16764,7 @@ export namespace Prisma {
       userID: number
       step: number
       data: Prisma.JsonValue | null
+      complete: boolean
       /**
        * Timestamps
        */
@@ -17185,6 +17197,7 @@ export namespace Prisma {
     readonly userID: FieldRef<"KYC_FLOW", 'Int'>
     readonly step: FieldRef<"KYC_FLOW", 'Int'>
     readonly data: FieldRef<"KYC_FLOW", 'Json'>
+    readonly complete: FieldRef<"KYC_FLOW", 'Boolean'>
     readonly createdAt: FieldRef<"KYC_FLOW", 'DateTime'>
     readonly updatedAt: FieldRef<"KYC_FLOW", 'DateTime'>
   }
@@ -27662,6 +27675,7 @@ export namespace Prisma {
     userID: 'userID',
     step: 'step',
     data: 'data',
+    complete: 'complete',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -29318,6 +29332,7 @@ export namespace Prisma {
     userID?: IntFilter<"KYC_FLOW"> | number
     step?: IntFilter<"KYC_FLOW"> | number
     data?: JsonNullableFilter<"KYC_FLOW">
+    complete?: BoolFilter<"KYC_FLOW"> | boolean
     createdAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
     updatedAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
   }
@@ -29327,6 +29342,7 @@ export namespace Prisma {
     userID?: SortOrder
     step?: SortOrder
     data?: SortOrderInput | SortOrder
+    complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -29339,6 +29355,7 @@ export namespace Prisma {
     NOT?: KYC_FLOWWhereInput | KYC_FLOWWhereInput[]
     step?: IntFilter<"KYC_FLOW"> | number
     data?: JsonNullableFilter<"KYC_FLOW">
+    complete?: BoolFilter<"KYC_FLOW"> | boolean
     createdAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
     updatedAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
   }, "id" | "userID">
@@ -29348,6 +29365,7 @@ export namespace Prisma {
     userID?: SortOrder
     step?: SortOrder
     data?: SortOrderInput | SortOrder
+    complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: KYC_FLOWCountOrderByAggregateInput
@@ -29365,6 +29383,7 @@ export namespace Prisma {
     userID?: IntWithAggregatesFilter<"KYC_FLOW"> | number
     step?: IntWithAggregatesFilter<"KYC_FLOW"> | number
     data?: JsonNullableWithAggregatesFilter<"KYC_FLOW">
+    complete?: BoolWithAggregatesFilter<"KYC_FLOW"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"KYC_FLOW"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"KYC_FLOW"> | Date | string
   }
@@ -31460,6 +31479,7 @@ export namespace Prisma {
     userID: number
     step?: number
     data?: NullableJsonNullValueInput | InputJsonValue
+    complete?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31469,6 +31489,7 @@ export namespace Prisma {
     userID: number
     step?: number
     data?: NullableJsonNullValueInput | InputJsonValue
+    complete?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31477,6 +31498,7 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31486,6 +31508,7 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31495,6 +31518,7 @@ export namespace Prisma {
     userID: number
     step?: number
     data?: NullableJsonNullValueInput | InputJsonValue
+    complete?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31503,6 +31527,7 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31512,6 +31537,7 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33663,6 +33689,7 @@ export namespace Prisma {
     userID?: SortOrder
     step?: SortOrder
     data?: SortOrder
+    complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -33677,6 +33704,7 @@ export namespace Prisma {
     id?: SortOrder
     userID?: SortOrder
     step?: SortOrder
+    complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -33685,6 +33713,7 @@ export namespace Prisma {
     id?: SortOrder
     userID?: SortOrder
     step?: SortOrder
+    complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

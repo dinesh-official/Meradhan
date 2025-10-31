@@ -126,4 +126,26 @@ export class PersonalDetailsKycController {
         })
     }
 
+
+    async getEsignRequest(req: Request, res: Response) {
+        const id = req.customer!.id;
+        const data = await this.panKycService.reqEsignPdf(id);
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: data
+        })
+    }
+
+    async verifyEsignResponse(req: Request, res: Response) {
+        const doc = req.params.doc!;
+        const data = await this.panKycService.downloadEsignPdf(doc);
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: {
+                fileUrl: data,
+            }
+        })
+    }
+
+
 }

@@ -1,11 +1,9 @@
-import React, { useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { strAssets } from "@/core/connection/apollo-client";
 import { quicksand } from "@/global/font/font";
+import { cn } from "@/lib/utils";
 import PostCard from "../_components/PostCard";
 import NewsPageFIlterOrSort from "./_components/NewsPageFIlterOrSort";
 import { fetchNewsData } from "./_gql/news.gql";
-import { strAssets } from "@/core/connection/apollo-client";
-import CardPagination from "@/global/elements/CardPagination";
 
 async function NewsView() {
   const data = await fetchNewsData();
@@ -14,8 +12,8 @@ async function NewsView() {
   return (
     <div>
       <div className="pt-10">
-        <h1 className={cn("text-4xl font-medium", quicksand.className)}>
-          MeraDhan <span className="text-secondary font-semibold">News</span>
+        <h1 className={cn("font-medium text-4xl", quicksand.className)}>
+          MeraDhan <span className="font-semibold text-secondary">News</span>
         </h1>
         <NewsPageFIlterOrSort />
       </div>
@@ -32,7 +30,7 @@ async function NewsView() {
             profilePic={`${strAssets}${items[0]?.Author?.Profile_Image?.url}`}
             views={String(items[0]?.Views ?? 0)}
           />
-          <div className="grid md:grid-cols-3 gap-5 gap-y-8">
+          <div className="gap-5 gap-y-8 grid md:grid-cols-3">
             {items.slice(1).map((item) => (
               <PostCard
                 key={item.documentId}

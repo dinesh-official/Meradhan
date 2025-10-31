@@ -153,4 +153,27 @@ export class PersonalDetailsKycService {
         return dematDetails;
     }
 
+
+    async reqEsignPdf(userID: number) {
+        const user = await db.dataBase.customerProfileDataModel.findUnique({ where: { id: userID }, select: { emailAddress: true } });
+        if (!user) {
+            throw new AppError("User Not Found")
+        }
+        const kycData = await db.dataBase.kYC_FLOW.findUnique({ where: { userID } });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const panData = ((kycData?.data as any)?.['step_1'] as any)?.['pan'] as any;
+        if (!panData) {
+            throw new AppError("not eligible for e-sign")
+        }
+        return await this.kycProvider.esignRequest({
+            email: user.emailAddress,
+            name: panData?.['firstName'] + " " + panData?.['middleName'] + " " + panData?.['lastName']
+        });
+    }
+
+    async downloadEsignPdf(document_id: string) {
+        const pdfData = await this.kycProvider.getEsignPdf(document_id);
+        return pdfData;
+    }
+
 }

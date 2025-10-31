@@ -5,6 +5,7 @@ import BankKycStepView from "./_components/3_BankAccount/BankKycStepView";
 import DematKycStepView from "./_components/4_DematAccount/DematKycStepView";
 import RiskProfilingCard from "./_components/5_RiskProfiling/RiskProfilingCard";
 import KycESign from "./_components/6_E_Signature/KycESign";
+import FinishKyc from "./_components/End_Finish/FinishKyc";
 import { useKycStepStore } from "./_store/useKycStepStore";
 
 const stepList = [
@@ -14,13 +15,13 @@ const stepList = [
   <DematKycStepView key={3} />,
   <RiskProfilingCard key={4} />,
   <KycESign key={5} />,
-  <></>,
-  <></>,
-  <></>,
 ];
 
 function KycFlowStepsView() {
-  const { step } = useKycStepStore();
+  const { step, isComplete } = useKycStepStore();
+  if (isComplete) {
+    return <FinishKyc key={6} />;
+  }
   return <>{stepList?.[step - 1]}</>;
 }
 

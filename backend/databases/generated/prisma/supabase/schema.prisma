@@ -392,10 +392,11 @@ enum BondType {
 }
 
 model KYC_FLOW {
-  id     Int   @id @default(autoincrement())
-  userID Int   @unique
-  step   Int   @default(1)
-  data   Json?
+  id       Int     @id @default(autoincrement())
+  userID   Int     @unique
+  step     Int     @default(1)
+  data     Json?
+  complete Boolean @default(false)
 
   /// Timestamps
   createdAt DateTime @default(now())

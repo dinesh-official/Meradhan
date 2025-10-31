@@ -298,6 +298,7 @@ exports.Prisma.KYC_FLOWScalarFieldEnum = {
   userID: 'userID',
   step: 'step',
   data: 'data',
+  complete: 'complete',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

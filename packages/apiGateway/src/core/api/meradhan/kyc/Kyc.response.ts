@@ -1,4 +1,4 @@
-import { type DanResponse, type DigioAadharPanData, type DigioBankVerifyResponse, type DigioFaceDataResponse, type TDigioWithTemplateResponse } from "kyc-providers";
+import { type DanResponse, type DigioAadharPanData, type DigioBankVerifyResponse, type DigioFaceDataResponse, type DigioSignatureResponse, type TDigioWithTemplateResponse } from "kyc-providers";
 import type { BaseResponseData } from "../../../../types/base";
 
 export type IPANKycRequestResponse = BaseResponseData<TDigioWithTemplateResponse>
@@ -14,6 +14,10 @@ export type ISignKycVerifyResponse = BaseResponseData<DigioFaceDataResponse>
 export type IBankKycVerifyResponse = BaseResponseData<DigioBankVerifyResponse>
 export type IDmatKycVerifyResponse = BaseResponseData<DanResponse>
 
+export type IEsignKycRequest = BaseResponseData<TDigioWithTemplateResponse>
+export type IEsignKycResponse = BaseResponseData<DigioSignatureResponse>
+
+
 
 
 
@@ -27,7 +31,7 @@ export type IStoreKycGETResponse = BaseResponseData<{
   data: any
   createdAt: string
   updatedAt: string
-
+  complete:boolean
 } | null>
 export type IStoreKycSETResponse = BaseResponseData<{
   status: boolean

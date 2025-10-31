@@ -22,6 +22,7 @@ export class KycStoreController {
         const id = req.customer!.id;
         const step = req.params.step!;
         const data = req.body;
+        const complete = req.query.complete === 'true';
 
         const user = await db.dataBase.kYC_FLOW.findUnique({ where: { userID: id } });
 
@@ -29,6 +30,7 @@ export class KycStoreController {
             await db.dataBase.kYC_FLOW.create({
                 data: {
                     userID: id,
+
                 }
             })
         }
@@ -40,7 +42,8 @@ export class KycStoreController {
             data: {
                 data: data,
                 userID: id,
-                step: Number(step)
+                step: Number(step),
+                complete
             },
 
         });

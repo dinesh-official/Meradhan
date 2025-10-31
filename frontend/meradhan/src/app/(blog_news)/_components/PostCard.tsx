@@ -33,10 +33,10 @@ function PostCard({
         alt="Blog"
         width={1300}
         height={900}
-        className="w-full rounded-xl aspect-video object-cover"
+        className="rounded-xl w-full object-cover aspect-video"
       />
       <div className="flex justify-between items-center">
-        <Badge className="py-1.5 px-4 text-[14px] bg-[#7fabd2] rounded-xl">
+        <Badge className="bg-[#7fabd2] px-4 py-1.5 rounded-xl text-[14px]">
           {badge}
         </Badge>
         <p className="text-[14px]">{createAt}</p>
@@ -44,14 +44,14 @@ function PostCard({
 
       <h3
         className={cn(
-          "lg:text-3xl text-[20px] font-medium text-primary line-clamp-2",
+          "font-medium text-[20px] text-primary lg:text-3xl line-clamp-2",
           quicksand.className,
           listMode && "lg:text-2xl"
         )}
       >
         {heading}
       </h3>
-      <p className="text-gray-600 line-clamp-3 text-[16px]">{description}</p>
+      <p className="text-[16px] text-gray-600 line-clamp-3">{description}</p>
 
       <AuthorViewSharePostCard
         name={name}

@@ -50,6 +50,7 @@ function KycDataProvider({ children }: { children: ReactNode }) {
       if (data.responseData?.data) {
         kycDataStorage.setState(data.responseData.data);
         kycStep.setStep(data.responseData.step);
+        kycStep.setIsComplete(data.responseData.complete || false);
       }
     },
     onError: (error) => {
@@ -68,6 +69,7 @@ function KycDataProvider({ children }: { children: ReactNode }) {
       await api.storeKycProgress({
         data: kycDataStorage.state,
         step: kycStep.step,
+        complete: kycStep.isComplete,
       });
 
       if (e?.exit) {

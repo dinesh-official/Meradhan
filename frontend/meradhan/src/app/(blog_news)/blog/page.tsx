@@ -1,17 +1,17 @@
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import BlogView from "./BlogView";
 function page() {
   return (
     <ViewPort>
-      <div className="container mb-[4rem] md:w-[80%]">
+      <div className="mb-[4rem] md:w-[80%] container">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>

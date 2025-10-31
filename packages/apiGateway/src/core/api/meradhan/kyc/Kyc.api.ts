@@ -3,7 +3,7 @@ import type { IApiCaller } from "../../../connection/apiCaller.interface";
 import type { AxiosRequestConfig } from "axios";
 
 import type z from "zod";
-import type { I_IFSCResponse, IBankKycVerifyResponse, IDmatKycVerifyResponse, IPANKycRequestResponse, IPANKycVerifyResponse, ISelfireKycRequestResponse, ISelfireKycVerifyResponse, ISignKycRequestResponse, ISignKycVerifyResponse, IStoreKycGETResponse, IStoreKycSETResponse } from "./Kyc.response";
+import type { I_IFSCResponse, IBankKycVerifyResponse, IDmatKycVerifyResponse, IEsignKycRequest, IPANKycRequestResponse, IPANKycVerifyResponse, ISelfireKycRequestResponse, ISelfireKycVerifyResponse, ISignKycRequestResponse, ISignKycVerifyResponse, IStoreKycGETResponse, IStoreKycSETResponse } from "./Kyc.response";
 
 export class CustomerKycApi {
     private schema = appSchema.kyc;
@@ -20,8 +20,13 @@ export class CustomerKycApi {
         return data;
     }
 
-    async storeKycProgress(payload: { step: number, data: unknown }, config?: AxiosRequestConfig) {
-        const { data } = await this.apiClient.post<IStoreKycSETResponse>("/customer/kyc/store/" + payload.step, payload.data, config);
+    async storeKycProgress(payload: { step: number, data: unknown, complete?: boolean }, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IStoreKycSETResponse>("/customer/kyc/store/" + payload.step, payload.data, {
+            ...config,
+            params: {
+                complete: payload.complete
+            }
+        });
         return data;
     }
 
@@ -69,4 +74,16 @@ export class CustomerKycApi {
         const { data } = await this.apiClient.post<IDmatKycVerifyResponse>(`/customer/kyc/demat/verify`, payload, config);
         return data;
     }
+
+
+    async esignRequest(config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<IEsignKycRequest>(`/customer/kyc/esign/request`, undefined, config);
+        return data;
+    }
+
+    async esignVerifyResponse(docId: string, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<IEsignKycRequest>(`/customer/kyc/esign/verify/${docId}`, config);
+        return data;
+    }
+
 }

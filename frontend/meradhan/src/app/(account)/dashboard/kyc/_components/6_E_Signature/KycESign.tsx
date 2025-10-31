@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,8 +11,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaDownload } from "react-icons/fa";
 import { MdOutlineArrowRight } from "react-icons/md";
+import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
 
 function KycESign() {
+  const { handleEsignKyc, isPending } = useHandelEsignKyc();
+  const { state, setStep6Data } = useKycDataStorage();
+
   return (
     <Card accountMode>
       <CardHeader accountMode>
@@ -22,7 +28,7 @@ function KycESign() {
         </CardDescription>
       </CardHeader>
       <CardContent accountMode>
-        <div className="flex flex-col gap-3" >
+        <div className="flex flex-col gap-3">
           <Button
             size={`lg`}
             variant={`defaultLight`}
@@ -36,10 +42,13 @@ function KycESign() {
             to e-Sign.
           </p>
 
-          <p className="flex items-center gap-2">
-            <Checkbox />
+          <label className="flex items-center gap-2">
+            <Checkbox
+              checked={state?.step_6?.terms}
+              onCheckedChange={(e) => setStep6Data("terms", e)}
+            />
             By continue, I agree to the following terms:
-          </p>
+          </label>
           <ul className="flex flex-col gap-1 ml-10 list-disc">
             <li>
               I hereby authorize MeraDhan to use my Aadhaar / Virtual ID details
@@ -54,7 +63,11 @@ function KycESign() {
         </div>
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
-        <Button className="w-full sm:w-auto">
+        <Button
+          className="w-full sm:w-auto"
+          onClick={handleEsignKyc}
+          disabled={isPending}
+        >
           Proceed to E-Sign <MdOutlineArrowRight />
         </Button>
       </CardFooter>

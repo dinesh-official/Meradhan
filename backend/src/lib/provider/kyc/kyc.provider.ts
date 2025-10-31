@@ -1,6 +1,6 @@
 import AdmZip from "adm-zip";
 import * as fs from 'fs';
-import { DigioSDK, NSDLApi, type DanRequest, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
+import { DigioSDK, genPdfForSign, NSDLApi, type DanRequest, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
 import os from "os";
 import * as path from 'path';
 import { putFileS3 } from '../fileUpload/s3FileUploader.provider';
@@ -68,6 +68,14 @@ export class KycProvider {
         return saveData.location;
     }
 
+    async getFileBytesPath(bytes: string, data?: { name?: string, path?: string }) {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "filedata"));
+        const fileName = data?.name || `file.jpeg`;
+        fs.writeFileSync(path.join(tempDir, fileName), bytes);
+        const location = path.join(tempDir, fileName);
+        const saveData = await putFileS3(location, data?.path);
+        return saveData.location;
+    }
 
     // sign
     async createSelfieVerifyRequest({ email, id, name }: { email: string, name: string, id: string }) {
@@ -131,6 +139,22 @@ export class KycProvider {
         }
 
         throw new AppError("cdsl not supported. Please use NSDL", { code: "NOT_SUPPORTED", statusCode: 400 });
+    }
+
+
+    async esignRequest({ email, name }: { name: string, email: string }) {
+        const file = genPdfForSign();
+        const reqData = await this.digio.esignRequest(file, {
+            email,
+            name
+        })
+        return reqData;
+    }
+
+    async getEsignPdf(document_id: string) {
+        const pdfData = await this.digio.getSignatureEsignPdf(document_id);
+        const url = this.getFileBytesPath(pdfData, { name: "esign.pdf", path: "kyc/esign" });
+        return url;
     }
 
 

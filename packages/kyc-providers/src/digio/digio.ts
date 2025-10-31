@@ -1,6 +1,8 @@
+import fs from "fs";
 import axios, { type AxiosInstance } from 'axios'
+import FormData from "form-data";
 import { v4 as uuid } from 'uuid'
-import type { TDigioWithTemplateResponse, TVerifyBankAccountResponse } from './digio.response';
+import type { DigioSignatureResponse, TDigioWithTemplateResponse, TVerifyBankAccountResponse } from './digio.response';
 export class DigioSDK {
     private client: AxiosInstance;
     constructor() {
@@ -68,8 +70,6 @@ export class DigioSDK {
     }
 
 
-
-
     // ifsc code 
     async fetchIfscCode(payload: { ifsc: string }) {
         try {
@@ -97,5 +97,65 @@ export class DigioSDK {
             }
         }
     }
+
+
+
+
+    async esignRequest(filePath: string, { email, name }: { email: string, name: string }) {
+        const form = new FormData();
+
+        // Attach the PDF as binary
+        // Attach the PDF file as binary stream
+        form.append("file", fs.createReadStream(filePath), {
+            filename: "document.pdf",
+            contentType: "application/pdf",
+        });
+        form.append(
+            "request",
+            JSON.stringify({
+                file_name: "document.pdf",
+                will_self_sign: false,
+                notify_signers: false,
+                send_sign_link: false,
+                generate_access_token: true,
+                display_on_page: "custom",
+                "sign_coordinates": {
+                    [email]: Object.fromEntries(
+                        Array.from({ length: 33 }, (_, i) => [
+                            (i + 1).toString(),
+                            [{ llx: 420, lly: 50, urx: 555, ury: 100 }],
+                        ])
+                    ),
+                },
+                signers: [
+                    {
+                        identifier: email,
+                        name: name,
+                        sign_type: "aadhaar",
+                        reason: "For MeraDhan Kyc",
+                    },
+                ],
+            })
+        );
+
+
+
+        const data = await this.client.post<DigioSignatureResponse>("/v2/client/document/upload", form, {
+            headers: {
+                ...form.getHeaders(),
+            },
+        });
+        return data.data;
+
+    }
+
+    async getSignatureEsignPdf(document_id: string) {
+        const response = await this.client.get<string>(`/v2/client/document/download`, {
+            params: { document_id },
+            responseType: "arraybuffer",
+        });
+        return response.data;
+    }
+
 
 }

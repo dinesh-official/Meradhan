@@ -12,9 +12,7 @@ const stepList = [
 function BankKycStepView() {
   const { state } = useKycDataStorage();
   return <>
-    {state.stepIndex}
     {stepList?.[state.stepIndex]}
-
   </>
 }
 export default memo(BankKycStepView);

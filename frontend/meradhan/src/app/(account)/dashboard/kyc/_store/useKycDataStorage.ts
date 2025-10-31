@@ -51,6 +51,7 @@ export interface DepositoryData<T = unknown> extends z.infer<schema['dpAccountIn
     response?: T;
 }
 
+
 // ==========================
 // 🧠 Step 5: Questionnaire
 // ==========================
@@ -66,7 +67,14 @@ export interface KycDataStorage {
     step_3: BankAccountData[];
     step_4: DepositoryData[];
     step_5: QuestionnaireData;
+    step_6: {
+        terms: boolean;
+        response?: any;
+    };
 }
+
+
+
 
 // ==========================
 // 🧩 Initial Default Data
@@ -151,7 +159,11 @@ const initData: KycDataStorage = {
             index: 3,
             opt: ["Up to 1 year", "1 – 3 years", "3 – 5 years", "More than 5 years"],
         },
+
     ],
+    step_6: {
+        terms: false
+    }
 };
 
 // ==========================
@@ -187,9 +199,10 @@ export const useKycDataStorage = create<{
     updateDepositoryPan: (index: number, subIndex: number, data: string) => void;
     setDepositoryPan: (index: number, data: string[]) => void;
     removeDepositoryPan: (index: number, subIndex: number) => void;
-
-
     selectStep5RiskProfileAnswer: (index: number, answer: string) => void;
+
+    // step 6
+    setStep6Data: (Key: keyof KycDataStorage['step_6'], data: any) => void;
 }>((set) => ({
     state: initData,
 
@@ -424,4 +437,19 @@ export const useKycDataStorage = create<{
             },
         }));
     },
+
+    // ==========================
+    // 🧠 STEP 6 HANDLERS
+    // ==========================
+    setStep6Data(Key, data) {
+        set((prev) => ({
+            state: {
+                ...prev.state,
+                step_6: {
+                    ...prev.state.step_6,
+                    [Key]: data,
+                },
+            },
+        }));
+    }
 }));

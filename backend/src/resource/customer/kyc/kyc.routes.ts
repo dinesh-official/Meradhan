@@ -21,8 +21,11 @@ kycRoutes.get("/api/customer/kyc/sign/response/:kid", customerAuthMiddleware, (r
 
 // bank
 kycRoutes.post("/api/customer/kyc/bank/verify", customerAuthMiddleware, (req, res) => controller.verifyBankAccount(req, res));
-kycRoutes.post("/api/customer/kyc/demat/verify", customerAuthMiddleware, (req, res) => controller.verifyDematAccount(req, res));
+kycRoutes.post("/api/customer/kyc/demat/submit", customerAuthMiddleware, (req, res) => controller.verifyDematAccount(req, res));
 
+// esign
+kycRoutes.post("/api/customer/kyc/esign/request", customerAuthMiddleware, (req, res) => controller.getEsignRequest(req, res));
+kycRoutes.get("/api/customer/kyc/esign/verify/:doc", customerAuthMiddleware, (req, res) => controller.verifyEsignResponse(req, res));
 
 // for storage
 kycRoutes.get("/api/customer/kyc/store/get", customerAuthMiddleware, (req, res) => storeKyc.getKycData(req, res));
