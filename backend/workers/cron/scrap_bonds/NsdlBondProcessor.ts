@@ -285,7 +285,7 @@ export class NsdlBondProcessor {
 
     return {
       companyName,
-      date,
+      date: this.extractDatesFromText(date),
     };
   }
 
@@ -496,7 +496,7 @@ export class NsdlBondProcessor {
       interestPaymentMode: this.getInterestFrequency(),
       isListed: this.isListedBond(),
       ratingAgencyName: this.extractRatingCompanyAndDate()?.companyName || "N/A",
-      ratingDate: this.extractRatingCompanyAndDate()?.date || "N/A",
+      ratingDate: this.extractRatingCompanyAndDate()?.date,
       categories: this.getBondCategories(),
       sectorName: this.getBondCorporateName(this.bond.COMPANY),
       dateOfAllotment: this.getDateOfAllotment(),

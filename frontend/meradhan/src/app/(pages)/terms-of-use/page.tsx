@@ -2,7 +2,7 @@ import React from "react";
 import TermsOfUse from "./TermsOfUse";
 import slugBasedPagesGQLData from "@/graphql/PagesGQLAction";
 import { redirect } from "next/navigation";
-
+export const revalidate = 0;
 const page = async () => {
   const data = await slugBasedPagesGQLData("terms-of-use");
   if (!data) {

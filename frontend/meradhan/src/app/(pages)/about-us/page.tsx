@@ -4,6 +4,7 @@ import ViewPort from "@/global/components/wrapper/ViewPort";
 import slugBasedPagesGQLData from "@/graphql/PagesGQLAction";
 import { redirect } from "next/navigation";
 
+export const revalidate = 0;
 const page = async () => {
   const data = await slugBasedPagesGQLData("about-us");
   if (!data) {
