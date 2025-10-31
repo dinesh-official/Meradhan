@@ -95,28 +95,28 @@ function page() {
                     Related Articles:
                   </p>
                   <div className="flex flex-col gap-5">
-                     <PostCard
-            listMode
-            src="/assets/bondYield.png"
-            badge="Educative"
-            createAt="24 Oct 2025"
-            heading="What Are Bonds? A Simple Guide for Indian Investors"
-            description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
-            name="Vikas Kukreja"
-            profilePic="/avatars/person.jpeg"
-            views="10"
+                    <PostCard
+                      listMode
+                      src="/assets/bondYield.png"
+                      badge="Educative"
+                      createAt="24 Oct 2025"
+                      heading="What Are Bonds? A Simple Guide for Indian Investors"
+                      description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
+                      name="Vikas Kukreja"
+                      profilePic="/avatars/person.jpeg"
+                      views="10"
                     />
-                      <PostCard
-            listMode
-            src="/assets/bondYield.png"
-            badge="Educative"
-            createAt="24 Oct 2025"
-            heading="What Are Bonds? A Simple Guide for Indian Investors"
-            description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
-            name="Vikas Kukreja"
-            profilePic="/avatars/person.jpeg"
-            views="10"
-          />
+                    <PostCard
+                      listMode
+                      src="/assets/bondYield.png"
+                      badge="Educative"
+                      createAt="24 Oct 2025"
+                      heading="What Are Bonds? A Simple Guide for Indian Investors"
+                      description="Bonds are one of the most trusted and popular investment instruments, especially among investors seeking safety, stability, and a predictable income stream. Despite their popularity, many Indian investors often find themselves puzzled by how bonds work and how they fit into their financial plans. updated"
+                      name="Vikas Kukreja"
+                      profilePic="/avatars/person.jpeg"
+                      views="10"
+                    />
                   </div>
                 </div>
               </div>

@@ -130,7 +130,7 @@ function IdentityValidationPanInfo() {
             pushUserKycState();
           }}
         >
-          Continue To verify <MdOutlineArrowRight />
+          Continue to verify <MdOutlineArrowRight />
         </Button>
         <Button
           variant={`link`}

@@ -128,7 +128,7 @@ function IdentityValidationForm() {
           onClick={handelPanVerification}
           disabled={isPending}
         >
-          Continue To Verify <MdOutlineArrowRight />
+          Continue to verify <MdOutlineArrowRight />
         </Button>
         <Button
           variant="link"

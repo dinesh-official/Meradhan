@@ -8,13 +8,12 @@ import { strAssets } from "@/core/connection/apollo-client";
 
 async function BlogView() {
   const data = await fetchBlogsData();
-  console.log(data?.blogPosts_connection.nodes);
   const items = data?.blogPosts_connection.nodes;
   return (
     <div>
       <div className="pt-10">
-        <h1 className={cn("text-4xl font-medium", quicksand.className)}>
-          MeraDhan <span className="text-secondary font-semibold">Blogs</span>
+        <h1 className={cn("font-medium text-4xl", quicksand.className)}>
+          MeraDhan <span className="font-semibold text-secondary">Blogs</span>
         </h1>
         <BlogPageFIlterOrSort />
       </div>
@@ -31,7 +30,7 @@ async function BlogView() {
             profilePic={`${strAssets}${items[0]?.Author?.Profile_Image?.url}`}
             views={String(items[0]?.Views ?? 0)}
           />
-          <div className="grid md:grid-cols-3 gap-5 gap-y-5">
+          <div className="gap-5 gap-y-5 grid md:grid-cols-3">
             {items.slice(1).map((item) => (
               <PostCard
                 key={item.documentId}

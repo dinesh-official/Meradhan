@@ -8,16 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { dataMatcherUtils } from "@/global/utils/matcher";
 import { MdOutlineArrowRight } from "react-icons/md";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { dataMatcherUtils } from "@/global/utils/matcher";
-import { useKycStepStore } from "../../../_store/useKycStepStore";
 
 function IdentityValidationAadharInfo() {
   const { pushUserKycState } = useKycDataProvider();
-  const { state, setStepIndex } = useKycDataStorage();
-  const { nextStep } = useKycStepStore();
+  const { state, setStepIndex,nextLocalStep } = useKycDataStorage();
+
   const data = state.step_1.pan;
 
   const isNameMatched = dataMatcherUtils.areNamesMatched(
@@ -107,12 +106,12 @@ function IdentityValidationAadharInfo() {
           className="w-full sm:w-auto"
           disabled={!isNameMatched}
           onClick={() => {
-            nextStep();
+            nextLocalStep();
             setStepIndex(0);
             pushUserKycState();
           }}
         >
-          Continue To verify <MdOutlineArrowRight />
+          Continue to verify <MdOutlineArrowRight />
         </Button>
         <Button
           variant={`link`}

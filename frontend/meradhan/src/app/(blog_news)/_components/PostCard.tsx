@@ -27,7 +27,7 @@ function PostCard({
   listMode,
 }: PostCardProps) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <Image
         src={src}
         alt="Blog"
@@ -36,7 +36,7 @@ function PostCard({
         className="rounded-xl w-full object-cover aspect-video"
       />
       <div className="flex justify-between items-center">
-        <Badge className="bg-[#7fabd2] px-4 py-1.5 rounded-xl text-[14px]">
+        <Badge className="bg-[#7fabd2] px-4 py-1.5 rounded-lg font-normal text-[12px]">
           {badge}
         </Badge>
         <p className="text-[14px]">{createAt}</p>
@@ -44,14 +44,13 @@ function PostCard({
 
       <h3
         className={cn(
-          "font-medium text-[20px] text-primary lg:text-3xl line-clamp-2",
+          "font-medium text-[20px] text-primary line-clamp-2",
           quicksand.className,
-          listMode && "lg:text-2xl"
         )}
       >
         {heading}
       </h3>
-      <p className="text-[16px] text-gray-600 line-clamp-3">{description}</p>
+      <p className="mb-2 text-[16px] line-clamp-3">{description}</p>
 
       <AuthorViewSharePostCard
         name={name}
