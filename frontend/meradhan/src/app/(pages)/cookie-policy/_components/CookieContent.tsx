@@ -1,18 +1,16 @@
-import React from 'react'
+import React from "react";
 
 const CookieContent = () => {
   return (
-        <section className="flex justify-center w-full">
-        <div className="container">
-          <div className='py-12 px-5 leading-relaxed space-y-6 text-[14px]'>
- <p>
+    <section className="flex justify-center w-full">
+      <div className="container">
+        <div className="py-12 px-5 leading-relaxed space-y-6 text-[14px]">
+          <p>
             Welcome to <strong>MeraDhan</strong>, a platform by BondNest Capital
             India Securities Private Limited.
           </p>
 
-          <h3 className="text-xl text-gray-900 mt-4">
-            What Are Cookies?
-          </h3>
+          <h3 className="text-xl text-gray-900 mt-4">What Are Cookies?</h3>
           <p>
             Cookies are small text files stored on your computer or mobile when
             you visit a website. Only the website that stored the cookie can
@@ -49,9 +47,7 @@ const CookieContent = () => {
             <li>Ads you click on</li>
           </ul>
 
-          <h3 className="text-xl text-gray-900 mt-4">
-            How to Manage Cookies
-          </h3>
+          <h3 className="text-xl text-gray-900 mt-4">How to Manage Cookies</h3>
           <p>
             Most internet browsers accept cookies automatically. However, you
             can change your browser settings to block cookies if you want. You
@@ -80,11 +76,10 @@ const CookieContent = () => {
           </p>
 
           <p>If you have any questions, feel free to contact us.</p>
-          </div>
-         
         </div>
-      </section>
-  )
-}
+      </div>
+    </section>
+  );
+};
 
-export default CookieContent
+export default CookieContent;

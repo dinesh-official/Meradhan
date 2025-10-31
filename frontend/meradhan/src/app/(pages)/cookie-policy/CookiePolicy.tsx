@@ -1,18 +1,14 @@
-import { cn } from "@/lib/utils";
 import React from "react";
-import CookieContent from "./_components/CookieContent";
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
+import { T_PAGE_DATA } from "@/graphql/PagesGQLAction";
 
-const CookiePolicy = () => {
+const CookiePolicy = ({ Description, Title, Content }: T_PAGE_DATA) => {
   return (
     <>
+      <TopTitleDesc title={Title} description={Description} />
 
-         <TopTitleDesc
-        title="Our Cookie <span class='text-secondary'>Policy</span>"
-        description="Last updated: 19 March 2025"
-      />
-
-      <CookieContent />
+      <div dangerouslySetInnerHTML={{ __html: Content }} />
+      {/* <CookieContent /> */}
     </>
   );
 };
