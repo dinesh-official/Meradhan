@@ -1,17 +1,16 @@
 import React from "react";
-import TermsContent from "./_components/TermsContent";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
+import { T_PAGE_DATA } from "@/graphql/PagesGQLAction";
 
-const TermsOfUse = () => {
+const TermsOfUse = ({ Description, Title, Content }: T_PAGE_DATA) => {
+  console.log(Content);
   return (
     <ViewPort>
-      <TopTitleDesc
-        title="Terms & <span class='text-secondary'>Conditions</span>"
-        description="Last updated: 19 March 2025"
-      />
+      <TopTitleDesc title={Title} description={Description} />
 
-      <TermsContent />
+      {/* <TermsContent /> */}
+      <div dangerouslySetInnerHTML={{ __html: Content }} />
     </ViewPort>
   );
 };

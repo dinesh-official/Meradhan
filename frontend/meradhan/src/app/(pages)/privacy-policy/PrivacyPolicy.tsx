@@ -1,15 +1,14 @@
 import React from "react";
 import PrivacyPolicyContent from "./_components/PrivacyPolicyContent";
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
+import { T_PAGE_DATA } from "@/graphql/PagesGQLAction";
 
-const PrivacyPolicy = () => {
+const PrivacyPolicy = ({ Description, Title, Content }: T_PAGE_DATA) => {
   return (
     <>
-      <TopTitleDesc
-        title="Privacy <span class='text-secondary'>Policy</span>"
-        description="Last updated: 19 March 2025"
-      />
-      <PrivacyPolicyContent />
+      <TopTitleDesc title={Title} description={Description} />
+      {/* <PrivacyPolicyContent /> */}
+      <div dangerouslySetInnerHTML={{ __html: Content }} />
     </>
   );
 };
