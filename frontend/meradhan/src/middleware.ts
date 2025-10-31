@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
 
   // ✅ 1. Basic Auth protection for production
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production" && !pathname.startsWith("/api") && !pathname.startsWith("/assets")) {
     const authHeader = request.headers.get("authorization");
 
     if (authHeader !== BASIC_AUTH_HEADER) {
@@ -30,6 +30,7 @@ export async function middleware(request: NextRequest) {
         },
       });
     }
+
   }
 
   // ✅ 2. Protect /dashboard routes
