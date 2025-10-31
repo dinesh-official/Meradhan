@@ -71,7 +71,7 @@ export class CustomerKycApi {
     }
 
     async verifyDematAccount(payload: z.infer<typeof this.schema.dpAccountInfoSchema>, config?: AxiosRequestConfig) {
-        const { data } = await this.apiClient.post<IDmatKycVerifyResponse>(`/customer/kyc/demat/verify`, payload, config);
+        const { data } = await this.apiClient.post<IDmatKycVerifyResponse>(`/customer/kyc/demat/submit`, payload, config);
         return data;
     }
 
