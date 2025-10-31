@@ -25,11 +25,3 @@ cron.schedule('0 11 * * *', async () => {
         console.error(error);
     }
 });
-
-
-
-
-
-revalidateBonds().catch((err) => {
-    console.error('Error during bond revalidation:', err);
-});
