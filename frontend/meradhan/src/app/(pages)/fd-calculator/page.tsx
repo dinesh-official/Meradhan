@@ -22,7 +22,7 @@ const page = () => {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Fd Calculator</BreadcrumbPage>
+                  <BreadcrumbPage>FD Calculator</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

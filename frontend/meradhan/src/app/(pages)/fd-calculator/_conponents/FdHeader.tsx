@@ -4,9 +4,9 @@ const FdHeader = () => {
   return (
     <div className="flex justify-center w-full">
       <div className="container">
-        <div className=" py-12 px-5 space-y-6 ">
-          <h1 className="text-[36px]">
-            FD <span className="text-secondary">Calculator</span>
+        <div className="pb-16 space-y-4">
+          <h1 className="text-[36px] quicksand-medium" >
+            FD <span className="text-secondary ">Calculator</span>
           </h1>
           <p className="text-[24px]">
             Extended Internal Rate of Return Calculator

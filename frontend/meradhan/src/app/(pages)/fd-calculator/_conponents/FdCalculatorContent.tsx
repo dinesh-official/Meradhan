@@ -1,13 +1,13 @@
 import React from "react";
 
 const FdCalculatorContent = () => {
+
+
   return (
-    <section className="flex justify-center w-full bg-white">
+    <section>
       <div className="container ">
-        <div className="py-12 px-5 text-gray-800 leading-relaxed space-y-6 text-[14px]">
-          <h3 className="text-xl  text-primary mt-6">
-            1. What is an FD Calculator?
-          </h3>
+        <div className="article md:py-12">
+          <h3>1. What is an FD Calculator?</h3>
           <p>
             An FD Calculator estimates how much your deposit will grow over a
             chosen tenure at a given interest rate. It supports common payout
@@ -15,10 +15,8 @@ const FdCalculatorContent = () => {
             either interest-payout plans or cumulative (reinvested) growth.
           </p>
 
-          <h3 className="text-xl  text-primary mt-6">
-            2. How to Use the MeraDhan FD Calculator
-          </h3>
-          <ul className="list-disc list-inside space-y-1">
+          <h3>2. How to Use the MeraDhan FD Calculator</h3>
+          <ul>
             <li>
               Select the payout frequency: Monthly, Quarterly, Half-yearly, or
               Yearly.
@@ -32,13 +30,11 @@ const FdCalculatorContent = () => {
             </li>
           </ul>
 
-          <h3 className="text-xl  text-primary mt-6">
-            3. Calculating Returns in Excel (Optional)
-          </h3>
+          <h3>3. Calculating Returns in Excel (Optional)</h3>
           <p>
             Prefer doing it manually? You can approximate FD growth with Excel:
           </p>
-          <ul className="list-disc list-inside space-y-1">
+          <ul>
             <li>
               For cumulative FDs, use periodic compounding:
               <br />
@@ -65,9 +61,7 @@ const FdCalculatorContent = () => {
             </li>
           </ul>
 
-          <h3 className="text-xl  text-primary mt-6">
-            4. When to Use FD vs. XIRR
-          </h3>
+          <h3>4. When to Use FD vs. XIRR</h3>
           <p>
             Use the FD Calculator for standard fixed deposits with a fixed rate
             and regular compounding or payouts. Use <strong>XIRR</strong> when
@@ -76,9 +70,7 @@ const FdCalculatorContent = () => {
             timing.
           </p>
 
-          <h3 className="text-xl  text-primary mt-6">
-            5. CAGR vs. FD (and XIRR)
-          </h3>
+          <h3>5. CAGR vs. FD (and XIRR)</h3>
           <p>
             <strong>CAGR</strong> assumes smooth, lump-sum growth between a
             start and end value. It’s great for a single buy-and-hold scenario.{" "}
@@ -88,10 +80,8 @@ const FdCalculatorContent = () => {
             interest payouts.
           </p>
 
-          <h3 className="text-xl  text-primary mt-6">
-            6. Benefits of Using the FD Calculator
-          </h3>
-          <ul className="list-disc list-inside space-y-1">
+          <h3>6. Benefits of Using the FD Calculator</h3>
+          <ul>
             <li>
               <strong>Accurate Estimates:</strong> See maturity value and total
               interest for chosen tenure and frequency.
@@ -110,10 +100,8 @@ const FdCalculatorContent = () => {
             </li>
           </ul>
 
-          <h3 className="text-xl  text-primary mt-6">
-            7. Important Notes & Disclaimer
-          </h3>
-          <ul className="list-disc list-inside space-y-1">
+          <h3>7. Important Notes & Disclaimer</h3>
+          <ul>
             <li>
               Actual bank/NBFC rates, compounding rules, and TDS (tax) may
               affect your real returns.
@@ -128,7 +116,7 @@ const FdCalculatorContent = () => {
             </li>
           </ul>
 
-          <h3 className="text-xl  text-primary mt-6">8. Need Help?</h3>
+          <h3>8. Need Help?</h3>
           <p>
             For feedback or support, write to{" "}
             <strong>support@meradhan.co</strong>.
