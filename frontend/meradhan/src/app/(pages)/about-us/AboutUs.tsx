@@ -1,30 +1,23 @@
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
-import NewsLetter from "@/global/components/footer/NewsLetter";
-import ViewPort from "@/global/components/wrapper/ViewPort";
-import AboutMeraDhanSection from "./_components/sections/AboutMeraDhanSection";
-import CoreValuesSection from "./_components/sections/CoreValuesSection";
-import MissionVisionSection from "./_components/sections/MissionVisionSection";
-import OfferingsSection from "./_components/sections/OfferingsSection";
-import WhyChooseUsSection from "./_components/sections/WhyChooseUsSection.tsx";
+import { T_PAGE_DATA } from "@/graphql/PagesGQLAction";
 
-const AboutUs = () => {
+const AboutUs = ({Description, Title,Content}:T_PAGE_DATA) => {
   return (
-   <>
+    <>
       <TopTitleDesc
-        title="About <span class='text-secondary'>Us</span>"
-        description="MeraDhan - Empowering INdia with Fixed INcome INvestments a Product
-            of Bondnext Capital India Securities Private Limited"
+        title={Title}
+        description={Description}
       />
 
-      <AboutMeraDhanSection />
-
-      <MissionVisionSection />
-
-      <CoreValuesSection />
-
-      <OfferingsSection />
-      <WhyChooseUsSection />
-   </>
+      <div>
+        {/* <AboutMeraDhanSection />
+        <MissionVisionSection />
+        <CoreValuesSection />
+        <OfferingsSection />
+        <WhyChooseUsSection /> */}
+        <div dangerouslySetInnerHTML={{__html:Content}} />
+      </div>
+    </>
   );
 };
 
