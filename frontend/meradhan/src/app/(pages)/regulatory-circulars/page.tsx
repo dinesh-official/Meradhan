@@ -7,8 +7,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import ListFilter from "./_components/ListFilter";
 import ListNseData from "./_components/ListNseData";
 
@@ -89,7 +88,7 @@ const page = () => {
           <h1
             className={cn(
               "font-medium text-4xl text-center",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             Regulatory

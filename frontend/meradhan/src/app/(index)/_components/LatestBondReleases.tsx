@@ -1,6 +1,5 @@
 import { BondListCard } from "@/global/components/Bond/BondListCard";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import React from "react";
 
 function LatestBondReleases() {
@@ -10,7 +9,7 @@ function LatestBondReleases() {
         <h3
           className={cn(
             "text-center lg:text-3xl  text-2xl font-medium",
-            quicksand.className
+            "quicksand-medium"
           )}
         >
           <span className="text-secondary font-semibold">Latest</span> Bond

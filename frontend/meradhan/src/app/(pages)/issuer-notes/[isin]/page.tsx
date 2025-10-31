@@ -11,8 +11,7 @@ import { FaCalendarAlt, FaClock, FaEye, FaStar } from "react-icons/fa";
 import { RiShareFill } from "react-icons/ri";
 import IsshuerNotesAddToWatchList from "../_components/IsshuerNotesAddToWatchList";
 import { cn } from "@/lib/utils";
-import { quicksand } from "@/global/font/font";
-import Image from "next/image";
+ import Image from "next/image";
 import { SortInfoBox } from "@/global/components/wrapper/cards/SortInfoBox";
 
 function page() {
@@ -65,7 +64,7 @@ function page() {
             {/* title logo  */}
             <div className="flex justify-between items-center mt-4">
               <div className="flex flex-col gap-5">
-                <h1 className={cn("font-medium text-4xl", quicksand.className)}>
+                <h1 className={cn("font-medium text-4xl", "quicksand-medium")}>
                   ICICI HOME FINANCE COMPANY LIMITED
                 </h1>
 

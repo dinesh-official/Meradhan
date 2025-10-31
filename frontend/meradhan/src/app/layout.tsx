@@ -1,4 +1,3 @@
-import { poppins, quicksand } from "@/global/font/font";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import Client from "./client";
@@ -20,6 +19,7 @@ export const metadata: Metadata = {
         type: "image/png",
       },
     ],
+
     apple: [
       { url: "/favicon/apple-icon-57x57.png", sizes: "57x57" },
       { url: "/favicon/apple-icon-60x60.png", sizes: "60x60" },
@@ -31,9 +31,11 @@ export const metadata: Metadata = {
       { url: "/favicon/apple-icon-152x152.png", sizes: "152x152" },
       { url: "/favicon/apple-icon-180x180.png", sizes: "180x180" },
     ],
+
     other: [{ rel: "manifest", url: "/manifest.json" }],
   },
 
+ 
   other: {
     viewport:
       "width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0",
@@ -41,6 +43,8 @@ export const metadata: Metadata = {
     "msapplication-TileColor": "#ffffff",
     "msapplication-TileImage": "/favicon/ms-icon-144x144.png",
   },
+  
+  
 };
 
 export const revalidate = 0;
@@ -53,7 +57,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.className} ${quicksand.variable} antialiased`}
+        className={`antialiased`}
       >
         <NextTopLoader color="#002c59" />
         <Client>{children}</Client>

@@ -1,9 +1,10 @@
-import React from 'react'
+import React from "react";
 
 const DisclaimerContent = () => {
   return (
-       <section className="flex justify-center w-full bg-white">
-        <div className="max-w-[80%] py-12 px-5  text-gray-800 leading-relaxed space-y-6">
+    <section className="flex justify-center w-full bg-white">
+      <div className="container">
+        <div className="py-12 px-5  text-gray-800 leading-relaxed space-y-6">
           <p className="font-semibold text-lg text-gray-900">
             Welcome to the website of BondNest Capital India Securities Private
             Limited.
@@ -69,8 +70,9 @@ const DisclaimerContent = () => {
             (&ldquo;Registered User&rdquo;).
           </p>
         </div>
-      </section>
-  )
-}
+      </div>
+    </section>
+  );
+};
 
-export default DisclaimerContent
+export default DisclaimerContent;

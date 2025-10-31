@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import React from "react";
 import {
   FaFileWaveform,
@@ -81,7 +80,7 @@ function WhyMeraDhanSection() {
         <h3
           className={cn(
             "text-center lg:text-3xl  text-2xl  font-medium",
-            quicksand.className
+            "quicksand-medium"
           )}
         >
           Why <span className="text-secondary font-semibold">MeraDhan</span>

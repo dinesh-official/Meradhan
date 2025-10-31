@@ -1,6 +1,5 @@
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import {
   Accordion,
   AccordionContent,
@@ -21,7 +20,7 @@ export default async function FAQPage() {
           <h1
             className={cn(
               "font-medium text-white text-3xl md:text-4xl text-center",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             Frequently Asked{" "}

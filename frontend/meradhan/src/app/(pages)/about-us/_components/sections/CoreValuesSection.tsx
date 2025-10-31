@@ -1,4 +1,3 @@
-import { quicksand } from '@/global/font/font';
 import { cn } from '@/lib/utils';
 import Image from 'next/image'
 import React from 'react'
@@ -38,11 +37,11 @@ const coreValues = [
 
 const CoreValuesSection = () => {
   return (
-   <section className="justify-center items-center gap-4 space-y-6 m-auto mt-[4rem] px-5 max-w-[70%] text-gray-800 leading-relaxed">
+   <section className="container justify-center items-center gap-4 space-y-6  mt-[4rem] px-5 text-gray-800 leading-relaxed">
           <h4
             className={cn(
               "font-medium text-black text-3xl md:text-4xl",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             Core <span className="font-semibold text-[#F25C4C]">Values</span>
@@ -52,7 +51,7 @@ const CoreValuesSection = () => {
             {coreValues.map((item) => (
               <div
                 key={item.id}
-                className="flex md:flex-row flex-col items-center gap-6"
+                className="flex md:flex-row flex-col gap-6"
               >
                 <div className="flex-shrink-0">
                   <Image
@@ -63,7 +62,7 @@ const CoreValuesSection = () => {
                     className="w-[90px] md:w-[110px] h-[90px] md:h-[110px]"
                   />
                 </div>
-                <div className="flex flex-col gap-2 md:text-left text-center">
+                <div className="flex flex-col gap-2 md:text-left">
                   <h4 className="font-semibold text-lg md:text-xl">
                     {item.title}
                   </h4>

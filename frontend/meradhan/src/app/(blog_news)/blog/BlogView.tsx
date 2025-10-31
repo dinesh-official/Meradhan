@@ -1,10 +1,8 @@
-import React from "react";
-import BlogPageFIlterOrSort from "./_components/BlogPageFIlterOrSort";
-import { cn } from "@/lib/utils";
-import { quicksand } from "@/global/font/font";
-import PostCard from "../_components/PostCard";
-import { fetchBlogsData } from "./_gql/blogs.gql";
 import { strAssets } from "@/core/connection/apollo-client";
+import { cn } from "@/lib/utils";
+import PostCard from "../_components/PostCard";
+import BlogPageFIlterOrSort from "./_components/BlogPageFIlterOrSort";
+import { fetchBlogsData } from "./_gql/blogs.gql";
 
 async function BlogView() {
   const data = await fetchBlogsData();
@@ -12,7 +10,7 @@ async function BlogView() {
   return (
     <div>
       <div className="pt-10">
-        <h1 className={cn("font-medium text-4xl", quicksand.className)}>
+        <h1 className={cn("quicksand-medium  text-4xl", )}>
           MeraDhan <span className="font-semibold text-secondary">Blogs</span>
         </h1>
         <BlogPageFIlterOrSort />

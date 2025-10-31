@@ -1,8 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BondsByCategories from "@/global/components/Bond/BondsByCategories";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import { LucideLayoutGrid } from "lucide-react";
 import { FaList } from "react-icons/fa";
 import ExploreBondsHeader from "./_components/ExploreBondsHeader";
@@ -15,7 +14,7 @@ function page() {
       <BondsByCategories />
       <div className="container">
         <div className="flex justify-between items-center">
-          <h4 className={cn("text-2xl font-medium", quicksand.className)}>
+          <h4 className={cn("text-2xl font-medium", "quicksand-medium")}>
             All <span className="font-semibold text-secondary">Bonds</span>
           </h4>
           <Tabs defaultValue="list">

@@ -1,5 +1,4 @@
 import { strAssets } from "@/core/connection/apollo-client";
-import { quicksand } from "@/global/font/font";
 import { cn } from "@/lib/utils";
 import PostCard from "../_components/PostCard";
 import NewsPageFIlterOrSort from "./_components/NewsPageFIlterOrSort";
@@ -12,7 +11,7 @@ async function NewsView() {
   return (
     <div>
       <div className="pt-10">
-        <h1 className={cn("font-medium text-4xl", quicksand.className)}>
+        <h1 className={cn("quicksand-medium  text-4xl" )}>
           MeraDhan <span className="font-semibold text-secondary">News</span>
         </h1>
         <NewsPageFIlterOrSort />

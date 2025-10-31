@@ -1,5 +1,4 @@
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import ReturnsCalculation from "./elements/ReturnsCalculation";
 
 function ReturnsCalculationSection() {
@@ -9,7 +8,7 @@ function ReturnsCalculationSection() {
         <h3
           className={cn(
             "text-center lg:text-3xl  text-2xl  font-medium",
-            quicksand.className
+            "quicksand-medium"
           )}
         >
           <span className="text-secondary font-semibold">Returns</span>{" "}

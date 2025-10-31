@@ -1,4 +1,3 @@
-import { quicksand } from '@/global/font/font'
 import { cn } from '@/lib/utils'
 import React from 'react'
 
@@ -36,12 +35,13 @@ const advisory = {
 const OfferingsSection = () => {
   return (
      <section className="mt-16 bg-[#ebf6ff]">
-        <div className="mx-auto max-w-[70%] px-4 py-12 md:py-16">
+        <div className="container ">
+          <div className='px-4 py-12 md:py-16"'>
           {/* Heading */}
           <h2
             className={cn(
               "text-3xl md:text-4xl font-medium text-slate-900",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             Our <span className="text-[#F25C4C] font-semibold">Offerings</span>
@@ -54,7 +54,7 @@ const OfferingsSection = () => {
                 <h3
                   className={cn(
                     "text-xl md:text-2xl font-semibold text-slate-800",
-                    quicksand.className
+                    "quicksand-medium"
                   )}
                 >
                   {blk.title}
@@ -74,7 +74,7 @@ const OfferingsSection = () => {
               <h3
                 className={cn(
                   "text-xl md:text-2xl font-semibold text-slate-800",
-                  quicksand.className
+                  "quicksand-medium"
                 )}
               >
                 {advisory.title}
@@ -85,6 +85,8 @@ const OfferingsSection = () => {
                 ))}
               </ul>
             </div>
+          </div>
+
           </div>
         </div>
       </section>

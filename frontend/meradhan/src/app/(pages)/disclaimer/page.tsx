@@ -1,10 +1,13 @@
-import React from 'react'
-import Disclaimer from './Disclaimer'
+import React from "react";
+import Disclaimer from "./Disclaimer";
+import ViewPort from "@/global/components/wrapper/ViewPort";
 
 const page = () => {
   return (
-  <Disclaimer/>
-  )
-}
+    <ViewPort>
+      <Disclaimer />
+    </ViewPort>
+  );
+};
 
-export default page
+export default page;

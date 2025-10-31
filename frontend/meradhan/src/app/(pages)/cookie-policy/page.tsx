@@ -1,10 +1,13 @@
-import React from 'react'
-import CookiePolicy from './CookiePolicy'
+import React from "react";
+import CookiePolicy from "./CookiePolicy";
+import ViewPort from "@/global/components/wrapper/ViewPort";
 
 const page = () => {
   return (
-   <CookiePolicy/>
-  )
-}
+    <ViewPort>
+      <CookiePolicy />
+    </ViewPort>
+  );
+};
 
-export default page
+export default page;

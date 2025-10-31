@@ -8,7 +8,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { quicksand } from "@/global/font/font";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { FaCalendarAlt } from "react-icons/fa";
@@ -63,8 +62,8 @@ function page() {
           </div>
           <h1
             className={cn(
-              "font-medium text-2xl lg:text-4xl",
-              quicksand.className
+              "quicksand-medium text-2xl lg:text-4xl",
+              
             )}
           >
             What Is Credit Rating in Bonds?

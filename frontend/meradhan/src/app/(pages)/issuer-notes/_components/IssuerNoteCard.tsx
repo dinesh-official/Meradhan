@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
 import { IoShareSocialSharp } from "react-icons/io5";
@@ -38,7 +37,7 @@ export function IssuerNoteCard({ gridMode }: { gridMode?: boolean }) {
           <h5
             className={cn(
               "text-2xl font-semibold text-primary",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             ICICI HOME FINANCE COMPANY LIMITED

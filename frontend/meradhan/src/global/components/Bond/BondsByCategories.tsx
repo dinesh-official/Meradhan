@@ -1,5 +1,4 @@
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import { BsFillBuildingsFill } from "react-icons/bs";
 import { FaCrown, FaTaxi } from "react-icons/fa6";
 import CategorySlider from "./CategorySlider";
@@ -53,7 +52,7 @@ function BondsByCategories() {
         <h3
           className={cn(
             "text-center lg:text-3xl  text-2xl font-medium",
-            quicksand.className
+            "quicksand-medium"
           )}
         >
           <span className="text-secondary font-semibold">Bonds</span> by

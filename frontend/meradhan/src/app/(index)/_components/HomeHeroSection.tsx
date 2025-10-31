@@ -1,5 +1,4 @@
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import DhanGptHeroInput from "./elements/DhanGptHeroInput";
 import IWantToQus from "./elements/IWantToQus";
 
@@ -11,7 +10,7 @@ function HomeHeroSection() {
           <h1
             className={cn(
               "lg:text-[40px] text-3xl font-medium",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             <span className="text-secondary">AI-Powered</span> Fixed Income

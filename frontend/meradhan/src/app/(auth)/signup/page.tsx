@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { quicksand } from "@/global/font/font";
 import { cn } from "@/lib/utils";
 import { FaCircleCheck } from "react-icons/fa6";
 import SignUpForm from "./SignUpForm";
@@ -15,8 +14,7 @@ function page() {
             <div className="flex flex-col justify-center items-start gap-3 bg-primary p-10 lg:p-20 w-full h-full">
               <h5
                 className={cn(
-                  "font-medium text-white text-2xl",
-                  quicksand.className
+                  "quicksand-medium  text-white text-2xl"
                 )}
               >
                 Reasons to choose MeraDhan

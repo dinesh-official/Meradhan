@@ -1,9 +1,10 @@
-import React from 'react'
+import React from "react";
 
 const PrivacyPolicyContent = () => {
   return (
-       <section className="flex justify-center w-full bg-white">
-        <div className="max-w-[80%] py-12 px-5 text-gray-800 leading-relaxed space-y-6 text-[14px]">
+    <section className="flex justify-center w-full bg-white">
+      <div className="container ">
+        <div className="py-12 px-5 text-gray-800 leading-relaxed space-y-6 text-[14px]">
           <p>
             Thank you for visiting our website, <strong>www.meradhan.co</strong>{" "}
             (&ldquo;Platform&rdquo;).
@@ -135,9 +136,7 @@ const PrivacyPolicyContent = () => {
             </li>
           </ul>
 
-          <h3 className="text-xl   text-primary mt-6">
-            3. Use of Information
-          </h3>
+          <h3 className="text-xl   text-primary mt-6">3. Use of Information</h3>
           <p>
             We use and process user information (Personal and Non-Personal) for
             various purposes, including:
@@ -269,9 +268,7 @@ const PrivacyPolicyContent = () => {
             handled securely and transparently at all times.
           </p>
 
-          <h3 className="text-xl   text-primary mt-6">
-            4. Security Measures
-          </h3>
+          <h3 className="text-xl   text-primary mt-6">4. Security Measures</h3>
           <p>
             While we implement reasonable security measures, no internet
             transmission is fully secure. To enhance security, we:
@@ -363,9 +360,7 @@ const PrivacyPolicyContent = () => {
             Updated policies will take effect immediately upon posting.
           </p>
 
-          <h3 className="text-xl   text-primary mt-6">
-            12. Grievance Officer
-          </h3>
+          <h3 className="text-xl   text-primary mt-6">12. Grievance Officer</h3>
           <p>
             For grievances or concerns regarding data processing, please
             contact:
@@ -378,8 +373,9 @@ const PrivacyPolicyContent = () => {
             Email: compliance@meradhan.co
           </p>
         </div>
-      </section>
-  )
-}
+      </div>
+    </section>
+  );
+};
 
-export default PrivacyPolicyContent
+export default PrivacyPolicyContent;

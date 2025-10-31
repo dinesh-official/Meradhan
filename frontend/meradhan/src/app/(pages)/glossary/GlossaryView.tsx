@@ -10,8 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import { Loader2, Search } from "lucide-react";
 import GlossaryPost from "./_components/glossaryPost";
 import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";

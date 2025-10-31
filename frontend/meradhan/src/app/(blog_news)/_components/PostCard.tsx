@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { quicksand } from "@/global/font/font";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import AuthorViewSharePostCard from "./AuthorViewSharePostCard";
@@ -44,8 +43,8 @@ function PostCard({
 
       <h3
         className={cn(
-          "font-medium text-[20px] text-primary line-clamp-2",
-          quicksand.className,
+          "quicksand-medium  text-[20px] text-primary line-clamp-2",
+         
         )}
       >
         {heading}

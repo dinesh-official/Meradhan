@@ -19,8 +19,7 @@ import VerifyOtpPopUp from "./_components/VerifyOtpPopUp";
 import { useSignUpAuthFlow } from "./_hooks/useSignUpAuthFlow";
 import { useSignUpFormDataState } from "./_hooks/useSignUpFormDataState";
 import { cn } from "@/lib/utils";
-import { quicksand } from "@/global/font/font";
-
+ 
 // ✅ Reusable field wrapper with error display
 const Field: React.FC<{
   error?: string;
@@ -67,8 +66,8 @@ function SignUpForm() {
         {/* Header */}
         <h2
           className={cn(
-            "font-medium text-gray-700 text-2xl",
-            quicksand.className
+            "quicksand-medium  text-gray-700 text-2xl",
+            
           )}
         >
           Create an Account

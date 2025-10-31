@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import React from "react";
 import { FaBrain } from "react-icons/fa6";
 import { FaCalculator } from "react-icons/fa6";
@@ -12,7 +11,7 @@ function ToolsOfferedByMeraDhan() {
         <h3
           className={cn(
             "text-center lg:text-3xl  text-2xl  font-medium",
-            quicksand.className
+            "quicksand-medium"
           )}
         >
           <span className="text-secondary font-semibold">Tools</span> Offered by

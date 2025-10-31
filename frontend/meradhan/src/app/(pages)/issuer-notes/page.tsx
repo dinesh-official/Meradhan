@@ -7,8 +7,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import { IssuerNoteCard } from "./_components/IssuerNoteCard";
 import IssuerNotesSearchMode from "./_components/IssuerNotesSearchMode";
 
@@ -33,7 +32,7 @@ function page() {
           <h1
             className={cn(
               "text-4xl text-center font-medium",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             Issuer

@@ -1,5 +1,4 @@
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import { RecentBlogCard } from "./elements/RecentBlogCard";
 
 function RecentBlogs() {
@@ -9,7 +8,7 @@ function RecentBlogs() {
         <h3
           className={cn(
             "text-center lg:text-3xl  text-2xl  font-medium",
-            quicksand.className
+            "quicksand-medium"
           )}
         >
           Recent <span className="text-secondary font-semibold">Blogs</span>

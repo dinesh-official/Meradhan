@@ -1,39 +1,19 @@
-import Footer from '@/global/components/footer/Footer'
-import NewsLetter from '@/global/components/footer/NewsLetter'
-import NavBar from '@/global/components/navbar/NavBar'
-import { quicksand } from '@/global/font/font'
-import { cn } from '@/lib/utils'
-import React from 'react'
-import TermsContent from './_components/TermsContent'
+import React from "react";
+import TermsContent from "./_components/TermsContent";
+import ViewPort from "@/global/components/wrapper/ViewPort";
+import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
 
 const TermsOfUse = () => {
   return (
-      <div className="bg-primary h-72">
+    <ViewPort>
+      <TopTitleDesc
+        title="Terms & <span class='text-secondary'>Conditions</span>"
+        description="Last updated: 19 March 2025"
+      />
 
-      <div className="relative flex justify-center items-center bg-[#02264A] w-full h-[224px]">
-        <div className="flex flex-col justify-center items-center text-center">
-          <h1
-            className={cn(
-              "font-medium text-white text-3xl md:text-4xl",
-              quicksand.className
-            )}
-          >
-            Terms &{" "}
-            <span className="font-semibold text-[#F25C4C]">Conditions</span>
-          </h1>
-          <p className="mt-2 text-white text-sm md:text-base">
-            Last updated: 19 March 2025
-          </p>
-        </div>
-      </div>
+      <TermsContent />
+    </ViewPort>
+  );
+};
 
-     <TermsContent/>
-      <div className="mt-[4rem]">
-        <NewsLetter />
-        <Footer />
-      </div>
-    </div>
-  )
-}
-
-export default TermsOfUse
+export default TermsOfUse;

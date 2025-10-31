@@ -2,9 +2,10 @@ import React from 'react'
 
 const CookieContent = () => {
   return (
-        <section className="flex justify-center w-full bg-white">
-        <div className="max-w-[80%] py-12 px-5 text-gray-800 leading-relaxed space-y-6 text-[14px]">
-          <p>
+        <section className="flex justify-center w-full">
+        <div className="container">
+          <div className='py-12 px-5 leading-relaxed space-y-6 text-[14px]'>
+ <p>
             Welcome to <strong>MeraDhan</strong>, a platform by BondNest Capital
             India Securities Private Limited.
           </p>
@@ -79,6 +80,8 @@ const CookieContent = () => {
           </p>
 
           <p>If you have any questions, feel free to contact us.</p>
+          </div>
+         
         </div>
       </section>
   )

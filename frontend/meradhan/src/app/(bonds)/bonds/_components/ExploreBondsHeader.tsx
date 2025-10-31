@@ -7,8 +7,7 @@ import {
   MultiSelectTrigger,
   MultiSelectValue,
 } from "@/components/ui/multi-select";
-import { quicksand } from "@/global/font/font";
-import { cn } from "@/lib/utils";
+ import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 function ExploreBondsHeader() {
   return (
@@ -18,7 +17,7 @@ function ExploreBondsHeader() {
           <h1
             className={cn(
               "lg:text-[40px] text-3xl font-medium",
-              quicksand.className
+              "quicksand-medium"
             )}
           >
             Exclusive{" "}
