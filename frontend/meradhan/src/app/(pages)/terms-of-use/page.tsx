@@ -1,7 +1,11 @@
 import React from "react";
 import TermsOfUse from "./TermsOfUse";
-import slugBasedPagesGQLData from "@/graphql/PagesGQLAction";
+import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLAction";
 import { redirect } from "next/navigation";
+
+export async function generateMetadata() {
+  return await slugBasedGQLMetaData("terms-of-use");
+}
 
 const page = async () => {
   const data = await slugBasedPagesGQLData("terms-of-use");

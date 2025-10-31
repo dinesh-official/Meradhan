@@ -2,10 +2,13 @@ import React from "react";
 import Disclaimer from "./Disclaimer";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import { redirect } from "next/navigation";
-import slugBasedPagesGQLData from "@/graphql/PagesGQLAction";
+import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLAction";
 
+export async function generateMetadata() {
+  return await slugBasedGQLMetaData("disclaimer");
+}
 const page = async () => {
-  const data = await slugBasedPagesGQLData("terms-of-use");
+  const data = await slugBasedPagesGQLData("disclaimer");
   if (!data) {
     redirect("/404");
   }

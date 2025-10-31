@@ -1,9 +1,14 @@
 import React from "react";
 import AboutUs from "./AboutUs";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import slugBasedPagesGQLData from "@/graphql/PagesGQLAction";
+import slugBasedPagesGQLData, {
+  slugBasedGQLMetaData,
+} from "@/graphql/PagesGQLAction";
 import { redirect } from "next/navigation";
 
+export async function generateMetadata() {
+  return await slugBasedGQLMetaData("about-us");
+}
 const page = async () => {
   const data = await slugBasedPagesGQLData("about-us");
   if (!data) {

@@ -1,9 +1,12 @@
 import React from "react";
 import PrivacyPolicy from "./PrivacyPolicy";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import slugBasedPagesGQLData from "@/graphql/PagesGQLAction";
+import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLAction";
 import { redirect } from "next/navigation";
 
+export async function generateMetadata() {
+  return await slugBasedGQLMetaData("privacy-policy");
+}
 const page = async () => {
   const data = await slugBasedPagesGQLData("privacy-policy");
   if (!data) {
