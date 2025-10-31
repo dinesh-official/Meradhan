@@ -17,7 +17,7 @@ function LabelInput({
 }) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <Label className="font-base text-gray-500 text-xs">
+      <Label className="text-[#666666] text-xs">
         {label} {required && <span className="text-red-600">*</span>}
       </Label>
       {children}

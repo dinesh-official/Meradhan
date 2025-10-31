@@ -30,10 +30,10 @@ function BankViewCard({
           statusLabel={bank.isVerified ? "Verified" : "Invalid"}
           showStatus
         >
-          <p className="flex items-center gap-2 font-medium">
+          <p className="flex items-center gap-2">
             {bank.bankName}{" "}
             <IoMdTrash
-              className="text-gray-600 cursor-pointer"
+              className="text-[#AAAAAA] cursor-pointer"
               size={16}
               onClick={onDelete}
             />
@@ -42,23 +42,23 @@ function BankViewCard({
         <DataInfoLabel
           title="Name"
           status={isNameMatched ? "SUCCESS" : "ERROR"}
-          statusLabel={isNameMatched ? "Verified" : "Invalid"}
+          statusLabel={isNameMatched ? "Matched" : "Invalid"}
           showStatus
         >
-          <p className="font-medium">{bank.beneficiary_name}</p>
+          <p>{bank.beneficiary_name}</p>
         </DataInfoLabel>
       </div>
 
       <div className="gap-5 grid sm:grid-cols-2 lg:grid-cols-4">
         <DataInfoLabel title="Account Number ">
-          <p className="font-medium">{bank.accountNumber}</p>
+          <p>{bank.accountNumber}</p>
         </DataInfoLabel>
         <DataInfoLabel title="IFSC Code ">
-          <p className="font-medium">{bank.ifscCode}</p>
+          <p>{bank.ifscCode}</p>
         </DataInfoLabel>
 
         <DataInfoLabel title="Bank Account Type">
-          <p className="font-medium capitalize">{bank.bankAccountType}</p>
+          <p className="capitalize">{bank.bankAccountType}</p>
         </DataInfoLabel>
         <DataInfoLabel
           title="Branch"
@@ -66,7 +66,7 @@ function BankViewCard({
           showStatus
           statusLabel={bank.isVerified ? "Verified" : "Invalid"}
         >
-          <p className="font-medium">{bank.branchName}</p>
+          <p>{bank.branchName}</p>
         </DataInfoLabel>
       </div>
       <label className="flex lg:items-center gap-2 mt-3 text-sm">

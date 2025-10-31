@@ -18,13 +18,13 @@ function DematAccountView({
   setDefault: () => void;
   myPan: string;
 }) {
-  const isNameMatched = dataMatcherUtils.areNamesMatched(
-    dataMatcherUtils.splitFullName(account.accountHolderName),
-    dataMatcherUtils.splitFullName(name)
-  );
+  // const isNameMatched = dataMatcherUtils.areNamesMatched(
+  //   dataMatcherUtils.splitFullName(account.accountHolderName),
+  //   dataMatcherUtils.splitFullName(name)
+  // );
   return (
     <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
-      <div className="gap-5 grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+      <div className="gap-5 grid sm:grid-cols-2 xl:grid-cols-4">
         <DataInfoLabel
           title="DP ID "
           status={account.isVerified ? "SUCCESS" : "ERROR"}
@@ -46,7 +46,7 @@ function DematAccountView({
           title="PAN"
           status={account.panNumber.includes(myPan) ? "SUCCESS" : "ERROR"}
           statusLabel={
-            account.panNumber.includes(myPan) ? "Verified" : "Invalid"
+            account.panNumber.includes(myPan) ? "Matched" : "Invalid"
           }
           showStatus
         >
@@ -62,20 +62,21 @@ function DematAccountView({
             />
           </p>
         </DataInfoLabel>
-
+      </div>
+      <div className="gap-5 grid sm:grid-cols-2 xl:grid-cols-3">
         <DataInfoLabel
           title="Depository Participant Name"
-          status={account.isVerified ? "SUCCESS" : "ERROR"}
-          statusLabel={account.isVerified ? "Verified" : "Invalid"}
-          showStatus
+          // status={account.isVerified ? "SUCCESS" : "ERROR"}
+          // statusLabel={account.isVerified ? "Verified" : "Invalid"}
+          // showStatus
         >
           <p className="font-medium">{account.depositoryParticipantName}</p>
         </DataInfoLabel>
         <DataInfoLabel
           title="Account Holder Name"
-          status={isNameMatched ? "SUCCESS" : "ERROR"}
-          showStatus
-          statusLabel={isNameMatched ? "Verified" : "Invalid"}
+          // status={isNameMatched ? "SUCCESS" : "ERROR"}
+          // showStatus
+          // statusLabel={isNameMatched ? "Verified" : "Invalid"}
         >
           <p className="font-medium">{account.accountHolderName}</p>
         </DataInfoLabel>

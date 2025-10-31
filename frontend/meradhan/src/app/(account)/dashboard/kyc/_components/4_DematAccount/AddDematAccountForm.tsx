@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import React from "react";
+import React, { useEffect } from "react";
 import { MdOutlineArrowRight } from "react-icons/md";
 import {
   Select,
@@ -40,10 +40,28 @@ function AddDematAccountForm() {
     });
   };
 
+  useEffect(() => {
+    if (state.step_1.pan.panCardNo != data.panNumber?.[0]) {
+      updateData("panNumber", [
+        state.step_1.pan.panCardNo,
+        ...data.panNumber?.slice(1),
+      ]);
+      updateData(
+        "accountHolderName",
+        state.step_1.pan.firstName +
+          " " +
+          state.step_1.pan.middleName +
+          " " +
+          state.step_1.pan.lastName
+      );
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Add Demat Account</CardTitle>
+        <CardTitle className="font-normal">Add Demat Account</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="flex flex-col gap-3 md:gap-5">
@@ -96,15 +114,15 @@ function AddDematAccountForm() {
                 value={data?.accountType}
                 onValueChange={(e) => {
                   updateData("accountType", e);
+                  updateData("panNumber", [state.step_1.pan.panCardNo]);
                 }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SINGLE">Single</SelectItem>
+                  <SelectItem value="SOLO">Solo</SelectItem>
                   <SelectItem value="JOINT">Joint</SelectItem>
-                  <SelectItem value="HUF">HUF</SelectItem>
                 </SelectContent>
               </Select>
             </LabelInput>
@@ -128,9 +146,8 @@ function AddDematAccountForm() {
               index={state.step_4.length - 1}
               errors={error?.panNumber}
             />
-
             <LabelInput
-              label="Account Holder Name"
+              label="Name as per PAN"
               required
               error={error?.accountHolderName?.[0]}
             >
@@ -139,14 +156,17 @@ function AddDematAccountForm() {
                 onChange={(e) =>
                   updateData("accountHolderName", e.target.value)
                 }
+                disabled
+                adminMode
               />
             </LabelInput>
           </div>
-          <label className="flex lg:items-center gap-3 text-sm">
+          <label className="flex lg:items-start gap-3 text-sm">
             <Checkbox
               onClick={() => {
                 updateData("checkTerms", !data?.checkTerms);
               }}
+              className="lg:mt-[2px]"
               checked={data?.checkTerms}
             />
             <p>

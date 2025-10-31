@@ -7,6 +7,7 @@ import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLA
 export async function generateMetadata() {
   return await slugBasedGQLMetaData("disclaimer");
 }
+
 const page = async () => {
   const data = await slugBasedPagesGQLData("disclaimer");
   if (!data) {

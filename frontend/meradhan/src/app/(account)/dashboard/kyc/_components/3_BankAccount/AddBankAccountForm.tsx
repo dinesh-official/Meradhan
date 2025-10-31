@@ -36,7 +36,8 @@ const accountTypeOptions = [
 function AddBankAccountForm() {
   const { error, handleBankAccountSubmit, fetchBankIfsc, isPending } =
     useAddBankAccountFormHook();
-  const { updateBankAccount, state, removeBankAccount,nextLocalStep } = useKycDataStorage();
+  const { updateBankAccount, state, removeBankAccount, nextLocalStep } =
+    useKycDataStorage();
   const data = state.step_3[state.step_3.length - 1];
 
   const updateData = (
@@ -51,7 +52,7 @@ function AddBankAccountForm() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Add Bank Account</CardTitle>
+        <CardTitle className="font-normal">Add Bank Account</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="flex flex-col gap-3 md:gap-5">
@@ -105,6 +106,7 @@ function AddBankAccountForm() {
                 onChange={(e) => updateData("bankName", e.target.value)}
                 value={data?.bankName}
                 disabled
+                adminMode
               />
             </LabelInput>
             <LabelInput label="Branch" required error={error?.branchName?.[0]}>
@@ -112,6 +114,7 @@ function AddBankAccountForm() {
                 onChange={(e) => updateData("branchName", e.target.value)}
                 value={data?.branchName}
                 disabled
+                adminMode
               />
             </LabelInput>
           </div>

@@ -6,9 +6,19 @@ import { Plus, Trash } from "lucide-react";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { useEffect } from "react";
 
-const panHanderLeablel = ['Primary PAN Number', 'Secondary PAN Number', 'Tertiary PAN Number'];
+const panHanderLeablel = [
+  "Primary PAN Number",
+  "Secondary PAN Number",
+  "Tertiary PAN Number",
+];
 
-function ManageDematPanInputs({ index,errors }: { index: number ,errors?:string[]}) {
+function ManageDematPanInputs({
+  index,
+  errors,
+}: {
+  index: number;
+  errors?: string[];
+}) {
   const {
     addDepositoryPan,
     removeDepositoryPan,
@@ -33,13 +43,19 @@ function ManageDematPanInputs({ index,errors }: { index: number ,errors?:string[
   return (
     <>
       {pansData.map((item, subIndex) => (
-        <LabelInput label={( isJoined && panHanderLeablel?.[subIndex]) || "PAN Number"} required key={subIndex} error={errors?.[subIndex]} >
+        <LabelInput
+          label={(isJoined && panHanderLeablel?.[subIndex]) || "PAN Number"}
+          required
+          key={subIndex}
+          error={errors?.[subIndex]}
+        >
           <div className="relative">
             <Input
               className="peer pe-9"
               type="text"
               maxLength={10}
-              disabled={!isJoined && subIndex > 0} // prevent typing in extra fields if isJoined = false
+              disabled={subIndex === 0}
+              adminMode
               value={item}
               onChange={(e) =>
                 updateDepositoryPan(
@@ -54,14 +70,13 @@ function ManageDematPanInputs({ index,errors }: { index: number ,errors?:string[
             {isJoined && (
               <div className="absolute inset-y-0 flex justify-center items-center text-muted-foreground/80 end-2">
                 {/* ➕ Add new PAN when last item and under max */}
-                {subIndex === pansData.length - 1 &&
-                pansData.length < MAX_PAN_COUNT ? (
+                {subIndex == 0 && pansData.length < MAX_PAN_COUNT ? (
                   <Plus
                     size={18}
                     className="hover:text-primary cursor-pointer"
                     onClick={() => addDepositoryPan(index)}
                   />
-                ) : pansData.length > 1 ? (
+                ) : subIndex != 0 ? (
                   // 🗑 Remove existing PAN
                   <Trash
                     size={15}

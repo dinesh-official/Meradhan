@@ -34,7 +34,7 @@ function RiskProfilingCard() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Investment Experience</CardTitle>
+        <CardTitle className="font-normal">Investment Experience</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <RiskProfilingSelector />

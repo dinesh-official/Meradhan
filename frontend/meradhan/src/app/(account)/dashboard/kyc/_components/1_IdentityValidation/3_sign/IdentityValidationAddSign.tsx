@@ -16,7 +16,7 @@ export default function IdentityValidationAddSign() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Add Your Signature</CardTitle>
+        <CardTitle className="font-normal">Add Your Signature</CardTitle>
       </CardHeader>
 
       <CardContent accountMode>

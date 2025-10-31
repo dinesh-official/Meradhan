@@ -21,8 +21,8 @@ function KycESign() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Kyc Form Generation</CardTitle>
-        <CardDescription>
+        <CardTitle className="font-normal" >Kyc Form Generation</CardTitle>
+        <CardDescription className="text-black" >
           KYC form generated successfully. Download the form and review it
           before you proceed to e-sign.
         </CardDescription>
@@ -66,9 +66,9 @@ function KycESign() {
         <Button
           className="w-full sm:w-auto"
           onClick={handleEsignKyc}
-          disabled={isPending}
+          disabled={isPending || !state?.step_6?.terms}
         >
-          Proceed to E-Sign <MdOutlineArrowRight />
+          Proceed to e-Sign <MdOutlineArrowRight />
         </Button>
       </CardFooter>
     </Card>

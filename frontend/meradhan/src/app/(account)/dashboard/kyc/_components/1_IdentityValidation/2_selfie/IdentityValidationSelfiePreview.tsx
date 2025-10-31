@@ -18,7 +18,7 @@ function IdentityValidationSelfiePreview() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Confirm Selfie</CardTitle>
+        <CardTitle className="font-normal">Confirm Selfie</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="flex items-center gap-5">

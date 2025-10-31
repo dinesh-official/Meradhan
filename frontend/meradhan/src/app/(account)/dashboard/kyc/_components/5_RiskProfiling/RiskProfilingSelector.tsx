@@ -10,14 +10,14 @@ function RiskProfilingSelector() {
       {riskProfiling.map((question, idx) => (
         <div key={idx} className="flex flex-col gap-2">
           <p className="font-medium text-sm">{question.qus}</p>
-          <div className="gap-5 grid lg:grid-cols-4">
+          <div className="gap-5 grid lg:grid-cols-4 text-sm">
             {question.opt.map((option, n_idx) => (
               <div
                 key={n_idx}
                 className={cn(
-                  "p-2.5 border border-gray-200 rounded-lg text-center cursor-pointer",
+                  "p-2.5 border border-gray-200 rounded-md text-center cursor-pointer",
                   option === riskProfiling[idx].ans &&
-                    "bg-secondary border-0 text-white"
+                    "bg-secondary border-secondary text-white"
                 )}
                 onClick={() => selectStep5RiskProfileAnswer(idx, option)}
               >

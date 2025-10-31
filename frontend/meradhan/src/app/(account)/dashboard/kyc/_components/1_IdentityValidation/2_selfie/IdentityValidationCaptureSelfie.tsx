@@ -16,7 +16,7 @@ function IdentityValidationCaptureSelfie() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Capture Your Selfie</CardTitle>
+        <CardTitle className="font-normal">Capture Your Selfie</CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <KycSelfieGuide />

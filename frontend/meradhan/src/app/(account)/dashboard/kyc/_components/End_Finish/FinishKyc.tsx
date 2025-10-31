@@ -13,11 +13,11 @@ function FinishKyc() {
     <Card accountMode>
       <CardContent accountMode>
         <div className="flex flex-col justify-center items-center gap-3 py-10 text-center">
-          <FaCheckSquare size={60} className="text-green-600" />
-          <p className="font-medium text-lg">KYC Form Submitted</p>
-          <p>
+          <FaCheckSquare size={50} className="text-green-600" />
+          <p className="font-normal text-lg">KYC Form Submitted</p>
+          <p className="flex justify-center items-center gap-4" >
             Registration on Exchange Platform{" "}
-            <span className="bg-amber-100 px-4 py-1.5 rounded-lg">Pending</span>{" "}
+            <span className="bg-amber-100 px-4 py-1.5 rounded-md">Pending</span>{" "}
           </p>
           <p className="max-w-[600px]">
             Your KYC details have been submitted to the respective exchanges.

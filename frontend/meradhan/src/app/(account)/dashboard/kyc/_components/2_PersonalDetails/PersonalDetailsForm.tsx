@@ -38,7 +38,7 @@ function PersonalDetailsForm() {
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-medium">Personal Details</CardTitle>
+        <CardTitle className="font-normal">Personal Details</CardTitle>
       </CardHeader>
 
       <CardContent accountMode>
