@@ -13,7 +13,7 @@ export class NSDLApi {
     constructor(requestorId: string, secretKey: string, isProd: boolean = false) {
         this.requestorId = requestorId;
         this.secretKey = secretKey;
-        this.baseUrl = "https://eservices-test.nsdl.com";
+        this.baseUrl = isProd ? "https://eservices.nsdl.com" : "https://eservices-test.nsdl.com";
 
         this.axiosInstance = axios.create({
             baseURL: this.baseUrl,

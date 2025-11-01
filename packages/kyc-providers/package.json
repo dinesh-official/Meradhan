@@ -6,8 +6,18 @@
   "exports": {
     ".": "./index.ts"
   },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "check": "npx tsc --noEmit"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@eslint/js": "^9.39.0",
+    "@types/bun": "latest",
+    "eslint": "^9.39.0",
+    "globals": "^16.5.0",
+    "jiti": "^2.6.1",
+    "typescript-eslint": "^8.46.2"
   },
   "peerDependencies": {
     "typescript": "^5"

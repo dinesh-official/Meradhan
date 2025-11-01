@@ -2,11 +2,16 @@
 
 # Exit on first error
 set -e
-
 echo "🚀 Starting MeraDhan deployment..."
 
 # Navigate to main project directory
 cd MeradhanProject/
+
+# --------------------------
+# LINT & TYPE CHECK ALL
+# --------------------------
+echo "🧹 Running lint and type checks for all projects..."
+./lint-check-all.sh
 ./setup.sh
 
 echo "✅ Setup complete."
