@@ -8,6 +8,7 @@ import ToolsOfferedByMeraDhan from "./_components/ToolsOfferedbyMeraDhan";
 import WhyMeraDhanSection from "./_components/WhyMeraDhanSection";
 import RecentBlogs from "./_components/RecentBlogs";
 
+export const revalidate = 0; // Revalidate the page every hour
 export default function HomePage() {
   return (
     <ViewPort>

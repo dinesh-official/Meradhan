@@ -4,13 +4,14 @@ import PostCard from "../_components/PostCard";
 import BlogPageFIlterOrSort from "./_components/BlogPageFIlterOrSort";
 import { fetchBlogsData } from "./_gql/blogs.gql";
 
+export const revalidate = 0;
 async function BlogView() {
   const data = await fetchBlogsData();
   const items = data?.blogPosts_connection.nodes;
   return (
     <div>
       <div className="pt-10">
-        <h1 className={cn("quicksand-medium  text-4xl", )}>
+        <h1 className={cn("text-4xl quicksand-medium")}>
           MeraDhan <span className="font-semibold text-secondary">Blogs</span>
         </h1>
         <BlogPageFIlterOrSort />
