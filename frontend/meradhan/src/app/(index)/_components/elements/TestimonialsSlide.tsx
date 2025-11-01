@@ -35,7 +35,7 @@ export const CustomArrow: React.FC<ArrowProps & { side: "LEFT" | "RIGHT" }> = ({
     <button
       onClick={onClick}
       className={cn(
-        "absolute top-1/2 z-40 transform -translate-y-1/2   py-2 cursor-pointer ",
+        "top-1/2 z-40 absolute py-2 -translate-y-1/2 cursor-pointer transform",
         side == "LEFT" ? "left-0" : "right-0 "
       )}
       aria-label="Next Slide"
@@ -75,15 +75,15 @@ export default TestimonialsSlide;
 
 function Testimonial() {
   return (
-    <div className="flex md:flex-row flex-col   gap-5 items-center px-10">
+    <div className="flex md:flex-row flex-col items-center gap-5 px-10">
       <div className="relative min-w-52">
-        <div className="w-24 h-56 rounded-xl bg-muted"></div>
+        <div className="bg-muted rounded-xl w-24 h-56"></div>
         <Image
           src={"/avatars/person.jpeg"}
           alt="person"
           width={300}
           height={300}
-          className="w-44 h-44 mt-6 ml-5 object-cover rounded-xl absolute top-0 left-0 bg-gray-50"
+          className="top-0 left-0 absolute bg-gray-50 mt-6 ml-5 rounded-xl w-44 h-44 object-cover"
         />
       </div>
       <div className="flex flex-col gap-3">

@@ -253,6 +253,7 @@ exports.Prisma.AADHAARCardModelScalarFieldEnum = {
   image: 'image',
   isVerified: 'isVerified',
   verifyDate: 'verifyDate',
+  fileUrl: 'fileUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -265,8 +266,10 @@ exports.Prisma.PanCardModelScalarFieldEnum = {
   panCardNo: 'panCardNo',
   dateOfBirth: 'dateOfBirth',
   gender: 'gender',
+  image: 'image',
   isVerified: 'isVerified',
   verifyDate: 'verifyDate',
+  fileUrl: 'fileUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

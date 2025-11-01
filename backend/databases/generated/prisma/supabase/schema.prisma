@@ -228,16 +228,17 @@ model AADHAARCardModel {
   id Int @id @default(autoincrement())
 
   firstName   String
-  middleName  String
+  middleName  String?
   lastName    String
-  fatherName  String
+  fatherName  String?
   aadhaarNo   String
   dateOfBirth String
   gender      Gender
   image       String
 
-  isVerified Boolean  @default(false)
-  verifyDate DateTime
+  isVerified Boolean   @default(false)
+  verifyDate DateTime?
+  fileUrl    String
 
   // 1-to-1 back reference
   customerProfileDataModel CustomerProfileDataModel?
@@ -253,14 +254,15 @@ model PanCardModel {
   id Int @id @default(autoincrement())
 
   firstName   String
-  middleName  String
+  middleName  String?
   lastName    String
   panCardNo   String
   dateOfBirth String
   gender      Gender
-
-  isVerified Boolean  @default(false)
-  verifyDate DateTime
+  image       String
+  isVerified  Boolean   @default(false)
+  verifyDate  DateTime?
+  fileUrl     String
 
   // 1-to-1 back reference
   customerProfileDataModel CustomerProfileDataModel?
@@ -275,7 +277,7 @@ model PanCardModel {
 model CustomersRiskProfileModel {
   id Int @id @default(autoincrement())
 
-  data Json
+  data Json[]
 
   // 1-to-1 back reference
   customerProfileDataModel CustomerProfileDataModel?
@@ -321,9 +323,9 @@ model CustomersBankAccountModel {
   bankName          String
   branch            String
 
-  isPrimary  Boolean  @default(false)
-  isVerified Boolean  @default(false)
-  verifyDate DateTime
+  isPrimary  Boolean   @default(false)
+  isVerified Boolean   @default(false)
+  verifyDate DateTime?
 
   CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
   customerProfileDataModelId Int?
@@ -349,9 +351,9 @@ model CustomersDematAccountModel {
   trdPanNumber      String?
   accountHolderName String
 
-  isPrimary  Boolean  @default(false)
-  isVerified Boolean  @default(false)
-  verifyDate DateTime
+  isPrimary  Boolean   @default(false)
+  isVerified Boolean   @default(false)
+  verifyDate DateTime?
 
   CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
   customerProfileDataModelId Int?

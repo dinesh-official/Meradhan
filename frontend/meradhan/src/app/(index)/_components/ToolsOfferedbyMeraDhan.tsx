@@ -1,23 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
- import { cn } from "@/lib/utils";
-import React from "react";
-import { FaBrain } from "react-icons/fa6";
-import { FaCalculator } from "react-icons/fa6";
+import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
+import { FaBrain, FaCalculator } from "react-icons/fa6";
 function ToolsOfferedByMeraDhan() {
   return (
-    <div className="bg-accent py-14">
+    <SectionWrapper className="bg-accent">
       <div className="container">
-        <h3
-          className={cn(
-            "text-center lg:text-3xl  text-2xl  font-medium",
-            "quicksand-medium"
-          )}
-        >
-          <span className="text-secondary font-semibold">Tools</span> Offered by
-          MeraDhan
-        </h3>
-        <div className="grid lg:grid-cols-2 gap-5 mt-8">
+        <SectionTitleDesc
+          title={
+            <>
+              <span className="font-semibold text-secondary">Tools</span>{" "}
+              Offered by MeraDhan
+            </>
+          }
+        />
+
+        <div className="gap-5 grid lg:grid-cols-2 mt-8">
           <Card className="border-none">
             <CardContent>
               <div className="flex flex-col gap-5">
@@ -54,7 +53,7 @@ function ToolsOfferedByMeraDhan() {
           </Card>
         </div>
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

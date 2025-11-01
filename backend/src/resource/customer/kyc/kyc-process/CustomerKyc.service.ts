@@ -4,7 +4,7 @@ import { appSchema } from '@root/schema';
 import { AppError } from '@utils/error/AppError';
 import type z from 'zod';
 
-export class PersonalDetailsKycService {
+export class CustomerKycKycService {
     private kycProvider = new KycProvider()
 
     async createPanVerifyRequest({ id, data }: { id: number, data: z.infer<typeof appSchema.kyc.kycPanInfoDataSchema> }) {

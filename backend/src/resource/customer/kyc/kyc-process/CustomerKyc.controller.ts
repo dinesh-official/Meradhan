@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { PersonalDetailsKycService } from "./PersonalDetailsKyc.service";
+import { CustomerKycKycService } from "./CustomerKyc.service";
 import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 
-export class PersonalDetailsKycController {
-    private panKycService = new PersonalDetailsKycService()
+export class CustomerKycKycController {
+    private panKycService = new CustomerKycKycService()
 
     async createPanVerifyRequest(req: Request, res: Response) {
         const data = appSchema.kyc.kycPanInfoDataSchema.parse(req.body);

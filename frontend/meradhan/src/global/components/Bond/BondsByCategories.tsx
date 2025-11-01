@@ -1,7 +1,9 @@
- import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { BsFillBuildingsFill } from "react-icons/bs";
 import { FaCrown, FaTaxi } from "react-icons/fa6";
 import CategorySlider from "./CategorySlider";
+import SectionTitleDesc from "../basic/section/SectionTitleDesc";
+import SectionWrapper from "../basic/section/SectionWrapper";
 const category = [
   {
     icon: <FaTaxi />,
@@ -42,29 +44,27 @@ const category = [
     icon: <FaCrown />,
     name: "Sovereign Gold",
     href: "#",
-  }
+  },
 ];
 
 function BondsByCategories() {
   return (
-    <div className="py-14">
-      <div className="container flex flex-col gap-5">
-        <h3
-          className={cn(
-            "text-center lg:text-3xl  text-2xl font-medium",
-            "quicksand-medium"
-          )}
-        >
-          <span className="text-secondary font-semibold">Bonds</span> by
-          Categories
-        </h3>
-        <p className="text-center">
-          Explore bonds by category to find investment options that match your
-          goals, risk appetite, and financial preferences.
-        </p>
+    <SectionWrapper>
+      <div className="flex flex-col gap-5 container">
+        <SectionTitleDesc
+          title={
+            <>
+              <span className="font-semibold text-secondary">Bonds</span> by
+              Categories
+            </>
+          }
+          description="Explore bonds by category to find investment options that match your
+          goals, risk appetite, and financial preferences."
+        />
+
         <CategorySlider category={category} />
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

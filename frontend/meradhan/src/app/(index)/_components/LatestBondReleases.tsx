@@ -1,30 +1,27 @@
+import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import { BondListCard } from "@/global/components/Bond/BondListCard";
- import { cn } from "@/lib/utils";
-import React from "react";
 
 function LatestBondReleases() {
   return (
-    <div className="py-14">
-      <div className="container flex flex-col gap-5">
-        <h3
-          className={cn(
-            "text-center lg:text-3xl  text-2xl font-medium",
-            "quicksand-medium"
-          )}
-        >
-          <span className="text-secondary font-semibold">Latest</span> Bond
-          Releases
-        </h3>
-        <p className="text-center">
-          New bonds are in! See what’s just been released in the market.
-        </p>
-        <div className="grid md:grid-cols-3 gap-5 mt-2">
+    <SectionWrapper >
+      <div className="flex flex-col gap-5 container">
+        <SectionTitleDesc
+          title={
+            <>
+              <span className="font-semibold text-secondary">Latest</span> Bond
+              Releases
+            </>
+          }
+          description="New bonds are in! See what’s just been released in the market."
+        />
+        <div className="gap-5 grid lg:grid-cols-3 mt-2">
           <BondListCard gridMode={true} onlyShare></BondListCard>
           <BondListCard gridMode={true} onlyShare></BondListCard>
           <BondListCard gridMode={true} onlyShare></BondListCard>
         </div>
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

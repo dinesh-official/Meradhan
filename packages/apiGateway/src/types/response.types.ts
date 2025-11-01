@@ -166,6 +166,15 @@ export type CustomerByIdPayload = {
   panCard: PanCard | null;
   permanentAddress: Address | null;
   personalInformation: PersonalInfo | null;
+  riskProfile: {
+    id: number;
+    data: {
+      ans: string
+      opt: Array<string>
+      qus: string
+      index: number
+    }[]
+  }
 
   userName: string;
   firstName: string;

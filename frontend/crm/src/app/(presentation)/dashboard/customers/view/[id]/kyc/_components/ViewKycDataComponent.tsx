@@ -1,5 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { genMediaUrl } from "@/global/utils/url.utils";
+import { areNamesMatched } from "@/lib/utils";
+import { CustomerByIdPayload } from "@root/apiGateway";
 import StickyHeader from "./StickyHeader";
 import AadhaarCardInfo from "./cards/AadhaarCardInfo";
 import AdharaCard from "./cards/AdharaCard";
@@ -13,15 +17,11 @@ import PersonalInformationCard from "./cards/PersonalInformationCard";
 import RiskProfileQuestion, {
   RiskProfileAnsOption,
 } from "./cards/riskprofile/RiskProfileQuestion";
-import { CustomerByIdPayload } from "@root/apiGateway";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import { areNamesMatched } from "@/lib/utils";
-import { genMediaUrl } from "@/global/utils/url.utils";
 
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   return (
-    <div className="flex flex-col gap-5 relative mt-5">
-      <div className="grid xl:grid-cols-2 gap-5">
+    <div className="relative flex flex-col gap-5 mt-5">
+      <div className="gap-5 grid xl:grid-cols-2">
         <CustomerOverViewCard
           name={`${data.firstName} ${data.middleName} ${data.lastName}`}
           customerSince={
@@ -50,7 +50,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       </div>
 
       <StickyHeader />
-
+      {genMediaUrl(data.avatar)}
+      {data.personalInformation?.SignatureUrl}
       {/* Personal Information */}
       <div className="scroll-mt-16" id="personal-info">
         <PersonalInformationCard
@@ -89,7 +90,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       </div>
 
       {/* Identity Documents */}
-      <div className="scroll-mt-16  flex flex-col gap-5" id="identity-docs">
+      <div className="flex flex-col gap-5 scroll-mt-16" id="identity-docs">
         <Card>
           <CardHeader>
             <CardTitle>Identity Documents</CardTitle>
@@ -99,7 +100,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               <PanCard
                 panNumber={data.panCard?.panCardNo || "--------"}
                 name={`${data.panCard?.firstName || "----"} ${
-                  data.panCard?.middleName || "--"
+                  data.panCard?.middleName || ""
                 } ${data.panCard?.lastName || "---"}`}
                 gender={data.panCard?.gender || "----"}
                 dateOfBirth={
@@ -136,7 +137,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         <PanCardInfoCard
           panCardNumber={data.panCard?.panCardNo || "--------"}
           Name={`${data.panCard?.firstName || "----"} ${
-            data.panCard?.middleName || "--"
+            data.panCard?.middleName || ""
           } ${data.panCard?.lastName || "---"}`}
           gender={data.panCard?.gender || "----"}
           DateOFBirth={
@@ -171,7 +172,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         />
         <AadhaarCardInfo
           name={`${data.aadhaarCard?.firstName || "----"} ${
-            data.aadhaarCard?.middleName || "--"
+            data.aadhaarCard?.middleName || ""
           } ${data.aadhaarCard?.lastName || "---"}`}
           gender={data.aadhaarCard?.gender || "----"}
           aadhaarNumber={data.aadhaarCard?.aadhaarNo || "----------------"}
@@ -235,7 +236,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle>Demat Accounts Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid lg:grid-cols-3  gap-5">
+            <div className="gap-5 grid lg:grid-cols-3">
               {data.dematAccounts.map((e) => {
                 return (
                   <DematCard
@@ -277,7 +278,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle>Bank Accounts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid lg:grid-cols-3 gap-5">
+            <div className="gap-5 grid lg:grid-cols-3">
               {data.bankAccounts.map((e) => {
                 return (
                   <BankCard
@@ -313,36 +314,19 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           </CardHeader>
           <CardContent>
             <CardTitle className="text-sm">Investment Experience</CardTitle>
-            <div className="mt-4 flex flex-col gap-5">
-              <RiskProfileQuestion question="How many years of investment experience do you have?">
-                <RiskProfileAnsOption active>None</RiskProfileAnsOption>
-                <RiskProfileAnsOption>Upto 1 Year</RiskProfileAnsOption>
-                <RiskProfileAnsOption>1 - 5 Years</RiskProfileAnsOption>
-                <RiskProfileAnsOption>Above 5 Years</RiskProfileAnsOption>
-              </RiskProfileQuestion>
-
-              <RiskProfileQuestion question="How many years of investment experience do you have?">
-                <RiskProfileAnsOption>None</RiskProfileAnsOption>
-                <RiskProfileAnsOption>Upto 1 Year</RiskProfileAnsOption>
-                <RiskProfileAnsOption active>1 - 5 Years</RiskProfileAnsOption>
-                <RiskProfileAnsOption>Above 5 Years</RiskProfileAnsOption>
-              </RiskProfileQuestion>
-
-              <RiskProfileQuestion question="How many years of investment experience do you have?">
-                <RiskProfileAnsOption>None</RiskProfileAnsOption>
-                <RiskProfileAnsOption active>Upto 1 Year</RiskProfileAnsOption>
-                <RiskProfileAnsOption>1 - 5 Years</RiskProfileAnsOption>
-                <RiskProfileAnsOption>Above 5 Years</RiskProfileAnsOption>
-              </RiskProfileQuestion>
-
-              <RiskProfileQuestion question="How many years of investment experience do you have?">
-                <RiskProfileAnsOption>None</RiskProfileAnsOption>
-                <RiskProfileAnsOption>Upto 1 Year</RiskProfileAnsOption>
-                <RiskProfileAnsOption>1 - 5 Years</RiskProfileAnsOption>
-                <RiskProfileAnsOption active>
-                  Above 5 Years
-                </RiskProfileAnsOption>
-              </RiskProfileQuestion>
+            <div className="flex flex-col gap-5 mt-4">
+              {data?.riskProfile?.data?.map((e) => (
+                <RiskProfileQuestion
+                  question="How many years of investment experience do you have?"
+                  key={e.index}
+                >
+                  {e.opt.map((option, idx) => (
+                    <RiskProfileAnsOption key={idx} active={e.ans === option}>
+                      {option}
+                    </RiskProfileAnsOption>
+                  ))}
+                </RiskProfileQuestion>
+              ))}
             </div>
           </CardContent>
         </Card>

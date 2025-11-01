@@ -1,22 +1,22 @@
- import { cn } from "@/lib/utils";
+import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
 import ReturnsCalculation from "./elements/ReturnsCalculation";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 
 function ReturnsCalculationSection() {
   return (
-    <div className="bg-accent py-14">
+    <SectionWrapper className="bg-accent">
       <div className="container">
-        <h3
-          className={cn(
-            "text-center lg:text-3xl  text-2xl  font-medium",
-            "quicksand-medium"
-          )}
-        >
-          <span className="text-secondary font-semibold">Returns</span>{" "}
-          Calculation
-        </h3>
+        <SectionTitleDesc
+          title={
+            <>
+              <span className="font-semibold text-secondary">Returns</span>{" "}
+              Calculation
+            </>
+          }
+        />
         <ReturnsCalculation />
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

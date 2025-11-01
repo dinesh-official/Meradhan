@@ -208,23 +208,23 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
         className={!lightModded ? "container" : "border-t px-8 border-gray-200"}
       >
         <div className="flex md:flex-row flex-col justify-center md:justify-between items-center md:items-center gap-2 py-6 text-sm">
-          <p>© 2025 MeraDhan. All Rights Reserved</p>
+          <p>© {new Date().getFullYear()} MeraDhan. All Rights Reserved</p>
           <div className="flex items-center gap-4">
             <Link
               href="/privacy-policy"
-              className="hover:text-primary transition-colors duration-200"
+              className="hover:text-secondary transition-colors duration-200"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-use"
-              className="hover:text-primary transition-colors duration-200"
+              className="hover:text-secondary transition-colors duration-200"
             >
               Terms of Use
             </Link>
             <Link
               href="/cookie-policy"
-              className="hover:text-primary transition-colors duration-200"
+              className="hover:text-secondary transition-colors duration-200"
             >
               Cookie Policy
             </Link>

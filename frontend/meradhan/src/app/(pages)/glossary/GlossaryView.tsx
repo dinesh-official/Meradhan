@@ -10,13 +10,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
- import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Loader2, Search } from "lucide-react";
 import GlossaryPost from "./_components/glossaryPost";
 import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
+import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
 
 const GlossaryView = () => {
   const {
@@ -53,10 +54,15 @@ const GlossaryView = () => {
       {/* Glossary Section */}
       <div className="py-14">
         <div className="flex flex-col gap-3">
-          <TopTitleDesc description="Simple explanations of bond and fixed-income terms">
-            Fixed Income
-            <span className="font-semibold text-secondary"> Glossary</span>
-          </TopTitleDesc>
+          <SectionTitleDesc
+            title={
+              <>
+                Fixed Income
+                <span className="font-semibold text-secondary"> Glossary</span>
+              </>
+            }
+            description="Simple explanations of bond and fixed-income terms"
+          />
 
           {/* Search Input */}
           <div className="relative mt-5 w-full">

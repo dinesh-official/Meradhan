@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
- import { cn } from "@/lib/utils";
+import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
+import { cn } from "@/lib/utils";
 import React from "react";
 import {
   FaFileWaveform,
@@ -18,7 +20,7 @@ function WhyPoints({
   return (
     <div
       className={cn(
-        "text-center flex flex-col justify-center items-center py-4 gap-1 lg:border-r-2 lg:border-b-0 border-b-2 border-primary/10",
+        "flex flex-col justify-center items-center gap-1 py-4 border-primary/10 lg:border-r-2 border-b-2 lg:border-b-0 text-center",
         isLast && "border-none"
       )}
     >
@@ -75,48 +77,46 @@ const whyCardInfo = [
 
 function WhyMeraDhanSection() {
   return (
-    <div className="py-14">
-      <div className="container flex flex-col gap-5">
-        <h3
-          className={cn(
-            "text-center lg:text-3xl  text-2xl  font-medium",
-            "quicksand-medium"
-          )}
-        >
-          Why <span className="text-secondary font-semibold">MeraDhan</span>
-        </h3>
-        <p className="text-center">
-          MeraDhan is built on decades of financial expertise, drawing from
+    <SectionWrapper>
+      <div className="flex flex-col gap-5 container">
+        <SectionTitleDesc
+          title={
+            <>
+              Why <span className="font-semibold text-secondary">MeraDhan</span>
+            </>
+          }
+          description=" MeraDhan is built on decades of financial expertise, drawing from
           experience in global institutions. We blend deep market knowledge with
           data-driven insights to bring accessible, unbiased, and
-          easy-to-understand fixed income knowledge sharing with every Indian.
-        </p>
-        <div className="bg-muted  py-6 lg:px-0 px-8 rounded-lg my-4 ">
-          <div className="grid lg:grid-cols-4 text-center ">
+          easy-to-understand fixed income knowledge sharing with every Indian."
+        />
+
+        <div className="bg-muted my-4 px-8 lg:px-0 py-6 rounded-lg">
+          <div className="grid lg:grid-cols-4 text-center">
             <WhyPoints>
               <FaSackDollar size={25} className="text-primary" />
-              <span className="flex items-center justify-center font-medium mt-2 text-xl">
+              <span className="flex justify-center items-center mt-2 font-medium text-xl">
                 <PiCurrencyInrBold /> 10,000
               </span>
               <p className="text-sm">Minimum Investment</p>
             </WhyPoints>
             <WhyPoints>
               <FaUser size={25} className="text-primary" />
-              <span className="flex items-center justify-center font-medium mt-2 text-xl">
+              <span className="flex justify-center items-center mt-2 font-medium text-xl">
                 7,600+
               </span>
               <p className="text-sm">Users</p>
             </WhyPoints>
             <WhyPoints>
               <FaFileWaveform size={25} className="text-primary" />
-              <span className="flex items-center justify-center font-medium mt-2 text-xl">
+              <span className="flex justify-center items-center mt-2 font-medium text-xl">
                 6200+
               </span>
               <p className="text-sm">Bonds</p>
             </WhyPoints>
             <WhyPoints isLast>
               <FaMoneyBill size={25} className="text-primary" />
-              <span className="flex items-center justify-center font-medium mt-2 text-xl">
+              <span className="flex justify-center items-center mt-2 font-medium text-xl">
                 0
               </span>
               <p className="text-sm">Brokerage Fee</p>
@@ -124,18 +124,18 @@ function WhyMeraDhanSection() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-5">
+        <div className="gap-5 grid lg:grid-cols-3">
           {whyCardInfo.map((item, i) => (
             <Card key={i}>
-              <CardContent className="py-0 ">
-                <h5 className="text-xl font-medium mb-3">{item.title}</h5>
+              <CardContent className="py-0">
+                <h5 className="mb-3 font-medium text-xl">{item.title}</h5>
                 <div>{item.content}</div>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

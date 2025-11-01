@@ -1,15 +1,16 @@
- import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import DhanGptHeroInput from "./elements/DhanGptHeroInput";
 import IWantToQus from "./elements/IWantToQus";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 
 function HomeHeroSection() {
   return (
-    <div className="w-full lg:h-[520px] py-8 bg-primary flx flex-col justify-center items-center">
-      <div className="container text-center text-white h-full">
-        <div className="flex flex-col gap-5 h-full justify-center">
+    <SectionWrapper className="flex-col justify-center items-center bg-primary py-8 w-full lg:h-[520px] flx">
+      <div className="h-full text-white text-center container">
+        <div className="flex flex-col justify-center gap-5 h-full">
           <h1
             className={cn(
-              "lg:text-[40px] text-3xl font-medium",
+              "font-medium lg:text-[40px] text-3xl",
               "quicksand-medium"
             )}
           >
@@ -21,14 +22,14 @@ function HomeHeroSection() {
             got your back!
           </p>
           <DhanGptHeroInput />
-          <p className="mt-3 ">
+          <p className="mt-3">
             Or answer the following questions to let MeraDhan guide you!
           </p>
 
           <IWantToQus />
         </div>
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

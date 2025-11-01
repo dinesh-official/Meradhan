@@ -1,29 +1,26 @@
- import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import TestimonialsSlide from "./elements/TestimonialsSlide";
+import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 
 function CustomersTestimonials() {
   return (
-    <div className="bg-white py-14 ">
-      <div className="container flex flex-col gap-5">
-        <h3
-          className={cn(
-            "text-center lg:text-3xl  text-2xl  font-medium",
-            "quicksand-medium"
-          )}
-        >
-          <span className="text-secondary font-semibold">Customer`s</span>{" "}
-          Testimonials
-        </h3>
-        <p className="text-center">
-          See what our users are saying—real stories from real investors who’ve
-          found success with MeraDhan.
-        </p>
+    <SectionWrapper>
+      <div className="flex flex-col gap-5 container">
+        <SectionTitleDesc
+          title={
+            <>
+              <span className="font-semibold text-secondary">Customer`s</span>{" "}
+              Testimonials
+            </>
+          }
+          description="See what our users are saying—real stories from real investors who’ve
+          found success with MeraDhan."
+        />
 
-        <div>
-          <TestimonialsSlide />
-        </div>
+        <TestimonialsSlide />
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

@@ -1,25 +1,28 @@
- import { cn } from "@/lib/utils";
+import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import { RecentBlogCard } from "./elements/RecentBlogCard";
 
 function RecentBlogs() {
   return (
-    <div className="bg-white py-14 ">
-      <div className="container flex flex-col gap-5">
-        <h3
-          className={cn(
-            "text-center lg:text-3xl  text-2xl  font-medium",
-            "quicksand-medium"
-          )}
-        >
-          Recent <span className="text-secondary font-semibold">Blogs</span>
-        </h3>
-        <div className="grid lg:grid-cols-3 gap-5 mt-3">
+    <SectionWrapper>
+      <div className="flex flex-col gap-5 container">
+        <SectionTitleDesc
+          title={
+            <>
+              Recent <span className="font-semibold text-secondary">Blogs</span>
+            </>
+          }
+          description="See what our users are saying—real stories from real investors who’ve
+          found success with MeraDhan."
+        />
+
+        <div className="gap-5 grid lg:grid-cols-3 mt-3">
           <RecentBlogCard></RecentBlogCard>
           <RecentBlogCard></RecentBlogCard>
           <RecentBlogCard></RecentBlogCard>
         </div>
       </div>
-    </div>
+    </SectionWrapper>
   );
 }
 

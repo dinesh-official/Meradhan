@@ -1,11 +1,11 @@
-import ViewPort from "@/global/components/wrapper/ViewPort";
- import { cn } from "@/lib/utils";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
+import ViewPort from "@/global/components/wrapper/ViewPort";
 import { fetchFaqData } from "./_gql/faq.gql";
 
 export const revalidate = 0;
@@ -15,24 +15,13 @@ export default async function FAQPage() {
 
   return (
     <ViewPort>
-      <div className="bg-primary h-72">
-        <div className="flex flex-col justify-center items-center gap-6 h-full container">
-          <h1
-            className={cn(
-              "font-medium text-white text-3xl md:text-4xl text-center",
-              "quicksand-medium"
-            )}
-          >
-            Frequently Asked{" "}
-            <span className="font-semibold text-secondary">Questions</span>
-          </h1>
-          <p className="max-w-[800px] text-white text-center">
-            Find clear answers to commonly asked questions about MeraDhan, bond
-            investing, and our platform’s features to help you make informed
-            financial decisions.
-          </p>
-        </div>
-      </div>
+      <TopTitleDesc
+        title={
+          /*html*/ `Frequently Asked <span class="font-semibold text-secondary"> Questions</span>`
+        }
+        description="Find clear answers to commonly asked questions about MeraDhan, bond investing, and our
+platform’s features to help you make informed financial decisions."
+      ></TopTitleDesc>
 
       <div className="py-12">
         <div className="max-w-3xl container">
@@ -43,7 +32,9 @@ export default async function FAQPage() {
                 value={`item-${i}`}
                 className="border-b-0"
               >
-                <AccordionTrigger>{faq.Question}</AccordionTrigger>
+                <AccordionTrigger className="quicksand-semibold">
+                  {faq.Question}
+                </AccordionTrigger>
                 <AccordionContent>{faq.Answer}</AccordionContent>
               </AccordionItem>
             ))}

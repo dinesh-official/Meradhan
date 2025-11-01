@@ -16,6 +16,7 @@ import participantsRouter from "./src/resource/crm/refq/nse/cbrics/participants.
 import nseIsinRoute from "./src/resource/crm/refq/nse/isin/nseisin.routes";
 import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
 import kycRoutes from "./src/resource/customer/kyc/kyc.routes";
+import { CustomerKycManager } from "@lib/manager/customer/kyc/customerKyc.manager";
 dotenv.config({ debug: false });
 const monitoring = new PrometheusMonitorProvider()
 const response_time_monitor = new PrometheusResponseTimeMonitor()
@@ -56,4 +57,17 @@ checkConnectToDatabases()
         process.exit(1);
     });
 
+
+// Initialize
+const kycManager = new CustomerKycManager();
+
+// Save KYC data to customer
+await kycManager.saveKycToCustomer(105);
+
+// Check completion
+const isComplete = await kycManager.isKycComplete(105);
+
+// Get status
+const status = await kycManager.getKycStatus(105);
+console.log(`KYC Complete: ${isComplete}, Status: ${status}`);
 

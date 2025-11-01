@@ -1,10 +1,10 @@
 import { customerAuthMiddleware } from "@lib/middlewares/customer.middleware";
 import { Router } from "express";
-import { PersonalDetailsKycController } from "./personal_info/PersonalDetailsKyc.controller";
+import { CustomerKycKycController } from "./kyc-process/CustomerKyc.controller";
 import { KycStoreController } from "./store/kycStore.controller";
 
 const kycRoutes = Router();
-const controller = new PersonalDetailsKycController();
+const controller = new CustomerKycKycController();
 const storeKyc = new KycStoreController();
 
 

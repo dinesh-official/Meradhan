@@ -3,18 +3,26 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import apiServerCaller from './core/connection/apiServerCaller';
 import { cookies } from 'next/headers';
+// Helper: Generate Basic Auth header
+const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64");
 
 export async function middleware(request: NextRequest) {
   const cookieStore = await cookies();
-  const auth = request.headers.get("authorization");
-  const validAuth = "Basic " + Buffer.from("admin:admin").toString("base64");
-  if (auth !== validAuth) {
-    return new Response("Unauthorized", {
-      status: 401,
-      headers: {
-        "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
-      },
-    });
+  const { pathname } = request.nextUrl;
+
+  // ✅ 1. Basic Auth protection for production
+  if (process.env.NODE_ENV === "production" && !pathname.startsWith("/api") && !pathname.startsWith("/assets")) {
+    const authHeader = request.headers.get("authorization");
+
+    if (authHeader !== BASIC_AUTH_HEADER) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
+        },
+      });
+    }
+
   }
   // Only protect /dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard')) {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import Client from "./client";
 import "./styles/globals.css";
+import "./styles/override.css"
 import Script from "next/script";
 export const metadata: Metadata = {
   title: "MeraDhan One: Buy Bonds Online from Fixed Income Investment Platform",

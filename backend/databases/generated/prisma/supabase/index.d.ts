@@ -10926,6 +10926,7 @@ export namespace Prisma {
     image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10942,6 +10943,7 @@ export namespace Prisma {
     image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10958,6 +10960,7 @@ export namespace Prisma {
     image: number
     isVerified: number
     verifyDate: number
+    fileUrl: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -10984,6 +10987,7 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    fileUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11000,6 +11004,7 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    fileUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11016,6 +11021,7 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    fileUrl?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -11110,15 +11116,16 @@ export namespace Prisma {
   export type AADHAARCardModelGroupByOutputType = {
     id: number
     firstName: string
-    middleName: string
+    middleName: string | null
     lastName: string
-    fatherName: string
+    fatherName: string | null
     aadhaarNo: string
     dateOfBirth: string
     gender: $Enums.Gender
     image: string
     isVerified: boolean
-    verifyDate: Date
+    verifyDate: Date | null
+    fileUrl: string
     createdAt: Date
     updatedAt: Date
     _count: AADHAARCardModelCountAggregateOutputType | null
@@ -11154,6 +11161,7 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     customerProfileDataModel?: boolean | AADHAARCardModel$customerProfileDataModelArgs<ExtArgs>
@@ -11171,6 +11179,7 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["aADHAARCardModel"]>
@@ -11187,6 +11196,7 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["aADHAARCardModel"]>
@@ -11203,11 +11213,12 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AADHAARCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "fatherName" | "aadhaarNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "createdAt" | "updatedAt", ExtArgs["result"]["aADHAARCardModel"]>
+  export type AADHAARCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "fatherName" | "aadhaarNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "fileUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["aADHAARCardModel"]>
   export type AADHAARCardModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customerProfileDataModel?: boolean | AADHAARCardModel$customerProfileDataModelArgs<ExtArgs>
   }
@@ -11222,15 +11233,16 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       firstName: string
-      middleName: string
+      middleName: string | null
       lastName: string
-      fatherName: string
+      fatherName: string | null
       aadhaarNo: string
       dateOfBirth: string
       gender: $Enums.Gender
       image: string
       isVerified: boolean
-      verifyDate: Date
+      verifyDate: Date | null
+      fileUrl: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["aADHAARCardModel"]>
@@ -11668,6 +11680,7 @@ export namespace Prisma {
     readonly image: FieldRef<"AADHAARCardModel", 'String'>
     readonly isVerified: FieldRef<"AADHAARCardModel", 'Boolean'>
     readonly verifyDate: FieldRef<"AADHAARCardModel", 'DateTime'>
+    readonly fileUrl: FieldRef<"AADHAARCardModel", 'String'>
     readonly createdAt: FieldRef<"AADHAARCardModel", 'DateTime'>
     readonly updatedAt: FieldRef<"AADHAARCardModel", 'DateTime'>
   }
@@ -12123,8 +12136,10 @@ export namespace Prisma {
     panCardNo: string | null
     dateOfBirth: string | null
     gender: $Enums.Gender | null
+    image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12137,8 +12152,10 @@ export namespace Prisma {
     panCardNo: string | null
     dateOfBirth: string | null
     gender: $Enums.Gender | null
+    image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12151,8 +12168,10 @@ export namespace Prisma {
     panCardNo: number
     dateOfBirth: number
     gender: number
+    image: number
     isVerified: number
     verifyDate: number
+    fileUrl: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -12175,8 +12194,10 @@ export namespace Prisma {
     panCardNo?: true
     dateOfBirth?: true
     gender?: true
+    image?: true
     isVerified?: true
     verifyDate?: true
+    fileUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12189,8 +12210,10 @@ export namespace Prisma {
     panCardNo?: true
     dateOfBirth?: true
     gender?: true
+    image?: true
     isVerified?: true
     verifyDate?: true
+    fileUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12203,8 +12226,10 @@ export namespace Prisma {
     panCardNo?: true
     dateOfBirth?: true
     gender?: true
+    image?: true
     isVerified?: true
     verifyDate?: true
+    fileUrl?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -12299,13 +12324,15 @@ export namespace Prisma {
   export type PanCardModelGroupByOutputType = {
     id: number
     firstName: string
-    middleName: string
+    middleName: string | null
     lastName: string
     panCardNo: string
     dateOfBirth: string
     gender: $Enums.Gender
+    image: string
     isVerified: boolean
-    verifyDate: Date
+    verifyDate: Date | null
+    fileUrl: string
     createdAt: Date
     updatedAt: Date
     _count: PanCardModelCountAggregateOutputType | null
@@ -12337,8 +12364,10 @@ export namespace Prisma {
     panCardNo?: boolean
     dateOfBirth?: boolean
     gender?: boolean
+    image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     customerProfileDataModel?: boolean | PanCardModel$customerProfileDataModelArgs<ExtArgs>
@@ -12352,8 +12381,10 @@ export namespace Prisma {
     panCardNo?: boolean
     dateOfBirth?: boolean
     gender?: boolean
+    image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["panCardModel"]>
@@ -12366,8 +12397,10 @@ export namespace Prisma {
     panCardNo?: boolean
     dateOfBirth?: boolean
     gender?: boolean
+    image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["panCardModel"]>
@@ -12380,13 +12413,15 @@ export namespace Prisma {
     panCardNo?: boolean
     dateOfBirth?: boolean
     gender?: boolean
+    image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PanCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "panCardNo" | "dateOfBirth" | "gender" | "isVerified" | "verifyDate" | "createdAt" | "updatedAt", ExtArgs["result"]["panCardModel"]>
+  export type PanCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "panCardNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "fileUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["panCardModel"]>
   export type PanCardModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customerProfileDataModel?: boolean | PanCardModel$customerProfileDataModelArgs<ExtArgs>
   }
@@ -12401,13 +12436,15 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       firstName: string
-      middleName: string
+      middleName: string | null
       lastName: string
       panCardNo: string
       dateOfBirth: string
       gender: $Enums.Gender
+      image: string
       isVerified: boolean
-      verifyDate: Date
+      verifyDate: Date | null
+      fileUrl: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["panCardModel"]>
@@ -12841,8 +12878,10 @@ export namespace Prisma {
     readonly panCardNo: FieldRef<"PanCardModel", 'String'>
     readonly dateOfBirth: FieldRef<"PanCardModel", 'String'>
     readonly gender: FieldRef<"PanCardModel", 'Gender'>
+    readonly image: FieldRef<"PanCardModel", 'String'>
     readonly isVerified: FieldRef<"PanCardModel", 'Boolean'>
     readonly verifyDate: FieldRef<"PanCardModel", 'DateTime'>
+    readonly fileUrl: FieldRef<"PanCardModel", 'String'>
     readonly createdAt: FieldRef<"PanCardModel", 'DateTime'>
     readonly updatedAt: FieldRef<"PanCardModel", 'DateTime'>
   }
@@ -13427,7 +13466,7 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelGroupByOutputType = {
     id: number
-    data: JsonValue
+    data: JsonValue[]
     createdAt: Date
     updatedAt: Date
     _count: CustomersRiskProfileModelCountAggregateOutputType | null
@@ -13494,7 +13533,7 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      data: Prisma.JsonValue
+      data: Prisma.JsonValue[]
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customersRiskProfileModel"]>
@@ -13922,7 +13961,7 @@ export namespace Prisma {
    */
   interface CustomersRiskProfileModelFieldRefs {
     readonly id: FieldRef<"CustomersRiskProfileModel", 'Int'>
-    readonly data: FieldRef<"CustomersRiskProfileModel", 'Json'>
+    readonly data: FieldRef<"CustomersRiskProfileModel", 'Json[]'>
     readonly createdAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomersRiskProfileModel", 'DateTime'>
   }
@@ -15788,7 +15827,7 @@ export namespace Prisma {
     branch: string
     isPrimary: boolean
     isVerified: boolean
-    verifyDate: Date
+    verifyDate: Date | null
     customerProfileDataModelId: number | null
     createdAt: Date
     updatedAt: Date
@@ -15906,7 +15945,7 @@ export namespace Prisma {
       branch: string
       isPrimary: boolean
       isVerified: boolean
-      verifyDate: Date
+      verifyDate: Date | null
       customerProfileDataModelId: number | null
       createdAt: Date
       updatedAt: Date
@@ -17028,7 +17067,7 @@ export namespace Prisma {
     accountHolderName: string
     isPrimary: boolean
     isVerified: boolean
-    verifyDate: Date
+    verifyDate: Date | null
     customerProfileDataModelId: number | null
     createdAt: Date
     updatedAt: Date
@@ -17161,7 +17200,7 @@ export namespace Prisma {
       accountHolderName: string
       isPrimary: boolean
       isVerified: boolean
-      verifyDate: Date
+      verifyDate: Date | null
       customerProfileDataModelId: number | null
       createdAt: Date
       updatedAt: Date
@@ -29149,6 +29188,7 @@ export namespace Prisma {
     image: 'image',
     isVerified: 'isVerified',
     verifyDate: 'verifyDate',
+    fileUrl: 'fileUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -29164,8 +29204,10 @@ export namespace Prisma {
     panCardNo: 'panCardNo',
     dateOfBirth: 'dateOfBirth',
     gender: 'gender',
+    image: 'image',
     isVerified: 'isVerified',
     verifyDate: 'verifyDate',
+    fileUrl: 'fileUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -29679,6 +29721,13 @@ export namespace Prisma {
    * Reference to a field of type 'KYCStatus[]'
    */
   export type ListEnumKYCStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'KYCStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json[]'
+   */
+  export type ListJsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json[]'>
     
 
 
@@ -30593,15 +30642,16 @@ export namespace Prisma {
     NOT?: AADHAARCardModelWhereInput | AADHAARCardModelWhereInput[]
     id?: IntFilter<"AADHAARCardModel"> | number
     firstName?: StringFilter<"AADHAARCardModel"> | string
-    middleName?: StringFilter<"AADHAARCardModel"> | string
+    middleName?: StringNullableFilter<"AADHAARCardModel"> | string | null
     lastName?: StringFilter<"AADHAARCardModel"> | string
-    fatherName?: StringFilter<"AADHAARCardModel"> | string
+    fatherName?: StringNullableFilter<"AADHAARCardModel"> | string | null
     aadhaarNo?: StringFilter<"AADHAARCardModel"> | string
     dateOfBirth?: StringFilter<"AADHAARCardModel"> | string
     gender?: EnumGenderFilter<"AADHAARCardModel"> | $Enums.Gender
     image?: StringFilter<"AADHAARCardModel"> | string
     isVerified?: BoolFilter<"AADHAARCardModel"> | boolean
-    verifyDate?: DateTimeFilter<"AADHAARCardModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"AADHAARCardModel"> | Date | string | null
+    fileUrl?: StringFilter<"AADHAARCardModel"> | string
     createdAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30610,15 +30660,16 @@ export namespace Prisma {
   export type AADHAARCardModelOrderByWithRelationInput = {
     id?: SortOrder
     firstName?: SortOrder
-    middleName?: SortOrder
+    middleName?: SortOrderInput | SortOrder
     lastName?: SortOrder
-    fatherName?: SortOrder
+    fatherName?: SortOrderInput | SortOrder
     aadhaarNo?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
     image?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
@@ -30630,15 +30681,16 @@ export namespace Prisma {
     OR?: AADHAARCardModelWhereInput[]
     NOT?: AADHAARCardModelWhereInput | AADHAARCardModelWhereInput[]
     firstName?: StringFilter<"AADHAARCardModel"> | string
-    middleName?: StringFilter<"AADHAARCardModel"> | string
+    middleName?: StringNullableFilter<"AADHAARCardModel"> | string | null
     lastName?: StringFilter<"AADHAARCardModel"> | string
-    fatherName?: StringFilter<"AADHAARCardModel"> | string
+    fatherName?: StringNullableFilter<"AADHAARCardModel"> | string | null
     aadhaarNo?: StringFilter<"AADHAARCardModel"> | string
     dateOfBirth?: StringFilter<"AADHAARCardModel"> | string
     gender?: EnumGenderFilter<"AADHAARCardModel"> | $Enums.Gender
     image?: StringFilter<"AADHAARCardModel"> | string
     isVerified?: BoolFilter<"AADHAARCardModel"> | boolean
-    verifyDate?: DateTimeFilter<"AADHAARCardModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"AADHAARCardModel"> | Date | string | null
+    fileUrl?: StringFilter<"AADHAARCardModel"> | string
     createdAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30647,15 +30699,16 @@ export namespace Prisma {
   export type AADHAARCardModelOrderByWithAggregationInput = {
     id?: SortOrder
     firstName?: SortOrder
-    middleName?: SortOrder
+    middleName?: SortOrderInput | SortOrder
     lastName?: SortOrder
-    fatherName?: SortOrder
+    fatherName?: SortOrderInput | SortOrder
     aadhaarNo?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
     image?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: AADHAARCardModelCountOrderByAggregateInput
@@ -30671,15 +30724,16 @@ export namespace Prisma {
     NOT?: AADHAARCardModelScalarWhereWithAggregatesInput | AADHAARCardModelScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"AADHAARCardModel"> | number
     firstName?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
-    middleName?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
+    middleName?: StringNullableWithAggregatesFilter<"AADHAARCardModel"> | string | null
     lastName?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
-    fatherName?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
+    fatherName?: StringNullableWithAggregatesFilter<"AADHAARCardModel"> | string | null
     aadhaarNo?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
     dateOfBirth?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
     gender?: EnumGenderWithAggregatesFilter<"AADHAARCardModel"> | $Enums.Gender
     image?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
     isVerified?: BoolWithAggregatesFilter<"AADHAARCardModel"> | boolean
-    verifyDate?: DateTimeWithAggregatesFilter<"AADHAARCardModel"> | Date | string
+    verifyDate?: DateTimeNullableWithAggregatesFilter<"AADHAARCardModel"> | Date | string | null
+    fileUrl?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
     createdAt?: DateTimeWithAggregatesFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AADHAARCardModel"> | Date | string
   }
@@ -30690,13 +30744,15 @@ export namespace Prisma {
     NOT?: PanCardModelWhereInput | PanCardModelWhereInput[]
     id?: IntFilter<"PanCardModel"> | number
     firstName?: StringFilter<"PanCardModel"> | string
-    middleName?: StringFilter<"PanCardModel"> | string
+    middleName?: StringNullableFilter<"PanCardModel"> | string | null
     lastName?: StringFilter<"PanCardModel"> | string
     panCardNo?: StringFilter<"PanCardModel"> | string
     dateOfBirth?: StringFilter<"PanCardModel"> | string
     gender?: EnumGenderFilter<"PanCardModel"> | $Enums.Gender
+    image?: StringFilter<"PanCardModel"> | string
     isVerified?: BoolFilter<"PanCardModel"> | boolean
-    verifyDate?: DateTimeFilter<"PanCardModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"PanCardModel"> | Date | string | null
+    fileUrl?: StringFilter<"PanCardModel"> | string
     createdAt?: DateTimeFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"PanCardModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30705,13 +30761,15 @@ export namespace Prisma {
   export type PanCardModelOrderByWithRelationInput = {
     id?: SortOrder
     firstName?: SortOrder
-    middleName?: SortOrder
+    middleName?: SortOrderInput | SortOrder
     lastName?: SortOrder
     panCardNo?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
+    image?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
@@ -30723,13 +30781,15 @@ export namespace Prisma {
     OR?: PanCardModelWhereInput[]
     NOT?: PanCardModelWhereInput | PanCardModelWhereInput[]
     firstName?: StringFilter<"PanCardModel"> | string
-    middleName?: StringFilter<"PanCardModel"> | string
+    middleName?: StringNullableFilter<"PanCardModel"> | string | null
     lastName?: StringFilter<"PanCardModel"> | string
     panCardNo?: StringFilter<"PanCardModel"> | string
     dateOfBirth?: StringFilter<"PanCardModel"> | string
     gender?: EnumGenderFilter<"PanCardModel"> | $Enums.Gender
+    image?: StringFilter<"PanCardModel"> | string
     isVerified?: BoolFilter<"PanCardModel"> | boolean
-    verifyDate?: DateTimeFilter<"PanCardModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"PanCardModel"> | Date | string | null
+    fileUrl?: StringFilter<"PanCardModel"> | string
     createdAt?: DateTimeFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"PanCardModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30738,13 +30798,15 @@ export namespace Prisma {
   export type PanCardModelOrderByWithAggregationInput = {
     id?: SortOrder
     firstName?: SortOrder
-    middleName?: SortOrder
+    middleName?: SortOrderInput | SortOrder
     lastName?: SortOrder
     panCardNo?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
+    image?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PanCardModelCountOrderByAggregateInput
@@ -30760,13 +30822,15 @@ export namespace Prisma {
     NOT?: PanCardModelScalarWhereWithAggregatesInput | PanCardModelScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PanCardModel"> | number
     firstName?: StringWithAggregatesFilter<"PanCardModel"> | string
-    middleName?: StringWithAggregatesFilter<"PanCardModel"> | string
+    middleName?: StringNullableWithAggregatesFilter<"PanCardModel"> | string | null
     lastName?: StringWithAggregatesFilter<"PanCardModel"> | string
     panCardNo?: StringWithAggregatesFilter<"PanCardModel"> | string
     dateOfBirth?: StringWithAggregatesFilter<"PanCardModel"> | string
     gender?: EnumGenderWithAggregatesFilter<"PanCardModel"> | $Enums.Gender
+    image?: StringWithAggregatesFilter<"PanCardModel"> | string
     isVerified?: BoolWithAggregatesFilter<"PanCardModel"> | boolean
-    verifyDate?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
+    verifyDate?: DateTimeNullableWithAggregatesFilter<"PanCardModel"> | Date | string | null
+    fileUrl?: StringWithAggregatesFilter<"PanCardModel"> | string
     createdAt?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
   }
@@ -30776,7 +30840,7 @@ export namespace Prisma {
     OR?: CustomersRiskProfileModelWhereInput[]
     NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
     id?: IntFilter<"CustomersRiskProfileModel"> | number
-    data?: JsonFilter<"CustomersRiskProfileModel">
+    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
     createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30795,7 +30859,7 @@ export namespace Prisma {
     AND?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
     OR?: CustomersRiskProfileModelWhereInput[]
     NOT?: CustomersRiskProfileModelWhereInput | CustomersRiskProfileModelWhereInput[]
-    data?: JsonFilter<"CustomersRiskProfileModel">
+    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
     createdAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersRiskProfileModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30818,7 +30882,7 @@ export namespace Prisma {
     OR?: CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
     NOT?: CustomersRiskProfileModelScalarWhereWithAggregatesInput | CustomersRiskProfileModelScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"CustomersRiskProfileModel"> | number
-    data?: JsonWithAggregatesFilter<"CustomersRiskProfileModel">
+    data?: JsonNullableListFilter<"CustomersRiskProfileModel">
     createdAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersRiskProfileModel"> | Date | string
   }
@@ -30931,7 +30995,7 @@ export namespace Prisma {
     branch?: StringFilter<"CustomersBankAccountModel"> | string
     isPrimary?: BoolFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersBankAccountModel"> | boolean
-    verifyDate?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
@@ -30948,7 +31012,7 @@ export namespace Prisma {
     branch?: SortOrder
     isPrimary?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -30968,7 +31032,7 @@ export namespace Prisma {
     branch?: StringFilter<"CustomersBankAccountModel"> | string
     isPrimary?: BoolFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersBankAccountModel"> | boolean
-    verifyDate?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
@@ -30985,7 +31049,7 @@ export namespace Prisma {
     branch?: SortOrder
     isPrimary?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -31009,7 +31073,7 @@ export namespace Prisma {
     branch?: StringWithAggregatesFilter<"CustomersBankAccountModel"> | string
     isPrimary?: BoolWithAggregatesFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolWithAggregatesFilter<"CustomersBankAccountModel"> | boolean
-    verifyDate?: DateTimeWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableWithAggregatesFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string
@@ -31031,7 +31095,7 @@ export namespace Prisma {
     accountHolderName?: StringFilter<"CustomersDematAccountModel"> | string
     isPrimary?: BoolFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersDematAccountModel"> | boolean
-    verifyDate?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
@@ -31051,7 +31115,7 @@ export namespace Prisma {
     accountHolderName?: SortOrder
     isPrimary?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -31074,7 +31138,7 @@ export namespace Prisma {
     accountHolderName?: StringFilter<"CustomersDematAccountModel"> | string
     isPrimary?: BoolFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersDematAccountModel"> | boolean
-    verifyDate?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
@@ -31094,7 +31158,7 @@ export namespace Prisma {
     accountHolderName?: SortOrder
     isPrimary?: SortOrder
     isVerified?: SortOrder
-    verifyDate?: SortOrder
+    verifyDate?: SortOrderInput | SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -31121,7 +31185,7 @@ export namespace Prisma {
     accountHolderName?: StringWithAggregatesFilter<"CustomersDematAccountModel"> | string
     isPrimary?: BoolWithAggregatesFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolWithAggregatesFilter<"CustomersDematAccountModel"> | boolean
-    verifyDate?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableWithAggregatesFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
@@ -32913,15 +32977,16 @@ export namespace Prisma {
 
   export type AADHAARCardModelCreateInput = {
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
-    fatherName: string
+    fatherName?: string | null
     aadhaarNo: string
     dateOfBirth: string
     gender: $Enums.Gender
     image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutAadhaarCardInput
@@ -32930,15 +32995,16 @@ export namespace Prisma {
   export type AADHAARCardModelUncheckedCreateInput = {
     id?: number
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
-    fatherName: string
+    fatherName?: string | null
     aadhaarNo: string
     dateOfBirth: string
     gender: $Enums.Gender
     image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutAadhaarCardInput
@@ -32946,15 +33012,16 @@ export namespace Prisma {
 
   export type AADHAARCardModelUpdateInput = {
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
-    fatherName?: StringFieldUpdateOperationsInput | string
+    fatherName?: NullableStringFieldUpdateOperationsInput | string | null
     aadhaarNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutAadhaarCardNestedInput
@@ -32963,15 +33030,16 @@ export namespace Prisma {
   export type AADHAARCardModelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
-    fatherName?: StringFieldUpdateOperationsInput | string
+    fatherName?: NullableStringFieldUpdateOperationsInput | string | null
     aadhaarNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutAadhaarCardNestedInput
@@ -32980,30 +33048,32 @@ export namespace Prisma {
   export type AADHAARCardModelCreateManyInput = {
     id?: number
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
-    fatherName: string
+    fatherName?: string | null
     aadhaarNo: string
     dateOfBirth: string
     gender: $Enums.Gender
     image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type AADHAARCardModelUpdateManyMutationInput = {
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
-    fatherName?: StringFieldUpdateOperationsInput | string
+    fatherName?: NullableStringFieldUpdateOperationsInput | string | null
     aadhaarNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33011,28 +33081,31 @@ export namespace Prisma {
   export type AADHAARCardModelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
-    fatherName?: StringFieldUpdateOperationsInput | string
+    fatherName?: NullableStringFieldUpdateOperationsInput | string | null
     aadhaarNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PanCardModelCreateInput = {
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
     panCardNo: string
     dateOfBirth: string
     gender: $Enums.Gender
+    image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutPanCardInput
@@ -33041,13 +33114,15 @@ export namespace Prisma {
   export type PanCardModelUncheckedCreateInput = {
     id?: number
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
     panCardNo: string
     dateOfBirth: string
     gender: $Enums.Gender
+    image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutPanCardInput
@@ -33055,13 +33130,15 @@ export namespace Prisma {
 
   export type PanCardModelUpdateInput = {
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
     panCardNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutPanCardNestedInput
@@ -33070,13 +33147,15 @@ export namespace Prisma {
   export type PanCardModelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
     panCardNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutPanCardNestedInput
@@ -33085,26 +33164,30 @@ export namespace Prisma {
   export type PanCardModelCreateManyInput = {
     id?: number
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
     panCardNo: string
     dateOfBirth: string
     gender: $Enums.Gender
+    image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type PanCardModelUpdateManyMutationInput = {
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
     panCardNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33112,19 +33195,21 @@ export namespace Prisma {
   export type PanCardModelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
     panCardNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CustomersRiskProfileModelCreateInput = {
-    data: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutRiskProfileInput
@@ -33132,14 +33217,14 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelUncheckedCreateInput = {
     id?: number
-    data: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutRiskProfileInput
   }
 
   export type CustomersRiskProfileModelUpdateInput = {
-    data?: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutRiskProfileNestedInput
@@ -33147,7 +33232,7 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    data?: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutRiskProfileNestedInput
@@ -33155,20 +33240,20 @@ export namespace Prisma {
 
   export type CustomersRiskProfileModelCreateManyInput = {
     id?: number
-    data: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type CustomersRiskProfileModelUpdateManyMutationInput = {
-    data?: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CustomersRiskProfileModelUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    data?: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33292,7 +33377,7 @@ export namespace Prisma {
     branch: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutBankAccountsInput
@@ -33308,7 +33393,7 @@ export namespace Prisma {
     branch: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -33323,7 +33408,7 @@ export namespace Prisma {
     branch?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutBankAccountsNestedInput
@@ -33339,7 +33424,7 @@ export namespace Prisma {
     branch?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33355,7 +33440,7 @@ export namespace Prisma {
     branch: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -33370,7 +33455,7 @@ export namespace Prisma {
     branch?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33385,7 +33470,7 @@ export namespace Prisma {
     branch?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33403,7 +33488,7 @@ export namespace Prisma {
     accountHolderName: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutDematAccountsInput
@@ -33422,7 +33507,7 @@ export namespace Prisma {
     accountHolderName: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -33440,7 +33525,7 @@ export namespace Prisma {
     accountHolderName?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutDematAccountsNestedInput
@@ -33459,7 +33544,7 @@ export namespace Prisma {
     accountHolderName?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33478,7 +33563,7 @@ export namespace Prisma {
     accountHolderName: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -33496,7 +33581,7 @@ export namespace Prisma {
     accountHolderName?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33514,7 +33599,7 @@ export namespace Prisma {
     accountHolderName?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -35597,6 +35682,7 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35617,6 +35703,7 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35633,6 +35720,7 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35659,8 +35747,10 @@ export namespace Prisma {
     panCardNo?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
+    image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35677,8 +35767,10 @@ export namespace Prisma {
     panCardNo?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
+    image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35691,14 +35783,30 @@ export namespace Prisma {
     panCardNo?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
+    image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type PanCardModelSumOrderByAggregateInput = {
     id?: SortOrder
+  }
+  export type JsonNullableListFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableListFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableListFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableListFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableListFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableListFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel> | null
+    has?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    hasEvery?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel>
+    hasSome?: InputJsonValue[] | ListJsonFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
   }
 
   export type CustomersRiskProfileModelCountOrderByAggregateInput = {
@@ -37404,6 +37512,10 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutPanCardInput, CustomerProfileDataModelUpdateWithoutPanCardInput>, CustomerProfileDataModelUncheckedUpdateWithoutPanCardInput>
   }
 
+  export type CustomersRiskProfileModelCreatedataInput = {
+    set: InputJsonValue[]
+  }
+
   export type CustomerProfileDataModelCreateNestedOneWithoutRiskProfileInput = {
     create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
     connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput
@@ -37414,6 +37526,11 @@ export namespace Prisma {
     create?: XOR<CustomerProfileDataModelCreateWithoutRiskProfileInput, CustomerProfileDataModelUncheckedCreateWithoutRiskProfileInput>
     connectOrCreate?: CustomerProfileDataModelCreateOrConnectWithoutRiskProfileInput
     connect?: CustomerProfileDataModelWhereUniqueInput
+  }
+
+  export type CustomersRiskProfileModelUpdatedataInput = {
+    set?: InputJsonValue[]
+    push?: InputJsonValue | InputJsonValue[]
   }
 
   export type CustomerProfileDataModelUpdateOneWithoutRiskProfileNestedInput = {
@@ -38871,14 +38988,14 @@ export namespace Prisma {
   }
 
   export type CustomersRiskProfileModelCreateWithoutCustomerProfileDataModelInput = {
-    data: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type CustomersRiskProfileModelUncheckedCreateWithoutCustomerProfileDataModelInput = {
     id?: number
-    data: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelCreatedataInput | InputJsonValue[]
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -38926,15 +39043,16 @@ export namespace Prisma {
 
   export type AADHAARCardModelCreateWithoutCustomerProfileDataModelInput = {
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
-    fatherName: string
+    fatherName?: string | null
     aadhaarNo: string
     dateOfBirth: string
     gender: $Enums.Gender
     image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -38942,15 +39060,16 @@ export namespace Prisma {
   export type AADHAARCardModelUncheckedCreateWithoutCustomerProfileDataModelInput = {
     id?: number
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
-    fatherName: string
+    fatherName?: string | null
     aadhaarNo: string
     dateOfBirth: string
     gender: $Enums.Gender
     image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -38962,13 +39081,15 @@ export namespace Prisma {
 
   export type PanCardModelCreateWithoutCustomerProfileDataModelInput = {
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
     panCardNo: string
     dateOfBirth: string
     gender: $Enums.Gender
+    image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -38976,13 +39097,15 @@ export namespace Prisma {
   export type PanCardModelUncheckedCreateWithoutCustomerProfileDataModelInput = {
     id?: number
     firstName: string
-    middleName: string
+    middleName?: string | null
     lastName: string
     panCardNo: string
     dateOfBirth: string
     gender: $Enums.Gender
+    image: string
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
+    fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39115,7 +39238,7 @@ export namespace Prisma {
     branch: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39130,7 +39253,7 @@ export namespace Prisma {
     branch: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39157,7 +39280,7 @@ export namespace Prisma {
     accountHolderName: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39175,7 +39298,7 @@ export namespace Prisma {
     accountHolderName: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39216,14 +39339,14 @@ export namespace Prisma {
   }
 
   export type CustomersRiskProfileModelUpdateWithoutCustomerProfileDataModelInput = {
-    data?: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CustomersRiskProfileModelUncheckedUpdateWithoutCustomerProfileDataModelInput = {
     id?: IntFieldUpdateOperationsInput | number
-    data?: JsonNullValueInput | InputJsonValue
+    data?: CustomersRiskProfileModelUpdatedataInput | InputJsonValue[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39283,15 +39406,16 @@ export namespace Prisma {
 
   export type AADHAARCardModelUpdateWithoutCustomerProfileDataModelInput = {
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
-    fatherName?: StringFieldUpdateOperationsInput | string
+    fatherName?: NullableStringFieldUpdateOperationsInput | string | null
     aadhaarNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39299,15 +39423,16 @@ export namespace Prisma {
   export type AADHAARCardModelUncheckedUpdateWithoutCustomerProfileDataModelInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
-    fatherName?: StringFieldUpdateOperationsInput | string
+    fatherName?: NullableStringFieldUpdateOperationsInput | string | null
     aadhaarNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39325,13 +39450,15 @@ export namespace Prisma {
 
   export type PanCardModelUpdateWithoutCustomerProfileDataModelInput = {
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
     panCardNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39339,13 +39466,15 @@ export namespace Prisma {
   export type PanCardModelUncheckedUpdateWithoutCustomerProfileDataModelInput = {
     id?: IntFieldUpdateOperationsInput | number
     firstName?: StringFieldUpdateOperationsInput | string
-    middleName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: StringFieldUpdateOperationsInput | string
     panCardNo?: StringFieldUpdateOperationsInput | string
     dateOfBirth?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39511,7 +39640,7 @@ export namespace Prisma {
     branch?: StringFilter<"CustomersBankAccountModel"> | string
     isPrimary?: BoolFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersBankAccountModel"> | boolean
-    verifyDate?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
@@ -39549,7 +39678,7 @@ export namespace Prisma {
     accountHolderName?: StringFilter<"CustomersDematAccountModel"> | string
     isPrimary?: BoolFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersDematAccountModel"> | boolean
-    verifyDate?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
+    verifyDate?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
     customerProfileDataModelId?: IntNullableFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
@@ -41541,7 +41670,7 @@ export namespace Prisma {
     branch: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41559,7 +41688,7 @@ export namespace Prisma {
     accountHolderName: string
     isPrimary?: boolean
     isVerified?: boolean
-    verifyDate: Date | string
+    verifyDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41573,7 +41702,7 @@ export namespace Prisma {
     branch?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41588,7 +41717,7 @@ export namespace Prisma {
     branch?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41603,7 +41732,7 @@ export namespace Prisma {
     branch?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41620,7 +41749,7 @@ export namespace Prisma {
     accountHolderName?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41638,7 +41767,7 @@ export namespace Prisma {
     accountHolderName?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41656,7 +41785,7 @@ export namespace Prisma {
     accountHolderName?: StringFieldUpdateOperationsInput | string
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifyDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

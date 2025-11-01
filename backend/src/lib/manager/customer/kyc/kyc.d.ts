@@ -1,0 +1,226 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+export type KycDataStorage = {
+  step_1: {
+    pan: {
+      lastName: string
+      response: {
+        id: string
+        type: string
+        status: string
+        details: {
+          pan: {
+            dob: string
+            name: string
+            gender: string
+            file_url: string
+            id_number: string
+            document_type: string
+            id_proof_type: string
+          }
+          aadhaar: {
+            dob: string
+            name: string
+            image: string
+            gender: string
+            file_url: string
+            id_number: string
+            document_type: string
+            id_proof_type: string
+            current_address: string
+            last_refresh_date: string
+            permanent_address: string
+            father_name?: string
+            current_address_details: {
+              state: string
+              address: string
+              pincode: string
+              district_or_city: string
+              locality_or_post_office: string
+            }
+            permanent_address_details: {
+              state: string
+              address: string
+              pincode: string
+              district_or_city: string
+              locality_or_post_office: string
+            }
+          }
+        }
+        rules_data: {
+          approval_rule: Array<any>
+        }
+        retry_count: number
+        completed_at: string
+        processing_done: boolean
+        face_match_status: string
+        validation_result: {}
+        face_match_obj_type: string
+        obj_analysis_status: string
+        execution_request_id: string
+      }
+      firstName: string
+      panCardNo: string
+      middleName: string
+      checkTerms1: boolean
+      checkTerms2: boolean
+      dateOfBirth: string
+    }
+    face: {
+      url: string
+      response: {
+        id: string
+        status: string
+        actions: Array<{
+          id: string
+          type: string
+          method: string
+          status: string
+          file_id: string
+          action_ref: string
+          retry_count: number
+          sub_actions: Array<{
+            id: string
+            type: string
+            status: string
+            details: {
+              address: string
+              accuracy: number
+              latitude: number
+              longitude: number
+              latitude_from_input_address: number
+              longitude_from_input_address: number
+              distance_from_input_address_in_kilo_metres: number
+            }
+            actioner: string
+            optional: boolean
+            input_data: string
+            completed_at: string
+            sub_action_ref: string
+            face_match_status: string
+            face_match_obj_type: string
+            obj_analysis_status: string
+          }>
+          completed_at: string
+          processing_done: boolean
+          face_match_status: string
+          validation_result: {}
+          face_match_obj_type: string
+          obj_analysis_status: string
+        }>
+        file_url: string
+        created_at: string
+        updated_at: string
+        template_id: string
+        reference_id: string
+        auto_approved: boolean
+        customer_name: string
+        workflow_name: string
+        expire_in_days: number
+        transaction_id: string
+        customer_identifier: string
+        reminder_registered: boolean
+      }
+    }
+    sign: {
+      url: string
+      response: {
+        id: string
+        status: string
+        actions: Array<{
+          id: string
+          type: string
+          status: string
+          file_id: string
+          action_ref: string
+          rules_data: {
+            strict_validation_types: Array<string>
+          }
+          retry_count: number
+          completed_at: string
+          processing_done: boolean
+          face_match_status: string
+          validation_result: {}
+          face_match_obj_type: string
+          obj_analysis_status: string
+        }>
+        file_url: string
+        created_at: string
+        updated_at: string
+        template_id: string
+        reference_id: string
+        auto_approved: boolean
+        customer_name: string
+        workflow_name: string
+        expire_in_days: number
+        transaction_id: string
+        customer_identifier: string
+        reminder_registered: boolean
+      }
+    }
+  }
+  step_2: {
+    fatSpuName: string
+    motherName: string
+    nationality: string
+    maritalStatus: string
+    qualification: string
+    occupationType: string
+    reelWithPerson: string
+    annualGrossIncome: string
+    residentialStatus: string
+  }
+  step_3: Array<{
+    bankName: string
+    ifscCode: string
+    response: {
+      id: string
+      verified: boolean
+      verified_at: string
+      validation_mode: string
+      fuzzy_match_score: number
+      fuzzy_match_result: boolean
+      beneficiary_name_with_bank: string
+    }
+    isDefault: boolean
+    branchName: string
+    checkTerms: boolean
+    isVerified: boolean
+    accountNumber: string
+    bankAccountType: string
+    beneficiary_name: string
+  }>
+  step_4: Array<{
+    dpId: string
+    response: {
+      rrn: number
+      dpId: string
+      status: string
+      clientId: string
+      fstHoldrPan: string
+      transactionId: string
+    }
+    isDefault: boolean
+    panNumber: Array<string>
+    checkTerms: boolean
+    isVerified: boolean
+    accountType: string
+    depositoryName: string
+    accountHolderName: string
+    beneficiaryClientId: string
+    depositoryParticipantName: string
+  }>
+  step_5: Array<{
+    ans: string
+    opt: Array<string>
+    qus: string
+    index: number
+  }>
+  step_6: {
+    terms: boolean
+    response: {
+      fileUrl: string
+    }
+  }
+  stepIndex: number
+}

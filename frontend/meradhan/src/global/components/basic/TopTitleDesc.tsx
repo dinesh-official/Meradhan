@@ -11,8 +11,8 @@ function TopTitleDesc({
   description?: string;
 }) {
   return (
-    <div className="bg-primary py-18">
-      <div className="flex flex-col justify-center items-center gap-3 text-white text-center container">
+    <div className="bg-primary py-16">
+      <div className="flex flex-col justify-center items-center gap-4 text-white text-center container">
         {title && (
           <h1
             className={cn(
@@ -24,7 +24,7 @@ function TopTitleDesc({
 
         {description && (
           <p
-            className="md:max-w-[50%]"
+            className="md:max-w-[60%]"
             dangerouslySetInnerHTML={{ __html: description }}
           />
         )}
