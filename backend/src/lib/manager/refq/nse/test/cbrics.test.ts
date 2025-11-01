@@ -36,6 +36,8 @@ export const testCreateParticipant = async () => {
                     middleName: "",
                     verifyDate: new Date(),
                     isVerified: true,
+                    fileUrl: 'aadhaar.png',
+
                 }
             },
             panCard: {
@@ -47,7 +49,9 @@ export const testCreateParticipant = async () => {
                     gender: "MALE",
                     middleName: "",
                     verifyDate: new Date(),
-                    isVerified: true
+                    isVerified: true,
+                    fileUrl: 'pan.png',
+                    image: 'person.png',
                 }
             },
             bankAccounts: {

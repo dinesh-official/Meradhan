@@ -45,6 +45,7 @@ const generateMockCustomer = async () => {
                     middleName: faker.person.middleName(),
                     verifyDate: new Date(),
                     isVerified: true,
+                    fileUrl: faker.image.url(),
                 },
             },
 
@@ -59,6 +60,8 @@ const generateMockCustomer = async () => {
                     panCardNo: faker.string.alphanumeric(10).toUpperCase(),
                     verifyDate: new Date(),
                     isVerified: true,
+                    fileUrl: faker.image.url(),
+                    image: faker.image.avatar(),
                 },
             },
 
