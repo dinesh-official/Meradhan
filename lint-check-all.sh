@@ -81,7 +81,7 @@ run_lint_check() {
 
 # Main execution
 main() {
-    local project_root="/home/sourav/Desktop/MeradhanProject"
+    local project_root="/home/ubuntu/MeradhanProject"
     local failed_projects=()
     local total_projects=0
     local successful_projects=0
