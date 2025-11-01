@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/server/:path*",
-        destination: `${BASE.API_SERVER}/:path*`,
+        destination: `${BASE.API_SERVER}/api/:path*`,
       },
       {
         source: "/assets/cms/media/:path*",

@@ -95,6 +95,8 @@ export class NseCBRICS {
         }>("/login", this.credentials);
 
         const loginKey = headers?.["set-cookie"]?.find((c) => c.includes("LoginKey"))?.split("=")[1]?.split(";")[0];
+        console.log(loginKey,data);
+        
         if (data.status == "F") {
             throw new AppError("Nse Cbrics Login Failed");
         }

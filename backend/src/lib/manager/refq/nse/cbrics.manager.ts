@@ -288,6 +288,10 @@ export class ParticipantManager {
         return saveToMyDb;
     }
 
+    public async getAllParticipants() { 
+        return this.cbrics.getAllUnregisteredParticipants();
+    }
+
     public async syncParticipant(userId: number) {
         // query data
         const user = await db.dataBase.customerProfileDataModel.findUnique({
