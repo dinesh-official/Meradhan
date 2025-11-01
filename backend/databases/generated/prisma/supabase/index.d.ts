@@ -9689,6 +9689,7 @@ export namespace Prisma {
     qualification: string | null
     politicallyExposedPerson: string | null
     dateOfBirth: string | null
+    signPdfUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9708,6 +9709,7 @@ export namespace Prisma {
     qualification: string | null
     politicallyExposedPerson: string | null
     dateOfBirth: string | null
+    signPdfUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9727,6 +9729,7 @@ export namespace Prisma {
     qualification: number
     politicallyExposedPerson: number
     dateOfBirth: number
+    signPdfUrl: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -9756,6 +9759,7 @@ export namespace Prisma {
     qualification?: true
     politicallyExposedPerson?: true
     dateOfBirth?: true
+    signPdfUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9775,6 +9779,7 @@ export namespace Prisma {
     qualification?: true
     politicallyExposedPerson?: true
     dateOfBirth?: true
+    signPdfUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9794,6 +9799,7 @@ export namespace Prisma {
     qualification?: true
     politicallyExposedPerson?: true
     dateOfBirth?: true
+    signPdfUrl?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -9900,6 +9906,7 @@ export namespace Prisma {
     qualification: string
     politicallyExposedPerson: string | null
     dateOfBirth: string | null
+    signPdfUrl: string | null
     createdAt: Date
     updatedAt: Date
     _count: CustomerPersonalInfoModelCountAggregateOutputType | null
@@ -9938,6 +9945,7 @@ export namespace Prisma {
     qualification?: boolean
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
+    signPdfUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     customerProfileDataModel?: boolean | CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs>
@@ -9958,6 +9966,7 @@ export namespace Prisma {
     qualification?: boolean
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
+    signPdfUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -9977,6 +9986,7 @@ export namespace Prisma {
     qualification?: boolean
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
+    signPdfUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -9996,11 +10006,12 @@ export namespace Prisma {
     qualification?: boolean
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
+    signPdfUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CustomerPersonalInfoModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "SignatureUrl" | "maritalStatus" | "occupationType" | "annualGrossIncome" | "fatherOrSpouseName" | "relationshipWithPerson" | "mothersName" | "nationality" | "maidenName" | "residentialStatus" | "qualification" | "politicallyExposedPerson" | "dateOfBirth" | "createdAt" | "updatedAt", ExtArgs["result"]["customerPersonalInfoModel"]>
+  export type CustomerPersonalInfoModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "SignatureUrl" | "maritalStatus" | "occupationType" | "annualGrossIncome" | "fatherOrSpouseName" | "relationshipWithPerson" | "mothersName" | "nationality" | "maidenName" | "residentialStatus" | "qualification" | "politicallyExposedPerson" | "dateOfBirth" | "signPdfUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["customerPersonalInfoModel"]>
   export type CustomerPersonalInfoModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customerProfileDataModel?: boolean | CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs>
   }
@@ -10027,6 +10038,7 @@ export namespace Prisma {
       qualification: string
       politicallyExposedPerson: string | null
       dateOfBirth: string | null
+      signPdfUrl: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -10467,6 +10479,7 @@ export namespace Prisma {
     readonly qualification: FieldRef<"CustomerPersonalInfoModel", 'String'>
     readonly politicallyExposedPerson: FieldRef<"CustomerPersonalInfoModel", 'String'>
     readonly dateOfBirth: FieldRef<"CustomerPersonalInfoModel", 'String'>
+    readonly signPdfUrl: FieldRef<"CustomerPersonalInfoModel", 'String'>
     readonly createdAt: FieldRef<"CustomerPersonalInfoModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomerPersonalInfoModel", 'DateTime'>
   }
@@ -29169,6 +29182,7 @@ export namespace Prisma {
     qualification: 'qualification',
     politicallyExposedPerson: 'politicallyExposedPerson',
     dateOfBirth: 'dateOfBirth',
+    signPdfUrl: 'signPdfUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -30542,6 +30556,7 @@ export namespace Prisma {
     qualification?: StringFilter<"CustomerPersonalInfoModel"> | string
     politicallyExposedPerson?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     dateOfBirth?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
+    signPdfUrl?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     createdAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30562,6 +30577,7 @@ export namespace Prisma {
     qualification?: SortOrder
     politicallyExposedPerson?: SortOrderInput | SortOrder
     dateOfBirth?: SortOrderInput | SortOrder
+    signPdfUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
@@ -30585,6 +30601,7 @@ export namespace Prisma {
     qualification?: StringFilter<"CustomerPersonalInfoModel"> | string
     politicallyExposedPerson?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     dateOfBirth?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
+    signPdfUrl?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     createdAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -30605,6 +30622,7 @@ export namespace Prisma {
     qualification?: SortOrder
     politicallyExposedPerson?: SortOrderInput | SortOrder
     dateOfBirth?: SortOrderInput | SortOrder
+    signPdfUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CustomerPersonalInfoModelCountOrderByAggregateInput
@@ -30632,6 +30650,7 @@ export namespace Prisma {
     qualification?: StringWithAggregatesFilter<"CustomerPersonalInfoModel"> | string
     politicallyExposedPerson?: StringNullableWithAggregatesFilter<"CustomerPersonalInfoModel"> | string | null
     dateOfBirth?: StringNullableWithAggregatesFilter<"CustomerPersonalInfoModel"> | string | null
+    signPdfUrl?: StringNullableWithAggregatesFilter<"CustomerPersonalInfoModel"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomerPersonalInfoModel"> | Date | string
   }
@@ -32855,6 +32874,7 @@ export namespace Prisma {
     qualification: string
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
+    signPdfUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutPersonalInformationInput
@@ -32875,6 +32895,7 @@ export namespace Prisma {
     qualification: string
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
+    signPdfUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutPersonalInformationInput
@@ -32894,6 +32915,7 @@ export namespace Prisma {
     qualification?: StringFieldUpdateOperationsInput | string
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
+    signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutPersonalInformationNestedInput
@@ -32914,6 +32936,7 @@ export namespace Prisma {
     qualification?: StringFieldUpdateOperationsInput | string
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
+    signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutPersonalInformationNestedInput
@@ -32934,6 +32957,7 @@ export namespace Prisma {
     qualification: string
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
+    signPdfUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32952,6 +32976,7 @@ export namespace Prisma {
     qualification?: StringFieldUpdateOperationsInput | string
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
+    signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32971,6 +32996,7 @@ export namespace Prisma {
     qualification?: StringFieldUpdateOperationsInput | string
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
+    signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -35613,6 +35639,7 @@ export namespace Prisma {
     qualification?: SortOrder
     politicallyExposedPerson?: SortOrder
     dateOfBirth?: SortOrder
+    signPdfUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35636,6 +35663,7 @@ export namespace Prisma {
     qualification?: SortOrder
     politicallyExposedPerson?: SortOrder
     dateOfBirth?: SortOrder
+    signPdfUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35655,6 +35683,7 @@ export namespace Prisma {
     qualification?: SortOrder
     politicallyExposedPerson?: SortOrder
     dateOfBirth?: SortOrder
+    signPdfUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -39129,6 +39158,7 @@ export namespace Prisma {
     qualification: string
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
+    signPdfUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39148,6 +39178,7 @@ export namespace Prisma {
     qualification: string
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
+    signPdfUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39504,6 +39535,7 @@ export namespace Prisma {
     qualification?: StringFieldUpdateOperationsInput | string
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
+    signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39523,6 +39555,7 @@ export namespace Prisma {
     qualification?: StringFieldUpdateOperationsInput | string
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
+    signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

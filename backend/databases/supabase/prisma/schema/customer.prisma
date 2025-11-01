@@ -56,6 +56,8 @@ model CustomerProfileDataModel {
     VerifiedBy Int?
     verifyDate DateTime?
 
+
+
     // One-to-one relations
     riskProfile                 CustomersRiskProfileModel? @relation(fields: [customersRiskProfileModelId], references: [id], onDelete: Cascade)
     customersRiskProfileModelId Int?                       @unique
@@ -110,6 +112,7 @@ model CustomerPersonalInfoModel {
     qualification            String
     politicallyExposedPerson String?
     dateOfBirth              String?
+    signPdfUrl               String?
 
     // 1-to-1 back reference
     customerProfileDataModel CustomerProfileDataModel?

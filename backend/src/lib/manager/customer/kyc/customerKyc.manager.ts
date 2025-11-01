@@ -173,6 +173,7 @@ export class CustomerKycManager {
                                 qualification: step2.qualification,
                                 dateOfBirth: step1.pan.dateOfBirth,
                                 SignatureUrl: step1.sign.url,
+                                signPdfUrl: step6.response.fileUrl,
                                 maidenName: null,
                                 politicallyExposedPerson: null
                             },
@@ -188,6 +189,7 @@ export class CustomerKycManager {
                                 qualification: step2.qualification,
                                 dateOfBirth: step1.pan.dateOfBirth,
                                 SignatureUrl: step1.sign.url,
+                                signPdfUrl: step6.response.fileUrl,
                                 maidenName: null,
                                 politicallyExposedPerson: null
                             }

@@ -237,6 +237,7 @@ exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {
   qualification: 'qualification',
   politicallyExposedPerson: 'politicallyExposedPerson',
   dateOfBirth: 'dateOfBirth',
+  signPdfUrl: 'signPdfUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

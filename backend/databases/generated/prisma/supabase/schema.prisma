@@ -213,6 +213,7 @@ model CustomerPersonalInfoModel {
   qualification            String
   politicallyExposedPerson String?
   dateOfBirth              String?
+  signPdfUrl               String?
 
   // 1-to-1 back reference
   customerProfileDataModel CustomerProfileDataModel?

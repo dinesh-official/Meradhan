@@ -50,8 +50,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       </div>
 
       <StickyHeader />
-      {genMediaUrl(data.avatar)}
-      {data.personalInformation?.SignatureUrl}
+
       {/* Personal Information */}
       <div className="scroll-mt-16" id="personal-info">
         <PersonalInformationCard
@@ -115,7 +114,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               />
               <AdharaCard
                 name={`${data.aadhaarCard?.firstName || "----"} ${
-                  data.aadhaarCard?.middleName || "--"
+                  data.aadhaarCard?.middleName || ""
                 } ${data.aadhaarCard?.lastName || "---"}`}
                 gender={data.aadhaarCard?.gender || "----"}
                 aadhaarNumberMasked={
@@ -341,11 +340,11 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           <CardContent>
             <CardTitle className="text-sm">Compliance Confirmations</CardTitle>
             <p className="flex justify-start items-center gap-3 mt-3">
-              <Checkbox /> I hereby confirm that I am not a Politically Exposed
+              <Checkbox checked /> I hereby confirm that I am not a Politically Exposed
               Person (PEP) nor related to any PEP
             </p>
             <p className="flex justify-start items-center gap-3 mt-2">
-              <Checkbox /> I hereby confirm that I am not a person and/or entity
+              <Checkbox checked /> I hereby confirm that I am not a person and/or entity
               debarred from accessing the securities market or dealing in
               securities, as per directions or orders issued by SEBI
             </p>
