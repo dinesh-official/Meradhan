@@ -11,8 +11,8 @@ cd MeradhanProject/
 # LINT & TYPE CHECK ALL
 # --------------------------
 echo "🧹 Running lint and type checks for all projects..."
-./lint-check-all.sh
 ./setup.sh
+./lint-check-all.sh
 
 echo "✅ Setup complete."
 
