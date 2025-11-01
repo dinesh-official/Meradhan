@@ -1,23 +1,10 @@
 // next.config.ts
+import { BASES } from "@/core/config/base.urls";
 import type { NextConfig } from "next";
 
-// Environment flag
+
+
 const isDev = process.env.NODE_ENV === "development";
-
-// Centralized base URLs for all environments
-const BASES = {
-  development: {
-    API_SERVER: "http://localhost:4000/api",
-    CMS: "http://3.110.126.202:1337",
-    ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
-  },
-  production: {
-    API_SERVER: "http://3.110.126.202:4000/api",
-    CMS: "http://3.110.126.202:1337",
-    ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
-  },
-};
-
 // Select current environment base
 const BASE = isDev ? BASES.development : BASES.production;
 

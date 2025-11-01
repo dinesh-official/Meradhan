@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import { BASES } from "./src/core/config/base.urls";
+
+// Environment detection
+const isDev = process.env.NODE_ENV === "development";
+const BASE = isDev ? BASES.development : BASES.production;
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -26,13 +31,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/server/:path*",
-        // destination: "http://3.110.126.202:4000/api/:path*",
-        destination: 'http://localhost:4000/api/:path*',
+        destination: `${BASE.API_SERVER}/api/:path*`,
       },
       {
         source: "/assets/media/:path*", // what user visits
-        destination:
-          "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public/:path*", // where it actually fetches
+        destination: `${BASE.ASSETS}/:path*`, // where it actually fetches
       },
     ];
   },

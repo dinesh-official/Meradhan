@@ -3,6 +3,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import apiServerCaller from './core/connection/apiServerCaller';
 import { cookies } from 'next/headers';
+
+// Environment detection for middleware
+const isProduction = process.env.NODE_ENV === "production";
+
 // Helper: Generate Basic Auth header
 const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64");
 
@@ -11,7 +15,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ✅ 1. Basic Auth protection for production
-  if (process.env.NODE_ENV === "production" && !pathname.startsWith("/api") && !pathname.startsWith("/assets")) {
+  if (isProduction && !pathname.startsWith("/api") && !pathname.startsWith("/assets")) {
     const authHeader = request.headers.get("authorization");
 
     if (authHeader !== BASIC_AUTH_HEADER) {
