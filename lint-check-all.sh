@@ -135,7 +135,7 @@ main() {
 }
 
 # Check if we're in the right directory
-if [ ! -d "/home/sourav/Desktop/MeradhanProject" ]; then
+if [ ! -d "/home/ubuntu/MeradhanProject" ]; then
     print_error "Project directory not found. Please make sure you're running this script from the correct location."
     exit 1
 fi
