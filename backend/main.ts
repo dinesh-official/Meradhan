@@ -1,22 +1,23 @@
 import { config } from "@config/config";
 import { ExpressServer } from "@core/bootstrap/server";
 import { checkConnectToDatabases } from "@core/database/database";
-import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@lib/provider/monitoring/prometheus.provider";
+import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@modules/monitoring/prometheus";
+import auditLogsRouter from "@resource/crm/audit_logs/audit_logs_route";
+import crmAuthRoutes from "@resource/crm/auth/auth.route";
+import crmCustomersRoutes from "@resource/crm/customers/customers.routes";
+import followUpRouter from "@resource/crm/leads/followup/leads_follow_up.routes";
+import leadsRoutes from "@resource/crm/leads/leads.routes";
+import participantsRouter from "@resource/crm/refq/nse/cbrics/participants.route";
+import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
+import crmUsersRoutes from "@resource/crm/users/crmuser.route";
+import customerAuthRoutes from "@resource/customer/auth/customer.auth.route";
+import kycRoutes from "@resource/customer/kyc/kyc.routes";
+import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";
 import dotenv from "dotenv";
-import { cacheStorage } from "./src/queues/redis/queues";
-import auditlogsRouter from "./src/resource/auditlogs/auditlogs.route";
-import authRoutes from "./src/resource/auth/auth.route";
-import customerAuthRoutes from "./src/resource/auth/customers/customerauth.route";
-import customerResetPasswordAuthRoutes from "./src/resource/auth/customers/password/forgetpassword.route";
-import customersRoutes from "./src/resource/crm/customers/customers.routes";
-import followUpRouter from "./src/resource/crm/leads/followup/leadsFollowUp.routes";
-import leadsRoutes from "./src/resource/crm/leads/leads.routes";
-import participantsRouter from "./src/resource/crm/refq/nse/cbrics/participants.route";
-import nseIsinRoute from "./src/resource/crm/refq/nse/isin/nseisin.routes";
-import crmUsersRoutes from "./src/resource/crm/users/crmuser.route";
-import kycRoutes from "./src/resource/customer/kyc/kyc.routes";
-import { CustomerKycManager } from "@lib/manager/customer/kyc/customerKyc.manager";
+
+
+
 dotenv.config({ debug: false });
 const monitoring = new PrometheusMonitorProvider()
 const response_time_monitor = new PrometheusResponseTimeMonitor()
@@ -33,16 +34,18 @@ logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
 server.addRoutes([
-    authRoutes,
+    // crm routes
+    crmAuthRoutes,
     crmUsersRoutes,
-    customersRoutes,
+    crmCustomersRoutes,
     leadsRoutes,
     followUpRouter,
     nseIsinRoute,
-    auditlogsRouter,
+    auditLogsRouter,
     participantsRouter,
+
+    // customer routes
     customerAuthRoutes,
-    customerResetPasswordAuthRoutes,
     kycRoutes
 ]);
 
@@ -56,18 +59,4 @@ checkConnectToDatabases()
         logger.logError("Error connecting to databases:", error);
         process.exit(1);
     });
-
-
-// Initialize
-const kycManager = new CustomerKycManager();
-
-// Save KYC data to customer
-await kycManager.saveKycToCustomer(105);
-
-// Check completion
-const isComplete = await kycManager.isKycComplete(105);
-
-// Get status
-const status = await kycManager.getKycStatus(105);
-console.log(`KYC Complete: ${isComplete}, Status: ${status}`);
 

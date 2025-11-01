@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { NSEIsinService } from "./nseisin.service";
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
-import { cacheStorage } from "../../../../../queues/redis/queues";
+import { cacheStorage } from "@store/redis_store";
 
 export class NSEIsinController {
 

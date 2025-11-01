@@ -1,5 +1,6 @@
 import { db, type DataBaseSchema } from "@core/database/database";
-import { fullCustomerProfileSelect } from "@lib/manager/customer/customermanager.selector";
+import { fullCustomerProfileSelect } from "@services/customer/customer_manager_selector";
+
 import { AppError } from "@utils/error/AppError";
 
 

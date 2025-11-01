@@ -1,8 +1,9 @@
-import { EmailAuthService } from "../src/resource/auth/emailAuth.service";
-import type { CustomerProfileService } from "../src/resource/crm/customers/customer.service";
-import type { LeadsFollowUpManager } from "../src/resource/crm/leads/manager/leadFollowup.manager";
-import type { LeadManager } from "../src/resource/crm/leads/manager/leads.manager";
-import type { CrmUserService } from "../src/resource/crm/users/crmusers.service";
+import type { EmailAuthService } from "@resource/crm/auth/email_auth.service";
+import type { CustomerProfileService } from "@resource/crm/customers/customer.service";
+import type { LeadsFollowUpManagerService } from "@resource/crm/leads/services/lead_followup_manager.service";
+import type { LeadManagerService } from "@resource/crm/leads/services/leads_manager.service";
+import type { CrmUserService } from "@resource/crm/users/crmusers.service";
+
 
 type EmailAuthServiceType = InstanceType<typeof EmailAuthService>;
 
@@ -21,7 +22,7 @@ export interface CustomerProfileDataTypes {
 }
 
 
-type LeadsManagerServiceType = InstanceType<typeof LeadManager>;
+type LeadsManagerServiceType = InstanceType<typeof LeadManagerService>;
 export interface LeadsDataTypes {
     NewLeadData: Awaited<ReturnType<LeadsManagerServiceType["createNewLead"]>>,
     FilterLeadsData: Awaited<ReturnType<LeadsManagerServiceType["filterLead"]>>,
@@ -30,7 +31,7 @@ export interface LeadsDataTypes {
     DeleteLeadData: Awaited<ReturnType<LeadsManagerServiceType["deleteLead"]>>,
 }
 
-type LeadsFollowUpManagerServiceType = InstanceType<typeof LeadsFollowUpManager>;
+type LeadsFollowUpManagerServiceType = InstanceType<typeof LeadsFollowUpManagerService>;
 export interface LeadsDataTypes {
     NewLeadFollowUpData: Awaited<ReturnType<LeadsFollowUpManagerServiceType["createNewFollowUpNote"]>>,
     LeadFollowUpData: Awaited<ReturnType<LeadsFollowUpManagerServiceType["getFollowUpNotesByLeadId"]>>,

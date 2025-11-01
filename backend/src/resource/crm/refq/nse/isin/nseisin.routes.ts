@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import { NSEIsinController } from './nseisin.controller';
-import { withAuthMiddleware } from '@lib/middlewares/auth.middleware';
+import { withCrmAuthMiddleware } from '@middlewares/crm_middleware';
 const nseIsinRoute = Router();
 
 const controller = new NSEIsinController()
 
-nseIsinRoute.get("/api/crm/rfq/nse/isin", withAuthMiddleware, (req, res) => controller.searchIsin(req, res));
+nseIsinRoute.get("/api/crm/rfq/nse/isin", withCrmAuthMiddleware, (req, res) => controller.searchIsin(req, res));
 
 export default nseIsinRoute;

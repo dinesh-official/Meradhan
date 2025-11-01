@@ -1,14 +1,15 @@
+import { withCrmAuthMiddleware } from "@middlewares/crm_middleware";
 import { Router } from "express";
 import { CustomerProfileController } from "./customer.controller";
-import { withAuthMiddleware } from "@lib/middlewares/auth.middleware";
 
-const customersRoutes = Router();
+
+const crmCustomersRoutes = Router();
 const controller = new CustomerProfileController()
 
-customersRoutes.get("/api/crm/customers", withAuthMiddleware, (req, res) => controller.filterCustomer(req, res));
-customersRoutes.get("/api/crm/customer/:customerId", withAuthMiddleware, (req, res) => controller.getFullProfileCustomer(req, res));
-customersRoutes.post("/api/crm/customer", withAuthMiddleware, (req, res) => controller.createCustomer(req, res));
-customersRoutes.patch("/api/crm/customer/:customerId", withAuthMiddleware, (req, res) => controller.updateCustomer(req, res));
-customersRoutes.delete("/api/crm/customer/:customerId", withAuthMiddleware, (req, res) => controller.deleteCustomer(req, res));
+crmCustomersRoutes.get("/api/crm/customers", withCrmAuthMiddleware, (req, res) => controller.filterCustomer(req, res));
+crmCustomersRoutes.get("/api/crm/customer/:customerId", withCrmAuthMiddleware, (req, res) => controller.getFullProfileCustomer(req, res));
+crmCustomersRoutes.post("/api/crm/customer", withCrmAuthMiddleware, (req, res) => controller.createCustomer(req, res));
+crmCustomersRoutes.patch("/api/crm/customer/:customerId", withCrmAuthMiddleware, (req, res) => controller.updateCustomer(req, res));
+crmCustomersRoutes.delete("/api/crm/customer/:customerId", withCrmAuthMiddleware, (req, res) => controller.deleteCustomer(req, res));
 
-export default customersRoutes
+export default crmCustomersRoutes

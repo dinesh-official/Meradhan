@@ -1,0 +1,24 @@
+import { QueueNames, sharedConnection } from "@store/redis_store";
+import Bull from "bull";
+
+
+// 🔹 Reuse shared Redis clients across all queues
+const sharedRedisOpts = {
+    createClient: (type: string) => {
+        switch (type) {
+            case 'client':
+                return sharedConnection.getInstance().duplicate();
+            case 'subscriber':
+                return sharedConnection.getInstance().duplicate();
+            default:
+                return sharedConnection.getInstance().duplicate();
+        }
+    },
+};
+
+// 🔹 Initialize all queues using shared redis connections
+export const welcomeEmailSenderQueue = new Bull(QueueNames.welComeEmail, sharedRedisOpts);
+export const emailOtpSenderQueue = new Bull(QueueNames.emailOtpSend, sharedRedisOpts);
+export const mobileOtpSenderQueue = new Bull(QueueNames.mobileOtpSend, sharedRedisOpts);
+export const forgotPasswordLinkSenderQueue = new Bull(QueueNames.forgotPasswordEmail, sharedRedisOpts);
+export const successResetPasswordQueue = new Bull(QueueNames.successResetPassword, sharedRedisOpts);

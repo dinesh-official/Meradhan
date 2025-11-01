@@ -1,7 +1,10 @@
-import { ParticipantManager } from "@lib/manager/refq/nse/cbrics.manager";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-const cb = new ParticipantManager();
+// Initialize
+const kycManager = new ParticipantManager();
 
-cb.getAllParticipants().then((data) => {
-  console.log(data);
-});
+// Save KYC data to customer
+const data = await kycManager.getAllParticipants();
+
+console.log(data);
+

@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ✅ 1. Basic Auth protection for production
-  if (isProduction && !pathname.startsWith("/api") && !pathname.startsWith("/assets") && !pathname.startsWith("/_next")) {
+  // if (isProduction && !pathname.startsWith("/api") && !pathname.startsWith("/assets") && !pathname.startsWith("/_next")) {
     const authHeader = request.headers.get("authorization");
 
     if (authHeader !== BASIC_AUTH_HEADER) {
@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
       });
     }
 
-  }
+  // }
   // Only protect /dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     try {

@@ -1,7 +1,7 @@
-import { appSchema } from '@root/schema'
+import { appSchema } from '@root/schema';
+import { HttpStatus } from '@utils/error/AppError';
 import type { Request, Response } from 'express';
 import { CbricsParticipantService } from './participants.service';
-import { HttpStatus } from '@utils/error/AppError';
 export class CbricsParticipantController {
 
     private participantService = new CbricsParticipantService();

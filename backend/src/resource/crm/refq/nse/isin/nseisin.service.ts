@@ -1,13 +1,15 @@
 import { db, type DataBaseSchema } from "@core/database/database";
-import { NseRfq } from "@lib/provider/RFQ/nse/NseRFQ";
+import type { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+
 import type { appSchema } from "@root/schema";
+import { NseRfqManager } from "@services/refq/nse/nseisin_manager.service";
 import type z from "zod";
 
 export class NSEIsinService {
     private nseRfq: NseRfq;
 
     constructor() {
-        this.nseRfq = new NseRfq();
+        this.nseRfq = new NseRfqManager();
     }
 
     async searchIsin(

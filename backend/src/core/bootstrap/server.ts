@@ -1,5 +1,7 @@
-import type { ServerMonitorInterface } from "@lib/provider/monitoring/monitoring.base";
+
+import type { ServerMonitorInterface } from "@modules/monitoring/monitoring";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import logger from "@utils/logger/logger";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express, type Router } from "express";
@@ -7,10 +9,10 @@ import helmet from "helmet";
 import http from "http";
 import morgan from "morgan";
 import responseTime from "response-time";
-import { errorHandler } from "./error.handler";
-import { responseHandler } from "./response.handler";
-import type { IExpressRoute, IServer } from "./server.interface";
-import logger from "@utils/logger/logger";
+import { errorHandler } from "./error_handler";
+import { responseHandler } from "./response_handler";
+import type { IExpressRoute, IServer } from "./server_interface";
+
 
 type TMonitor = { serverMonitor?: ServerMonitorInterface, responseTimeHandler?: (data: { method: string, url: string, duration: number, statusCode: string }) => void }
 

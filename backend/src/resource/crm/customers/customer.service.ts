@@ -1,6 +1,6 @@
 import type { DataBaseSchema } from "@core/database/database";
-import { CustomerProfileManager } from "@lib/manager/customer/customer.manager";
 import type { appSchema } from "@root/schema";
+import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import type z from "zod";
 import type { CustomerProfileRepo } from "./customer.repo";
 

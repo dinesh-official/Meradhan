@@ -22,13 +22,20 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "paths": {
+      "@communication/*": ["./src/communication/*"],
       "@core/*": ["./src/core/*"],
       "@databases/*": ["./databases/*"],
       "@utils/*": ["./src/utils/*"],
-      "@schemas/*": ["./src/schemas/*"],
       "@emails/*": ["./emails/*"],
       "@config/*": ["./src/config/*"],
-      "@lib/*": ["./src/lib/*"]
+      "@modules/*": ["./src/modules/*"],
+      "@jobs/*": ["./src/jobs/*"],
+      "@middlewares/*": ["./src/middlewares/*"],
+      "@resource/*": ["./src/resource/*"],
+      "@store/*": ["./src/store/*"],
+      "@services/*": ["./src/services/*"],
+      "@root/*": ["./src/*"],
+      "@types/*": ["./types/*"]
     },
 
     // Some stricter flags (disabled by default)

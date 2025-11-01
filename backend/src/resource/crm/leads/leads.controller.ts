@@ -1,15 +1,13 @@
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
-import { LeadManager } from "./manager/leads.manager";
-
-
+import { LeadManagerService } from "./services/leads_manager.service";
 
 export class LeadController {
 
-    private manager: LeadManager;
+    private manager: LeadManagerService;
     constructor() {
-        this.manager = new LeadManager();
+        this.manager = new LeadManagerService();
     }
 
     async createLead(req: Request, res: Response): Promise<void> {

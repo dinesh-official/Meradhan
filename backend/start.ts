@@ -2,7 +2,7 @@ import os from 'os'
 import cluster from 'cluster'
 import logger from '@utils/logger/logger';
 import { disconnectFromDatabases } from '@core/database/database';
-import { cacheStorage } from './src/queues/redis/queues';
+import { cacheStorage } from './src/store/redis_store';
 const numCPUs = os.availableParallelism();
 if (cluster.isPrimary) {
     logger.logInfo(`Primary ${process.pid} is running`);
