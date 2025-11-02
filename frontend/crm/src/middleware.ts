@@ -16,16 +16,16 @@ export async function middleware(request: NextRequest) {
 
   // ✅ 1. Basic Auth protection for production
   // if (isProduction && !pathname.startsWith("/api") && !pathname.startsWith("/assets") && !pathname.startsWith("/_next")) {
-    const authHeader = request.headers.get("authorization");
+  const authHeader = request.headers.get("authorization");
 
-    if (authHeader !== BASIC_AUTH_HEADER) {
-      return new Response("Unauthorized", {
-        status: 401,
-        headers: {
-          "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
-        },
-      });
-    }
+  if (authHeader !== BASIC_AUTH_HEADER) {
+    return new Response("Unauthorized", {
+      status: 401,
+      headers: {
+        "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
+      },
+    });
+  }
 
   // }
   // Only protect /dashboard routes
@@ -62,7 +62,9 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Match all /dashboard paths including nested ones
+// ✅ Match all paths (you can narrow this if needed)
 export const config = {
-  matcher: '/:path*',
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)', // This means "match everything except api, static, image, favicon"
+  ],
 };
