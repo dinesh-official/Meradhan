@@ -11,7 +11,7 @@ import {
 } from "nuqs";
 import { useEffect } from "react";
 import z from "zod";
-import { cleanArray, validateBondsFilters } from "../_utils/filter";
+import {  toValidatedArray, validateBondsFilters } from "../_utils/filter";
 import { useGeneratePageUrl } from "@/hooks/useGeneratePageUrl";
 
 // --- Zod schema ---
@@ -35,10 +35,10 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
 
     useEffect(() => {
         if (!validated.success) {
-            setMaturity((prev) => cleanArray(prev, appSchema.bonds.maturityYearEnums));
-            setCoupon((prev) => cleanArray(prev, appSchema.bonds.couponPercentEnums));
-            setTaxation((prev) => cleanArray(prev, appSchema.bonds.taxationEnums));
-            setInterest((prev) => cleanArray(prev, appSchema.bonds.INTEREST_MODE_VALUES));
+            setMaturity((prev) => toValidatedArray(prev, appSchema.bonds.maturityYearEnums));
+            setCoupon((prev) => toValidatedArray(prev, appSchema.bonds.couponPercentEnums));
+            setTaxation((prev) => toValidatedArray(prev, appSchema.bonds.taxationEnums));
+            setInterest((prev) => toValidatedArray(prev, appSchema.bonds.INTEREST_MODE_VALUES));
         }
     }, [setCoupon, setInterest, setMaturity, setTaxation, validated.success]);
 
@@ -79,10 +79,10 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
             ? validated.data
             : {
                 ...filters,
-                maturity: cleanArray(filters.maturity, appSchema.bonds.maturityYearEnums),
-                coupon: cleanArray(filters.coupon, appSchema.bonds.couponPercentEnums),
-                taxation: cleanArray(filters.taxation, appSchema.bonds.taxationEnums),
-                interest: cleanArray(filters.interest, appSchema.bonds.INTEREST_MODE_VALUES),
+                maturity: toValidatedArray(filters.maturity, appSchema.bonds.maturityYearEnums),
+                coupon: toValidatedArray(filters.coupon, appSchema.bonds.couponPercentEnums),
+                taxation: toValidatedArray(filters.taxation, appSchema.bonds.taxationEnums),
+                interest: toValidatedArray(filters.interest, appSchema.bonds.INTEREST_MODE_VALUES),
             },
         setSearch,
         setMaturity,

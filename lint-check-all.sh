@@ -81,7 +81,7 @@ run_lint_check() {
 
 # Main execution
 main() {
-    local project_root="/home/ubuntu/MeradhanProject"
+    local project_root="/opt/MeradhanProject"
     local failed_projects=()
     local total_projects=0
     local successful_projects=0
@@ -135,7 +135,7 @@ main() {
 }
 
 # Check if we're in the right directory
-if [ ! -d "/home/ubuntu/MeradhanProject" ]; then
+if [ ! -d "/opt/MeradhanProject" ]; then
     print_error "Project directory not found. Please make sure you're running this script from the correct location."
     exit 1
 fi

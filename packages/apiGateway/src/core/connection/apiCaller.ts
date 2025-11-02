@@ -7,7 +7,10 @@ import { ApiError } from "./error";
 class ApiCallerClient implements IApiCaller {
     private instance: AxiosInstance;
 
-    constructor(baseURL: string = 'http://localhost:3000/api/server') {
+    constructor(baseURL:string) {
+
+        
+
         this.instance = axios.create({
             baseURL,
             withCredentials: true,

@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectionViewWrapper } from "@/global/components/basic/section/SectionWrapper";
 import { BondListCard } from "@/global/components/Bond/BondListCard";
 import BondsByCategories from "@/global/components/Bond/BondsByCategories";
-import { BondDetailsResponse, ListedBondsResponse } from "@root/apiGateway";
+import { BondDetailsResponse, ListedBondsResponse, PaginationMeta } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { LoaderCircle, LucideLayoutGrid } from "lucide-react";
 import { ReactNode } from "react";
@@ -14,7 +14,7 @@ import ExploreBondsHeader from "../_components/ExploreBondsHeader";
 import useBondsFilters from "../_hooks/useBondsFilters";
 import { useViewModeStore } from "../_hooks/useViewModeStore";
 import { cn } from "@/lib/utils";
-import { PaginationMeta } from "../../../../../../packages/apiGateway/src/types/base";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -43,8 +43,7 @@ function BondsView({
   const bondFilterManager = useBondsFilters({ pathname, category });
   const { setViewMode, viewMode } = useViewModeStore();
 
-  const bondsListData =
-    bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
+  const bondsListData = bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
 
   return (
     <>
@@ -53,6 +52,8 @@ function BondsView({
         title={options.header.title}
         desc={options.header.desc}
         applyFilters={() => {
+          console.log("Apply filter");
+          
           bondFilterManager.applyFilters(bondFilterManager.filters);
         }}
       />

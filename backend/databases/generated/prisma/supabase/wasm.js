@@ -666,7 +666,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/sourav/Desktop/MeradhanProject/backend/databases/generated/prisma/supabase",
+      "value": "/opt/MeradhanProject/backend/databases/generated/prisma/supabase",
       "fromEnvVar": null
     },
     "config": {
@@ -680,7 +680,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/sourav/Desktop/MeradhanProject/backend/databases/supabase/prisma/schema/schema.prisma",
+    "sourceFilePath": "/opt/MeradhanProject/backend/databases/supabase/prisma/schema/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -693,6 +693,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {

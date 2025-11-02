@@ -2,65 +2,65 @@ import { appSchema } from "@root/schema";
 import { ratingOptions } from "../_hooks/bonds_filter_data";
 
 /**
- * Utility to clean an array of values against valid enums.
+ * Converts unknown input into a validated array of allowed string values.
  */
-export function cleanArray<T extends string>(
-    arr: unknown,
-    validValues: readonly T[]
+export function toValidatedArray<T extends string>(
+  input: unknown,
+  validValues: readonly T[]
 ): T[] {
-    if (!arr) return [];
+  if (!input) return [];
 
-    // Convert single string or comma-separated list into array
-    if (typeof arr === "string") {
-        arr = arr.split(",").map((s) => s.trim());
-    }
+  const arr = Array.isArray(input)
+    ? input
+    : typeof input === "string"
+      ? input.split(",").map((s) => s.trim())
+      : [];
 
-    // Ensure it's an array before filtering
-    if (!Array.isArray(arr)) return [];
-
-    return arr.filter(
-        (v): v is T =>
-            typeof v === "string" && validValues.includes(v as T)
-    );
+  return arr.filter(
+    (value): value is T =>
+      typeof value === "string" && validValues.includes(value as T)
+  );
 }
 
 /**
- * Validates and sanitizes bond filters.
+ * Cleans and validates the bond filter query.
+ * Uses Object.assign() for clean merging of default and parsed data.
  */
 export function validateBondsFilters(rawQuery: Record<string, unknown>) {
-    const cleaned = {
-        search:
-            typeof rawQuery.search === "string"
-                ? rawQuery.search.trim()
-                : undefined,
+  const { bonds } = appSchema;
 
-        maturity: cleanArray(
-            rawQuery.maturity,
-            appSchema.bonds.maturityYearEnums
-        ),
+  // Default clean structure
+  const baseFilters = {
+    search: undefined,
+    maturity: [] as string[],
+    rating: [] as string[],
+    coupon: [] as string[],
+    taxation: [] as string[],
+    interest: [] as string[],
+  };
 
-        rating: cleanArray(
-            rawQuery.rating,
-            ratingOptions.map((o) => o.value) as readonly string[]
-        ),
+  // Merge cleaned values into defaults using Object.assign()
+  const cleaned = Object.assign({}, baseFilters, {
+    search:
+      typeof rawQuery.search === "string"
+        ? rawQuery.search.trim()
+        : undefined,
 
-        coupon: cleanArray(
-            rawQuery.coupon,
-            appSchema.bonds.couponPercentEnums
-        ),
+    maturity: toValidatedArray(rawQuery.maturity, bonds.maturityYearEnums),
 
-        taxation: cleanArray(
-            rawQuery.taxation,
-            appSchema.bonds.taxationEnums
-        ),
+    rating: toValidatedArray(
+      rawQuery.rating,
+      ratingOptions.map((o) => o.value) as readonly string[]
+    ),
 
-        interest: cleanArray(
-            rawQuery.interest,
-            appSchema.bonds.INTEREST_MODE_VALUES
-        ),
-    };
+    coupon: toValidatedArray(rawQuery.coupon, bonds.couponPercentEnums),
 
-    const parsed = appSchema.bonds.bondsFilterSchema.safeParse(cleaned);
+    taxation: toValidatedArray(rawQuery.taxation, bonds.taxationEnums),
 
-    return parsed.success ? parsed.data : cleaned;
+    interest: toValidatedArray(rawQuery.interest, bonds.INTEREST_MODE_VALUES),
+  });
+
+  const parsed = bonds.bondsFilterSchema.safeParse(cleaned);
+
+  return parsed.success ? parsed.data : cleaned;
 }

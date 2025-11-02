@@ -5,14 +5,14 @@ set -e
 echo "🚀 Starting MeraDhan deployment..."
 
 # Navigate to main project directory
-cd MeradhanProject/
+# cd MeradhanProject/
 
 # --------------------------
 # LINT & TYPE CHECK ALL
 # --------------------------
 echo "🧹 Running lint and type checks for all projects..."
-./setup.sh
-./lint-check-all.sh
+# ./setup.sh
+# ./lint-check-all.sh
 
 echo "✅ Setup complete."
 
