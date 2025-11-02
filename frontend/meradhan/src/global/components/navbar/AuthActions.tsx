@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ShowUserBadge } from "@/app/(account)/_components/NavBar/AccountNavBar";
 import { Button } from "@/components/ui/button";
 import { ISessionResponse } from "@root/apiGateway";
 import Link from "next/link";
@@ -8,13 +8,7 @@ function AuthActions({
   session: ISessionResponse["responseData"] | null;
 }) {
   if (session) {
-    return (
-      <Avatar>
-        <AvatarFallback>
-          {session.firstName?.slice(0, 1)} {session.lastName?.slice(0, 1)}
-        </AvatarFallback>
-      </Avatar>
-    );
+    return ShowUserBadge(session);
   }
 
   return (

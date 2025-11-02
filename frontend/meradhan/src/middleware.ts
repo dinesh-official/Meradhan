@@ -18,6 +18,9 @@ const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+
   // ✅ 1. Basic Auth protection for production
   if (process.env.NODE_ENV === "production" && !pathname.startsWith("/api") && !pathname.startsWith("/assets") && !pathname.startsWith("/_next")) {
     const authHeader = request.headers.get("authorization");
@@ -43,9 +46,9 @@ export async function middleware(request: NextRequest) {
       try {
         // Attempt session restore via API
         await authApi.getSession();
-        return NextResponse.next();
+        return NextResponse.next({ headers: requestHeaders });
       } catch (error) {
-        const response = NextResponse.redirect(new URL("/logout", origin));
+        const response = NextResponse.redirect(new URL("/logout", origin), { headers: requestHeaders });
         const allCookies = cookieStore.getAll();
         for (const cookie of allCookies) {
           response.cookies.set({
@@ -63,10 +66,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // ✅ Default: Allow request to proceed
-  return NextResponse.next();
+  return NextResponse.next({ headers: requestHeaders }); // Let the request pass
 }
 
 // ✅ Match all paths (you can narrow this if needed)
 export const config = {
-  matcher: '/:path*',
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)', // This means "match everything except api, static, image, favicon"
+  ],
 };

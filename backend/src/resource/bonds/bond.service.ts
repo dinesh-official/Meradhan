@@ -17,26 +17,39 @@ export class BondService {
             page?: number | string;
             limit?: number | string;
             sortBy?: keyof ReturnType<typeof BondQueryBuilder.getSortingOptions>;
+            category?: string;
         },
     ) {
         const whereQuery = BondQueryBuilder.generateFilterQuery(filters);
-        console.log(whereQuery);
-        
+        console.log(whereQuery, null, 2);
+
         const sortingOptions = BondQueryBuilder.getSortingOptions();
         // Convert page and limit to numbers for calculations
         const pageNum = typeof options?.page === 'string' ? parseInt(options.page, 10) || 1 : options?.page || 1;
         const limitNum = typeof options?.limit === 'string' ? parseInt(options.limit, 10) || 9 : options?.limit || 9;
         const paginationOptions = BondQueryBuilder.getPaginationOptions(pageNum, limitNum);
 
-        const orderBy = options?.sortBy
+        let orderBy = options?.sortBy
             ? sortingOptions[options.sortBy]
             : sortingOptions.default;
 
+        const extendedQuery = whereQuery;
+        extendedQuery.isListed = { equals: "YES" };
+        extendedQuery.redemptionDate = { gte: new Date() };
+        extendedQuery.creditRating = { notIn: ["D", "C"] };
+        extendedQuery.redemptionDate = { gte: new Date() };
+        if (options?.category) {
+            if (options.category == "latest-release") {
+                orderBy = sortingOptions.byMaturity;
+            } else {
+                extendedQuery.categories = { has: options?.category || "" };
+            }
+        }
+
+
         const [data, total] = await Promise.all([
             db.dataBase.bonds.findMany({
-                where: {
-                    ...whereQuery,
-                },
+                where: whereQuery,
                 orderBy,
                 ...paginationOptions
             }),
@@ -55,4 +68,24 @@ export class BondService {
             }
         };
     }
+
+
+    async getLatestBonds(limit: number = 3) {
+
+        const data = await db.dataBase.bonds.findMany({
+            where: {
+                isListed: { equals: "YES" },
+                redemptionDate: { lte: new Date() },
+                creditRating: { notIn: ["D", "C", "UnRated", ""] },
+            },
+            orderBy: {
+                dateOfAllotment: 'desc'
+            },
+            take: limit
+        });
+
+        return data;
+
+    }
+
 }

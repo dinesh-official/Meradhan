@@ -12,13 +12,14 @@ import Image from "next/image";
 import { MENU_ITEMS } from "../../constants/menu.constants";
 import { IoMdArrowDropdown } from "react-icons/io";
 import Link from "next/link";
+import { ISessionResponse } from "@root/apiGateway";
 
 interface MenuItemProps {
   item: (typeof MENU_ITEMS)[number];
   level?: number;
 }
 
-function MobMenu() {
+function MobMenu({ session }: { session?: ISessionResponse["responseData"] | null }) {
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden block">
@@ -45,21 +46,24 @@ function MobMenu() {
         {/* Scrollable Menu */}
         <div className="flex-1 overflow-y-auto">
           {MENU_ITEMS.map((item, i) => {
-
-            return (
-                <MobileMenuItem item={item} key={i}/>
-            );
+            return <MobileMenuItem item={item} key={i} />;
           })}
         </div>
 
         {/* Bottom Login / Signup Buttons */}
         <div className="flex flex-col flex-shrink-0 gap-3 p-4 border-t border-t-gray-200">
-          <button className="bg-primary hover:bg-primary/90 py-2 rounded-md w-full text-white transition">
-            Login
-          </button>
-          <button className="hover:bg-primary/10 py-2 border border-primary rounded-md w-full text-primary transition">
-            Sign Up
-          </button>
+          <Link
+            href={session?.id ? "/dashboard" : "/login"}
+            className="bg-primary hover:bg-primary/90 py-2 rounded-md w-full text-white text-center transition"
+          >
+            {session?.id ? "Go to Dashboard" : "Login"}
+          </Link>
+          <Link
+            href={session?.id ? "/logout" : "/signup"}
+            className="hover:bg-primary/10 py-2 border border-primary rounded-md w-full text-primary text-center transition"
+          >
+            {session?.id ? "Logout" : "Sign Up"}
+          </Link>
         </div>
       </SheetContent>
     </Sheet>
@@ -81,25 +85,31 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
           level > 0 ? `pl-${level * 4}` : ""
         }`}
       >
-  {item.href ? (
-    <Link href={item.href} className="flex-1" onClick={() => setOpen(false)}>
-      {item.title}
-    </Link>
-  ) : (
-    <span className="flex-1" onClick={() => hasChildren && setOpen(!open)}>
-      {item.title}
-    </span>
-  )}
+        {item.href ? (
+          <Link
+            href={item.href}
+            className="flex-1"
+            onClick={() => setOpen(false)}
+          >
+            {item.title}
+          </Link>
+        ) : (
+          <span
+            className="flex-1"
+            onClick={() => hasChildren && setOpen(!open)}
+          >
+            {item.title}
+          </span>
+        )}
 
-  {hasChildren && (
-    <IoMdArrowDropdown
-      onClick={() => setOpen(!open)}
-      className={`transition-transform duration-200 ${
-        open ? "rotate-180" : "-rotate-90"
-      }`}
-    />
-  )}
-
+        {hasChildren && (
+          <IoMdArrowDropdown
+            onClick={() => setOpen(!open)}
+            className={`transition-transform duration-200 ${
+              open ? "rotate-180" : "-rotate-90"
+            }`}
+          />
+        )}
       </div>
 
       {/* Nested Children */}

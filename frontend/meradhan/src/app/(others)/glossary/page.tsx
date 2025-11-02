@@ -1,10 +1,18 @@
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import GlossaryView from "./GlossaryView";
+import { getDynamicPageDataGql, getDynamicPageMetaDataGql } from "@/graphql/getDynamicPageDataGql";
 
-function page() {
+export const revalidate = 0;
+export async function generateMetadata() {
+  return await getDynamicPageMetaDataGql("glossary");
+}
+async function page() {
+  
+  const data = await getDynamicPageDataGql("glossary");
+
   return (
     <ViewPort>
-      <GlossaryView />
+      <GlossaryView pageData={data} />
     </ViewPort>
   );
 }

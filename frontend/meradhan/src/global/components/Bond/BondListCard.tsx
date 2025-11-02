@@ -40,13 +40,13 @@ export function BondListCard({
               </p>
               {/* // make sure 2 buttons on that code deferent places */}
               {!gridMode && (
-                <div className="hidden lg:flex gap-5">
+                <div className="hidden lg:flex gap-5 col-span-2">
                   <Link href={`/bonds/detail/` + data.isin} >
                     <Button variant={`outline`} className="bg-transparent">
                       View Details
                     </Button>
                   </Link>
-                  <Button>Buy Now</Button>
+                  {/* <Button>Buy Now</Button> */}
                 </div>
               )}
             </div>
@@ -110,7 +110,7 @@ export function BondListCard({
 
               <div
                 className={cn(
-                  "gap-5 grid grid-cols-2 col-span-2 mt-2",
+                  "gap-5 grid grid-cols-1 col-span-2 mt-2",
                   !gridMode && "lg:hidden grid"
                 )}
               >
@@ -120,7 +120,7 @@ export function BondListCard({
                     View Details
                   </Button>
                 </Link>
-                <Button>Buy Now</Button>
+                {/* <Button>Buy Now</Button> */}
               </div>
             </div>
           </div>

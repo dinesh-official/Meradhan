@@ -4,8 +4,14 @@ import apiGateway from "@root/apiGateway";
 import { validateBondsFilters } from "../../../_utils/filter";
 import BondsView from "../../BondsView";
 import { cn } from "@/lib/utils";
+import { generateBondCategoryMetaData } from "../_gql/getCategoryPageGql";
 
 export const revalidate = 0;
+
+export async function generateMetadata() {
+  return await generateBondCategoryMetaData("perpetual");
+}
+
 async function BondPage({
   searchParams,
   params,
@@ -39,24 +45,23 @@ async function BondPage({
           header: {
             title: (
               <>
-                Exclusive{" "}
-                <span className="font-semibold text-secondary">
-                  Bonds Directory
-                </span>
+                Perpetual{" "}
+                <span className="font-semibold text-secondary">Bonds</span>
               </>
             ),
-            desc: "Get access to 26000+ bonds of India",
+            // desc: "Get access to 26000+ bonds of India",
           },
           page: {
             title: (
               <>
                 <h4 className={cn("font-medium text-3xl", "quicksand-medium")}>
-                  All{" "}
-                  <span className="font-semibold text-secondary">Bonds</span>
+                  All Listed Perpetual{" "}
+                  <span className="font-semibold text-secondary">Bonds</span> in
+                  India
                 </h4>
               </>
             ),
-            desc: "Explore a comprehensive list of bonds available in MeraDhan’s database.",
+            desc: "Perpetual bonds provide steady coupon income without a maturity date. Browse the complete list of listed perpetual bonds available in India.",
           },
         }}
       />

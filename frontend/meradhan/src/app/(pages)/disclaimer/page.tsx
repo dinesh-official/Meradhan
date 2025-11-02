@@ -13,7 +13,7 @@ const page = async () => {
   if (!data) {
     redirect("/404");
   }
-  console.log("data", data);
+
   return (
     <ViewPort>
       <Disclaimer

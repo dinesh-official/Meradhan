@@ -7,24 +7,34 @@ import {
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import { fetchFaqData } from "./_gql/faq.gql";
+import {
+  getDynamicPageDataGql,
+  getDynamicPageMetaDataGql,
+} from "@/graphql/getDynamicPageDataGql";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 
 export const revalidate = 0;
 
+export async function generateMetadata() {
+  return await getDynamicPageMetaDataGql("faqs");
+}
+
 export default async function FAQPage() {
+  const data = await getDynamicPageDataGql("faqs");
   const faqs = await fetchFaqData();
 
   return (
     <ViewPort>
       <TopTitleDesc
-        title={
-          /*html*/ `Frequently Asked <span class="font-semibold text-secondary"> Questions</span>`
+        title={data?.Title || "Frequently Asked Questions (FAQs)"}
+        description={
+          data?.Content.Introduction ||
+          "Find answers to common questions about our platform, services, and more."
         }
-        description="Find clear answers to commonly asked questions about MeraDhan, bond investing, and our
-platform’s features to help you make informed financial decisions."
       ></TopTitleDesc>
 
-      <div className="py-12">
-        <div className="max-w-3xl container">
+      <SectionWrapper>
+        <div className="container">
           <Accordion type="single" collapsible defaultValue="item-0">
             {faqs?.faqS_connection.nodes.map((faq, i) => (
               <AccordionItem
@@ -40,7 +50,7 @@ platform’s features to help you make informed financial decisions."
             ))}
           </Accordion>
         </div>
-      </div>
+      </SectionWrapper>
     </ViewPort>
   );
 }

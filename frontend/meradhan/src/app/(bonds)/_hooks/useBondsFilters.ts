@@ -2,7 +2,7 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import {
     parseAsArrayOf,
@@ -11,14 +11,13 @@ import {
 } from "nuqs";
 import { useEffect } from "react";
 import z from "zod";
-import {  toValidatedArray, validateBondsFilters } from "../_utils/filter";
-import { useGeneratePageUrl } from "@/hooks/useGeneratePageUrl";
+import { toValidatedArray, validateBondsFilters } from "../_utils/filter";
 
 // --- Zod schema ---
 const bondsFilterSchema = appSchema.bonds.bondsFilterSchema;
 
 // --- Hook ---
-export const useBondsFilters = ({ pathname,category }: { pathname: string, category: string }) => {
+export const useBondsFilters = ({ pathname, category }: { pathname: string, category: string }) => {
     const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
     const [maturity, setMaturity] = useQueryState("maturity", parseAsArrayOf(parseAsString).withDefault([]));
     const [rating, setRating] = useQueryState("rating", parseAsArrayOf(parseAsString).withDefault([]));
@@ -27,8 +26,6 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
     const [interest, setInterest] = useQueryState("interest", parseAsArrayOf(parseAsString).withDefault([]));
     const { page } = useParams<{ page?: string }>(); // returns an object
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const generatePageUrl = useGeneratePageUrl();
 
     const filters = { search, maturity, rating, coupon, taxation, interest };
     const validated = bondsFilterSchema.safeParse(filters);
@@ -51,7 +48,7 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
             const queryFilter = validateBondsFilters(filters || {});
             return await apiCaller.getListedBonds({
                 filters: queryFilter,
-                params: { page: 1 ,category}
+                params: { page: 1, category }
             });
         },
     });
@@ -59,17 +56,11 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
     const applyFilters = async (filter: z.infer<typeof bondsFilterSchema>) => {
         const activePage = page ? parseInt(page as string, 10) : 1;
 
-        // Start with existing params
-        const currentParams = new URLSearchParams(searchParams.toString());
-        // Reset page param when filters change
-        currentParams.set("page", "1");
         if (activePage !== 1) {
-            const url = generatePageUrl({ basePath: pathname })
-            // Navigate to updated URL
-            router.push(url);
+            router.push(pathname + window.location.search);
         } else {
             // Direct API fetch
-            applyFilterMutation.mutate({ filters: filter  });
+            applyFilterMutation.mutate({ filters: filter });
         }
     };
 
@@ -103,7 +94,6 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
         setInterest,
         applyFilters,
         applyFilterMutation,
-
         anyFilterApplied,
     };
 };

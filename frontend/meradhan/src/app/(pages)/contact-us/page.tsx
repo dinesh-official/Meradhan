@@ -14,6 +14,13 @@ import {
 } from "@/constants/contact";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import ContactForm from "./_components/ContactForm";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
+
+export const revalidate = 0;
+
+export async function generateMetadata() {
+  return await generatePagesMetaData("contact-us");
+}
 
 const ContactUsPage = () => {
   return (
@@ -55,7 +62,6 @@ const ContactUsPage = () => {
           address={ADDRESSES.communication.address}
           highlightedWord="Address"
           contact={CONTACT_INFO.phone2}
-
         />
       </div>
 

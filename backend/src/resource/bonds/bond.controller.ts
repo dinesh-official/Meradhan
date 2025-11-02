@@ -26,4 +26,17 @@ export class BondController {
             responseData: data
         });
     }
+
+    async getLatestListedBonds(
+        req: Request,
+        res: Response
+    ) {
+        const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 3;
+        const data = await this.bondService.getLatestBonds(limit);
+        return res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: data
+        });
+    }
+
 }

@@ -25,6 +25,7 @@ export class BondQueryBuilder {
         this.addArrayFilter(conditions, 'interestPaymentMode', filters.interest);
         this.addMaturityFilter(conditions, filters.maturity);
         this.addCouponFilter(conditions, filters.coupon);
+        
 
         // Combine all conditions with AND logic
         return conditions.length > 0 ? { AND: conditions } : {};

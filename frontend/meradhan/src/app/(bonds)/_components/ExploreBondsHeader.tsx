@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/multi-select";
 import { cn } from "@/lib/utils";
 import { Search, Trash2Icon, X } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
 import {
   couponOptions,
   interestPaymentOptions,
@@ -19,18 +20,19 @@ import {
   taxationOptions,
 } from "../_hooks/bonds_filter_data";
 import { BondsFilterHook } from "../_hooks/useBondsFilters";
-import { ReactNode, useEffect, useState } from "react";
 
 function ExploreBondsHeader({
   manager,
   applyFilters,
   desc,
   title,
+  rootUrl,
 }: {
   manager: BondsFilterHook;
   applyFilters?: () => void;
   title?: string | ReactNode;
   desc?: string | ReactNode;
+  rootUrl: string;
 }) {
   const [dounce, setDobunce] = useState(0);
 
@@ -209,7 +211,7 @@ function ExploreBondsHeader({
           </div>
           <div className="flex flex-wrap gap-3">
             {/* Search Filter */}
-            {manager.filters?.search && (
+            {/* {manager.filters?.search && (
               <div className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm">
                 <span>Search: {manager.filters.search}</span>
                 <Trash2Icon
@@ -221,7 +223,7 @@ function ExploreBondsHeader({
                   }}
                 />
               </div>
-            )}
+            )} */}
 
             {/* Maturity Filters */}
             {manager.filters?.maturity?.map((m) => {
@@ -353,8 +355,7 @@ function ExploreBondsHeader({
             })}
 
             {/* Clear All Filters Button */}
-            {manager.filters?.search ||
-            manager.filters?.maturity?.length ||
+            {manager.filters?.maturity?.length ||
             manager.filters?.rating?.length ||
             manager.filters?.taxation?.length ||
             manager.filters?.coupon?.length ||
@@ -362,13 +363,14 @@ function ExploreBondsHeader({
               <div
                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
                 onClick={() => {
-                  manager.setSearch("");
-                  manager.setMaturity([]);
-                  manager.setRating([]);
-                  manager.setTaxation([]);
-                  manager.setCoupon([]);
-                  manager.setInterest([]);
-                  setDobunce((prev) => prev + 1);
+                  // manager.setSearch("");
+                  // manager.setMaturity([]);
+                  // manager.setRating([]);
+                  // manager.setTaxation([]);
+                  // manager.setCoupon([]);
+                  // manager.setInterest([]);
+                  window.location.href = rootUrl;
+                  // setDobunce((prev) => prev + 1);
                 }}
               >
                 <span>Clear All</span>

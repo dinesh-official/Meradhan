@@ -52,7 +52,7 @@ export const useSelfieVerifyHook = () => {
             middleName: state.step_1.pan.middleName,
         }),
         onSuccess: (data) => {
-            console.log(data);
+
             if (data.responseData.access_token.id) {
                 const kycInstance = digio.createInstance({
                     callback(response) {

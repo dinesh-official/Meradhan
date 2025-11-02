@@ -1,51 +1,52 @@
-import { cn } from "@/lib/utils";
-import { BsFillBuildingsFill } from "react-icons/bs";
-import { FaCrown, FaTaxi } from "react-icons/fa6";
-import CategorySlider from "./CategorySlider";
 import SectionTitleDesc from "../basic/section/SectionTitleDesc";
-import SectionWrapper from "../basic/section/SectionWrapper";
-const category = [
-  {
-    icon: <FaTaxi />,
-    name: "Latest Release",
-    href: "#",
-  },
-  {
-    icon: <FaTaxi />,
-    name: "PSU",
-    href: "#",
-  },
-  {
-    icon: <BsFillBuildingsFill />,
-    name: "Corporate",
-    href: "#",
-  },
-  {
-    icon: <FaTaxi />,
-    name: "Tax Free",
-    href: "#",
-  },
-  {
-    icon: <FaTaxi />,
-    name: "Zero Coupon",
-    href: "#",
-  },
-  {
-    icon: <FaTaxi />,
-    name: "Government",
-    href: "#",
-  },
-  {
-    icon: <FaTaxi />,
-    name: "Perpetual",
-    href: "#",
-  },
-  {
-    icon: <FaCrown />,
-    name: "Sovereign Gold",
-    href: "#",
-  },
-];
+import CategorySlider from "./CategorySlider";
+  const bondCategories = [
+    {
+      imageUrl: "/images/icons/latest.svg",
+      categoryName: "Latest Releases",
+      href: "/bonds/latest-release",
+    },
+    // {
+    //   imageUrl: "/images/icons/government.svg",
+    //   categoryName: "Government",
+    //   href: "#",
+    // },
+    // {
+    //   imageUrl: "/images/icons/sovereign-gold.svg",
+    //   categoryName: "Sovereign Gold",
+    //   href: "#",
+    // },
+    {
+      imageUrl: "/images/icons/psu.svg",
+      categoryName: "PSU",
+      href: "/bonds/psu",
+    },
+    {
+      imageUrl: "/images/icons/corporate.svg",
+      categoryName: "Corporate",
+      href: "/bonds/corporate",
+    },
+    {
+      imageUrl: "/images/icons/tax-free.svg",
+      categoryName: "Tax Free",
+      href: "/bonds/tax-free",
+    },
+    {
+      imageUrl: "/images/icons/latest.svg",
+      categoryName: "Perpetual",
+      href: "/bonds/perpetual",
+    },
+    {
+      imageUrl: "/images/icons/latest.svg",
+      categoryName: "Convertible",
+      href: "/bonds/convertible",
+    },
+    {
+      imageUrl: "/images/icons/latest.svg",
+      categoryName: "Zero Coupons",
+      href: "/bonds/zero-coupons",
+    },
+  ];
 
 function BondsByCategories() {
   return (
@@ -61,7 +62,7 @@ function BondsByCategories() {
           goals, risk appetite, and financial preferences."
       />
 
-      <CategorySlider category={category} />
+      <CategorySlider category={bondCategories} />
     </div>
   );
 }

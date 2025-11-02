@@ -1,11 +1,25 @@
+"use client";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
 import AuthActions from "./AuthActions";
 import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
+import { userSessionStore } from "@/core/auth/userSessionStore";
+import { useEffect } from "react";
 
-function NavBar({ session }: { session: ISessionResponse['responseData'] | null }) {
+function NavBar({
+  session,
+}: {
+  session: ISessionResponse["responseData"] | null;
+}) {
+  // save data on session store
+  const { setSession } = userSessionStore();
+
+  useEffect(() => {
+    setSession(session);
+  }, [session, setSession]);
+
   return (
     <div className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18">
       <div className="mx-auto h-full container">
@@ -26,7 +40,7 @@ function NavBar({ session }: { session: ISessionResponse['responseData'] | null 
             <NavMenu />
             <AuthActions session={session} />
           </div>
-          <MobMenu />
+          <MobMenu session={session} />
         </div>
       </div>
     </div>

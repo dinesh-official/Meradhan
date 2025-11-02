@@ -62,7 +62,7 @@ export const bankInfoSchema = z.object({
         .refine(val => val === true, { message: "You must agree to the terms" }),
     beneficiary_name: z.string().min(1, "Beneficiary name is required"),
 });
-
+const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 export const dpAccountInfoSchema = z.object({
     depositoryName: z.enum(["CDSL", "NSDL"], {
         error: "Select a depository name",
@@ -78,16 +78,27 @@ export const dpAccountInfoSchema = z.object({
     depositoryParticipantName: z
         .string()
         .min(1, "Depository participant name is required"),
+
+
     panNumber: z
-        .array(
-            z
-                .string()
-                .regex(
-                    /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
-                    "Invalid PAN format (e.g., ABCDE1234F)"
-                )
+        .array(z.string())
+        .nonempty("At least one PAN number is required")
+        .refine(
+            (arr) =>
+                arr.slice(0, -1).every((v) => panRegex.test(v)), // all except last must be valid
+            { message: "All PAN numbers except the last one must be valid (e.g., ABCDE1234F)" }
         )
-        .nonempty("At least one PAN number is required"),
+        .refine(
+            (arr) => {
+                const last = arr[arr.length - 1];
+                return !last || panRegex.test(last); // last is optional but must be valid if provided
+            },
+            { message: "Invalid format for last PAN number (e.g., ABCDE1234F)" }
+        ),
+
+
+
+
     accountHolderName: z.string().min(1, "Account holder name is required"),
     accountType: z.enum(["SOLO", "JOINT"], { error: "Select an account type" }).optional(),
     isDefault: z.boolean(),

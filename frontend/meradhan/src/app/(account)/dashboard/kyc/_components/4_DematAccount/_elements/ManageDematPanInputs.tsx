@@ -2,14 +2,13 @@
 
 import LabelInput from "@/app/(account)/_components/wrapper/LableInput";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash } from "lucide-react";
-import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { useEffect } from "react";
+import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 
 const panHanderLeablel = [
-  "Primary PAN Number",
-  "Secondary PAN Number",
-  "Tertiary PAN Number",
+  "First (Primary) Account Holder PAN*",
+  "Second Account Holder PAN*",
+  "Third Account Holder PAN",
 ];
 
 function ManageDematPanInputs({
@@ -20,15 +19,13 @@ function ManageDematPanInputs({
   errors?: string[];
 }) {
   const {
-    addDepositoryPan,
-    removeDepositoryPan,
+
     updateDepositoryPan,
     state,
     setDepositoryPan,
   } = useKycDataStorage();
 
   const pansData = state.step_4[index].panNumber;
-  const MAX_PAN_COUNT = 3;
   const isJoined = state.step_4[index].accountType === "JOINT";
 
   useEffect(() => {
@@ -45,7 +42,7 @@ function ManageDematPanInputs({
       {pansData.map((item, subIndex) => (
         <LabelInput
           label={(isJoined && panHanderLeablel?.[subIndex]) || "PAN Number"}
-          required
+          required={subIndex != 2}
           key={subIndex}
           error={errors?.[subIndex]}
         >
@@ -55,7 +52,7 @@ function ManageDematPanInputs({
               type="text"
               maxLength={10}
               disabled={subIndex === 0}
-              adminMode
+              adminMode={subIndex === 0}
               value={item}
               onChange={(e) =>
                 updateDepositoryPan(
@@ -67,25 +64,7 @@ function ManageDematPanInputs({
             />
 
             {/* Icons — only if isJoined is enabled */}
-            {isJoined && (
-              <div className="absolute inset-y-0 flex justify-center items-center text-muted-foreground/80 end-2">
-                {/* ➕ Add new PAN when last item and under max */}
-                {subIndex == 0 && pansData.length < MAX_PAN_COUNT ? (
-                  <Plus
-                    size={18}
-                    className="hover:text-primary cursor-pointer"
-                    onClick={() => addDepositoryPan(index)}
-                  />
-                ) : subIndex != 0 ? (
-                  // 🗑 Remove existing PAN
-                  <Trash
-                    size={15}
-                    className="text-red-500 cursor-pointer"
-                    onClick={() => removeDepositoryPan(index, subIndex)}
-                  />
-                ) : null}
-              </div>
-            )}
+          
           </div>
         </LabelInput>
       ))}

@@ -1,14 +1,14 @@
-import { appSchema } from "@root/schema";
-import { KycDataStorage, useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { ZodError } from "zod";
-import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
-import toast from "react-hot-toast";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import apiGateway, { ApiError } from "@root/apiGateway";
+import { appSchema } from "@root/schema";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import { ZodError } from "zod";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
+import { KycDataStorage, useKycDataStorage } from "../../../_store/useKycDataStorage";
 const statusCodes = {
     "00": "VALID Record",
     "01": "DP ID does not match",
@@ -81,10 +81,18 @@ export const useDematAccountFormHook = () => {
             verifyDematAccount.mutate();
         } catch (error) {
             console.log(error);
-            
+
             if (error instanceof ZodError) {
                 const errorMessage = zodErrorToErrorMap(error);
-                setError(errorMessage);
+
+                // Specific validation for PAN numbers for joint accounts : 1. First two PANs are required
+                const panErrors = validatePanNumbers(data.panNumber || []);
+
+                console.log(panErrors);
+                setError({
+                    ...errorMessage,
+                    panNumber: panErrors,
+                });
             } else {
                 console.log(error);
                 toast.error("Something went wrong");
@@ -98,4 +106,35 @@ export const useDematAccountFormHook = () => {
         isPending: verifyDematAccount.isPending,
         error
     };
+};
+
+
+// reason to validate here: FOR JOIN ACCOUNT NEED MIn 2 PANs 3 is optional but if filled must be valid
+// 1. First two PANs are required
+// 2. Last PAN is optional
+// 3. All PANs must match the regex if filled
+const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+export const validatePanNumbers = (panNumber: string[]): string[] => {
+  // create an error array matching the same length
+  const errors = Array(panNumber.length).fill("");
+
+  panNumber.forEach((value, index) => {
+    const isLast = index === panNumber.length - 1;
+
+    if (isLast) {
+      // Last one optional but must match if filled
+      if (value && !panRegex.test(value)) {
+        errors[index] = "Invalid PAN format (e.g., ABCDE1234F)";
+      }
+    } else {
+      // All before last are required and must match
+      if (!value) {
+        errors[index] = "PAN number is required";
+      } else if (!panRegex.test(value)) {
+        errors[index] = "Invalid PAN format (e.g., ABCDE1234F)";
+      }
+    }
+  });
+
+  return errors;
 };

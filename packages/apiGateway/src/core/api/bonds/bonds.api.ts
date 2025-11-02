@@ -2,7 +2,7 @@ import type z from "zod";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 import type { appSchema } from "@root/schema";
 import type { AxiosRequestConfig } from "axios";
-import type { BondDetailResponse, ListedBondsResponse } from "./bonds.response";
+import type { BondDetailResponse, LatestBondsResponse, ListedBondsResponse } from "./bonds.response";
 
 export class BondsApi {
     constructor(private apiClient: IApiCaller) { }
@@ -20,6 +20,11 @@ export class BondsApi {
 
     public async getBondDetailsByIsin(isin: string, config?: AxiosRequestConfig) {
         const response = await this.apiClient.get<BondDetailResponse>(`/bonds/${isin}`, config);
+        return response.data;
+    }
+
+    public async getLatestBonds(count: number = 3, config?: AxiosRequestConfig) {
+        const response = await this.apiClient.get<LatestBondsResponse>(`/bonds/latest`, { ...config, params: { count } });
         return response.data;
     }
 

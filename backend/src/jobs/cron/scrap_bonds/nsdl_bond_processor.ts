@@ -396,15 +396,13 @@ export class NsdlBondProcessor {
       "on matuirty",
     ];
 
-    const matchesAny = (terms: string[]) =>
-      terms.some((term) => lower.includes(term));
+    const matchesAny = (terms: string[]) => terms.some((term) => lower.includes(term));
 
     if (matchesAny(monthlyTerms)) return "MONTHLY";
     if (matchesAny(quarterlyTerms)) return "QUARTERLY";
     if (matchesAny(halfYearlyTerms)) return "HALF_YEARLY";
     if (matchesAny(yearlyTerms)) return "YEARLY";
     if (matchesAny(maturityTerms)) return "ON_MATURITY";
-
     return "UNKNOWN";
   }
 
@@ -429,16 +427,26 @@ export class NsdlBondProcessor {
     return releaseDate >= oneMonthAgo && releaseDate <= now;
   }
 
+
+  isConvertible() {
+    const instrumentName = this.bond.NAME_OF_THE_INSTRUMENT || "";
+    if (instrumentName.toLocaleLowerCase().includes("non")) {
+      return false
+    } else if (instrumentName.toLocaleLowerCase().includes("convertible")) {
+      return true;
+    }
+    return false;
+  }
+
   // Get bond categories based on various attributes
   private getBondCategories() {
     const isector = this.getBondCorporateName(
       this.bond.COMPANY
     );
-    const taxFree = this.getTaxable() == "TAXABLE";
+    const taxFree = this.getTaxable() == "TAX_FREE";
     const perpetual = this.isPerpetualBond();
     const zeroCoupon = this.isZeroCouponBond();
-    const isConvertible = this.getInterestFrequency(
-    );
+    const isConvertible = this.isConvertible();
     const isNewRelease = this.isNewReleaseBond();
 
     const category = [];

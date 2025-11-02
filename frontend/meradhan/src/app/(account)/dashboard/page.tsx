@@ -1,22 +1,21 @@
-"use client";
 import { FaPercent, FaTag, FaUser } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { PiCurrencyInrBold } from "react-icons/pi";
+import NameTitleView from "../_components/UserView/NameTitileView";
 import AccountViewPort from "../_components/wrapper/AccountViewPort";
 import DashBoardDataViewCard from "./_components/_cards/DashBoardDataViewCard";
 import { DashBoardSatsCard } from "./_components/_cards/DashBoardSatsCard";
 import OngoingDealsCard from "./_components/_cards/OngoingDealsCard";
+import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
+
+export const revalidate = 0;
+export const generateMetadata = async () => {
+  return await getAccountPagesMetaData("dashboard");
+};
 
 function DashBoardPage() {
   return (
-    <AccountViewPort
-
-      title={
-        <>
-          Welcome <span className="font-bold">Sourav Sourav!</span>
-        </>
-      }
-    >
+    <AccountViewPort title={<NameTitleView />}>
       <div className="flex flex-col gap-5">
         <div className="bg-gray-100 p-4 px-5 rounded">
           <p>Explore your portfolio, offers, and deals — all in one place.</p>

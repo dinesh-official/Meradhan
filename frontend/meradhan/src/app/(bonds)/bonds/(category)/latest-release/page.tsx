@@ -4,8 +4,12 @@ import apiGateway from "@root/apiGateway";
 import { validateBondsFilters } from "../../../_utils/filter";
 import BondsView from "../../BondsView";
 import { cn } from "@/lib/utils";
+import { generateBondCategoryMetaData } from "../_gql/getCategoryPageGql";
 
 export const revalidate = 0;
+export async function generateMetadata() {
+  return await generateBondCategoryMetaData("latest-release");
+}
 async function LatestRelease({
   searchParams,
   params,
@@ -50,7 +54,7 @@ async function LatestRelease({
               <>
                 <h4 className={cn("font-medium text-3xl", "quicksand-medium")}>
                   Newly Listed
-                  <span className="font-semibold text-secondary">Bonds</span>
+                  <span className="font-semibold text-secondary"> Bonds</span>
                 </h4>
               </>
             ),

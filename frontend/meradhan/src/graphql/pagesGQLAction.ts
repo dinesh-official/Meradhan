@@ -18,7 +18,8 @@ type slugType =
   | "disclaimer"
   | "terms-of-use"
   | "privacy-policy"
-  | "cookie-policy";
+  | "cookie-policy"
+  | "contact-us"
 
 async function slugBasedPagesGQLData(slug: slugType) {
   const GQLQuery = `query Pages($filters: PagesListFiltersInput) {

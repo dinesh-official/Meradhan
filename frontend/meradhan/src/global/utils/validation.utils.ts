@@ -20,6 +20,37 @@ export const zodErrorToErrorMap = <T>(
 };
 
 
+/**
+ * Converts a ZodError for an array field (like panNumber) into
+ * an array of messages where each index matches the array element.
+ * Invalid indexes get an error message, others are blank.
+ */
+export const zodErrorToErrorArray = (
+  err: unknown,
+  totalLength: number,
+  fieldName = "panNumber"
+): string[] => {
+  if (!(err instanceof ZodError)) {
+    return Array(totalLength).fill("");
+  }
+
+  // Start with blank array
+  const result = Array(totalLength).fill("");
+
+  err.issues.forEach((issue) => {
+    // Match only the specified field
+    if (issue.path[0] === fieldName) {
+      const index = issue.path[1];
+      if (typeof index === "number" && index < totalLength) {
+        result[index] = issue.message || "";
+      }
+    }
+  });
+
+  return result;
+};
+
+
 export const isEmail = (email: string) => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());

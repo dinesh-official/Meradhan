@@ -158,30 +158,30 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
               <div>
                 <h6 className="font-base text-lg">Resources</h6>
                 <ul className="flex flex-col gap-3 mt-3 text-sm">
-                  <li>
+                  {/* <li>
                     <Link
                       href="/blog"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Blog
                     </Link>
-                  </li>
-                  <li>
+                  </li> */}
+                  {/* <li>
                     <Link
                       href="/news"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       News
                     </Link>
-                  </li>
-                  <li>
+                  </li> */}
+                  {/* <li>
                     <Link
                       href="/economic-calendar"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Economic Calendar
                     </Link>
-                  </li>
+                  </li> */}
                   <li>
                     <Link
                       href="/glossary"

@@ -16,7 +16,7 @@ export default function NotFound() {
           width={1200}
           height={800}
           alt="No found"
-          className="w-96 h-auto"
+          className="w-80 h-auto"
         />
 
         <p className="max-w-md text-gray-600">

@@ -1,6 +1,6 @@
 // import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
+// import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 
 // // Initialize
 // const kycManager = new ParticipantManager();
@@ -10,6 +10,4 @@ import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 
 // console.log(data);
 
-
-
-await revalidateBonds();
+// await revalidateBonds();

@@ -10,15 +10,14 @@ const BASE = isDev ? BASES.development : BASES.production;
 
 // Next.js configuration
 const nextConfig: NextConfig = {
-  trailingSlash: false,
-  transpilePackages: ["@root/apiGateway", "@root/schema"],
-  compress: false,
-
+  htmlLimitedBots: /.*/,
+  reactStrictMode: false,
   devIndicators: {
     position: "bottom-left",
   },
 
   images: {
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "**" },
       { protocol: "http", hostname: "**" },

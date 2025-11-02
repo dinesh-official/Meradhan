@@ -15,9 +15,22 @@ import { FaCartShopping } from "react-icons/fa6";
 import { MdLogout } from "react-icons/md";
 import { SideBarCollapseButton } from "./ActionSideBar";
 import MobSideBar from "./MobSideBar";
-import { memo } from "react";
+import { memo, useEffect } from "react";
+import { userSessionStore } from "@/core/auth/userSessionStore";
+import { ISessionResponse } from "@root/apiGateway";
+import { IoIosArrowDown } from "react-icons/io";
 
-function AccountNavBar() {
+function AccountNavBar({
+  session,
+}: {
+  session: ISessionResponse["responseData"] | null;
+}) {
+  const { setSession } = userSessionStore();
+
+  useEffect(() => {
+    setSession(session);
+  }, [session, setSession]);
+
   return (
     <nav
       className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18"
@@ -97,43 +110,7 @@ function AccountNavBar() {
           </div>
 
           {/* Profile Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
-                aria-label="Open user menu"
-              >
-                <Avatar>
-                  {/* Add avatar image here if needed */}
-                  {/* <AvatarImage src="https://github.com/shadcn.png" alt="User profile picture" /> */}
-                  <AvatarFallback aria-hidden="true">SB</AvatarFallback>
-                </Avatar>
-              </button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent
-              side="bottom"
-              align="end"
-              className="shadow-none"
-              aria-label="Profile Menu"
-            >
-              <DropdownMenuItem asChild>
-                <Link href="/profile" className="flex items-center gap-2">
-                  <FaUser aria-hidden="true" /> Profile
-                </Link>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-2 w-full text-left"
-                  aria-label="Logout"
-                >
-                  <MdLogout aria-hidden="true" /> Logout
-                </button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {ShowUserBadge(session)}
         </section>
       </div>
     </nav>
@@ -141,3 +118,50 @@ function AccountNavBar() {
 }
 
 export default memo(AccountNavBar);
+export function ShowUserBadge(session: { id: number; avatar: string | null; userName: string; emailAddress: string; firstName: string; middleName: string; lastName: string; } | null) {
+  return <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <button
+        className="flex items-center gap-1 bg-white rounded-full focus:outline-none cursor-pointer"
+        aria-label="Open user menu"
+      >
+        <Avatar>
+          {/* Add avatar image here if needed */}
+          {/* <AvatarImage src="https://github.com/shadcn.png" alt="User profile picture" /> */}
+          <AvatarFallback aria-hidden="true">
+            {session?.firstName.charAt(0)}
+            {session?.lastName.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
+        <IoIosArrowDown />
+      </button>
+    </DropdownMenuTrigger>
+
+    <DropdownMenuContent
+      side="bottom"
+      align="end"
+      className="shadow-none w-36"
+      aria-label="Profile Menu"
+    >
+      <DropdownMenuItem asChild>
+        <Link
+          href="/dashboard/profile"
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <FaUser aria-hidden="true" /> Profile
+        </Link>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem asChild>
+        <Link
+          href="/logout"
+          className="flex items-center gap-2 w-full text-left cursor-pointer"
+          aria-label="Logout"
+        >
+          <MdLogout aria-hidden="true" /> Logout
+        </Link>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>;
+}
+

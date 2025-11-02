@@ -5,9 +5,11 @@ import { useGeneratePageUrl } from "@/hooks/useGeneratePageUrl";
 function BondPagePagination({
   activePage,
   totalPages,
+  pathname,
 }: {
   activePage?: number;
   totalPages?: number;
+  pathname: string;
 }) {
   const generatePageUrl = useGeneratePageUrl();
 
@@ -21,7 +23,7 @@ function BondPagePagination({
       totalPages={totalPages || 1}
       getPageLink={(pageIndex) =>
         generatePageUrl({
-          basePath: "/bonds/page/" + pageIndex,
+          basePath: pathname + "/page/" + pageIndex,
         })
       }
     />

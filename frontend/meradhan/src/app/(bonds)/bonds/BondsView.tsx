@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectionViewWrapper } from "@/global/components/basic/section/SectionWrapper";
 import { BondListCard } from "@/global/components/Bond/BondListCard";
 import BondsByCategories from "@/global/components/Bond/BondsByCategories";
+import { cn } from "@/lib/utils";
 import {
   BondDetailsResponse,
   ListedBondsResponse,
@@ -17,10 +18,9 @@ import BondPagePagination from "../_components/BondPagePagination";
 import ExploreBondsHeader from "../_components/ExploreBondsHeader";
 import useBondsFilters from "../_hooks/useBondsFilters";
 import { useViewModeStore } from "../_hooks/useViewModeStore";
-import { cn } from "@/lib/utils";
 
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 function BondsView({
   bondsData,
@@ -59,6 +59,7 @@ function BondsView({
         applyFilters={() => {
           bondFilterManager.applyFilters(bondFilterManager.filters);
         }}
+        rootUrl={pathname}
       />
       <SectionViewWrapper>
         {options.showBondsByCategory && <BondsByCategories />}
@@ -75,6 +76,7 @@ function BondsView({
             viewMode,
             setViewMode,
             bondsListData,
+            pathname,
             bondFilterManager.anyFilterApplied
           )
         )}
@@ -99,15 +101,28 @@ function newFunction(
   viewMode: string,
   setViewMode: (mode: "list" | "grid") => void,
   bondsListData: { data: BondDetailsResponse[]; meta: PaginationMeta },
+  pathname: string,
   isFiltered?: boolean
 ) {
   if (bondsListData.data.length == 0)
-    return <NotBondsFound onReset={() => {}} />;
+    return (
+      <NotBondsFound
+        onReset={() => {
+          window.location.href = pathname;
+        }}
+      />
+    );
 
   return (
     <div className={cn("container", options.showBondsByCategory && "mt-14 ")}>
       <div className="flex justify-between items-center">
-        {isFiltered ? <h4 className="text-xl" >Showing bonds based on selected filters or search</h4> : options.page.title}
+        {isFiltered ? (
+          <h4 className="text-xl">
+            Showing bonds based on selected filters or search
+          </h4>
+        ) : (
+          options.page.title
+        )}
         <Tabs
           defaultValue={viewMode}
           onValueChange={(e) => setViewMode(e == "list" ? "list" : "grid")}
@@ -129,7 +144,9 @@ function newFunction(
           </TabsList>
         </Tabs>
       </div>
-      {(options.page.desc && !isFiltered) && <p className="mt-3">{options.page.desc}</p>}
+      {options.page.desc && !isFiltered && (
+        <p className="mt-3">{options.page.desc}</p>
+      )}
 
       <div
         className={`gap-5 grid grid-cols-1 mt-2 py-5 ${
@@ -147,6 +164,7 @@ function newFunction(
 
       <div className="mt-5">
         <BondPagePagination
+          pathname={pathname}
           activePage={bondsListData.meta.page}
           totalPages={bondsListData.meta.totalPages}
         />

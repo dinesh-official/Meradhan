@@ -17,6 +17,7 @@ export const config = {
     smtp: {
         host: getEnvVar("SMTP_HOST", "smtp.ethereal.email"),
         port: parseInt(getEnvVar("SMTP_PORT", "587")),
+        sender: getEnvVar("SMTP_SENDER", `"Meradhan" <noreply@meradhan.co>`),
         user: getEnvVar("SMTP_USER", "maddison53@ethereal.email"),
         pass: getEnvVar("SMTP_PASS", "jn7jnAPss4f63QBp6D"),
         secure: getEnvVar("SMTP_PORT", "587") === '465' // true for 465, false for other ports

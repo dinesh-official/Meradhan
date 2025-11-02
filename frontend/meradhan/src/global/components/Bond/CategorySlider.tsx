@@ -1,7 +1,7 @@
 "use client";
 import { CustomArrow } from "@/app/(index)/_components/elements/TestimonialsSlide";
+import Image from "next/image";
 import Link from "next/link";
-import { JSX } from "react";
 import Carousel, { ResponsiveType } from "react-multi-carousel";
 
 const responsive: ResponsiveType = {
@@ -27,8 +27,8 @@ const CategorySlider = ({
   category,
 }: {
   category: {
-    icon: JSX.Element;
-    name: string;
+    imageUrl: string;
+    categoryName: string;
     href: string;
   }[];
 }) => {
@@ -50,9 +50,15 @@ const CategorySlider = ({
             className="flex flex-col justify-center items-center gap-3 select-none"
           >
             <div className="flex justify-center items-center bg-primary hover:bg-secondary rounded-full w-14 h-14 text-white transition-all cursor-pointer">
-              {e.icon}
+              <Image
+                src={e.imageUrl}
+                width={18}
+                height={18}
+                className=""
+                alt=""
+              />
             </div>
-            <p className="text-sm">{e.name}</p>
+            <p className="text-sm">{e.categoryName}</p>
           </Link>
         ))}
       </Carousel>

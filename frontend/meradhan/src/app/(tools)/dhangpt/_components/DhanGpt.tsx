@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useDhanGPT } from "../_hook/useDhanGPT";
 import ChatInput from "./chatInput";
-import TitleSection from "./TitleSection";
 import ChatMessages from "./ChatMessages";
+import TitleSection from "./TitleSection";
 
 function DhanGpt() {
-  const { chat, sendMessage, clearChat, loading } = useDhanGPT(); // streaming version
+  const { chat, sendMessage,  loading } = useDhanGPT(); // streaming version
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 

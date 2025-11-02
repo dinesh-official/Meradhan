@@ -10,15 +10,15 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
+import PageTitleDesc from "@/global/components/basic/page/PageTitleDesc";
 import { cn } from "@/lib/utils";
 import { Loader2, Search } from "lucide-react";
 import Image from "next/image";
 import GlossaryPost from "./_components/glossaryPost";
 import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
-import PageTitleDesc from "@/global/components/basic/page/PageTitleDesc";
+import { DynamicPageData } from "@/graphql/getDynamicPageDataGql";
 
-const GlossaryView = () => {
+const GlossaryView = ({ pageData }: { pageData: DynamicPageData }) => {
   const {
     alphabets,
     onAlphabetClick,
@@ -54,13 +54,8 @@ const GlossaryView = () => {
       <div className="py-14">
         <div className="flex flex-col gap-3">
           <PageTitleDesc
-            title={
-              <>
-                Fixed Income
-                <span className="font-semibold text-secondary"> Glossary</span>
-              </>
-            }
-            description="Simple explanations of bond and fixed-income terms"
+            title={pageData?.Title || "Glossary"}
+            description={pageData?.Content.Introduction || ""}
           />
 
           {/* Search Input */}

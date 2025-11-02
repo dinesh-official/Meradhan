@@ -17,20 +17,20 @@ export const MENU_ITEMS: MenuItem[] = [
       { title: "NBFC Bonds", href: "/bonds/nbfc" },
       { title: "Perpetual Bonds", href: "/bonds/perpetual" },
       { title: "Zero Coupon Bonds", href: "/bonds/zero-coupon" },
-      { title: "Tax Free Bonds", href: "/bonds/tax-free" },
-      { title: "Public Issues", href: "#" },
-      { title: "Gold Bonds", href: "#" },
-      { title: "IPO", href: "#" },
-      {
-        title: "Sovereign Bonds",
-        children: [
-          { title: "State Government", href: "#" },
-          { title: "Central Government", href: "#" },
-        ],
-      },
-      { title: "G-Sec", href: "#" },
-      { title: "54EC - Capital Gain", href: "#" },
-      { title: "Govt. Guaranteed Bonds", href: "#" },
+      // { title: "Tax Free Bonds", href: "/bonds/tax-free" },
+      // { title: "Public Issues", href: "#" },
+      // { title: "Gold Bonds", href: "#" },
+      // { title: "IPO", href: "#" },
+      // {
+      //   title: "Sovereign Bonds",
+      //   children: [
+      //     { title: "State Government", href: "#" },
+      //     { title: "Central Government", href: "#" },
+      //   ],
+      // },
+      // { title: "G-Sec", href: "#" },
+      // { title: "54EC - Capital Gain", href: "#" },
+      // { title: "Govt. Guaranteed Bonds", href: "#" },
     ],
   },
   {
@@ -39,44 +39,44 @@ export const MENU_ITEMS: MenuItem[] = [
     children: [
       { title: "DhanGPT", href: "/dhangpt" },
       { title: "FD Calculator", href: "/fd-calculator" },
-      { title: "XIRR Calculators", href: "/xirr-calculators" },
+      // { title: "XIRR Calculators", href: "/xirr-calculators" },
     ],
   },
-  {
-    title: "How it Works",
-    href: "/blog",
-  },
+  // {
+  //   title: "How it Works",
+  //   href: "/blog",
+  // },
   {
     title: "Resources",
     children: [
-      {
-        title: "Blog",
-        href: "/blog",
-      },
-      {
-        title: "News",
-        href: "/news",
-      },
-      {
-        title: "Economic Calendar",
-        href: "/economic-calendar",
-      },
-      {
-        title: "Research Reports",
-        href: "/news#",
-      },
+      // {
+      //   title: "Blog",
+      //   href: "/blog",
+      // },
+      // {
+      //   title: "News",
+      //   href: "/news",
+      // },
+      // {
+      //   title: "Economic Calendar",
+      //   href: "/economic-calendar",
+      // },
+      // {
+      //   title: "Research Reports",
+      //   href: "/news#",
+      // },
       {
         title: "Glossary",
         href: "/glossary",
       },
-      {
-        title: "Issuer Notes",
-        href: "/issuer-notes",
-      },
-      {
-        title: "Regulatory Circulars",
-        href: "/regulatory-circulars",
-      },
+      // {
+      //   title: "Issuer Notes",
+      //   href: "/issuer-notes",
+      // },
+      // {
+      //   title: "Regulatory Circulars",
+      //   href: "/regulatory-circulars",
+      // },
       {
         title: "FAQs",
         href: "/faqs",

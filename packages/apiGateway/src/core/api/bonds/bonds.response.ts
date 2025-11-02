@@ -42,3 +42,4 @@ export type ListedBondsResponse = BaseResponseData<{
 }>
 
 export type BondDetailResponse = BaseResponseData<BondDetailsResponse>;
+export type LatestBondsResponse = BaseResponseData<BondDetailsResponse[]>;

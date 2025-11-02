@@ -4,7 +4,6 @@ import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
 import { T_PAGE_DATA } from "@/graphql/pagesGQLAction";
 
 const TermsOfUse = ({ Description, Title, Content }: T_PAGE_DATA) => {
-  console.log(Content);
   return (
     <ViewPort>
       <TopTitleDesc title={Title} description={Description} />

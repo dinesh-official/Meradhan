@@ -1,19 +1,28 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
+interface PageTitleDescProps {
+  title?: string | React.ReactNode;
+  description?: string | React.ReactNode;
+  className?: string;
+  descClassName?: string;
+  titleClassName?: string;
+}
+
 function PageTitleDesc({
   title,
   description,
   className,
   descClassName,
   titleClassName,
-}: {
-  title?: string | React.ReactNode;
-  description?: string | React.ReactNode;
-  className?: string;
-  descClassName?: string;
-  titleClassName?: string;
-}) {
+}: PageTitleDescProps) {
+  const renderContent = (content: string | React.ReactNode) => {
+    if (typeof content === "string") {
+      return <span dangerouslySetInnerHTML={{ __html: content }} />;
+    }
+    return content;
+  };
+
   return (
     <div
       className={cn(
@@ -29,10 +38,15 @@ function PageTitleDesc({
             titleClassName
           )}
         >
-          {title}
+          {renderContent(title)}
         </h3>
       )}
-      {description && <p className={descClassName}>{description}</p>}
+
+      {description && (
+        <p className={cn("text-gray-600", descClassName)}>
+          {renderContent(description)}
+        </p>
+      )}
     </div>
   );
 }

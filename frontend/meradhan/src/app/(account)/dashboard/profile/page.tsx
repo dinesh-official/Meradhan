@@ -1,10 +1,26 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import DataInfoLabel from "../../_components/cards/DataInfoLabel";
+import apiGateway from "@root/apiGateway";
 import AccountViewPort from "../../_components/wrapper/AccountViewPort";
-import { ProfileTabs } from "./_components/ProfileTab";
-import ProfileViewCard from "./_components/ProfileViewCard";
+import ProfilePage from "./ProfilePage";
+import apiServerCaller from "@/core/connection/apiServerCaller";
+import { cookies } from "next/headers";
+import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
 
-function page() {
+export const revalidate = 0;
+
+export const generateMetadata = async () => {
+  return  await getAccountPagesMetaData("dashboard/profile");
+}
+
+async function page() {
+  const cookie = await cookies();
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
+    apiServerCaller
+  );
+
+  // Fetch customer data
+  const id = cookie.get("userId")?.value || "";
+  const userData = await customerApi.customerInfoById(Number(id));
+
   return (
     <AccountViewPort
       title={
@@ -13,79 +29,7 @@ function page() {
         </>
       }
     >
-      <Card accountMode className="relative gap-0">
-        <CardHeader accountMode>
-          <ProfileViewCard />
-        </CardHeader>
-        <CardContent accountMode>
-          <div className="top-16 md:top-18 z-40 sticky bg-white mt-4 lg:mt-2">
-            <ProfileTabs
-              active={`Personal Details`}
-              tabs={[
-                "Personal Details",
-                "Bank Accounts",
-                "Demat Accounts",
-                "Risk Profile",
-                "My Watch List",
-                "Refer & Earn",
-              ]}
-            />
-          </div>
-          <div className="gap-5 grid md:grid-cols-3 mt-5">
-            <DataInfoLabel title="First Name">
-              <p className="font-medium">Sourav</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Middle Name">
-              <p className="font-medium">--</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Last Name">
-              <p className="font-medium">Bapari</p>
-            </DataInfoLabel>
-
-            <DataInfoLabel title="Mobile" status={"ERROR"} showStatus>
-              <p className="font-medium">+91 9382156026</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Email">
-              <p className="font-medium">adarsh@meradhan.co</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="WhatsApp Notification ">
-              <p className="font-medium">Allow Notification</p>
-            </DataInfoLabel>
-          </div>
-          <div className="gap-5 grid md:grid-cols-3 mt-6 pt-6 border-gray-200 border-t">
-            <DataInfoLabel title="Line 1" className="md:col-span-3">
-              <p className="font-medium">
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Officia ipsa corrupti aut excepturi cum totam{" "}
-              </p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Line 2" className="md:col-span-3">
-              <p className="font-medium">
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.{" "}
-              </p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Line 3" className="md:col-span-3">
-              <p className="font-medium">--</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="City / Town / Village">
-              <p className="font-medium">Kolkata</p>
-            </DataInfoLabel>
-
-            <DataInfoLabel title="District">
-              <p className="font-medium">Bankura</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="State">
-              <p className="font-medium">West Bengal</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Pincode ">
-              <p className="font-medium">722141</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Country ">
-              <p className="font-medium">India</p>
-            </DataInfoLabel>
-          </div>
-        </CardContent>
-      </Card>
+      <ProfilePage profile={userData.data.responseData} />
     </AccountViewPort>
   );
 }

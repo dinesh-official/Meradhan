@@ -5,9 +5,13 @@ import apiGateway from "@root/apiGateway";
 import { cn } from "@/lib/utils";
 import { validateBondsFilters } from "../../../_utils/filter";
 import BondsView from "../../BondsView";
+import { generateBondCategoryMetaData } from "../_gql/getCategoryPageGql";
 
 export const revalidate = 0;
-async function BondPage({
+export async function generateMetadata() {
+  return await generateBondCategoryMetaData("bank");
+}
+async function BankBondPage({
   searchParams,
   params,
 }: {
@@ -24,14 +28,14 @@ async function BondPage({
     filters: queryFilter,
     params: {
       page: pageParams.page ? parseInt(pageParams?.page as string, 10) : 1,
-      category: "bank",
+      category: "banks",
     },
   });
 
   return (
     <ViewPort>
       <BondsView
-        category="bank"
+        category="banks"
         pathname="/bonds/bank"
         filter={queryFilter}
         bondsData={responseData}
@@ -62,4 +66,4 @@ async function BondPage({
   );
 }
 
-export default BondPage;
+export default BankBondPage;

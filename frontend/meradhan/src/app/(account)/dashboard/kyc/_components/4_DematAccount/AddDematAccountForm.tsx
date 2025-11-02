@@ -55,7 +55,7 @@ function AddDematAccountForm() {
           state.step_1.pan.lastName
       );
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -114,7 +114,15 @@ function AddDematAccountForm() {
                 value={data?.accountType}
                 onValueChange={(e) => {
                   updateData("accountType", e);
-                  updateData("panNumber", [state.step_1.pan.panCardNo]);
+                  if (e == "SOLO") {
+                    updateData("panNumber", [state.step_1.pan.panCardNo]);
+                  } else {
+                    updateData("panNumber", [
+                      state.step_1.pan.panCardNo,
+                      "",
+                      "",
+                    ]);
+                  }
                 }}
               >
                 <SelectTrigger className="w-full">
@@ -127,6 +135,9 @@ function AddDematAccountForm() {
               </Select>
             </LabelInput>
           </div>
+
+       {  data.accountType === "JOINT" &&   <p className="text-sm" >If you are adding a joint Demat account, please ensure that you are the primary holder, and that your PAN is the verified one.</p>
+}
           <div className="gap-3 md:gap-5 grid lg:grid-cols-3">
             <LabelInput
               label="Depository Participant Name"

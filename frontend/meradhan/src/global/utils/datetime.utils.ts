@@ -18,6 +18,7 @@ export type DateFormatToken =
     | "HH:mm"
     | "hh:mm AA"
     | "hh:mm:ss AA"
+    | "hh:mm aa"
     // Combined date-time formats
     | "DD/MM/YYYY HH:mm:ss"
     | "YYYY-MM-DD HH:mm:ss"
@@ -26,6 +27,7 @@ export type DateFormatToken =
     | "MMMM DD, YYYY HH:mm"
     | "YYYY.MM.DD HH:mm:ss"
     | "MM-DD-YYYY hh:mm AA";
+
 
 /**
  * DateFormatString type allows either a predefined format or any string
@@ -71,6 +73,7 @@ export const dateTimeUtils = {
             .replace(/mm/g, String(minutes).padStart(2, "0"))
             .replace(/ss/g, String(seconds).padStart(2, "0"))
             .replace(/AA/g, ampm)
+            .replace(/A/g, ampm.charAt(0))
             .replace(/aa/g, ampm.toLowerCase());
 
         return formatted;

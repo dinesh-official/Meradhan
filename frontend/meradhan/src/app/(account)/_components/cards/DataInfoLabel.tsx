@@ -23,9 +23,9 @@ function DataInfoLabel({
   const getStatus = (status: "ERROR" | "SUCCESS" | "WARNING") => {
     switch (status) {
       case "ERROR":
-        return <IoCloseCircle className="text-red-600" size={20} />;
+        return <IoCloseCircle className="text-red-600" size={15} />;
       case "WARNING":
-        return <IoIosInformationCircle className="text-yellow-600" size={20} />;
+        return <IoIosInformationCircle className="text-yellow-600" size={15} />;
       case "SUCCESS":
       default:
         return <ImCheckboxChecked className="text-green-600" size={15} />;

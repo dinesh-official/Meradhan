@@ -1,7 +1,6 @@
-import { cn } from "@/lib/utils";
-import TestimonialsSlide from "./elements/TestimonialsSlide";
 import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
+import TestimonialsSlide from "./elements/TestimonialsSlide";
 
 function CustomersTestimonials() {
   return (
