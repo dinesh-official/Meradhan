@@ -1,13 +1,20 @@
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import NewsView from "./NewsView";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
+
+export const revalidate = 0; // Revalidate the page every hour
+
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("news");
+};
 function page() {
   return (
     <ViewPort>

@@ -2,8 +2,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
 import ResetPasswordForm from "./ResetPasswordForm";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 
-export const revalidate = 0;
+export const revalidate = 0; // Revalidate the page every hour
+
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("reset-password");
+};
 async function page({
   searchParams,
 }: {

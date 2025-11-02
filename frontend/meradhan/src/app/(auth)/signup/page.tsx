@@ -1,9 +1,14 @@
 import { Card } from "@/components/ui/card";
 import ViewPort from "@/global/components/wrapper/ViewPort";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import { cn } from "@/lib/utils";
 import { FaCircleCheck } from "react-icons/fa6";
 import SignUpForm from "./SignUpForm";
+export const revalidate = 0; // Revalidate the page every hour
 
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("signup");
+};
 function page() {
   return (
     <ViewPort headerOnly>
@@ -12,11 +17,7 @@ function page() {
           <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
             <SignUpForm />
             <div className="flex flex-col justify-center items-start gap-3 bg-primary p-10 lg:p-20 w-full h-full">
-              <h5
-                className={cn(
-                  "quicksand-medium  text-white text-2xl"
-                )}
-              >
+              <h5 className={cn("text-white text-2xl quicksand-medium")}>
                 Reasons to choose MeraDhan
               </h5>
               <ul className="flex flex-col gap-4 mt-2 text-white text-sm">

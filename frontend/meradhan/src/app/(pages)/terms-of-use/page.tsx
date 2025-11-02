@@ -1,6 +1,6 @@
 import React from "react";
 import TermsOfUse from "./TermsOfUse";
-import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLAction";
+import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/pagesGQLAction";
 import { redirect } from "next/navigation";
 
 export const revalidate = 0;

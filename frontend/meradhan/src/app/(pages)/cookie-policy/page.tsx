@@ -1,7 +1,7 @@
 import React from "react";
 import CookiePolicy from "./CookiePolicy";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/PagesGQLAction";
+import slugBasedPagesGQLData, { slugBasedGQLMetaData } from "@/graphql/pagesGQLAction";
 import { redirect } from "next/navigation";
 export const revalidate = 0;
 export async function generateMetadata() {

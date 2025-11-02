@@ -3,7 +3,12 @@ import ViewPort from "@/global/components/wrapper/ViewPort";
 import Image from "next/image";
 import Link from "next/link";
 import LoginForm from "./LoginForm";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
+export const revalidate = 0; // Revalidate the page every hour
 
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("login");
+};
 function page() {
   return (
     <ViewPort headerOnly>

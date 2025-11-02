@@ -7,9 +7,6 @@ import Script from "next/script";
 import "./styles/globals.css";
 import "./styles/override.css";
 export const metadata: Metadata = {
-  title: "MeraDhan One: Buy Bonds Online from Fixed Income Investment Platform",
-  description:
-    "Explore fixed income investments with MeraDhan. Learn, buy, and sell bonds seamlessly. Empower your financial journey with expert insights and reliable tools.",
   icons: {
     icon: [
       { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },

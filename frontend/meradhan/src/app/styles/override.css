@@ -89,7 +89,6 @@ input[type="range"]::-moz-range-thumb {
   scrollbar-width: none;
 }
 
-
 /* Base container */
 .container {
   width: 100%;

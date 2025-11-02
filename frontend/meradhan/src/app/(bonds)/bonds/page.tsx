@@ -4,8 +4,13 @@ import apiGateway from "@root/apiGateway";
 import { validateBondsFilters } from "../_utils/filter";
 import BondsView from "./BondsView";
 import { cn } from "@/lib/utils";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 
-export const revalidate = 0;
+export const revalidate = 0; // Revalidate the page every hour
+
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("bonds");
+};
 async function BondPage({
   searchParams,
   params,
