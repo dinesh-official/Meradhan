@@ -35,17 +35,15 @@ export class BondService {
 
         const extendedQuery = whereQuery;
 
+        extendedQuery.isListed = { equals: "YES" };
+        extendedQuery.redemptionDate = { gte: new Date() };
+        extendedQuery.creditRating = { notIn: ["D", "C"] };
+        extendedQuery.redemptionDate = { gte: new Date() };
         if (options?.category && options.category != "all") {
-            extendedQuery.isListed = { equals: "YES" };
-            extendedQuery.redemptionDate = { gte: new Date() };
-            extendedQuery.creditRating = { notIn: ["D", "C"] };
-            extendedQuery.redemptionDate = { gte: new Date() };
-            if (options?.category) {
-                if (options.category == "latest-release") {
-                    orderBy = sortingOptions.byMaturity;
-                } else {
-                    extendedQuery.categories = { has: options?.category || "" };
-                }
+            if (options.category == "latest-release") {
+                orderBy = sortingOptions.byMaturity;
+            } else {
+                extendedQuery.categories = { has: options?.category || "" };
             }
         }
 
