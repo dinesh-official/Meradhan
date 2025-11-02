@@ -21,7 +21,7 @@ async function page({
             </CardContent>
             <div className="flex justify-center items-center bg-primary py-10 lg:py-10 w-full h-full">
               <Image
-                src={`/assets/login.svg`}
+                src={`/static/login.svg`}
                 alt="blog"
                 width={1200}
                 height={800}

@@ -22,3 +22,28 @@ export function genMediaUrl(mediaPath?: string | null): string {
   // Return the full URL
   return `${ASSETS_URL}${normalizedPath}`;
 }
+
+
+// utils/generatePageUrl.ts
+export function generatePageUrl(
+  { basePath, page, currentQuery }: {
+    basePath: string,
+    page: number,
+    currentQuery?: Record<string, string | number | undefined>
+  }): string {
+  // Copy current queries if provided
+  const searchParams = new URLSearchParams();
+  if (currentQuery) {
+    for (const [key, value] of Object.entries(currentQuery)) {
+      if (value !== undefined && key !== "page") {
+        searchParams.set(key, String(value));
+      }
+    }
+  }
+
+  // Always set the new page
+  searchParams.set("page", String(page));
+
+  const queryString = searchParams.toString();
+  return queryString ? `${basePath}?${queryString}` : basePath;
+}

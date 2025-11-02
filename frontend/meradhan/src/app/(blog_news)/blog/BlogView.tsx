@@ -28,12 +28,14 @@ async function BlogView() {
             name={items[0]?.Author?.Name || "Unknown Author"}
             profilePic={`${strAssets}${items[0]?.Author?.Profile_Image?.url}`}
             views={String(items[0]?.Views ?? 0)}
+            slug={"/blog/url-slug"}
           />
           <div className="gap-5 gap-y-5 grid md:grid-cols-3">
             {items.slice(1).map((item) => (
               <PostCard
                 key={item.documentId}
                 listMode
+                slug="/blog/url-slug"
                 src={`${strAssets}${items[0]?.Featured_Image?.url}`}
                 badge={item.Category?.Name || "General"}
                 createAt={new Date(item.createdAt).toDateString()}

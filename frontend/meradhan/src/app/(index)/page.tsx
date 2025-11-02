@@ -7,6 +7,7 @@ import ReturnsCalculationSection from "./_components/ReturnsCalculationSection";
 import ToolsOfferedByMeraDhan from "./_components/ToolsOfferedbyMeraDhan";
 import WhyMeraDhanSection from "./_components/WhyMeraDhanSection";
 import RecentBlogs from "./_components/RecentBlogs";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 
 export const revalidate = 0; // Revalidate the page every hour
 export default function HomePage() {
@@ -15,8 +16,12 @@ export default function HomePage() {
       <HomeHeroSection />
       <WhyMeraDhanSection />
       <ToolsOfferedByMeraDhan />
-      <BondsByCategories />
-      <LatestBondReleases />
+      <div className="container">
+        <SectionWrapper>
+          <BondsByCategories />
+        </SectionWrapper>
+      </div>
+      {/* <LatestBondReleases /> */}
       <ReturnsCalculationSection />
       <CustomersTestimonials />
       <RecentBlogs />

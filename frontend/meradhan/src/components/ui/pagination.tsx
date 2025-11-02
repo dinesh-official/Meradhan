@@ -14,7 +14,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center", className)}
+      className={cn("flex justify-center mx-auto w-full", className)}
       {...props}
     />
   )
@@ -107,7 +107,7 @@ function PaginationEllipsis({
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn("flex size-9 items-center justify-center", className)}
+      className={cn("flex justify-center items-center size-9", className)}
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />

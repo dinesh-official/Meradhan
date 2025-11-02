@@ -60,8 +60,8 @@ model Bonds {
 }
 
 enum TAX_TYPE {
-  YES
-  NO
+  TAX_FREE
+  TAXABLE
   TAX_SAVING
   TAX_EXEMPTION
   UNKNOWN

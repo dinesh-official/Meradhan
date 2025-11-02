@@ -60,12 +60,7 @@ function page() {
               </div>
             </div>
           </div>
-          <h1
-            className={cn(
-              "quicksand-medium text-2xl lg:text-4xl",
-              
-            )}
-          >
+          <h1 className={cn("text-2xl lg:text-4xl quicksand-medium")}>
             What Is Credit Rating in Bonds?
           </h1>
           <Image
@@ -102,7 +97,7 @@ function page() {
                   <div className="flex flex-col gap-5">
                     <PostCard
                       listMode
-                      src="/assets/bondYield.png"
+                      src="/static/bondYield.png"
                       badge="Educative"
                       createAt="24 Oct 2025"
                       heading="What Are Bonds? A Simple Guide for Indian Investors"
@@ -110,10 +105,11 @@ function page() {
                       name="Vikas Kukreja"
                       profilePic="/avatars/person.jpeg"
                       views="10"
+                      slug="/news/slug"
                     />
                     <PostCard
                       listMode
-                      src="/assets/bondYield.png"
+                      src="/static/bondYield.png"
                       badge="Educative"
                       createAt="24 Oct 2025"
                       heading="What Are Bonds? A Simple Guide for Indian Investors"
@@ -121,6 +117,7 @@ function page() {
                       name="Vikas Kukreja"
                       profilePic="/avatars/person.jpeg"
                       views="10"
+                      slug="/news/slug"
                     />
                   </div>
                 </div>

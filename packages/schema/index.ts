@@ -9,9 +9,8 @@ import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";
 import * as auditlogs from "./lib/crm/auditlogs.schema";
 
-
-
 import * as Enum from "./lib/enums"
+import * as  bondsSchema from "./lib/bonds/bonds.schema";
 
 
 
@@ -30,6 +29,7 @@ export const appSchema = {
    },
    Enum,
    customer: customerSchema,
-   kyc: customerKycSchema
+   kyc: customerKycSchema,
+   bonds: bondsSchema
 
 };

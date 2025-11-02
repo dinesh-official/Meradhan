@@ -6,7 +6,7 @@
   "scripts": {
     "start": "bun run start.ts",
     "dev": "bun run --watch main.ts",
-    "worker": "bun run  ./workers/start.ts",
+    "worker": "bun run  ./src/workers/start.ts",
     "email": "email dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

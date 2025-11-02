@@ -1,10 +1,15 @@
-import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
+// import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-// Initialize
-const kycManager = new ParticipantManager();
+import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 
-// Save KYC data to customer
-const data = await kycManager.getAllParticipants();
+// // Initialize
+// const kycManager = new ParticipantManager();
 
-console.log(data);
+// // Save KYC data to customer
+// const data = await kycManager.getAllParticipants();
 
+// console.log(data);
+
+
+
+await revalidateBonds();

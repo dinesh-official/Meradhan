@@ -49,22 +49,20 @@ const category = [
 
 function BondsByCategories() {
   return (
-    <SectionWrapper>
-      <div className="flex flex-col gap-5 container">
-        <SectionTitleDesc
-          title={
-            <>
-              <span className="font-semibold text-secondary">Bonds</span> by
-              Categories
-            </>
-          }
-          description="Explore bonds by category to find investment options that match your
+    <div className="flex flex-col gap-5 container">
+      <SectionTitleDesc
+        title={
+          <>
+            <span className="font-semibold text-secondary">Bonds</span> by
+            Categories
+          </>
+        }
+        description="Explore bonds by category to find investment options that match your
           goals, risk appetite, and financial preferences."
-        />
+      />
 
-        <CategorySlider category={category} />
-      </div>
-    </SectionWrapper>
+      <CategorySlider category={category} />
+    </div>
   );
 }
 

@@ -176,7 +176,7 @@ export function MultiSelectContent({
         </Command>
       </div>
       <PopoverContent
-        className="bg-secondary p-0"
+        className="bg-secondary p-0 scrollbar-hide"
         style={{ width: "var(--radix-popover-trigger-width)" }}
       >
         <Command {...props}>

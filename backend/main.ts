@@ -2,6 +2,7 @@ import { config } from "@config/config";
 import { ExpressServer } from "@core/bootstrap/server";
 import { checkConnectToDatabases } from "@core/database/database";
 import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@modules/monitoring/prometheus";
+import bondRoute from "@resource/bonds/bond.routes";
 import auditLogsRouter from "@resource/crm/audit_logs/audit_logs_route";
 import crmAuthRoutes from "@resource/crm/auth/auth.route";
 import crmCustomersRoutes from "@resource/crm/customers/customers.routes";
@@ -46,7 +47,10 @@ server.addRoutes([
 
     // customer routes
     customerAuthRoutes,
-    kycRoutes
+    kycRoutes,
+
+    // bond routes
+    bondRoute
 ]);
 
 

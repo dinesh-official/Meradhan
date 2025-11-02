@@ -11,7 +11,7 @@ import NewsView from "./NewsView";
 function page() {
   return (
     <ViewPort>
-      <div className="container mb-[4rem] md:w-[80%]">
+      <div className="mb-[4rem] md:w-[80%] container">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>

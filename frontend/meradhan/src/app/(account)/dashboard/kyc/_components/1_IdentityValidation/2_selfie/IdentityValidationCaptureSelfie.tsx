@@ -78,7 +78,7 @@ function HintAllowSelfie() {
       <div className="flex flex-col gap-2">
         <p className="font-bold text-lg">Don’ts</p>
         <Image
-          src="/assets/kyc/disallowFace.svg"
+          src="/static/kyc/disallowFace.svg"
           alt="disallowFace"
           width={350}
           height={300}
@@ -87,7 +87,7 @@ function HintAllowSelfie() {
       <div className="flex flex-col gap-2">
         <p className="font-bold text-lg">Do’s</p>
         <Image
-          src="/assets/kyc/allowFace.svg"
+          src="/static/kyc/allowFace.svg"
           alt="allowFace"
           width={100}
           height={100}

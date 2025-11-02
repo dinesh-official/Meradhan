@@ -1,23 +1,26 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { formatNumberTS } from "@/global/utils/formate";
 import { cn } from "@/lib/utils";
-import { FaStar } from "react-icons/fa";
+import { BondDetailsResponse } from "@root/apiGateway";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { RiShareFill } from "react-icons/ri";
 import BondAddToWatchList from "./BondAddToWatchList";
 import { BondInfoLabel } from "./BondInfoLabel";
-
-
+import CreditRatingBadge from "./CreaditRatingBadge";
+import Link from "next/link";
 
 export function BondListCard({
   gridMode,
   onlyShare,
+  data,
 }: {
   gridMode: boolean;
   onlyShare?: boolean;
+  data: BondDetailsResponse;
 }) {
   return (
     <Card
@@ -26,23 +29,23 @@ export function BondListCard({
       <CardContent>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            <p className="font-semibold text-primary text-sm">INE01YL07342</p>
-            <Badge className="flex">
-              <FaStar />
-              <span className="font-semibold">A-</span>
-            </Badge>
+            <p className="font-semibold text-primary text-sm">{data.isin}</p>
+            <CreditRatingBadge creditRating={data.creditRating} />
             <BondAddToWatchList />
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex justify-between">
               <p className="text-gray-700 text-xl line-clamp-1">
-                EARLYSALARY SERVICES PRIVATE LIMITED
+                {data.bondName}
               </p>
+              {/* // make sure 2 buttons on that code deferent places */}
               {!gridMode && (
                 <div className="hidden lg:flex gap-5">
-                  <Button variant={`outline`} className="bg-transparent">
-                    View Details
-                  </Button>
+                  <Link href={`/bonds/detail/` + data.isin} >
+                    <Button variant={`outline`} className="bg-transparent">
+                      View Details
+                    </Button>
+                  </Link>
                   <Button>Buy Now</Button>
                 </div>
               )}
@@ -75,7 +78,8 @@ export function BondListCard({
             >
               <BondInfoLabel title="Issue Price">
                 <p className="flex items-center">
-                  <PiCurrencyInrBold size={15} /> 62,500.00
+                  <PiCurrencyInrBold size={15} />{" "}
+                  {formatNumberTS(data.issuePrice)}
                 </p>
               </BondInfoLabel>
               <BondInfoLabel title="Yield">
@@ -83,17 +87,25 @@ export function BondListCard({
               </BondInfoLabel>
               <BondInfoLabel title="Face Value">
                 <p className="flex items-center">
-                  <PiCurrencyInrBold size={15} /> 62,500.00
+                  <PiCurrencyInrBold size={15} />{" "}
+                  {formatNumberTS(data.faceValue)}
                 </p>
               </BondInfoLabel>
               <BondInfoLabel title="Coupon">
-                <p> 10.40%</p>
+                <p>{data.couponRate}%</p>
               </BondInfoLabel>
               <BondInfoLabel title="Maturity Date">
-                <p> 02 Dec 2026</p>
+                <p>
+                  {dateTimeUtils.formatDateTime(
+                    data.maturityDate,
+                    "DD MMM YYYY"
+                  )}
+                </p>
               </BondInfoLabel>
               <BondInfoLabel title="Payment Term">
-                <p> Monthly</p>
+                <p className="capitalize">
+                  {data.interestPaymentMode.replaceAll("_", " ").toLowerCase()}
+                </p>
               </BondInfoLabel>
 
               <div
@@ -102,9 +114,12 @@ export function BondListCard({
                   !gridMode && "lg:hidden grid"
                 )}
               >
-                <Button variant={`outline`} className="bg-transparent">
-                  View Details
-                </Button>
+                {/* // make sure 2 buttons on that code deferent places */}
+                <Link href={`/bonds/detail/${data.isin}`} className="block w-full">
+                  <Button variant={`outline`} className="bg-transparent w-full">
+                    View Details
+                  </Button>
+                </Link>
                 <Button>Buy Now</Button>
               </div>
             </div>

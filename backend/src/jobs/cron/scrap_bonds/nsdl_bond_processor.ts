@@ -1,7 +1,8 @@
-import type { $Enums } from "@core/database/database";
+import { type $Enums, type DataBaseSchema } from "@core/database/database";
 import dayjs from "dayjs";
 import { allCompanyNameOrTyes } from "./all_company_data";
 import { type BondDataSet } from "./nsdl_bond_service";
+
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) { }
 
@@ -313,11 +314,11 @@ export class NsdlBondProcessor {
     const lower = text.toLowerCase();
 
     if (lower.includes("free")) {
-      return "NO";
+      return "TAX_FREE";
     }
 
     if (lower.includes("tax") && !lower.includes("free")) {
-      return "YES";
+      return "TAXABLE";
     }
 
     if (lower.includes("tax") && lower.includes("saving")) {
@@ -433,7 +434,7 @@ export class NsdlBondProcessor {
     const isector = this.getBondCorporateName(
       this.bond.COMPANY
     );
-    const taxFree = this.getTaxable() == "NO";
+    const taxFree = this.getTaxable() == "TAXABLE";
     const perpetual = this.isPerpetualBond();
     const zeroCoupon = this.isZeroCouponBond();
     const isConvertible = this.getInterestFrequency(
@@ -466,12 +467,11 @@ export class NsdlBondProcessor {
       category.push("latest-release")
     }
 
-    return category;
-
+    return category.map(c => c.toLowerCase());
   }
 
   // Main parse function to extract and structure bond data
-  public parse() {
+  public parse(): DataBaseSchema.BondsCreateInput {
     return {
       isin: this.formatString(this.bond.ISIN),
       bondName: this.formatString(this.bond.COMPANY),
@@ -501,7 +501,7 @@ export class NsdlBondProcessor {
       sectorName: this.getBondCorporateName(this.bond.COMPANY),
       dateOfAllotment: this.getDateOfAllotment(),
       maturityDate: this.getRedemptionDate(),
-    }
+    };
   }
 
 }

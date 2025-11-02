@@ -11,7 +11,7 @@ async function NewsView() {
   return (
     <div>
       <div className="pt-10">
-        <h1 className={cn("quicksand-medium  text-4xl" )}>
+        <h1 className={cn("text-4xl quicksand-medium")}>
           MeraDhan <span className="font-semibold text-secondary">News</span>
         </h1>
         <NewsPageFIlterOrSort />
@@ -28,6 +28,7 @@ async function NewsView() {
             name={items[0]?.Author?.Name || "Unknown Author"}
             profilePic={`${strAssets}${items[0]?.Author?.Profile_Image?.url}`}
             views={String(items[0]?.Views ?? 0)}
+            slug="/news/slug"
           />
           <div className="gap-5 gap-y-8 grid md:grid-cols-3">
             {items.slice(1).map((item) => (
@@ -42,6 +43,8 @@ async function NewsView() {
                 name={item.Author?.Name || "Anonymous"}
                 profilePic={`${strAssets}${items[0]?.Author?.Profile_Image?.url}`}
                 views={String(item.Views ?? 0)}
+                slug="/news/slug"
+
               />
             ))}
           </div>

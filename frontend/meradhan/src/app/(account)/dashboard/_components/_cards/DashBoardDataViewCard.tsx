@@ -32,7 +32,7 @@ export default function DashBoardDataViewCard({
   emptyMessage = "No investment found",
   ctaText,
   onCtaClick,
-  emptyImageSrc = "/assets/sad-emoji.svg",
+  emptyImageSrc = "/static/sad-emoji.svg",
   children,
 }: DashBoardDataViewCardProps) {
   return (

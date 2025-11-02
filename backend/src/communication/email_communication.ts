@@ -1,7 +1,7 @@
 import { config } from '@config/config';
 import nodemailer from 'nodemailer';
 
-export class EmailSenderGateway {
+export class EmailCommunication {
 
     private transporter: nodemailer.Transporter;
 

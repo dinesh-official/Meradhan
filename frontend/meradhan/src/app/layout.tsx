@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import Client from "./client";
-import "./styles/globals.css";
-import "./styles/override.css"
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+
 import Script from "next/script";
+import "./styles/globals.css";
+import "./styles/override.css";
 export const metadata: Metadata = {
   title: "MeraDhan One: Buy Bonds Online from Fixed Income Investment Platform",
   description:
@@ -35,7 +37,6 @@ export const metadata: Metadata = {
     other: [{ rel: "manifest", url: "/manifest.json" }],
   },
 
- 
   other: {
     viewport:
       "width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0",
@@ -43,8 +44,6 @@ export const metadata: Metadata = {
     "msapplication-TileColor": "#ffffff",
     "msapplication-TileImage": "/favicon/ms-icon-144x144.png",
   },
-  
-  
 };
 
 export const revalidate = 0;
@@ -56,11 +55,11 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`antialiased`}
-      >
+      <body className={`antialiased`}>
         <NextTopLoader color="#002c59" />
-        <Client>{children}</Client>
+        <NuqsAdapter>
+          <Client>{children}</Client>
+        </NuqsAdapter>
         <Script
           type="text/javascript"
           src="https://ext-gateway.digio.in/sdk/v11/digio.js"

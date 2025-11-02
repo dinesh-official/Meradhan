@@ -1,4 +1,4 @@
-import { EmailSenderGateway } from "@communication/email_communication";
+import { EmailCommunication } from "@communication/email_communication";
 import { config } from "@config/config";
 import { db } from "@core/database/database";
 import { NsdlBondProcessor } from "./nsdl_bond_processor";
@@ -19,14 +19,14 @@ export const revalidateBonds = async () => {
         return undefined;
     };
 
-    const isRedemptionExpired = (date: string) => {
-        const d = toISODate(date);
+    const isRedemptionExpired = (date: string | Date) => {
+        const d = date instanceof Date ? date : toISODate(date);
         if (!d) return false;
         return d.getTime() < Date.now();
     };
 
-    const isYearOver9999 = (date: string) => {
-        const d = toISODate(date);
+    const isYearOver9999 = (date: string | Date) => {
+        const d = date instanceof Date ? date : toISODate(date);
         if (!d) return false;
         return d.getUTCFullYear() > 9999;
     };
@@ -65,7 +65,7 @@ export const revalidateBonds = async () => {
             // Exclude _index from the data before upserting
             const { _index, ...bondData } = e;
             console.log(_index);
-            
+
             // Use Prisma upsert for atomic create/update operation
             const result = await db.dataBase.bonds.upsert({
                 where: { isin: bondData.isin },
@@ -95,7 +95,7 @@ export const revalidateBonds = async () => {
     const emailContent = `Bond Data Processing Summary\\n\\nTotal Bonds: ${parsedRows.length}\\nExpired Bonds: ${expired.length}\\n\\nNew Bonds Added: ${created}\\nBonds Updated: ${updated}\\n`;
 
     try {
-        const emailer = new EmailSenderGateway();
+        const emailer = new EmailCommunication();
         await emailer.sendEmail({
             to: config.smtp.user,
             subject: 'NSDL Bond Revalidation Summary',

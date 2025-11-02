@@ -124,8 +124,8 @@ export type NSERfqModel = $Result.DefaultSelection<Prisma.$NSERfqModelPayload>
  */
 export namespace $Enums {
   export const TAX_TYPE: {
-  YES: 'YES',
-  NO: 'NO',
+  TAX_FREE: 'TAX_FREE',
+  TAXABLE: 'TAXABLE',
   TAX_SAVING: 'TAX_SAVING',
   TAX_EXEMPTION: 'TAX_EXEMPTION',
   UNKNOWN: 'UNKNOWN'

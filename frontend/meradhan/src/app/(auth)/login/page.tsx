@@ -32,7 +32,7 @@ function page() {
             </CardContent>
             <div className="flex justify-center items-center bg-primary py-14 lg:py-20 w-full h-full">
               <Image
-                src={`/assets/login.svg`}
+                src={`/static/login.svg`}
                 alt="blog"
                 width={1200}
                 height={800}

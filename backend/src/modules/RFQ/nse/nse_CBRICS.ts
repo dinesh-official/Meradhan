@@ -166,7 +166,7 @@ export class NseCBRICS {
     }
 
     // ────────────────────────────────────────────────────────────────
-    // 🧩 PARTICIPANTS
+    // 🧩 PARTICIPANTS 
     // ────────────────────────────────────────────────────────────────
 
     public async findParticipants(payload?: ParticipantFindRequest) {
