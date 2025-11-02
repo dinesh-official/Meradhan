@@ -43,6 +43,9 @@ export class ExpressServer implements IServer, IExpressRoute {
         }
 
         // Pre Middlewares -
+        // Trust proxy - required for rate limiting and proper IP detection behind proxies
+     
+        
         this.app.use(cors());
         this.app.use(morgan("common"));
         this.app.use(helmet());
