@@ -33,6 +33,8 @@ export async function middleware(request: NextRequest) {
     try {
       const authClient = new apiGateway.auth.AuthApi(apiServerCaller);
       const session = await authClient.getSession();
+      console.log(session);
+      
 
       const roleCookie = cookieStore.get('role')?.value;
 
