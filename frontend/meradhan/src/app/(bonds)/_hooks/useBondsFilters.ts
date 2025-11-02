@@ -74,6 +74,17 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
     };
 
 
+    const anyFilterApplied = (() => {
+        if (search) return true;
+        if (maturity.length > 0) return true;
+        if (rating.length > 0) return true;
+        if (coupon.length > 0) return true;
+        if (taxation.length > 0) return true;
+        if (interest.length > 0) return true;
+        return false;
+    })();
+
+
     return {
         filters: validated.success
             ? validated.data
@@ -92,6 +103,8 @@ export const useBondsFilters = ({ pathname,category }: { pathname: string, categ
         setInterest,
         applyFilters,
         applyFilterMutation,
+
+        anyFilterApplied,
     };
 };
 

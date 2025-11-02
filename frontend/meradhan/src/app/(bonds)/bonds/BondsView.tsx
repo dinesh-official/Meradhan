@@ -3,7 +3,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectionViewWrapper } from "@/global/components/basic/section/SectionWrapper";
 import { BondListCard } from "@/global/components/Bond/BondListCard";
 import BondsByCategories from "@/global/components/Bond/BondsByCategories";
-import { BondDetailsResponse, ListedBondsResponse, PaginationMeta } from "@root/apiGateway";
+import {
+  BondDetailsResponse,
+  ListedBondsResponse,
+  PaginationMeta,
+} from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { LoaderCircle, LucideLayoutGrid } from "lucide-react";
 import { ReactNode } from "react";
@@ -43,7 +47,8 @@ function BondsView({
   const bondFilterManager = useBondsFilters({ pathname, category });
   const { setViewMode, viewMode } = useViewModeStore();
 
-  const bondsListData = bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
+  const bondsListData =
+    bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
 
   return (
     <>
@@ -52,8 +57,6 @@ function BondsView({
         title={options.header.title}
         desc={options.header.desc}
         applyFilters={() => {
-          console.log("Apply filter");
-          
           bondFilterManager.applyFilters(bondFilterManager.filters);
         }}
       />
@@ -61,10 +64,19 @@ function BondsView({
         {options.showBondsByCategory && <BondsByCategories />}
         {bondFilterManager.applyFilterMutation.isPending ? (
           <div className="flex justify-center items-center h-96 container">
-            <LoaderCircle className="text-primary animate-spin animate" size={50} />
+            <LoaderCircle
+              className="text-primary animate-spin animate"
+              size={50}
+            />
           </div>
         ) : (
-          newFunction(options, viewMode, setViewMode, bondsListData)
+          newFunction(
+            options,
+            viewMode,
+            setViewMode,
+            bondsListData,
+            bondFilterManager.anyFilterApplied
+          )
         )}
       </SectionViewWrapper>
     </>
@@ -86,7 +98,8 @@ function newFunction(
   },
   viewMode: string,
   setViewMode: (mode: "list" | "grid") => void,
-  bondsListData: { data: BondDetailsResponse[]; meta: PaginationMeta }
+  bondsListData: { data: BondDetailsResponse[]; meta: PaginationMeta },
+  isFiltered?: boolean
 ) {
   if (bondsListData.data.length == 0)
     return <NotBondsFound onReset={() => {}} />;
@@ -94,7 +107,7 @@ function newFunction(
   return (
     <div className={cn("container", options.showBondsByCategory && "mt-14 ")}>
       <div className="flex justify-between items-center">
-        {options.page.title}
+        {isFiltered ? <h4 className="text-xl" >Showing bonds based on selected filters or search</h4> : options.page.title}
         <Tabs
           defaultValue={viewMode}
           onValueChange={(e) => setViewMode(e == "list" ? "list" : "grid")}
@@ -116,7 +129,7 @@ function newFunction(
           </TabsList>
         </Tabs>
       </div>
-      {options.page.desc && <p className="mt-3">{options.page.desc}</p>}
+      {(options.page.desc && !isFiltered) && <p className="mt-3">{options.page.desc}</p>}
 
       <div
         className={`gap-5 grid grid-cols-1 mt-2 py-5 ${

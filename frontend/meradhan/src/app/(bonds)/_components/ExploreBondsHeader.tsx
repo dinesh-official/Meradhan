@@ -10,7 +10,7 @@ import {
   MultiSelectValue,
 } from "@/components/ui/multi-select";
 import { cn } from "@/lib/utils";
-import { Search } from "lucide-react";
+import { Search, Trash2Icon, X } from "lucide-react";
 import {
   couponOptions,
   interestPaymentOptions,
@@ -45,7 +45,7 @@ function ExploreBondsHeader({
   }, [dounce]);
 
   return (
-    <div className="flex flex-col justify-center items-center bg-primary lg:-mt-5 py-8 lg:py-0 w-full lg:h-[420px]">
+    <div className="flex flex-col justify-center items-center bg-primary py-14 lg:py-0 w-full lg:min-h-[420px]">
       <div className="h-full text-white text-center container">
         <div className="flex flex-col justify-center gap-5 h-full">
           {title && (
@@ -206,6 +206,175 @@ function ExploreBondsHeader({
                 </MultiSelectGroup>
               </MultiSelectContent>
             </MultiSelect>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {/* Search Filter */}
+            {manager.filters?.search && (
+              <div className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm">
+                <span>Search: {manager.filters.search}</span>
+                <Trash2Icon
+                  className="hover:text-red-300 transition-colors cursor-pointer"
+                  size={14}
+                  onClick={() => {
+                    manager.setSearch("");
+                    setDobunce((prev) => prev + 1);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Maturity Filters */}
+            {manager.filters?.maturity?.map((m) => {
+              const maturityOption = maturityOptions.find(
+                (opt) => opt.value === m
+              );
+              return (
+                <div
+                  key={m}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Maturity: {maturityOption?.title || m}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newMaturity =
+                        manager.filters?.maturity?.filter(
+                          (item) => item !== m
+                        ) || [];
+                      manager.setMaturity(newMaturity);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Rating Filters */}
+            {manager.filters?.rating?.map((r) => {
+              const ratingOption = ratingOptions.find((opt) => opt.value === r);
+              return (
+                <div
+                  key={r}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Rating: {ratingOption?.title || r}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newRating =
+                        manager.filters?.rating?.filter((item) => item !== r) ||
+                        [];
+                      manager.setRating(newRating);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Taxation Filters */}
+            {manager.filters?.taxation?.map((t) => {
+              const taxationOption = taxationOptions.find(
+                (opt) => opt.value === t
+              );
+              return (
+                <div
+                  key={t}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Taxation: {taxationOption?.title || t}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newTaxation =
+                        manager.filters?.taxation?.filter(
+                          (item) => item !== t
+                        ) || [];
+                      manager.setTaxation(newTaxation);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Coupon Filters */}
+            {manager.filters?.coupon?.map((c) => {
+              const couponOption = couponOptions.find((opt) => opt.value === c);
+              return (
+                <div
+                  key={c}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Coupon: {couponOption?.title || c}%</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newCoupon =
+                        manager.filters?.coupon?.filter((item) => item !== c) ||
+                        [];
+                      manager.setCoupon(newCoupon);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Interest Payment Filters */}
+            {manager.filters?.interest?.map((i) => {
+              const interestOption = interestPaymentOptions.find(
+                (opt) => opt.value === i
+              );
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Interest: {interestOption?.title || i}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newInterest =
+                        manager.filters?.interest?.filter(
+                          (item) => item !== i
+                        ) || [];
+                      manager.setInterest(newInterest);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Clear All Filters Button */}
+            {manager.filters?.search ||
+            manager.filters?.maturity?.length ||
+            manager.filters?.rating?.length ||
+            manager.filters?.taxation?.length ||
+            manager.filters?.coupon?.length ||
+            manager.filters?.interest?.length ? (
+              <div
+                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
+                onClick={() => {
+                  manager.setSearch("");
+                  manager.setMaturity([]);
+                  manager.setRating([]);
+                  manager.setTaxation([]);
+                  manager.setCoupon([]);
+                  manager.setInterest([]);
+                  setDobunce((prev) => prev + 1);
+                }}
+              >
+                <span>Clear All</span>
+                <X size={14} />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

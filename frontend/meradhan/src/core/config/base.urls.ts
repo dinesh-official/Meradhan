@@ -1,4 +1,3 @@
-import { API_SERVER_URL_IP } from "@/global/constants/domains";
 
 
 // Centralized base URLs for all environments
