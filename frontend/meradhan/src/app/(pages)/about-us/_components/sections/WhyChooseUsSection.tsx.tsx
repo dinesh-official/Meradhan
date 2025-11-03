@@ -14,15 +14,15 @@ const WhyChooseUsSection = () => {
   return (
     <>
       <section className="container">
-        <div className="mt-[4rem] px-5  leading-relaxed space-y-8">
+        <div className="space-y-8 px-5 leading-relaxed">
           {/* Heading */}
           <h4
             className={cn(
-              "text-3xl md:text-4xl font-medium ",
+              "font-medium text-3xl md:text-4xl",
               "quicksand-medium"
             )}
           >
-            Why <span className="text-[#F25C4C] font-semibold">Choose Us?</span>
+            Why <span className="font-semibold text-[#F25C4C]">Choose Us?</span>
           </h4>
 
           {/* List */}
@@ -31,11 +31,11 @@ const WhyChooseUsSection = () => {
               <li key={idx} className="flex items-start gap-3">
                 <CheckCircle
                   size={20}
-                  className="text-[#6496C8] flex-shrink-0 mt-0.5"
+                  className="text-[#6496C8]"
                   strokeWidth={2}
                   fill="#ebf6ff"
                 />
-                <p className="text-[16px] md:text-[17px] text-slate-800">
+                <p className="text-[16px] text-slate-800 md:text-[17px]">
                   {item}
                 </p>
               </li>
@@ -44,29 +44,29 @@ const WhyChooseUsSection = () => {
         </div>
       </section>
 
-      <section className="mt-16 bg-[#ebf6ff]">
-        <div className="container ">
-          <div className="px-4 py-12 md:py-16 flex flex-col gap-6">
+      <section className="bg-[#ebf6ff] mt-16">
+        <div className="container">
+          <div className="flex flex-col gap-6 px-4 py-12 md:py-16">
             <h5
               className={cn(
-                "text-2xl md:text-3xl font-medium text-black",
+                "font-medium text-black text-2xl md:text-3xl",
                 "quicksand-medium"
               )}
             >
               Join the Fixed Income Revolution with{" "}
-              <span className="text-[#F25C4C] font-semibold">MeraDhan!</span>
+              <span className="font-semibold text-[#F25C4C]">MeraDhan!</span>
             </h5>
 
-            <p className="text-gray-700 leading-relaxed">
+            <p className="leading-relaxed">
               Empower your financial future with the stability and security of
               fixed income investments. Explore MeraDhan today and take your
               first step towards smart, sustainable investing.
             </p>
 
             {/* Contact Section */}
-            <div className="mt-4 flex flex-col gap-3 text-gray-800">
+            <div className="flex flex-col gap-3 mt-4 text-gray-800">
               <div className="flex items-center gap-3">
-                <Globe size={18} className="text-gray-700" />
+                <Globe size={18} />
                 <a
                   href="https://www.meradhan.co"
                   target="_blank"
@@ -78,7 +78,7 @@ const WhyChooseUsSection = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <Mail size={18} className="text-gray-700" />
+                <Mail size={18} />
                 <a
                   href="mailto:support@meradhan.co"
                   className="hover:underline"
@@ -88,7 +88,7 @@ const WhyChooseUsSection = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <Phone size={18} className="text-gray-700" />
+                <Phone size={18} />
                 <a href="tel:+919873373195" className="hover:underline">
                   +91 9873373195
                 </a>

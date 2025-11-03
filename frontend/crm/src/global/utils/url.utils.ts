@@ -1,6 +1,6 @@
 import { ASSETS_URL } from "../constants/domains";
 
-const hostPath = "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public/"
+const hostPath = "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public"
 
 export function genMediaUrl(mediaPath?: string | null): string {
   if (!mediaPath) return "/noimage.jpg";

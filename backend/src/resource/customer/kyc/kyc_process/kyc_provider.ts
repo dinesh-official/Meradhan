@@ -3,38 +3,16 @@ import { AppError } from "@utils/error/AppError";
 import AdmZip from "adm-zip";
 import { AxiosError } from "axios";
 import * as fs from 'fs';
-import { DigioSDK, genPdfForSign, NSDLApi, type DanRequest, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
+import { CDSLApi, DigioSDK, genPdfForSign, NSDLApi, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
 import os from "os";
 import * as path from 'path';
 
+// helper class for digio kyc file operations
+class DigioKycFileHelper {
+    constructor(private digioSdk: DigioSDK) { }
 
-
-export class KycProvider {
-    private digio = new DigioSDK()
-    private nsdlApi = new NSDLApi(
-        "NR100013",
-        "06b2d035ad7d2f12c5d339bec39d58d4fc6e",
-        false
-    ); // false = test mode
-
-
-    async createPanVerifyRequest({ email, id, name }: { email: string, name: string, id: string }) {
-        const panDetails = await this.digio.sendTemplateRequest({
-            emailId: email,
-            name,
-            templateName: "DIGILOCKER_AADHAAR_PAN",
-            reference_id: id
-        });
-        return panDetails;
-    }
-
-    async verifyPan({ kid }: { kid: string }) {
-        const panDetails = await this.digio.getKycgetResponse<DigioAadharPanData>(kid);
-        return panDetails;
-    }
-
-    async getPanAadharDocumentFiles(rid: string) {
-        const bytes = await this.digio.getMediaData(rid);
+    // get pan aadhar document files from digio rid
+    async getPanAadharDocumentFiles(bytes: string) {
         const zipBuffer = Buffer.from(bytes);
         const zip = new AdmZip(zipBuffer);
 
@@ -63,11 +41,13 @@ export class KycProvider {
         }
     }
 
-    async getFileDataBytes(kid: string) {
-        const bytes = await this.digio.getMediaData(kid);
+    // get file data bytes from digio kid 
+    async getMediaFileDataBytes(kid: string) {
+        const bytes = await this.digioSdk.getMediaData(kid);
         return bytes;
     }
 
+    // use for make file from base64 string and upload to cloud
     async getBash64File(baseData: string, data?: { name?: string, path?: string }) {
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "aadhar"));
         const fileName = data?.name || `file.jpeg`;
@@ -80,6 +60,7 @@ export class KycProvider {
         return saveUrl;
     }
 
+    // use for make file from bytes string and upload to cloud
     async getFileBytesPath(bytes: string, data?: { name?: string, path?: string }) {
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "filedata"));
         const fileName = data?.name || `file.jpeg`;
@@ -92,7 +73,50 @@ export class KycProvider {
         return saveUrl;
     }
 
-    // sign
+
+}
+
+// main KYC provider class
+export class KycProvider extends DigioKycFileHelper {
+
+    private digio: DigioSDK;
+
+    constructor() {
+        const digio = new DigioSDK();
+        super(digio);
+        this.digio = digio;
+    }
+
+    private nsdlApi = new NSDLApi(
+        "NR100013",
+        "06b2d035ad7d2f12c5d339bec39d58d4fc6e",
+        false
+    ); // false = test mode
+    private cdslApi = new CDSLApi({
+        AESKey: "P6KZN7PEHRASDX6M19Y3EF382F1F9NLQ",
+        isProd: false
+    });
+
+    // KYC STEP 1: PAN Verification ---------------------------------------------
+
+    // pan aadhar generate request to digio
+    async createPanVerifyRequest({ email, id, name }: { email: string, name: string, id: string }) {
+        const panDetails = await this.digio.sendTemplateRequest({
+            emailId: email,
+            name,
+            templateName: "DIGILOCKER_AADHAAR_PAN",
+            reference_id: id
+        });
+        return panDetails;
+    }
+
+    // verify pan aadhar details from digio kid
+    async verifyPan({ kid }: { kid: string }) {
+        const panDetails = await this.digio.getKycgetResponse<DigioAadharPanData>(kid);
+        return panDetails;
+    }
+
+    // selfie generate request to digio
     async createSelfieVerifyRequest({ email, id, name }: { email: string, name: string, id: string }) {
         const selfieDetails = await this.digio.sendTemplateRequest({
             emailId: email,
@@ -103,13 +127,15 @@ export class KycProvider {
         return selfieDetails;
     }
 
+
+    // verify selfie from digio kid
     async verifySelfie({ kid }: { kid: string }) {
         const selfieDetails = await this.digio.getKycgetResponse<DigioFaceDataResponse>(kid);
         return selfieDetails;
     }
 
 
-    // face 
+    // face verification request to digio
     async createSignVerifyRequest({ email, id, name }: { email: string, name: string, id: string }) {
         const selfieDetails = await this.digio.sendTemplateRequest({
             emailId: email,
@@ -120,17 +146,20 @@ export class KycProvider {
         return selfieDetails;
     }
 
+    // verify sign from digio kid
     async verifySign({ kid }: { kid: string }) {
         const signDetails = await this.digio.getKycgetResponse<DigioFaceDataResponse>(kid);
         return signDetails;
     }
 
+    // KYC STEP 2: BANK Verification ---------------------------------------------
+    // fetch ifsc info from Razorpay
     async fetchIfscInfo(ifsc: string) {
         const ifscInfo = await this.digio.fetchIfscCode({ ifsc });
         return ifscInfo;
     }
 
-
+    // verify bank account details from digio
     async verifyBankAccount(payload: {
         beneficiary_account_no: string
         beneficiary_ifsc: string
@@ -141,22 +170,54 @@ export class KycProvider {
     }
 
 
-    async verifyDmateAccount(type: "NSDL" | "CDSL", payload: DanRequest) {
+    // KYC STEP 3: DEMAT Verification ---------------------------------------------
+    // verify demat account from NSDL/CDSL
+    async verifyDmateAccount(type: "NSDL" | "CDSL", payload: {
+        dpId?: string;
+        boId_or_clientId: string;
+        pan1: string;
+        pan2?: string | null;
+        pan3?: string | null;
+    }
+    ) {
+
         try {
             if (type == "NSDL") {
-                const nsdlDetails = await this.nsdlApi.checkDANstatus(payload);
+                const nsdlDetails = await this.nsdlApi.checkDANstatus({
+                    clientId: payload.boId_or_clientId,
+                    dpId: payload.dpId!,
+                    fstHoldrPan: payload.pan1,
+                    scndHoldrPan: payload.pan2 || undefined,
+                    thrdHoldrPan: payload.pan3 || undefined,
+                    transactionId: new Date().getTime().toString()
+                });
                 return nsdlDetails;
+            } else if (type == "CDSL") {
+                const cdslDetails = await this.cdslApi.panVerifyRequest({
+                    boid: payload.boId_or_clientId,
+                    pan1: payload.pan1,
+                    pan2: payload.pan2 || undefined,
+                    pan3: payload.pan3 || undefined,
+                });
+                return cdslDetails;
             }
         } catch (error) {
             if (error) {
-                throw new AppError((error as AxiosError<{ error: string }>)?.response?.data?.error || error.toString(), { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 });
+                throw new AppError((error as AxiosError<{ error: string,ErrorDescription?:string }>)?.response?.data?.ErrorDescription || error.toString(), { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 });
             }
         }
 
-        throw new AppError("cdsl not supported. Please use NSDL", { code: "NOT_SUPPORTED", statusCode: 400 });
+        throw new AppError("ben not supported. Please use NSDL", { code: "NOT_SUPPORTED", statusCode: 400 });
     }
 
 
+    // KYC STEP 4: RISK PROFILE IS A PLAN Array OF JSON so use KYCStore to save IT Manage By "Client" Or "Kyc Store"
+    // No External Provider Integration Required
+
+
+
+    // KYC STEP 5: E-SIGN Verification ---------------------------------------------
+    // esign request to digio
     async esignRequest({ email, name }: { name: string, email: string }) {
         const file = genPdfForSign();
         const reqData = await this.digio.esignRequest(file, {
@@ -166,6 +227,7 @@ export class KycProvider {
         return reqData;
     }
 
+    // get esign pdf from digio document id
     async getEsignPdf(document_id: string) {
         const pdfData = await this.digio.getSignatureEsignPdf(document_id);
         const url = this.getFileBytesPath(pdfData, { name: "esign.pdf", path: "kyc/esign" });
@@ -173,4 +235,8 @@ export class KycProvider {
     }
 
 
+
+
 }
+
+

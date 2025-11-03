@@ -1,5 +1,6 @@
 "use client";
 import { userSessionStore } from "@/core/auth/userSessionStore";
+import { makeFullname } from "@/global/utils/formate";
 import React from "react";
 
 function NameTitleView() {
@@ -9,7 +10,11 @@ function NameTitleView() {
     <>
       Welcome{" "}
       <span className="font-bold">
-        {session?.firstName} {session?.lastName}
+        {makeFullname({
+          firstName: session?.firstName || "User",
+          middleName: session?.middleName,
+          lastName: session?.lastName,
+        })}
       </span>
       {session && "!"}
     </>

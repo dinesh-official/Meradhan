@@ -1,6 +1,6 @@
 import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
 import AccountViewPort from "../../_components/wrapper/AccountViewPort";
-import KycWorkSpace from "./_components/wrapper/KycWorkSpace";
+import KycWorkSpace from "./_steps/wrapper/KycWorkSpace";
 import KycDataProvider from "./_context/KycDataProvider";
 import KycFlowStepsView from "./KycFlowStepsView";
 

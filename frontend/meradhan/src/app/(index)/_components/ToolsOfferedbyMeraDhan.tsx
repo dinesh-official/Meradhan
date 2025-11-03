@@ -21,7 +21,7 @@ function ToolsOfferedByMeraDhan() {
             <CardContent>
               <div className="flex flex-col gap-5">
                 <FaBrain size={30} className="text-secondary" />
-                <p className="text-2xl">DhanGPT</p>
+                <p className="text-2xl quicksand-medium">DhanGPT</p>
                 <p>
                   Meet DhanGPT—your friendly, AI-powered learning companion for
                   fixed income. It explains concepts, clarifies doubts, and
@@ -39,7 +39,7 @@ function ToolsOfferedByMeraDhan() {
             <CardContent>
               <div className="flex flex-col gap-5">
                 <FaCalculator size={30} className="text-secondary" />
-                <p className="text-2xl">Yield to Maturity Calculator</p>
+                <p className="text-2xl quicksand-medium">Yield to Maturity Calculator</p>
                 <p>
                   Curious about how bond returns are calculated? Use our Yield
                   to Maturity (YTM) calculator to explore how bond returns are

@@ -13,6 +13,7 @@ import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 import BankViewCard from "./_elements/BankViewCard";
+import { makeFullname } from "@/global/utils/formate";
 
 function VerifyBankAccount() {
   const {
@@ -50,13 +51,11 @@ function VerifyBankAccount() {
           <BankViewCard
             bank={item}
             key={item.accountNumber}
-            name={
-              state.step_1.pan.firstName +
-              " " +
-              state.step_1.pan.middleName +
-              " " +
-              state.step_1.pan.lastName
-            }
+            name={makeFullname({
+              firstName: state.step_1.pan.firstName,
+              middleName: state.step_1.pan.middleName,
+              lastName: state.step_1.pan.lastName,
+            })}
             setDefault={() => {
               setDefaultBankAccount(index);
             }}

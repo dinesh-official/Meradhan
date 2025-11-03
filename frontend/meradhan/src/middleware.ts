@@ -1,20 +1,29 @@
-import apiGateway from '@root/apiGateway';
+import { UserSessionDataResponse } from '@root/apiGateway';
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import apiServerCaller from './core/connection/apiServerCaller';
-
-// Initialize Auth API client
-const authApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(apiServerCaller);
+import { API_SERVER_URL } from './global/constants/domains';
 
 // Helper: Generate Basic Auth header
 const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64");
 
-/**
- * Next.js Middleware
- * Handles:
- *  1. Basic Authentication (production only)
- *  2. Session validation via cookies and backend API
- */
+
+const fetchUserSession = async (token: string) => {
+  try {
+    const sessionResponse = fetch(API_SERVER_URL + "/customer/session", {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }).then(res => res.json());
+    return sessionResponse as Promise<UserSessionDataResponse>;
+  } catch (error) {
+    console.error("Error fetching user session:", error);
+    throw error;
+  }
+}
+
+
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
 
@@ -33,7 +42,6 @@ export async function middleware(request: NextRequest) {
         },
       });
     }
-
   }
 
   // ✅ 2. Protect /dashboard routes
@@ -42,10 +50,10 @@ export async function middleware(request: NextRequest) {
     const token = cookieStore.get("token")?.value;
 
     // No token? Try to restore session
-    if (!token) {
+    if (token) {
       try {
         // Attempt session restore via API
-        await authApi.getSession();
+        await fetchUserSession(token);
         return NextResponse.next({ headers: requestHeaders });
       } catch (error) {
         const response = NextResponse.redirect(new URL("/logout", origin), { headers: requestHeaders });

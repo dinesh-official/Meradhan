@@ -12,6 +12,7 @@ import { SignUPFormDataHook } from "../_hooks/useSignUpFormDataState";
 import { useTrackUserVerifyFlowStore } from "../_hooks/useTrackUserVerifyFlowStore";
 import CaptchaInput from "./CaptchaInput";
 import SignUpOtpInput from "./SignUpOtpInput";
+import { makeFullname } from "@/global/utils/formate";
 
 function VerifyOtpPopUp({
   formData,
@@ -97,7 +98,7 @@ function VerifyOtpPopUp({
         </DialogHeader>
         <div className="flex flex-col gap-3.5 px-5">
           <p className="text-green-600">{content.successMessage}</p>
-          <p className="text-gray-700 text-sm">{content.text}</p>
+          <p className="text-sm">{content.text}</p>
           {currentStep != "support" &&
             (showCaptcha ? (
               <CaptchaInput onVerify={(e) => setVerifyCaptcha(e)} />
@@ -142,7 +143,10 @@ function VerifyOtpPopUp({
                 flowManager.sendVerifyOtp({
                   emailId: formData.email,
                   mobile: formData.mobile,
-                  name: formData.firstName + " " + formData.lastName,
+                  name: makeFullname({
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                  }),
                 })
               }
             >

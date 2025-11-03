@@ -70,7 +70,7 @@ const ListFilter = () => {
                   "px-4 py-2 rounded-lg text-sm font-semibold transition-colors",
                   active === s
                     ? "bg-[#02264A] text-white"
-                    : "text-gray-700 hover:text-[#02264A]",
+                    : " hover:text-[#02264A]",
                 ].join(" ")}
               >
                 {s}

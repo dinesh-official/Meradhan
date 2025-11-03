@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance } from "axios";
 import * as crypto from "crypto";
 import type { DanRequest, DanResponse } from "./NSDLApi.response";
+import type { DemateVerifyResponse } from "../dmeat.types";
 
 
 
@@ -17,11 +18,11 @@ export class NSDLApi {
 
         this.axiosInstance = axios.create({
             baseURL: this.baseUrl,
-            timeout: 10000,
             headers: {
                 "Content-Type": "application/json",
                 "Transaction-Type": "MFS", // Predefined as per spec
                 "Requestor-Id": this.requestorId,
+                verbose: true
             },
         });
     }
@@ -51,9 +52,12 @@ export class NSDLApi {
         return `${iso}${sign}${offsetHours}${offsetMins}`;
     }
 
-    async checkDANstatus(body: DanRequest): Promise<DanResponse> {
+    async checkDANstatus(body: DanRequest): Promise<DemateVerifyResponse<DanResponse>> {
         const timestamp = this.getCurrentTimestamp();
         const signature = this.generateSignature(timestamp, body);
+
+
+
         const response = await this.axiosInstance.post<DanResponse>(
             "/customer-service/v2/dan/checkDANstatus",
             body,
@@ -64,6 +68,15 @@ export class NSDLApi {
                 },
             }
         );
-        return response.data;
+        return {
+            fstHoldrPan: body.fstHoldrPan,
+            scndHoldrPan: body.scndHoldrPan,
+            idNo: body.transactionId,
+            isVerified: response.data.status === "00",
+            status: response.data.status,
+            message: response.data.message,
+            thrdHoldrPan: body.thrdHoldrPan,
+            data: response.data,
+        };
     }
 }

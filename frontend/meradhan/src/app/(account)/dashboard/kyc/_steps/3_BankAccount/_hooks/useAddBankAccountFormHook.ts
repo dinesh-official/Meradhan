@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 import { ZodError } from "zod";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { KycDataStorage, useKycDataStorage } from "../../../_store/useKycDataStorage";
+import { makeFullname } from "@/global/utils/formate";
 
 export const useAddBankAccountFormHook = () => {
     const { state, updateBankAccount, nextLocalStep } = useKycDataStorage();
@@ -33,7 +34,11 @@ export const useAddBankAccountFormHook = () => {
         onSuccess: (data) => {
             updateData("bankName", data?.responseData.BANK);
             updateData("branchName", data?.responseData.BRANCH);
-            updateData("beneficiary_name", state.step_1.pan.firstName + " " + state.step_1.pan.middleName + " " + state.step_1.pan.lastName);
+            updateData("beneficiary_name", makeFullname({
+                firstName: state.step_1.pan.firstName,
+                middleName: state.step_1.pan.middleName,
+                lastName: state.step_1.pan.lastName,
+            }));
         }
     });
 
@@ -76,7 +81,7 @@ export const useAddBankAccountFormHook = () => {
                 .slice(0, -1) // exclude last item
                 .find((item) => item.accountNumber === bankData.accountNumber);
 
-            
+
             if (existingAccount) {
                 Swal.fire({
                     icon: 'error',
@@ -90,7 +95,7 @@ export const useAddBankAccountFormHook = () => {
             verifyBankAccountMutation.mutate(data);
         } catch (error) {
             console.log(error);
-            
+
             if (error instanceof ZodError) {
                 const errorMessage = zodErrorToErrorMap(error);
                 setError(errorMessage);

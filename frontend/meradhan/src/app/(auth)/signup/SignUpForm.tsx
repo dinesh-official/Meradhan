@@ -66,7 +66,7 @@ function SignUpForm() {
         {/* Header */}
         <h2
           className={cn(
-            "quicksand-medium  text-gray-700 text-2xl",
+            "text-2xl quicksand-medium",
             
           )}
         >

@@ -25,12 +25,16 @@ import {
   useKycDataStorage,
 } from "../../_store/useKycDataStorage";
 import { useDematAccountFormHook } from "./_hooks/useDematAccountFormHook";
+import { makeFullname } from "@/global/utils/formate";
+import { cn } from "@/lib/utils";
+
 function AddDematAccountForm() {
   const { updateDepository, state, removeDepository, nextLocalStep } =
     useKycDataStorage();
   const data = state.step_4[state.step_4.length - 1];
   const { handelSubmit, error, isPending } = useDematAccountFormHook();
 
+  // user for update state data with type safety
   const updateData = (
     key: keyof KycDataStorage["step_4"][number],
     data: string | boolean | unknown
@@ -40,19 +44,21 @@ function AddDematAccountForm() {
     });
   };
 
+  // Sync "PAN Number" and "Account Holder Name" from Step 1 auto fill
   useEffect(() => {
     if (state.step_1.pan.panCardNo != data.panNumber?.[0]) {
+      // update first index of pan number array with step 1 pan card no
       updateData("panNumber", [
         state.step_1.pan.panCardNo,
         ...data.panNumber?.slice(1),
       ]);
       updateData(
         "accountHolderName",
-        state.step_1.pan.firstName +
-          " " +
-          state.step_1.pan.middleName +
-          " " +
-          state.step_1.pan.lastName
+        makeFullname({
+          firstName: state.step_1.pan.firstName,
+          middleName: state.step_1.pan.middleName,
+          lastName: state.step_1.pan.lastName,
+        })
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,7 +71,8 @@ function AddDematAccountForm() {
       </CardHeader>
       <CardContent accountMode>
         <div className="flex flex-col gap-3 md:gap-5">
-          <div className="gap-3 md:gap-5 grid lg:grid-cols-4">
+          {/* 3 for CDSL  */}
+          <div className={cn("gap-3 md:gap-5 grid lg:grid-cols-4", data.depositoryName === "CDSL" && "lg:grid-cols-3")}>
             <LabelInput
               label="Depository Name"
               required
@@ -73,25 +80,35 @@ function AddDematAccountForm() {
             >
               <Select
                 value={data?.depositoryName}
-                onValueChange={(e) => updateData("depositoryName", e)}
+                onValueChange={(e) => {
+                  updateData("depositoryName", e);
+                  // Clear DP ID if changing from NSDL to CDSL
+                  if (e === "CDSL") {
+                    updateData("dpId", "");
+                  }
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CDSL" disabled>
-                    CDSL (under development)
-                  </SelectItem>
+                  <SelectItem value="CDSL">CDSL</SelectItem>
                   <SelectItem value="NSDL">NSDL</SelectItem>
                 </SelectContent>
               </Select>
             </LabelInput>
-            <LabelInput label="DP ID" required error={error?.dpId?.[0]}>
-              <Input
-                value={data?.dpId}
-                onChange={(e) => updateData("dpId", e.target.value)}
-              />
-            </LabelInput>
+
+            {/* // Only for NSDL */}
+            {data.depositoryName == "NSDL" && (
+              <LabelInput label="DP ID" required error={error?.dpId?.[0]}>
+                <Input
+                  value={data?.dpId}
+                  onChange={(e) => updateData("dpId", e.target.value)}
+                />
+              </LabelInput>
+            )}
+
+            {/* // Beneficiary (mens CDSL ID)  / Client ID */}
             <LabelInput
               label="Beneficiary / Client ID"
               required
@@ -105,6 +122,7 @@ function AddDematAccountForm() {
               />
             </LabelInput>
 
+            {/* // Account Type */}
             <LabelInput
               label="Account Type"
               required
@@ -136,8 +154,14 @@ function AddDematAccountForm() {
             </LabelInput>
           </div>
 
-       {  data.accountType === "JOINT" &&   <p className="text-sm" >If you are adding a joint Demat account, please ensure that you are the primary holder, and that your PAN is the verified one.</p>
-}
+          {/* // Info text for Joint Account */}
+          {data.accountType === "JOINT" && (
+            <p className="text-sm">
+              If you are adding a joint Demat account, please ensure that you
+              are the primary holder, and that your PAN is the verified one.
+            </p>
+          )}
+
           <div className="gap-3 md:gap-5 grid lg:grid-cols-3">
             <LabelInput
               label="Depository Participant Name"
@@ -152,11 +176,20 @@ function AddDematAccountForm() {
               />
             </LabelInput>
 
-            {/* <Input /> */}
-            <ManageDematPanInputs
-              index={state.step_4.length - 1}
-              errors={error?.panNumber}
-            />
+            {/* //  Primary Account Holder Details (PAN & Name) - Auto filled from Step 1 */}
+            <LabelInput
+              label="Primary Account Holder Name"
+              required
+              error={error?.panNumber?.[0]}
+            >
+              <Input
+                value={data?.panNumber[0]}
+                onChange={(e) => updateData("panNumber", e.target.value)}
+                disabled
+                adminMode
+              />
+            </LabelInput>
+
             <LabelInput
               label="Name as per PAN"
               required
@@ -171,13 +204,22 @@ function AddDematAccountForm() {
                 adminMode
               />
             </LabelInput>
+
+            {/* <Input /> */}
+            {/* // Manage Other Account Holders PAN Inputs */}
+            <ManageDematPanInputs
+              // for use get last index of step_4 array mins last item update [{A1},{A2},{manage new account index}]
+              index={state.step_4.length - 1}
+              errors={error?.panNumber}
+            />
           </div>
+          {/* // Terms and conditions checkbox */}
           <label className="flex lg:items-start gap-3 text-sm">
             <Checkbox
               onClick={() => {
                 updateData("checkTerms", !data?.checkTerms);
               }}
-              className="lg:mt-[2px]"
+              className="lg:mt-0.5"
               checked={data?.checkTerms}
             />
             <p>
@@ -186,6 +228,7 @@ function AddDematAccountForm() {
               onboarding, in accordance with applicable regulatory guidelines.
             </p>
           </label>
+
           {error?.checkTerms?.[0] && (
             <small className="text-red-600 text-xs">
               {error?.checkTerms?.[0]}
@@ -201,6 +244,8 @@ function AddDematAccountForm() {
         >
           Confirm & Verify <MdOutlineArrowRight />
         </Button>
+
+        {/* // if add more than 1 demat account then show cancel button */}
         {state.step_4.length > 1 && (
           <Button
             variant={`link`}

@@ -2,6 +2,8 @@ import { db } from "@core/database/database";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 
+
+// KYC store controller class to get and set kyc data in kyc_flow table to track kyc progress for customer to resume later
 export class KycStoreController {
     async getKycData(req: Request, res: Response) {
         const id = req.customer!.id

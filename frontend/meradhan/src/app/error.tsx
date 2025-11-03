@@ -17,7 +17,7 @@ export default function Error({
   // Only render in development mode
   if (process.env.NODE_ENV != "development") {
     return (
-      <div className="flex flex-col justify-center items-center gap-3 px-4 min-h-screen text-gray-700">
+      <div className="flex flex-col justify-center items-center gap-3 px-4 min-h-screen">
         {/* Error Image */}
         <Image
           width={100}
@@ -61,7 +61,7 @@ export default function Error({
   };
 
   return (
-    <div className="flex flex-col justify-center items-center bg-gray-100 px-4 min-h-screen text-gray-700">
+    <div className="flex flex-col justify-center items-center bg-gray-100 px-4 min-h-screen">
       <div className="max-w-xl text-center">
         {/* Error Title */}
         <div className="font-semibold text-gray-800 text-3xl">
@@ -81,7 +81,7 @@ export default function Error({
             <div className="mb-2 font-semibold text-red-700 text-sm">
               Error Message:
             </div>
-            <div className="text-gray-700 text-xs">
+            <div className="text-xs">
               {error?.message || "Unknown error occurred."}
             </div>
             <button

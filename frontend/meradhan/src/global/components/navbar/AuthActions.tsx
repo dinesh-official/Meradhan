@@ -13,7 +13,7 @@ function AuthActions({
 
   return (
     <>
-      <Link href="/login" className="text-gray-700">
+      <Link href="/login" className="">
         Login
       </Link>
       <Link href={`/signup`}>

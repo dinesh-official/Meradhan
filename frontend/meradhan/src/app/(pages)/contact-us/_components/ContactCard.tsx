@@ -20,7 +20,7 @@ export function ContactCard({
 }: ContactCardProps) {
   const cardContent = (
     <>
-      <span className="-top-3 left-3 absolute bg-white px-4 text-gray-700">
+      <span className="-top-3 left-3 absolute bg-white px-4">
         {label}
       </span>
       <Icon className="text-secondary" size={iconSize} />

@@ -1,11 +1,11 @@
 "use client";
-import IdentityValidationStep from "./_components/1_IdentityValidation/IdentityValidationStep";
-import PersonalDetailsForm from "./_components/2_PersonalDetails/PersonalDetailsForm";
-import BankKycStepView from "./_components/3_BankAccount/BankKycStepView";
-import DematKycStepView from "./_components/4_DematAccount/DematKycStepView";
-import RiskProfilingCard from "./_components/5_RiskProfiling/RiskProfilingCard";
-import KycESign from "./_components/6_E_Signature/KycESign";
-import FinishKyc from "./_components/End_Finish/FinishKyc";
+import IdentityValidationStep from "./_steps/1_IdentityValidation/IdentityValidationStep";
+import PersonalDetailsForm from "./_steps/2_PersonalDetails/PersonalDetailsForm";
+import BankKycStepView from "./_steps/3_BankAccount/BankKycStepView";
+import DematKycStepView from "./_steps/4_DematAccount/DematKycStepView";
+import RiskProfilingCard from "./_steps/5_RiskProfiling/RiskProfilingCard";
+import KycESign from "./_steps/6_E_Signature/KycESign";
+import FinishKyc from "./_steps/End_Finish/FinishKyc";
 import { useKycStepStore } from "./_store/useKycStepStore";
 
 const stepList = [

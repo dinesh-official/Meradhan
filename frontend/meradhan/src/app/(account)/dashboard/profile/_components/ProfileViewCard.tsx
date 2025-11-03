@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { makeFullname } from "@/global/utils/formate";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { GetCustomerResponseById } from "@root/apiGateway";
 import Image from "next/image";
@@ -20,11 +21,15 @@ function ProfileViewCard({
             src={genMediaUrl(profile.avatar)}
             width={100}
             height={100}
-            className="p-[2px] border-1 border-primary border-dashed rounded-full w-24 h-24 object-cover"
+            className="p-0.5 border border-primary border-dashed rounded-full w-24 h-24 object-cover"
           />
           <div className="flex flex-col gap-1">
             <p className="font-semibold text-lg">
-              {profile.firstName} {profile.middleName} {profile.lastName}
+              {makeFullname({
+                firstName: profile.firstName,
+                middleName: profile.middleName,
+                lastName: profile.lastName,
+              })}
             </p>
             <p>Client ID: {profile.userName}</p>
             <p>User Type: {profile.userType}</p>

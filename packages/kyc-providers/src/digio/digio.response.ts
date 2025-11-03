@@ -230,6 +230,8 @@ interface AccessToken {
     created_at: string; // ISO timestamp
 }
 
+
+
 export interface DigioBankVerifyResponse {
     id: string
     verified: boolean

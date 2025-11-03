@@ -2,16 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { HOST_URL } from "@/global/constants/domains";
+import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatNumberTS } from "@/global/utils/formate";
 import { cn } from "@/lib/utils";
 import { BondDetailsResponse } from "@root/apiGateway";
+import Link from "next/link";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { RiShareFill } from "react-icons/ri";
 import BondAddToWatchList from "./BondAddToWatchList";
 import { BondInfoLabel } from "./BondInfoLabel";
 import CreditRatingBadge from "./CreaditRatingBadge";
-import Link from "next/link";
 
 export function BondListCard({
   gridMode,
@@ -24,7 +26,7 @@ export function BondListCard({
 }) {
   return (
     <Card
-      className={cn("even:bg-white odd:bg-muted even:border-1 odd:border-0")}
+      className={cn("even:bg-white odd:bg-muted even:border odd:border-0")}
     >
       <CardContent>
         <div className="flex flex-col gap-4">
@@ -35,13 +37,11 @@ export function BondListCard({
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex justify-between">
-              <p className="text-gray-700 text-xl line-clamp-1">
-                {data.bondName}
-              </p>
+              <p className="text-xl line-clamp-1">{data.bondName}</p>
               {/* // make sure 2 buttons on that code deferent places */}
               {!gridMode && (
                 <div className="hidden lg:flex gap-5 col-span-2">
-                  <Link href={`/bonds/detail/` + data.isin} >
+                  <Link href={`/bonds/detail/` + data.isin}>
                     <Button variant={`outline`} className="bg-transparent">
                       View Details
                     </Button>
@@ -68,7 +68,12 @@ export function BondListCard({
               {onlyShare && (
                 <Label className="font-normal text-gray-600">Share this</Label>
               )}
-              <RiShareFill className="text-gray-600 cursor-pointer" size={18} />
+              <SharePopupTrigger title="Share Bond" url={HOST_URL+"/detail/"+data.isin}>
+                <RiShareFill
+                  className="text-gray-600 cursor-pointer"
+                  size={18}
+                />
+              </SharePopupTrigger>
             </div>
             <div
               className={cn(
@@ -115,7 +120,10 @@ export function BondListCard({
                 )}
               >
                 {/* // make sure 2 buttons on that code deferent places */}
-                <Link href={`/bonds/detail/${data.isin}`} className="block w-full">
+                <Link
+                  href={`/bonds/detail/${data.isin}`}
+                  className="block w-full"
+                >
                   <Button variant={`outline`} className="bg-transparent w-full">
                     View Details
                   </Button>

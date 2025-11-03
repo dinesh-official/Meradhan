@@ -66,7 +66,7 @@ const CoreValuesSection = () => {
                   <h4 className="font-semibold text-lg md:text-xl">
                     {item.title}
                   </h4>
-                  <p className="text-gray-700 text-sm md:text-base">
+                  <p className="text-sm md:text-base">
                     {item.desc}
                   </p>
                 </div>

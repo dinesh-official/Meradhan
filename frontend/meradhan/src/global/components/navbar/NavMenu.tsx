@@ -6,14 +6,14 @@ import { MENU_ITEMS } from "@/global/constants/menu.constants";
 
 function NavMenu() {
   return (
-    <nav className="flex items-center gap-7 ">
+    <nav className="flex items-center gap-7">
       {MENU_ITEMS.map((item, i) => (
-        <div key={i} className="relative group cursor-pointer">
+        <div key={i} className="group relative cursor-pointer">
           {/* Top-Level Menu */}
-          <div className="flex items-center gap-2  text-gray-700 hover:text-primary transition-all">
+          <div className="flex items-center gap-2 hover:text-primary transition-all">
             <span>{item.title}</span>
             {item.children && (
-              <IoMdArrowDropdown className="transition-all duration-200 group-hover:rotate-180" />
+              <IoMdArrowDropdown className="group-hover:rotate-180 transition-all duration-200" />
             )}
           </div>
           {/* Level 1 Dropdown */}
@@ -51,7 +51,7 @@ function NavMenuList({
               <li
                 key={j}
                 className={cn(
-                  "relative flex justify-between items-center group/item text-gray-700 hover:bg-primary/10 hover:text-primary transition text-sm  whitespace-nowrap",
+                  "group/item relative flex justify-between items-center hover:bg-primary/10 hover:text-primary text-sm whitespace-nowrap transition",
                   subItem.children && "pr-6"
                 )}
               >
@@ -59,19 +59,19 @@ function NavMenuList({
 
                 <Link
                   href={subItem.href || "#"}
-                  className="px-4 py-2 block w-full"
+                  className="block px-4 py-2 w-full"
                 >
                   {subItem.title}
                 </Link>
                 {subItem.children && (
-                  <IoMdArrowDropdown className="rotate-[-90deg] text-gray-400 group-hover/item:text-primary transition-all duration-200" />
+                  <IoMdArrowDropdown className="text-gray-400 group-hover/item:text-primary rotate-[-90deg] transition-all duration-200" />
                 )}
 
                 {/* Nested Dropdown — Opens to the Right */}
                 {subItem.children && (
                   <div
                     className={cn(
-                      "absolute top-0 left-full ml-1 opacity-0 invisible group-hover/item:opacity-100 group-hover/item:visible transition-all duration-200 ease-in-out transform group-hover/item:translate-x-1"
+                      "invisible group-hover/item:visible top-0 left-full absolute opacity-0 group-hover/item:opacity-100 ml-1 transition-all group-hover/item:translate-x-1 duration-200 ease-in-out transform"
                     )}
                   >
                     <NavMenuList item={subItem} isNested={true} />

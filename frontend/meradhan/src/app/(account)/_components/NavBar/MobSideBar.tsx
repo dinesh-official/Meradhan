@@ -18,7 +18,7 @@ function MobSideBar() {
     <Sheet>
       {/* Trigger Button (Visible only on Mobile) */}
       <SheetTrigger className="lg:hidden hover:bg-gray-100 p-2 rounded-md transition cursor-pointer">
-        <Menu className="text-gray-700" />
+        <Menu className="" />
       </SheetTrigger>
 
       {/* Sidebar Content */}
@@ -52,7 +52,7 @@ function MobSideBar() {
                   "transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 rounded-md"
                 )}
               >
-                <span className="flex justify-center items-center w-6 text-gray-700">
+                <span className="flex justify-center items-center w-6">
                   {item.icon}
                 </span>
                 <span className="font-medium text-gray-800 text-sm">

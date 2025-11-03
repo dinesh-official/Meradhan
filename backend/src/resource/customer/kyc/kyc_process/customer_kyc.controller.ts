@@ -6,9 +6,10 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 export class CustomerKycKycController {
     private panKycService = new CustomerKycKycService()
 
+    // pan verify request
     async createPanVerifyRequest(req: Request, res: Response) {
-        const data = appSchema.kyc.kycPanInfoDataSchema.parse(req.body);
         const id = req.customer!.id
+        const data = appSchema.kyc.kycPanInfoDataSchema.parse(req.body);
         const response = await this.panKycService.createPanVerifyRequest({ id, data });
         res.sendResponse({
             statusCode: HttpStatus.OK,
@@ -16,10 +17,14 @@ export class CustomerKycKycController {
         })
     }
 
+    // pan verify response
     async verifyPanResponse(req: Request, res: Response) {
         const kid = req.params.kid!;
+        // verify pan response from digio
         const response = await this.panKycService.verifyPanResponse({ kid });
         console.log(response.status);
+
+        // check if aadhaar and pan details are present in response actions by digio KYC
         if (
             !response.actions?.[0]?.details?.aadhaar &&
             !response.actions?.[0]?.details?.pan
@@ -40,14 +45,13 @@ export class CustomerKycKycController {
             );
         }
 
+        // fetch aadhar and pan document files
         const kycdata = response.actions?.[0];
-
         const aadharData = await this.panKycService.getPanAadharDocumentFiles(kycdata.execution_request_id);
         const aadharImage = await this.panKycService.getAadharProfileImage(kycdata.details.aadhaar.image);
 
+        // append file urls to kyc data response
         kycdata.details.aadhaar.image = aadharImage || ""
-
-
         kycdata.details.aadhaar.file_url = aadharData.aadhar || "";
         kycdata.details.pan.file_url = aadharData.pan || "";
 
@@ -58,9 +62,10 @@ export class CustomerKycKycController {
         })
     }
 
+    // selfie verify request
     async createSelfieVerifyRequest(req: Request, res: Response) {
-        const data = appSchema.kyc.selfieSignRequestSchema.parse(req.body);
         const id = req.customer!.id
+        const data = appSchema.kyc.selfieSignRequestSchema.parse(req.body);
         const response = await this.panKycService.createSelfieVerifyRequest({ id, data });
         res.sendResponse({
             statusCode: HttpStatus.OK,
@@ -68,6 +73,7 @@ export class CustomerKycKycController {
         })
     }
 
+    // selfie verify response
     async verifySelfieResponse(req: Request, res: Response) {
         const kid = req.params.kid!;
         const response = await this.panKycService.verifySelfieResponse({ kid });
@@ -77,11 +83,10 @@ export class CustomerKycKycController {
         })
     }
 
-
-
+    // sign verify request
     async createSignVerifyRequest(req: Request, res: Response) {
-        const data = appSchema.kyc.selfieSignRequestSchema.parse(req.body);
         const id = req.customer!.id
+        const data = appSchema.kyc.selfieSignRequestSchema.parse(req.body);
         const response = await this.panKycService.createSignVerifyRequest({ id, data });
         res.sendResponse({
             statusCode: HttpStatus.OK,
@@ -89,6 +94,7 @@ export class CustomerKycKycController {
         })
     }
 
+    // sign verify response
     async verifySignResponse(req: Request, res: Response) {
         const kid = req.params.kid!;
         const response = await this.panKycService.verifySignResponse({ kid });
@@ -98,7 +104,7 @@ export class CustomerKycKycController {
         })
     }
 
-
+    // fetch ifsc info
     async fetchIfscInfo(req: Request, res: Response) {
         const ifsc = req.params.ifsc!;
         const response = await this.panKycService.fetchIfscInfo(ifsc);
@@ -108,6 +114,7 @@ export class CustomerKycKycController {
         })
     }
 
+    // verify bank account
     async verifyBankAccount(req: Request, res: Response) {
         const bank = appSchema.kyc.bankInfoSchema.parse(req.body);
         const response = await this.panKycService.verifyBankAccount(bank);
@@ -117,6 +124,7 @@ export class CustomerKycKycController {
         })
     }
 
+    // verify demat account
     async verifyDematAccount(req: Request, res: Response) {
         const data = appSchema.kyc.dpAccountInfoSchema.parse(req.body);
         const response = await this.panKycService.verifyDematAccount(data);
@@ -126,7 +134,7 @@ export class CustomerKycKycController {
         })
     }
 
-
+    // e-sign request
     async getEsignRequest(req: Request, res: Response) {
         const id = req.customer!.id;
         const data = await this.panKycService.reqEsignPdf(id);
@@ -136,6 +144,7 @@ export class CustomerKycKycController {
         })
     }
 
+    // download esign pdf
     async verifyEsignResponse(req: Request, res: Response) {
         const doc = req.params.doc!;
         const data = await this.panKycService.downloadEsignPdf(doc);

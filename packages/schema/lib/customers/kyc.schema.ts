@@ -63,50 +63,89 @@ export const bankInfoSchema = z.object({
     beneficiary_name: z.string().min(1, "Beneficiary name is required"),
 });
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-export const dpAccountInfoSchema = z.object({
-    depositoryName: z.enum(["CDSL", "NSDL"], {
-        error: "Select a depository name",
-    }),
-    dpId: z
-        .string()
-        .min(8, "DP ID must be at least 8 characters")
-        .max(16, "DP ID cannot exceed 16 characters"),
-    beneficiaryClientId: z
-        .string()
-        .min(8, "Beneficiary Client ID must be at least 8 characters")
-        .max(16, "Beneficiary Client ID cannot exceed 16 characters"),
-    depositoryParticipantName: z
-        .string()
-        .min(1, "Depository participant name is required"),
-
-
-    panNumber: z
-        .array(z.string())
-        .nonempty("At least one PAN number is required")
-        .refine(
-            (arr) =>
-                arr.slice(0, -1).every((v) => panRegex.test(v)), // all except last must be valid
-            { message: "All PAN numbers except the last one must be valid (e.g., ABCDE1234F)" }
-        )
-        .refine(
-            (arr) => {
-                const last = arr[arr.length - 1];
-                return !last || panRegex.test(last); // last is optional but must be valid if provided
-            },
-            { message: "Invalid format for last PAN number (e.g., ABCDE1234F)" }
-        ),
 
 
 
+export const dpAccountInfoSchema = z
+    .object({
+        depositoryName: z.enum(["CDSL", "NSDL"], { error: "Select a depository name", }),
 
-    accountHolderName: z.string().min(1, "Account holder name is required"),
-    accountType: z.enum(["SOLO", "JOINT"], { error: "Select an account type" }).optional(),
-    isDefault: z.boolean(),
-    isVerified: z.boolean().default(false),
-    checkTerms: z
-        .boolean()
-        .refine(val => val === true, { message: "You must agree to the terms" }),
-});
+        dpId: z.string(),
+
+        beneficiaryClientId: z
+            .string()
+            .min(8, "Beneficiary Client ID must be at least 8 characters")
+            .max(16, "Beneficiary Client ID cannot exceed 16 characters"),
+
+        depositoryParticipantName: z
+            .string()
+            .min(1, "Depository participant name is required"),
+
+
+        //  pan numbers validation not here, handled separately
+        panNumber: z
+            .array(z.string())
+            .nonempty("At least one PAN number is required")
+            .refine(
+                (arr) => {
+                    // If only one PAN is given, validate it normally
+                    if (arr.length === 1) {
+                        return panRegex.test(arr?.[0] || "");
+                    }
+
+                    // For multiple PANs:
+                    const allExceptLast = arr.slice(0, -1);
+                    const last = arr[arr.length - 1];
+
+                    // All except last must be valid
+                    const allValid = allExceptLast.every((v) => panRegex.test(v));
+                    // Last one may be empty (if user still typing) OR valid
+                    const lastValid = !last || panRegex.test(last);
+
+                    return allValid && lastValid;
+                },
+                { message: "All PAN numbers except the last one must be valid (e.g., ABCDE1234F)" }
+            )
+            .refine(
+                (arr) => {
+                    const last = arr[arr.length - 1];
+                    return !last || panRegex.test(last);
+                },
+                { message: "Invalid format for last PAN number (e.g., ABCDE1234F)" }
+            ),
+
+        accountHolderName: z.string().min(1, "Account holder name is required"),
+        accountType: z.enum(["SOLO", "JOINT"], { message: "Select an account type" }),
+
+
+        isDefault: z.boolean(),
+        isVerified: z.boolean().default(false),
+
+        checkTerms: z
+            .boolean()
+            .refine((val) => val === true, { message: "You must agree to the terms" }),
+    }).superRefine((_data, _ctx) => {
+
+        if (_data.depositoryName === "NSDL") {
+            if (!_data.dpId?.trim()) {
+                _ctx.addIssue({
+                    code: "custom",
+                    message: "DP ID is required for NSDL",
+                    path: ["dpId"],
+                });
+            } else if (
+                _data.dpId.length < 8 ||
+                _data.dpId.length > 16
+            ) {
+                _ctx.addIssue({
+                    code: "custom",
+                    message: "DP ID must be between 8 and 16 characters",
+                    path: ["dpId"],
+                });
+            }
+        }
+
+    });
 
 
 export const riskProfileDataSchema = z.array(

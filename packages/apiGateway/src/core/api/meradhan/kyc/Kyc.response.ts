@@ -1,4 +1,4 @@
-import { type DanResponse, type DigioAadharPanData, type DigioBankVerifyResponse, type DigioFaceDataResponse, type DigioSignatureResponse, type TDigioWithTemplateResponse } from "kyc-providers";
+import { type DemateVerifyResponse, type DigioAadharPanData, type DigioBankVerifyResponse, type DigioFaceDataResponse, type DigioSignatureResponse, type TDigioWithTemplateResponse } from "kyc-providers";
 import type { BaseResponseData } from "../../../../types/base";
 
 export type IPANKycRequestResponse = BaseResponseData<TDigioWithTemplateResponse>
@@ -11,8 +11,11 @@ export type ISelfireKycVerifyResponse = BaseResponseData<DigioFaceDataResponse>
 export type ISignKycRequestResponse = BaseResponseData<TDigioWithTemplateResponse>
 export type ISignKycVerifyResponse = BaseResponseData<DigioFaceDataResponse>
 
+
 export type IBankKycVerifyResponse = BaseResponseData<DigioBankVerifyResponse>
-export type IDmatKycVerifyResponse = BaseResponseData<DanResponse>
+export type IDmatKycVerifyResponse = BaseResponseData<DemateVerifyResponse<DigioBankVerifyResponse>>
+
+
 
 export type IEsignKycRequest = BaseResponseData<TDigioWithTemplateResponse>
 export type IEsignKycResponse = BaseResponseData<DigioSignatureResponse>
@@ -31,28 +34,28 @@ export type IStoreKycGETResponse = BaseResponseData<{
   data: any
   createdAt: string
   updatedAt: string
-  complete:boolean
+  complete: boolean
 } | null>
 export type IStoreKycSETResponse = BaseResponseData<{
   status: boolean
 }>
 
 export type I_IFSCResponse = BaseResponseData<{
-    BRANCH: string
-    CENTRE: string
-    DISTRICT: string
-    STATE: string
-    ADDRESS: string
-    CONTACT: string
-    IMPS: boolean
-    CITY: string
-    UPI: boolean
-    MICR: string
-    RTGS: boolean
-    NEFT: boolean
-    SWIFT: unknown
-    ISO3166: string
-    BANK: string
-    BANKCODE: string
-    IFSC: string
+  BRANCH: string
+  CENTRE: string
+  DISTRICT: string
+  STATE: string
+  ADDRESS: string
+  CONTACT: string
+  IMPS: boolean
+  CITY: string
+  UPI: boolean
+  MICR: string
+  RTGS: boolean
+  NEFT: boolean
+  SWIFT: unknown
+  ISO3166: string
+  BANK: string
+  BANKCODE: string
+  IFSC: string
 }> 

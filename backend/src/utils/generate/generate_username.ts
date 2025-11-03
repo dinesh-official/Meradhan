@@ -23,3 +23,14 @@ export function generateUsername(
     const middle = randomValues.map((v) => CHARS[v % charLen]).join("");
     return `${prefix}${middle}${suffix}`;
 }
+
+export const makeFullname = ({firstName, middleName, lastName}: {firstName: string, middleName?: string, lastName?: string}) => {
+    let fullName = firstName;
+    if (middleName) {
+        fullName += ` ${middleName}`;
+    }
+    if (lastName) {
+        fullName += ` ${lastName}`;
+    }
+    return fullName;
+}

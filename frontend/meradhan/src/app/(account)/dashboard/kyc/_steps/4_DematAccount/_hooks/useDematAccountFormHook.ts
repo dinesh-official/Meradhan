@@ -30,7 +30,8 @@ export const useDematAccountFormHook = () => {
     const verifyDematAccount = useMutation({
         mutationFn: async () => kycApi.verifyDematAccount(data),
         onSuccess: (data) => {
-            if (data.responseData.status == "00") {
+            // if verified then move to next step
+            if (data.responseData.isVerified) {
                 nextLocalStep();
                 pushUserKycState();
                 updateDepository(state.step_4.length - 1, {
@@ -83,7 +84,7 @@ export const useDematAccountFormHook = () => {
             console.log(error);
 
             if (error instanceof ZodError) {
-                const errorMessage = zodErrorToErrorMap(error);
+                const errorMessage = zodErrorToErrorMap<typeof data>(error);
 
                 // Specific validation for PAN numbers for joint accounts : 1. First two PANs are required
                 const panErrors = validatePanNumbers(data.panNumber || []);

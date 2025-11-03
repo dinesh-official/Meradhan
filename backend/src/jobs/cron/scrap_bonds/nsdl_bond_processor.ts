@@ -132,7 +132,7 @@ export class NsdlBondProcessor {
 
   // Check if bond is perpetual
   private isPerpetualBond() {
-    return this.bond.NAME_OF_THE_INSTRUMENT?.toLocaleLowerCase().includes(" perpetual ") ?? false;
+    return this.bond.NAME_OF_THE_INSTRUMENT?.toLocaleLowerCase().includes(" perpetual ");
   }
 
   // Check if bond is zero coupon

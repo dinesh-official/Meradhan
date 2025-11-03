@@ -51,9 +51,9 @@ function IWantToQus() {
 
   return (
     <div className="text-white">
-      <h3 className="font-medium text-lg">{questions[INDEX].question}</h3>
+      <h3 className="font-medium text-xl">{questions[INDEX].question}</h3>
 
-      <div className="grid xl:grid-cols-4 lg:grid-cols-2  gap-3 mt-4">
+      <div className="gap-3 grid md:grid-cols-2 xl:grid-cols-4 mt-4">
         {questions[INDEX].options.map((option, index) => {
           const isSelected = answers[INDEX] === option;
           return (
@@ -77,7 +77,7 @@ function IWantToQus() {
         <div>
           {INDEX > 0 && (
             <button
-              className="flex items-center gap-1 cursor-pointer transition-colors"
+              className="flex items-center gap-1 transition-colors cursor-pointer"
               onClick={handlePrev}
             >
               <MdArrowLeft size={24} className="text-secondary" /> Previous
@@ -88,14 +88,14 @@ function IWantToQus() {
         <div>
           {INDEX < questions.length - 1 ? (
             <button
-              className="flex items-center gap-1 cursor-pointer transition-colors"
+              className="flex items-center gap-1 transition-colors cursor-pointer"
               onClick={handleNext}
             >
               Next <MdArrowRight size={24} className="text-secondary" />
             </button>
           ) : (
             <button
-              className="flex items-center gap-1 cursor-pointer text-white"
+              className="flex items-center gap-1 text-white cursor-pointer"
               onClick={() => console.log("Submitted Answers:", answers)}
             >
               Submit <MdArrowRight size={24} className="text-secondary" />

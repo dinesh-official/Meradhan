@@ -72,7 +72,7 @@ function ParticipantsTableList({
           label: "Action",
           stickyRight: true, // UniversalTable will add the sticky wrapper
           sortable: false,
-          cell: (row) => <></>,
+          cell: () => <></>,
         },
       ]}
     />

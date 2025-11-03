@@ -51,7 +51,7 @@ const StarRating: React.FC<StarRatingProps> = ({
         {stars.map((s, idx) => (
           <div
             key={idx}
-            className="relative inline-block"
+            className="inline-block relative"
             style={{ width: size, height: size, lineHeight: 0 }}
           >
             {/* empty star (base) */}
@@ -63,7 +63,7 @@ const StarRating: React.FC<StarRatingProps> = ({
 
             {/* filled star clipped by width percentage */}
             <div
-              className="absolute top-0 left-0 overflow-hidden pointer-events-none text-secondary"
+              className="top-0 left-0 absolute overflow-hidden text-secondary pointer-events-none"
               style={{ width: `${s.pct}%`, height: size }}
             >
               <Star size={size} fill="currentColor" aria-hidden="true" />
@@ -73,7 +73,7 @@ const StarRating: React.FC<StarRatingProps> = ({
       </div>
 
       {showValue && (
-        <span className="text-sm font-medium text-gray-700">
+        <span className="font-medium text-sm">
           {safeValue.toFixed(1)} / {max}
         </span>
       )}

@@ -21,7 +21,7 @@ import { signIn } from "next-auth/react";
  * --------------------------------------------------------- */
 const SocialLoginButtons = () => (
   <>
-    <p className="py-3 text-gray-700 text-center">Or continue with</p>
+    <p className="py-3 text-center">Or continue with</p>
 
     <div className="gap-3 lg:gap-5 grid md:grid-cols-3">
       <Button

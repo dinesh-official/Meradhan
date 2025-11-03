@@ -2,6 +2,7 @@ import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IoMdTrash } from "react-icons/io";
 import { KycDataStorage } from "../../../_store/useKycDataStorage";
+import { cn } from "@/lib/utils";
 
 function DematAccountView({
   account,
@@ -23,15 +24,19 @@ function DematAccountView({
 
   return (
     <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
-      <div className="gap-5 grid sm:grid-cols-2 xl:grid-cols-4">
-        <DataInfoLabel
-          title="DP ID "
-          status={account.isVerified ? "SUCCESS" : "ERROR"}
-          statusLabel={account.isVerified ? "Verified" : "Invalid"}
-          showStatus
-        >
-          <p className="font-medium">{account.dpId}</p>
-        </DataInfoLabel>
+      <div className={cn("gap-5 grid sm:grid-cols-2 xl:grid-cols-4", account.depositoryName === "CDSL" && "xl:grid-cols-3")}>
+
+        {/* // not show dp id for cdsl */}
+        {account.depositoryName != "CDSL" && (
+          <DataInfoLabel
+            title="DP ID "
+            status={account.isVerified ? "SUCCESS" : "ERROR"}
+            statusLabel={account.isVerified ? "Verified" : "Invalid"}
+            showStatus
+          >
+            <p className="font-medium">{account.dpId}</p>
+          </DataInfoLabel>
+        )}
         <DataInfoLabel
           title="Beneficiary / Client ID"
           status={account.isVerified ? "SUCCESS" : "ERROR"}

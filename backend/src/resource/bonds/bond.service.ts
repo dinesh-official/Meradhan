@@ -38,13 +38,19 @@ export class BondService {
         extendedQuery.isListed = { equals: "YES" };
         extendedQuery.redemptionDate = { gte: new Date() };
         extendedQuery.creditRating = { notIn: ["D", "C"] };
-        extendedQuery.redemptionDate = { gte: new Date() };
         if (options?.category && options.category != "all") {
+
+            // no need to filter by redemptionDate for perpetual bonds
+            if (options.category == "perpetual") {
+                delete extendedQuery.redemptionDate;
+                orderBy = sortingOptions.byRating
+            }
+
             if (options.category == "latest-release") {
                 orderBy = sortingOptions.byMaturity;
-            } else {
-                extendedQuery.categories = { has: options?.category || "" };
             }
+            extendedQuery.categories = { has: options?.category || "" };
+
         }
 
 

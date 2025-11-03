@@ -2,6 +2,7 @@ import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import Client from "./client";
 
+import { SharePopupViewProvider } from "@/global/module/share/SharePopupView";
 import { headers } from "next/headers";
 import Script from "next/script";
 import "./styles/globals.css";
@@ -12,9 +13,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-    const header = await headers();
+  const header = await headers();
   const pathname = header.get("x-pathname");
-  
+
   return (
     <html lang="en">
       <head>
@@ -99,13 +100,14 @@ export default async function RootLayout({
           content="/favicon/ms-icon-144x144.png"
         />
         <meta name="theme-color" content="#ffffff" />
-
-      
       </head>
       <body className={`antialiased`}>
         <NextTopLoader color="#002c59" />
         <NuqsAdapter>
-          <Client>{children}</Client>
+          <Client>
+            {children}
+            <SharePopupViewProvider />
+          </Client>
         </NuqsAdapter>
         <Script
           type="text/javascript"

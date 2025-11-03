@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 
 const panHanderLeablel = [
-  "First (Primary) Account Holder PAN*",
   "Second Account Holder PAN*",
   "Third Account Holder PAN",
 ];
@@ -18,12 +17,7 @@ function ManageDematPanInputs({
   index: number;
   errors?: string[];
 }) {
-  const {
-
-    updateDepositoryPan,
-    state,
-    setDepositoryPan,
-  } = useKycDataStorage();
+  const { updateDepositoryPan, state, setDepositoryPan } = useKycDataStorage();
 
   const pansData = state.step_4[index].panNumber;
   const isJoined = state.step_4[index].accountType === "JOINT";
@@ -39,32 +33,29 @@ function ManageDematPanInputs({
 
   return (
     <>
-      {pansData.map((item, subIndex) => (
+      {pansData.slice(1, 3).map((item, subIndex) => (
         <LabelInput
           label={(isJoined && panHanderLeablel?.[subIndex]) || "PAN Number"}
-          required={subIndex != 2}
+          // required={subIndex != 2}
           key={subIndex}
-          error={errors?.[subIndex]}
+          error={errors?.[subIndex + 1]}
         >
           <div className="relative">
             <Input
               className="peer pe-9"
               type="text"
               maxLength={10}
-              disabled={subIndex === 0}
-              adminMode={subIndex === 0}
               value={item}
               onChange={(e) =>
                 updateDepositoryPan(
-                  index,
-                  subIndex,
+                  index, // array index of step_4 manage demat account
+                  subIndex + 1, // pan number input index not need to +1 for first pan number in "state"
                   e.target.value.toUpperCase()
                 )
               }
             />
 
             {/* Icons — only if isJoined is enabled */}
-          
           </div>
         </LabelInput>
       ))}

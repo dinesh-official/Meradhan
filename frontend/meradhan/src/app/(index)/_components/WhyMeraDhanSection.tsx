@@ -95,31 +95,31 @@ function WhyMeraDhanSection() {
           <div className="grid lg:grid-cols-4 text-center">
             <WhyPoints>
               <FaSackDollar size={25} className="text-primary" />
-              <span className="flex justify-center items-center mt-2 font-medium text-xl">
+              <span className="flex justify-center items-center mt-2 text-2xl">
                 <PiCurrencyInrBold /> 10,000
               </span>
-              <p className="text-sm">Minimum Investment</p>
+              <p>Minimum Investment</p>
             </WhyPoints>
             <WhyPoints>
               <FaUser size={25} className="text-primary" />
-              <span className="flex justify-center items-center mt-2 font-medium text-xl">
+              <span className="flex justify-center items-center mt-2 text-2xl">
                 7,600+
               </span>
-              <p className="text-sm">Users</p>
+              <p>Users</p>
             </WhyPoints>
             <WhyPoints>
               <FaFileWaveform size={25} className="text-primary" />
-              <span className="flex justify-center items-center mt-2 font-medium text-xl">
+              <span className="flex justify-center items-center mt-2 text-2xl">
                 6200+
               </span>
-              <p className="text-sm">Bonds</p>
+              <p>Bonds</p>
             </WhyPoints>
             <WhyPoints isLast>
               <FaMoneyBill size={25} className="text-primary" />
-              <span className="flex justify-center items-center mt-2 font-medium text-xl">
+              <span className="flex justify-center items-center mt-2 text-2xl">
                 0
               </span>
-              <p className="text-sm">Brokerage Fee</p>
+              <p>Brokerage Fee</p>
             </WhyPoints>
           </div>
         </div>

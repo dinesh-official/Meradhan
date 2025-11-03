@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
 import PreviewCard from "./PriviewCard";
 import LabelView from "@/global/elements/wrapper/LabelView";
+import { genMediaUrl } from "@/global/utils/url.utils";
 export interface PersonalInformationCardProps {
   photoUrl: string;
   signatureUrl: string;
@@ -25,20 +26,20 @@ function PersonalInformationCard(personalInfoCardData:PersonalInformationCardPro
         <CardTitle>Personal Information</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-2 grid grid-cols-2 gap-5">
+        <div className="gap-8 grid lg:grid-cols-5">
+          <div className="gap-5 grid grid-cols-2 lg:col-span-2">
             <PreviewCard
-              url={personalInfoCardData.photoUrl}
+              url={genMediaUrl(personalInfoCardData.photoUrl)}
               source="uploaded"
               type="Photograph"
             />
             <PreviewCard
-              url={personalInfoCardData.signatureUrl}
+              url={genMediaUrl(personalInfoCardData.signatureUrl)}
               source="uploaded"
               type="Signature"
             />
           </div>
-          <div className="grid lg:grid-cols-3 grid-cols-2 gap-5 lg:col-span-3 lg:pl-8">
+          <div className="gap-5 grid grid-cols-2 lg:grid-cols-3 lg:col-span-3 lg:pl-8">
              <LabelView title="Full Name">
               <p className="font-medium text-sm">{personalInfoCardData.fullName}</p>
             </LabelView>

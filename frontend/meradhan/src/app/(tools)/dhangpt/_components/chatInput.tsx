@@ -96,7 +96,7 @@ export function ChatInput({
         </Button>
       </div>
 
-      <div className="flex justify-between items-center py-2 text-gray-700 text-xs">
+      <div className="flex justify-between items-center py-2 text-xs">
         <p>
           This is AI, not a financial advisor. Validate key information before
           making decisions.

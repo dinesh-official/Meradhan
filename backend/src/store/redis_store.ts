@@ -3,11 +3,11 @@ import { KeyValueStore } from './key_value_store';
 import { QueueStore } from './queue_store';
 
 export enum QueueNames {
-    emailOtpSend = 'emailOTPSend',
-    welComeEmail = 'welcomeEmail',
-    mobileOtpSend = 'mobileOTPSend',
-    forgotPasswordEmail = 'forgotPasswordEmail',
-    successResetPassword = 'successResetPassword'
+    emailOtpSend = 'emailOTPSendMD',
+    welComeEmail = 'welcomeEmailMD',
+    mobileOtpSend = 'mobileOTPSendMD',
+    forgotPasswordEmail = 'forgotPasswordEmailMD',
+    successResetPassword = 'successResetPasswordMD'
 }
 
 // 🔹 Create a shared Redis connection using QueueStore (recommended)

@@ -6,6 +6,7 @@ export const withCrmAuthMiddleware = (req: Request, res: Response, next: NextFun
     const authHeader = req.headers.authorization?.split("Bearer ")[1]
     const authCookie = req.cookies.token;
     const token = authHeader || authCookie;
+    
  
     if (!token) {
         res.status(401).json({

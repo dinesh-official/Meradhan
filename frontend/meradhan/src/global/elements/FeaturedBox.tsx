@@ -60,7 +60,7 @@ const FeaturedBox = (featured: FeaturedBoxProps) => {;
               />
             </div>
 
-            <span className="text-gray-700 text-sm">
+            <span className="text-sm">
               {featured.author.name}
             </span>
           </div>
@@ -70,7 +70,7 @@ const FeaturedBox = (featured: FeaturedBoxProps) => {;
             </span>
             <button
               aria-label="Share featured news"
-              className="hover:text-gray-700"
+              className="hover:"
             >
               <Share2 className="w-4 h-4" />
             </button>

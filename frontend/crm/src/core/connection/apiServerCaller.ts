@@ -1,4 +1,4 @@
-import { API_BACKEND_URL_IP, API_SERVER_URL } from '@/global/constants/domains';
+import { API_BACKEND_URL_IP } from '@/global/constants/domains';
 import { ApiError, IApiCaller } from '@root/apiGateway';
 import axios, {
   AxiosInstance,

@@ -81,7 +81,7 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
     <div className="flex flex-col border-t border-t-gray-200 w-full">
       {/* Menu Item Header */}
       <div
-        className={`flex items-center justify-between w-full px-4 py-3 text-gray-700 hover:text-primary transition-all cursor-pointer ${
+        className={`flex items-center justify-between w-full px-4 py-3  hover:text-primary transition-all cursor-pointer ${
           level > 0 ? `pl-${level * 4}` : ""
         }`}
       >
