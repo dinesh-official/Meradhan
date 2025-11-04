@@ -7,7 +7,6 @@ const BASE = isDev ? BASES.development : BASES.production;
 
 const nextConfig: NextConfig = {
   /* config options here */
-  distDir: "build",
   typedRoutes: true,
   trailingSlash: false,
   transpilePackages: ["@root/apiGateway", "@root/schema"],
@@ -15,6 +14,7 @@ const nextConfig: NextConfig = {
     position: "bottom-left",
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
