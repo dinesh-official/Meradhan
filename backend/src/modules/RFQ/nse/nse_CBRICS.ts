@@ -1,5 +1,7 @@
-import axios, { Axios, AxiosError, type AxiosResponse } from "axios";
+import axios, { Axios, AxiosError } from "axios";
 
+import { cacheStorage } from "@store/redis_store";
+import { AppError } from "@utils/error/AppError";
 import type {
     ActiveIssuesRequest,
     ActiveIssuesResponse,
@@ -48,8 +50,6 @@ import type {
     UpdateUnregisteredDpAccountStatusResponse,
     UpiPaymentInitiationRequest,
 } from "./cbrics.types";
-import { AppError } from "@utils/error/AppError";
-import { cacheStorage } from "@store/redis_store";
 
 export class NseCBRICS {
     private loginStoreKey = "NSE_CBRICS_LOGIN_KEY";
@@ -133,7 +133,7 @@ export class NseCBRICS {
 
     private async withReLoginRetry<T>(
         apiCall: (loginKey: string) => Promise<T>,
-        attempt: number = 1
+        attempt: number = 2
     ): Promise<T> {
         try {
             const key = await this.getLoginKey(attempt > 1); // force relogin only if retry
@@ -212,7 +212,7 @@ export class NseCBRICS {
         return this.withReLoginRetry(async (loginKey) => {
             console.log(loginKey);
             
-            const { data } = await this.client.post<AxiosResponse<UnregisteredParticipantResponse>>(
+            const { data } = await this.client.post<UnregisteredParticipantResponse[]>(
                 "/unreg/all",
                 payload,
                 { headers: { loginKey } }

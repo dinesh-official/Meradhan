@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from "axios";
 import * as crypto from "crypto";
-import type { DemateVerifyResponse } from "../dmeat.types";
+import type { DemateVerifyResponse } from "../response.types";
 import type { BoPanRequest, BoPanResponse } from "./CDSLApi.response";
 
 

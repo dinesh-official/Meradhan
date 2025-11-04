@@ -88,9 +88,9 @@ export class NseRfq {
     private loginStoreKey = "NSE_RFQ_LOGIN_KEY";
     private client: Axios;
     private credentials = {
-        domain: "BCISPL",
-        login: "DEV",
-        password: "sour@V#404root",
+        "domain": "BCISPL",
+        "login": "DEV",
+        "password": "dv(En91T$kgS6b"
     };
 
     constructor() {
@@ -149,7 +149,7 @@ export class NseRfq {
     // 🔁 Universal Auto-Retry Wrapper
     private async withReLoginRetry<T>(
         apiCall: (loginKey: string) => Promise<T>,
-        attempt: number = 1
+        attempt: number = 2
     ): Promise<T> {
         try {
             const key = await this.getLoginKey(attempt > 1);
@@ -594,8 +594,6 @@ export class NseRfq {
                 payload,
                 { headers: { loginKey } }
             );
-
-            
             return data;
         });
     }

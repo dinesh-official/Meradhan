@@ -1,17 +1,150 @@
-// import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
+import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
+// import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-import { db } from "@core/database/database";
-import { NSDLApi } from "kyc-providers";
+// import { db } from "@core/database/database";
+// import { NSDLApi } from "kyc-providers";
 
 // import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 
-// // Initialize
-// const kycManager = new ParticipantManager();
+// Initialize
+const participantManager = new ParticipantManager();
+// const rfqManager = new NseRfq();
+const cbricsManager = new NseCBRICS();
 
-// // Save KYC data to customer
-// const data = await kycManager.getAllParticipants();
 
-// console.log(data);
+// Save KYC data to customer
+const data = await participantManager.getAllParticipants();
+
+console.log(data);
+
+console.log(data?.[0]?.loginId);
+
+// try {
+//     const addIsinToRfq = await rfqManager.createRfq({
+//     segment: "R",
+//     isin: "INE002L08010",
+//     participantCode: "BCISPL",
+//     dealType: "B",
+//     clientCode: "MD123456",
+//     buySell: "B",
+//     quoteType: "Y",
+//     settlementType: 1,
+//     value: 0.2,
+//     quantity: 2,
+//     yieldType: "YTM",
+//     yield: 7.1,
+//     calcMethod: "O",
+//     // price: null,
+//     // valueSell: null,
+//     // quantitySell: null,
+//     // yieldTypeSell: null,
+//     // yieldSell: null,
+//     // calcMethodSell: null,
+//     // priceSell: null,
+//     access: 2,
+
+//     participantList: ['BCISPL'],
+
+
+//     gtdFlag: "Y"
+// });
+
+
+// console.log(addIsinToRfq);
+
+// } catch (error) {
+// console.log(error?.response?.data);
+    
+// }
+
+// try {
+//     const isins = await rfqManager.getAllRfq({
+//         status:"P"
+//     });
+
+// console.log(isins);
+
+// } catch (error) {
+// console.log(error.response.data);
+// }
+
+
+
+
+// try {
+//     const isins = await rfqManager.acceptNegotiationQuote({
+//         rfqNumber: "R25110400000036",
+//         acceptedValue: 0.20,
+//         // id:null,
+//         // acceptedSettlementDate: "05-Nov-2025",
+//         // acceptedYieldType: "YTM",
+//         // acceptedYield: 7.10,
+//         respDealType: "D",
+//         respClientCode: "BCISPL",
+//     });
+
+//     console.log(isins);
+
+// } catch (error) {
+//     console.log(error?.response?.data);
+// }
+
+
+// try {
+    
+//     const isins = await rfqManager.proposeDeal({
+//         ngRfqNumber: "R25110400000036",
+//         ngId: "N25110400000043",
+//         participantCode: "BCISPL",
+//         dealType: "B",
+//         clientCode: "MD123456",
+//         price: 99.50,
+//         accruedInterest: 200,
+//         consideration: 1990200, // price * (acceptedValue * ) + accruedInterest
+//         calcMethod: "O",
+//         role: "I",
+        
+//     });
+
+//     console.log(isins);
+    
+
+// } catch (error) {
+//     console.log(error.response.data);
+// }
+
+
+// try {
+    
+//     const isins = await rfqManager.acceptOrRejectDeal({
+//         rfqNumber: "R25110400000036",
+//         id: "N25110400000043",
+//         acceptedPrice: 99.50,
+//         // acceptedPutCallDate: "",
+//         acceptedAccruedInterest: 200,
+//         acceptedConsideration: 1990200,
+//         confirmStatus: "PC",
+//     });
+
+//     console.log(isins);
+
+// } catch (error) {
+    
+//     console.log(error.response.data);
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 
 // await revalidateBonds();
 
@@ -35,3 +168,12 @@ import { NSDLApi } from "kyc-providers";
 // ); // false = test mode
 
 // const response = await nsdlApi.("INE848L07024");
+
+
+
+const response = await cbricsManager.getSettlementOrders({
+    filtFromModSettleDate: "01-11-2025",
+    filtToModSettleDate: "05-11-2025",
+})
+
+console.log("response:", response);

@@ -1425,7 +1425,7 @@ export interface AcceptNegotiationQuoteRequest {
     acceptedValue: number; // Decimal(10,10), Mandatory
 
     /** Negotiation Thread Id (optional for direct acceptance) */
-    id?: string; // String(15), Optional
+    id?: string | null ; // String(15), Optional
 
     /** Accepted Quote Settlement Date (Format: DD-MMM-YYYY) */
     acceptedSettlementDate?: string;
@@ -1615,7 +1615,7 @@ export interface DealProposeRequest {
     ngId: string; // String(15), Mandatory
 
     /** Always logged-in user’s participant code */
-    participantCodeType: string; // String(30), Mandatory
+    participantCode: string; // String(30), Mandatory
 
     /** Final Deal Type: D = Direct, B = Brokered */
     dealType: "D" | "B"; // String(1), Mandatory
