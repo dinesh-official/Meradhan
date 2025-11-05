@@ -3,6 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const revalidate = 0;
+
+export const metadata = {
+  title: "Page Not Found - MeraDhan",
+  description:
+    "Oops! The page you’re looking for doesn’t exist or has been moved. Go back to MeraDhan homepage.",
+};
+
 export default function NotFound() {
   return (
     <ViewPort>

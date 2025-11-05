@@ -1,4 +1,5 @@
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
+import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
@@ -9,7 +10,7 @@ import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
 // Initialize
 const participantManager = new ParticipantManager();
-// const rfqManager = new NseRfq();
+const rfqManager = new NseRfq();
 const cbricsManager = new NseCBRICS();
 
 
@@ -43,10 +44,7 @@ console.log(data?.[0]?.loginId);
 //     // calcMethodSell: null,
 //     // priceSell: null,
 //     access: 2,
-
 //     participantList: ['BCISPL'],
-
-
 //     gtdFlag: "Y"
 // });
 
@@ -58,16 +56,16 @@ console.log(data?.[0]?.loginId);
     
 // }
 
-// try {
-//     const isins = await rfqManager.getAllRfq({
-//         status:"P"
-//     });
+try {
+    const isins = await rfqManager.getAllRfq({
+        status:"P"
+    });
 
-// console.log(isins);
+console.log(isins);
 
-// } catch (error) {
-// console.log(error.response.data);
-// }
+} catch (error) {
+console.log(error.response.data);
+}
 
 
 
@@ -171,9 +169,9 @@ console.log(data?.[0]?.loginId);
 
 
 
-const response = await cbricsManager.getSettlementOrders({
-    filtFromModSettleDate: "01-11-2025",
-    filtToModSettleDate: "05-11-2025",
-})
+// const response = await cbricsManager.getSettlementOrders({
+//     filtFromModSettleDate: "01-11-2025",
+//     filtToModSettleDate: "05-11-2025",
+// })
 
-console.log("response:", response);
+// console.log("response:", response);

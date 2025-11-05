@@ -14,7 +14,7 @@ import FdCalculatorContent from './_conponents/FdCalculatorContent';
 const page = () => {
   return (
      <ViewPort>
-          <div className="mb-[1rem] container">
+          <div className="mb-4 container">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>

@@ -43,6 +43,7 @@
     "@root/schema": "file:../../packages/schema",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-query-devtools": "^5.90.2",
+    "@webcarrot/xirr": "^3.0.1",
     "axios": "^1.12.2",
     "chrono-node": "^2.9.0",
     "class-variance-authority": "^0.7.1",

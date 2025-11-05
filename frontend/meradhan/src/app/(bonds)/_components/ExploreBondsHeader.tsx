@@ -20,6 +20,7 @@ import {
   taxationOptions,
 } from "../_hooks/bonds_filter_data";
 import { BondsFilterHook } from "../_hooks/useBondsFilters";
+import { useRouter } from "nextjs-toploader/app";
 
 function ExploreBondsHeader({
   manager,
@@ -35,6 +36,7 @@ function ExploreBondsHeader({
   rootUrl: string;
 }) {
   const [dounce, setDobunce] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     if (dounce === 0) return; // skip first render
@@ -369,7 +371,7 @@ function ExploreBondsHeader({
                   // manager.setTaxation([]);
                   // manager.setCoupon([]);
                   // manager.setInterest([]);
-                  window.location.href = rootUrl;
+                  router.replace(rootUrl);
                   // setDobunce((prev) => prev + 1);
                 }}
               >

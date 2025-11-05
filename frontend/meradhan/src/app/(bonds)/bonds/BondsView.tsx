@@ -71,14 +71,14 @@ function BondsView({
             />
           </div>
         ) : (
-          newFunction(
-            options,
-            viewMode,
-            setViewMode,
-            bondsListData,
-            pathname,
-            bondFilterManager.anyFilterApplied
-          )
+          <RenderBondView
+            bondsListData={bondsListData}
+            options={options}
+            pathname={pathname}
+            setViewMode={setViewMode}
+            viewMode={viewMode}
+            isFiltered={bondFilterManager.anyFilterApplied}
+          />
         )}
       </SectionViewWrapper>
     </>
@@ -86,7 +86,14 @@ function BondsView({
 }
 
 export default BondsView;
-function newFunction(
+function RenderBondView({
+  bondsListData,
+  options,
+  pathname,
+  setViewMode,
+  viewMode,
+  isFiltered,
+}: {
   options: {
     showBondsByCategory?: boolean;
     header: {
@@ -97,13 +104,13 @@ function newFunction(
       title: string | ReactNode;
       desc?: string | ReactNode;
     };
-  },
-  viewMode: string,
-  setViewMode: (mode: "list" | "grid") => void,
-  bondsListData: { data: BondDetailsResponse[]; meta: PaginationMeta },
-  pathname: string,
-  isFiltered?: boolean
-) {
+  };
+  viewMode: string;
+  setViewMode: (mode: "list" | "grid") => void;
+  bondsListData: { data: BondDetailsResponse[]; meta: PaginationMeta };
+  pathname: string;
+  isFiltered?: boolean;
+}) {
   if (bondsListData.data.length == 0)
     return (
       <NotBondsFound

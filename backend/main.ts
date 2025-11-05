@@ -8,8 +8,9 @@ import crmAuthRoutes from "@resource/crm/auth/auth.route";
 import crmCustomersRoutes from "@resource/crm/customers/customers.routes";
 import followUpRouter from "@resource/crm/leads/followup/leads_follow_up.routes";
 import leadsRoutes from "@resource/crm/leads/leads.routes";
-import participantsRouter from "@resource/crm/refq/nse/cbrics/participants.route";
+import participantsRouter from "@resource/crm/refq/nse/cbrics/participants.routes";
 import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
+import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
 import crmUsersRoutes from "@resource/crm/users/crmuser.route";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.route";
 import kycRoutes from "@resource/customer/kyc/kyc.routes";
@@ -41,9 +42,12 @@ server.addRoutes([
     crmCustomersRoutes,
     leadsRoutes,
     followUpRouter,
-    nseIsinRoute,
     auditLogsRouter,
     participantsRouter,
+
+    // rfq routes 
+    nseIsinRoute,
+    rfqMasterRouter,
 
     // customer routes
     customerAuthRoutes,

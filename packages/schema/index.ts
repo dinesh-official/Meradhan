@@ -11,6 +11,8 @@ import * as auditlogs from "./lib/crm/auditlogs.schema";
 
 import * as Enum from "./lib/enums"
 import * as  bondsSchema from "./lib/bonds/bonds.schema";
+import * as  rfqSchema from "./lib/rfq/rfq.schema";
+
 
 
 
@@ -30,6 +32,7 @@ export const appSchema = {
    Enum,
    customer: customerSchema,
    kyc: customerKycSchema,
-   bonds: bondsSchema
+   bonds: bondsSchema,
+   rfq: rfqSchema
 
 };

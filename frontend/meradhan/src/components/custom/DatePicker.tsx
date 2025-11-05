@@ -12,6 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { FaCalendarDay } from "react-icons/fa";
 
 type DatePickerProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -86,16 +87,19 @@ export function DatePicker({ value, onChange, ...props }: DatePickerProps) {
 
             <Button
               variant="ghost"
-              className="top-1/2 right-2 absolute size-6 -translate-y-1/2 pointer-events-none"
+              className="top-1/2 right-2 absolute size-6 -translate-y-1/2 cursor-pointer"
               type="button"
             >
-              <CalendarIcon className="size-3.5" />
+              <FaCalendarDay className="size-3.5" />
               <span className="sr-only">Select date</span>
             </Button>
           </div>
         </PopoverTrigger>
 
-        <PopoverContent className="bg-white shadow-sm p-0 border border-gray-100 w-auto overflow-hidden" align="end">
+        <PopoverContent
+          className="bg-white shadow-sm p-0 border border-gray-100 w-auto overflow-hidden"
+          align="end"
+        >
           <Calendar
             mode="single"
             selected={selected}

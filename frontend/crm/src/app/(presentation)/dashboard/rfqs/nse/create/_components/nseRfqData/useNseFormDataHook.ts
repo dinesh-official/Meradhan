@@ -17,30 +17,26 @@ import {
 } from "./nseRfqFormData.schema";
 
 export const initNseRFQData: NseRFQFormData = {
-  segment: SEGMENTS[0],
   isin: "",
-  dealType: DEAL_TYPES[0],
-  clientCode: "",
+  segment: SEGMENTS[0],
   buySell: BUY_SELL[0],
   quoteType: QUOTE_TYPES[0],
+  clientCode: "",
+  dealType: DEAL_TYPES[0],
+  rfqSize: "",
   settlementType: SETTLEMENT_TYPES[0],
-  value: "",
-  quantity: undefined,
+  quantity: "",
   yieldType: YIELD_TYPES[0],
   yield: "",
   calcMethod: CALC_METHODS[0],
   price: "",
-  particempt: undefined,
-  participantCode: "",
-  institutions: false
+  particempt: undefined
 };
 
 export const useRFQFormDataHook = (initial: NseRFQFormData = initNseRFQData) => {
-  // participantCode is loginId
   const [participant, setParticipant] = useState<ParticipantData | undefined>(undefined);
+
   const [data, setData] = useState<NseRFQFormData>(initial);
-
-
   const [errors, setErrors] = useState<
     Partial<Record<keyof NseRFQFormData, string[]>>
   >({});

@@ -15,12 +15,12 @@ const TradingOptionsForm = ({
   const { state, errors, setTradingOptionsData } = manager;
 
   return (
-    <div className="flex flex-col gap-6 relative">
+    <div className="relative flex flex-col gap-6">
       {/* Section Title */}
       <h5 className="font-bold">Trading Options</h5>
 
       {/* ===== RFQ Options Section ===== */}
-      <div className="grid md:grid-cols-4  gap-4">
+      <div className="gap-4 grid md:grid-cols-3">
         {/* RFQ Valid Till Market Close */}
 
         <FormCheckbox
@@ -28,31 +28,6 @@ const TradingOptionsForm = ({
           checked={state.rfqValidTillMarketClose}
           onCheckedChange={(checked) =>
             setTradingOptionsData("rfqValidTillMarketClose", checked === true)
-          }
-        />
-
-        <FormCheckbox
-          label="Value Negotiable"
-          checked={state.valueNegotiable}
-          onCheckedChange={(checked) =>
-            setTradingOptionsData("valueNegotiable", checked === true)
-          }
-        />
-
-        <FormCheckbox
-          label="Quote Negotiable"
-          checked={state.quoteNegotiable}
-          onCheckedChange={(checked) =>
-            setTradingOptionsData("quoteNegotiable", checked === true)
-          }
-        />
-
-        {/* Anonymous */}
-        <FormCheckbox
-          label="Anonymous"
-          checked={state.anonymous}
-          onCheckedChange={(checked) =>
-            setTradingOptionsData("anonymous", checked === true)
           }
         />
 
@@ -65,6 +40,22 @@ const TradingOptionsForm = ({
           value={state.rfqExpiryTime}
           onChangeAction={(val) => setTradingOptionsData("rfqExpiryTime", val)}
           error={errors.rfqExpiryTime?.[0]}
+        />
+
+        <FormCheckbox
+          label="Quote Negotiable"
+          checked={state.quoteNegotiable}
+          onCheckedChange={(checked) =>
+            setTradingOptionsData("quoteNegotiable", checked === true)
+          }
+        />
+
+        <FormCheckbox
+          label="Value Negotiable"
+          checked={state.valueNegotiable}
+          onCheckedChange={(checked) =>
+            setTradingOptionsData("valueNegotiable", checked === true)
+          }
         />
 
         {/* Minimum Value */}
@@ -115,6 +106,15 @@ const TradingOptionsForm = ({
             )
           }
           error={errors.accessType?.[0]}
+        />
+
+        {/* Anonymous */}
+        <FormCheckbox
+          label="Anonymous"
+          checked={state.anonymous}
+          onCheckedChange={(checked) =>
+            setTradingOptionsData("anonymous", checked === true)
+          }
         />
       </div>
     </div>

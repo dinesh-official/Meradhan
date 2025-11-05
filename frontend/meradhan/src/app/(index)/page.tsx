@@ -12,10 +12,6 @@ import LatestBondReleases from "./_components/LatestBondReleases";
 
 export const revalidate = 0; // Revalidate the page every hour
 
-export const generateMetadata = async () => {
-  return await generatePagesMetaData("index");
-};
-  
 export default async function HomePage() {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const bonds = await apiCaller.getLatestBonds(3);

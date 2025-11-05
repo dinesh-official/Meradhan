@@ -7,6 +7,13 @@ import { headers } from "next/headers";
 import Script from "next/script";
 import "./styles/globals.css";
 import "./styles/override.css";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
+
+export const revalidate = 0;
+
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("index");
+};
 
 export default async function RootLayout({
   children,
@@ -91,9 +98,9 @@ export default async function RootLayout({
           href="/favicon/favicon-16x16.png"
         />
         {/* canonical={pathname} */}
-        <link rel="canonical" href={`https://dev.meradhan.co${pathname}`} />
+        <link rel="canonical" href={`https://test.meradhan.co${pathname}`} />
 
-        <link rel="manifest" href="/favicon/manifest.json" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta
           name="msapplication-TileImage"

@@ -36,15 +36,15 @@ import CategorySlider from "./CategorySlider";
       categoryName: "Perpetual",
       href: "/bonds/perpetual",
     },
+    // {
+    //   imageUrl: "/images/icons/latest.svg",
+    //   categoryName: "Convertible",
+    //   href: "/bonds/convertible",
+    // },
     {
       imageUrl: "/images/icons/latest.svg",
-      categoryName: "Convertible",
-      href: "/bonds/convertible",
-    },
-    {
-      imageUrl: "/images/icons/latest.svg",
-      categoryName: "Zero Coupons",
-      href: "/bonds/zero-coupons",
+      categoryName: "Zero Coupon",
+      href: "/bonds/zero-coupon",
     },
   ];
 

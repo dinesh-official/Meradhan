@@ -13,9 +13,9 @@ const AdditionalInformationForm = ({
   manager: ITradingOptionsFormHook;
 }) => {
   return (
-    <div className="flex flex-col gap-4 relative">
+    <div className="relative flex flex-col gap-4">
       <h5 className="font-bold">Additional Information</h5>
-      <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
+      <div className="items-center gap-4 grid grid-cols-1 md:grid-cols-2">
         <SelectField
           label="Sector"
           placeholder="Select Sector"
@@ -44,10 +44,10 @@ const AdditionalInformationForm = ({
           error={manager?.errors?.rating?.[0]}
         />
       </div>
-      <div className="flex flex-col w-full gap-2">
-        <Label htmlFor="notes">Notes</Label>
+      <div className="flex flex-col gap-2 w-full">
+        <Label htmlFor="Remarks">Remarks</Label>
         <Textarea
-          id="notes"
+          id="Remarks"
           placeholder="Add any additional notes about this lead"
           value={manager.state.notes}
           onChange={(e) =>

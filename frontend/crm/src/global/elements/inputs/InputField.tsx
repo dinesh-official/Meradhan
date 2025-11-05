@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import * as React from "react";
 
 interface InputFieldProps {
-  id: string;
+  id?: string;
   label: string;
   placeholder?: string;
   type?: string;
@@ -60,9 +60,9 @@ export function InputField({
         value={isControlled ? value : internalValue}
         onChange={handleChange}
         readOnly={readonly}
-        className="mt-2"
+        className="disabled:bg-gray-200 disabled:opacity-100 mt-2 disabled:border-0 disabled:text-black"
       />
-      {error && <p className="mt-1 text-xs text-destructive text-left">{error}</p>}
+      {error && <p className="mt-1 text-destructive text-xs text-left">{error}</p>}
     </div>
   );
 }
