@@ -185,8 +185,8 @@ function AddDematAccountForm() {
               <Input
                 value={data?.panNumber[0]}
                 onChange={(e) => updateData("panNumber", e.target.value)}
-                disabled
-                adminMode
+                // disabled
+                // adminMode
               />
             </LabelInput>
 
