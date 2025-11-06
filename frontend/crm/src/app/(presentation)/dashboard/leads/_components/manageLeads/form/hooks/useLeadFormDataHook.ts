@@ -27,7 +27,7 @@ export const initLeadData: LeadFormData = {
   note: "",
 };
 
-export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
+export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onComplete, goBackOnSuccess }: { onComplete?: () => void, goBackOnSuccess?: boolean }) => {
 
   const [data, setData] = useState<LeadFormData>(initial);
   const [errors, setErrors] = useState<
@@ -36,7 +36,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData) => {
 
   const [relationManager, setRelationManager] = useState<CrmUsersProfile | undefined>(undefined)
 
-  const leadsApi = useLeadFollowUpApiHook();
+  const leadsApi = useLeadFollowUpApiHook({ goBackOnSuccess, onComplete });
   const { createLeadMutation } = leadsApi;
   /** Update a single field and clear its error (if any) */
   const setLeadData = useCallback(

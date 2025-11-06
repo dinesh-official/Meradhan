@@ -12,7 +12,7 @@ import { useCustomerFromDataHook } from "../../../_components/manageCustomer/for
 
 const UpdateCustomerView = ({ id }: { id: number }) => {
   const manager = useCustomerFromDataHook();
-  const { updateCustomerMutation } = useCustomerApiHook();
+  const { updateCustomerMutation } = useCustomerApiHook({backOnDone:true});
 
   const fetchUser = async () => {
     const fetchUserApi = new apiGateway.crm.customer.CrmCustomerApi(
@@ -57,14 +57,14 @@ const UpdateCustomerView = ({ id }: { id: number }) => {
 
   if (isLoading) {
     return (
-      <div className="w-full h-96 flex justify-center items-center">
+      <div className="flex justify-center items-center w-full h-96">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mt-6 mx-auto">
+    <div className="mx-auto mt-6 max-w-3xl">
       <Card>
         <CardContent>
           <CustomerManagementForm manager={manager} updateMode />
@@ -95,7 +95,7 @@ const UpdateCustomerView = ({ id }: { id: number }) => {
                 customerId: String(id),
               });
             }}
-            className="md:w-auto w-full"
+            className="w-full md:w-auto"
             disabled={updateCustomerMutation.isPending}
           >
             Update Customer

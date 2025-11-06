@@ -57,6 +57,8 @@ export class CustomerProfileService extends CustomerProfileManager {
                 { emailAddress: { contains: payload.search, mode: "insensitive" } },
                 { userName: { contains: payload.search, mode: "insensitive" } },
                 { phoneNo: { contains: payload.search, mode: "insensitive" } },
+                { panCard: { panCardNo: { contains: payload.search, mode: "insensitive" } } },
+
             ];
         }
 

@@ -14,26 +14,30 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import { useLeadTableActionHook } from "./useLeadTableActionHook";
 import { useFollowUpNoteFormHook } from "../../followUpNotes/hooks/useFollowUpFormDataHook";
+import UpdateLeadFormOnPopup from "../../../[id]/update/UpdatePopupForm";
 
 const LeadTableActions = ({ lead }: { lead: NewLeadPayload }) => {
-const manager = useFollowUpNoteFormHook(lead.id);
+  const manager = useFollowUpNoteFormHook(lead.id);
   const [followUpOpen, setFollowUpOpen] = useState(false);
-  const { handleLeadUpdate,deleteLeadMutation } = useLeadTableActionHook({
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const { deleteLeadMutation } = useLeadTableActionHook({
     leadId: lead.id,
   });
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
+          <Button variant="ghost" className="p-0 w-8 h-8">
             <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLeadUpdate}>Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setUpdateOpen(true)}>
+            Edit
+          </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
               setFollowUpOpen(true);
@@ -56,7 +60,7 @@ const manager = useFollowUpNoteFormHook(lead.id);
               });
 
               if (result.isConfirmed) {
-                 deleteLeadMutation.mutate()
+                deleteLeadMutation.mutate();
               }
             }}
           >
@@ -65,11 +69,18 @@ const manager = useFollowUpNoteFormHook(lead.id);
         </DropdownMenuContent>
       </DropdownMenu>
       <LeadFollowUpNotes
-      leadId={lead.id}
+        leadId={lead.id}
         manager={manager}
         open={followUpOpen}
         onOpenChange={setFollowUpOpen}
       />
+      {updateOpen && (
+        <UpdateLeadFormOnPopup
+          id={lead.id}
+          open={updateOpen}
+          setOpen={setUpdateOpen}
+        />
+      )}
     </>
   );
 };

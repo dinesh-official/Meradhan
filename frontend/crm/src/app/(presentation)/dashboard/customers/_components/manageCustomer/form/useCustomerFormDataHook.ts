@@ -29,7 +29,8 @@ const initData: CustomerFormData = {
 };
 
 export const useCustomerFromDataHook = (
-  state: CustomerFormData = initData
+  state: CustomerFormData = initData,
+  backOnDone: boolean = true
 ): ICustomerDataFormHook => {
 
   const [relationManager, setRelationManager] = useState<CrmUsersProfile | undefined>(undefined)
@@ -38,7 +39,7 @@ export const useCustomerFromDataHook = (
   const [errors, setErrors] = useState<
     Partial<Record<keyof CustomerFormData, string[]>>
   >({});
-  const customerApi = useCustomerApiHook();
+  const customerApi = useCustomerApiHook({ backOnDone });
   const { createCustomerMutation } = customerApi;
 
 

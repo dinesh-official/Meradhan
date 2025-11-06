@@ -32,7 +32,7 @@ function EmailInputStep({
           </div>
         </div>
       </div>
-      <Button className="w-full" onClick={onSubmit} disabled={isLoading}>
+      <Button className="w-full" onClick={onSubmit} disabled={isLoading || !value?.includes("@meradhan.co")}>
         Send OTP
       </Button>
     </div>

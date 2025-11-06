@@ -1,8 +1,29 @@
+const getFormattedTimestamp = (): string => {
+    const date = new Date();
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    // Convert to IST (UTC + 5:30)
+    const utcOffsetMs = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(date.getTime() + utcOffsetMs);
+
+    let hours = istDate.getUTCHours();
+    const minutes = istDate.getUTCMinutes().toString().padStart(2, "0");
+    const seconds = istDate.getUTCSeconds().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+
+    const day = istDate.getUTCDate().toString().padStart(2, "0");
+    const month = months[istDate.getUTCMonth()];
+    const year = istDate.getUTCFullYear();
+
+    return `${day}-${month}-${year} ${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
+};
+
 import { emailOtpSenderQueue, forgotPasswordLinkSenderQueue, successResetPasswordQueue, welcomeEmailSenderQueue } from "@jobs/queue/worker_queues"
 export const sendLoginOtpEmail = async (data: { email: string, userName: string, otp: string }) => {
     await emailOtpSenderQueue.add({
         ...data,
-        subject: `Your One-Time Password (OTP) for Login - MeraDhan`
+        subject: `MeraDhan CRM - Login OTP ${getFormattedTimestamp()}`
     }, {
         removeOnComplete: true,
         attempts: 1,
@@ -13,7 +34,7 @@ export const sendLoginOtpEmail = async (data: { email: string, userName: string,
 export const sendCustomerSignupOtpEmail = async (data: { email: string, userName: string, otp: string }) => {
     await emailOtpSenderQueue.add({
         ...data,
-        subject: `Your One-Time Password (OTP) for Signup - MeraDhan`
+        subject: `Your One-Time Password (OTP) for Signup - MeraDhan ${getFormattedTimestamp()}`
     }, {
         removeOnComplete: true,
         attempts: 1,
@@ -24,7 +45,7 @@ export const sendCustomerSignupOtpEmail = async (data: { email: string, userName
 export const sendCustomerSigninOtpEmail = async (data: { email: string, userName: string, otp: string }) => {
     await emailOtpSenderQueue.add({
         ...data,
-        subject: `Your One-Time Password (OTP) for Signup - MeraDhan`
+        subject: `Your One-Time Password (OTP) for Signup - MeraDhan ${getFormattedTimestamp()}`
     }, {
         removeOnComplete: true,
         attempts: 1,
@@ -46,7 +67,7 @@ export const sendCustomerWelcomeEmail = async (data: { email: string, userName: 
 export const sendForgetPasswordEmail = async (data: { email: string, userName: string, link: string }) => {
     await forgotPasswordLinkSenderQueue.add({
         ...data,
-        subject: `Reset Your Password – MeraDhan`
+        subject: `Reset Your Password – MeraDhan ${getFormattedTimestamp()}`
     }, {
         removeOnComplete: true,
         attempts: 1,
@@ -57,7 +78,7 @@ export const sendForgetPasswordEmail = async (data: { email: string, userName: s
 export const sendPasswordResetSuccessEmail = async (data: { email: string, userName: string }) => {
     await successResetPasswordQueue.add({
         ...data,
-        subject: `Password Reset Successful – MeraDhan`
+        subject: `Password Reset Successful – MeraDhan ${getFormattedTimestamp()}`
     }, {
         removeOnComplete: true,
         attempts: 1,

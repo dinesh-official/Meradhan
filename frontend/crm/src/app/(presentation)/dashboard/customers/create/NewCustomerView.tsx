@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 import CustomerManagementForm from "../_components/manageCustomer/form/CustomerManagementForm";
 import { useCustomerFromDataHook } from "../_components/manageCustomer/form/useCustomerFormDataHook";
 
-function NewCustomerView() {
-  const manager = useCustomerFromDataHook();
+function NewCustomerView({ popup }: { popup?: boolean }) {
+  const manager = useCustomerFromDataHook(undefined, !popup);
   return (
-    <div className="max-w-3xl mt-6 mx-auto">
-      <Card>
+    <div className="mx-auto mt-6 max-w-3xl">
+      <Card className={popup ? "border-none " : ""}>
         <CardContent>
           <CustomerManagementForm manager={manager} />
         </CardContent>
         <CardFooter>
           <Button
             onClick={manager.validateCustomerData}
-            className="md:w-auto w-full"
+            className="w-full md:w-auto"
             disabled={manager.createCustomerMutation.isLoading}
           >
             Save New Customer

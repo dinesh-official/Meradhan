@@ -1,23 +1,47 @@
 "use client";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 import React from "react";
+
+import { Button } from "@/components/ui/button";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import apiGateway from "@root/apiGateway";
+import { useQuery } from "@tanstack/react-query";
 import LeadFormManagementForm from "../../_components/manageLeads/form/LeadFormManagementForm";
 import { useLeadFormDataHook } from "../../_components/manageLeads/form/hooks/useLeadFormDataHook";
-import apiGateway from "@root/apiGateway";
-import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { useQuery } from "@tanstack/react-query";
-import { Spinner } from "@/components/ui/spinner";
-import { Button } from "@/components/ui/button";
 import { useLeadFollowUpApiHook } from "../../_components/manageLeads/form/hooks/useLeadApiHook";
 import { appSchema } from "@root/schema";
 import { toast } from "sonner";
 
-const UpdateLeadView = ({ id }: { id: number }) => {
-  console.log("id", id);
-  const manager = useLeadFormDataHook(undefined, { goBackOnSuccess: true });
-  const { updateLeadMutation } = useLeadFollowUpApiHook({
-    goBackOnSuccess: true,
+function UpdateLeadFormOnPopup({
+  id,
+  open,
+  setOpen,
+}: {
+  children?: React.ReactNode;
+  id: number;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}) {
+  const manager = useLeadFormDataHook(undefined, {
+    goBackOnSuccess: false,
+    onComplete() {
+      setOpen(false);
+    },
   });
+  const { updateLeadMutation } = useLeadFollowUpApiHook({
+    goBackOnSuccess: false,
+    onComplete() {
+      setOpen(false);
+    },
+  });
+
   const fetchUser = async () => {
     const fetchLeadApi = new apiGateway.crm.crmLeads.CrmLeadApi(
       apiClientCaller
@@ -46,20 +70,6 @@ const UpdateLeadView = ({ id }: { id: number }) => {
     }
   };
 
-  const { isLoading } = useQuery({
-    queryKey: ["fetchLead", id],
-    queryFn: fetchUser,
-    refetchOnWindowFocus: false,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center w-full h-96">
-        <Spinner />
-      </div>
-    );
-  }
-
   const handleUpdate = () => {
     try {
       // parse/validate with the UPDATE schema
@@ -70,24 +80,30 @@ const UpdateLeadView = ({ id }: { id: number }) => {
     }
   };
 
+  const { isLoading } = useQuery({
+    queryKey: ["fetchLead", id],
+    queryFn: fetchUser,
+    refetchOnWindowFocus: false,
+  });
   return (
-    <div className="mx-auto mt-6 max-w-3xl">
-      <Card>
-        <CardContent>
-          <LeadFormManagementForm manager={manager} />
-        </CardContent>
-        <CardFooter>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Lead</DialogTitle>
+        </DialogHeader>
+        <LeadFormManagementForm manager={manager} />
+        <DialogFooter>
           <Button
-            onClick={handleUpdate}
             className="w-full md:w-auto"
-            disabled={updateLeadMutation.isPending}
+            onClick={handleUpdate}
+            disabled={updateLeadMutation.isPending || isLoading}
           >
-            Update Customer
+            Save Lead
           </Button>
-        </CardFooter>
-      </Card>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-};
+}
 
-export default UpdateLeadView;
+export default UpdateLeadFormOnPopup;

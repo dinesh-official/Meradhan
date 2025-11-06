@@ -1,16 +1,18 @@
+import { Role } from "@/global/constants/role.constants";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { PhoneField } from "@/global/elements/inputs/PhoneField";
 import {
   SelectField,
   SelectOption,
 } from "@/global/elements/inputs/SelectField";
-import React from "react";
+import HideForMe from "@/global/elements/permissions/HideForMe";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import { IUserDataFormHook, UserFormData } from "./hooks/userForm";
-import { Role } from "@/global/constants/role.constants";
-import { PhoneField } from "@/global/elements/inputs/PhoneField";
 
 const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
+  const { cookies } = useAppCookie();
   return (
-    <div className="flex flex-col gap-4 relative">
+    <div className="relative flex flex-col gap-4">
       <InputField
         id="name"
         label="Name"
@@ -36,7 +38,6 @@ const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
         error={manager?.errors?.email?.[0]}
       />
       <PhoneField
-     
         label="Phone Number"
         placeholder="Enter Phone Number"
         required
@@ -46,25 +47,26 @@ const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
         }}
         error={manager?.errors?.phoneNo?.[0]}
       />
-
-      <SelectField
-        label="Select Role"
-        placeholder="Select Role"
-        options={
-          [
-            { label: "Viewer", value: "VIEWER" },
-            { label: "Sales", value: "SALES" },
-            { label: "Relationship manager", value: "RELATIONSHIP_MANAGER" },
-            { label: "Admin", value: "ADMIN" },
-            { label: "Support", value: "SUPPORT" },
-          ] as (SelectOption & { value: Role })[]
-        }
-        value={manager.state.role}
-        onChangeAction={(e) => {
-          manager.setUserData("role", e as UserFormData["role"]);
-        }}
-        error={manager?.errors?.role?.[0]}
-      />
+      <HideForMe userId={cookies.userId}>
+        <SelectField
+          label="Select Role"
+          placeholder="Select Role"
+          options={
+            [
+              { label: "Viewer", value: "VIEWER" },
+              { label: "Sales", value: "SALES" },
+              { label: "Relationship manager", value: "RELATIONSHIP_MANAGER" },
+              { label: "Admin", value: "ADMIN" },
+              { label: "Support", value: "SUPPORT" },
+            ] as (SelectOption & { value: Role })[]
+          }
+          value={manager.state.role}
+          onChangeAction={(e) => {
+            manager.setUserData("role", e as UserFormData["role"]);
+          }}
+          error={manager?.errors?.role?.[0]}
+        />
+      </HideForMe>
     </div>
   );
 };

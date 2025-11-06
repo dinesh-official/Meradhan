@@ -64,7 +64,7 @@ export class CrmUsersApi implements TCrmUsersInterface {
     id: number,
     config?: AxiosRequestConfig
   ): ReturnType<TCrmUsersInterface["getUserById"]> {
-    return this.apiClient.get<UserByIdResponse>(`/crm/users/${id}`, config);
+    return this.apiClient.get<UserByIdResponse>(`/crm/user/${id}`, config);
   }
 
   async deleteUser(

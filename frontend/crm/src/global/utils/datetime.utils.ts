@@ -34,8 +34,8 @@ export type DateFormatToken =
 
 export const dateTimeUtils = {
     formatDateTime: (
-        dateInput: DateInput,
-        format: DateFormatToken,
+        dateInput?: DateInput,
+        format?: DateFormatToken,
         locale: string = "en-US"
     ): string => {
         if (!dateInput) return "";

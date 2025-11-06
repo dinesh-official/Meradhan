@@ -1,14 +1,18 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import Table from "../../Table";
-import NseRFQSearchFilterBar from "./_components/NseRFQSearchFilterBar";
+import NseRFQSearchFilterBar from "./_components/rfcqLIst/NseRFQSearchFilterBar";
+import NseTableView from "./_components/rfcqLIst/NseTableView";
+import { useRfqisinHook } from "./_components/rfcqLIst/useRfqisinHook";
+import { useRouter } from "nextjs-toploader/app";
 
 function NscRfqView() {
+  const { findRfqSearchMutasion } = useRfqisinHook();
+  const router = useRouter();
+
   return (
     <div className="flex flex-col gap-5">
       <PageInfoBar
@@ -26,9 +30,15 @@ function NscRfqView() {
       <Card>
         <NseRFQSearchFilterBar />
         <CardContent>
-          <Table />
+          <NseTableView
+            loading={findRfqSearchMutasion.isLoading}
+            data={findRfqSearchMutasion.data?.responseData || []}
+            onClick={(e) => {
+              router.push("/dashboard/rfqs/nse/manage/" + e.number);
+            }}
+          />
         </CardContent>
-        <CardPagination onClick={() => {}} page={10} totalPages={50} />
+        {/* <CardPagination onClick={() => {}} page={10} totalPages={50} /> */}
       </Card>
     </div>
   );

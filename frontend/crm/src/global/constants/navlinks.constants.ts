@@ -130,7 +130,7 @@ export const NAV_ITEMS: NavItem[] = [
     {
         label: 'Sales',
         icon: ShoppingCart,
-        path: "/sales",
+        path: "#",
         module: 'sales',
         allowOnly: ['view:sales']
     },
@@ -142,13 +142,13 @@ export const NAV_ITEMS: NavItem[] = [
         children: [
             {
                 label: 'Manage Tickets',
-                path: '/dashboard/support',
+                path: '#',
                 module: 'support',
                 allowOnly: ['view:support', 'edit:support', 'create:support']
             },
             {
                 label: 'New Ticket',
-                path: '/dashboard/support',
+                path: '#',
                 module: 'support',
                 allowOnly: ['create:support']
             },
@@ -158,7 +158,7 @@ export const NAV_ITEMS: NavItem[] = [
     {
         label: 'Reports',
         icon: BarChart,
-        path: "/reports",
+        path: "#",
         module: 'reports',
         allowOnly: ['view:reports']
     },
@@ -207,13 +207,13 @@ export const NAV_ITEMS: NavItem[] = [
                     },
                     {
                         label: 'Authentication Logs',
-                        path: '/dashboard/audit-logs/crm/authentication',
+                        path: '#',
                         module: 'crmauditlogs',
                         allowOnly: ['view:crmauditlogs'],
                     },
                     {
                         label: 'Session Analytics',
-                        path: '/dashboard/audit-logs/crm/session',
+                        path: '#',
                         module: 'crmauditlogs',
                         allowOnly: ['view:crmauditlogs'],
                     }
@@ -226,13 +226,13 @@ export const NAV_ITEMS: NavItem[] = [
                 children: [
                     {
                         label: 'Activity Logs',
-                        path: '/dashboard/audit-logs/web/activity',
+                        path: '#',
                         module: 'webauditlogs',
                         allowOnly: ['view:webauditlogs'],
                     },
                     {
                         label: 'Session Logs',
-                        path: '/dashboard/audit-logs/web/session',
+                        path: '#',
                         module: 'webauditlogs',
                         allowOnly: ['view:webauditlogs'],
                     }
@@ -242,14 +242,14 @@ export const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Website Analytics',
-        path: '/dashboard/bin',
+        path: '#',
         icon: Earth,
         module: 'bin',
         allowOnly: ['view:webanalytics']
     },
     {
         label: 'Recycle Bin',
-        path: '/dashboard/bin',
+        path: '#',
         icon: Trash2,
         module: 'bin',
         allowOnly: ['create:bin', 'view:bin', 'edit:bin', 'delete:bin']

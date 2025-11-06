@@ -6,16 +6,18 @@ import { useLeadFormDataHook } from "../_components/manageLeads/form/hooks/useLe
 import { Button } from "@/components/ui/button";
 
 function NewLeadView() {
-  const manager = useLeadFormDataHook();
+  const manager = useLeadFormDataHook(undefined, {
+    goBackOnSuccess: true,
+  });
   return (
-    <div className="max-w-3xl mt-6 mx-auto">
+    <div className="mx-auto mt-6 max-w-3xl">
       <Card>
         <CardContent>
           <LeadFormManagementForm manager={manager} />
         </CardContent>
         <CardFooter>
           <Button
-            className="md:w-auto w-full"
+            className="w-full md:w-auto"
             onClick={manager.validateLeadData}
             disabled={manager.createLeadMutation.isPending}
           >

@@ -4,16 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
-import Link from "next/link";
 import LeadsSearchFilterBar from "./_components/listLeads/LeadsSearchFilterBar";
 import LeadTable from "./_components/listLeads/LeadTable";
 import { useLeadFilterApiHook } from "./_components/listLeads/useLeadFilterApiHook";
 import { useLeadFilterListHook } from "./_components/listLeads/useLeadFilterListHook";
+import NewLeadFormOnPopup from "./create/NewLeadFormOnPopup";
 
 function LeadsView() {
   const filterManager = useLeadFilterListHook();
   const filterApiManager = useLeadFilterApiHook(filterManager);
-  
+
   const isShowPagination = () => {
     return (
       (filterApiManager.fetchLeadsQuery.data?.responseData.data.length || 0) >
@@ -29,11 +29,11 @@ function LeadsView() {
         title="Leads Management"
         description="Track and manage potential customers"
         actions={
-          <Link href={`/dashboard/leads/create`}>
+          <NewLeadFormOnPopup>
             <Button>
               <Plus /> Add New Lead
             </Button>
-          </Link>
+          </NewLeadFormOnPopup>
         }
       />
       <Card className="mt-5">

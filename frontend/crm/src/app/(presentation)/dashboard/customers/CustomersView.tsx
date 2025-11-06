@@ -1,15 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger
+} from "@/components/ui/dialog";
 import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
-import Link from "next/link";
 import CustomerSearchFilterBar from "./_components/listView/CustomerSearchFilterBar";
 import CustomerTable from "./_components/listView/CustomerTable";
-import { useCustomerFilterListHook } from "./_components/listView/useCustomerListHook";
 import { useFilterListApiHook } from "./_components/listView/useCustomerListApiHook";
-
+import { useCustomerFilterListHook } from "./_components/listView/useCustomerListHook";
+import NewCustomerView from "./create/NewCustomerView";
 function CustomersView() {
   const filterManager = useCustomerFilterListHook();
   const filterApiManager = useFilterListApiHook(filterManager);
@@ -29,11 +33,16 @@ function CustomersView() {
         title="Customer Management"
         description="Manage customer profiles and KYC status"
         actions={
-          <Link href={`/dashboard/customers/create`}>
-            <Button>
-              <Plus /> Add New Customer
-            </Button>
-          </Link>
+          <Dialog>
+            <DialogTrigger>
+              <Button>
+                <Plus /> Add New Customer
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="mt-0 p-0 min-w-[660px]" >
+              <NewCustomerView popup />
+            </DialogContent>
+          </Dialog>
         }
       />
       <Card className="mt-5">

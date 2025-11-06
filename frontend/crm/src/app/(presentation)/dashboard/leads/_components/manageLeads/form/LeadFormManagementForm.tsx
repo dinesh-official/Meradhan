@@ -19,8 +19,8 @@ const LeadFormManagementForm = ({
   manager: ILeadDataFormHook;
 }) => {
   return (
-    <div className="flex flex-col gap-4 relative">
-      <div className="grid md:grid-cols-2 gap-4">
+    <div className="relative flex flex-col gap-4">
+      <div className="gap-4 grid md:grid-cols-2">
         <InputField
           id="FullName"
           label="Full Name"
@@ -47,7 +47,7 @@ const LeadFormManagementForm = ({
         />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="gap-4 grid md:grid-cols-2">
         <PhoneField
           label="Mobile Number"
           defaultCountry="IN"
@@ -72,7 +72,7 @@ const LeadFormManagementForm = ({
           error={manager?.errors?.companyName?.[0]}
         />
       </div>
-      <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+      <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <SelectField
           label="Lead Source"
           placeholder="Select Source"
@@ -98,7 +98,7 @@ const LeadFormManagementForm = ({
         />
       </div>
 
-      <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+      <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label>Assign To</Label>
           <SelectRoleUser

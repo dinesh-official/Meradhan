@@ -23,16 +23,21 @@ function OtpInputStep({
   email: string;
 }) {
   return (
-    <div className="flex flex-col gap-4 mt-5 px-3 relative">
+    <div className="relative flex flex-col gap-4 mt-5 px-3">
       <div>
-        <p className="text-xs text-gray-800 mb-1">Enter OTP</p>
+        <p className="mb-1 text-gray-800 text-xs">Enter OTP</p>
         <InputOTP
           pattern={REGEXP_ONLY_DIGITS}
           maxLength={6}
           value={value}
           className="w-full overflow-hidden"
+          enterKeyHint="done"
+          disabled={isLoading}
           onChange={(e) => {
             onChangeAction?.(e);
+          }}
+          onComplete={() => {
+            onSubmit?.();
           }}
         >
           <InputOTPGroup className="w-full">
@@ -44,13 +49,13 @@ function OtpInputStep({
             <InputOTPSlot index={5} className="w-full" />
           </InputOTPGroup>
         </InputOTP>
-        <p className="text-[10px] text-gray-400 mt-1">
+        <p className="mt-1 text-[10px] text-gray-400">
           OTP sent to <span className="text-gray-700">{email}</span>
         </p>
       </div>
-      <div className="grid grid-cols-5 gap-3">
+      <div className="gap-3 grid grid-cols-5">
         <Button
-          className="w-full col-span-2"
+          className="col-span-2 w-full"
           disabled={isLoading}
           variant={"secondary"}
           onClick={onBack}
@@ -58,8 +63,8 @@ function OtpInputStep({
           Go Back
         </Button>
         <Button
-          className="w-full col-span-3"
-          disabled={isLoading}
+          className="col-span-3 w-full"
+          disabled={isLoading || value?.length !== 6}
           onClick={onSubmit}
         >
           Verify & Login
