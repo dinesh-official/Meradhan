@@ -19,6 +19,7 @@ class ApiServerCaller implements IApiCaller {
   private instance: AxiosInstance;
 
   constructor(baseURL: string = API_SERVER_URL_IP) {
+
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
@@ -28,7 +29,6 @@ class ApiServerCaller implements IApiCaller {
     this.instance.interceptors.response.use(
       (response) => response,
       (error) => {
-        
         if (axios.isAxiosError(error)) {
           return Promise.reject(
             new ApiError(
@@ -58,7 +58,7 @@ class ApiServerCaller implements IApiCaller {
       headersObj[key] = value;
     });
 
-    // Ensure cookies are preserved
+    // Ensure cookies are preserved for session management
     const cookie = incomingHeaders.get('cookie') || '';
     headersObj['cookie'] = cookie;
 
@@ -103,7 +103,7 @@ class ApiServerCaller implements IApiCaller {
   }
 
   /**
-   * PUT request
+   * PUT request 
    */
   async put<T = unknown, D = unknown>(
     url: string,
@@ -114,8 +114,8 @@ class ApiServerCaller implements IApiCaller {
   }
 
   /**
-   * PATCH request
-   */
+   * PATCH request - edited duplicate 
+   */ 
   async patch<T = unknown, D = unknown>(
     url: string,
     data?: D,

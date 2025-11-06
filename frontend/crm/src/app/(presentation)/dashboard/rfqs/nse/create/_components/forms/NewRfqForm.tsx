@@ -76,9 +76,9 @@ const dateTimeUtils = {
   },
 };
 
-type SchemaType = z.infer<typeof appSchema.rfq.addIsinSchema>;
+export type SchemaType = z.infer<typeof appSchema.rfq.addIsinSchema>;
 
-function NewRfqForm() {
+function NewRfqForm({ onSubmit }: { onSubmit?: (data: SchemaType) => void }) {
   const {
     handleSubmit,
     watch,
@@ -96,17 +96,22 @@ function NewRfqForm() {
       yieldType: "YTM",
       calcMethod: "O",
       institutions: false,
+      participantCode: "BCISPL",
     },
   });
 
-  const onSubmit: SubmitHandler<SchemaType> = (data) => {
-    console.log("Form submitted:", data);
+  const onSubmitForm: SubmitHandler<SchemaType> = (data) => {
+    if (onSubmit) {
+      onSubmit(data);
+    }
   };
+
+  console.log("Errors:", errors);
 
   const [isin, setIsin] = useState<NSE_ISIN_DATA | undefined>(undefined);
 
   return (
-    <Form control={control} className="space-y-6 p-5">
+    <Form control={control} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Information</CardTitle>
@@ -275,8 +280,9 @@ function NewRfqForm() {
                 label="RFQ Size (Value in Crores)"
                 placeholder="RFQ Size (Value in Crores)"
                 value={watch("value")?.toString()}
+                type="number"
                 required
-                onChangeAction={(e) => setValue("value", Number(e))}
+                onChangeAction={(e) => setValue("value", e)}
                 error={errors.value?.message}
               />
 
@@ -451,6 +457,7 @@ function NewRfqForm() {
               checked={watch("gtdFlag") == "Y"}
               onCheckedChange={(e) => {
                 setValue("gtdFlag", e ? "Y" : null);
+                setValue("endTime", undefined);
               }}
             />
 
@@ -462,7 +469,7 @@ function NewRfqForm() {
               value={watch("endTime") || ""}
               onChangeAction={(e) => setValue("endTime", e)}
               error={errors.endTime?.message}
-              disabled={watch("gtdFlag") !== "Y"}
+              disabled={watch("gtdFlag") == "Y"}
             />
 
             <FormCheckbox
@@ -474,6 +481,7 @@ function NewRfqForm() {
                   watch("quoteNegotiable") == "Y" ? null : "Y"
                 );
               }}
+              error={errors.quoteNegotiable?.message}
             />
 
             <FormCheckbox
@@ -485,6 +493,7 @@ function NewRfqForm() {
                   watch("valueNegotiable") == "Y" ? null : "Y"
                 );
               }}
+              error={errors.valueNegotiable?.message}
             />
 
             <InputField
@@ -533,6 +542,7 @@ function NewRfqForm() {
               onCheckedChange={() => {
                 setValue("anonymous", watch("anonymous") == "Y" ? null : "Y");
               }}
+              error={errors.anonymous?.message}
             />
           </div>
         </CardContent>
@@ -600,7 +610,7 @@ function NewRfqForm() {
         </CardContent>
         <CardFooter className="gap-5">
           <Button variant={`secondary`}>Cancel</Button>
-          <Button onClick={handleSubmit(onSubmit)}>Submit RFQ</Button>
+          <Button onClick={handleSubmit(onSubmitForm)}>Submit RFQ</Button>
         </CardFooter>
       </Card>
     </Form>

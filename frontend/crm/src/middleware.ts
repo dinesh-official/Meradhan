@@ -2,7 +2,6 @@ import { UserSessionDataResponse } from '@root/apiGateway';
 import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { API_BACKEND_URL_IP } from './global/constants/domains';
 // Environment detection for middleware
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -11,7 +10,7 @@ const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64
 
 const fetchUserSession = async (token: string) => {
   try {
-    const sessionResponse = fetch(API_BACKEND_URL_IP + "/session", {
+    const sessionResponse = fetch("http://localhost:4000/api/session", {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
