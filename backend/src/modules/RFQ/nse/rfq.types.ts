@@ -689,6 +689,7 @@ export interface UpdateRfqRequest {
     category?: string | null;
     rating?: string | null;
     remarks?: string | null;
+
 }
 
 export type UpdateRfqResponse = CreateRfqResponse; // Same as add/isin response
@@ -703,45 +704,7 @@ export interface GetAllRfqRequest {
     status?: "P" | "W" | "T";
 }
 
-export interface GetAllRfqResponse {
-    segment: string;
-    date: string;
-    quoteTime: string;
-    access?: number;
-    rating: string | null;
-    quoteType: "Y" | "B"; 
-    tradedValue: number;
-    participantList: string[] | null;
-    calcMethod: "M" | "O";
-    number: string;
-    gtdFlag: string | null;
-    price: number | null;
-    yield: number;
-    yieldType: "YTM" | "YTP" | "YTC";
-    minFillValue: number | null;
-    participantCode: string;
-    value: number;
-    settlementType: number;
-    buySell: "B" | "S";
-    clientRegType: "R" | "I" | "U";
-    quantity: number;
-    groupList: number[] | null;
-    settlementDate: string;
-    dealType: "D" | "B";
-    valueNegotiable: "Y" | null;
-    userLogin: string;
-    clientCode: string;
-    confirmedValue: number;
-    anonymous: "Y" | null;
-    endTime: string;
-    category: string | null;
-    isin: string;
-    quoteNegotiable: "Y" | null;
-    valueStepSize: number | null;
-    remarks: string | null;
-    status: "P" | "W" | "T";
-}
-
+export type GetAllRfqResponse  = CreateRfqResponse;
 
 export interface GetMarketWatchRfqRequest {
     number?: string;           // Optional RFQ number
@@ -758,7 +721,7 @@ export interface GetMarketWatchRfqResponse {
     quoteTime: string;
     isin: string;
     buySell: "B" | "S";
-    quoteType: "Y" | "B"; 
+    quoteType: "Y" | "B";
     settlementType: number;
     settlementDate: string;
     value: number;
@@ -817,7 +780,7 @@ export interface CreateOpenRfqResponse {
     scriptDesc: string;
     openIsinList?: string[];
     buySell: "B" | "S" | "X";
-    quoteType: "Y" | "B"; 
+    quoteType: "Y" | "B";
     value: number;
     gtdFlag?: string | null;
     endTime?: string | null;
@@ -894,7 +857,7 @@ export interface UpdateOpenRfqResponse {
     scriptDesc: string;
     openIsinList?: string[];
     buySell: string;
-    quoteType: "Y" | "B"; 
+    quoteType: "Y" | "B";
     value: number;
     gtdFlag?: string;
     endTime?: string | null;
@@ -934,7 +897,7 @@ export interface WithdrawRfqResponse {
     openIsinList?: string[];
 
     buySell: string; // "B" | "S"
-    quoteType: "Y" | "B"; 
+    quoteType: "Y" | "B";
     settlementType?: number;
     settlementDate?: string;
 
@@ -1042,14 +1005,14 @@ export interface CreateNegotiationResponse {
     initClientRegType?: "R" | "I" | "U";
     initValue?: number;
     initQuantity?: number;
-    initYieldType?: string;
+    initYieldType?: "YTM" | "YTP" | "YTC";
     initYield?: number;
     initCalcMethod?: "M" | "O";
     initPrice?: number;
     initAccruedInterest?: number;
     initConsideration?: number;
     initQuoteTime?: string;
-    initGtdFlag?: string;
+    initGtdFlag?: "Y" | null;
     initEndTime?: string;
     initRemarks?: string;
     initLoginId?: string;
@@ -1062,14 +1025,14 @@ export interface CreateNegotiationResponse {
     respClientRegType?: "R" | "I" | "U";
     respValue?: number;
     respQuantity?: number;
-    respYieldType?: string;
+    respYieldType?: "YTM" | "YTP" | "YTC";
     respYield?: number;
     respCalcMethod?: "M" | "O";
     respPrice?: number;
     respAccruedInterest?: number;
     respConsideration?: number;
     respQuoteTime?: string;
-    respGtdFlag?: string;
+    respGtdFlag?: "Y" | null;
     respEndTime?: string;
     respRemarks?: string;
     respLoginId?: string;
@@ -1081,7 +1044,7 @@ export interface CreateNegotiationResponse {
     acceptedSettlementDate?: string;
     acceptedValue?: number;
     acceptedQuantity?: number;
-    acceptedYieldType?: string;
+    acceptedYieldType?: "YTM" | "YTP" | "YTC";
     acceptedYield?: number;
     acceptedCalcMethod?: "M" | "O";
     acceptedPrice?: number;
@@ -1092,7 +1055,7 @@ export interface CreateNegotiationResponse {
     acceptedBySide?: "I" | "R";
     acceptedByLoginId?: string;
 
-    confirmStatus?: string;
+    confirmStatus?: "PP" | "PC" | "PR" | "CA" | "CC" | "CR";
     proposedBySide?: "I" | "R";
     proposedTime?: string;
     confirmedPriceQuoteTime?: string;
@@ -1160,82 +1123,11 @@ export interface UpdateNegotiationRequest {
 
     /** Remarks */
     remarks?: string | null; // String(100), Optional
+
 }
 
 
-export interface UpdateNegotiationResponse {
-    rfqNumber: string;
-    id: string;
-    date: string;
-    isin: string;
-    buySell: "B" | "S";
-
-    initSettlementType?: number;
-    initSettlementDate?: string;
-    initAeCode?: string;
-    initDealType?: "D" | "B";
-    initClientCode?: string;
-    initClientRegType?: "R" | "I" | "U";
-    initValue?: number;
-    initQuantity?: number;
-    initYieldType?: string;
-    initYield?: number;
-    initCalcMethod?: "M" | "O";
-    initPrice?: number;
-    initAccruedInterest?: number;
-    initConsideration?: number;
-    initQuoteTime?: string;
-    initGtdFlag?: string;
-    initEndTime?: string;
-    initRemarks?: string;
-    initLoginId?: string;
-
-    respSettlementType?: number;
-    respSettlementDate?: string;
-    respAeCode?: string;
-    respDealType?: "D" | "B";
-    respClientCode?: string;
-    respClientRegType?: "R" | "I" | "U";
-    respValue?: number;
-    respQuantity?: number;
-    respYieldType?: string;
-    respYield?: number;
-    respCalcMethod?: "M" | "O";
-    respPrice?: number;
-    respAccruedInterest?: number;
-    respConsideration?: number;
-    respQuoteTime?: string;
-    respGtdFlag?: string;
-    respEndTime?: string;
-    respRemarks?: string;
-    respLoginId?: string;
-
-    status: "N" | "R" | "A" | "C" | "E"; // Negotiation status
-    tradeNumber?: string;
-
-    acceptedSettlementType?: number;
-    acceptedSettlementDate?: string;
-    acceptedValue?: number;
-    acceptedQuantity?: number;
-    acceptedYieldType?: string;
-    acceptedYield?: number;
-    acceptedCalcMethod?: "M" | "O";
-    acceptedPrice?: number;
-    acceptedPutCallDate?: string;
-    acceptedAccruedInterest?: number;
-    acceptedConsideration?: number;
-    acceptedQuoteTime?: string;
-    acceptedBySide?: "I" | "R";
-    acceptedByLoginId?: string;
-
-    confirmStatus?: string;
-    proposedBySide?: "I" | "R";
-    proposedTime?: string;
-    confirmedPriceQuoteTime?: string;
-    lastActivityTimestamp: string;
-
-    tradeSplits?: TradeSplit[];
-}
+export type UpdateNegotiationResponse = CreateNegotiationResponse;
 
 export interface TradeSplit {
     tradeId: string;
@@ -1333,7 +1225,7 @@ export interface WithdrawNegotiationQuoteResponseItem {
 }
 
 /** Response: List of withdrawn negotiation threads */
-export type WithdrawNegotiationQuoteResponse = WithdrawNegotiationQuoteResponseItem[];
+export type WithdrawNegotiationQuoteResponse = CreateNegotiationResponse[];
 
 
 /**
@@ -1355,66 +1247,7 @@ export interface TerminateNegotiationRequest {
  * Response schema for POST /rest/v1/negotiation/terminate
  * Structure same as /rest/v1/negotiation/add response
  */
-export interface TerminateNegotiationResponse {
-    date: string | null;
-    acceptedCalcMethod: string | null;
-    tradeNumber: string | null;
-    initQuoteTime: string | null;
-    initSettlementType: string | null;
-    respAeCode: string | null;
-    tradeSplits: TradeSplit[] | null;
-    initSettlementDate: string | null;
-    initAccruedInterest: string | null;
-    acceptedValue: string | null;
-    confirmedPriceQuoteTime: string | null;
-    initGtdFlag: string | null;
-    initYield: string | null;
-    respAccruedInterest: string | null;
-    confirmStatus: string | null;
-    id: string;
-    initYieldType: string | null;
-    respPrice: string | null;
-    initLoginId: string | null;
-    respQuoteTime: string | null;
-    respEndTime: string | null;
-    acceptedBySide: "I" | "R" | null;
-    respCalcMethod: string | null;
-    initAeCode: string | null;
-    acceptedSettlementDate: string | null;
-    acceptedPrice: string | null;
-    respGtdFlag: string | null;
-    acceptedQuantity: string | null;
-    acceptedByLoginId: string | null;
-    acceptedAccruedInterest: string | null;
-    respConsideration: string | null;
-    initQuantity: string | null;
-    status: string; // e.g. "R"
-    respSettlementDate: string | null;
-    respValue: string | null;
-    respLoginId: string | null;
-    initPrice: string | null;
-    respYieldType: string | null;
-    acceptedYieldType: string | null;
-    acceptedSettlementType: string | null;
-    acceptedConsideration: string | null;
-    respSettlementType: string | null;
-    respRemarks: string | null;
-    initValue: string | null;
-    initCalcMethod: string | null;
-    buySell: "B" | "S";
-    acceptedQuoteTime: string | null;
-    initAuId: string | null;
-    rfqNumber: string;
-    acceptedPutCallDate: string | null;
-    acceptedYield: string | null;
-    respYield: string | null;
-    initConsideration: string | null;
-    initEndTime: string | null;
-    respQuantity: string | null;
-    isin: string;
-    initRemarks: string | null;
-    lastActivityTimestamp: string | null;
-}
+export type TerminateNegotiationResponse = CreateNegotiationResponse;
 
 
 export interface AcceptNegotiationQuoteRequest {
@@ -1425,13 +1258,13 @@ export interface AcceptNegotiationQuoteRequest {
     acceptedValue: number; // Decimal(10,10), Mandatory
 
     /** Negotiation Thread Id (optional for direct acceptance) */
-    id?: string | null ; // String(15), Optional
+    id?: string | null; // String(15), Optional
 
     /** Accepted Quote Settlement Date (Format: DD-MMM-YYYY) */
     acceptedSettlementDate?: string;
 
     /** Accepted Quote Yield Type (YTM / YTP / YTC) */
-    acceptedYieldType?: string; // String(3), Optional
+    acceptedYieldType?: "YTM" | "YTP" | "YTC"; // String(3), Optional
 
     /** Accepted Quote Yield */
     acceptedYield?: number; // Decimal(3,4), Optional
@@ -1449,66 +1282,7 @@ export interface AcceptNegotiationQuoteRequest {
     role?: "I" | "R"; // Conditional
 }
 
-export interface AcceptNegotiationQuoteResponse {
-    date: string;
-    acceptedCalcMethod: string | null;
-    tradeNumber: string | null;
-    initQuoteTime: string | null;
-    initSettlementType: number | null;
-    respAeCode: string | null;
-    tradeSplits: TradeSplit[] | null;
-    initSettlementDate: string | null;
-    initAccruedInterest: number | null;
-    acceptedValue: number | null;
-    confirmedPriceQuoteTime: string | null;
-    initGtdFlag: string | null;
-    initYield: number | null;
-    respAccruedInterest: number | null;
-    confirmStatus: string | null;
-    id: string;
-    initYieldType: string | null;
-    respPrice: number | null;
-    initLoginId: string | null;
-    respQuoteTime: string | null;
-    respEndTime: string | null;
-    acceptedBySide: string | null;
-    respCalcMethod: string | null;
-    initAeCode: string | null;
-    acceptedSettlementDate: string | null;
-    acceptedPrice: number | null;
-    respGtdFlag: string | null;
-    acceptedQuantity: number | null;
-    acceptedByLoginId: string | null;
-    acceptedAccruedInterest: number | null;
-    respConsideration: number | null;
-    initQuantity: number | null;
-    status: string;
-    respSettlementDate: string | null;
-    respValue: number | null;
-    respLoginId: string | null;
-    initPrice: number | null;
-    respYieldType: string | null;
-    acceptedYieldType: string | null;
-    acceptedSettlementType: number | null;
-    acceptedConsideration: number | null;
-    respSettlementType: string | null;
-    respRemarks: string | null;
-    initValue: number | null;
-    initCalcMethod: string | null;
-    buySell: string | null;
-    acceptedQuoteTime: string | null;
-    initAuId: string | null;
-    rfqNumber: string;
-    acceptedPutCallDate: string | null;
-    acceptedYield: number | null;
-    respYield: number | null;
-    initConsideration: number | null;
-    initEndTime: string | null;
-    respQuantity: number | null;
-    isin: string | null;
-    initRemarks: string | null;
-    lastActivityTimestamp: string | null;
-}
+export type AcceptNegotiationQuoteResponse = CreateNegotiationResponse;
 
 // Request
 export interface NegotiationAllRequest {
@@ -1544,67 +1318,9 @@ export interface NegotiationAllRequest {
 }
 
 // Response
-export type NegotiationAllResponse = NegotiationThreadResponse[];
-export interface NegotiationThreadResponse {
-    date: string;
-    acceptedCalcMethod: string | null;
-    tradeNumber: string | null;
-    initQuoteTime: string | null;
-    initSettlementType: number | null;
-    respAeCode: string | null;
-    tradeSplits: TradeSplit[] | null;
-    initSettlementDate: string | null;
-    initAccruedInterest: number | null;
-    acceptedValue: number | null;
-    confirmedPriceQuoteTime: string | null;
-    initGtdFlag: string | null;
-    initYield: number | null;
-    respAccruedInterest: number | null;
-    confirmStatus: string | null;
-    id: string;
-    initYieldType: string | null;
-    respPrice: number | null;
-    initLoginId: string | null;
-    respQuoteTime: string | null;
-    respEndTime: string | null;
-    acceptedBySide: string | null;
-    respCalcMethod: string | null;
-    initAeCode: string | null;
-    acceptedSettlementDate: string | null;
-    acceptedPrice: number | null;
-    respGtdFlag: string | null;
-    acceptedQuantity: number | null;
-    acceptedByLoginId: string | null;
-    acceptedAccruedInterest: number | null;
-    respConsideration: number | null;
-    initQuantity: number | null;
-    status: string;
-    respSettlementDate: string | null;
-    respValue: number | null;
-    respLoginId: string | null;
-    initPrice: number | null;
-    respYieldType: string | null;
-    acceptedYieldType: string | null;
-    acceptedSettlementType: number | null;
-    acceptedConsideration: number | null;
-    respSettlementType: string | null | number;
-    respRemarks: string | null;
-    initValue: number | null;
-    initCalcMethod: string | null;
-    buySell: string | null;
-    acceptedQuoteTime: string | null;
-    initAuId: string | null;
-    rfqNumber: string;
-    acceptedPutCallDate: string | null;
-    acceptedYield: number | null;
-    respYield: number | null;
-    initConsideration: number | null;
-    initEndTime: string | null;
-    respQuantity: number | null;
-    isin: string | null;
-    initRemarks: string | null;
-    lastActivityTimestamp: string | null;
-}
+
+export type NegotiationAllResponse = CreateNegotiationResponse[];
+
 
 
 export interface DealProposeRequest {
@@ -1648,7 +1364,7 @@ export interface DealProposeRequest {
     role?: "I" | "R" | null; // Optional
 }
 
-export type DealProposeResponse = NegotiationThreadResponse;
+export type DealProposeResponse = CreateNegotiationResponse;
 
 
 export interface DealAcceptRejectRequest {
@@ -1675,7 +1391,7 @@ export interface DealAcceptRejectRequest {
 }
 
 
-export type DealAcceptRejectResponse = NegotiationThreadResponse;
+export type DealAcceptRejectResponse = CreateNegotiationResponse;
 
 
 export interface DealTradeSplitRequest {
@@ -2020,7 +1736,7 @@ export interface RfqOpenRecord {
     buySell: "B" | "S";
 
     /** Quote Type — e.g., B = Best, etc. */
-    quoteType: "Y" | "B"; 
+    quoteType: "Y" | "B";
 
     /** RFQ total buy value */
     value: number | null;

@@ -1,22 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
-import NseIsinPicker from "@/global/elements/autocomplete/NseIsinPicker";
-import { SelectNseParticipant } from "@/global/elements/autocomplete/SelectNseParticipant";
-import { InputField } from "@/global/elements/inputs/InputField";
-import React from "react";
+"use client";
 
-function NewRfqForm() {
+import NewRfqForm from "../../_components/forms/NewRfqForm";
+
+function NewRfqFormView() {
   return (
-    <Card>
-      <CardContent>
-        <div className="grid grid-cols-2">
-          <NseIsinPicker>
-            <InputField label="ISIN" id="ISIN" readonly />
-          </NseIsinPicker>
-          <SelectNseParticipant/>
-        </div>
-      </CardContent>
-    </Card>
+    <NewRfqForm/>
   );
 }
 
-export default NewRfqForm;
+export default NewRfqFormView;

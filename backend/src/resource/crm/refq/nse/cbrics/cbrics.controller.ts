@@ -1,7 +1,7 @@
 import { appSchema } from '@root/schema';
 import { HttpStatus } from '@utils/error/AppError';
 import type { Request, Response } from 'express';
-import { CbricsParticipantService } from './participants.service';
+import { CbricsParticipantService } from './cbrics.service';
 export class CbricsParticipantController {
 
     private participantService = new CbricsParticipantService();
@@ -10,7 +10,7 @@ export class CbricsParticipantController {
         // safeParse gives you non-throwing validation
         const result = appSchema.crm.rfq.nse.getParticipants.GetParticipantsZ.parse(req.query);
         console.log(result);
-        
+
         const data = await this.participantService.getParticipants(result);
         res.sendResponse({
             statusCode: HttpStatus.OK,

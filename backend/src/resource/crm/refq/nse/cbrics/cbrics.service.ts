@@ -59,4 +59,10 @@ export class CbricsParticipantService {
             },
         };
     }
+
+    async getSettledOrders() {
+
+        
+        
+    }
 }

@@ -1,12 +1,15 @@
 import type { appSchema } from "@root/schema";
 import { NseRfqManager } from "@services/refq/nse/nseisin_manager.service";
 import type z from "zod";
+import { RfqMasterDbSyncManager } from "./rfq_master.manager";
 
 export class RfqMasterService {
 
     private rfqManager = new NseRfqManager();
+    private rfqDbSyncManager = new RfqMasterDbSyncManager();
 
     async createNewRfq(data: z.infer<typeof appSchema.rfq.addIsinSchema>, createdBy: number) {
+
 
         // Create RFQ for ISIN NSE - Call Service 
         const addIsinToRfq = await this.rfqManager.createRfq({
@@ -45,7 +48,77 @@ export class RfqMasterService {
             remarks: data.remarks,
         });
 
-        console.log(createdBy);
+        // Sync RFQ Master Data to Our Database
+        //  its return 1 or array for safety add in map function : Its Optional Change in Future
+        const result = addIsinToRfq.map(async (addIsinToRfq) => {
+            return await this.rfqDbSyncManager.syncRfqMasterData(addIsinToRfq, createdBy, data);
+        });
+
+        await Promise.all(result);
+
         return addIsinToRfq;
+
     }
+
+    async negotiateRfqAccept(data: z.infer<typeof appSchema.rfq.acceptNegotiationQuoteSchema>, createdBy: number) {
+        // Negotiate RFQ Quote - Call Service
+        const negotiateRfqQuote = await this.rfqManager.acceptNegotiationQuote({
+            rfqNumber: data.rfqNumber,
+            acceptedValue: data.acceptedValue,
+            id: data.id,
+            acceptedSettlementDate: data.acceptedSettlementDate,
+            acceptedYieldType: data.acceptedYieldType,
+            acceptedYield: data.acceptedYield,
+            acceptedPrice: data.acceptedPrice,
+            respDealType: data.respDealType,
+            respClientCode: data.respClientCode,
+            role: data.role,
+        });
+
+        // Sync Negotiation Data to Our Database
+        return await this.rfqDbSyncManager.syncNegotiationData(negotiateRfqQuote, createdBy);
+
+    }
+
+
+    async terminateNegotiation(data: z.infer<typeof appSchema.rfq.terminateNegotiationQuoteSchema>, createdBy: number) {
+        // Negotiate RFQ Quote - Call Service
+        const negotiateRfqQuote = await this.rfqManager.terminateNegotiationThread({
+            rfqNumber: data.rfqNumber,
+            id: data.id,
+            role: data.role,
+        });
+
+        // Sync Negotiation Data to Our Database
+        return await this.rfqDbSyncManager.syncNegotiationData(negotiateRfqQuote, createdBy);
+    }
+
+
+    async acceptRejectDeal(data: z.infer<typeof appSchema.rfq.acceptRejectDealSchema>, createdBy: number) {
+        // Accept/Reject RFQ Deal - Call Service
+        const acceptRejectDeal = await this.rfqManager.acceptOrRejectDeal({
+            rfqNumber: data.rfqNumber,
+            id: data.id,
+            acceptedPrice: data.acceptedPrice,
+            acceptedPutCallDate: data.acceptedPutCallDate,
+            acceptedAccruedInterest: data.acceptedAccruedInterest,
+            acceptedConsideration: data.acceptedConsideration,
+            confirmStatus: data.confirmStatus,
+        });
+
+        // Sync Deal Data to Our Database
+        return await this.rfqDbSyncManager.syncNegotiationData(acceptRejectDeal, createdBy);
+    }
+
+
+    async getAllRfqList(filters: z.infer<typeof appSchema.rfq.rfqFilterSchema>) {
+        const data = await this.rfqManager.getAllRfq(filters);
+        const result = data.map(async (rfq) => {
+            return await this.rfqDbSyncManager.syncRfqMasterData(rfq);
+        });
+        const rfqs = await Promise.all(result);
+        return rfqs;
+    }
+
+
 }

@@ -16,6 +16,7 @@ import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 import { DatePicker } from "@/components/custom/DatePicker";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -52,9 +53,22 @@ function IdentityValidationForm() {
               required
               error={error?.dateOfBirth?.[0]}
             >
+              {/* // fix date formatting issue */}
               <DatePicker
-                value={data.dateOfBirth}
-                onChange={(e) => setStep1PanData("dateOfBirth", e.target.value)}
+                value={
+                  data.dateOfBirth
+                    ? dateTimeUtils.formatDateTime(
+                        data.dateOfBirth,
+                        "DD/MM/YYYY"
+                      )
+                    : ""
+                }
+                onChange={(e) =>
+                  setStep1PanData(
+                    "dateOfBirth",
+                    dateTimeUtils.formatDateTime(e.target.value, "YYYY-MM-DD")
+                  )
+                }
               />
             </LabelInput>
           </div>
@@ -99,7 +113,7 @@ function IdentityValidationForm() {
               checked={data.checkTerms1}
               onCheckedChange={(val) => setStep1PanData("checkTerms1", val)}
               checkClass="text-white"
-              className="mt-[2px] border border-gray-200"
+              className="mt-0.5 border border-gray-200"
             />
             I hereby confirm that I am not a Politically Exposed Person (PEP)
             nor related to any PEP.

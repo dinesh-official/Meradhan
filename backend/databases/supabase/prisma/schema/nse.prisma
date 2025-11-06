@@ -105,80 +105,60 @@ model NseIsinSecurityReceipt {
     @@map("nse_isin_security_receipts")
 }
 
-model NSERfqModel {
-    key             Int         @id @default(autoincrement())
-    number          String      @unique
-    segment         String
-    isin            String
-    date            String
-    participantCode String
-    dealType        DealType
-    clientCode      String
-    buySell         BuySell
-    quoteType       QuoteType
-    settlementType  Int
-    value           Float
-    quantity        Int?
-    yieldType       YieldType
-    yield           Float
-    calcMethod      CalcMethod
-    price           Float?
-    valueSell       Float?
-    quantitySell    Int?
-    yieldTypeSell   YieldType?
-    yieldSell       Float?
-    calcMethodSell  CalcMethod?
-    priceSell       Float?
-    gtdFlag         String?
-    endTime         String?
-    quoteNegotiable String?
-    valueNegotiable String?
-    minFillValue    Float?
-    valueStepSize   Float?
-    anonymous       String?
-    access          Int
-    groupList       Int[]
-    participantList String[]
-    category        String?
-    rating          String?
-    remarks         String?
-    status          RFQStatus
-    userLogin       String
-    tradedValue     Float
-    confirmedValue  Float
-    clientRegType   String
-    quoteTime       String
+
+
+model SettlementOrderModel{
+id String @unique
+orderNumber String @unique
+symbol String
+buyParticipantLoginId String
+sellParticipantLoginId String
+price Float
+yieldType YieldTypeSort
+yield Float
+value Float
+
+
+buyerRefNo String?
+sellerRefNo String
+buyBackofficeLoginId String?
+sellBackofficeLoginId String?
+
+buyBrokerLoginId String
+
+sellBrokerLoginId String?
+
+source Int
+modSettleDate String
+modQuantity Int
+modAccrInt Float?
+modConsideration Float
+settlementNo String
+stampDutyAmount Float
+stampDutyBearer String
+buyerFundPayinObligation Float
+sellerFundPayoutObligation Float
+fundPayinRefId String
+settleStatus Int
+
+secPayinQuantity Int?
+secPayinRemarks String?
+secPayinTime String?
+fundsPayinAmount Float?
+fundsPayinRemarks String?
+fundsPayinTime String?
+payoutRemarks String?
+payoutTime String?
+ifscCode String
+accountNo String
+utrNumber String?
+
+dpId String
+benId String
 }
 
-enum DealType {
-    D
-    B
-}
-
-enum BuySell {
-    B
-    S
-    X
-}
-
-enum QuoteType {
-    Y
-    B
-}
-
-enum YieldType {
-    YTM
-    YTP
-    YTC
-}
-
-enum CalcMethod {
-    M
-    O
-}
-
-enum RFQStatus {
+enum YieldTypeSort {
     P
-    W
-    T
+    C
+    M
 }

@@ -114,10 +114,20 @@ export type NSEDpAccount = $Result.DefaultSelection<Prisma.$NSEDpAccountPayload>
  */
 export type NseIsinSecurityReceipt = $Result.DefaultSelection<Prisma.$NseIsinSecurityReceiptPayload>
 /**
- * Model NSERfqModel
+ * Model SettlementOrderModel
  * 
  */
-export type NSERfqModel = $Result.DefaultSelection<Prisma.$NSERfqModelPayload>
+export type SettlementOrderModel = $Result.DefaultSelection<Prisma.$SettlementOrderModelPayload>
+/**
+ * Model RFQMasterISIN
+ * 
+ */
+export type RFQMasterISIN = $Result.DefaultSelection<Prisma.$RFQMasterISINPayload>
+/**
+ * Model RFQNegotiation
+ * 
+ */
+export type RFQNegotiation = $Result.DefaultSelection<Prisma.$RFQNegotiationPayload>
 
 /**
  * Enums
@@ -277,12 +287,30 @@ export const DefaultSelect: {
 export type DefaultSelect = (typeof DefaultSelect)[keyof typeof DefaultSelect]
 
 
-export const DealType: {
-  D: 'D',
-  B: 'B'
+export const YieldTypeSort: {
+  P: 'P',
+  C: 'C',
+  M: 'M'
 };
 
-export type DealType = (typeof DealType)[keyof typeof DealType]
+export type YieldTypeSort = (typeof YieldTypeSort)[keyof typeof YieldTypeSort]
+
+
+export const RFQSegment: {
+  R: 'R',
+  C: 'C'
+};
+
+export type RFQSegment = (typeof RFQSegment)[keyof typeof RFQSegment]
+
+
+export const ClientRegType: {
+  R: 'R',
+  I: 'I',
+  U: 'U'
+};
+
+export type ClientRegType = (typeof ClientRegType)[keyof typeof ClientRegType]
 
 
 export const BuySell: {
@@ -319,13 +347,59 @@ export const CalcMethod: {
 export type CalcMethod = (typeof CalcMethod)[keyof typeof CalcMethod]
 
 
-export const RFQStatus: {
+export const YesNo: {
+  Y: 'Y'
+};
+
+export type YesNo = (typeof YesNo)[keyof typeof YesNo]
+
+
+export const Status: {
   P: 'P',
   W: 'W',
   T: 'T'
 };
 
-export type RFQStatus = (typeof RFQStatus)[keyof typeof RFQStatus]
+export type Status = (typeof Status)[keyof typeof Status]
+
+
+export const DealType: {
+  D: 'D',
+  B: 'B'
+};
+
+export type DealType = (typeof DealType)[keyof typeof DealType]
+
+
+export const BySide: {
+  I: 'I',
+  R: 'R'
+};
+
+export type BySide = (typeof BySide)[keyof typeof BySide]
+
+
+export const NegotiationStatus: {
+  N: 'N',
+  R: 'R',
+  A: 'A',
+  C: 'C',
+  E: 'E'
+};
+
+export type NegotiationStatus = (typeof NegotiationStatus)[keyof typeof NegotiationStatus]
+
+
+export const NegotiationConfirmationStatus: {
+  PP: 'PP',
+  PC: 'PC',
+  PR: 'PR',
+  CA: 'CA',
+  CC: 'CC',
+  CR: 'CR'
+};
+
+export type NegotiationConfirmationStatus = (typeof NegotiationConfirmationStatus)[keyof typeof NegotiationConfirmationStatus]
 
 }
 
@@ -389,9 +463,17 @@ export type DefaultSelect = $Enums.DefaultSelect
 
 export const DefaultSelect: typeof $Enums.DefaultSelect
 
-export type DealType = $Enums.DealType
+export type YieldTypeSort = $Enums.YieldTypeSort
 
-export const DealType: typeof $Enums.DealType
+export const YieldTypeSort: typeof $Enums.YieldTypeSort
+
+export type RFQSegment = $Enums.RFQSegment
+
+export const RFQSegment: typeof $Enums.RFQSegment
+
+export type ClientRegType = $Enums.ClientRegType
+
+export const ClientRegType: typeof $Enums.ClientRegType
 
 export type BuySell = $Enums.BuySell
 
@@ -409,9 +491,29 @@ export type CalcMethod = $Enums.CalcMethod
 
 export const CalcMethod: typeof $Enums.CalcMethod
 
-export type RFQStatus = $Enums.RFQStatus
+export type YesNo = $Enums.YesNo
 
-export const RFQStatus: typeof $Enums.RFQStatus
+export const YesNo: typeof $Enums.YesNo
+
+export type Status = $Enums.Status
+
+export const Status: typeof $Enums.Status
+
+export type DealType = $Enums.DealType
+
+export const DealType: typeof $Enums.DealType
+
+export type BySide = $Enums.BySide
+
+export const BySide: typeof $Enums.BySide
+
+export type NegotiationStatus = $Enums.NegotiationStatus
+
+export const NegotiationStatus: typeof $Enums.NegotiationStatus
+
+export type NegotiationConfirmationStatus = $Enums.NegotiationConfirmationStatus
+
+export const NegotiationConfirmationStatus: typeof $Enums.NegotiationConfirmationStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -732,14 +834,34 @@ export class PrismaClient<
   get nseIsinSecurityReceipt(): Prisma.NseIsinSecurityReceiptDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.nSERfqModel`: Exposes CRUD operations for the **NSERfqModel** model.
+   * `prisma.settlementOrderModel`: Exposes CRUD operations for the **SettlementOrderModel** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more NSERfqModels
-    * const nSERfqModels = await prisma.nSERfqModel.findMany()
+    * // Fetch zero or more SettlementOrderModels
+    * const settlementOrderModels = await prisma.settlementOrderModel.findMany()
     * ```
     */
-  get nSERfqModel(): Prisma.NSERfqModelDelegate<ExtArgs, ClientOptions>;
+  get settlementOrderModel(): Prisma.SettlementOrderModelDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.rFQMasterISIN`: Exposes CRUD operations for the **RFQMasterISIN** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RFQMasterISINS
+    * const rFQMasterISINS = await prisma.rFQMasterISIN.findMany()
+    * ```
+    */
+  get rFQMasterISIN(): Prisma.RFQMasterISINDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.rFQNegotiation`: Exposes CRUD operations for the **RFQNegotiation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RFQNegotiations
+    * const rFQNegotiations = await prisma.rFQNegotiation.findMany()
+    * ```
+    */
+  get rFQNegotiation(): Prisma.RFQNegotiationDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1200,7 +1322,9 @@ export namespace Prisma {
     NSEBankAccount: 'NSEBankAccount',
     NSEDpAccount: 'NSEDpAccount',
     NseIsinSecurityReceipt: 'NseIsinSecurityReceipt',
-    NSERfqModel: 'NSERfqModel'
+    SettlementOrderModel: 'SettlementOrderModel',
+    RFQMasterISIN: 'RFQMasterISIN',
+    RFQNegotiation: 'RFQNegotiation'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1219,7 +1343,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "nSERfqModel"
+      modelProps: "crmAuditLogs" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "settlementOrderModel" | "rFQMasterISIN" | "rFQNegotiation"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2703,77 +2827,225 @@ export namespace Prisma {
           }
         }
       }
-      NSERfqModel: {
-        payload: Prisma.$NSERfqModelPayload<ExtArgs>
-        fields: Prisma.NSERfqModelFieldRefs
+      SettlementOrderModel: {
+        payload: Prisma.$SettlementOrderModelPayload<ExtArgs>
+        fields: Prisma.SettlementOrderModelFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.NSERfqModelFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload> | null
+            args: Prisma.SettlementOrderModelFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.NSERfqModelFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+            args: Prisma.SettlementOrderModelFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
           }
           findFirst: {
-            args: Prisma.NSERfqModelFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload> | null
+            args: Prisma.SettlementOrderModelFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.NSERfqModelFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+            args: Prisma.SettlementOrderModelFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
           }
           findMany: {
-            args: Prisma.NSERfqModelFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>[]
+            args: Prisma.SettlementOrderModelFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>[]
           }
           create: {
-            args: Prisma.NSERfqModelCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+            args: Prisma.SettlementOrderModelCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
           }
           createMany: {
-            args: Prisma.NSERfqModelCreateManyArgs<ExtArgs>
+            args: Prisma.SettlementOrderModelCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.NSERfqModelCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>[]
+            args: Prisma.SettlementOrderModelCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>[]
           }
           delete: {
-            args: Prisma.NSERfqModelDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+            args: Prisma.SettlementOrderModelDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
           }
           update: {
-            args: Prisma.NSERfqModelUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+            args: Prisma.SettlementOrderModelUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
           }
           deleteMany: {
-            args: Prisma.NSERfqModelDeleteManyArgs<ExtArgs>
+            args: Prisma.SettlementOrderModelDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.NSERfqModelUpdateManyArgs<ExtArgs>
+            args: Prisma.SettlementOrderModelUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.NSERfqModelUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>[]
+            args: Prisma.SettlementOrderModelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>[]
           }
           upsert: {
-            args: Prisma.NSERfqModelUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NSERfqModelPayload>
+            args: Prisma.SettlementOrderModelUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
           }
           aggregate: {
-            args: Prisma.NSERfqModelAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateNSERfqModel>
+            args: Prisma.SettlementOrderModelAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSettlementOrderModel>
           }
           groupBy: {
-            args: Prisma.NSERfqModelGroupByArgs<ExtArgs>
-            result: $Utils.Optional<NSERfqModelGroupByOutputType>[]
+            args: Prisma.SettlementOrderModelGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SettlementOrderModelGroupByOutputType>[]
           }
           count: {
-            args: Prisma.NSERfqModelCountArgs<ExtArgs>
-            result: $Utils.Optional<NSERfqModelCountAggregateOutputType> | number
+            args: Prisma.SettlementOrderModelCountArgs<ExtArgs>
+            result: $Utils.Optional<SettlementOrderModelCountAggregateOutputType> | number
+          }
+        }
+      }
+      RFQMasterISIN: {
+        payload: Prisma.$RFQMasterISINPayload<ExtArgs>
+        fields: Prisma.RFQMasterISINFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RFQMasterISINFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RFQMasterISINFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>
+          }
+          findFirst: {
+            args: Prisma.RFQMasterISINFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RFQMasterISINFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>
+          }
+          findMany: {
+            args: Prisma.RFQMasterISINFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>[]
+          }
+          create: {
+            args: Prisma.RFQMasterISINCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>
+          }
+          createMany: {
+            args: Prisma.RFQMasterISINCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RFQMasterISINCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>[]
+          }
+          delete: {
+            args: Prisma.RFQMasterISINDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>
+          }
+          update: {
+            args: Prisma.RFQMasterISINUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>
+          }
+          deleteMany: {
+            args: Prisma.RFQMasterISINDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RFQMasterISINUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RFQMasterISINUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>[]
+          }
+          upsert: {
+            args: Prisma.RFQMasterISINUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQMasterISINPayload>
+          }
+          aggregate: {
+            args: Prisma.RFQMasterISINAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRFQMasterISIN>
+          }
+          groupBy: {
+            args: Prisma.RFQMasterISINGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RFQMasterISINGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RFQMasterISINCountArgs<ExtArgs>
+            result: $Utils.Optional<RFQMasterISINCountAggregateOutputType> | number
+          }
+        }
+      }
+      RFQNegotiation: {
+        payload: Prisma.$RFQNegotiationPayload<ExtArgs>
+        fields: Prisma.RFQNegotiationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RFQNegotiationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RFQNegotiationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>
+          }
+          findFirst: {
+            args: Prisma.RFQNegotiationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RFQNegotiationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>
+          }
+          findMany: {
+            args: Prisma.RFQNegotiationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>[]
+          }
+          create: {
+            args: Prisma.RFQNegotiationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>
+          }
+          createMany: {
+            args: Prisma.RFQNegotiationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RFQNegotiationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>[]
+          }
+          delete: {
+            args: Prisma.RFQNegotiationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>
+          }
+          update: {
+            args: Prisma.RFQNegotiationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>
+          }
+          deleteMany: {
+            args: Prisma.RFQNegotiationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RFQNegotiationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RFQNegotiationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>[]
+          }
+          upsert: {
+            args: Prisma.RFQNegotiationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RFQNegotiationPayload>
+          }
+          aggregate: {
+            args: Prisma.RFQNegotiationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRFQNegotiation>
+          }
+          groupBy: {
+            args: Prisma.RFQNegotiationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RFQNegotiationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RFQNegotiationCountArgs<ExtArgs>
+            result: $Utils.Optional<RFQNegotiationCountAggregateOutputType> | number
           }
         }
       }
@@ -2893,7 +3165,9 @@ export namespace Prisma {
     nSEBankAccount?: NSEBankAccountOmit
     nSEDpAccount?: NSEDpAccountOmit
     nseIsinSecurityReceipt?: NseIsinSecurityReceiptOmit
-    nSERfqModel?: NSERfqModelOmit
+    settlementOrderModel?: SettlementOrderModelOmit
+    rFQMasterISIN?: RFQMasterISINOmit
+    rFQNegotiation?: RFQNegotiationOmit
   }
 
   /* Types for Logging */
@@ -4219,6 +4493,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     sortedAt: number | null
+    isConvertedDeal: boolean | null
   }
 
   export type BondsMaxAggregateOutputType = {
@@ -4253,6 +4528,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     sortedAt: number | null
+    isConvertedDeal: boolean | null
   }
 
   export type BondsCountAggregateOutputType = {
@@ -4288,6 +4564,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     sortedAt: number
+    isConvertedDeal: number
     _all: number
   }
 
@@ -4342,6 +4619,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     sortedAt?: true
+    isConvertedDeal?: true
   }
 
   export type BondsMaxAggregateInputType = {
@@ -4376,6 +4654,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     sortedAt?: true
+    isConvertedDeal?: true
   }
 
   export type BondsCountAggregateInputType = {
@@ -4411,6 +4690,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     sortedAt?: true
+    isConvertedDeal?: true
     _all?: true
   }
 
@@ -4533,6 +4813,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     sortedAt: number
+    isConvertedDeal: boolean | null
     _count: BondsCountAggregateOutputType | null
     _avg: BondsAvgAggregateOutputType | null
     _sum: BondsSumAggregateOutputType | null
@@ -4587,6 +4868,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     sortedAt?: boolean
+    isConvertedDeal?: boolean
   }, ExtArgs["result"]["bonds"]>
 
   export type BondsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4622,6 +4904,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     sortedAt?: boolean
+    isConvertedDeal?: boolean
   }, ExtArgs["result"]["bonds"]>
 
   export type BondsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4657,6 +4940,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     sortedAt?: boolean
+    isConvertedDeal?: boolean
   }, ExtArgs["result"]["bonds"]>
 
   export type BondsSelectScalar = {
@@ -4692,9 +4976,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     sortedAt?: boolean
+    isConvertedDeal?: boolean
   }
 
-  export type BondsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "isin" | "bondName" | "instrumentName" | "description" | "issuePrice" | "faceValue" | "couponRate" | "interestPaymentFrequency" | "putCallOptionDetails" | "certificateNumbers" | "totalIssueSize" | "registrarDetails" | "physicalSecurityAddress" | "defaultedInRedemption" | "debentureTrustee" | "creditRatingInfo" | "remarks" | "taxStatus" | "creditRating" | "interestPaymentMode" | "isListed" | "ratingAgencyName" | "ratingDate" | "categories" | "sectorName" | "dateOfAllotment" | "redemptionDate" | "maturityDate" | "createdAt" | "updatedAt" | "sortedAt", ExtArgs["result"]["bonds"]>
+  export type BondsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "isin" | "bondName" | "instrumentName" | "description" | "issuePrice" | "faceValue" | "couponRate" | "interestPaymentFrequency" | "putCallOptionDetails" | "certificateNumbers" | "totalIssueSize" | "registrarDetails" | "physicalSecurityAddress" | "defaultedInRedemption" | "debentureTrustee" | "creditRatingInfo" | "remarks" | "taxStatus" | "creditRating" | "interestPaymentMode" | "isListed" | "ratingAgencyName" | "ratingDate" | "categories" | "sectorName" | "dateOfAllotment" | "redemptionDate" | "maturityDate" | "createdAt" | "updatedAt" | "sortedAt" | "isConvertedDeal", ExtArgs["result"]["bonds"]>
 
   export type $BondsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Bonds"
@@ -4735,6 +5020,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       sortedAt: number
+      isConvertedDeal: boolean | null
     }, ExtArgs["result"]["bonds"]>
     composites: {}
   }
@@ -5190,6 +5476,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"Bonds", 'DateTime'>
     readonly updatedAt: FieldRef<"Bonds", 'DateTime'>
     readonly sortedAt: FieldRef<"Bonds", 'Int'>
+    readonly isConvertedDeal: FieldRef<"Bonds", 'Boolean'>
   }
     
 
@@ -27475,867 +27762,839 @@ export namespace Prisma {
 
 
   /**
-   * Model NSERfqModel
+   * Model SettlementOrderModel
    */
 
-  export type AggregateNSERfqModel = {
-    _count: NSERfqModelCountAggregateOutputType | null
-    _avg: NSERfqModelAvgAggregateOutputType | null
-    _sum: NSERfqModelSumAggregateOutputType | null
-    _min: NSERfqModelMinAggregateOutputType | null
-    _max: NSERfqModelMaxAggregateOutputType | null
+  export type AggregateSettlementOrderModel = {
+    _count: SettlementOrderModelCountAggregateOutputType | null
+    _avg: SettlementOrderModelAvgAggregateOutputType | null
+    _sum: SettlementOrderModelSumAggregateOutputType | null
+    _min: SettlementOrderModelMinAggregateOutputType | null
+    _max: SettlementOrderModelMaxAggregateOutputType | null
   }
 
-  export type NSERfqModelAvgAggregateOutputType = {
-    key: number | null
-    settlementType: number | null
-    value: number | null
-    quantity: number | null
-    yield: number | null
+  export type SettlementOrderModelAvgAggregateOutputType = {
     price: number | null
-    valueSell: number | null
-    quantitySell: number | null
-    yieldSell: number | null
-    priceSell: number | null
-    minFillValue: number | null
-    valueStepSize: number | null
-    access: number | null
-    groupList: number | null
-    tradedValue: number | null
-    confirmedValue: number | null
-  }
-
-  export type NSERfqModelSumAggregateOutputType = {
-    key: number | null
-    settlementType: number | null
-    value: number | null
-    quantity: number | null
     yield: number | null
-    price: number | null
-    valueSell: number | null
-    quantitySell: number | null
-    yieldSell: number | null
-    priceSell: number | null
-    minFillValue: number | null
-    valueStepSize: number | null
-    access: number | null
-    groupList: number[]
-    tradedValue: number | null
-    confirmedValue: number | null
-  }
-
-  export type NSERfqModelMinAggregateOutputType = {
-    key: number | null
-    number: string | null
-    segment: string | null
-    isin: string | null
-    date: string | null
-    participantCode: string | null
-    dealType: $Enums.DealType | null
-    clientCode: string | null
-    buySell: $Enums.BuySell | null
-    quoteType: $Enums.QuoteType | null
-    settlementType: number | null
     value: number | null
-    quantity: number | null
-    yieldType: $Enums.YieldType | null
-    yield: number | null
-    calcMethod: $Enums.CalcMethod | null
-    price: number | null
-    valueSell: number | null
-    quantitySell: number | null
-    yieldTypeSell: $Enums.YieldType | null
-    yieldSell: number | null
-    calcMethodSell: $Enums.CalcMethod | null
-    priceSell: number | null
-    gtdFlag: string | null
-    endTime: string | null
-    quoteNegotiable: string | null
-    valueNegotiable: string | null
-    minFillValue: number | null
-    valueStepSize: number | null
-    anonymous: string | null
-    access: number | null
-    category: string | null
-    rating: string | null
-    remarks: string | null
-    status: $Enums.RFQStatus | null
-    userLogin: string | null
-    tradedValue: number | null
-    confirmedValue: number | null
-    clientRegType: string | null
-    quoteTime: string | null
+    source: number | null
+    modQuantity: number | null
+    modAccrInt: number | null
+    modConsideration: number | null
+    stampDutyAmount: number | null
+    buyerFundPayinObligation: number | null
+    sellerFundPayoutObligation: number | null
+    settleStatus: number | null
+    secPayinQuantity: number | null
+    fundsPayinAmount: number | null
   }
 
-  export type NSERfqModelMaxAggregateOutputType = {
-    key: number | null
-    number: string | null
-    segment: string | null
-    isin: string | null
-    date: string | null
-    participantCode: string | null
-    dealType: $Enums.DealType | null
-    clientCode: string | null
-    buySell: $Enums.BuySell | null
-    quoteType: $Enums.QuoteType | null
-    settlementType: number | null
+  export type SettlementOrderModelSumAggregateOutputType = {
+    price: number | null
+    yield: number | null
     value: number | null
-    quantity: number | null
-    yieldType: $Enums.YieldType | null
-    yield: number | null
-    calcMethod: $Enums.CalcMethod | null
-    price: number | null
-    valueSell: number | null
-    quantitySell: number | null
-    yieldTypeSell: $Enums.YieldType | null
-    yieldSell: number | null
-    calcMethodSell: $Enums.CalcMethod | null
-    priceSell: number | null
-    gtdFlag: string | null
-    endTime: string | null
-    quoteNegotiable: string | null
-    valueNegotiable: string | null
-    minFillValue: number | null
-    valueStepSize: number | null
-    anonymous: string | null
-    access: number | null
-    category: string | null
-    rating: string | null
-    remarks: string | null
-    status: $Enums.RFQStatus | null
-    userLogin: string | null
-    tradedValue: number | null
-    confirmedValue: number | null
-    clientRegType: string | null
-    quoteTime: string | null
+    source: number | null
+    modQuantity: number | null
+    modAccrInt: number | null
+    modConsideration: number | null
+    stampDutyAmount: number | null
+    buyerFundPayinObligation: number | null
+    sellerFundPayoutObligation: number | null
+    settleStatus: number | null
+    secPayinQuantity: number | null
+    fundsPayinAmount: number | null
   }
 
-  export type NSERfqModelCountAggregateOutputType = {
-    key: number
-    number: number
-    segment: number
-    isin: number
-    date: number
-    participantCode: number
-    dealType: number
-    clientCode: number
-    buySell: number
-    quoteType: number
-    settlementType: number
-    value: number
-    quantity: number
+  export type SettlementOrderModelMinAggregateOutputType = {
+    id: string | null
+    orderNumber: string | null
+    symbol: string | null
+    buyParticipantLoginId: string | null
+    sellParticipantLoginId: string | null
+    price: number | null
+    yieldType: $Enums.YieldTypeSort | null
+    yield: number | null
+    value: number | null
+    buyerRefNo: string | null
+    sellerRefNo: string | null
+    buyBackofficeLoginId: string | null
+    sellBackofficeLoginId: string | null
+    buyBrokerLoginId: string | null
+    sellBrokerLoginId: string | null
+    source: number | null
+    modSettleDate: string | null
+    modQuantity: number | null
+    modAccrInt: number | null
+    modConsideration: number | null
+    settlementNo: string | null
+    stampDutyAmount: number | null
+    stampDutyBearer: string | null
+    buyerFundPayinObligation: number | null
+    sellerFundPayoutObligation: number | null
+    fundPayinRefId: string | null
+    settleStatus: number | null
+    secPayinQuantity: number | null
+    secPayinRemarks: string | null
+    secPayinTime: string | null
+    fundsPayinAmount: number | null
+    fundsPayinRemarks: string | null
+    fundsPayinTime: string | null
+    payoutRemarks: string | null
+    payoutTime: string | null
+    ifscCode: string | null
+    accountNo: string | null
+    utrNumber: string | null
+    dpId: string | null
+    benId: string | null
+  }
+
+  export type SettlementOrderModelMaxAggregateOutputType = {
+    id: string | null
+    orderNumber: string | null
+    symbol: string | null
+    buyParticipantLoginId: string | null
+    sellParticipantLoginId: string | null
+    price: number | null
+    yieldType: $Enums.YieldTypeSort | null
+    yield: number | null
+    value: number | null
+    buyerRefNo: string | null
+    sellerRefNo: string | null
+    buyBackofficeLoginId: string | null
+    sellBackofficeLoginId: string | null
+    buyBrokerLoginId: string | null
+    sellBrokerLoginId: string | null
+    source: number | null
+    modSettleDate: string | null
+    modQuantity: number | null
+    modAccrInt: number | null
+    modConsideration: number | null
+    settlementNo: string | null
+    stampDutyAmount: number | null
+    stampDutyBearer: string | null
+    buyerFundPayinObligation: number | null
+    sellerFundPayoutObligation: number | null
+    fundPayinRefId: string | null
+    settleStatus: number | null
+    secPayinQuantity: number | null
+    secPayinRemarks: string | null
+    secPayinTime: string | null
+    fundsPayinAmount: number | null
+    fundsPayinRemarks: string | null
+    fundsPayinTime: string | null
+    payoutRemarks: string | null
+    payoutTime: string | null
+    ifscCode: string | null
+    accountNo: string | null
+    utrNumber: string | null
+    dpId: string | null
+    benId: string | null
+  }
+
+  export type SettlementOrderModelCountAggregateOutputType = {
+    id: number
+    orderNumber: number
+    symbol: number
+    buyParticipantLoginId: number
+    sellParticipantLoginId: number
+    price: number
     yieldType: number
     yield: number
-    calcMethod: number
-    price: number
-    valueSell: number
-    quantitySell: number
-    yieldTypeSell: number
-    yieldSell: number
-    calcMethodSell: number
-    priceSell: number
-    gtdFlag: number
-    endTime: number
-    quoteNegotiable: number
-    valueNegotiable: number
-    minFillValue: number
-    valueStepSize: number
-    anonymous: number
-    access: number
-    groupList: number
-    participantList: number
-    category: number
-    rating: number
-    remarks: number
-    status: number
-    userLogin: number
-    tradedValue: number
-    confirmedValue: number
-    clientRegType: number
-    quoteTime: number
+    value: number
+    buyerRefNo: number
+    sellerRefNo: number
+    buyBackofficeLoginId: number
+    sellBackofficeLoginId: number
+    buyBrokerLoginId: number
+    sellBrokerLoginId: number
+    source: number
+    modSettleDate: number
+    modQuantity: number
+    modAccrInt: number
+    modConsideration: number
+    settlementNo: number
+    stampDutyAmount: number
+    stampDutyBearer: number
+    buyerFundPayinObligation: number
+    sellerFundPayoutObligation: number
+    fundPayinRefId: number
+    settleStatus: number
+    secPayinQuantity: number
+    secPayinRemarks: number
+    secPayinTime: number
+    fundsPayinAmount: number
+    fundsPayinRemarks: number
+    fundsPayinTime: number
+    payoutRemarks: number
+    payoutTime: number
+    ifscCode: number
+    accountNo: number
+    utrNumber: number
+    dpId: number
+    benId: number
     _all: number
   }
 
 
-  export type NSERfqModelAvgAggregateInputType = {
-    key?: true
-    settlementType?: true
-    value?: true
-    quantity?: true
-    yield?: true
+  export type SettlementOrderModelAvgAggregateInputType = {
     price?: true
-    valueSell?: true
-    quantitySell?: true
-    yieldSell?: true
-    priceSell?: true
-    minFillValue?: true
-    valueStepSize?: true
-    access?: true
-    groupList?: true
-    tradedValue?: true
-    confirmedValue?: true
+    yield?: true
+    value?: true
+    source?: true
+    modQuantity?: true
+    modAccrInt?: true
+    modConsideration?: true
+    stampDutyAmount?: true
+    buyerFundPayinObligation?: true
+    sellerFundPayoutObligation?: true
+    settleStatus?: true
+    secPayinQuantity?: true
+    fundsPayinAmount?: true
   }
 
-  export type NSERfqModelSumAggregateInputType = {
-    key?: true
-    settlementType?: true
-    value?: true
-    quantity?: true
-    yield?: true
+  export type SettlementOrderModelSumAggregateInputType = {
     price?: true
-    valueSell?: true
-    quantitySell?: true
-    yieldSell?: true
-    priceSell?: true
-    minFillValue?: true
-    valueStepSize?: true
-    access?: true
-    groupList?: true
-    tradedValue?: true
-    confirmedValue?: true
+    yield?: true
+    value?: true
+    source?: true
+    modQuantity?: true
+    modAccrInt?: true
+    modConsideration?: true
+    stampDutyAmount?: true
+    buyerFundPayinObligation?: true
+    sellerFundPayoutObligation?: true
+    settleStatus?: true
+    secPayinQuantity?: true
+    fundsPayinAmount?: true
   }
 
-  export type NSERfqModelMinAggregateInputType = {
-    key?: true
-    number?: true
-    segment?: true
-    isin?: true
-    date?: true
-    participantCode?: true
-    dealType?: true
-    clientCode?: true
-    buySell?: true
-    quoteType?: true
-    settlementType?: true
-    value?: true
-    quantity?: true
+  export type SettlementOrderModelMinAggregateInputType = {
+    id?: true
+    orderNumber?: true
+    symbol?: true
+    buyParticipantLoginId?: true
+    sellParticipantLoginId?: true
+    price?: true
     yieldType?: true
     yield?: true
-    calcMethod?: true
-    price?: true
-    valueSell?: true
-    quantitySell?: true
-    yieldTypeSell?: true
-    yieldSell?: true
-    calcMethodSell?: true
-    priceSell?: true
-    gtdFlag?: true
-    endTime?: true
-    quoteNegotiable?: true
-    valueNegotiable?: true
-    minFillValue?: true
-    valueStepSize?: true
-    anonymous?: true
-    access?: true
-    category?: true
-    rating?: true
-    remarks?: true
-    status?: true
-    userLogin?: true
-    tradedValue?: true
-    confirmedValue?: true
-    clientRegType?: true
-    quoteTime?: true
+    value?: true
+    buyerRefNo?: true
+    sellerRefNo?: true
+    buyBackofficeLoginId?: true
+    sellBackofficeLoginId?: true
+    buyBrokerLoginId?: true
+    sellBrokerLoginId?: true
+    source?: true
+    modSettleDate?: true
+    modQuantity?: true
+    modAccrInt?: true
+    modConsideration?: true
+    settlementNo?: true
+    stampDutyAmount?: true
+    stampDutyBearer?: true
+    buyerFundPayinObligation?: true
+    sellerFundPayoutObligation?: true
+    fundPayinRefId?: true
+    settleStatus?: true
+    secPayinQuantity?: true
+    secPayinRemarks?: true
+    secPayinTime?: true
+    fundsPayinAmount?: true
+    fundsPayinRemarks?: true
+    fundsPayinTime?: true
+    payoutRemarks?: true
+    payoutTime?: true
+    ifscCode?: true
+    accountNo?: true
+    utrNumber?: true
+    dpId?: true
+    benId?: true
   }
 
-  export type NSERfqModelMaxAggregateInputType = {
-    key?: true
-    number?: true
-    segment?: true
-    isin?: true
-    date?: true
-    participantCode?: true
-    dealType?: true
-    clientCode?: true
-    buySell?: true
-    quoteType?: true
-    settlementType?: true
-    value?: true
-    quantity?: true
+  export type SettlementOrderModelMaxAggregateInputType = {
+    id?: true
+    orderNumber?: true
+    symbol?: true
+    buyParticipantLoginId?: true
+    sellParticipantLoginId?: true
+    price?: true
     yieldType?: true
     yield?: true
-    calcMethod?: true
-    price?: true
-    valueSell?: true
-    quantitySell?: true
-    yieldTypeSell?: true
-    yieldSell?: true
-    calcMethodSell?: true
-    priceSell?: true
-    gtdFlag?: true
-    endTime?: true
-    quoteNegotiable?: true
-    valueNegotiable?: true
-    minFillValue?: true
-    valueStepSize?: true
-    anonymous?: true
-    access?: true
-    category?: true
-    rating?: true
-    remarks?: true
-    status?: true
-    userLogin?: true
-    tradedValue?: true
-    confirmedValue?: true
-    clientRegType?: true
-    quoteTime?: true
+    value?: true
+    buyerRefNo?: true
+    sellerRefNo?: true
+    buyBackofficeLoginId?: true
+    sellBackofficeLoginId?: true
+    buyBrokerLoginId?: true
+    sellBrokerLoginId?: true
+    source?: true
+    modSettleDate?: true
+    modQuantity?: true
+    modAccrInt?: true
+    modConsideration?: true
+    settlementNo?: true
+    stampDutyAmount?: true
+    stampDutyBearer?: true
+    buyerFundPayinObligation?: true
+    sellerFundPayoutObligation?: true
+    fundPayinRefId?: true
+    settleStatus?: true
+    secPayinQuantity?: true
+    secPayinRemarks?: true
+    secPayinTime?: true
+    fundsPayinAmount?: true
+    fundsPayinRemarks?: true
+    fundsPayinTime?: true
+    payoutRemarks?: true
+    payoutTime?: true
+    ifscCode?: true
+    accountNo?: true
+    utrNumber?: true
+    dpId?: true
+    benId?: true
   }
 
-  export type NSERfqModelCountAggregateInputType = {
-    key?: true
-    number?: true
-    segment?: true
-    isin?: true
-    date?: true
-    participantCode?: true
-    dealType?: true
-    clientCode?: true
-    buySell?: true
-    quoteType?: true
-    settlementType?: true
-    value?: true
-    quantity?: true
+  export type SettlementOrderModelCountAggregateInputType = {
+    id?: true
+    orderNumber?: true
+    symbol?: true
+    buyParticipantLoginId?: true
+    sellParticipantLoginId?: true
+    price?: true
     yieldType?: true
     yield?: true
-    calcMethod?: true
-    price?: true
-    valueSell?: true
-    quantitySell?: true
-    yieldTypeSell?: true
-    yieldSell?: true
-    calcMethodSell?: true
-    priceSell?: true
-    gtdFlag?: true
-    endTime?: true
-    quoteNegotiable?: true
-    valueNegotiable?: true
-    minFillValue?: true
-    valueStepSize?: true
-    anonymous?: true
-    access?: true
-    groupList?: true
-    participantList?: true
-    category?: true
-    rating?: true
-    remarks?: true
-    status?: true
-    userLogin?: true
-    tradedValue?: true
-    confirmedValue?: true
-    clientRegType?: true
-    quoteTime?: true
+    value?: true
+    buyerRefNo?: true
+    sellerRefNo?: true
+    buyBackofficeLoginId?: true
+    sellBackofficeLoginId?: true
+    buyBrokerLoginId?: true
+    sellBrokerLoginId?: true
+    source?: true
+    modSettleDate?: true
+    modQuantity?: true
+    modAccrInt?: true
+    modConsideration?: true
+    settlementNo?: true
+    stampDutyAmount?: true
+    stampDutyBearer?: true
+    buyerFundPayinObligation?: true
+    sellerFundPayoutObligation?: true
+    fundPayinRefId?: true
+    settleStatus?: true
+    secPayinQuantity?: true
+    secPayinRemarks?: true
+    secPayinTime?: true
+    fundsPayinAmount?: true
+    fundsPayinRemarks?: true
+    fundsPayinTime?: true
+    payoutRemarks?: true
+    payoutTime?: true
+    ifscCode?: true
+    accountNo?: true
+    utrNumber?: true
+    dpId?: true
+    benId?: true
     _all?: true
   }
 
-  export type NSERfqModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NSERfqModel to aggregate.
+     * Filter which SettlementOrderModel to aggregate.
      */
-    where?: NSERfqModelWhereInput
+    where?: SettlementOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSERfqModels to fetch.
+     * Determine the order of SettlementOrderModels to fetch.
      */
-    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: NSERfqModelWhereUniqueInput
+    cursor?: SettlementOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSERfqModels from the position of the cursor.
+     * Take `±n` SettlementOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSERfqModels.
+     * Skip the first `n` SettlementOrderModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned NSERfqModels
+     * Count returned SettlementOrderModels
     **/
-    _count?: true | NSERfqModelCountAggregateInputType
+    _count?: true | SettlementOrderModelCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to average
     **/
-    _avg?: NSERfqModelAvgAggregateInputType
+    _avg?: SettlementOrderModelAvgAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to sum
     **/
-    _sum?: NSERfqModelSumAggregateInputType
+    _sum?: SettlementOrderModelSumAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: NSERfqModelMinAggregateInputType
+    _min?: SettlementOrderModelMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: NSERfqModelMaxAggregateInputType
+    _max?: SettlementOrderModelMaxAggregateInputType
   }
 
-  export type GetNSERfqModelAggregateType<T extends NSERfqModelAggregateArgs> = {
-        [P in keyof T & keyof AggregateNSERfqModel]: P extends '_count' | 'count'
+  export type GetSettlementOrderModelAggregateType<T extends SettlementOrderModelAggregateArgs> = {
+        [P in keyof T & keyof AggregateSettlementOrderModel]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateNSERfqModel[P]>
-      : GetScalarType<T[P], AggregateNSERfqModel[P]>
+        : GetScalarType<T[P], AggregateSettlementOrderModel[P]>
+      : GetScalarType<T[P], AggregateSettlementOrderModel[P]>
   }
 
 
 
 
-  export type NSERfqModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NSERfqModelWhereInput
-    orderBy?: NSERfqModelOrderByWithAggregationInput | NSERfqModelOrderByWithAggregationInput[]
-    by: NSERfqModelScalarFieldEnum[] | NSERfqModelScalarFieldEnum
-    having?: NSERfqModelScalarWhereWithAggregatesInput
+  export type SettlementOrderModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SettlementOrderModelWhereInput
+    orderBy?: SettlementOrderModelOrderByWithAggregationInput | SettlementOrderModelOrderByWithAggregationInput[]
+    by: SettlementOrderModelScalarFieldEnum[] | SettlementOrderModelScalarFieldEnum
+    having?: SettlementOrderModelScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: NSERfqModelCountAggregateInputType | true
-    _avg?: NSERfqModelAvgAggregateInputType
-    _sum?: NSERfqModelSumAggregateInputType
-    _min?: NSERfqModelMinAggregateInputType
-    _max?: NSERfqModelMaxAggregateInputType
+    _count?: SettlementOrderModelCountAggregateInputType | true
+    _avg?: SettlementOrderModelAvgAggregateInputType
+    _sum?: SettlementOrderModelSumAggregateInputType
+    _min?: SettlementOrderModelMinAggregateInputType
+    _max?: SettlementOrderModelMaxAggregateInputType
   }
 
-  export type NSERfqModelGroupByOutputType = {
-    key: number
-    number: string
-    segment: string
-    isin: string
-    date: string
-    participantCode: string
-    dealType: $Enums.DealType
-    clientCode: string
-    buySell: $Enums.BuySell
-    quoteType: $Enums.QuoteType
-    settlementType: number
-    value: number
-    quantity: number | null
-    yieldType: $Enums.YieldType
+  export type SettlementOrderModelGroupByOutputType = {
+    id: string
+    orderNumber: string
+    symbol: string
+    buyParticipantLoginId: string
+    sellParticipantLoginId: string
+    price: number
+    yieldType: $Enums.YieldTypeSort
     yield: number
-    calcMethod: $Enums.CalcMethod
-    price: number | null
-    valueSell: number | null
-    quantitySell: number | null
-    yieldTypeSell: $Enums.YieldType | null
-    yieldSell: number | null
-    calcMethodSell: $Enums.CalcMethod | null
-    priceSell: number | null
-    gtdFlag: string | null
-    endTime: string | null
-    quoteNegotiable: string | null
-    valueNegotiable: string | null
-    minFillValue: number | null
-    valueStepSize: number | null
-    anonymous: string | null
-    access: number
-    groupList: number[]
-    participantList: string[]
-    category: string | null
-    rating: string | null
-    remarks: string | null
-    status: $Enums.RFQStatus
-    userLogin: string
-    tradedValue: number
-    confirmedValue: number
-    clientRegType: string
-    quoteTime: string
-    _count: NSERfqModelCountAggregateOutputType | null
-    _avg: NSERfqModelAvgAggregateOutputType | null
-    _sum: NSERfqModelSumAggregateOutputType | null
-    _min: NSERfqModelMinAggregateOutputType | null
-    _max: NSERfqModelMaxAggregateOutputType | null
+    value: number
+    buyerRefNo: string | null
+    sellerRefNo: string
+    buyBackofficeLoginId: string | null
+    sellBackofficeLoginId: string | null
+    buyBrokerLoginId: string
+    sellBrokerLoginId: string | null
+    source: number
+    modSettleDate: string
+    modQuantity: number
+    modAccrInt: number | null
+    modConsideration: number
+    settlementNo: string
+    stampDutyAmount: number
+    stampDutyBearer: string
+    buyerFundPayinObligation: number
+    sellerFundPayoutObligation: number
+    fundPayinRefId: string
+    settleStatus: number
+    secPayinQuantity: number | null
+    secPayinRemarks: string | null
+    secPayinTime: string | null
+    fundsPayinAmount: number | null
+    fundsPayinRemarks: string | null
+    fundsPayinTime: string | null
+    payoutRemarks: string | null
+    payoutTime: string | null
+    ifscCode: string
+    accountNo: string
+    utrNumber: string | null
+    dpId: string
+    benId: string
+    _count: SettlementOrderModelCountAggregateOutputType | null
+    _avg: SettlementOrderModelAvgAggregateOutputType | null
+    _sum: SettlementOrderModelSumAggregateOutputType | null
+    _min: SettlementOrderModelMinAggregateOutputType | null
+    _max: SettlementOrderModelMaxAggregateOutputType | null
   }
 
-  type GetNSERfqModelGroupByPayload<T extends NSERfqModelGroupByArgs> = Prisma.PrismaPromise<
+  type GetSettlementOrderModelGroupByPayload<T extends SettlementOrderModelGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<NSERfqModelGroupByOutputType, T['by']> &
+      PickEnumerable<SettlementOrderModelGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof NSERfqModelGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof SettlementOrderModelGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], NSERfqModelGroupByOutputType[P]>
-            : GetScalarType<T[P], NSERfqModelGroupByOutputType[P]>
+              : GetScalarType<T[P], SettlementOrderModelGroupByOutputType[P]>
+            : GetScalarType<T[P], SettlementOrderModelGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type NSERfqModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    key?: boolean
-    number?: boolean
-    segment?: boolean
-    isin?: boolean
-    date?: boolean
-    participantCode?: boolean
-    dealType?: boolean
-    clientCode?: boolean
-    buySell?: boolean
-    quoteType?: boolean
-    settlementType?: boolean
-    value?: boolean
-    quantity?: boolean
+  export type SettlementOrderModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderNumber?: boolean
+    symbol?: boolean
+    buyParticipantLoginId?: boolean
+    sellParticipantLoginId?: boolean
+    price?: boolean
     yieldType?: boolean
     yield?: boolean
-    calcMethod?: boolean
-    price?: boolean
-    valueSell?: boolean
-    quantitySell?: boolean
-    yieldTypeSell?: boolean
-    yieldSell?: boolean
-    calcMethodSell?: boolean
-    priceSell?: boolean
-    gtdFlag?: boolean
-    endTime?: boolean
-    quoteNegotiable?: boolean
-    valueNegotiable?: boolean
-    minFillValue?: boolean
-    valueStepSize?: boolean
-    anonymous?: boolean
-    access?: boolean
-    groupList?: boolean
-    participantList?: boolean
-    category?: boolean
-    rating?: boolean
-    remarks?: boolean
-    status?: boolean
-    userLogin?: boolean
-    tradedValue?: boolean
-    confirmedValue?: boolean
-    clientRegType?: boolean
-    quoteTime?: boolean
-  }, ExtArgs["result"]["nSERfqModel"]>
+    value?: boolean
+    buyerRefNo?: boolean
+    sellerRefNo?: boolean
+    buyBackofficeLoginId?: boolean
+    sellBackofficeLoginId?: boolean
+    buyBrokerLoginId?: boolean
+    sellBrokerLoginId?: boolean
+    source?: boolean
+    modSettleDate?: boolean
+    modQuantity?: boolean
+    modAccrInt?: boolean
+    modConsideration?: boolean
+    settlementNo?: boolean
+    stampDutyAmount?: boolean
+    stampDutyBearer?: boolean
+    buyerFundPayinObligation?: boolean
+    sellerFundPayoutObligation?: boolean
+    fundPayinRefId?: boolean
+    settleStatus?: boolean
+    secPayinQuantity?: boolean
+    secPayinRemarks?: boolean
+    secPayinTime?: boolean
+    fundsPayinAmount?: boolean
+    fundsPayinRemarks?: boolean
+    fundsPayinTime?: boolean
+    payoutRemarks?: boolean
+    payoutTime?: boolean
+    ifscCode?: boolean
+    accountNo?: boolean
+    utrNumber?: boolean
+    dpId?: boolean
+    benId?: boolean
+  }, ExtArgs["result"]["settlementOrderModel"]>
 
-  export type NSERfqModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    key?: boolean
-    number?: boolean
-    segment?: boolean
-    isin?: boolean
-    date?: boolean
-    participantCode?: boolean
-    dealType?: boolean
-    clientCode?: boolean
-    buySell?: boolean
-    quoteType?: boolean
-    settlementType?: boolean
-    value?: boolean
-    quantity?: boolean
+  export type SettlementOrderModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderNumber?: boolean
+    symbol?: boolean
+    buyParticipantLoginId?: boolean
+    sellParticipantLoginId?: boolean
+    price?: boolean
     yieldType?: boolean
     yield?: boolean
-    calcMethod?: boolean
-    price?: boolean
-    valueSell?: boolean
-    quantitySell?: boolean
-    yieldTypeSell?: boolean
-    yieldSell?: boolean
-    calcMethodSell?: boolean
-    priceSell?: boolean
-    gtdFlag?: boolean
-    endTime?: boolean
-    quoteNegotiable?: boolean
-    valueNegotiable?: boolean
-    minFillValue?: boolean
-    valueStepSize?: boolean
-    anonymous?: boolean
-    access?: boolean
-    groupList?: boolean
-    participantList?: boolean
-    category?: boolean
-    rating?: boolean
-    remarks?: boolean
-    status?: boolean
-    userLogin?: boolean
-    tradedValue?: boolean
-    confirmedValue?: boolean
-    clientRegType?: boolean
-    quoteTime?: boolean
-  }, ExtArgs["result"]["nSERfqModel"]>
+    value?: boolean
+    buyerRefNo?: boolean
+    sellerRefNo?: boolean
+    buyBackofficeLoginId?: boolean
+    sellBackofficeLoginId?: boolean
+    buyBrokerLoginId?: boolean
+    sellBrokerLoginId?: boolean
+    source?: boolean
+    modSettleDate?: boolean
+    modQuantity?: boolean
+    modAccrInt?: boolean
+    modConsideration?: boolean
+    settlementNo?: boolean
+    stampDutyAmount?: boolean
+    stampDutyBearer?: boolean
+    buyerFundPayinObligation?: boolean
+    sellerFundPayoutObligation?: boolean
+    fundPayinRefId?: boolean
+    settleStatus?: boolean
+    secPayinQuantity?: boolean
+    secPayinRemarks?: boolean
+    secPayinTime?: boolean
+    fundsPayinAmount?: boolean
+    fundsPayinRemarks?: boolean
+    fundsPayinTime?: boolean
+    payoutRemarks?: boolean
+    payoutTime?: boolean
+    ifscCode?: boolean
+    accountNo?: boolean
+    utrNumber?: boolean
+    dpId?: boolean
+    benId?: boolean
+  }, ExtArgs["result"]["settlementOrderModel"]>
 
-  export type NSERfqModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    key?: boolean
-    number?: boolean
-    segment?: boolean
-    isin?: boolean
-    date?: boolean
-    participantCode?: boolean
-    dealType?: boolean
-    clientCode?: boolean
-    buySell?: boolean
-    quoteType?: boolean
-    settlementType?: boolean
-    value?: boolean
-    quantity?: boolean
+  export type SettlementOrderModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderNumber?: boolean
+    symbol?: boolean
+    buyParticipantLoginId?: boolean
+    sellParticipantLoginId?: boolean
+    price?: boolean
     yieldType?: boolean
     yield?: boolean
-    calcMethod?: boolean
-    price?: boolean
-    valueSell?: boolean
-    quantitySell?: boolean
-    yieldTypeSell?: boolean
-    yieldSell?: boolean
-    calcMethodSell?: boolean
-    priceSell?: boolean
-    gtdFlag?: boolean
-    endTime?: boolean
-    quoteNegotiable?: boolean
-    valueNegotiable?: boolean
-    minFillValue?: boolean
-    valueStepSize?: boolean
-    anonymous?: boolean
-    access?: boolean
-    groupList?: boolean
-    participantList?: boolean
-    category?: boolean
-    rating?: boolean
-    remarks?: boolean
-    status?: boolean
-    userLogin?: boolean
-    tradedValue?: boolean
-    confirmedValue?: boolean
-    clientRegType?: boolean
-    quoteTime?: boolean
-  }, ExtArgs["result"]["nSERfqModel"]>
+    value?: boolean
+    buyerRefNo?: boolean
+    sellerRefNo?: boolean
+    buyBackofficeLoginId?: boolean
+    sellBackofficeLoginId?: boolean
+    buyBrokerLoginId?: boolean
+    sellBrokerLoginId?: boolean
+    source?: boolean
+    modSettleDate?: boolean
+    modQuantity?: boolean
+    modAccrInt?: boolean
+    modConsideration?: boolean
+    settlementNo?: boolean
+    stampDutyAmount?: boolean
+    stampDutyBearer?: boolean
+    buyerFundPayinObligation?: boolean
+    sellerFundPayoutObligation?: boolean
+    fundPayinRefId?: boolean
+    settleStatus?: boolean
+    secPayinQuantity?: boolean
+    secPayinRemarks?: boolean
+    secPayinTime?: boolean
+    fundsPayinAmount?: boolean
+    fundsPayinRemarks?: boolean
+    fundsPayinTime?: boolean
+    payoutRemarks?: boolean
+    payoutTime?: boolean
+    ifscCode?: boolean
+    accountNo?: boolean
+    utrNumber?: boolean
+    dpId?: boolean
+    benId?: boolean
+  }, ExtArgs["result"]["settlementOrderModel"]>
 
-  export type NSERfqModelSelectScalar = {
-    key?: boolean
-    number?: boolean
-    segment?: boolean
-    isin?: boolean
-    date?: boolean
-    participantCode?: boolean
-    dealType?: boolean
-    clientCode?: boolean
-    buySell?: boolean
-    quoteType?: boolean
-    settlementType?: boolean
-    value?: boolean
-    quantity?: boolean
+  export type SettlementOrderModelSelectScalar = {
+    id?: boolean
+    orderNumber?: boolean
+    symbol?: boolean
+    buyParticipantLoginId?: boolean
+    sellParticipantLoginId?: boolean
+    price?: boolean
     yieldType?: boolean
     yield?: boolean
-    calcMethod?: boolean
-    price?: boolean
-    valueSell?: boolean
-    quantitySell?: boolean
-    yieldTypeSell?: boolean
-    yieldSell?: boolean
-    calcMethodSell?: boolean
-    priceSell?: boolean
-    gtdFlag?: boolean
-    endTime?: boolean
-    quoteNegotiable?: boolean
-    valueNegotiable?: boolean
-    minFillValue?: boolean
-    valueStepSize?: boolean
-    anonymous?: boolean
-    access?: boolean
-    groupList?: boolean
-    participantList?: boolean
-    category?: boolean
-    rating?: boolean
-    remarks?: boolean
-    status?: boolean
-    userLogin?: boolean
-    tradedValue?: boolean
-    confirmedValue?: boolean
-    clientRegType?: boolean
-    quoteTime?: boolean
+    value?: boolean
+    buyerRefNo?: boolean
+    sellerRefNo?: boolean
+    buyBackofficeLoginId?: boolean
+    sellBackofficeLoginId?: boolean
+    buyBrokerLoginId?: boolean
+    sellBrokerLoginId?: boolean
+    source?: boolean
+    modSettleDate?: boolean
+    modQuantity?: boolean
+    modAccrInt?: boolean
+    modConsideration?: boolean
+    settlementNo?: boolean
+    stampDutyAmount?: boolean
+    stampDutyBearer?: boolean
+    buyerFundPayinObligation?: boolean
+    sellerFundPayoutObligation?: boolean
+    fundPayinRefId?: boolean
+    settleStatus?: boolean
+    secPayinQuantity?: boolean
+    secPayinRemarks?: boolean
+    secPayinTime?: boolean
+    fundsPayinAmount?: boolean
+    fundsPayinRemarks?: boolean
+    fundsPayinTime?: boolean
+    payoutRemarks?: boolean
+    payoutTime?: boolean
+    ifscCode?: boolean
+    accountNo?: boolean
+    utrNumber?: boolean
+    dpId?: boolean
+    benId?: boolean
   }
 
-  export type NSERfqModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"key" | "number" | "segment" | "isin" | "date" | "participantCode" | "dealType" | "clientCode" | "buySell" | "quoteType" | "settlementType" | "value" | "quantity" | "yieldType" | "yield" | "calcMethod" | "price" | "valueSell" | "quantitySell" | "yieldTypeSell" | "yieldSell" | "calcMethodSell" | "priceSell" | "gtdFlag" | "endTime" | "quoteNegotiable" | "valueNegotiable" | "minFillValue" | "valueStepSize" | "anonymous" | "access" | "groupList" | "participantList" | "category" | "rating" | "remarks" | "status" | "userLogin" | "tradedValue" | "confirmedValue" | "clientRegType" | "quoteTime", ExtArgs["result"]["nSERfqModel"]>
+  export type SettlementOrderModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "symbol" | "buyParticipantLoginId" | "sellParticipantLoginId" | "price" | "yieldType" | "yield" | "value" | "buyerRefNo" | "sellerRefNo" | "buyBackofficeLoginId" | "sellBackofficeLoginId" | "buyBrokerLoginId" | "sellBrokerLoginId" | "source" | "modSettleDate" | "modQuantity" | "modAccrInt" | "modConsideration" | "settlementNo" | "stampDutyAmount" | "stampDutyBearer" | "buyerFundPayinObligation" | "sellerFundPayoutObligation" | "fundPayinRefId" | "settleStatus" | "secPayinQuantity" | "secPayinRemarks" | "secPayinTime" | "fundsPayinAmount" | "fundsPayinRemarks" | "fundsPayinTime" | "payoutRemarks" | "payoutTime" | "ifscCode" | "accountNo" | "utrNumber" | "dpId" | "benId", ExtArgs["result"]["settlementOrderModel"]>
 
-  export type $NSERfqModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "NSERfqModel"
+  export type $SettlementOrderModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SettlementOrderModel"
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
-      key: number
-      number: string
-      segment: string
-      isin: string
-      date: string
-      participantCode: string
-      dealType: $Enums.DealType
-      clientCode: string
-      buySell: $Enums.BuySell
-      quoteType: $Enums.QuoteType
-      settlementType: number
-      value: number
-      quantity: number | null
-      yieldType: $Enums.YieldType
+      id: string
+      orderNumber: string
+      symbol: string
+      buyParticipantLoginId: string
+      sellParticipantLoginId: string
+      price: number
+      yieldType: $Enums.YieldTypeSort
       yield: number
-      calcMethod: $Enums.CalcMethod
-      price: number | null
-      valueSell: number | null
-      quantitySell: number | null
-      yieldTypeSell: $Enums.YieldType | null
-      yieldSell: number | null
-      calcMethodSell: $Enums.CalcMethod | null
-      priceSell: number | null
-      gtdFlag: string | null
-      endTime: string | null
-      quoteNegotiable: string | null
-      valueNegotiable: string | null
-      minFillValue: number | null
-      valueStepSize: number | null
-      anonymous: string | null
-      access: number
-      groupList: number[]
-      participantList: string[]
-      category: string | null
-      rating: string | null
-      remarks: string | null
-      status: $Enums.RFQStatus
-      userLogin: string
-      tradedValue: number
-      confirmedValue: number
-      clientRegType: string
-      quoteTime: string
-    }, ExtArgs["result"]["nSERfqModel"]>
+      value: number
+      buyerRefNo: string | null
+      sellerRefNo: string
+      buyBackofficeLoginId: string | null
+      sellBackofficeLoginId: string | null
+      buyBrokerLoginId: string
+      sellBrokerLoginId: string | null
+      source: number
+      modSettleDate: string
+      modQuantity: number
+      modAccrInt: number | null
+      modConsideration: number
+      settlementNo: string
+      stampDutyAmount: number
+      stampDutyBearer: string
+      buyerFundPayinObligation: number
+      sellerFundPayoutObligation: number
+      fundPayinRefId: string
+      settleStatus: number
+      secPayinQuantity: number | null
+      secPayinRemarks: string | null
+      secPayinTime: string | null
+      fundsPayinAmount: number | null
+      fundsPayinRemarks: string | null
+      fundsPayinTime: string | null
+      payoutRemarks: string | null
+      payoutTime: string | null
+      ifscCode: string
+      accountNo: string
+      utrNumber: string | null
+      dpId: string
+      benId: string
+    }, ExtArgs["result"]["settlementOrderModel"]>
     composites: {}
   }
 
-  type NSERfqModelGetPayload<S extends boolean | null | undefined | NSERfqModelDefaultArgs> = $Result.GetResult<Prisma.$NSERfqModelPayload, S>
+  type SettlementOrderModelGetPayload<S extends boolean | null | undefined | SettlementOrderModelDefaultArgs> = $Result.GetResult<Prisma.$SettlementOrderModelPayload, S>
 
-  type NSERfqModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<NSERfqModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: NSERfqModelCountAggregateInputType | true
+  type SettlementOrderModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SettlementOrderModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SettlementOrderModelCountAggregateInputType | true
     }
 
-  export interface NSERfqModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NSERfqModel'], meta: { name: 'NSERfqModel' } }
+  export interface SettlementOrderModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SettlementOrderModel'], meta: { name: 'SettlementOrderModel' } }
     /**
-     * Find zero or one NSERfqModel that matches the filter.
-     * @param {NSERfqModelFindUniqueArgs} args - Arguments to find a NSERfqModel
+     * Find zero or one SettlementOrderModel that matches the filter.
+     * @param {SettlementOrderModelFindUniqueArgs} args - Arguments to find a SettlementOrderModel
      * @example
-     * // Get one NSERfqModel
-     * const nSERfqModel = await prisma.nSERfqModel.findUnique({
+     * // Get one SettlementOrderModel
+     * const settlementOrderModel = await prisma.settlementOrderModel.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends NSERfqModelFindUniqueArgs>(args: SelectSubset<T, NSERfqModelFindUniqueArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends SettlementOrderModelFindUniqueArgs>(args: SelectSubset<T, SettlementOrderModelFindUniqueArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one NSERfqModel that matches the filter or throw an error with `error.code='P2025'`
+     * Find one SettlementOrderModel that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {NSERfqModelFindUniqueOrThrowArgs} args - Arguments to find a NSERfqModel
+     * @param {SettlementOrderModelFindUniqueOrThrowArgs} args - Arguments to find a SettlementOrderModel
      * @example
-     * // Get one NSERfqModel
-     * const nSERfqModel = await prisma.nSERfqModel.findUniqueOrThrow({
+     * // Get one SettlementOrderModel
+     * const settlementOrderModel = await prisma.settlementOrderModel.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends NSERfqModelFindUniqueOrThrowArgs>(args: SelectSubset<T, NSERfqModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends SettlementOrderModelFindUniqueOrThrowArgs>(args: SelectSubset<T, SettlementOrderModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NSERfqModel that matches the filter.
+     * Find the first SettlementOrderModel that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSERfqModelFindFirstArgs} args - Arguments to find a NSERfqModel
+     * @param {SettlementOrderModelFindFirstArgs} args - Arguments to find a SettlementOrderModel
      * @example
-     * // Get one NSERfqModel
-     * const nSERfqModel = await prisma.nSERfqModel.findFirst({
+     * // Get one SettlementOrderModel
+     * const settlementOrderModel = await prisma.settlementOrderModel.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends NSERfqModelFindFirstArgs>(args?: SelectSubset<T, NSERfqModelFindFirstArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends SettlementOrderModelFindFirstArgs>(args?: SelectSubset<T, SettlementOrderModelFindFirstArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NSERfqModel that matches the filter or
+     * Find the first SettlementOrderModel that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSERfqModelFindFirstOrThrowArgs} args - Arguments to find a NSERfqModel
+     * @param {SettlementOrderModelFindFirstOrThrowArgs} args - Arguments to find a SettlementOrderModel
      * @example
-     * // Get one NSERfqModel
-     * const nSERfqModel = await prisma.nSERfqModel.findFirstOrThrow({
+     * // Get one SettlementOrderModel
+     * const settlementOrderModel = await prisma.settlementOrderModel.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends NSERfqModelFindFirstOrThrowArgs>(args?: SelectSubset<T, NSERfqModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends SettlementOrderModelFindFirstOrThrowArgs>(args?: SelectSubset<T, SettlementOrderModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more NSERfqModels that matches the filter.
+     * Find zero or more SettlementOrderModels that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSERfqModelFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {SettlementOrderModelFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all NSERfqModels
-     * const nSERfqModels = await prisma.nSERfqModel.findMany()
+     * // Get all SettlementOrderModels
+     * const settlementOrderModels = await prisma.settlementOrderModel.findMany()
      * 
-     * // Get first 10 NSERfqModels
-     * const nSERfqModels = await prisma.nSERfqModel.findMany({ take: 10 })
+     * // Get first 10 SettlementOrderModels
+     * const settlementOrderModels = await prisma.settlementOrderModel.findMany({ take: 10 })
      * 
-     * // Only select the `key`
-     * const nSERfqModelWithKeyOnly = await prisma.nSERfqModel.findMany({ select: { key: true } })
+     * // Only select the `id`
+     * const settlementOrderModelWithIdOnly = await prisma.settlementOrderModel.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends NSERfqModelFindManyArgs>(args?: SelectSubset<T, NSERfqModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends SettlementOrderModelFindManyArgs>(args?: SelectSubset<T, SettlementOrderModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a NSERfqModel.
-     * @param {NSERfqModelCreateArgs} args - Arguments to create a NSERfqModel.
+     * Create a SettlementOrderModel.
+     * @param {SettlementOrderModelCreateArgs} args - Arguments to create a SettlementOrderModel.
      * @example
-     * // Create one NSERfqModel
-     * const NSERfqModel = await prisma.nSERfqModel.create({
+     * // Create one SettlementOrderModel
+     * const SettlementOrderModel = await prisma.settlementOrderModel.create({
      *   data: {
-     *     // ... data to create a NSERfqModel
+     *     // ... data to create a SettlementOrderModel
      *   }
      * })
      * 
      */
-    create<T extends NSERfqModelCreateArgs>(args: SelectSubset<T, NSERfqModelCreateArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends SettlementOrderModelCreateArgs>(args: SelectSubset<T, SettlementOrderModelCreateArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many NSERfqModels.
-     * @param {NSERfqModelCreateManyArgs} args - Arguments to create many NSERfqModels.
+     * Create many SettlementOrderModels.
+     * @param {SettlementOrderModelCreateManyArgs} args - Arguments to create many SettlementOrderModels.
      * @example
-     * // Create many NSERfqModels
-     * const nSERfqModel = await prisma.nSERfqModel.createMany({
+     * // Create many SettlementOrderModels
+     * const settlementOrderModel = await prisma.settlementOrderModel.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends NSERfqModelCreateManyArgs>(args?: SelectSubset<T, NSERfqModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends SettlementOrderModelCreateManyArgs>(args?: SelectSubset<T, SettlementOrderModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many NSERfqModels and returns the data saved in the database.
-     * @param {NSERfqModelCreateManyAndReturnArgs} args - Arguments to create many NSERfqModels.
+     * Create many SettlementOrderModels and returns the data saved in the database.
+     * @param {SettlementOrderModelCreateManyAndReturnArgs} args - Arguments to create many SettlementOrderModels.
      * @example
-     * // Create many NSERfqModels
-     * const nSERfqModel = await prisma.nSERfqModel.createManyAndReturn({
+     * // Create many SettlementOrderModels
+     * const settlementOrderModel = await prisma.settlementOrderModel.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many NSERfqModels and only return the `key`
-     * const nSERfqModelWithKeyOnly = await prisma.nSERfqModel.createManyAndReturn({
-     *   select: { key: true },
+     * // Create many SettlementOrderModels and only return the `id`
+     * const settlementOrderModelWithIdOnly = await prisma.settlementOrderModel.createManyAndReturn({
+     *   select: { id: true },
      *   data: [
      *     // ... provide data here
      *   ]
@@ -28344,28 +28603,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends NSERfqModelCreateManyAndReturnArgs>(args?: SelectSubset<T, NSERfqModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends SettlementOrderModelCreateManyAndReturnArgs>(args?: SelectSubset<T, SettlementOrderModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a NSERfqModel.
-     * @param {NSERfqModelDeleteArgs} args - Arguments to delete one NSERfqModel.
+     * Delete a SettlementOrderModel.
+     * @param {SettlementOrderModelDeleteArgs} args - Arguments to delete one SettlementOrderModel.
      * @example
-     * // Delete one NSERfqModel
-     * const NSERfqModel = await prisma.nSERfqModel.delete({
+     * // Delete one SettlementOrderModel
+     * const SettlementOrderModel = await prisma.settlementOrderModel.delete({
      *   where: {
-     *     // ... filter to delete one NSERfqModel
+     *     // ... filter to delete one SettlementOrderModel
      *   }
      * })
      * 
      */
-    delete<T extends NSERfqModelDeleteArgs>(args: SelectSubset<T, NSERfqModelDeleteArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends SettlementOrderModelDeleteArgs>(args: SelectSubset<T, SettlementOrderModelDeleteArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one NSERfqModel.
-     * @param {NSERfqModelUpdateArgs} args - Arguments to update one NSERfqModel.
+     * Update one SettlementOrderModel.
+     * @param {SettlementOrderModelUpdateArgs} args - Arguments to update one SettlementOrderModel.
      * @example
-     * // Update one NSERfqModel
-     * const nSERfqModel = await prisma.nSERfqModel.update({
+     * // Update one SettlementOrderModel
+     * const settlementOrderModel = await prisma.settlementOrderModel.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -28375,30 +28634,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends NSERfqModelUpdateArgs>(args: SelectSubset<T, NSERfqModelUpdateArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends SettlementOrderModelUpdateArgs>(args: SelectSubset<T, SettlementOrderModelUpdateArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more NSERfqModels.
-     * @param {NSERfqModelDeleteManyArgs} args - Arguments to filter NSERfqModels to delete.
+     * Delete zero or more SettlementOrderModels.
+     * @param {SettlementOrderModelDeleteManyArgs} args - Arguments to filter SettlementOrderModels to delete.
      * @example
-     * // Delete a few NSERfqModels
-     * const { count } = await prisma.nSERfqModel.deleteMany({
+     * // Delete a few SettlementOrderModels
+     * const { count } = await prisma.settlementOrderModel.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends NSERfqModelDeleteManyArgs>(args?: SelectSubset<T, NSERfqModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends SettlementOrderModelDeleteManyArgs>(args?: SelectSubset<T, SettlementOrderModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NSERfqModels.
+     * Update zero or more SettlementOrderModels.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSERfqModelUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {SettlementOrderModelUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many NSERfqModels
-     * const nSERfqModel = await prisma.nSERfqModel.updateMany({
+     * // Update many SettlementOrderModels
+     * const settlementOrderModel = await prisma.settlementOrderModel.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -28408,14 +28667,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends NSERfqModelUpdateManyArgs>(args: SelectSubset<T, NSERfqModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends SettlementOrderModelUpdateManyArgs>(args: SelectSubset<T, SettlementOrderModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NSERfqModels and returns the data updated in the database.
-     * @param {NSERfqModelUpdateManyAndReturnArgs} args - Arguments to update many NSERfqModels.
+     * Update zero or more SettlementOrderModels and returns the data updated in the database.
+     * @param {SettlementOrderModelUpdateManyAndReturnArgs} args - Arguments to update many SettlementOrderModels.
      * @example
-     * // Update many NSERfqModels
-     * const nSERfqModel = await prisma.nSERfqModel.updateManyAndReturn({
+     * // Update many SettlementOrderModels
+     * const settlementOrderModel = await prisma.settlementOrderModel.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -28424,9 +28683,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more NSERfqModels and only return the `key`
-     * const nSERfqModelWithKeyOnly = await prisma.nSERfqModel.updateManyAndReturn({
-     *   select: { key: true },
+     * // Update zero or more SettlementOrderModels and only return the `id`
+     * const settlementOrderModelWithIdOnly = await prisma.settlementOrderModel.updateManyAndReturn({
+     *   select: { id: true },
      *   where: {
      *     // ... provide filter here
      *   },
@@ -28438,56 +28697,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends NSERfqModelUpdateManyAndReturnArgs>(args: SelectSubset<T, NSERfqModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends SettlementOrderModelUpdateManyAndReturnArgs>(args: SelectSubset<T, SettlementOrderModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one NSERfqModel.
-     * @param {NSERfqModelUpsertArgs} args - Arguments to update or create a NSERfqModel.
+     * Create or update one SettlementOrderModel.
+     * @param {SettlementOrderModelUpsertArgs} args - Arguments to update or create a SettlementOrderModel.
      * @example
-     * // Update or create a NSERfqModel
-     * const nSERfqModel = await prisma.nSERfqModel.upsert({
+     * // Update or create a SettlementOrderModel
+     * const settlementOrderModel = await prisma.settlementOrderModel.upsert({
      *   create: {
-     *     // ... data to create a NSERfqModel
+     *     // ... data to create a SettlementOrderModel
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the NSERfqModel we want to update
+     *     // ... the filter for the SettlementOrderModel we want to update
      *   }
      * })
      */
-    upsert<T extends NSERfqModelUpsertArgs>(args: SelectSubset<T, NSERfqModelUpsertArgs<ExtArgs>>): Prisma__NSERfqModelClient<$Result.GetResult<Prisma.$NSERfqModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends SettlementOrderModelUpsertArgs>(args: SelectSubset<T, SettlementOrderModelUpsertArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of NSERfqModels.
+     * Count the number of SettlementOrderModels.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSERfqModelCountArgs} args - Arguments to filter NSERfqModels to count.
+     * @param {SettlementOrderModelCountArgs} args - Arguments to filter SettlementOrderModels to count.
      * @example
-     * // Count the number of NSERfqModels
-     * const count = await prisma.nSERfqModel.count({
+     * // Count the number of SettlementOrderModels
+     * const count = await prisma.settlementOrderModel.count({
      *   where: {
-     *     // ... the filter for the NSERfqModels we want to count
+     *     // ... the filter for the SettlementOrderModels we want to count
      *   }
      * })
     **/
-    count<T extends NSERfqModelCountArgs>(
-      args?: Subset<T, NSERfqModelCountArgs>,
+    count<T extends SettlementOrderModelCountArgs>(
+      args?: Subset<T, SettlementOrderModelCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], NSERfqModelCountAggregateOutputType>
+          : GetScalarType<T['select'], SettlementOrderModelCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a NSERfqModel.
+     * Allows you to perform aggregations operations on a SettlementOrderModel.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSERfqModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {SettlementOrderModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -28507,13 +28766,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends NSERfqModelAggregateArgs>(args: Subset<T, NSERfqModelAggregateArgs>): Prisma.PrismaPromise<GetNSERfqModelAggregateType<T>>
+    aggregate<T extends SettlementOrderModelAggregateArgs>(args: Subset<T, SettlementOrderModelAggregateArgs>): Prisma.PrismaPromise<GetSettlementOrderModelAggregateType<T>>
 
     /**
-     * Group by NSERfqModel.
+     * Group by SettlementOrderModel.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NSERfqModelGroupByArgs} args - Group by arguments.
+     * @param {SettlementOrderModelGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -28528,14 +28787,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends NSERfqModelGroupByArgs,
+      T extends SettlementOrderModelGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: NSERfqModelGroupByArgs['orderBy'] }
-        : { orderBy?: NSERfqModelGroupByArgs['orderBy'] },
+        ? { orderBy: SettlementOrderModelGroupByArgs['orderBy'] }
+        : { orderBy?: SettlementOrderModelGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -28584,20 +28843,20 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, NSERfqModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNSERfqModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, SettlementOrderModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSettlementOrderModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the NSERfqModel model
+   * Fields of the SettlementOrderModel model
    */
-  readonly fields: NSERfqModelFieldRefs;
+  readonly fields: SettlementOrderModelFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for NSERfqModel.
+   * The delegate class that acts as a "Promise-like" for SettlementOrderModel.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__NSERfqModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__SettlementOrderModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -28625,414 +28884,3992 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the NSERfqModel model
+   * Fields of the SettlementOrderModel model
    */
-  interface NSERfqModelFieldRefs {
-    readonly key: FieldRef<"NSERfqModel", 'Int'>
-    readonly number: FieldRef<"NSERfqModel", 'String'>
-    readonly segment: FieldRef<"NSERfqModel", 'String'>
-    readonly isin: FieldRef<"NSERfqModel", 'String'>
-    readonly date: FieldRef<"NSERfqModel", 'String'>
-    readonly participantCode: FieldRef<"NSERfqModel", 'String'>
-    readonly dealType: FieldRef<"NSERfqModel", 'DealType'>
-    readonly clientCode: FieldRef<"NSERfqModel", 'String'>
-    readonly buySell: FieldRef<"NSERfqModel", 'BuySell'>
-    readonly quoteType: FieldRef<"NSERfqModel", 'QuoteType'>
-    readonly settlementType: FieldRef<"NSERfqModel", 'Int'>
-    readonly value: FieldRef<"NSERfqModel", 'Float'>
-    readonly quantity: FieldRef<"NSERfqModel", 'Int'>
-    readonly yieldType: FieldRef<"NSERfqModel", 'YieldType'>
-    readonly yield: FieldRef<"NSERfqModel", 'Float'>
-    readonly calcMethod: FieldRef<"NSERfqModel", 'CalcMethod'>
-    readonly price: FieldRef<"NSERfqModel", 'Float'>
-    readonly valueSell: FieldRef<"NSERfqModel", 'Float'>
-    readonly quantitySell: FieldRef<"NSERfqModel", 'Int'>
-    readonly yieldTypeSell: FieldRef<"NSERfqModel", 'YieldType'>
-    readonly yieldSell: FieldRef<"NSERfqModel", 'Float'>
-    readonly calcMethodSell: FieldRef<"NSERfqModel", 'CalcMethod'>
-    readonly priceSell: FieldRef<"NSERfqModel", 'Float'>
-    readonly gtdFlag: FieldRef<"NSERfqModel", 'String'>
-    readonly endTime: FieldRef<"NSERfqModel", 'String'>
-    readonly quoteNegotiable: FieldRef<"NSERfqModel", 'String'>
-    readonly valueNegotiable: FieldRef<"NSERfqModel", 'String'>
-    readonly minFillValue: FieldRef<"NSERfqModel", 'Float'>
-    readonly valueStepSize: FieldRef<"NSERfqModel", 'Float'>
-    readonly anonymous: FieldRef<"NSERfqModel", 'String'>
-    readonly access: FieldRef<"NSERfqModel", 'Int'>
-    readonly groupList: FieldRef<"NSERfqModel", 'Int[]'>
-    readonly participantList: FieldRef<"NSERfqModel", 'String[]'>
-    readonly category: FieldRef<"NSERfqModel", 'String'>
-    readonly rating: FieldRef<"NSERfqModel", 'String'>
-    readonly remarks: FieldRef<"NSERfqModel", 'String'>
-    readonly status: FieldRef<"NSERfqModel", 'RFQStatus'>
-    readonly userLogin: FieldRef<"NSERfqModel", 'String'>
-    readonly tradedValue: FieldRef<"NSERfqModel", 'Float'>
-    readonly confirmedValue: FieldRef<"NSERfqModel", 'Float'>
-    readonly clientRegType: FieldRef<"NSERfqModel", 'String'>
-    readonly quoteTime: FieldRef<"NSERfqModel", 'String'>
+  interface SettlementOrderModelFieldRefs {
+    readonly id: FieldRef<"SettlementOrderModel", 'String'>
+    readonly orderNumber: FieldRef<"SettlementOrderModel", 'String'>
+    readonly symbol: FieldRef<"SettlementOrderModel", 'String'>
+    readonly buyParticipantLoginId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly sellParticipantLoginId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly price: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly yieldType: FieldRef<"SettlementOrderModel", 'YieldTypeSort'>
+    readonly yield: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly value: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly buyerRefNo: FieldRef<"SettlementOrderModel", 'String'>
+    readonly sellerRefNo: FieldRef<"SettlementOrderModel", 'String'>
+    readonly buyBackofficeLoginId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly sellBackofficeLoginId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly buyBrokerLoginId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly sellBrokerLoginId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly source: FieldRef<"SettlementOrderModel", 'Int'>
+    readonly modSettleDate: FieldRef<"SettlementOrderModel", 'String'>
+    readonly modQuantity: FieldRef<"SettlementOrderModel", 'Int'>
+    readonly modAccrInt: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly modConsideration: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly settlementNo: FieldRef<"SettlementOrderModel", 'String'>
+    readonly stampDutyAmount: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly stampDutyBearer: FieldRef<"SettlementOrderModel", 'String'>
+    readonly buyerFundPayinObligation: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly sellerFundPayoutObligation: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly fundPayinRefId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly settleStatus: FieldRef<"SettlementOrderModel", 'Int'>
+    readonly secPayinQuantity: FieldRef<"SettlementOrderModel", 'Int'>
+    readonly secPayinRemarks: FieldRef<"SettlementOrderModel", 'String'>
+    readonly secPayinTime: FieldRef<"SettlementOrderModel", 'String'>
+    readonly fundsPayinAmount: FieldRef<"SettlementOrderModel", 'Float'>
+    readonly fundsPayinRemarks: FieldRef<"SettlementOrderModel", 'String'>
+    readonly fundsPayinTime: FieldRef<"SettlementOrderModel", 'String'>
+    readonly payoutRemarks: FieldRef<"SettlementOrderModel", 'String'>
+    readonly payoutTime: FieldRef<"SettlementOrderModel", 'String'>
+    readonly ifscCode: FieldRef<"SettlementOrderModel", 'String'>
+    readonly accountNo: FieldRef<"SettlementOrderModel", 'String'>
+    readonly utrNumber: FieldRef<"SettlementOrderModel", 'String'>
+    readonly dpId: FieldRef<"SettlementOrderModel", 'String'>
+    readonly benId: FieldRef<"SettlementOrderModel", 'String'>
   }
     
 
   // Custom InputTypes
   /**
-   * NSERfqModel findUnique
+   * SettlementOrderModel findUnique
    */
-  export type NSERfqModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which NSERfqModel to fetch.
+     * Filter, which SettlementOrderModel to fetch.
      */
-    where: NSERfqModelWhereUniqueInput
+    where: SettlementOrderModelWhereUniqueInput
   }
 
   /**
-   * NSERfqModel findUniqueOrThrow
+   * SettlementOrderModel findUniqueOrThrow
    */
-  export type NSERfqModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which NSERfqModel to fetch.
+     * Filter, which SettlementOrderModel to fetch.
      */
-    where: NSERfqModelWhereUniqueInput
+    where: SettlementOrderModelWhereUniqueInput
   }
 
   /**
-   * NSERfqModel findFirst
+   * SettlementOrderModel findFirst
    */
-  export type NSERfqModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which NSERfqModel to fetch.
+     * Filter, which SettlementOrderModel to fetch.
      */
-    where?: NSERfqModelWhereInput
+    where?: SettlementOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSERfqModels to fetch.
+     * Determine the order of SettlementOrderModels to fetch.
      */
-    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for NSERfqModels.
+     * Sets the position for searching for SettlementOrderModels.
      */
-    cursor?: NSERfqModelWhereUniqueInput
+    cursor?: SettlementOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSERfqModels from the position of the cursor.
+     * Take `±n` SettlementOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSERfqModels.
+     * Skip the first `n` SettlementOrderModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of NSERfqModels.
+     * Filter by unique combinations of SettlementOrderModels.
      */
-    distinct?: NSERfqModelScalarFieldEnum | NSERfqModelScalarFieldEnum[]
+    distinct?: SettlementOrderModelScalarFieldEnum | SettlementOrderModelScalarFieldEnum[]
   }
 
   /**
-   * NSERfqModel findFirstOrThrow
+   * SettlementOrderModel findFirstOrThrow
    */
-  export type NSERfqModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which NSERfqModel to fetch.
+     * Filter, which SettlementOrderModel to fetch.
      */
-    where?: NSERfqModelWhereInput
+    where?: SettlementOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSERfqModels to fetch.
+     * Determine the order of SettlementOrderModels to fetch.
      */
-    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for NSERfqModels.
+     * Sets the position for searching for SettlementOrderModels.
      */
-    cursor?: NSERfqModelWhereUniqueInput
+    cursor?: SettlementOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSERfqModels from the position of the cursor.
+     * Take `±n` SettlementOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSERfqModels.
+     * Skip the first `n` SettlementOrderModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of NSERfqModels.
+     * Filter by unique combinations of SettlementOrderModels.
      */
-    distinct?: NSERfqModelScalarFieldEnum | NSERfqModelScalarFieldEnum[]
+    distinct?: SettlementOrderModelScalarFieldEnum | SettlementOrderModelScalarFieldEnum[]
   }
 
   /**
-   * NSERfqModel findMany
+   * SettlementOrderModel findMany
    */
-  export type NSERfqModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which NSERfqModels to fetch.
+     * Filter, which SettlementOrderModels to fetch.
      */
-    where?: NSERfqModelWhereInput
+    where?: SettlementOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of NSERfqModels to fetch.
+     * Determine the order of SettlementOrderModels to fetch.
      */
-    orderBy?: NSERfqModelOrderByWithRelationInput | NSERfqModelOrderByWithRelationInput[]
+    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing NSERfqModels.
+     * Sets the position for listing SettlementOrderModels.
      */
-    cursor?: NSERfqModelWhereUniqueInput
+    cursor?: SettlementOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` NSERfqModels from the position of the cursor.
+     * Take `±n` SettlementOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` NSERfqModels.
+     * Skip the first `n` SettlementOrderModels.
      */
     skip?: number
-    distinct?: NSERfqModelScalarFieldEnum | NSERfqModelScalarFieldEnum[]
+    distinct?: SettlementOrderModelScalarFieldEnum | SettlementOrderModelScalarFieldEnum[]
   }
 
   /**
-   * NSERfqModel create
+   * SettlementOrderModel create
    */
-  export type NSERfqModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * The data needed to create a NSERfqModel.
+     * The data needed to create a SettlementOrderModel.
      */
-    data: XOR<NSERfqModelCreateInput, NSERfqModelUncheckedCreateInput>
+    data: XOR<SettlementOrderModelCreateInput, SettlementOrderModelUncheckedCreateInput>
   }
 
   /**
-   * NSERfqModel createMany
+   * SettlementOrderModel createMany
    */
-  export type NSERfqModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many NSERfqModels.
+     * The data used to create many SettlementOrderModels.
      */
-    data: NSERfqModelCreateManyInput | NSERfqModelCreateManyInput[]
+    data: SettlementOrderModelCreateManyInput | SettlementOrderModelCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * NSERfqModel createManyAndReturn
+   * SettlementOrderModel createManyAndReturn
    */
-  export type NSERfqModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelectCreateManyAndReturn<ExtArgs> | null
+    select?: SettlementOrderModelSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * The data used to create many NSERfqModels.
+     * The data used to create many SettlementOrderModels.
      */
-    data: NSERfqModelCreateManyInput | NSERfqModelCreateManyInput[]
+    data: SettlementOrderModelCreateManyInput | SettlementOrderModelCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * NSERfqModel update
+   * SettlementOrderModel update
    */
-  export type NSERfqModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * The data needed to update a NSERfqModel.
+     * The data needed to update a SettlementOrderModel.
      */
-    data: XOR<NSERfqModelUpdateInput, NSERfqModelUncheckedUpdateInput>
+    data: XOR<SettlementOrderModelUpdateInput, SettlementOrderModelUncheckedUpdateInput>
     /**
-     * Choose, which NSERfqModel to update.
+     * Choose, which SettlementOrderModel to update.
      */
-    where: NSERfqModelWhereUniqueInput
+    where: SettlementOrderModelWhereUniqueInput
   }
 
   /**
-   * NSERfqModel updateMany
+   * SettlementOrderModel updateMany
    */
-  export type NSERfqModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update NSERfqModels.
+     * The data used to update SettlementOrderModels.
      */
-    data: XOR<NSERfqModelUpdateManyMutationInput, NSERfqModelUncheckedUpdateManyInput>
+    data: XOR<SettlementOrderModelUpdateManyMutationInput, SettlementOrderModelUncheckedUpdateManyInput>
     /**
-     * Filter which NSERfqModels to update
+     * Filter which SettlementOrderModels to update
      */
-    where?: NSERfqModelWhereInput
+    where?: SettlementOrderModelWhereInput
     /**
-     * Limit how many NSERfqModels to update.
+     * Limit how many SettlementOrderModels to update.
      */
     limit?: number
   }
 
   /**
-   * NSERfqModel updateManyAndReturn
+   * SettlementOrderModel updateManyAndReturn
    */
-  export type NSERfqModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: SettlementOrderModelSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * The data used to update NSERfqModels.
+     * The data used to update SettlementOrderModels.
      */
-    data: XOR<NSERfqModelUpdateManyMutationInput, NSERfqModelUncheckedUpdateManyInput>
+    data: XOR<SettlementOrderModelUpdateManyMutationInput, SettlementOrderModelUncheckedUpdateManyInput>
     /**
-     * Filter which NSERfqModels to update
+     * Filter which SettlementOrderModels to update
      */
-    where?: NSERfqModelWhereInput
+    where?: SettlementOrderModelWhereInput
     /**
-     * Limit how many NSERfqModels to update.
+     * Limit how many SettlementOrderModels to update.
      */
     limit?: number
   }
 
   /**
-   * NSERfqModel upsert
+   * SettlementOrderModel upsert
    */
-  export type NSERfqModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * The filter to search for the NSERfqModel to update in case it exists.
+     * The filter to search for the SettlementOrderModel to update in case it exists.
      */
-    where: NSERfqModelWhereUniqueInput
+    where: SettlementOrderModelWhereUniqueInput
     /**
-     * In case the NSERfqModel found by the `where` argument doesn't exist, create a new NSERfqModel with this data.
+     * In case the SettlementOrderModel found by the `where` argument doesn't exist, create a new SettlementOrderModel with this data.
      */
-    create: XOR<NSERfqModelCreateInput, NSERfqModelUncheckedCreateInput>
+    create: XOR<SettlementOrderModelCreateInput, SettlementOrderModelUncheckedCreateInput>
     /**
-     * In case the NSERfqModel was found with the provided `where` argument, update it with this data.
+     * In case the SettlementOrderModel was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<NSERfqModelUpdateInput, NSERfqModelUncheckedUpdateInput>
+    update: XOR<SettlementOrderModelUpdateInput, SettlementOrderModelUncheckedUpdateInput>
   }
 
   /**
-   * NSERfqModel delete
+   * SettlementOrderModel delete
    */
-  export type NSERfqModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
     /**
-     * Filter which NSERfqModel to delete.
+     * Filter which SettlementOrderModel to delete.
      */
-    where: NSERfqModelWhereUniqueInput
+    where: SettlementOrderModelWhereUniqueInput
   }
 
   /**
-   * NSERfqModel deleteMany
+   * SettlementOrderModel deleteMany
    */
-  export type NSERfqModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NSERfqModels to delete
+     * Filter which SettlementOrderModels to delete
      */
-    where?: NSERfqModelWhereInput
+    where?: SettlementOrderModelWhereInput
     /**
-     * Limit how many NSERfqModels to delete.
+     * Limit how many SettlementOrderModels to delete.
      */
     limit?: number
   }
 
   /**
-   * NSERfqModel without action
+   * SettlementOrderModel without action
    */
-  export type NSERfqModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettlementOrderModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NSERfqModel
+     * Select specific fields to fetch from the SettlementOrderModel
      */
-    select?: NSERfqModelSelect<ExtArgs> | null
+    select?: SettlementOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NSERfqModel
+     * Omit specific fields from the SettlementOrderModel
      */
-    omit?: NSERfqModelOmit<ExtArgs> | null
+    omit?: SettlementOrderModelOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RFQMasterISIN
+   */
+
+  export type AggregateRFQMasterISIN = {
+    _count: RFQMasterISINCountAggregateOutputType | null
+    _avg: RFQMasterISINAvgAggregateOutputType | null
+    _sum: RFQMasterISINSumAggregateOutputType | null
+    _min: RFQMasterISINMinAggregateOutputType | null
+    _max: RFQMasterISINMaxAggregateOutputType | null
+  }
+
+  export type RFQMasterISINAvgAggregateOutputType = {
+    id: number | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yield: number | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldSell: number | null
+    priceSell: number | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    access: number | null
+    groupList: number | null
+    tradedValue: number | null
+    confirmedValue: number | null
+    createdBy: number | null
+    updatedBy: number | null
+  }
+
+  export type RFQMasterISINSumAggregateOutputType = {
+    id: number | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yield: number | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldSell: number | null
+    priceSell: number | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    access: number | null
+    groupList: number[]
+    tradedValue: number | null
+    confirmedValue: number | null
+    createdBy: number | null
+    updatedBy: number | null
+  }
+
+  export type RFQMasterISINMinAggregateOutputType = {
+    id: number | null
+    number: string | null
+    segment: $Enums.RFQSegment | null
+    isin: string | null
+    participantCode: string | null
+    dealType: $Enums.DealType | null
+    clientCode: string | null
+    clientRegType: $Enums.ClientRegType | null
+    buySell: $Enums.BuySell | null
+    quoteType: $Enums.QuoteType | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yieldType: $Enums.YieldType | null
+    yield: number | null
+    calcMethod: $Enums.CalcMethod | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldTypeSell: $Enums.YieldType | null
+    yieldSell: number | null
+    calcMethodSell: $Enums.CalcMethod | null
+    priceSell: number | null
+    gtdFlag: $Enums.YesNo | null
+    endTime: string | null
+    quoteNegotiable: $Enums.YesNo | null
+    valueNegotiable: $Enums.YesNo | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    anonymous: $Enums.YesNo | null
+    access: number | null
+    category: string | null
+    rating: string | null
+    remarks: string | null
+    date: string | null
+    quoteTime: string | null
+    settlementDate: string | null
+    status: $Enums.Status | null
+    userLogin: string | null
+    tradedValue: number | null
+    confirmedValue: number | null
+    createdAt: Date | null
+    createdBy: number | null
+    updatedBy: number | null
+    updatedAt: Date | null
+  }
+
+  export type RFQMasterISINMaxAggregateOutputType = {
+    id: number | null
+    number: string | null
+    segment: $Enums.RFQSegment | null
+    isin: string | null
+    participantCode: string | null
+    dealType: $Enums.DealType | null
+    clientCode: string | null
+    clientRegType: $Enums.ClientRegType | null
+    buySell: $Enums.BuySell | null
+    quoteType: $Enums.QuoteType | null
+    settlementType: number | null
+    value: number | null
+    quantity: number | null
+    yieldType: $Enums.YieldType | null
+    yield: number | null
+    calcMethod: $Enums.CalcMethod | null
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldTypeSell: $Enums.YieldType | null
+    yieldSell: number | null
+    calcMethodSell: $Enums.CalcMethod | null
+    priceSell: number | null
+    gtdFlag: $Enums.YesNo | null
+    endTime: string | null
+    quoteNegotiable: $Enums.YesNo | null
+    valueNegotiable: $Enums.YesNo | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    anonymous: $Enums.YesNo | null
+    access: number | null
+    category: string | null
+    rating: string | null
+    remarks: string | null
+    date: string | null
+    quoteTime: string | null
+    settlementDate: string | null
+    status: $Enums.Status | null
+    userLogin: string | null
+    tradedValue: number | null
+    confirmedValue: number | null
+    createdAt: Date | null
+    createdBy: number | null
+    updatedBy: number | null
+    updatedAt: Date | null
+  }
+
+  export type RFQMasterISINCountAggregateOutputType = {
+    id: number
+    number: number
+    segment: number
+    isin: number
+    participantCode: number
+    dealType: number
+    clientCode: number
+    clientRegType: number
+    buySell: number
+    quoteType: number
+    settlementType: number
+    value: number
+    quantity: number
+    yieldType: number
+    yield: number
+    calcMethod: number
+    price: number
+    valueSell: number
+    quantitySell: number
+    yieldTypeSell: number
+    yieldSell: number
+    calcMethodSell: number
+    priceSell: number
+    gtdFlag: number
+    endTime: number
+    quoteNegotiable: number
+    valueNegotiable: number
+    minFillValue: number
+    valueStepSize: number
+    anonymous: number
+    access: number
+    groupList: number
+    participantList: number
+    category: number
+    rating: number
+    remarks: number
+    date: number
+    quoteTime: number
+    settlementDate: number
+    status: number
+    userLogin: number
+    tradedValue: number
+    confirmedValue: number
+    createdAt: number
+    createdBy: number
+    updatedBy: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RFQMasterISINAvgAggregateInputType = {
+    id?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yield?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldSell?: true
+    priceSell?: true
+    minFillValue?: true
+    valueStepSize?: true
+    access?: true
+    groupList?: true
+    tradedValue?: true
+    confirmedValue?: true
+    createdBy?: true
+    updatedBy?: true
+  }
+
+  export type RFQMasterISINSumAggregateInputType = {
+    id?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yield?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldSell?: true
+    priceSell?: true
+    minFillValue?: true
+    valueStepSize?: true
+    access?: true
+    groupList?: true
+    tradedValue?: true
+    confirmedValue?: true
+    createdBy?: true
+    updatedBy?: true
+  }
+
+  export type RFQMasterISINMinAggregateInputType = {
+    id?: true
+    number?: true
+    segment?: true
+    isin?: true
+    participantCode?: true
+    dealType?: true
+    clientCode?: true
+    clientRegType?: true
+    buySell?: true
+    quoteType?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yieldType?: true
+    yield?: true
+    calcMethod?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldTypeSell?: true
+    yieldSell?: true
+    calcMethodSell?: true
+    priceSell?: true
+    gtdFlag?: true
+    endTime?: true
+    quoteNegotiable?: true
+    valueNegotiable?: true
+    minFillValue?: true
+    valueStepSize?: true
+    anonymous?: true
+    access?: true
+    category?: true
+    rating?: true
+    remarks?: true
+    date?: true
+    quoteTime?: true
+    settlementDate?: true
+    status?: true
+    userLogin?: true
+    tradedValue?: true
+    confirmedValue?: true
+    createdAt?: true
+    createdBy?: true
+    updatedBy?: true
+    updatedAt?: true
+  }
+
+  export type RFQMasterISINMaxAggregateInputType = {
+    id?: true
+    number?: true
+    segment?: true
+    isin?: true
+    participantCode?: true
+    dealType?: true
+    clientCode?: true
+    clientRegType?: true
+    buySell?: true
+    quoteType?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yieldType?: true
+    yield?: true
+    calcMethod?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldTypeSell?: true
+    yieldSell?: true
+    calcMethodSell?: true
+    priceSell?: true
+    gtdFlag?: true
+    endTime?: true
+    quoteNegotiable?: true
+    valueNegotiable?: true
+    minFillValue?: true
+    valueStepSize?: true
+    anonymous?: true
+    access?: true
+    category?: true
+    rating?: true
+    remarks?: true
+    date?: true
+    quoteTime?: true
+    settlementDate?: true
+    status?: true
+    userLogin?: true
+    tradedValue?: true
+    confirmedValue?: true
+    createdAt?: true
+    createdBy?: true
+    updatedBy?: true
+    updatedAt?: true
+  }
+
+  export type RFQMasterISINCountAggregateInputType = {
+    id?: true
+    number?: true
+    segment?: true
+    isin?: true
+    participantCode?: true
+    dealType?: true
+    clientCode?: true
+    clientRegType?: true
+    buySell?: true
+    quoteType?: true
+    settlementType?: true
+    value?: true
+    quantity?: true
+    yieldType?: true
+    yield?: true
+    calcMethod?: true
+    price?: true
+    valueSell?: true
+    quantitySell?: true
+    yieldTypeSell?: true
+    yieldSell?: true
+    calcMethodSell?: true
+    priceSell?: true
+    gtdFlag?: true
+    endTime?: true
+    quoteNegotiable?: true
+    valueNegotiable?: true
+    minFillValue?: true
+    valueStepSize?: true
+    anonymous?: true
+    access?: true
+    groupList?: true
+    participantList?: true
+    category?: true
+    rating?: true
+    remarks?: true
+    date?: true
+    quoteTime?: true
+    settlementDate?: true
+    status?: true
+    userLogin?: true
+    tradedValue?: true
+    confirmedValue?: true
+    createdAt?: true
+    createdBy?: true
+    updatedBy?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RFQMasterISINAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RFQMasterISIN to aggregate.
+     */
+    where?: RFQMasterISINWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQMasterISINS to fetch.
+     */
+    orderBy?: RFQMasterISINOrderByWithRelationInput | RFQMasterISINOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RFQMasterISINWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQMasterISINS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQMasterISINS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RFQMasterISINS
+    **/
+    _count?: true | RFQMasterISINCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RFQMasterISINAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RFQMasterISINSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RFQMasterISINMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RFQMasterISINMaxAggregateInputType
+  }
+
+  export type GetRFQMasterISINAggregateType<T extends RFQMasterISINAggregateArgs> = {
+        [P in keyof T & keyof AggregateRFQMasterISIN]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRFQMasterISIN[P]>
+      : GetScalarType<T[P], AggregateRFQMasterISIN[P]>
+  }
+
+
+
+
+  export type RFQMasterISINGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RFQMasterISINWhereInput
+    orderBy?: RFQMasterISINOrderByWithAggregationInput | RFQMasterISINOrderByWithAggregationInput[]
+    by: RFQMasterISINScalarFieldEnum[] | RFQMasterISINScalarFieldEnum
+    having?: RFQMasterISINScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RFQMasterISINCountAggregateInputType | true
+    _avg?: RFQMasterISINAvgAggregateInputType
+    _sum?: RFQMasterISINSumAggregateInputType
+    _min?: RFQMasterISINMinAggregateInputType
+    _max?: RFQMasterISINMaxAggregateInputType
+  }
+
+  export type RFQMasterISINGroupByOutputType = {
+    id: number
+    number: string
+    segment: $Enums.RFQSegment
+    isin: string
+    participantCode: string
+    dealType: $Enums.DealType
+    clientCode: string
+    clientRegType: $Enums.ClientRegType
+    buySell: $Enums.BuySell
+    quoteType: $Enums.QuoteType
+    settlementType: number
+    value: number
+    quantity: number | null
+    yieldType: $Enums.YieldType
+    yield: number | null
+    calcMethod: $Enums.CalcMethod
+    price: number | null
+    valueSell: number | null
+    quantitySell: number | null
+    yieldTypeSell: $Enums.YieldType | null
+    yieldSell: number | null
+    calcMethodSell: $Enums.CalcMethod | null
+    priceSell: number | null
+    gtdFlag: $Enums.YesNo | null
+    endTime: string | null
+    quoteNegotiable: $Enums.YesNo | null
+    valueNegotiable: $Enums.YesNo | null
+    minFillValue: number | null
+    valueStepSize: number | null
+    anonymous: $Enums.YesNo | null
+    access: number
+    groupList: number[]
+    participantList: string[]
+    category: string | null
+    rating: string | null
+    remarks: string | null
+    date: string | null
+    quoteTime: string | null
+    settlementDate: string | null
+    status: $Enums.Status
+    userLogin: string | null
+    tradedValue: number | null
+    confirmedValue: number | null
+    createdAt: Date
+    createdBy: number | null
+    updatedBy: number | null
+    updatedAt: Date
+    _count: RFQMasterISINCountAggregateOutputType | null
+    _avg: RFQMasterISINAvgAggregateOutputType | null
+    _sum: RFQMasterISINSumAggregateOutputType | null
+    _min: RFQMasterISINMinAggregateOutputType | null
+    _max: RFQMasterISINMaxAggregateOutputType | null
+  }
+
+  type GetRFQMasterISINGroupByPayload<T extends RFQMasterISINGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RFQMasterISINGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RFQMasterISINGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RFQMasterISINGroupByOutputType[P]>
+            : GetScalarType<T[P], RFQMasterISINGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RFQMasterISINSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    clientRegType?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    date?: boolean
+    quoteTime?: boolean
+    settlementDate?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["rFQMasterISIN"]>
+
+  export type RFQMasterISINSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    clientRegType?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    date?: boolean
+    quoteTime?: boolean
+    settlementDate?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["rFQMasterISIN"]>
+
+  export type RFQMasterISINSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    clientRegType?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    date?: boolean
+    quoteTime?: boolean
+    settlementDate?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["rFQMasterISIN"]>
+
+  export type RFQMasterISINSelectScalar = {
+    id?: boolean
+    number?: boolean
+    segment?: boolean
+    isin?: boolean
+    participantCode?: boolean
+    dealType?: boolean
+    clientCode?: boolean
+    clientRegType?: boolean
+    buySell?: boolean
+    quoteType?: boolean
+    settlementType?: boolean
+    value?: boolean
+    quantity?: boolean
+    yieldType?: boolean
+    yield?: boolean
+    calcMethod?: boolean
+    price?: boolean
+    valueSell?: boolean
+    quantitySell?: boolean
+    yieldTypeSell?: boolean
+    yieldSell?: boolean
+    calcMethodSell?: boolean
+    priceSell?: boolean
+    gtdFlag?: boolean
+    endTime?: boolean
+    quoteNegotiable?: boolean
+    valueNegotiable?: boolean
+    minFillValue?: boolean
+    valueStepSize?: boolean
+    anonymous?: boolean
+    access?: boolean
+    groupList?: boolean
+    participantList?: boolean
+    category?: boolean
+    rating?: boolean
+    remarks?: boolean
+    date?: boolean
+    quoteTime?: boolean
+    settlementDate?: boolean
+    status?: boolean
+    userLogin?: boolean
+    tradedValue?: boolean
+    confirmedValue?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RFQMasterISINOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "number" | "segment" | "isin" | "participantCode" | "dealType" | "clientCode" | "clientRegType" | "buySell" | "quoteType" | "settlementType" | "value" | "quantity" | "yieldType" | "yield" | "calcMethod" | "price" | "valueSell" | "quantitySell" | "yieldTypeSell" | "yieldSell" | "calcMethodSell" | "priceSell" | "gtdFlag" | "endTime" | "quoteNegotiable" | "valueNegotiable" | "minFillValue" | "valueStepSize" | "anonymous" | "access" | "groupList" | "participantList" | "category" | "rating" | "remarks" | "date" | "quoteTime" | "settlementDate" | "status" | "userLogin" | "tradedValue" | "confirmedValue" | "createdAt" | "createdBy" | "updatedBy" | "updatedAt", ExtArgs["result"]["rFQMasterISIN"]>
+
+  export type $RFQMasterISINPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RFQMasterISIN"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      number: string
+      segment: $Enums.RFQSegment
+      isin: string
+      participantCode: string
+      dealType: $Enums.DealType
+      clientCode: string
+      clientRegType: $Enums.ClientRegType
+      buySell: $Enums.BuySell
+      quoteType: $Enums.QuoteType
+      settlementType: number
+      value: number
+      quantity: number | null
+      yieldType: $Enums.YieldType
+      yield: number | null
+      calcMethod: $Enums.CalcMethod
+      price: number | null
+      valueSell: number | null
+      quantitySell: number | null
+      yieldTypeSell: $Enums.YieldType | null
+      yieldSell: number | null
+      calcMethodSell: $Enums.CalcMethod | null
+      priceSell: number | null
+      gtdFlag: $Enums.YesNo | null
+      endTime: string | null
+      quoteNegotiable: $Enums.YesNo | null
+      valueNegotiable: $Enums.YesNo | null
+      minFillValue: number | null
+      valueStepSize: number | null
+      anonymous: $Enums.YesNo | null
+      access: number
+      groupList: number[]
+      participantList: string[]
+      category: string | null
+      rating: string | null
+      remarks: string | null
+      date: string | null
+      quoteTime: string | null
+      settlementDate: string | null
+      status: $Enums.Status
+      userLogin: string | null
+      tradedValue: number | null
+      confirmedValue: number | null
+      createdAt: Date
+      createdBy: number | null
+      updatedBy: number | null
+      updatedAt: Date
+    }, ExtArgs["result"]["rFQMasterISIN"]>
+    composites: {}
+  }
+
+  type RFQMasterISINGetPayload<S extends boolean | null | undefined | RFQMasterISINDefaultArgs> = $Result.GetResult<Prisma.$RFQMasterISINPayload, S>
+
+  type RFQMasterISINCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RFQMasterISINFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RFQMasterISINCountAggregateInputType | true
+    }
+
+  export interface RFQMasterISINDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RFQMasterISIN'], meta: { name: 'RFQMasterISIN' } }
+    /**
+     * Find zero or one RFQMasterISIN that matches the filter.
+     * @param {RFQMasterISINFindUniqueArgs} args - Arguments to find a RFQMasterISIN
+     * @example
+     * // Get one RFQMasterISIN
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RFQMasterISINFindUniqueArgs>(args: SelectSubset<T, RFQMasterISINFindUniqueArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RFQMasterISIN that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RFQMasterISINFindUniqueOrThrowArgs} args - Arguments to find a RFQMasterISIN
+     * @example
+     * // Get one RFQMasterISIN
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RFQMasterISINFindUniqueOrThrowArgs>(args: SelectSubset<T, RFQMasterISINFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RFQMasterISIN that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQMasterISINFindFirstArgs} args - Arguments to find a RFQMasterISIN
+     * @example
+     * // Get one RFQMasterISIN
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RFQMasterISINFindFirstArgs>(args?: SelectSubset<T, RFQMasterISINFindFirstArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RFQMasterISIN that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQMasterISINFindFirstOrThrowArgs} args - Arguments to find a RFQMasterISIN
+     * @example
+     * // Get one RFQMasterISIN
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RFQMasterISINFindFirstOrThrowArgs>(args?: SelectSubset<T, RFQMasterISINFindFirstOrThrowArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RFQMasterISINS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQMasterISINFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RFQMasterISINS
+     * const rFQMasterISINS = await prisma.rFQMasterISIN.findMany()
+     * 
+     * // Get first 10 RFQMasterISINS
+     * const rFQMasterISINS = await prisma.rFQMasterISIN.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const rFQMasterISINWithIdOnly = await prisma.rFQMasterISIN.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RFQMasterISINFindManyArgs>(args?: SelectSubset<T, RFQMasterISINFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RFQMasterISIN.
+     * @param {RFQMasterISINCreateArgs} args - Arguments to create a RFQMasterISIN.
+     * @example
+     * // Create one RFQMasterISIN
+     * const RFQMasterISIN = await prisma.rFQMasterISIN.create({
+     *   data: {
+     *     // ... data to create a RFQMasterISIN
+     *   }
+     * })
+     * 
+     */
+    create<T extends RFQMasterISINCreateArgs>(args: SelectSubset<T, RFQMasterISINCreateArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RFQMasterISINS.
+     * @param {RFQMasterISINCreateManyArgs} args - Arguments to create many RFQMasterISINS.
+     * @example
+     * // Create many RFQMasterISINS
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RFQMasterISINCreateManyArgs>(args?: SelectSubset<T, RFQMasterISINCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RFQMasterISINS and returns the data saved in the database.
+     * @param {RFQMasterISINCreateManyAndReturnArgs} args - Arguments to create many RFQMasterISINS.
+     * @example
+     * // Create many RFQMasterISINS
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RFQMasterISINS and only return the `id`
+     * const rFQMasterISINWithIdOnly = await prisma.rFQMasterISIN.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RFQMasterISINCreateManyAndReturnArgs>(args?: SelectSubset<T, RFQMasterISINCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RFQMasterISIN.
+     * @param {RFQMasterISINDeleteArgs} args - Arguments to delete one RFQMasterISIN.
+     * @example
+     * // Delete one RFQMasterISIN
+     * const RFQMasterISIN = await prisma.rFQMasterISIN.delete({
+     *   where: {
+     *     // ... filter to delete one RFQMasterISIN
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RFQMasterISINDeleteArgs>(args: SelectSubset<T, RFQMasterISINDeleteArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RFQMasterISIN.
+     * @param {RFQMasterISINUpdateArgs} args - Arguments to update one RFQMasterISIN.
+     * @example
+     * // Update one RFQMasterISIN
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RFQMasterISINUpdateArgs>(args: SelectSubset<T, RFQMasterISINUpdateArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RFQMasterISINS.
+     * @param {RFQMasterISINDeleteManyArgs} args - Arguments to filter RFQMasterISINS to delete.
+     * @example
+     * // Delete a few RFQMasterISINS
+     * const { count } = await prisma.rFQMasterISIN.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RFQMasterISINDeleteManyArgs>(args?: SelectSubset<T, RFQMasterISINDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RFQMasterISINS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQMasterISINUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RFQMasterISINS
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RFQMasterISINUpdateManyArgs>(args: SelectSubset<T, RFQMasterISINUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RFQMasterISINS and returns the data updated in the database.
+     * @param {RFQMasterISINUpdateManyAndReturnArgs} args - Arguments to update many RFQMasterISINS.
+     * @example
+     * // Update many RFQMasterISINS
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RFQMasterISINS and only return the `id`
+     * const rFQMasterISINWithIdOnly = await prisma.rFQMasterISIN.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RFQMasterISINUpdateManyAndReturnArgs>(args: SelectSubset<T, RFQMasterISINUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RFQMasterISIN.
+     * @param {RFQMasterISINUpsertArgs} args - Arguments to update or create a RFQMasterISIN.
+     * @example
+     * // Update or create a RFQMasterISIN
+     * const rFQMasterISIN = await prisma.rFQMasterISIN.upsert({
+     *   create: {
+     *     // ... data to create a RFQMasterISIN
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RFQMasterISIN we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RFQMasterISINUpsertArgs>(args: SelectSubset<T, RFQMasterISINUpsertArgs<ExtArgs>>): Prisma__RFQMasterISINClient<$Result.GetResult<Prisma.$RFQMasterISINPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RFQMasterISINS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQMasterISINCountArgs} args - Arguments to filter RFQMasterISINS to count.
+     * @example
+     * // Count the number of RFQMasterISINS
+     * const count = await prisma.rFQMasterISIN.count({
+     *   where: {
+     *     // ... the filter for the RFQMasterISINS we want to count
+     *   }
+     * })
+    **/
+    count<T extends RFQMasterISINCountArgs>(
+      args?: Subset<T, RFQMasterISINCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RFQMasterISINCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RFQMasterISIN.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQMasterISINAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RFQMasterISINAggregateArgs>(args: Subset<T, RFQMasterISINAggregateArgs>): Prisma.PrismaPromise<GetRFQMasterISINAggregateType<T>>
+
+    /**
+     * Group by RFQMasterISIN.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQMasterISINGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RFQMasterISINGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RFQMasterISINGroupByArgs['orderBy'] }
+        : { orderBy?: RFQMasterISINGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RFQMasterISINGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRFQMasterISINGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RFQMasterISIN model
+   */
+  readonly fields: RFQMasterISINFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RFQMasterISIN.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RFQMasterISINClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RFQMasterISIN model
+   */
+  interface RFQMasterISINFieldRefs {
+    readonly id: FieldRef<"RFQMasterISIN", 'Int'>
+    readonly number: FieldRef<"RFQMasterISIN", 'String'>
+    readonly segment: FieldRef<"RFQMasterISIN", 'RFQSegment'>
+    readonly isin: FieldRef<"RFQMasterISIN", 'String'>
+    readonly participantCode: FieldRef<"RFQMasterISIN", 'String'>
+    readonly dealType: FieldRef<"RFQMasterISIN", 'DealType'>
+    readonly clientCode: FieldRef<"RFQMasterISIN", 'String'>
+    readonly clientRegType: FieldRef<"RFQMasterISIN", 'ClientRegType'>
+    readonly buySell: FieldRef<"RFQMasterISIN", 'BuySell'>
+    readonly quoteType: FieldRef<"RFQMasterISIN", 'QuoteType'>
+    readonly settlementType: FieldRef<"RFQMasterISIN", 'Int'>
+    readonly value: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly quantity: FieldRef<"RFQMasterISIN", 'Int'>
+    readonly yieldType: FieldRef<"RFQMasterISIN", 'YieldType'>
+    readonly yield: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly calcMethod: FieldRef<"RFQMasterISIN", 'CalcMethod'>
+    readonly price: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly valueSell: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly quantitySell: FieldRef<"RFQMasterISIN", 'Int'>
+    readonly yieldTypeSell: FieldRef<"RFQMasterISIN", 'YieldType'>
+    readonly yieldSell: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly calcMethodSell: FieldRef<"RFQMasterISIN", 'CalcMethod'>
+    readonly priceSell: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly gtdFlag: FieldRef<"RFQMasterISIN", 'YesNo'>
+    readonly endTime: FieldRef<"RFQMasterISIN", 'String'>
+    readonly quoteNegotiable: FieldRef<"RFQMasterISIN", 'YesNo'>
+    readonly valueNegotiable: FieldRef<"RFQMasterISIN", 'YesNo'>
+    readonly minFillValue: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly valueStepSize: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly anonymous: FieldRef<"RFQMasterISIN", 'YesNo'>
+    readonly access: FieldRef<"RFQMasterISIN", 'Int'>
+    readonly groupList: FieldRef<"RFQMasterISIN", 'Int[]'>
+    readonly participantList: FieldRef<"RFQMasterISIN", 'String[]'>
+    readonly category: FieldRef<"RFQMasterISIN", 'String'>
+    readonly rating: FieldRef<"RFQMasterISIN", 'String'>
+    readonly remarks: FieldRef<"RFQMasterISIN", 'String'>
+    readonly date: FieldRef<"RFQMasterISIN", 'String'>
+    readonly quoteTime: FieldRef<"RFQMasterISIN", 'String'>
+    readonly settlementDate: FieldRef<"RFQMasterISIN", 'String'>
+    readonly status: FieldRef<"RFQMasterISIN", 'Status'>
+    readonly userLogin: FieldRef<"RFQMasterISIN", 'String'>
+    readonly tradedValue: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly confirmedValue: FieldRef<"RFQMasterISIN", 'Float'>
+    readonly createdAt: FieldRef<"RFQMasterISIN", 'DateTime'>
+    readonly createdBy: FieldRef<"RFQMasterISIN", 'Int'>
+    readonly updatedBy: FieldRef<"RFQMasterISIN", 'Int'>
+    readonly updatedAt: FieldRef<"RFQMasterISIN", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RFQMasterISIN findUnique
+   */
+  export type RFQMasterISINFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQMasterISIN to fetch.
+     */
+    where: RFQMasterISINWhereUniqueInput
+  }
+
+  /**
+   * RFQMasterISIN findUniqueOrThrow
+   */
+  export type RFQMasterISINFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQMasterISIN to fetch.
+     */
+    where: RFQMasterISINWhereUniqueInput
+  }
+
+  /**
+   * RFQMasterISIN findFirst
+   */
+  export type RFQMasterISINFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQMasterISIN to fetch.
+     */
+    where?: RFQMasterISINWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQMasterISINS to fetch.
+     */
+    orderBy?: RFQMasterISINOrderByWithRelationInput | RFQMasterISINOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RFQMasterISINS.
+     */
+    cursor?: RFQMasterISINWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQMasterISINS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQMasterISINS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RFQMasterISINS.
+     */
+    distinct?: RFQMasterISINScalarFieldEnum | RFQMasterISINScalarFieldEnum[]
+  }
+
+  /**
+   * RFQMasterISIN findFirstOrThrow
+   */
+  export type RFQMasterISINFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQMasterISIN to fetch.
+     */
+    where?: RFQMasterISINWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQMasterISINS to fetch.
+     */
+    orderBy?: RFQMasterISINOrderByWithRelationInput | RFQMasterISINOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RFQMasterISINS.
+     */
+    cursor?: RFQMasterISINWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQMasterISINS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQMasterISINS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RFQMasterISINS.
+     */
+    distinct?: RFQMasterISINScalarFieldEnum | RFQMasterISINScalarFieldEnum[]
+  }
+
+  /**
+   * RFQMasterISIN findMany
+   */
+  export type RFQMasterISINFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQMasterISINS to fetch.
+     */
+    where?: RFQMasterISINWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQMasterISINS to fetch.
+     */
+    orderBy?: RFQMasterISINOrderByWithRelationInput | RFQMasterISINOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RFQMasterISINS.
+     */
+    cursor?: RFQMasterISINWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQMasterISINS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQMasterISINS.
+     */
+    skip?: number
+    distinct?: RFQMasterISINScalarFieldEnum | RFQMasterISINScalarFieldEnum[]
+  }
+
+  /**
+   * RFQMasterISIN create
+   */
+  export type RFQMasterISINCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * The data needed to create a RFQMasterISIN.
+     */
+    data: XOR<RFQMasterISINCreateInput, RFQMasterISINUncheckedCreateInput>
+  }
+
+  /**
+   * RFQMasterISIN createMany
+   */
+  export type RFQMasterISINCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RFQMasterISINS.
+     */
+    data: RFQMasterISINCreateManyInput | RFQMasterISINCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RFQMasterISIN createManyAndReturn
+   */
+  export type RFQMasterISINCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * The data used to create many RFQMasterISINS.
+     */
+    data: RFQMasterISINCreateManyInput | RFQMasterISINCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RFQMasterISIN update
+   */
+  export type RFQMasterISINUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * The data needed to update a RFQMasterISIN.
+     */
+    data: XOR<RFQMasterISINUpdateInput, RFQMasterISINUncheckedUpdateInput>
+    /**
+     * Choose, which RFQMasterISIN to update.
+     */
+    where: RFQMasterISINWhereUniqueInput
+  }
+
+  /**
+   * RFQMasterISIN updateMany
+   */
+  export type RFQMasterISINUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RFQMasterISINS.
+     */
+    data: XOR<RFQMasterISINUpdateManyMutationInput, RFQMasterISINUncheckedUpdateManyInput>
+    /**
+     * Filter which RFQMasterISINS to update
+     */
+    where?: RFQMasterISINWhereInput
+    /**
+     * Limit how many RFQMasterISINS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RFQMasterISIN updateManyAndReturn
+   */
+  export type RFQMasterISINUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * The data used to update RFQMasterISINS.
+     */
+    data: XOR<RFQMasterISINUpdateManyMutationInput, RFQMasterISINUncheckedUpdateManyInput>
+    /**
+     * Filter which RFQMasterISINS to update
+     */
+    where?: RFQMasterISINWhereInput
+    /**
+     * Limit how many RFQMasterISINS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RFQMasterISIN upsert
+   */
+  export type RFQMasterISINUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * The filter to search for the RFQMasterISIN to update in case it exists.
+     */
+    where: RFQMasterISINWhereUniqueInput
+    /**
+     * In case the RFQMasterISIN found by the `where` argument doesn't exist, create a new RFQMasterISIN with this data.
+     */
+    create: XOR<RFQMasterISINCreateInput, RFQMasterISINUncheckedCreateInput>
+    /**
+     * In case the RFQMasterISIN was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RFQMasterISINUpdateInput, RFQMasterISINUncheckedUpdateInput>
+  }
+
+  /**
+   * RFQMasterISIN delete
+   */
+  export type RFQMasterISINDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+    /**
+     * Filter which RFQMasterISIN to delete.
+     */
+    where: RFQMasterISINWhereUniqueInput
+  }
+
+  /**
+   * RFQMasterISIN deleteMany
+   */
+  export type RFQMasterISINDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RFQMasterISINS to delete
+     */
+    where?: RFQMasterISINWhereInput
+    /**
+     * Limit how many RFQMasterISINS to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RFQMasterISIN without action
+   */
+  export type RFQMasterISINDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQMasterISIN
+     */
+    select?: RFQMasterISINSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQMasterISIN
+     */
+    omit?: RFQMasterISINOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RFQNegotiation
+   */
+
+  export type AggregateRFQNegotiation = {
+    _count: RFQNegotiationCountAggregateOutputType | null
+    _avg: RFQNegotiationAvgAggregateOutputType | null
+    _sum: RFQNegotiationSumAggregateOutputType | null
+    _min: RFQNegotiationMinAggregateOutputType | null
+    _max: RFQNegotiationMaxAggregateOutputType | null
+  }
+
+  export type RFQNegotiationAvgAggregateOutputType = {
+    initSettlementType: number | null
+    initValue: number | null
+    initQuantity: number | null
+    initYield: number | null
+    initPrice: number | null
+    initAccruedInterest: number | null
+    initConsideration: number | null
+    respSettlementType: number | null
+    respValue: number | null
+    respQuantity: number | null
+    respYield: number | null
+    respPrice: number | null
+    respAccruedInterest: number | null
+    respConsideration: number | null
+    acceptedSettlementType: number | null
+    acceptedValue: number | null
+    acceptedQuantity: number | null
+    acceptedYield: number | null
+    acceptedPrice: number | null
+    acceptedAccruedInterest: number | null
+    acceptedConsideration: number | null
+    createdBy: number | null
+    updatedBy: number | null
+  }
+
+  export type RFQNegotiationSumAggregateOutputType = {
+    initSettlementType: number | null
+    initValue: number | null
+    initQuantity: number | null
+    initYield: number | null
+    initPrice: number | null
+    initAccruedInterest: number | null
+    initConsideration: number | null
+    respSettlementType: number | null
+    respValue: number | null
+    respQuantity: number | null
+    respYield: number | null
+    respPrice: number | null
+    respAccruedInterest: number | null
+    respConsideration: number | null
+    acceptedSettlementType: number | null
+    acceptedValue: number | null
+    acceptedQuantity: number | null
+    acceptedYield: number | null
+    acceptedPrice: number | null
+    acceptedAccruedInterest: number | null
+    acceptedConsideration: number | null
+    createdBy: number | null
+    updatedBy: number | null
+  }
+
+  export type RFQNegotiationMinAggregateOutputType = {
+    rfqNumber: string | null
+    id: string | null
+    date: string | null
+    isin: string | null
+    buySell: $Enums.BuySell | null
+    initSettlementType: number | null
+    initSettlementDate: string | null
+    initAeCode: string | null
+    initDealType: $Enums.DealType | null
+    initClientCode: string | null
+    initClientRegType: $Enums.ClientRegType | null
+    initValue: number | null
+    initQuantity: number | null
+    initYieldType: $Enums.YieldType | null
+    initYield: number | null
+    initCalcMethod: $Enums.CalcMethod | null
+    initPrice: number | null
+    initAccruedInterest: number | null
+    initConsideration: number | null
+    initQuoteTime: string | null
+    initGtdFlag: $Enums.YesNo | null
+    initEndTime: string | null
+    initRemarks: string | null
+    initLoginId: string | null
+    respSettlementType: number | null
+    respSettlementDate: string | null
+    respAeCode: string | null
+    respDealType: $Enums.DealType | null
+    respClientCode: string | null
+    respClientRegType: $Enums.ClientRegType | null
+    respValue: number | null
+    respQuantity: number | null
+    respYieldType: $Enums.YieldType | null
+    respYield: number | null
+    respCalcMethod: $Enums.CalcMethod | null
+    respPrice: number | null
+    respAccruedInterest: number | null
+    respConsideration: number | null
+    respQuoteTime: string | null
+    respGtdFlag: $Enums.YesNo | null
+    respEndTime: string | null
+    respRemarks: string | null
+    respLoginId: string | null
+    status: $Enums.NegotiationStatus | null
+    tradeNumber: string | null
+    acceptedSettlementType: number | null
+    acceptedSettlementDate: string | null
+    acceptedValue: number | null
+    acceptedQuantity: number | null
+    acceptedYieldType: $Enums.YieldType | null
+    acceptedYield: number | null
+    acceptedCalcMethod: $Enums.CalcMethod | null
+    acceptedPrice: number | null
+    acceptedPutCallDate: string | null
+    acceptedAccruedInterest: number | null
+    acceptedConsideration: number | null
+    acceptedQuoteTime: string | null
+    acceptedBySide: $Enums.BySide | null
+    acceptedByLoginId: string | null
+    confirmStatus: $Enums.NegotiationConfirmationStatus | null
+    proposedBySide: $Enums.BySide | null
+    proposedTime: string | null
+    confirmedPriceQuoteTime: string | null
+    lastActivityTimestamp: string | null
+    createdAt: Date | null
+    createdBy: number | null
+    updatedBy: number | null
+    updatedAt: Date | null
+  }
+
+  export type RFQNegotiationMaxAggregateOutputType = {
+    rfqNumber: string | null
+    id: string | null
+    date: string | null
+    isin: string | null
+    buySell: $Enums.BuySell | null
+    initSettlementType: number | null
+    initSettlementDate: string | null
+    initAeCode: string | null
+    initDealType: $Enums.DealType | null
+    initClientCode: string | null
+    initClientRegType: $Enums.ClientRegType | null
+    initValue: number | null
+    initQuantity: number | null
+    initYieldType: $Enums.YieldType | null
+    initYield: number | null
+    initCalcMethod: $Enums.CalcMethod | null
+    initPrice: number | null
+    initAccruedInterest: number | null
+    initConsideration: number | null
+    initQuoteTime: string | null
+    initGtdFlag: $Enums.YesNo | null
+    initEndTime: string | null
+    initRemarks: string | null
+    initLoginId: string | null
+    respSettlementType: number | null
+    respSettlementDate: string | null
+    respAeCode: string | null
+    respDealType: $Enums.DealType | null
+    respClientCode: string | null
+    respClientRegType: $Enums.ClientRegType | null
+    respValue: number | null
+    respQuantity: number | null
+    respYieldType: $Enums.YieldType | null
+    respYield: number | null
+    respCalcMethod: $Enums.CalcMethod | null
+    respPrice: number | null
+    respAccruedInterest: number | null
+    respConsideration: number | null
+    respQuoteTime: string | null
+    respGtdFlag: $Enums.YesNo | null
+    respEndTime: string | null
+    respRemarks: string | null
+    respLoginId: string | null
+    status: $Enums.NegotiationStatus | null
+    tradeNumber: string | null
+    acceptedSettlementType: number | null
+    acceptedSettlementDate: string | null
+    acceptedValue: number | null
+    acceptedQuantity: number | null
+    acceptedYieldType: $Enums.YieldType | null
+    acceptedYield: number | null
+    acceptedCalcMethod: $Enums.CalcMethod | null
+    acceptedPrice: number | null
+    acceptedPutCallDate: string | null
+    acceptedAccruedInterest: number | null
+    acceptedConsideration: number | null
+    acceptedQuoteTime: string | null
+    acceptedBySide: $Enums.BySide | null
+    acceptedByLoginId: string | null
+    confirmStatus: $Enums.NegotiationConfirmationStatus | null
+    proposedBySide: $Enums.BySide | null
+    proposedTime: string | null
+    confirmedPriceQuoteTime: string | null
+    lastActivityTimestamp: string | null
+    createdAt: Date | null
+    createdBy: number | null
+    updatedBy: number | null
+    updatedAt: Date | null
+  }
+
+  export type RFQNegotiationCountAggregateOutputType = {
+    rfqNumber: number
+    id: number
+    date: number
+    isin: number
+    buySell: number
+    initSettlementType: number
+    initSettlementDate: number
+    initAeCode: number
+    initDealType: number
+    initClientCode: number
+    initClientRegType: number
+    initValue: number
+    initQuantity: number
+    initYieldType: number
+    initYield: number
+    initCalcMethod: number
+    initPrice: number
+    initAccruedInterest: number
+    initConsideration: number
+    initQuoteTime: number
+    initGtdFlag: number
+    initEndTime: number
+    initRemarks: number
+    initLoginId: number
+    respSettlementType: number
+    respSettlementDate: number
+    respAeCode: number
+    respDealType: number
+    respClientCode: number
+    respClientRegType: number
+    respValue: number
+    respQuantity: number
+    respYieldType: number
+    respYield: number
+    respCalcMethod: number
+    respPrice: number
+    respAccruedInterest: number
+    respConsideration: number
+    respQuoteTime: number
+    respGtdFlag: number
+    respEndTime: number
+    respRemarks: number
+    respLoginId: number
+    status: number
+    tradeNumber: number
+    acceptedSettlementType: number
+    acceptedSettlementDate: number
+    acceptedValue: number
+    acceptedQuantity: number
+    acceptedYieldType: number
+    acceptedYield: number
+    acceptedCalcMethod: number
+    acceptedPrice: number
+    acceptedPutCallDate: number
+    acceptedAccruedInterest: number
+    acceptedConsideration: number
+    acceptedQuoteTime: number
+    acceptedBySide: number
+    acceptedByLoginId: number
+    confirmStatus: number
+    proposedBySide: number
+    proposedTime: number
+    confirmedPriceQuoteTime: number
+    lastActivityTimestamp: number
+    tradeSplits: number
+    createdAt: number
+    createdBy: number
+    updatedBy: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RFQNegotiationAvgAggregateInputType = {
+    initSettlementType?: true
+    initValue?: true
+    initQuantity?: true
+    initYield?: true
+    initPrice?: true
+    initAccruedInterest?: true
+    initConsideration?: true
+    respSettlementType?: true
+    respValue?: true
+    respQuantity?: true
+    respYield?: true
+    respPrice?: true
+    respAccruedInterest?: true
+    respConsideration?: true
+    acceptedSettlementType?: true
+    acceptedValue?: true
+    acceptedQuantity?: true
+    acceptedYield?: true
+    acceptedPrice?: true
+    acceptedAccruedInterest?: true
+    acceptedConsideration?: true
+    createdBy?: true
+    updatedBy?: true
+  }
+
+  export type RFQNegotiationSumAggregateInputType = {
+    initSettlementType?: true
+    initValue?: true
+    initQuantity?: true
+    initYield?: true
+    initPrice?: true
+    initAccruedInterest?: true
+    initConsideration?: true
+    respSettlementType?: true
+    respValue?: true
+    respQuantity?: true
+    respYield?: true
+    respPrice?: true
+    respAccruedInterest?: true
+    respConsideration?: true
+    acceptedSettlementType?: true
+    acceptedValue?: true
+    acceptedQuantity?: true
+    acceptedYield?: true
+    acceptedPrice?: true
+    acceptedAccruedInterest?: true
+    acceptedConsideration?: true
+    createdBy?: true
+    updatedBy?: true
+  }
+
+  export type RFQNegotiationMinAggregateInputType = {
+    rfqNumber?: true
+    id?: true
+    date?: true
+    isin?: true
+    buySell?: true
+    initSettlementType?: true
+    initSettlementDate?: true
+    initAeCode?: true
+    initDealType?: true
+    initClientCode?: true
+    initClientRegType?: true
+    initValue?: true
+    initQuantity?: true
+    initYieldType?: true
+    initYield?: true
+    initCalcMethod?: true
+    initPrice?: true
+    initAccruedInterest?: true
+    initConsideration?: true
+    initQuoteTime?: true
+    initGtdFlag?: true
+    initEndTime?: true
+    initRemarks?: true
+    initLoginId?: true
+    respSettlementType?: true
+    respSettlementDate?: true
+    respAeCode?: true
+    respDealType?: true
+    respClientCode?: true
+    respClientRegType?: true
+    respValue?: true
+    respQuantity?: true
+    respYieldType?: true
+    respYield?: true
+    respCalcMethod?: true
+    respPrice?: true
+    respAccruedInterest?: true
+    respConsideration?: true
+    respQuoteTime?: true
+    respGtdFlag?: true
+    respEndTime?: true
+    respRemarks?: true
+    respLoginId?: true
+    status?: true
+    tradeNumber?: true
+    acceptedSettlementType?: true
+    acceptedSettlementDate?: true
+    acceptedValue?: true
+    acceptedQuantity?: true
+    acceptedYieldType?: true
+    acceptedYield?: true
+    acceptedCalcMethod?: true
+    acceptedPrice?: true
+    acceptedPutCallDate?: true
+    acceptedAccruedInterest?: true
+    acceptedConsideration?: true
+    acceptedQuoteTime?: true
+    acceptedBySide?: true
+    acceptedByLoginId?: true
+    confirmStatus?: true
+    proposedBySide?: true
+    proposedTime?: true
+    confirmedPriceQuoteTime?: true
+    lastActivityTimestamp?: true
+    createdAt?: true
+    createdBy?: true
+    updatedBy?: true
+    updatedAt?: true
+  }
+
+  export type RFQNegotiationMaxAggregateInputType = {
+    rfqNumber?: true
+    id?: true
+    date?: true
+    isin?: true
+    buySell?: true
+    initSettlementType?: true
+    initSettlementDate?: true
+    initAeCode?: true
+    initDealType?: true
+    initClientCode?: true
+    initClientRegType?: true
+    initValue?: true
+    initQuantity?: true
+    initYieldType?: true
+    initYield?: true
+    initCalcMethod?: true
+    initPrice?: true
+    initAccruedInterest?: true
+    initConsideration?: true
+    initQuoteTime?: true
+    initGtdFlag?: true
+    initEndTime?: true
+    initRemarks?: true
+    initLoginId?: true
+    respSettlementType?: true
+    respSettlementDate?: true
+    respAeCode?: true
+    respDealType?: true
+    respClientCode?: true
+    respClientRegType?: true
+    respValue?: true
+    respQuantity?: true
+    respYieldType?: true
+    respYield?: true
+    respCalcMethod?: true
+    respPrice?: true
+    respAccruedInterest?: true
+    respConsideration?: true
+    respQuoteTime?: true
+    respGtdFlag?: true
+    respEndTime?: true
+    respRemarks?: true
+    respLoginId?: true
+    status?: true
+    tradeNumber?: true
+    acceptedSettlementType?: true
+    acceptedSettlementDate?: true
+    acceptedValue?: true
+    acceptedQuantity?: true
+    acceptedYieldType?: true
+    acceptedYield?: true
+    acceptedCalcMethod?: true
+    acceptedPrice?: true
+    acceptedPutCallDate?: true
+    acceptedAccruedInterest?: true
+    acceptedConsideration?: true
+    acceptedQuoteTime?: true
+    acceptedBySide?: true
+    acceptedByLoginId?: true
+    confirmStatus?: true
+    proposedBySide?: true
+    proposedTime?: true
+    confirmedPriceQuoteTime?: true
+    lastActivityTimestamp?: true
+    createdAt?: true
+    createdBy?: true
+    updatedBy?: true
+    updatedAt?: true
+  }
+
+  export type RFQNegotiationCountAggregateInputType = {
+    rfqNumber?: true
+    id?: true
+    date?: true
+    isin?: true
+    buySell?: true
+    initSettlementType?: true
+    initSettlementDate?: true
+    initAeCode?: true
+    initDealType?: true
+    initClientCode?: true
+    initClientRegType?: true
+    initValue?: true
+    initQuantity?: true
+    initYieldType?: true
+    initYield?: true
+    initCalcMethod?: true
+    initPrice?: true
+    initAccruedInterest?: true
+    initConsideration?: true
+    initQuoteTime?: true
+    initGtdFlag?: true
+    initEndTime?: true
+    initRemarks?: true
+    initLoginId?: true
+    respSettlementType?: true
+    respSettlementDate?: true
+    respAeCode?: true
+    respDealType?: true
+    respClientCode?: true
+    respClientRegType?: true
+    respValue?: true
+    respQuantity?: true
+    respYieldType?: true
+    respYield?: true
+    respCalcMethod?: true
+    respPrice?: true
+    respAccruedInterest?: true
+    respConsideration?: true
+    respQuoteTime?: true
+    respGtdFlag?: true
+    respEndTime?: true
+    respRemarks?: true
+    respLoginId?: true
+    status?: true
+    tradeNumber?: true
+    acceptedSettlementType?: true
+    acceptedSettlementDate?: true
+    acceptedValue?: true
+    acceptedQuantity?: true
+    acceptedYieldType?: true
+    acceptedYield?: true
+    acceptedCalcMethod?: true
+    acceptedPrice?: true
+    acceptedPutCallDate?: true
+    acceptedAccruedInterest?: true
+    acceptedConsideration?: true
+    acceptedQuoteTime?: true
+    acceptedBySide?: true
+    acceptedByLoginId?: true
+    confirmStatus?: true
+    proposedBySide?: true
+    proposedTime?: true
+    confirmedPriceQuoteTime?: true
+    lastActivityTimestamp?: true
+    tradeSplits?: true
+    createdAt?: true
+    createdBy?: true
+    updatedBy?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RFQNegotiationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RFQNegotiation to aggregate.
+     */
+    where?: RFQNegotiationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQNegotiations to fetch.
+     */
+    orderBy?: RFQNegotiationOrderByWithRelationInput | RFQNegotiationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RFQNegotiationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQNegotiations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQNegotiations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RFQNegotiations
+    **/
+    _count?: true | RFQNegotiationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RFQNegotiationAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RFQNegotiationSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RFQNegotiationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RFQNegotiationMaxAggregateInputType
+  }
+
+  export type GetRFQNegotiationAggregateType<T extends RFQNegotiationAggregateArgs> = {
+        [P in keyof T & keyof AggregateRFQNegotiation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRFQNegotiation[P]>
+      : GetScalarType<T[P], AggregateRFQNegotiation[P]>
+  }
+
+
+
+
+  export type RFQNegotiationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RFQNegotiationWhereInput
+    orderBy?: RFQNegotiationOrderByWithAggregationInput | RFQNegotiationOrderByWithAggregationInput[]
+    by: RFQNegotiationScalarFieldEnum[] | RFQNegotiationScalarFieldEnum
+    having?: RFQNegotiationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RFQNegotiationCountAggregateInputType | true
+    _avg?: RFQNegotiationAvgAggregateInputType
+    _sum?: RFQNegotiationSumAggregateInputType
+    _min?: RFQNegotiationMinAggregateInputType
+    _max?: RFQNegotiationMaxAggregateInputType
+  }
+
+  export type RFQNegotiationGroupByOutputType = {
+    rfqNumber: string
+    id: string
+    date: string
+    isin: string | null
+    buySell: $Enums.BuySell | null
+    initSettlementType: number | null
+    initSettlementDate: string | null
+    initAeCode: string | null
+    initDealType: $Enums.DealType | null
+    initClientCode: string | null
+    initClientRegType: $Enums.ClientRegType | null
+    initValue: number | null
+    initQuantity: number | null
+    initYieldType: $Enums.YieldType | null
+    initYield: number | null
+    initCalcMethod: $Enums.CalcMethod | null
+    initPrice: number | null
+    initAccruedInterest: number | null
+    initConsideration: number | null
+    initQuoteTime: string | null
+    initGtdFlag: $Enums.YesNo | null
+    initEndTime: string | null
+    initRemarks: string | null
+    initLoginId: string | null
+    respSettlementType: number | null
+    respSettlementDate: string | null
+    respAeCode: string | null
+    respDealType: $Enums.DealType | null
+    respClientCode: string | null
+    respClientRegType: $Enums.ClientRegType | null
+    respValue: number | null
+    respQuantity: number | null
+    respYieldType: $Enums.YieldType | null
+    respYield: number | null
+    respCalcMethod: $Enums.CalcMethod | null
+    respPrice: number | null
+    respAccruedInterest: number | null
+    respConsideration: number | null
+    respQuoteTime: string | null
+    respGtdFlag: $Enums.YesNo | null
+    respEndTime: string | null
+    respRemarks: string | null
+    respLoginId: string | null
+    status: $Enums.NegotiationStatus | null
+    tradeNumber: string | null
+    acceptedSettlementType: number | null
+    acceptedSettlementDate: string | null
+    acceptedValue: number | null
+    acceptedQuantity: number | null
+    acceptedYieldType: $Enums.YieldType | null
+    acceptedYield: number | null
+    acceptedCalcMethod: $Enums.CalcMethod | null
+    acceptedPrice: number | null
+    acceptedPutCallDate: string | null
+    acceptedAccruedInterest: number | null
+    acceptedConsideration: number | null
+    acceptedQuoteTime: string | null
+    acceptedBySide: $Enums.BySide | null
+    acceptedByLoginId: string | null
+    confirmStatus: $Enums.NegotiationConfirmationStatus | null
+    proposedBySide: $Enums.BySide | null
+    proposedTime: string | null
+    confirmedPriceQuoteTime: string | null
+    lastActivityTimestamp: string | null
+    tradeSplits: JsonValue[]
+    createdAt: Date
+    createdBy: number | null
+    updatedBy: number | null
+    updatedAt: Date
+    _count: RFQNegotiationCountAggregateOutputType | null
+    _avg: RFQNegotiationAvgAggregateOutputType | null
+    _sum: RFQNegotiationSumAggregateOutputType | null
+    _min: RFQNegotiationMinAggregateOutputType | null
+    _max: RFQNegotiationMaxAggregateOutputType | null
+  }
+
+  type GetRFQNegotiationGroupByPayload<T extends RFQNegotiationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RFQNegotiationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RFQNegotiationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RFQNegotiationGroupByOutputType[P]>
+            : GetScalarType<T[P], RFQNegotiationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RFQNegotiationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    rfqNumber?: boolean
+    id?: boolean
+    date?: boolean
+    isin?: boolean
+    buySell?: boolean
+    initSettlementType?: boolean
+    initSettlementDate?: boolean
+    initAeCode?: boolean
+    initDealType?: boolean
+    initClientCode?: boolean
+    initClientRegType?: boolean
+    initValue?: boolean
+    initQuantity?: boolean
+    initYieldType?: boolean
+    initYield?: boolean
+    initCalcMethod?: boolean
+    initPrice?: boolean
+    initAccruedInterest?: boolean
+    initConsideration?: boolean
+    initQuoteTime?: boolean
+    initGtdFlag?: boolean
+    initEndTime?: boolean
+    initRemarks?: boolean
+    initLoginId?: boolean
+    respSettlementType?: boolean
+    respSettlementDate?: boolean
+    respAeCode?: boolean
+    respDealType?: boolean
+    respClientCode?: boolean
+    respClientRegType?: boolean
+    respValue?: boolean
+    respQuantity?: boolean
+    respYieldType?: boolean
+    respYield?: boolean
+    respCalcMethod?: boolean
+    respPrice?: boolean
+    respAccruedInterest?: boolean
+    respConsideration?: boolean
+    respQuoteTime?: boolean
+    respGtdFlag?: boolean
+    respEndTime?: boolean
+    respRemarks?: boolean
+    respLoginId?: boolean
+    status?: boolean
+    tradeNumber?: boolean
+    acceptedSettlementType?: boolean
+    acceptedSettlementDate?: boolean
+    acceptedValue?: boolean
+    acceptedQuantity?: boolean
+    acceptedYieldType?: boolean
+    acceptedYield?: boolean
+    acceptedCalcMethod?: boolean
+    acceptedPrice?: boolean
+    acceptedPutCallDate?: boolean
+    acceptedAccruedInterest?: boolean
+    acceptedConsideration?: boolean
+    acceptedQuoteTime?: boolean
+    acceptedBySide?: boolean
+    acceptedByLoginId?: boolean
+    confirmStatus?: boolean
+    proposedBySide?: boolean
+    proposedTime?: boolean
+    confirmedPriceQuoteTime?: boolean
+    lastActivityTimestamp?: boolean
+    tradeSplits?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["rFQNegotiation"]>
+
+  export type RFQNegotiationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    rfqNumber?: boolean
+    id?: boolean
+    date?: boolean
+    isin?: boolean
+    buySell?: boolean
+    initSettlementType?: boolean
+    initSettlementDate?: boolean
+    initAeCode?: boolean
+    initDealType?: boolean
+    initClientCode?: boolean
+    initClientRegType?: boolean
+    initValue?: boolean
+    initQuantity?: boolean
+    initYieldType?: boolean
+    initYield?: boolean
+    initCalcMethod?: boolean
+    initPrice?: boolean
+    initAccruedInterest?: boolean
+    initConsideration?: boolean
+    initQuoteTime?: boolean
+    initGtdFlag?: boolean
+    initEndTime?: boolean
+    initRemarks?: boolean
+    initLoginId?: boolean
+    respSettlementType?: boolean
+    respSettlementDate?: boolean
+    respAeCode?: boolean
+    respDealType?: boolean
+    respClientCode?: boolean
+    respClientRegType?: boolean
+    respValue?: boolean
+    respQuantity?: boolean
+    respYieldType?: boolean
+    respYield?: boolean
+    respCalcMethod?: boolean
+    respPrice?: boolean
+    respAccruedInterest?: boolean
+    respConsideration?: boolean
+    respQuoteTime?: boolean
+    respGtdFlag?: boolean
+    respEndTime?: boolean
+    respRemarks?: boolean
+    respLoginId?: boolean
+    status?: boolean
+    tradeNumber?: boolean
+    acceptedSettlementType?: boolean
+    acceptedSettlementDate?: boolean
+    acceptedValue?: boolean
+    acceptedQuantity?: boolean
+    acceptedYieldType?: boolean
+    acceptedYield?: boolean
+    acceptedCalcMethod?: boolean
+    acceptedPrice?: boolean
+    acceptedPutCallDate?: boolean
+    acceptedAccruedInterest?: boolean
+    acceptedConsideration?: boolean
+    acceptedQuoteTime?: boolean
+    acceptedBySide?: boolean
+    acceptedByLoginId?: boolean
+    confirmStatus?: boolean
+    proposedBySide?: boolean
+    proposedTime?: boolean
+    confirmedPriceQuoteTime?: boolean
+    lastActivityTimestamp?: boolean
+    tradeSplits?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["rFQNegotiation"]>
+
+  export type RFQNegotiationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    rfqNumber?: boolean
+    id?: boolean
+    date?: boolean
+    isin?: boolean
+    buySell?: boolean
+    initSettlementType?: boolean
+    initSettlementDate?: boolean
+    initAeCode?: boolean
+    initDealType?: boolean
+    initClientCode?: boolean
+    initClientRegType?: boolean
+    initValue?: boolean
+    initQuantity?: boolean
+    initYieldType?: boolean
+    initYield?: boolean
+    initCalcMethod?: boolean
+    initPrice?: boolean
+    initAccruedInterest?: boolean
+    initConsideration?: boolean
+    initQuoteTime?: boolean
+    initGtdFlag?: boolean
+    initEndTime?: boolean
+    initRemarks?: boolean
+    initLoginId?: boolean
+    respSettlementType?: boolean
+    respSettlementDate?: boolean
+    respAeCode?: boolean
+    respDealType?: boolean
+    respClientCode?: boolean
+    respClientRegType?: boolean
+    respValue?: boolean
+    respQuantity?: boolean
+    respYieldType?: boolean
+    respYield?: boolean
+    respCalcMethod?: boolean
+    respPrice?: boolean
+    respAccruedInterest?: boolean
+    respConsideration?: boolean
+    respQuoteTime?: boolean
+    respGtdFlag?: boolean
+    respEndTime?: boolean
+    respRemarks?: boolean
+    respLoginId?: boolean
+    status?: boolean
+    tradeNumber?: boolean
+    acceptedSettlementType?: boolean
+    acceptedSettlementDate?: boolean
+    acceptedValue?: boolean
+    acceptedQuantity?: boolean
+    acceptedYieldType?: boolean
+    acceptedYield?: boolean
+    acceptedCalcMethod?: boolean
+    acceptedPrice?: boolean
+    acceptedPutCallDate?: boolean
+    acceptedAccruedInterest?: boolean
+    acceptedConsideration?: boolean
+    acceptedQuoteTime?: boolean
+    acceptedBySide?: boolean
+    acceptedByLoginId?: boolean
+    confirmStatus?: boolean
+    proposedBySide?: boolean
+    proposedTime?: boolean
+    confirmedPriceQuoteTime?: boolean
+    lastActivityTimestamp?: boolean
+    tradeSplits?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["rFQNegotiation"]>
+
+  export type RFQNegotiationSelectScalar = {
+    rfqNumber?: boolean
+    id?: boolean
+    date?: boolean
+    isin?: boolean
+    buySell?: boolean
+    initSettlementType?: boolean
+    initSettlementDate?: boolean
+    initAeCode?: boolean
+    initDealType?: boolean
+    initClientCode?: boolean
+    initClientRegType?: boolean
+    initValue?: boolean
+    initQuantity?: boolean
+    initYieldType?: boolean
+    initYield?: boolean
+    initCalcMethod?: boolean
+    initPrice?: boolean
+    initAccruedInterest?: boolean
+    initConsideration?: boolean
+    initQuoteTime?: boolean
+    initGtdFlag?: boolean
+    initEndTime?: boolean
+    initRemarks?: boolean
+    initLoginId?: boolean
+    respSettlementType?: boolean
+    respSettlementDate?: boolean
+    respAeCode?: boolean
+    respDealType?: boolean
+    respClientCode?: boolean
+    respClientRegType?: boolean
+    respValue?: boolean
+    respQuantity?: boolean
+    respYieldType?: boolean
+    respYield?: boolean
+    respCalcMethod?: boolean
+    respPrice?: boolean
+    respAccruedInterest?: boolean
+    respConsideration?: boolean
+    respQuoteTime?: boolean
+    respGtdFlag?: boolean
+    respEndTime?: boolean
+    respRemarks?: boolean
+    respLoginId?: boolean
+    status?: boolean
+    tradeNumber?: boolean
+    acceptedSettlementType?: boolean
+    acceptedSettlementDate?: boolean
+    acceptedValue?: boolean
+    acceptedQuantity?: boolean
+    acceptedYieldType?: boolean
+    acceptedYield?: boolean
+    acceptedCalcMethod?: boolean
+    acceptedPrice?: boolean
+    acceptedPutCallDate?: boolean
+    acceptedAccruedInterest?: boolean
+    acceptedConsideration?: boolean
+    acceptedQuoteTime?: boolean
+    acceptedBySide?: boolean
+    acceptedByLoginId?: boolean
+    confirmStatus?: boolean
+    proposedBySide?: boolean
+    proposedTime?: boolean
+    confirmedPriceQuoteTime?: boolean
+    lastActivityTimestamp?: boolean
+    tradeSplits?: boolean
+    createdAt?: boolean
+    createdBy?: boolean
+    updatedBy?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RFQNegotiationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"rfqNumber" | "id" | "date" | "isin" | "buySell" | "initSettlementType" | "initSettlementDate" | "initAeCode" | "initDealType" | "initClientCode" | "initClientRegType" | "initValue" | "initQuantity" | "initYieldType" | "initYield" | "initCalcMethod" | "initPrice" | "initAccruedInterest" | "initConsideration" | "initQuoteTime" | "initGtdFlag" | "initEndTime" | "initRemarks" | "initLoginId" | "respSettlementType" | "respSettlementDate" | "respAeCode" | "respDealType" | "respClientCode" | "respClientRegType" | "respValue" | "respQuantity" | "respYieldType" | "respYield" | "respCalcMethod" | "respPrice" | "respAccruedInterest" | "respConsideration" | "respQuoteTime" | "respGtdFlag" | "respEndTime" | "respRemarks" | "respLoginId" | "status" | "tradeNumber" | "acceptedSettlementType" | "acceptedSettlementDate" | "acceptedValue" | "acceptedQuantity" | "acceptedYieldType" | "acceptedYield" | "acceptedCalcMethod" | "acceptedPrice" | "acceptedPutCallDate" | "acceptedAccruedInterest" | "acceptedConsideration" | "acceptedQuoteTime" | "acceptedBySide" | "acceptedByLoginId" | "confirmStatus" | "proposedBySide" | "proposedTime" | "confirmedPriceQuoteTime" | "lastActivityTimestamp" | "tradeSplits" | "createdAt" | "createdBy" | "updatedBy" | "updatedAt", ExtArgs["result"]["rFQNegotiation"]>
+
+  export type $RFQNegotiationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RFQNegotiation"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      rfqNumber: string
+      id: string
+      date: string
+      isin: string | null
+      buySell: $Enums.BuySell | null
+      initSettlementType: number | null
+      initSettlementDate: string | null
+      initAeCode: string | null
+      initDealType: $Enums.DealType | null
+      initClientCode: string | null
+      initClientRegType: $Enums.ClientRegType | null
+      initValue: number | null
+      initQuantity: number | null
+      initYieldType: $Enums.YieldType | null
+      initYield: number | null
+      initCalcMethod: $Enums.CalcMethod | null
+      initPrice: number | null
+      initAccruedInterest: number | null
+      initConsideration: number | null
+      initQuoteTime: string | null
+      initGtdFlag: $Enums.YesNo | null
+      initEndTime: string | null
+      initRemarks: string | null
+      initLoginId: string | null
+      respSettlementType: number | null
+      respSettlementDate: string | null
+      respAeCode: string | null
+      respDealType: $Enums.DealType | null
+      respClientCode: string | null
+      respClientRegType: $Enums.ClientRegType | null
+      respValue: number | null
+      respQuantity: number | null
+      respYieldType: $Enums.YieldType | null
+      respYield: number | null
+      respCalcMethod: $Enums.CalcMethod | null
+      respPrice: number | null
+      respAccruedInterest: number | null
+      respConsideration: number | null
+      respQuoteTime: string | null
+      respGtdFlag: $Enums.YesNo | null
+      respEndTime: string | null
+      respRemarks: string | null
+      respLoginId: string | null
+      status: $Enums.NegotiationStatus | null
+      tradeNumber: string | null
+      acceptedSettlementType: number | null
+      acceptedSettlementDate: string | null
+      acceptedValue: number | null
+      acceptedQuantity: number | null
+      acceptedYieldType: $Enums.YieldType | null
+      acceptedYield: number | null
+      acceptedCalcMethod: $Enums.CalcMethod | null
+      acceptedPrice: number | null
+      acceptedPutCallDate: string | null
+      acceptedAccruedInterest: number | null
+      acceptedConsideration: number | null
+      acceptedQuoteTime: string | null
+      acceptedBySide: $Enums.BySide | null
+      acceptedByLoginId: string | null
+      confirmStatus: $Enums.NegotiationConfirmationStatus | null
+      proposedBySide: $Enums.BySide | null
+      proposedTime: string | null
+      confirmedPriceQuoteTime: string | null
+      lastActivityTimestamp: string | null
+      tradeSplits: Prisma.JsonValue[]
+      createdAt: Date
+      createdBy: number | null
+      updatedBy: number | null
+      updatedAt: Date
+    }, ExtArgs["result"]["rFQNegotiation"]>
+    composites: {}
+  }
+
+  type RFQNegotiationGetPayload<S extends boolean | null | undefined | RFQNegotiationDefaultArgs> = $Result.GetResult<Prisma.$RFQNegotiationPayload, S>
+
+  type RFQNegotiationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RFQNegotiationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RFQNegotiationCountAggregateInputType | true
+    }
+
+  export interface RFQNegotiationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RFQNegotiation'], meta: { name: 'RFQNegotiation' } }
+    /**
+     * Find zero or one RFQNegotiation that matches the filter.
+     * @param {RFQNegotiationFindUniqueArgs} args - Arguments to find a RFQNegotiation
+     * @example
+     * // Get one RFQNegotiation
+     * const rFQNegotiation = await prisma.rFQNegotiation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RFQNegotiationFindUniqueArgs>(args: SelectSubset<T, RFQNegotiationFindUniqueArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RFQNegotiation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RFQNegotiationFindUniqueOrThrowArgs} args - Arguments to find a RFQNegotiation
+     * @example
+     * // Get one RFQNegotiation
+     * const rFQNegotiation = await prisma.rFQNegotiation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RFQNegotiationFindUniqueOrThrowArgs>(args: SelectSubset<T, RFQNegotiationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RFQNegotiation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQNegotiationFindFirstArgs} args - Arguments to find a RFQNegotiation
+     * @example
+     * // Get one RFQNegotiation
+     * const rFQNegotiation = await prisma.rFQNegotiation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RFQNegotiationFindFirstArgs>(args?: SelectSubset<T, RFQNegotiationFindFirstArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RFQNegotiation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQNegotiationFindFirstOrThrowArgs} args - Arguments to find a RFQNegotiation
+     * @example
+     * // Get one RFQNegotiation
+     * const rFQNegotiation = await prisma.rFQNegotiation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RFQNegotiationFindFirstOrThrowArgs>(args?: SelectSubset<T, RFQNegotiationFindFirstOrThrowArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RFQNegotiations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQNegotiationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RFQNegotiations
+     * const rFQNegotiations = await prisma.rFQNegotiation.findMany()
+     * 
+     * // Get first 10 RFQNegotiations
+     * const rFQNegotiations = await prisma.rFQNegotiation.findMany({ take: 10 })
+     * 
+     * // Only select the `rfqNumber`
+     * const rFQNegotiationWithRfqNumberOnly = await prisma.rFQNegotiation.findMany({ select: { rfqNumber: true } })
+     * 
+     */
+    findMany<T extends RFQNegotiationFindManyArgs>(args?: SelectSubset<T, RFQNegotiationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RFQNegotiation.
+     * @param {RFQNegotiationCreateArgs} args - Arguments to create a RFQNegotiation.
+     * @example
+     * // Create one RFQNegotiation
+     * const RFQNegotiation = await prisma.rFQNegotiation.create({
+     *   data: {
+     *     // ... data to create a RFQNegotiation
+     *   }
+     * })
+     * 
+     */
+    create<T extends RFQNegotiationCreateArgs>(args: SelectSubset<T, RFQNegotiationCreateArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RFQNegotiations.
+     * @param {RFQNegotiationCreateManyArgs} args - Arguments to create many RFQNegotiations.
+     * @example
+     * // Create many RFQNegotiations
+     * const rFQNegotiation = await prisma.rFQNegotiation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RFQNegotiationCreateManyArgs>(args?: SelectSubset<T, RFQNegotiationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RFQNegotiations and returns the data saved in the database.
+     * @param {RFQNegotiationCreateManyAndReturnArgs} args - Arguments to create many RFQNegotiations.
+     * @example
+     * // Create many RFQNegotiations
+     * const rFQNegotiation = await prisma.rFQNegotiation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RFQNegotiations and only return the `rfqNumber`
+     * const rFQNegotiationWithRfqNumberOnly = await prisma.rFQNegotiation.createManyAndReturn({
+     *   select: { rfqNumber: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RFQNegotiationCreateManyAndReturnArgs>(args?: SelectSubset<T, RFQNegotiationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RFQNegotiation.
+     * @param {RFQNegotiationDeleteArgs} args - Arguments to delete one RFQNegotiation.
+     * @example
+     * // Delete one RFQNegotiation
+     * const RFQNegotiation = await prisma.rFQNegotiation.delete({
+     *   where: {
+     *     // ... filter to delete one RFQNegotiation
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RFQNegotiationDeleteArgs>(args: SelectSubset<T, RFQNegotiationDeleteArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RFQNegotiation.
+     * @param {RFQNegotiationUpdateArgs} args - Arguments to update one RFQNegotiation.
+     * @example
+     * // Update one RFQNegotiation
+     * const rFQNegotiation = await prisma.rFQNegotiation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RFQNegotiationUpdateArgs>(args: SelectSubset<T, RFQNegotiationUpdateArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RFQNegotiations.
+     * @param {RFQNegotiationDeleteManyArgs} args - Arguments to filter RFQNegotiations to delete.
+     * @example
+     * // Delete a few RFQNegotiations
+     * const { count } = await prisma.rFQNegotiation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RFQNegotiationDeleteManyArgs>(args?: SelectSubset<T, RFQNegotiationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RFQNegotiations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQNegotiationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RFQNegotiations
+     * const rFQNegotiation = await prisma.rFQNegotiation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RFQNegotiationUpdateManyArgs>(args: SelectSubset<T, RFQNegotiationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RFQNegotiations and returns the data updated in the database.
+     * @param {RFQNegotiationUpdateManyAndReturnArgs} args - Arguments to update many RFQNegotiations.
+     * @example
+     * // Update many RFQNegotiations
+     * const rFQNegotiation = await prisma.rFQNegotiation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RFQNegotiations and only return the `rfqNumber`
+     * const rFQNegotiationWithRfqNumberOnly = await prisma.rFQNegotiation.updateManyAndReturn({
+     *   select: { rfqNumber: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RFQNegotiationUpdateManyAndReturnArgs>(args: SelectSubset<T, RFQNegotiationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RFQNegotiation.
+     * @param {RFQNegotiationUpsertArgs} args - Arguments to update or create a RFQNegotiation.
+     * @example
+     * // Update or create a RFQNegotiation
+     * const rFQNegotiation = await prisma.rFQNegotiation.upsert({
+     *   create: {
+     *     // ... data to create a RFQNegotiation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RFQNegotiation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RFQNegotiationUpsertArgs>(args: SelectSubset<T, RFQNegotiationUpsertArgs<ExtArgs>>): Prisma__RFQNegotiationClient<$Result.GetResult<Prisma.$RFQNegotiationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RFQNegotiations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQNegotiationCountArgs} args - Arguments to filter RFQNegotiations to count.
+     * @example
+     * // Count the number of RFQNegotiations
+     * const count = await prisma.rFQNegotiation.count({
+     *   where: {
+     *     // ... the filter for the RFQNegotiations we want to count
+     *   }
+     * })
+    **/
+    count<T extends RFQNegotiationCountArgs>(
+      args?: Subset<T, RFQNegotiationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RFQNegotiationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RFQNegotiation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQNegotiationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RFQNegotiationAggregateArgs>(args: Subset<T, RFQNegotiationAggregateArgs>): Prisma.PrismaPromise<GetRFQNegotiationAggregateType<T>>
+
+    /**
+     * Group by RFQNegotiation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RFQNegotiationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RFQNegotiationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RFQNegotiationGroupByArgs['orderBy'] }
+        : { orderBy?: RFQNegotiationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RFQNegotiationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRFQNegotiationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RFQNegotiation model
+   */
+  readonly fields: RFQNegotiationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RFQNegotiation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RFQNegotiationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RFQNegotiation model
+   */
+  interface RFQNegotiationFieldRefs {
+    readonly rfqNumber: FieldRef<"RFQNegotiation", 'String'>
+    readonly id: FieldRef<"RFQNegotiation", 'String'>
+    readonly date: FieldRef<"RFQNegotiation", 'String'>
+    readonly isin: FieldRef<"RFQNegotiation", 'String'>
+    readonly buySell: FieldRef<"RFQNegotiation", 'BuySell'>
+    readonly initSettlementType: FieldRef<"RFQNegotiation", 'Int'>
+    readonly initSettlementDate: FieldRef<"RFQNegotiation", 'String'>
+    readonly initAeCode: FieldRef<"RFQNegotiation", 'String'>
+    readonly initDealType: FieldRef<"RFQNegotiation", 'DealType'>
+    readonly initClientCode: FieldRef<"RFQNegotiation", 'String'>
+    readonly initClientRegType: FieldRef<"RFQNegotiation", 'ClientRegType'>
+    readonly initValue: FieldRef<"RFQNegotiation", 'Float'>
+    readonly initQuantity: FieldRef<"RFQNegotiation", 'Int'>
+    readonly initYieldType: FieldRef<"RFQNegotiation", 'YieldType'>
+    readonly initYield: FieldRef<"RFQNegotiation", 'Float'>
+    readonly initCalcMethod: FieldRef<"RFQNegotiation", 'CalcMethod'>
+    readonly initPrice: FieldRef<"RFQNegotiation", 'Float'>
+    readonly initAccruedInterest: FieldRef<"RFQNegotiation", 'Float'>
+    readonly initConsideration: FieldRef<"RFQNegotiation", 'Float'>
+    readonly initQuoteTime: FieldRef<"RFQNegotiation", 'String'>
+    readonly initGtdFlag: FieldRef<"RFQNegotiation", 'YesNo'>
+    readonly initEndTime: FieldRef<"RFQNegotiation", 'String'>
+    readonly initRemarks: FieldRef<"RFQNegotiation", 'String'>
+    readonly initLoginId: FieldRef<"RFQNegotiation", 'String'>
+    readonly respSettlementType: FieldRef<"RFQNegotiation", 'Int'>
+    readonly respSettlementDate: FieldRef<"RFQNegotiation", 'String'>
+    readonly respAeCode: FieldRef<"RFQNegotiation", 'String'>
+    readonly respDealType: FieldRef<"RFQNegotiation", 'DealType'>
+    readonly respClientCode: FieldRef<"RFQNegotiation", 'String'>
+    readonly respClientRegType: FieldRef<"RFQNegotiation", 'ClientRegType'>
+    readonly respValue: FieldRef<"RFQNegotiation", 'Float'>
+    readonly respQuantity: FieldRef<"RFQNegotiation", 'Int'>
+    readonly respYieldType: FieldRef<"RFQNegotiation", 'YieldType'>
+    readonly respYield: FieldRef<"RFQNegotiation", 'Float'>
+    readonly respCalcMethod: FieldRef<"RFQNegotiation", 'CalcMethod'>
+    readonly respPrice: FieldRef<"RFQNegotiation", 'Float'>
+    readonly respAccruedInterest: FieldRef<"RFQNegotiation", 'Float'>
+    readonly respConsideration: FieldRef<"RFQNegotiation", 'Float'>
+    readonly respQuoteTime: FieldRef<"RFQNegotiation", 'String'>
+    readonly respGtdFlag: FieldRef<"RFQNegotiation", 'YesNo'>
+    readonly respEndTime: FieldRef<"RFQNegotiation", 'String'>
+    readonly respRemarks: FieldRef<"RFQNegotiation", 'String'>
+    readonly respLoginId: FieldRef<"RFQNegotiation", 'String'>
+    readonly status: FieldRef<"RFQNegotiation", 'NegotiationStatus'>
+    readonly tradeNumber: FieldRef<"RFQNegotiation", 'String'>
+    readonly acceptedSettlementType: FieldRef<"RFQNegotiation", 'Int'>
+    readonly acceptedSettlementDate: FieldRef<"RFQNegotiation", 'String'>
+    readonly acceptedValue: FieldRef<"RFQNegotiation", 'Float'>
+    readonly acceptedQuantity: FieldRef<"RFQNegotiation", 'Int'>
+    readonly acceptedYieldType: FieldRef<"RFQNegotiation", 'YieldType'>
+    readonly acceptedYield: FieldRef<"RFQNegotiation", 'Float'>
+    readonly acceptedCalcMethod: FieldRef<"RFQNegotiation", 'CalcMethod'>
+    readonly acceptedPrice: FieldRef<"RFQNegotiation", 'Float'>
+    readonly acceptedPutCallDate: FieldRef<"RFQNegotiation", 'String'>
+    readonly acceptedAccruedInterest: FieldRef<"RFQNegotiation", 'Float'>
+    readonly acceptedConsideration: FieldRef<"RFQNegotiation", 'Float'>
+    readonly acceptedQuoteTime: FieldRef<"RFQNegotiation", 'String'>
+    readonly acceptedBySide: FieldRef<"RFQNegotiation", 'BySide'>
+    readonly acceptedByLoginId: FieldRef<"RFQNegotiation", 'String'>
+    readonly confirmStatus: FieldRef<"RFQNegotiation", 'NegotiationConfirmationStatus'>
+    readonly proposedBySide: FieldRef<"RFQNegotiation", 'BySide'>
+    readonly proposedTime: FieldRef<"RFQNegotiation", 'String'>
+    readonly confirmedPriceQuoteTime: FieldRef<"RFQNegotiation", 'String'>
+    readonly lastActivityTimestamp: FieldRef<"RFQNegotiation", 'String'>
+    readonly tradeSplits: FieldRef<"RFQNegotiation", 'Json[]'>
+    readonly createdAt: FieldRef<"RFQNegotiation", 'DateTime'>
+    readonly createdBy: FieldRef<"RFQNegotiation", 'Int'>
+    readonly updatedBy: FieldRef<"RFQNegotiation", 'Int'>
+    readonly updatedAt: FieldRef<"RFQNegotiation", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RFQNegotiation findUnique
+   */
+  export type RFQNegotiationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQNegotiation to fetch.
+     */
+    where: RFQNegotiationWhereUniqueInput
+  }
+
+  /**
+   * RFQNegotiation findUniqueOrThrow
+   */
+  export type RFQNegotiationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQNegotiation to fetch.
+     */
+    where: RFQNegotiationWhereUniqueInput
+  }
+
+  /**
+   * RFQNegotiation findFirst
+   */
+  export type RFQNegotiationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQNegotiation to fetch.
+     */
+    where?: RFQNegotiationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQNegotiations to fetch.
+     */
+    orderBy?: RFQNegotiationOrderByWithRelationInput | RFQNegotiationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RFQNegotiations.
+     */
+    cursor?: RFQNegotiationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQNegotiations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQNegotiations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RFQNegotiations.
+     */
+    distinct?: RFQNegotiationScalarFieldEnum | RFQNegotiationScalarFieldEnum[]
+  }
+
+  /**
+   * RFQNegotiation findFirstOrThrow
+   */
+  export type RFQNegotiationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQNegotiation to fetch.
+     */
+    where?: RFQNegotiationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQNegotiations to fetch.
+     */
+    orderBy?: RFQNegotiationOrderByWithRelationInput | RFQNegotiationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RFQNegotiations.
+     */
+    cursor?: RFQNegotiationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQNegotiations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQNegotiations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RFQNegotiations.
+     */
+    distinct?: RFQNegotiationScalarFieldEnum | RFQNegotiationScalarFieldEnum[]
+  }
+
+  /**
+   * RFQNegotiation findMany
+   */
+  export type RFQNegotiationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * Filter, which RFQNegotiations to fetch.
+     */
+    where?: RFQNegotiationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RFQNegotiations to fetch.
+     */
+    orderBy?: RFQNegotiationOrderByWithRelationInput | RFQNegotiationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RFQNegotiations.
+     */
+    cursor?: RFQNegotiationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RFQNegotiations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RFQNegotiations.
+     */
+    skip?: number
+    distinct?: RFQNegotiationScalarFieldEnum | RFQNegotiationScalarFieldEnum[]
+  }
+
+  /**
+   * RFQNegotiation create
+   */
+  export type RFQNegotiationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * The data needed to create a RFQNegotiation.
+     */
+    data: XOR<RFQNegotiationCreateInput, RFQNegotiationUncheckedCreateInput>
+  }
+
+  /**
+   * RFQNegotiation createMany
+   */
+  export type RFQNegotiationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RFQNegotiations.
+     */
+    data: RFQNegotiationCreateManyInput | RFQNegotiationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RFQNegotiation createManyAndReturn
+   */
+  export type RFQNegotiationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * The data used to create many RFQNegotiations.
+     */
+    data: RFQNegotiationCreateManyInput | RFQNegotiationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RFQNegotiation update
+   */
+  export type RFQNegotiationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * The data needed to update a RFQNegotiation.
+     */
+    data: XOR<RFQNegotiationUpdateInput, RFQNegotiationUncheckedUpdateInput>
+    /**
+     * Choose, which RFQNegotiation to update.
+     */
+    where: RFQNegotiationWhereUniqueInput
+  }
+
+  /**
+   * RFQNegotiation updateMany
+   */
+  export type RFQNegotiationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RFQNegotiations.
+     */
+    data: XOR<RFQNegotiationUpdateManyMutationInput, RFQNegotiationUncheckedUpdateManyInput>
+    /**
+     * Filter which RFQNegotiations to update
+     */
+    where?: RFQNegotiationWhereInput
+    /**
+     * Limit how many RFQNegotiations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RFQNegotiation updateManyAndReturn
+   */
+  export type RFQNegotiationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * The data used to update RFQNegotiations.
+     */
+    data: XOR<RFQNegotiationUpdateManyMutationInput, RFQNegotiationUncheckedUpdateManyInput>
+    /**
+     * Filter which RFQNegotiations to update
+     */
+    where?: RFQNegotiationWhereInput
+    /**
+     * Limit how many RFQNegotiations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RFQNegotiation upsert
+   */
+  export type RFQNegotiationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * The filter to search for the RFQNegotiation to update in case it exists.
+     */
+    where: RFQNegotiationWhereUniqueInput
+    /**
+     * In case the RFQNegotiation found by the `where` argument doesn't exist, create a new RFQNegotiation with this data.
+     */
+    create: XOR<RFQNegotiationCreateInput, RFQNegotiationUncheckedCreateInput>
+    /**
+     * In case the RFQNegotiation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RFQNegotiationUpdateInput, RFQNegotiationUncheckedUpdateInput>
+  }
+
+  /**
+   * RFQNegotiation delete
+   */
+  export type RFQNegotiationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
+    /**
+     * Filter which RFQNegotiation to delete.
+     */
+    where: RFQNegotiationWhereUniqueInput
+  }
+
+  /**
+   * RFQNegotiation deleteMany
+   */
+  export type RFQNegotiationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RFQNegotiations to delete
+     */
+    where?: RFQNegotiationWhereInput
+    /**
+     * Limit how many RFQNegotiations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RFQNegotiation without action
+   */
+  export type RFQNegotiationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RFQNegotiation
+     */
+    select?: RFQNegotiationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RFQNegotiation
+     */
+    omit?: RFQNegotiationOmit<ExtArgs> | null
   }
 
 
@@ -29095,7 +32932,8 @@ export namespace Prisma {
     maturityDate: 'maturityDate',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    sortedAt: 'sortedAt'
+    sortedAt: 'sortedAt',
+    isConvertedDeal: 'isConvertedDeal'
   };
 
   export type BondsScalarFieldEnum = (typeof BondsScalarFieldEnum)[keyof typeof BondsScalarFieldEnum]
@@ -29434,15 +33272,61 @@ export namespace Prisma {
   export type NseIsinSecurityReceiptScalarFieldEnum = (typeof NseIsinSecurityReceiptScalarFieldEnum)[keyof typeof NseIsinSecurityReceiptScalarFieldEnum]
 
 
-  export const NSERfqModelScalarFieldEnum: {
-    key: 'key',
+  export const SettlementOrderModelScalarFieldEnum: {
+    id: 'id',
+    orderNumber: 'orderNumber',
+    symbol: 'symbol',
+    buyParticipantLoginId: 'buyParticipantLoginId',
+    sellParticipantLoginId: 'sellParticipantLoginId',
+    price: 'price',
+    yieldType: 'yieldType',
+    yield: 'yield',
+    value: 'value',
+    buyerRefNo: 'buyerRefNo',
+    sellerRefNo: 'sellerRefNo',
+    buyBackofficeLoginId: 'buyBackofficeLoginId',
+    sellBackofficeLoginId: 'sellBackofficeLoginId',
+    buyBrokerLoginId: 'buyBrokerLoginId',
+    sellBrokerLoginId: 'sellBrokerLoginId',
+    source: 'source',
+    modSettleDate: 'modSettleDate',
+    modQuantity: 'modQuantity',
+    modAccrInt: 'modAccrInt',
+    modConsideration: 'modConsideration',
+    settlementNo: 'settlementNo',
+    stampDutyAmount: 'stampDutyAmount',
+    stampDutyBearer: 'stampDutyBearer',
+    buyerFundPayinObligation: 'buyerFundPayinObligation',
+    sellerFundPayoutObligation: 'sellerFundPayoutObligation',
+    fundPayinRefId: 'fundPayinRefId',
+    settleStatus: 'settleStatus',
+    secPayinQuantity: 'secPayinQuantity',
+    secPayinRemarks: 'secPayinRemarks',
+    secPayinTime: 'secPayinTime',
+    fundsPayinAmount: 'fundsPayinAmount',
+    fundsPayinRemarks: 'fundsPayinRemarks',
+    fundsPayinTime: 'fundsPayinTime',
+    payoutRemarks: 'payoutRemarks',
+    payoutTime: 'payoutTime',
+    ifscCode: 'ifscCode',
+    accountNo: 'accountNo',
+    utrNumber: 'utrNumber',
+    dpId: 'dpId',
+    benId: 'benId'
+  };
+
+  export type SettlementOrderModelScalarFieldEnum = (typeof SettlementOrderModelScalarFieldEnum)[keyof typeof SettlementOrderModelScalarFieldEnum]
+
+
+  export const RFQMasterISINScalarFieldEnum: {
+    id: 'id',
     number: 'number',
     segment: 'segment',
     isin: 'isin',
-    date: 'date',
     participantCode: 'participantCode',
     dealType: 'dealType',
     clientCode: 'clientCode',
+    clientRegType: 'clientRegType',
     buySell: 'buySell',
     quoteType: 'quoteType',
     settlementType: 'settlementType',
@@ -29471,15 +33355,95 @@ export namespace Prisma {
     category: 'category',
     rating: 'rating',
     remarks: 'remarks',
+    date: 'date',
+    quoteTime: 'quoteTime',
+    settlementDate: 'settlementDate',
     status: 'status',
     userLogin: 'userLogin',
     tradedValue: 'tradedValue',
     confirmedValue: 'confirmedValue',
-    clientRegType: 'clientRegType',
-    quoteTime: 'quoteTime'
+    createdAt: 'createdAt',
+    createdBy: 'createdBy',
+    updatedBy: 'updatedBy',
+    updatedAt: 'updatedAt'
   };
 
-  export type NSERfqModelScalarFieldEnum = (typeof NSERfqModelScalarFieldEnum)[keyof typeof NSERfqModelScalarFieldEnum]
+  export type RFQMasterISINScalarFieldEnum = (typeof RFQMasterISINScalarFieldEnum)[keyof typeof RFQMasterISINScalarFieldEnum]
+
+
+  export const RFQNegotiationScalarFieldEnum: {
+    rfqNumber: 'rfqNumber',
+    id: 'id',
+    date: 'date',
+    isin: 'isin',
+    buySell: 'buySell',
+    initSettlementType: 'initSettlementType',
+    initSettlementDate: 'initSettlementDate',
+    initAeCode: 'initAeCode',
+    initDealType: 'initDealType',
+    initClientCode: 'initClientCode',
+    initClientRegType: 'initClientRegType',
+    initValue: 'initValue',
+    initQuantity: 'initQuantity',
+    initYieldType: 'initYieldType',
+    initYield: 'initYield',
+    initCalcMethod: 'initCalcMethod',
+    initPrice: 'initPrice',
+    initAccruedInterest: 'initAccruedInterest',
+    initConsideration: 'initConsideration',
+    initQuoteTime: 'initQuoteTime',
+    initGtdFlag: 'initGtdFlag',
+    initEndTime: 'initEndTime',
+    initRemarks: 'initRemarks',
+    initLoginId: 'initLoginId',
+    respSettlementType: 'respSettlementType',
+    respSettlementDate: 'respSettlementDate',
+    respAeCode: 'respAeCode',
+    respDealType: 'respDealType',
+    respClientCode: 'respClientCode',
+    respClientRegType: 'respClientRegType',
+    respValue: 'respValue',
+    respQuantity: 'respQuantity',
+    respYieldType: 'respYieldType',
+    respYield: 'respYield',
+    respCalcMethod: 'respCalcMethod',
+    respPrice: 'respPrice',
+    respAccruedInterest: 'respAccruedInterest',
+    respConsideration: 'respConsideration',
+    respQuoteTime: 'respQuoteTime',
+    respGtdFlag: 'respGtdFlag',
+    respEndTime: 'respEndTime',
+    respRemarks: 'respRemarks',
+    respLoginId: 'respLoginId',
+    status: 'status',
+    tradeNumber: 'tradeNumber',
+    acceptedSettlementType: 'acceptedSettlementType',
+    acceptedSettlementDate: 'acceptedSettlementDate',
+    acceptedValue: 'acceptedValue',
+    acceptedQuantity: 'acceptedQuantity',
+    acceptedYieldType: 'acceptedYieldType',
+    acceptedYield: 'acceptedYield',
+    acceptedCalcMethod: 'acceptedCalcMethod',
+    acceptedPrice: 'acceptedPrice',
+    acceptedPutCallDate: 'acceptedPutCallDate',
+    acceptedAccruedInterest: 'acceptedAccruedInterest',
+    acceptedConsideration: 'acceptedConsideration',
+    acceptedQuoteTime: 'acceptedQuoteTime',
+    acceptedBySide: 'acceptedBySide',
+    acceptedByLoginId: 'acceptedByLoginId',
+    confirmStatus: 'confirmStatus',
+    proposedBySide: 'proposedBySide',
+    proposedTime: 'proposedTime',
+    confirmedPriceQuoteTime: 'confirmedPriceQuoteTime',
+    lastActivityTimestamp: 'lastActivityTimestamp',
+    tradeSplits: 'tradeSplits',
+    createdAt: 'createdAt',
+    createdBy: 'createdBy',
+    updatedBy: 'updatedBy',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RFQNegotiationScalarFieldEnum = (typeof RFQNegotiationScalarFieldEnum)[keyof typeof RFQNegotiationScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -29648,6 +33612,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'CrmUserROLE'
    */
   export type EnumCrmUserROLEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CrmUserROLE'>
@@ -29686,13 +33657,6 @@ export namespace Prisma {
    * Reference to a field of type 'SIGNIN_WITH[]'
    */
   export type ListEnumSIGNIN_WITHFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SIGNIN_WITH[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -29830,6 +33794,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'YieldTypeSort'
+   */
+  export type EnumYieldTypeSortFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'YieldTypeSort'>
+    
+
+
+  /**
+   * Reference to a field of type 'YieldTypeSort[]'
+   */
+  export type ListEnumYieldTypeSortFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'YieldTypeSort[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RFQSegment'
+   */
+  export type EnumRFQSegmentFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RFQSegment'>
+    
+
+
+  /**
+   * Reference to a field of type 'RFQSegment[]'
+   */
+  export type ListEnumRFQSegmentFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RFQSegment[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DealType'
    */
   export type EnumDealTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DealType'>
@@ -29840,6 +33832,20 @@ export namespace Prisma {
    * Reference to a field of type 'DealType[]'
    */
   export type ListEnumDealTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DealType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ClientRegType'
+   */
+  export type EnumClientRegTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ClientRegType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ClientRegType[]'
+   */
+  export type ListEnumClientRegTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ClientRegType[]'>
     
 
 
@@ -29900,16 +33906,72 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'RFQStatus'
+   * Reference to a field of type 'YesNo'
    */
-  export type EnumRFQStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RFQStatus'>
+  export type EnumYesNoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'YesNo'>
     
 
 
   /**
-   * Reference to a field of type 'RFQStatus[]'
+   * Reference to a field of type 'YesNo[]'
    */
-  export type ListEnumRFQStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RFQStatus[]'>
+  export type ListEnumYesNoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'YesNo[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Status'
+   */
+  export type EnumStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Status'>
+    
+
+
+  /**
+   * Reference to a field of type 'Status[]'
+   */
+  export type ListEnumStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Status[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'NegotiationStatus'
+   */
+  export type EnumNegotiationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'NegotiationStatus[]'
+   */
+  export type ListEnumNegotiationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'BySide'
+   */
+  export type EnumBySideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BySide'>
+    
+
+
+  /**
+   * Reference to a field of type 'BySide[]'
+   */
+  export type ListEnumBySideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BySide[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'NegotiationConfirmationStatus'
+   */
+  export type EnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationConfirmationStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'NegotiationConfirmationStatus[]'
+   */
+  export type ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationConfirmationStatus[]'>
     
   /**
    * Deep Input Types
@@ -30016,6 +34078,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Bonds"> | Date | string
     updatedAt?: DateTimeFilter<"Bonds"> | Date | string
     sortedAt?: IntFilter<"Bonds"> | number
+    isConvertedDeal?: BoolNullableFilter<"Bonds"> | boolean | null
   }
 
   export type BondsOrderByWithRelationInput = {
@@ -30051,6 +34114,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sortedAt?: SortOrder
+    isConvertedDeal?: SortOrderInput | SortOrder
   }
 
   export type BondsWhereUniqueInput = Prisma.AtLeast<{
@@ -30089,6 +34153,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Bonds"> | Date | string
     updatedAt?: DateTimeFilter<"Bonds"> | Date | string
     sortedAt?: IntFilter<"Bonds"> | number
+    isConvertedDeal?: BoolNullableFilter<"Bonds"> | boolean | null
   }, "id" | "isin">
 
   export type BondsOrderByWithAggregationInput = {
@@ -30124,6 +34189,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sortedAt?: SortOrder
+    isConvertedDeal?: SortOrderInput | SortOrder
     _count?: BondsCountOrderByAggregateInput
     _avg?: BondsAvgOrderByAggregateInput
     _max?: BondsMaxOrderByAggregateInput
@@ -30167,6 +34233,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Bonds"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Bonds"> | Date | string
     sortedAt?: IntWithAggregatesFilter<"Bonds"> | number
+    isConvertedDeal?: BoolNullableWithAggregatesFilter<"Bonds"> | boolean | null
   }
 
   export type CRMUserDataModelWhereInput = {
@@ -31906,70 +35973,304 @@ export namespace Prisma {
     issuer?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
   }
 
-  export type NSERfqModelWhereInput = {
-    AND?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
-    OR?: NSERfqModelWhereInput[]
-    NOT?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
-    key?: IntFilter<"NSERfqModel"> | number
-    number?: StringFilter<"NSERfqModel"> | string
-    segment?: StringFilter<"NSERfqModel"> | string
-    isin?: StringFilter<"NSERfqModel"> | string
-    date?: StringFilter<"NSERfqModel"> | string
-    participantCode?: StringFilter<"NSERfqModel"> | string
-    dealType?: EnumDealTypeFilter<"NSERfqModel"> | $Enums.DealType
-    clientCode?: StringFilter<"NSERfqModel"> | string
-    buySell?: EnumBuySellFilter<"NSERfqModel"> | $Enums.BuySell
-    quoteType?: EnumQuoteTypeFilter<"NSERfqModel"> | $Enums.QuoteType
-    settlementType?: IntFilter<"NSERfqModel"> | number
-    value?: FloatFilter<"NSERfqModel"> | number
-    quantity?: IntNullableFilter<"NSERfqModel"> | number | null
-    yieldType?: EnumYieldTypeFilter<"NSERfqModel"> | $Enums.YieldType
-    yield?: FloatFilter<"NSERfqModel"> | number
-    calcMethod?: EnumCalcMethodFilter<"NSERfqModel"> | $Enums.CalcMethod
-    price?: FloatNullableFilter<"NSERfqModel"> | number | null
-    valueSell?: FloatNullableFilter<"NSERfqModel"> | number | null
-    quantitySell?: IntNullableFilter<"NSERfqModel"> | number | null
-    yieldTypeSell?: EnumYieldTypeNullableFilter<"NSERfqModel"> | $Enums.YieldType | null
-    yieldSell?: FloatNullableFilter<"NSERfqModel"> | number | null
-    calcMethodSell?: EnumCalcMethodNullableFilter<"NSERfqModel"> | $Enums.CalcMethod | null
-    priceSell?: FloatNullableFilter<"NSERfqModel"> | number | null
-    gtdFlag?: StringNullableFilter<"NSERfqModel"> | string | null
-    endTime?: StringNullableFilter<"NSERfqModel"> | string | null
-    quoteNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
-    valueNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
-    minFillValue?: FloatNullableFilter<"NSERfqModel"> | number | null
-    valueStepSize?: FloatNullableFilter<"NSERfqModel"> | number | null
-    anonymous?: StringNullableFilter<"NSERfqModel"> | string | null
-    access?: IntFilter<"NSERfqModel"> | number
-    groupList?: IntNullableListFilter<"NSERfqModel">
-    participantList?: StringNullableListFilter<"NSERfqModel">
-    category?: StringNullableFilter<"NSERfqModel"> | string | null
-    rating?: StringNullableFilter<"NSERfqModel"> | string | null
-    remarks?: StringNullableFilter<"NSERfqModel"> | string | null
-    status?: EnumRFQStatusFilter<"NSERfqModel"> | $Enums.RFQStatus
-    userLogin?: StringFilter<"NSERfqModel"> | string
-    tradedValue?: FloatFilter<"NSERfqModel"> | number
-    confirmedValue?: FloatFilter<"NSERfqModel"> | number
-    clientRegType?: StringFilter<"NSERfqModel"> | string
-    quoteTime?: StringFilter<"NSERfqModel"> | string
+  export type SettlementOrderModelWhereInput = {
+    AND?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
+    OR?: SettlementOrderModelWhereInput[]
+    NOT?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
+    id?: StringFilter<"SettlementOrderModel"> | string
+    orderNumber?: StringFilter<"SettlementOrderModel"> | string
+    symbol?: StringFilter<"SettlementOrderModel"> | string
+    buyParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
+    sellParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
+    price?: FloatFilter<"SettlementOrderModel"> | number
+    yieldType?: EnumYieldTypeSortFilter<"SettlementOrderModel"> | $Enums.YieldTypeSort
+    yield?: FloatFilter<"SettlementOrderModel"> | number
+    value?: FloatFilter<"SettlementOrderModel"> | number
+    buyerRefNo?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    sellerRefNo?: StringFilter<"SettlementOrderModel"> | string
+    buyBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    sellBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    buyBrokerLoginId?: StringFilter<"SettlementOrderModel"> | string
+    sellBrokerLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    source?: IntFilter<"SettlementOrderModel"> | number
+    modSettleDate?: StringFilter<"SettlementOrderModel"> | string
+    modQuantity?: IntFilter<"SettlementOrderModel"> | number
+    modAccrInt?: FloatNullableFilter<"SettlementOrderModel"> | number | null
+    modConsideration?: FloatFilter<"SettlementOrderModel"> | number
+    settlementNo?: StringFilter<"SettlementOrderModel"> | string
+    stampDutyAmount?: FloatFilter<"SettlementOrderModel"> | number
+    stampDutyBearer?: StringFilter<"SettlementOrderModel"> | string
+    buyerFundPayinObligation?: FloatFilter<"SettlementOrderModel"> | number
+    sellerFundPayoutObligation?: FloatFilter<"SettlementOrderModel"> | number
+    fundPayinRefId?: StringFilter<"SettlementOrderModel"> | string
+    settleStatus?: IntFilter<"SettlementOrderModel"> | number
+    secPayinQuantity?: IntNullableFilter<"SettlementOrderModel"> | number | null
+    secPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    secPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    fundsPayinAmount?: FloatNullableFilter<"SettlementOrderModel"> | number | null
+    fundsPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    fundsPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    payoutRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    payoutTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    ifscCode?: StringFilter<"SettlementOrderModel"> | string
+    accountNo?: StringFilter<"SettlementOrderModel"> | string
+    utrNumber?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    dpId?: StringFilter<"SettlementOrderModel"> | string
+    benId?: StringFilter<"SettlementOrderModel"> | string
   }
 
-  export type NSERfqModelOrderByWithRelationInput = {
-    key?: SortOrder
+  export type SettlementOrderModelOrderByWithRelationInput = {
+    id?: SortOrder
+    orderNumber?: SortOrder
+    symbol?: SortOrder
+    buyParticipantLoginId?: SortOrder
+    sellParticipantLoginId?: SortOrder
+    price?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    value?: SortOrder
+    buyerRefNo?: SortOrderInput | SortOrder
+    sellerRefNo?: SortOrder
+    buyBackofficeLoginId?: SortOrderInput | SortOrder
+    sellBackofficeLoginId?: SortOrderInput | SortOrder
+    buyBrokerLoginId?: SortOrder
+    sellBrokerLoginId?: SortOrderInput | SortOrder
+    source?: SortOrder
+    modSettleDate?: SortOrder
+    modQuantity?: SortOrder
+    modAccrInt?: SortOrderInput | SortOrder
+    modConsideration?: SortOrder
+    settlementNo?: SortOrder
+    stampDutyAmount?: SortOrder
+    stampDutyBearer?: SortOrder
+    buyerFundPayinObligation?: SortOrder
+    sellerFundPayoutObligation?: SortOrder
+    fundPayinRefId?: SortOrder
+    settleStatus?: SortOrder
+    secPayinQuantity?: SortOrderInput | SortOrder
+    secPayinRemarks?: SortOrderInput | SortOrder
+    secPayinTime?: SortOrderInput | SortOrder
+    fundsPayinAmount?: SortOrderInput | SortOrder
+    fundsPayinRemarks?: SortOrderInput | SortOrder
+    fundsPayinTime?: SortOrderInput | SortOrder
+    payoutRemarks?: SortOrderInput | SortOrder
+    payoutTime?: SortOrderInput | SortOrder
+    ifscCode?: SortOrder
+    accountNo?: SortOrder
+    utrNumber?: SortOrderInput | SortOrder
+    dpId?: SortOrder
+    benId?: SortOrder
+  }
+
+  export type SettlementOrderModelWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    orderNumber?: string
+    AND?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
+    OR?: SettlementOrderModelWhereInput[]
+    NOT?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
+    symbol?: StringFilter<"SettlementOrderModel"> | string
+    buyParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
+    sellParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
+    price?: FloatFilter<"SettlementOrderModel"> | number
+    yieldType?: EnumYieldTypeSortFilter<"SettlementOrderModel"> | $Enums.YieldTypeSort
+    yield?: FloatFilter<"SettlementOrderModel"> | number
+    value?: FloatFilter<"SettlementOrderModel"> | number
+    buyerRefNo?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    sellerRefNo?: StringFilter<"SettlementOrderModel"> | string
+    buyBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    sellBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    buyBrokerLoginId?: StringFilter<"SettlementOrderModel"> | string
+    sellBrokerLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    source?: IntFilter<"SettlementOrderModel"> | number
+    modSettleDate?: StringFilter<"SettlementOrderModel"> | string
+    modQuantity?: IntFilter<"SettlementOrderModel"> | number
+    modAccrInt?: FloatNullableFilter<"SettlementOrderModel"> | number | null
+    modConsideration?: FloatFilter<"SettlementOrderModel"> | number
+    settlementNo?: StringFilter<"SettlementOrderModel"> | string
+    stampDutyAmount?: FloatFilter<"SettlementOrderModel"> | number
+    stampDutyBearer?: StringFilter<"SettlementOrderModel"> | string
+    buyerFundPayinObligation?: FloatFilter<"SettlementOrderModel"> | number
+    sellerFundPayoutObligation?: FloatFilter<"SettlementOrderModel"> | number
+    fundPayinRefId?: StringFilter<"SettlementOrderModel"> | string
+    settleStatus?: IntFilter<"SettlementOrderModel"> | number
+    secPayinQuantity?: IntNullableFilter<"SettlementOrderModel"> | number | null
+    secPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    secPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    fundsPayinAmount?: FloatNullableFilter<"SettlementOrderModel"> | number | null
+    fundsPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    fundsPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    payoutRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    payoutTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    ifscCode?: StringFilter<"SettlementOrderModel"> | string
+    accountNo?: StringFilter<"SettlementOrderModel"> | string
+    utrNumber?: StringNullableFilter<"SettlementOrderModel"> | string | null
+    dpId?: StringFilter<"SettlementOrderModel"> | string
+    benId?: StringFilter<"SettlementOrderModel"> | string
+  }, "id" | "orderNumber">
+
+  export type SettlementOrderModelOrderByWithAggregationInput = {
+    id?: SortOrder
+    orderNumber?: SortOrder
+    symbol?: SortOrder
+    buyParticipantLoginId?: SortOrder
+    sellParticipantLoginId?: SortOrder
+    price?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    value?: SortOrder
+    buyerRefNo?: SortOrderInput | SortOrder
+    sellerRefNo?: SortOrder
+    buyBackofficeLoginId?: SortOrderInput | SortOrder
+    sellBackofficeLoginId?: SortOrderInput | SortOrder
+    buyBrokerLoginId?: SortOrder
+    sellBrokerLoginId?: SortOrderInput | SortOrder
+    source?: SortOrder
+    modSettleDate?: SortOrder
+    modQuantity?: SortOrder
+    modAccrInt?: SortOrderInput | SortOrder
+    modConsideration?: SortOrder
+    settlementNo?: SortOrder
+    stampDutyAmount?: SortOrder
+    stampDutyBearer?: SortOrder
+    buyerFundPayinObligation?: SortOrder
+    sellerFundPayoutObligation?: SortOrder
+    fundPayinRefId?: SortOrder
+    settleStatus?: SortOrder
+    secPayinQuantity?: SortOrderInput | SortOrder
+    secPayinRemarks?: SortOrderInput | SortOrder
+    secPayinTime?: SortOrderInput | SortOrder
+    fundsPayinAmount?: SortOrderInput | SortOrder
+    fundsPayinRemarks?: SortOrderInput | SortOrder
+    fundsPayinTime?: SortOrderInput | SortOrder
+    payoutRemarks?: SortOrderInput | SortOrder
+    payoutTime?: SortOrderInput | SortOrder
+    ifscCode?: SortOrder
+    accountNo?: SortOrder
+    utrNumber?: SortOrderInput | SortOrder
+    dpId?: SortOrder
+    benId?: SortOrder
+    _count?: SettlementOrderModelCountOrderByAggregateInput
+    _avg?: SettlementOrderModelAvgOrderByAggregateInput
+    _max?: SettlementOrderModelMaxOrderByAggregateInput
+    _min?: SettlementOrderModelMinOrderByAggregateInput
+    _sum?: SettlementOrderModelSumOrderByAggregateInput
+  }
+
+  export type SettlementOrderModelScalarWhereWithAggregatesInput = {
+    AND?: SettlementOrderModelScalarWhereWithAggregatesInput | SettlementOrderModelScalarWhereWithAggregatesInput[]
+    OR?: SettlementOrderModelScalarWhereWithAggregatesInput[]
+    NOT?: SettlementOrderModelScalarWhereWithAggregatesInput | SettlementOrderModelScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    orderNumber?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    symbol?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    buyParticipantLoginId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    sellParticipantLoginId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    price?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
+    yieldType?: EnumYieldTypeSortWithAggregatesFilter<"SettlementOrderModel"> | $Enums.YieldTypeSort
+    yield?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
+    value?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
+    buyerRefNo?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    sellerRefNo?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    buyBackofficeLoginId?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    sellBackofficeLoginId?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    buyBrokerLoginId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    sellBrokerLoginId?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    source?: IntWithAggregatesFilter<"SettlementOrderModel"> | number
+    modSettleDate?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    modQuantity?: IntWithAggregatesFilter<"SettlementOrderModel"> | number
+    modAccrInt?: FloatNullableWithAggregatesFilter<"SettlementOrderModel"> | number | null
+    modConsideration?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
+    settlementNo?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    stampDutyAmount?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
+    stampDutyBearer?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    buyerFundPayinObligation?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
+    sellerFundPayoutObligation?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
+    fundPayinRefId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    settleStatus?: IntWithAggregatesFilter<"SettlementOrderModel"> | number
+    secPayinQuantity?: IntNullableWithAggregatesFilter<"SettlementOrderModel"> | number | null
+    secPayinRemarks?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    secPayinTime?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    fundsPayinAmount?: FloatNullableWithAggregatesFilter<"SettlementOrderModel"> | number | null
+    fundsPayinRemarks?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    fundsPayinTime?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    payoutRemarks?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    payoutTime?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    ifscCode?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    accountNo?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    utrNumber?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
+    dpId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+    benId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+  }
+
+  export type RFQMasterISINWhereInput = {
+    AND?: RFQMasterISINWhereInput | RFQMasterISINWhereInput[]
+    OR?: RFQMasterISINWhereInput[]
+    NOT?: RFQMasterISINWhereInput | RFQMasterISINWhereInput[]
+    id?: IntFilter<"RFQMasterISIN"> | number
+    number?: StringFilter<"RFQMasterISIN"> | string
+    segment?: EnumRFQSegmentFilter<"RFQMasterISIN"> | $Enums.RFQSegment
+    isin?: StringFilter<"RFQMasterISIN"> | string
+    participantCode?: StringFilter<"RFQMasterISIN"> | string
+    dealType?: EnumDealTypeFilter<"RFQMasterISIN"> | $Enums.DealType
+    clientCode?: StringFilter<"RFQMasterISIN"> | string
+    clientRegType?: EnumClientRegTypeFilter<"RFQMasterISIN"> | $Enums.ClientRegType
+    buySell?: EnumBuySellFilter<"RFQMasterISIN"> | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFilter<"RFQMasterISIN"> | $Enums.QuoteType
+    settlementType?: IntFilter<"RFQMasterISIN"> | number
+    value?: FloatFilter<"RFQMasterISIN"> | number
+    quantity?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    yieldType?: EnumYieldTypeFilter<"RFQMasterISIN"> | $Enums.YieldType
+    yield?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    calcMethod?: EnumCalcMethodFilter<"RFQMasterISIN"> | $Enums.CalcMethod
+    price?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    valueSell?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    quantitySell?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    yieldTypeSell?: EnumYieldTypeNullableFilter<"RFQMasterISIN"> | $Enums.YieldType | null
+    yieldSell?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    calcMethodSell?: EnumCalcMethodNullableFilter<"RFQMasterISIN"> | $Enums.CalcMethod | null
+    priceSell?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    gtdFlag?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    endTime?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    quoteNegotiable?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    valueNegotiable?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    minFillValue?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    valueStepSize?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    anonymous?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    access?: IntFilter<"RFQMasterISIN"> | number
+    groupList?: IntNullableListFilter<"RFQMasterISIN">
+    participantList?: StringNullableListFilter<"RFQMasterISIN">
+    category?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    rating?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    remarks?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    date?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    quoteTime?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    settlementDate?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    status?: EnumStatusFilter<"RFQMasterISIN"> | $Enums.Status
+    userLogin?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    tradedValue?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    confirmedValue?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    createdAt?: DateTimeFilter<"RFQMasterISIN"> | Date | string
+    createdBy?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    updatedBy?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    updatedAt?: DateTimeFilter<"RFQMasterISIN"> | Date | string
+  }
+
+  export type RFQMasterISINOrderByWithRelationInput = {
+    id?: SortOrder
     number?: SortOrder
     segment?: SortOrder
     isin?: SortOrder
-    date?: SortOrder
     participantCode?: SortOrder
     dealType?: SortOrder
     clientCode?: SortOrder
+    clientRegType?: SortOrder
     buySell?: SortOrder
     quoteType?: SortOrder
     settlementType?: SortOrder
     value?: SortOrder
     quantity?: SortOrderInput | SortOrder
     yieldType?: SortOrder
-    yield?: SortOrder
+    yield?: SortOrderInput | SortOrder
     calcMethod?: SortOrder
     price?: SortOrderInput | SortOrder
     valueSell?: SortOrderInput | SortOrder
@@ -31991,78 +36292,88 @@ export namespace Prisma {
     category?: SortOrderInput | SortOrder
     rating?: SortOrderInput | SortOrder
     remarks?: SortOrderInput | SortOrder
+    date?: SortOrderInput | SortOrder
+    quoteTime?: SortOrderInput | SortOrder
+    settlementDate?: SortOrderInput | SortOrder
     status?: SortOrder
-    userLogin?: SortOrder
-    tradedValue?: SortOrder
-    confirmedValue?: SortOrder
-    clientRegType?: SortOrder
-    quoteTime?: SortOrder
+    userLogin?: SortOrderInput | SortOrder
+    tradedValue?: SortOrderInput | SortOrder
+    confirmedValue?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrderInput | SortOrder
+    updatedBy?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type NSERfqModelWhereUniqueInput = Prisma.AtLeast<{
-    key?: number
+  export type RFQMasterISINWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
     number?: string
-    AND?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
-    OR?: NSERfqModelWhereInput[]
-    NOT?: NSERfqModelWhereInput | NSERfqModelWhereInput[]
-    segment?: StringFilter<"NSERfqModel"> | string
-    isin?: StringFilter<"NSERfqModel"> | string
-    date?: StringFilter<"NSERfqModel"> | string
-    participantCode?: StringFilter<"NSERfqModel"> | string
-    dealType?: EnumDealTypeFilter<"NSERfqModel"> | $Enums.DealType
-    clientCode?: StringFilter<"NSERfqModel"> | string
-    buySell?: EnumBuySellFilter<"NSERfqModel"> | $Enums.BuySell
-    quoteType?: EnumQuoteTypeFilter<"NSERfqModel"> | $Enums.QuoteType
-    settlementType?: IntFilter<"NSERfqModel"> | number
-    value?: FloatFilter<"NSERfqModel"> | number
-    quantity?: IntNullableFilter<"NSERfqModel"> | number | null
-    yieldType?: EnumYieldTypeFilter<"NSERfqModel"> | $Enums.YieldType
-    yield?: FloatFilter<"NSERfqModel"> | number
-    calcMethod?: EnumCalcMethodFilter<"NSERfqModel"> | $Enums.CalcMethod
-    price?: FloatNullableFilter<"NSERfqModel"> | number | null
-    valueSell?: FloatNullableFilter<"NSERfqModel"> | number | null
-    quantitySell?: IntNullableFilter<"NSERfqModel"> | number | null
-    yieldTypeSell?: EnumYieldTypeNullableFilter<"NSERfqModel"> | $Enums.YieldType | null
-    yieldSell?: FloatNullableFilter<"NSERfqModel"> | number | null
-    calcMethodSell?: EnumCalcMethodNullableFilter<"NSERfqModel"> | $Enums.CalcMethod | null
-    priceSell?: FloatNullableFilter<"NSERfqModel"> | number | null
-    gtdFlag?: StringNullableFilter<"NSERfqModel"> | string | null
-    endTime?: StringNullableFilter<"NSERfqModel"> | string | null
-    quoteNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
-    valueNegotiable?: StringNullableFilter<"NSERfqModel"> | string | null
-    minFillValue?: FloatNullableFilter<"NSERfqModel"> | number | null
-    valueStepSize?: FloatNullableFilter<"NSERfqModel"> | number | null
-    anonymous?: StringNullableFilter<"NSERfqModel"> | string | null
-    access?: IntFilter<"NSERfqModel"> | number
-    groupList?: IntNullableListFilter<"NSERfqModel">
-    participantList?: StringNullableListFilter<"NSERfqModel">
-    category?: StringNullableFilter<"NSERfqModel"> | string | null
-    rating?: StringNullableFilter<"NSERfqModel"> | string | null
-    remarks?: StringNullableFilter<"NSERfqModel"> | string | null
-    status?: EnumRFQStatusFilter<"NSERfqModel"> | $Enums.RFQStatus
-    userLogin?: StringFilter<"NSERfqModel"> | string
-    tradedValue?: FloatFilter<"NSERfqModel"> | number
-    confirmedValue?: FloatFilter<"NSERfqModel"> | number
-    clientRegType?: StringFilter<"NSERfqModel"> | string
-    quoteTime?: StringFilter<"NSERfqModel"> | string
-  }, "key" | "number">
+    AND?: RFQMasterISINWhereInput | RFQMasterISINWhereInput[]
+    OR?: RFQMasterISINWhereInput[]
+    NOT?: RFQMasterISINWhereInput | RFQMasterISINWhereInput[]
+    segment?: EnumRFQSegmentFilter<"RFQMasterISIN"> | $Enums.RFQSegment
+    isin?: StringFilter<"RFQMasterISIN"> | string
+    participantCode?: StringFilter<"RFQMasterISIN"> | string
+    dealType?: EnumDealTypeFilter<"RFQMasterISIN"> | $Enums.DealType
+    clientCode?: StringFilter<"RFQMasterISIN"> | string
+    clientRegType?: EnumClientRegTypeFilter<"RFQMasterISIN"> | $Enums.ClientRegType
+    buySell?: EnumBuySellFilter<"RFQMasterISIN"> | $Enums.BuySell
+    quoteType?: EnumQuoteTypeFilter<"RFQMasterISIN"> | $Enums.QuoteType
+    settlementType?: IntFilter<"RFQMasterISIN"> | number
+    value?: FloatFilter<"RFQMasterISIN"> | number
+    quantity?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    yieldType?: EnumYieldTypeFilter<"RFQMasterISIN"> | $Enums.YieldType
+    yield?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    calcMethod?: EnumCalcMethodFilter<"RFQMasterISIN"> | $Enums.CalcMethod
+    price?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    valueSell?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    quantitySell?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    yieldTypeSell?: EnumYieldTypeNullableFilter<"RFQMasterISIN"> | $Enums.YieldType | null
+    yieldSell?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    calcMethodSell?: EnumCalcMethodNullableFilter<"RFQMasterISIN"> | $Enums.CalcMethod | null
+    priceSell?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    gtdFlag?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    endTime?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    quoteNegotiable?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    valueNegotiable?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    minFillValue?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    valueStepSize?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    anonymous?: EnumYesNoNullableFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    access?: IntFilter<"RFQMasterISIN"> | number
+    groupList?: IntNullableListFilter<"RFQMasterISIN">
+    participantList?: StringNullableListFilter<"RFQMasterISIN">
+    category?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    rating?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    remarks?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    date?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    quoteTime?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    settlementDate?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    status?: EnumStatusFilter<"RFQMasterISIN"> | $Enums.Status
+    userLogin?: StringNullableFilter<"RFQMasterISIN"> | string | null
+    tradedValue?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    confirmedValue?: FloatNullableFilter<"RFQMasterISIN"> | number | null
+    createdAt?: DateTimeFilter<"RFQMasterISIN"> | Date | string
+    createdBy?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    updatedBy?: IntNullableFilter<"RFQMasterISIN"> | number | null
+    updatedAt?: DateTimeFilter<"RFQMasterISIN"> | Date | string
+  }, "id" | "number">
 
-  export type NSERfqModelOrderByWithAggregationInput = {
-    key?: SortOrder
+  export type RFQMasterISINOrderByWithAggregationInput = {
+    id?: SortOrder
     number?: SortOrder
     segment?: SortOrder
     isin?: SortOrder
-    date?: SortOrder
     participantCode?: SortOrder
     dealType?: SortOrder
     clientCode?: SortOrder
+    clientRegType?: SortOrder
     buySell?: SortOrder
     quoteType?: SortOrder
     settlementType?: SortOrder
     value?: SortOrder
     quantity?: SortOrderInput | SortOrder
     yieldType?: SortOrder
-    yield?: SortOrder
+    yield?: SortOrderInput | SortOrder
     calcMethod?: SortOrder
     price?: SortOrderInput | SortOrder
     valueSell?: SortOrderInput | SortOrder
@@ -32084,65 +36395,449 @@ export namespace Prisma {
     category?: SortOrderInput | SortOrder
     rating?: SortOrderInput | SortOrder
     remarks?: SortOrderInput | SortOrder
+    date?: SortOrderInput | SortOrder
+    quoteTime?: SortOrderInput | SortOrder
+    settlementDate?: SortOrderInput | SortOrder
     status?: SortOrder
-    userLogin?: SortOrder
-    tradedValue?: SortOrder
-    confirmedValue?: SortOrder
-    clientRegType?: SortOrder
-    quoteTime?: SortOrder
-    _count?: NSERfqModelCountOrderByAggregateInput
-    _avg?: NSERfqModelAvgOrderByAggregateInput
-    _max?: NSERfqModelMaxOrderByAggregateInput
-    _min?: NSERfqModelMinOrderByAggregateInput
-    _sum?: NSERfqModelSumOrderByAggregateInput
+    userLogin?: SortOrderInput | SortOrder
+    tradedValue?: SortOrderInput | SortOrder
+    confirmedValue?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrderInput | SortOrder
+    updatedBy?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+    _count?: RFQMasterISINCountOrderByAggregateInput
+    _avg?: RFQMasterISINAvgOrderByAggregateInput
+    _max?: RFQMasterISINMaxOrderByAggregateInput
+    _min?: RFQMasterISINMinOrderByAggregateInput
+    _sum?: RFQMasterISINSumOrderByAggregateInput
   }
 
-  export type NSERfqModelScalarWhereWithAggregatesInput = {
-    AND?: NSERfqModelScalarWhereWithAggregatesInput | NSERfqModelScalarWhereWithAggregatesInput[]
-    OR?: NSERfqModelScalarWhereWithAggregatesInput[]
-    NOT?: NSERfqModelScalarWhereWithAggregatesInput | NSERfqModelScalarWhereWithAggregatesInput[]
-    key?: IntWithAggregatesFilter<"NSERfqModel"> | number
-    number?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    segment?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    isin?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    date?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    participantCode?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    dealType?: EnumDealTypeWithAggregatesFilter<"NSERfqModel"> | $Enums.DealType
-    clientCode?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    buySell?: EnumBuySellWithAggregatesFilter<"NSERfqModel"> | $Enums.BuySell
-    quoteType?: EnumQuoteTypeWithAggregatesFilter<"NSERfqModel"> | $Enums.QuoteType
-    settlementType?: IntWithAggregatesFilter<"NSERfqModel"> | number
-    value?: FloatWithAggregatesFilter<"NSERfqModel"> | number
-    quantity?: IntNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    yieldType?: EnumYieldTypeWithAggregatesFilter<"NSERfqModel"> | $Enums.YieldType
-    yield?: FloatWithAggregatesFilter<"NSERfqModel"> | number
-    calcMethod?: EnumCalcMethodWithAggregatesFilter<"NSERfqModel"> | $Enums.CalcMethod
-    price?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    valueSell?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    quantitySell?: IntNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    yieldTypeSell?: EnumYieldTypeNullableWithAggregatesFilter<"NSERfqModel"> | $Enums.YieldType | null
-    yieldSell?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    calcMethodSell?: EnumCalcMethodNullableWithAggregatesFilter<"NSERfqModel"> | $Enums.CalcMethod | null
-    priceSell?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    gtdFlag?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    endTime?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    quoteNegotiable?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    valueNegotiable?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    minFillValue?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    valueStepSize?: FloatNullableWithAggregatesFilter<"NSERfqModel"> | number | null
-    anonymous?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    access?: IntWithAggregatesFilter<"NSERfqModel"> | number
-    groupList?: IntNullableListFilter<"NSERfqModel">
-    participantList?: StringNullableListFilter<"NSERfqModel">
-    category?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    rating?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    remarks?: StringNullableWithAggregatesFilter<"NSERfqModel"> | string | null
-    status?: EnumRFQStatusWithAggregatesFilter<"NSERfqModel"> | $Enums.RFQStatus
-    userLogin?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    tradedValue?: FloatWithAggregatesFilter<"NSERfqModel"> | number
-    confirmedValue?: FloatWithAggregatesFilter<"NSERfqModel"> | number
-    clientRegType?: StringWithAggregatesFilter<"NSERfqModel"> | string
-    quoteTime?: StringWithAggregatesFilter<"NSERfqModel"> | string
+  export type RFQMasterISINScalarWhereWithAggregatesInput = {
+    AND?: RFQMasterISINScalarWhereWithAggregatesInput | RFQMasterISINScalarWhereWithAggregatesInput[]
+    OR?: RFQMasterISINScalarWhereWithAggregatesInput[]
+    NOT?: RFQMasterISINScalarWhereWithAggregatesInput | RFQMasterISINScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"RFQMasterISIN"> | number
+    number?: StringWithAggregatesFilter<"RFQMasterISIN"> | string
+    segment?: EnumRFQSegmentWithAggregatesFilter<"RFQMasterISIN"> | $Enums.RFQSegment
+    isin?: StringWithAggregatesFilter<"RFQMasterISIN"> | string
+    participantCode?: StringWithAggregatesFilter<"RFQMasterISIN"> | string
+    dealType?: EnumDealTypeWithAggregatesFilter<"RFQMasterISIN"> | $Enums.DealType
+    clientCode?: StringWithAggregatesFilter<"RFQMasterISIN"> | string
+    clientRegType?: EnumClientRegTypeWithAggregatesFilter<"RFQMasterISIN"> | $Enums.ClientRegType
+    buySell?: EnumBuySellWithAggregatesFilter<"RFQMasterISIN"> | $Enums.BuySell
+    quoteType?: EnumQuoteTypeWithAggregatesFilter<"RFQMasterISIN"> | $Enums.QuoteType
+    settlementType?: IntWithAggregatesFilter<"RFQMasterISIN"> | number
+    value?: FloatWithAggregatesFilter<"RFQMasterISIN"> | number
+    quantity?: IntNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    yieldType?: EnumYieldTypeWithAggregatesFilter<"RFQMasterISIN"> | $Enums.YieldType
+    yield?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    calcMethod?: EnumCalcMethodWithAggregatesFilter<"RFQMasterISIN"> | $Enums.CalcMethod
+    price?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    valueSell?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    quantitySell?: IntNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    yieldTypeSell?: EnumYieldTypeNullableWithAggregatesFilter<"RFQMasterISIN"> | $Enums.YieldType | null
+    yieldSell?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    calcMethodSell?: EnumCalcMethodNullableWithAggregatesFilter<"RFQMasterISIN"> | $Enums.CalcMethod | null
+    priceSell?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    gtdFlag?: EnumYesNoNullableWithAggregatesFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    endTime?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    quoteNegotiable?: EnumYesNoNullableWithAggregatesFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    valueNegotiable?: EnumYesNoNullableWithAggregatesFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    minFillValue?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    valueStepSize?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    anonymous?: EnumYesNoNullableWithAggregatesFilter<"RFQMasterISIN"> | $Enums.YesNo | null
+    access?: IntWithAggregatesFilter<"RFQMasterISIN"> | number
+    groupList?: IntNullableListFilter<"RFQMasterISIN">
+    participantList?: StringNullableListFilter<"RFQMasterISIN">
+    category?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    rating?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    remarks?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    date?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    quoteTime?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    settlementDate?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    status?: EnumStatusWithAggregatesFilter<"RFQMasterISIN"> | $Enums.Status
+    userLogin?: StringNullableWithAggregatesFilter<"RFQMasterISIN"> | string | null
+    tradedValue?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    confirmedValue?: FloatNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"RFQMasterISIN"> | Date | string
+    createdBy?: IntNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    updatedBy?: IntNullableWithAggregatesFilter<"RFQMasterISIN"> | number | null
+    updatedAt?: DateTimeWithAggregatesFilter<"RFQMasterISIN"> | Date | string
+  }
+
+  export type RFQNegotiationWhereInput = {
+    AND?: RFQNegotiationWhereInput | RFQNegotiationWhereInput[]
+    OR?: RFQNegotiationWhereInput[]
+    NOT?: RFQNegotiationWhereInput | RFQNegotiationWhereInput[]
+    rfqNumber?: StringFilter<"RFQNegotiation"> | string
+    id?: StringFilter<"RFQNegotiation"> | string
+    date?: StringFilter<"RFQNegotiation"> | string
+    isin?: StringNullableFilter<"RFQNegotiation"> | string | null
+    buySell?: EnumBuySellNullableFilter<"RFQNegotiation"> | $Enums.BuySell | null
+    initSettlementType?: IntNullableFilter<"RFQNegotiation"> | number | null
+    initSettlementDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initAeCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initDealType?: EnumDealTypeNullableFilter<"RFQNegotiation"> | $Enums.DealType | null
+    initClientCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initClientRegType?: EnumClientRegTypeNullableFilter<"RFQNegotiation"> | $Enums.ClientRegType | null
+    initValue?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initQuantity?: IntNullableFilter<"RFQNegotiation"> | number | null
+    initYieldType?: EnumYieldTypeNullableFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    initYield?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initCalcMethod?: EnumCalcMethodNullableFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    initPrice?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initAccruedInterest?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initConsideration?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initGtdFlag?: EnumYesNoNullableFilter<"RFQNegotiation"> | $Enums.YesNo | null
+    initEndTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initRemarks?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initLoginId?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respSettlementType?: IntNullableFilter<"RFQNegotiation"> | number | null
+    respSettlementDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respAeCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respDealType?: EnumDealTypeNullableFilter<"RFQNegotiation"> | $Enums.DealType | null
+    respClientCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respClientRegType?: EnumClientRegTypeNullableFilter<"RFQNegotiation"> | $Enums.ClientRegType | null
+    respValue?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respQuantity?: IntNullableFilter<"RFQNegotiation"> | number | null
+    respYieldType?: EnumYieldTypeNullableFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    respYield?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respCalcMethod?: EnumCalcMethodNullableFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    respPrice?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respAccruedInterest?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respConsideration?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respGtdFlag?: EnumYesNoNullableFilter<"RFQNegotiation"> | $Enums.YesNo | null
+    respEndTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respRemarks?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respLoginId?: StringNullableFilter<"RFQNegotiation"> | string | null
+    status?: EnumNegotiationStatusNullableFilter<"RFQNegotiation"> | $Enums.NegotiationStatus | null
+    tradeNumber?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedSettlementType?: IntNullableFilter<"RFQNegotiation"> | number | null
+    acceptedSettlementDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedValue?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedQuantity?: IntNullableFilter<"RFQNegotiation"> | number | null
+    acceptedYieldType?: EnumYieldTypeNullableFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    acceptedYield?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedCalcMethod?: EnumCalcMethodNullableFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    acceptedPrice?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedPutCallDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedAccruedInterest?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedConsideration?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedBySide?: EnumBySideNullableFilter<"RFQNegotiation"> | $Enums.BySide | null
+    acceptedByLoginId?: StringNullableFilter<"RFQNegotiation"> | string | null
+    confirmStatus?: EnumNegotiationConfirmationStatusNullableFilter<"RFQNegotiation"> | $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: EnumBySideNullableFilter<"RFQNegotiation"> | $Enums.BySide | null
+    proposedTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    confirmedPriceQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    lastActivityTimestamp?: StringNullableFilter<"RFQNegotiation"> | string | null
+    tradeSplits?: JsonNullableListFilter<"RFQNegotiation">
+    createdAt?: DateTimeFilter<"RFQNegotiation"> | Date | string
+    createdBy?: IntNullableFilter<"RFQNegotiation"> | number | null
+    updatedBy?: IntNullableFilter<"RFQNegotiation"> | number | null
+    updatedAt?: DateTimeFilter<"RFQNegotiation"> | Date | string
+  }
+
+  export type RFQNegotiationOrderByWithRelationInput = {
+    rfqNumber?: SortOrder
+    id?: SortOrder
+    date?: SortOrder
+    isin?: SortOrderInput | SortOrder
+    buySell?: SortOrderInput | SortOrder
+    initSettlementType?: SortOrderInput | SortOrder
+    initSettlementDate?: SortOrderInput | SortOrder
+    initAeCode?: SortOrderInput | SortOrder
+    initDealType?: SortOrderInput | SortOrder
+    initClientCode?: SortOrderInput | SortOrder
+    initClientRegType?: SortOrderInput | SortOrder
+    initValue?: SortOrderInput | SortOrder
+    initQuantity?: SortOrderInput | SortOrder
+    initYieldType?: SortOrderInput | SortOrder
+    initYield?: SortOrderInput | SortOrder
+    initCalcMethod?: SortOrderInput | SortOrder
+    initPrice?: SortOrderInput | SortOrder
+    initAccruedInterest?: SortOrderInput | SortOrder
+    initConsideration?: SortOrderInput | SortOrder
+    initQuoteTime?: SortOrderInput | SortOrder
+    initGtdFlag?: SortOrderInput | SortOrder
+    initEndTime?: SortOrderInput | SortOrder
+    initRemarks?: SortOrderInput | SortOrder
+    initLoginId?: SortOrderInput | SortOrder
+    respSettlementType?: SortOrderInput | SortOrder
+    respSettlementDate?: SortOrderInput | SortOrder
+    respAeCode?: SortOrderInput | SortOrder
+    respDealType?: SortOrderInput | SortOrder
+    respClientCode?: SortOrderInput | SortOrder
+    respClientRegType?: SortOrderInput | SortOrder
+    respValue?: SortOrderInput | SortOrder
+    respQuantity?: SortOrderInput | SortOrder
+    respYieldType?: SortOrderInput | SortOrder
+    respYield?: SortOrderInput | SortOrder
+    respCalcMethod?: SortOrderInput | SortOrder
+    respPrice?: SortOrderInput | SortOrder
+    respAccruedInterest?: SortOrderInput | SortOrder
+    respConsideration?: SortOrderInput | SortOrder
+    respQuoteTime?: SortOrderInput | SortOrder
+    respGtdFlag?: SortOrderInput | SortOrder
+    respEndTime?: SortOrderInput | SortOrder
+    respRemarks?: SortOrderInput | SortOrder
+    respLoginId?: SortOrderInput | SortOrder
+    status?: SortOrderInput | SortOrder
+    tradeNumber?: SortOrderInput | SortOrder
+    acceptedSettlementType?: SortOrderInput | SortOrder
+    acceptedSettlementDate?: SortOrderInput | SortOrder
+    acceptedValue?: SortOrderInput | SortOrder
+    acceptedQuantity?: SortOrderInput | SortOrder
+    acceptedYieldType?: SortOrderInput | SortOrder
+    acceptedYield?: SortOrderInput | SortOrder
+    acceptedCalcMethod?: SortOrderInput | SortOrder
+    acceptedPrice?: SortOrderInput | SortOrder
+    acceptedPutCallDate?: SortOrderInput | SortOrder
+    acceptedAccruedInterest?: SortOrderInput | SortOrder
+    acceptedConsideration?: SortOrderInput | SortOrder
+    acceptedQuoteTime?: SortOrderInput | SortOrder
+    acceptedBySide?: SortOrderInput | SortOrder
+    acceptedByLoginId?: SortOrderInput | SortOrder
+    confirmStatus?: SortOrderInput | SortOrder
+    proposedBySide?: SortOrderInput | SortOrder
+    proposedTime?: SortOrderInput | SortOrder
+    confirmedPriceQuoteTime?: SortOrderInput | SortOrder
+    lastActivityTimestamp?: SortOrderInput | SortOrder
+    tradeSplits?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrderInput | SortOrder
+    updatedBy?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RFQNegotiationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: RFQNegotiationWhereInput | RFQNegotiationWhereInput[]
+    OR?: RFQNegotiationWhereInput[]
+    NOT?: RFQNegotiationWhereInput | RFQNegotiationWhereInput[]
+    rfqNumber?: StringFilter<"RFQNegotiation"> | string
+    date?: StringFilter<"RFQNegotiation"> | string
+    isin?: StringNullableFilter<"RFQNegotiation"> | string | null
+    buySell?: EnumBuySellNullableFilter<"RFQNegotiation"> | $Enums.BuySell | null
+    initSettlementType?: IntNullableFilter<"RFQNegotiation"> | number | null
+    initSettlementDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initAeCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initDealType?: EnumDealTypeNullableFilter<"RFQNegotiation"> | $Enums.DealType | null
+    initClientCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initClientRegType?: EnumClientRegTypeNullableFilter<"RFQNegotiation"> | $Enums.ClientRegType | null
+    initValue?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initQuantity?: IntNullableFilter<"RFQNegotiation"> | number | null
+    initYieldType?: EnumYieldTypeNullableFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    initYield?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initCalcMethod?: EnumCalcMethodNullableFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    initPrice?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initAccruedInterest?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initConsideration?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    initQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initGtdFlag?: EnumYesNoNullableFilter<"RFQNegotiation"> | $Enums.YesNo | null
+    initEndTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initRemarks?: StringNullableFilter<"RFQNegotiation"> | string | null
+    initLoginId?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respSettlementType?: IntNullableFilter<"RFQNegotiation"> | number | null
+    respSettlementDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respAeCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respDealType?: EnumDealTypeNullableFilter<"RFQNegotiation"> | $Enums.DealType | null
+    respClientCode?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respClientRegType?: EnumClientRegTypeNullableFilter<"RFQNegotiation"> | $Enums.ClientRegType | null
+    respValue?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respQuantity?: IntNullableFilter<"RFQNegotiation"> | number | null
+    respYieldType?: EnumYieldTypeNullableFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    respYield?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respCalcMethod?: EnumCalcMethodNullableFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    respPrice?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respAccruedInterest?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respConsideration?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    respQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respGtdFlag?: EnumYesNoNullableFilter<"RFQNegotiation"> | $Enums.YesNo | null
+    respEndTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respRemarks?: StringNullableFilter<"RFQNegotiation"> | string | null
+    respLoginId?: StringNullableFilter<"RFQNegotiation"> | string | null
+    status?: EnumNegotiationStatusNullableFilter<"RFQNegotiation"> | $Enums.NegotiationStatus | null
+    tradeNumber?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedSettlementType?: IntNullableFilter<"RFQNegotiation"> | number | null
+    acceptedSettlementDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedValue?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedQuantity?: IntNullableFilter<"RFQNegotiation"> | number | null
+    acceptedYieldType?: EnumYieldTypeNullableFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    acceptedYield?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedCalcMethod?: EnumCalcMethodNullableFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    acceptedPrice?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedPutCallDate?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedAccruedInterest?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedConsideration?: FloatNullableFilter<"RFQNegotiation"> | number | null
+    acceptedQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    acceptedBySide?: EnumBySideNullableFilter<"RFQNegotiation"> | $Enums.BySide | null
+    acceptedByLoginId?: StringNullableFilter<"RFQNegotiation"> | string | null
+    confirmStatus?: EnumNegotiationConfirmationStatusNullableFilter<"RFQNegotiation"> | $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: EnumBySideNullableFilter<"RFQNegotiation"> | $Enums.BySide | null
+    proposedTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    confirmedPriceQuoteTime?: StringNullableFilter<"RFQNegotiation"> | string | null
+    lastActivityTimestamp?: StringNullableFilter<"RFQNegotiation"> | string | null
+    tradeSplits?: JsonNullableListFilter<"RFQNegotiation">
+    createdAt?: DateTimeFilter<"RFQNegotiation"> | Date | string
+    createdBy?: IntNullableFilter<"RFQNegotiation"> | number | null
+    updatedBy?: IntNullableFilter<"RFQNegotiation"> | number | null
+    updatedAt?: DateTimeFilter<"RFQNegotiation"> | Date | string
+  }, "id">
+
+  export type RFQNegotiationOrderByWithAggregationInput = {
+    rfqNumber?: SortOrder
+    id?: SortOrder
+    date?: SortOrder
+    isin?: SortOrderInput | SortOrder
+    buySell?: SortOrderInput | SortOrder
+    initSettlementType?: SortOrderInput | SortOrder
+    initSettlementDate?: SortOrderInput | SortOrder
+    initAeCode?: SortOrderInput | SortOrder
+    initDealType?: SortOrderInput | SortOrder
+    initClientCode?: SortOrderInput | SortOrder
+    initClientRegType?: SortOrderInput | SortOrder
+    initValue?: SortOrderInput | SortOrder
+    initQuantity?: SortOrderInput | SortOrder
+    initYieldType?: SortOrderInput | SortOrder
+    initYield?: SortOrderInput | SortOrder
+    initCalcMethod?: SortOrderInput | SortOrder
+    initPrice?: SortOrderInput | SortOrder
+    initAccruedInterest?: SortOrderInput | SortOrder
+    initConsideration?: SortOrderInput | SortOrder
+    initQuoteTime?: SortOrderInput | SortOrder
+    initGtdFlag?: SortOrderInput | SortOrder
+    initEndTime?: SortOrderInput | SortOrder
+    initRemarks?: SortOrderInput | SortOrder
+    initLoginId?: SortOrderInput | SortOrder
+    respSettlementType?: SortOrderInput | SortOrder
+    respSettlementDate?: SortOrderInput | SortOrder
+    respAeCode?: SortOrderInput | SortOrder
+    respDealType?: SortOrderInput | SortOrder
+    respClientCode?: SortOrderInput | SortOrder
+    respClientRegType?: SortOrderInput | SortOrder
+    respValue?: SortOrderInput | SortOrder
+    respQuantity?: SortOrderInput | SortOrder
+    respYieldType?: SortOrderInput | SortOrder
+    respYield?: SortOrderInput | SortOrder
+    respCalcMethod?: SortOrderInput | SortOrder
+    respPrice?: SortOrderInput | SortOrder
+    respAccruedInterest?: SortOrderInput | SortOrder
+    respConsideration?: SortOrderInput | SortOrder
+    respQuoteTime?: SortOrderInput | SortOrder
+    respGtdFlag?: SortOrderInput | SortOrder
+    respEndTime?: SortOrderInput | SortOrder
+    respRemarks?: SortOrderInput | SortOrder
+    respLoginId?: SortOrderInput | SortOrder
+    status?: SortOrderInput | SortOrder
+    tradeNumber?: SortOrderInput | SortOrder
+    acceptedSettlementType?: SortOrderInput | SortOrder
+    acceptedSettlementDate?: SortOrderInput | SortOrder
+    acceptedValue?: SortOrderInput | SortOrder
+    acceptedQuantity?: SortOrderInput | SortOrder
+    acceptedYieldType?: SortOrderInput | SortOrder
+    acceptedYield?: SortOrderInput | SortOrder
+    acceptedCalcMethod?: SortOrderInput | SortOrder
+    acceptedPrice?: SortOrderInput | SortOrder
+    acceptedPutCallDate?: SortOrderInput | SortOrder
+    acceptedAccruedInterest?: SortOrderInput | SortOrder
+    acceptedConsideration?: SortOrderInput | SortOrder
+    acceptedQuoteTime?: SortOrderInput | SortOrder
+    acceptedBySide?: SortOrderInput | SortOrder
+    acceptedByLoginId?: SortOrderInput | SortOrder
+    confirmStatus?: SortOrderInput | SortOrder
+    proposedBySide?: SortOrderInput | SortOrder
+    proposedTime?: SortOrderInput | SortOrder
+    confirmedPriceQuoteTime?: SortOrderInput | SortOrder
+    lastActivityTimestamp?: SortOrderInput | SortOrder
+    tradeSplits?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrderInput | SortOrder
+    updatedBy?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+    _count?: RFQNegotiationCountOrderByAggregateInput
+    _avg?: RFQNegotiationAvgOrderByAggregateInput
+    _max?: RFQNegotiationMaxOrderByAggregateInput
+    _min?: RFQNegotiationMinOrderByAggregateInput
+    _sum?: RFQNegotiationSumOrderByAggregateInput
+  }
+
+  export type RFQNegotiationScalarWhereWithAggregatesInput = {
+    AND?: RFQNegotiationScalarWhereWithAggregatesInput | RFQNegotiationScalarWhereWithAggregatesInput[]
+    OR?: RFQNegotiationScalarWhereWithAggregatesInput[]
+    NOT?: RFQNegotiationScalarWhereWithAggregatesInput | RFQNegotiationScalarWhereWithAggregatesInput[]
+    rfqNumber?: StringWithAggregatesFilter<"RFQNegotiation"> | string
+    id?: StringWithAggregatesFilter<"RFQNegotiation"> | string
+    date?: StringWithAggregatesFilter<"RFQNegotiation"> | string
+    isin?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    buySell?: EnumBuySellNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.BuySell | null
+    initSettlementType?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    initSettlementDate?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    initAeCode?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    initDealType?: EnumDealTypeNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.DealType | null
+    initClientCode?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    initClientRegType?: EnumClientRegTypeNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.ClientRegType | null
+    initValue?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    initQuantity?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    initYieldType?: EnumYieldTypeNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    initYield?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    initCalcMethod?: EnumCalcMethodNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    initPrice?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    initAccruedInterest?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    initConsideration?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    initQuoteTime?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    initGtdFlag?: EnumYesNoNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.YesNo | null
+    initEndTime?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    initRemarks?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    initLoginId?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    respSettlementType?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    respSettlementDate?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    respAeCode?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    respDealType?: EnumDealTypeNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.DealType | null
+    respClientCode?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    respClientRegType?: EnumClientRegTypeNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.ClientRegType | null
+    respValue?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    respQuantity?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    respYieldType?: EnumYieldTypeNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    respYield?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    respCalcMethod?: EnumCalcMethodNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    respPrice?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    respAccruedInterest?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    respConsideration?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    respQuoteTime?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    respGtdFlag?: EnumYesNoNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.YesNo | null
+    respEndTime?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    respRemarks?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    respLoginId?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    status?: EnumNegotiationStatusNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.NegotiationStatus | null
+    tradeNumber?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    acceptedSettlementType?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    acceptedSettlementDate?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    acceptedValue?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    acceptedQuantity?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    acceptedYieldType?: EnumYieldTypeNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.YieldType | null
+    acceptedYield?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    acceptedCalcMethod?: EnumCalcMethodNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.CalcMethod | null
+    acceptedPrice?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    acceptedPutCallDate?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    acceptedAccruedInterest?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    acceptedConsideration?: FloatNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    acceptedQuoteTime?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    acceptedBySide?: EnumBySideNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.BySide | null
+    acceptedByLoginId?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    confirmStatus?: EnumNegotiationConfirmationStatusNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: EnumBySideNullableWithAggregatesFilter<"RFQNegotiation"> | $Enums.BySide | null
+    proposedTime?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    confirmedPriceQuoteTime?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    lastActivityTimestamp?: StringNullableWithAggregatesFilter<"RFQNegotiation"> | string | null
+    tradeSplits?: JsonNullableListFilter<"RFQNegotiation">
+    createdAt?: DateTimeWithAggregatesFilter<"RFQNegotiation"> | Date | string
+    createdBy?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    updatedBy?: IntNullableWithAggregatesFilter<"RFQNegotiation"> | number | null
+    updatedAt?: DateTimeWithAggregatesFilter<"RFQNegotiation"> | Date | string
   }
 
   export type CrmAuditLogsCreateInput = {
@@ -32244,6 +36939,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sortedAt?: number
+    isConvertedDeal?: boolean | null
   }
 
   export type BondsUncheckedCreateInput = {
@@ -32279,6 +36975,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sortedAt?: number
+    isConvertedDeal?: boolean | null
   }
 
   export type BondsUpdateInput = {
@@ -32313,6 +37010,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sortedAt?: IntFieldUpdateOperationsInput | number
+    isConvertedDeal?: NullableBoolFieldUpdateOperationsInput | boolean | null
   }
 
   export type BondsUncheckedUpdateInput = {
@@ -32348,6 +37046,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sortedAt?: IntFieldUpdateOperationsInput | number
+    isConvertedDeal?: NullableBoolFieldUpdateOperationsInput | boolean | null
   }
 
   export type BondsCreateManyInput = {
@@ -32383,6 +37082,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sortedAt?: number
+    isConvertedDeal?: boolean | null
   }
 
   export type BondsUpdateManyMutationInput = {
@@ -32417,6 +37117,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sortedAt?: IntFieldUpdateOperationsInput | number
+    isConvertedDeal?: NullableBoolFieldUpdateOperationsInput | boolean | null
   }
 
   export type BondsUncheckedUpdateManyInput = {
@@ -32452,6 +37153,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sortedAt?: IntFieldUpdateOperationsInput | number
+    isConvertedDeal?: NullableBoolFieldUpdateOperationsInput | boolean | null
   }
 
   export type CRMUserDataModelCreateInput = {
@@ -34399,21 +39101,322 @@ export namespace Prisma {
     issuer?: StringFieldUpdateOperationsInput | string
   }
 
-  export type NSERfqModelCreateInput = {
+  export type SettlementOrderModelCreateInput = {
+    id: string
+    orderNumber: string
+    symbol: string
+    buyParticipantLoginId: string
+    sellParticipantLoginId: string
+    price: number
+    yieldType: $Enums.YieldTypeSort
+    yield: number
+    value: number
+    buyerRefNo?: string | null
+    sellerRefNo: string
+    buyBackofficeLoginId?: string | null
+    sellBackofficeLoginId?: string | null
+    buyBrokerLoginId: string
+    sellBrokerLoginId?: string | null
+    source: number
+    modSettleDate: string
+    modQuantity: number
+    modAccrInt?: number | null
+    modConsideration: number
+    settlementNo: string
+    stampDutyAmount: number
+    stampDutyBearer: string
+    buyerFundPayinObligation: number
+    sellerFundPayoutObligation: number
+    fundPayinRefId: string
+    settleStatus: number
+    secPayinQuantity?: number | null
+    secPayinRemarks?: string | null
+    secPayinTime?: string | null
+    fundsPayinAmount?: number | null
+    fundsPayinRemarks?: string | null
+    fundsPayinTime?: string | null
+    payoutRemarks?: string | null
+    payoutTime?: string | null
+    ifscCode: string
+    accountNo: string
+    utrNumber?: string | null
+    dpId: string
+    benId: string
+  }
+
+  export type SettlementOrderModelUncheckedCreateInput = {
+    id: string
+    orderNumber: string
+    symbol: string
+    buyParticipantLoginId: string
+    sellParticipantLoginId: string
+    price: number
+    yieldType: $Enums.YieldTypeSort
+    yield: number
+    value: number
+    buyerRefNo?: string | null
+    sellerRefNo: string
+    buyBackofficeLoginId?: string | null
+    sellBackofficeLoginId?: string | null
+    buyBrokerLoginId: string
+    sellBrokerLoginId?: string | null
+    source: number
+    modSettleDate: string
+    modQuantity: number
+    modAccrInt?: number | null
+    modConsideration: number
+    settlementNo: string
+    stampDutyAmount: number
+    stampDutyBearer: string
+    buyerFundPayinObligation: number
+    sellerFundPayoutObligation: number
+    fundPayinRefId: string
+    settleStatus: number
+    secPayinQuantity?: number | null
+    secPayinRemarks?: string | null
+    secPayinTime?: string | null
+    fundsPayinAmount?: number | null
+    fundsPayinRemarks?: string | null
+    fundsPayinTime?: string | null
+    payoutRemarks?: string | null
+    payoutTime?: string | null
+    ifscCode: string
+    accountNo: string
+    utrNumber?: string | null
+    dpId: string
+    benId: string
+  }
+
+  export type SettlementOrderModelUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNumber?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
+    yield?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
+    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: IntFieldUpdateOperationsInput | number
+    modSettleDate?: StringFieldUpdateOperationsInput | string
+    modQuantity?: IntFieldUpdateOperationsInput | number
+    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
+    modConsideration?: FloatFieldUpdateOperationsInput | number
+    settlementNo?: StringFieldUpdateOperationsInput | string
+    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
+    stampDutyBearer?: StringFieldUpdateOperationsInput | string
+    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
+    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
+    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    settleStatus?: IntFieldUpdateOperationsInput | number
+    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
+    ifscCode?: StringFieldUpdateOperationsInput | string
+    accountNo?: StringFieldUpdateOperationsInput | string
+    utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dpId?: StringFieldUpdateOperationsInput | string
+    benId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type SettlementOrderModelUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNumber?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
+    yield?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
+    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: IntFieldUpdateOperationsInput | number
+    modSettleDate?: StringFieldUpdateOperationsInput | string
+    modQuantity?: IntFieldUpdateOperationsInput | number
+    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
+    modConsideration?: FloatFieldUpdateOperationsInput | number
+    settlementNo?: StringFieldUpdateOperationsInput | string
+    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
+    stampDutyBearer?: StringFieldUpdateOperationsInput | string
+    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
+    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
+    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    settleStatus?: IntFieldUpdateOperationsInput | number
+    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
+    ifscCode?: StringFieldUpdateOperationsInput | string
+    accountNo?: StringFieldUpdateOperationsInput | string
+    utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dpId?: StringFieldUpdateOperationsInput | string
+    benId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type SettlementOrderModelCreateManyInput = {
+    id: string
+    orderNumber: string
+    symbol: string
+    buyParticipantLoginId: string
+    sellParticipantLoginId: string
+    price: number
+    yieldType: $Enums.YieldTypeSort
+    yield: number
+    value: number
+    buyerRefNo?: string | null
+    sellerRefNo: string
+    buyBackofficeLoginId?: string | null
+    sellBackofficeLoginId?: string | null
+    buyBrokerLoginId: string
+    sellBrokerLoginId?: string | null
+    source: number
+    modSettleDate: string
+    modQuantity: number
+    modAccrInt?: number | null
+    modConsideration: number
+    settlementNo: string
+    stampDutyAmount: number
+    stampDutyBearer: string
+    buyerFundPayinObligation: number
+    sellerFundPayoutObligation: number
+    fundPayinRefId: string
+    settleStatus: number
+    secPayinQuantity?: number | null
+    secPayinRemarks?: string | null
+    secPayinTime?: string | null
+    fundsPayinAmount?: number | null
+    fundsPayinRemarks?: string | null
+    fundsPayinTime?: string | null
+    payoutRemarks?: string | null
+    payoutTime?: string | null
+    ifscCode: string
+    accountNo: string
+    utrNumber?: string | null
+    dpId: string
+    benId: string
+  }
+
+  export type SettlementOrderModelUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNumber?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
+    yield?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
+    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: IntFieldUpdateOperationsInput | number
+    modSettleDate?: StringFieldUpdateOperationsInput | string
+    modQuantity?: IntFieldUpdateOperationsInput | number
+    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
+    modConsideration?: FloatFieldUpdateOperationsInput | number
+    settlementNo?: StringFieldUpdateOperationsInput | string
+    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
+    stampDutyBearer?: StringFieldUpdateOperationsInput | string
+    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
+    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
+    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    settleStatus?: IntFieldUpdateOperationsInput | number
+    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
+    ifscCode?: StringFieldUpdateOperationsInput | string
+    accountNo?: StringFieldUpdateOperationsInput | string
+    utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dpId?: StringFieldUpdateOperationsInput | string
+    benId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type SettlementOrderModelUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNumber?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
+    yield?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
+    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: IntFieldUpdateOperationsInput | number
+    modSettleDate?: StringFieldUpdateOperationsInput | string
+    modQuantity?: IntFieldUpdateOperationsInput | number
+    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
+    modConsideration?: FloatFieldUpdateOperationsInput | number
+    settlementNo?: StringFieldUpdateOperationsInput | string
+    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
+    stampDutyBearer?: StringFieldUpdateOperationsInput | string
+    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
+    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
+    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    settleStatus?: IntFieldUpdateOperationsInput | number
+    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
+    ifscCode?: StringFieldUpdateOperationsInput | string
+    accountNo?: StringFieldUpdateOperationsInput | string
+    utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dpId?: StringFieldUpdateOperationsInput | string
+    benId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type RFQMasterISINCreateInput = {
     number: string
-    segment: string
+    segment: $Enums.RFQSegment
     isin: string
-    date: string
     participantCode: string
     dealType: $Enums.DealType
     clientCode: string
+    clientRegType: $Enums.ClientRegType
     buySell: $Enums.BuySell
     quoteType: $Enums.QuoteType
     settlementType: number
     value: number
     quantity?: number | null
     yieldType: $Enums.YieldType
-    yield: number
+    yield?: number | null
     calcMethod: $Enums.CalcMethod
     price?: number | null
     valueSell?: number | null
@@ -34422,43 +39425,48 @@ export namespace Prisma {
     yieldSell?: number | null
     calcMethodSell?: $Enums.CalcMethod | null
     priceSell?: number | null
-    gtdFlag?: string | null
+    gtdFlag?: $Enums.YesNo | null
     endTime?: string | null
-    quoteNegotiable?: string | null
-    valueNegotiable?: string | null
+    quoteNegotiable?: $Enums.YesNo | null
+    valueNegotiable?: $Enums.YesNo | null
     minFillValue?: number | null
     valueStepSize?: number | null
-    anonymous?: string | null
+    anonymous?: $Enums.YesNo | null
     access: number
-    groupList?: NSERfqModelCreategroupListInput | number[]
-    participantList?: NSERfqModelCreateparticipantListInput | string[]
+    groupList?: RFQMasterISINCreategroupListInput | number[]
+    participantList?: RFQMasterISINCreateparticipantListInput | string[]
     category?: string | null
     rating?: string | null
     remarks?: string | null
-    status: $Enums.RFQStatus
-    userLogin: string
-    tradedValue: number
-    confirmedValue: number
-    clientRegType: string
-    quoteTime: string
+    date?: string | null
+    quoteTime?: string | null
+    settlementDate?: string | null
+    status?: $Enums.Status
+    userLogin?: string | null
+    tradedValue?: number | null
+    confirmedValue?: number | null
+    createdAt?: Date | string
+    createdBy?: number | null
+    updatedBy?: number | null
+    updatedAt?: Date | string
   }
 
-  export type NSERfqModelUncheckedCreateInput = {
-    key?: number
+  export type RFQMasterISINUncheckedCreateInput = {
+    id?: number
     number: string
-    segment: string
+    segment: $Enums.RFQSegment
     isin: string
-    date: string
     participantCode: string
     dealType: $Enums.DealType
     clientCode: string
+    clientRegType: $Enums.ClientRegType
     buySell: $Enums.BuySell
     quoteType: $Enums.QuoteType
     settlementType: number
     value: number
     quantity?: number | null
     yieldType: $Enums.YieldType
-    yield: number
+    yield?: number | null
     calcMethod: $Enums.CalcMethod
     price?: number | null
     valueSell?: number | null
@@ -34467,42 +39475,47 @@ export namespace Prisma {
     yieldSell?: number | null
     calcMethodSell?: $Enums.CalcMethod | null
     priceSell?: number | null
-    gtdFlag?: string | null
+    gtdFlag?: $Enums.YesNo | null
     endTime?: string | null
-    quoteNegotiable?: string | null
-    valueNegotiable?: string | null
+    quoteNegotiable?: $Enums.YesNo | null
+    valueNegotiable?: $Enums.YesNo | null
     minFillValue?: number | null
     valueStepSize?: number | null
-    anonymous?: string | null
+    anonymous?: $Enums.YesNo | null
     access: number
-    groupList?: NSERfqModelCreategroupListInput | number[]
-    participantList?: NSERfqModelCreateparticipantListInput | string[]
+    groupList?: RFQMasterISINCreategroupListInput | number[]
+    participantList?: RFQMasterISINCreateparticipantListInput | string[]
     category?: string | null
     rating?: string | null
     remarks?: string | null
-    status: $Enums.RFQStatus
-    userLogin: string
-    tradedValue: number
-    confirmedValue: number
-    clientRegType: string
-    quoteTime: string
+    date?: string | null
+    quoteTime?: string | null
+    settlementDate?: string | null
+    status?: $Enums.Status
+    userLogin?: string | null
+    tradedValue?: number | null
+    confirmedValue?: number | null
+    createdAt?: Date | string
+    createdBy?: number | null
+    updatedBy?: number | null
+    updatedAt?: Date | string
   }
 
-  export type NSERfqModelUpdateInput = {
+  export type RFQMasterISINUpdateInput = {
     number?: StringFieldUpdateOperationsInput | string
-    segment?: StringFieldUpdateOperationsInput | string
+    segment?: EnumRFQSegmentFieldUpdateOperationsInput | $Enums.RFQSegment
     isin?: StringFieldUpdateOperationsInput | string
-    date?: StringFieldUpdateOperationsInput | string
     participantCode?: StringFieldUpdateOperationsInput | string
     dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
     clientCode?: StringFieldUpdateOperationsInput | string
+    clientRegType?: EnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType
     buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
     quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
     settlementType?: IntFieldUpdateOperationsInput | number
     value?: FloatFieldUpdateOperationsInput | number
     quantity?: NullableIntFieldUpdateOperationsInput | number | null
     yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
-    yield?: FloatFieldUpdateOperationsInput | number
+    yield?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -34511,43 +39524,48 @@ export namespace Prisma {
     yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
     priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
-    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    gtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     endTime?: NullableStringFieldUpdateOperationsInput | string | null
-    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
-    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    valueNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
     valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
-    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    anonymous?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     access?: IntFieldUpdateOperationsInput | number
-    groupList?: NSERfqModelUpdategroupListInput | number[]
-    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    groupList?: RFQMasterISINUpdategroupListInput | number[]
+    participantList?: RFQMasterISINUpdateparticipantListInput | string[]
     category?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: NullableStringFieldUpdateOperationsInput | string | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
-    userLogin?: StringFieldUpdateOperationsInput | string
-    tradedValue?: FloatFieldUpdateOperationsInput | number
-    confirmedValue?: FloatFieldUpdateOperationsInput | number
-    clientRegType?: StringFieldUpdateOperationsInput | string
-    quoteTime?: StringFieldUpdateOperationsInput | string
+    date?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    settlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    userLogin?: NullableStringFieldUpdateOperationsInput | string | null
+    tradedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    confirmedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type NSERfqModelUncheckedUpdateInput = {
-    key?: IntFieldUpdateOperationsInput | number
+  export type RFQMasterISINUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
     number?: StringFieldUpdateOperationsInput | string
-    segment?: StringFieldUpdateOperationsInput | string
+    segment?: EnumRFQSegmentFieldUpdateOperationsInput | $Enums.RFQSegment
     isin?: StringFieldUpdateOperationsInput | string
-    date?: StringFieldUpdateOperationsInput | string
     participantCode?: StringFieldUpdateOperationsInput | string
     dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
     clientCode?: StringFieldUpdateOperationsInput | string
+    clientRegType?: EnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType
     buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
     quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
     settlementType?: IntFieldUpdateOperationsInput | number
     value?: FloatFieldUpdateOperationsInput | number
     quantity?: NullableIntFieldUpdateOperationsInput | number | null
     yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
-    yield?: FloatFieldUpdateOperationsInput | number
+    yield?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -34556,43 +39574,48 @@ export namespace Prisma {
     yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
     priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
-    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    gtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     endTime?: NullableStringFieldUpdateOperationsInput | string | null
-    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
-    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    valueNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
     valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
-    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    anonymous?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     access?: IntFieldUpdateOperationsInput | number
-    groupList?: NSERfqModelUpdategroupListInput | number[]
-    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    groupList?: RFQMasterISINUpdategroupListInput | number[]
+    participantList?: RFQMasterISINUpdateparticipantListInput | string[]
     category?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: NullableStringFieldUpdateOperationsInput | string | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
-    userLogin?: StringFieldUpdateOperationsInput | string
-    tradedValue?: FloatFieldUpdateOperationsInput | number
-    confirmedValue?: FloatFieldUpdateOperationsInput | number
-    clientRegType?: StringFieldUpdateOperationsInput | string
-    quoteTime?: StringFieldUpdateOperationsInput | string
+    date?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    settlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    userLogin?: NullableStringFieldUpdateOperationsInput | string | null
+    tradedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    confirmedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type NSERfqModelCreateManyInput = {
-    key?: number
+  export type RFQMasterISINCreateManyInput = {
+    id?: number
     number: string
-    segment: string
+    segment: $Enums.RFQSegment
     isin: string
-    date: string
     participantCode: string
     dealType: $Enums.DealType
     clientCode: string
+    clientRegType: $Enums.ClientRegType
     buySell: $Enums.BuySell
     quoteType: $Enums.QuoteType
     settlementType: number
     value: number
     quantity?: number | null
     yieldType: $Enums.YieldType
-    yield: number
+    yield?: number | null
     calcMethod: $Enums.CalcMethod
     price?: number | null
     valueSell?: number | null
@@ -34601,42 +39624,47 @@ export namespace Prisma {
     yieldSell?: number | null
     calcMethodSell?: $Enums.CalcMethod | null
     priceSell?: number | null
-    gtdFlag?: string | null
+    gtdFlag?: $Enums.YesNo | null
     endTime?: string | null
-    quoteNegotiable?: string | null
-    valueNegotiable?: string | null
+    quoteNegotiable?: $Enums.YesNo | null
+    valueNegotiable?: $Enums.YesNo | null
     minFillValue?: number | null
     valueStepSize?: number | null
-    anonymous?: string | null
+    anonymous?: $Enums.YesNo | null
     access: number
-    groupList?: NSERfqModelCreategroupListInput | number[]
-    participantList?: NSERfqModelCreateparticipantListInput | string[]
+    groupList?: RFQMasterISINCreategroupListInput | number[]
+    participantList?: RFQMasterISINCreateparticipantListInput | string[]
     category?: string | null
     rating?: string | null
     remarks?: string | null
-    status: $Enums.RFQStatus
-    userLogin: string
-    tradedValue: number
-    confirmedValue: number
-    clientRegType: string
-    quoteTime: string
+    date?: string | null
+    quoteTime?: string | null
+    settlementDate?: string | null
+    status?: $Enums.Status
+    userLogin?: string | null
+    tradedValue?: number | null
+    confirmedValue?: number | null
+    createdAt?: Date | string
+    createdBy?: number | null
+    updatedBy?: number | null
+    updatedAt?: Date | string
   }
 
-  export type NSERfqModelUpdateManyMutationInput = {
+  export type RFQMasterISINUpdateManyMutationInput = {
     number?: StringFieldUpdateOperationsInput | string
-    segment?: StringFieldUpdateOperationsInput | string
+    segment?: EnumRFQSegmentFieldUpdateOperationsInput | $Enums.RFQSegment
     isin?: StringFieldUpdateOperationsInput | string
-    date?: StringFieldUpdateOperationsInput | string
     participantCode?: StringFieldUpdateOperationsInput | string
     dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
     clientCode?: StringFieldUpdateOperationsInput | string
+    clientRegType?: EnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType
     buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
     quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
     settlementType?: IntFieldUpdateOperationsInput | number
     value?: FloatFieldUpdateOperationsInput | number
     quantity?: NullableIntFieldUpdateOperationsInput | number | null
     yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
-    yield?: FloatFieldUpdateOperationsInput | number
+    yield?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -34645,43 +39673,48 @@ export namespace Prisma {
     yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
     priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
-    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    gtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     endTime?: NullableStringFieldUpdateOperationsInput | string | null
-    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
-    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    valueNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
     valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
-    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    anonymous?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     access?: IntFieldUpdateOperationsInput | number
-    groupList?: NSERfqModelUpdategroupListInput | number[]
-    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    groupList?: RFQMasterISINUpdategroupListInput | number[]
+    participantList?: RFQMasterISINUpdateparticipantListInput | string[]
     category?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: NullableStringFieldUpdateOperationsInput | string | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
-    userLogin?: StringFieldUpdateOperationsInput | string
-    tradedValue?: FloatFieldUpdateOperationsInput | number
-    confirmedValue?: FloatFieldUpdateOperationsInput | number
-    clientRegType?: StringFieldUpdateOperationsInput | string
-    quoteTime?: StringFieldUpdateOperationsInput | string
+    date?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    settlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    userLogin?: NullableStringFieldUpdateOperationsInput | string | null
+    tradedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    confirmedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type NSERfqModelUncheckedUpdateManyInput = {
-    key?: IntFieldUpdateOperationsInput | number
+  export type RFQMasterISINUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
     number?: StringFieldUpdateOperationsInput | string
-    segment?: StringFieldUpdateOperationsInput | string
+    segment?: EnumRFQSegmentFieldUpdateOperationsInput | $Enums.RFQSegment
     isin?: StringFieldUpdateOperationsInput | string
-    date?: StringFieldUpdateOperationsInput | string
     participantCode?: StringFieldUpdateOperationsInput | string
     dealType?: EnumDealTypeFieldUpdateOperationsInput | $Enums.DealType
     clientCode?: StringFieldUpdateOperationsInput | string
+    clientRegType?: EnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType
     buySell?: EnumBuySellFieldUpdateOperationsInput | $Enums.BuySell
     quoteType?: EnumQuoteTypeFieldUpdateOperationsInput | $Enums.QuoteType
     settlementType?: IntFieldUpdateOperationsInput | number
     value?: FloatFieldUpdateOperationsInput | number
     quantity?: NullableIntFieldUpdateOperationsInput | number | null
     yieldType?: EnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType
-    yield?: FloatFieldUpdateOperationsInput | number
+    yield?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethod?: EnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     valueSell?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -34690,25 +39723,534 @@ export namespace Prisma {
     yieldSell?: NullableFloatFieldUpdateOperationsInput | number | null
     calcMethodSell?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
     priceSell?: NullableFloatFieldUpdateOperationsInput | number | null
-    gtdFlag?: NullableStringFieldUpdateOperationsInput | string | null
+    gtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     endTime?: NullableStringFieldUpdateOperationsInput | string | null
-    quoteNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
-    valueNegotiable?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    valueNegotiable?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     minFillValue?: NullableFloatFieldUpdateOperationsInput | number | null
     valueStepSize?: NullableFloatFieldUpdateOperationsInput | number | null
-    anonymous?: NullableStringFieldUpdateOperationsInput | string | null
+    anonymous?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
     access?: IntFieldUpdateOperationsInput | number
-    groupList?: NSERfqModelUpdategroupListInput | number[]
-    participantList?: NSERfqModelUpdateparticipantListInput | string[]
+    groupList?: RFQMasterISINUpdategroupListInput | number[]
+    participantList?: RFQMasterISINUpdateparticipantListInput | string[]
     category?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: NullableStringFieldUpdateOperationsInput | string | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRFQStatusFieldUpdateOperationsInput | $Enums.RFQStatus
-    userLogin?: StringFieldUpdateOperationsInput | string
-    tradedValue?: FloatFieldUpdateOperationsInput | number
-    confirmedValue?: FloatFieldUpdateOperationsInput | number
-    clientRegType?: StringFieldUpdateOperationsInput | string
-    quoteTime?: StringFieldUpdateOperationsInput | string
+    date?: NullableStringFieldUpdateOperationsInput | string | null
+    quoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    settlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    userLogin?: NullableStringFieldUpdateOperationsInput | string | null
+    tradedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    confirmedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RFQNegotiationCreateInput = {
+    rfqNumber: string
+    id: string
+    date: string
+    isin?: string | null
+    buySell?: $Enums.BuySell | null
+    initSettlementType?: number | null
+    initSettlementDate?: string | null
+    initAeCode?: string | null
+    initDealType?: $Enums.DealType | null
+    initClientCode?: string | null
+    initClientRegType?: $Enums.ClientRegType | null
+    initValue?: number | null
+    initQuantity?: number | null
+    initYieldType?: $Enums.YieldType | null
+    initYield?: number | null
+    initCalcMethod?: $Enums.CalcMethod | null
+    initPrice?: number | null
+    initAccruedInterest?: number | null
+    initConsideration?: number | null
+    initQuoteTime?: string | null
+    initGtdFlag?: $Enums.YesNo | null
+    initEndTime?: string | null
+    initRemarks?: string | null
+    initLoginId?: string | null
+    respSettlementType?: number | null
+    respSettlementDate?: string | null
+    respAeCode?: string | null
+    respDealType?: $Enums.DealType | null
+    respClientCode?: string | null
+    respClientRegType?: $Enums.ClientRegType | null
+    respValue?: number | null
+    respQuantity?: number | null
+    respYieldType?: $Enums.YieldType | null
+    respYield?: number | null
+    respCalcMethod?: $Enums.CalcMethod | null
+    respPrice?: number | null
+    respAccruedInterest?: number | null
+    respConsideration?: number | null
+    respQuoteTime?: string | null
+    respGtdFlag?: $Enums.YesNo | null
+    respEndTime?: string | null
+    respRemarks?: string | null
+    respLoginId?: string | null
+    status?: $Enums.NegotiationStatus | null
+    tradeNumber?: string | null
+    acceptedSettlementType?: number | null
+    acceptedSettlementDate?: string | null
+    acceptedValue?: number | null
+    acceptedQuantity?: number | null
+    acceptedYieldType?: $Enums.YieldType | null
+    acceptedYield?: number | null
+    acceptedCalcMethod?: $Enums.CalcMethod | null
+    acceptedPrice?: number | null
+    acceptedPutCallDate?: string | null
+    acceptedAccruedInterest?: number | null
+    acceptedConsideration?: number | null
+    acceptedQuoteTime?: string | null
+    acceptedBySide?: $Enums.BySide | null
+    acceptedByLoginId?: string | null
+    confirmStatus?: $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: $Enums.BySide | null
+    proposedTime?: string | null
+    confirmedPriceQuoteTime?: string | null
+    lastActivityTimestamp?: string | null
+    tradeSplits?: RFQNegotiationCreatetradeSplitsInput | InputJsonValue[]
+    createdAt?: Date | string
+    createdBy?: number | null
+    updatedBy?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type RFQNegotiationUncheckedCreateInput = {
+    rfqNumber: string
+    id: string
+    date: string
+    isin?: string | null
+    buySell?: $Enums.BuySell | null
+    initSettlementType?: number | null
+    initSettlementDate?: string | null
+    initAeCode?: string | null
+    initDealType?: $Enums.DealType | null
+    initClientCode?: string | null
+    initClientRegType?: $Enums.ClientRegType | null
+    initValue?: number | null
+    initQuantity?: number | null
+    initYieldType?: $Enums.YieldType | null
+    initYield?: number | null
+    initCalcMethod?: $Enums.CalcMethod | null
+    initPrice?: number | null
+    initAccruedInterest?: number | null
+    initConsideration?: number | null
+    initQuoteTime?: string | null
+    initGtdFlag?: $Enums.YesNo | null
+    initEndTime?: string | null
+    initRemarks?: string | null
+    initLoginId?: string | null
+    respSettlementType?: number | null
+    respSettlementDate?: string | null
+    respAeCode?: string | null
+    respDealType?: $Enums.DealType | null
+    respClientCode?: string | null
+    respClientRegType?: $Enums.ClientRegType | null
+    respValue?: number | null
+    respQuantity?: number | null
+    respYieldType?: $Enums.YieldType | null
+    respYield?: number | null
+    respCalcMethod?: $Enums.CalcMethod | null
+    respPrice?: number | null
+    respAccruedInterest?: number | null
+    respConsideration?: number | null
+    respQuoteTime?: string | null
+    respGtdFlag?: $Enums.YesNo | null
+    respEndTime?: string | null
+    respRemarks?: string | null
+    respLoginId?: string | null
+    status?: $Enums.NegotiationStatus | null
+    tradeNumber?: string | null
+    acceptedSettlementType?: number | null
+    acceptedSettlementDate?: string | null
+    acceptedValue?: number | null
+    acceptedQuantity?: number | null
+    acceptedYieldType?: $Enums.YieldType | null
+    acceptedYield?: number | null
+    acceptedCalcMethod?: $Enums.CalcMethod | null
+    acceptedPrice?: number | null
+    acceptedPutCallDate?: string | null
+    acceptedAccruedInterest?: number | null
+    acceptedConsideration?: number | null
+    acceptedQuoteTime?: string | null
+    acceptedBySide?: $Enums.BySide | null
+    acceptedByLoginId?: string | null
+    confirmStatus?: $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: $Enums.BySide | null
+    proposedTime?: string | null
+    confirmedPriceQuoteTime?: string | null
+    lastActivityTimestamp?: string | null
+    tradeSplits?: RFQNegotiationCreatetradeSplitsInput | InputJsonValue[]
+    createdAt?: Date | string
+    createdBy?: number | null
+    updatedBy?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type RFQNegotiationUpdateInput = {
+    rfqNumber?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    isin?: NullableStringFieldUpdateOperationsInput | string | null
+    buySell?: NullableEnumBuySellFieldUpdateOperationsInput | $Enums.BuySell | null
+    initSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    initSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    initAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    initClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    initValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    initYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    initYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    initCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    initPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    initAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    initConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    initEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    initLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    respSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    respSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    respAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    respClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    respValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    respYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    respYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    respCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    respPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    respAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    respConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    respEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    respLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableEnumNegotiationStatusFieldUpdateOperationsInput | $Enums.NegotiationStatus | null
+    tradeNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    acceptedYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    acceptedPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedPutCallDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    acceptedByLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmStatus?: NullableEnumNegotiationConfirmationStatusFieldUpdateOperationsInput | $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    proposedTime?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedPriceQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    lastActivityTimestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    tradeSplits?: RFQNegotiationUpdatetradeSplitsInput | InputJsonValue[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RFQNegotiationUncheckedUpdateInput = {
+    rfqNumber?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    isin?: NullableStringFieldUpdateOperationsInput | string | null
+    buySell?: NullableEnumBuySellFieldUpdateOperationsInput | $Enums.BuySell | null
+    initSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    initSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    initAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    initClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    initValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    initYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    initYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    initCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    initPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    initAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    initConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    initEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    initLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    respSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    respSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    respAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    respClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    respValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    respYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    respYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    respCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    respPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    respAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    respConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    respEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    respLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableEnumNegotiationStatusFieldUpdateOperationsInput | $Enums.NegotiationStatus | null
+    tradeNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    acceptedYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    acceptedPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedPutCallDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    acceptedByLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmStatus?: NullableEnumNegotiationConfirmationStatusFieldUpdateOperationsInput | $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    proposedTime?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedPriceQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    lastActivityTimestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    tradeSplits?: RFQNegotiationUpdatetradeSplitsInput | InputJsonValue[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RFQNegotiationCreateManyInput = {
+    rfqNumber: string
+    id: string
+    date: string
+    isin?: string | null
+    buySell?: $Enums.BuySell | null
+    initSettlementType?: number | null
+    initSettlementDate?: string | null
+    initAeCode?: string | null
+    initDealType?: $Enums.DealType | null
+    initClientCode?: string | null
+    initClientRegType?: $Enums.ClientRegType | null
+    initValue?: number | null
+    initQuantity?: number | null
+    initYieldType?: $Enums.YieldType | null
+    initYield?: number | null
+    initCalcMethod?: $Enums.CalcMethod | null
+    initPrice?: number | null
+    initAccruedInterest?: number | null
+    initConsideration?: number | null
+    initQuoteTime?: string | null
+    initGtdFlag?: $Enums.YesNo | null
+    initEndTime?: string | null
+    initRemarks?: string | null
+    initLoginId?: string | null
+    respSettlementType?: number | null
+    respSettlementDate?: string | null
+    respAeCode?: string | null
+    respDealType?: $Enums.DealType | null
+    respClientCode?: string | null
+    respClientRegType?: $Enums.ClientRegType | null
+    respValue?: number | null
+    respQuantity?: number | null
+    respYieldType?: $Enums.YieldType | null
+    respYield?: number | null
+    respCalcMethod?: $Enums.CalcMethod | null
+    respPrice?: number | null
+    respAccruedInterest?: number | null
+    respConsideration?: number | null
+    respQuoteTime?: string | null
+    respGtdFlag?: $Enums.YesNo | null
+    respEndTime?: string | null
+    respRemarks?: string | null
+    respLoginId?: string | null
+    status?: $Enums.NegotiationStatus | null
+    tradeNumber?: string | null
+    acceptedSettlementType?: number | null
+    acceptedSettlementDate?: string | null
+    acceptedValue?: number | null
+    acceptedQuantity?: number | null
+    acceptedYieldType?: $Enums.YieldType | null
+    acceptedYield?: number | null
+    acceptedCalcMethod?: $Enums.CalcMethod | null
+    acceptedPrice?: number | null
+    acceptedPutCallDate?: string | null
+    acceptedAccruedInterest?: number | null
+    acceptedConsideration?: number | null
+    acceptedQuoteTime?: string | null
+    acceptedBySide?: $Enums.BySide | null
+    acceptedByLoginId?: string | null
+    confirmStatus?: $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: $Enums.BySide | null
+    proposedTime?: string | null
+    confirmedPriceQuoteTime?: string | null
+    lastActivityTimestamp?: string | null
+    tradeSplits?: RFQNegotiationCreatetradeSplitsInput | InputJsonValue[]
+    createdAt?: Date | string
+    createdBy?: number | null
+    updatedBy?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type RFQNegotiationUpdateManyMutationInput = {
+    rfqNumber?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    isin?: NullableStringFieldUpdateOperationsInput | string | null
+    buySell?: NullableEnumBuySellFieldUpdateOperationsInput | $Enums.BuySell | null
+    initSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    initSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    initAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    initClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    initValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    initYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    initYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    initCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    initPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    initAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    initConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    initEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    initLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    respSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    respSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    respAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    respClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    respValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    respYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    respYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    respCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    respPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    respAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    respConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    respEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    respLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableEnumNegotiationStatusFieldUpdateOperationsInput | $Enums.NegotiationStatus | null
+    tradeNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    acceptedYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    acceptedPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedPutCallDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    acceptedByLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmStatus?: NullableEnumNegotiationConfirmationStatusFieldUpdateOperationsInput | $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    proposedTime?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedPriceQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    lastActivityTimestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    tradeSplits?: RFQNegotiationUpdatetradeSplitsInput | InputJsonValue[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RFQNegotiationUncheckedUpdateManyInput = {
+    rfqNumber?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
+    date?: StringFieldUpdateOperationsInput | string
+    isin?: NullableStringFieldUpdateOperationsInput | string | null
+    buySell?: NullableEnumBuySellFieldUpdateOperationsInput | $Enums.BuySell | null
+    initSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    initSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    initAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    initClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    initClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    initValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    initYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    initYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    initCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    initPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    initAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    initConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    initQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    initEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    initRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    initLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    respSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    respSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    respAeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respDealType?: NullableEnumDealTypeFieldUpdateOperationsInput | $Enums.DealType | null
+    respClientCode?: NullableStringFieldUpdateOperationsInput | string | null
+    respClientRegType?: NullableEnumClientRegTypeFieldUpdateOperationsInput | $Enums.ClientRegType | null
+    respValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    respYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    respYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    respCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    respPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    respAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    respConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    respQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respGtdFlag?: NullableEnumYesNoFieldUpdateOperationsInput | $Enums.YesNo | null
+    respEndTime?: NullableStringFieldUpdateOperationsInput | string | null
+    respRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    respLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableEnumNegotiationStatusFieldUpdateOperationsInput | $Enums.NegotiationStatus | null
+    tradeNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedSettlementType?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedSettlementDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    acceptedYieldType?: NullableEnumYieldTypeFieldUpdateOperationsInput | $Enums.YieldType | null
+    acceptedYield?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedCalcMethod?: NullableEnumCalcMethodFieldUpdateOperationsInput | $Enums.CalcMethod | null
+    acceptedPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedPutCallDate?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedAccruedInterest?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedConsideration?: NullableFloatFieldUpdateOperationsInput | number | null
+    acceptedQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    acceptedByLoginId?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmStatus?: NullableEnumNegotiationConfirmationStatusFieldUpdateOperationsInput | $Enums.NegotiationConfirmationStatus | null
+    proposedBySide?: NullableEnumBySideFieldUpdateOperationsInput | $Enums.BySide | null
+    proposedTime?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedPriceQuoteTime?: NullableStringFieldUpdateOperationsInput | string | null
+    lastActivityTimestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    tradeSplits?: RFQNegotiationUpdatetradeSplitsInput | InputJsonValue[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -35010,6 +40552,11 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type BondsCountOrderByAggregateInput = {
     id?: SortOrder
     isin?: SortOrder
@@ -35043,6 +40590,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sortedAt?: SortOrder
+    isConvertedDeal?: SortOrder
   }
 
   export type BondsAvgOrderByAggregateInput = {
@@ -35086,6 +40634,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sortedAt?: SortOrder
+    isConvertedDeal?: SortOrder
   }
 
   export type BondsMinOrderByAggregateInput = {
@@ -35120,6 +40669,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sortedAt?: SortOrder
+    isConvertedDeal?: SortOrder
   }
 
   export type BondsSumOrderByAggregateInput = {
@@ -35205,6 +40755,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type EnumCrmUserROLEFilter<$PrismaModel = never> = {
@@ -36673,11 +42231,203 @@ export namespace Prisma {
     faceValue?: SortOrder
   }
 
+  export type EnumYieldTypeSortFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldTypeSort | EnumYieldTypeSortFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeSortFilter<$PrismaModel> | $Enums.YieldTypeSort
+  }
+
+  export type SettlementOrderModelCountOrderByAggregateInput = {
+    id?: SortOrder
+    orderNumber?: SortOrder
+    symbol?: SortOrder
+    buyParticipantLoginId?: SortOrder
+    sellParticipantLoginId?: SortOrder
+    price?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    value?: SortOrder
+    buyerRefNo?: SortOrder
+    sellerRefNo?: SortOrder
+    buyBackofficeLoginId?: SortOrder
+    sellBackofficeLoginId?: SortOrder
+    buyBrokerLoginId?: SortOrder
+    sellBrokerLoginId?: SortOrder
+    source?: SortOrder
+    modSettleDate?: SortOrder
+    modQuantity?: SortOrder
+    modAccrInt?: SortOrder
+    modConsideration?: SortOrder
+    settlementNo?: SortOrder
+    stampDutyAmount?: SortOrder
+    stampDutyBearer?: SortOrder
+    buyerFundPayinObligation?: SortOrder
+    sellerFundPayoutObligation?: SortOrder
+    fundPayinRefId?: SortOrder
+    settleStatus?: SortOrder
+    secPayinQuantity?: SortOrder
+    secPayinRemarks?: SortOrder
+    secPayinTime?: SortOrder
+    fundsPayinAmount?: SortOrder
+    fundsPayinRemarks?: SortOrder
+    fundsPayinTime?: SortOrder
+    payoutRemarks?: SortOrder
+    payoutTime?: SortOrder
+    ifscCode?: SortOrder
+    accountNo?: SortOrder
+    utrNumber?: SortOrder
+    dpId?: SortOrder
+    benId?: SortOrder
+  }
+
+  export type SettlementOrderModelAvgOrderByAggregateInput = {
+    price?: SortOrder
+    yield?: SortOrder
+    value?: SortOrder
+    source?: SortOrder
+    modQuantity?: SortOrder
+    modAccrInt?: SortOrder
+    modConsideration?: SortOrder
+    stampDutyAmount?: SortOrder
+    buyerFundPayinObligation?: SortOrder
+    sellerFundPayoutObligation?: SortOrder
+    settleStatus?: SortOrder
+    secPayinQuantity?: SortOrder
+    fundsPayinAmount?: SortOrder
+  }
+
+  export type SettlementOrderModelMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orderNumber?: SortOrder
+    symbol?: SortOrder
+    buyParticipantLoginId?: SortOrder
+    sellParticipantLoginId?: SortOrder
+    price?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    value?: SortOrder
+    buyerRefNo?: SortOrder
+    sellerRefNo?: SortOrder
+    buyBackofficeLoginId?: SortOrder
+    sellBackofficeLoginId?: SortOrder
+    buyBrokerLoginId?: SortOrder
+    sellBrokerLoginId?: SortOrder
+    source?: SortOrder
+    modSettleDate?: SortOrder
+    modQuantity?: SortOrder
+    modAccrInt?: SortOrder
+    modConsideration?: SortOrder
+    settlementNo?: SortOrder
+    stampDutyAmount?: SortOrder
+    stampDutyBearer?: SortOrder
+    buyerFundPayinObligation?: SortOrder
+    sellerFundPayoutObligation?: SortOrder
+    fundPayinRefId?: SortOrder
+    settleStatus?: SortOrder
+    secPayinQuantity?: SortOrder
+    secPayinRemarks?: SortOrder
+    secPayinTime?: SortOrder
+    fundsPayinAmount?: SortOrder
+    fundsPayinRemarks?: SortOrder
+    fundsPayinTime?: SortOrder
+    payoutRemarks?: SortOrder
+    payoutTime?: SortOrder
+    ifscCode?: SortOrder
+    accountNo?: SortOrder
+    utrNumber?: SortOrder
+    dpId?: SortOrder
+    benId?: SortOrder
+  }
+
+  export type SettlementOrderModelMinOrderByAggregateInput = {
+    id?: SortOrder
+    orderNumber?: SortOrder
+    symbol?: SortOrder
+    buyParticipantLoginId?: SortOrder
+    sellParticipantLoginId?: SortOrder
+    price?: SortOrder
+    yieldType?: SortOrder
+    yield?: SortOrder
+    value?: SortOrder
+    buyerRefNo?: SortOrder
+    sellerRefNo?: SortOrder
+    buyBackofficeLoginId?: SortOrder
+    sellBackofficeLoginId?: SortOrder
+    buyBrokerLoginId?: SortOrder
+    sellBrokerLoginId?: SortOrder
+    source?: SortOrder
+    modSettleDate?: SortOrder
+    modQuantity?: SortOrder
+    modAccrInt?: SortOrder
+    modConsideration?: SortOrder
+    settlementNo?: SortOrder
+    stampDutyAmount?: SortOrder
+    stampDutyBearer?: SortOrder
+    buyerFundPayinObligation?: SortOrder
+    sellerFundPayoutObligation?: SortOrder
+    fundPayinRefId?: SortOrder
+    settleStatus?: SortOrder
+    secPayinQuantity?: SortOrder
+    secPayinRemarks?: SortOrder
+    secPayinTime?: SortOrder
+    fundsPayinAmount?: SortOrder
+    fundsPayinRemarks?: SortOrder
+    fundsPayinTime?: SortOrder
+    payoutRemarks?: SortOrder
+    payoutTime?: SortOrder
+    ifscCode?: SortOrder
+    accountNo?: SortOrder
+    utrNumber?: SortOrder
+    dpId?: SortOrder
+    benId?: SortOrder
+  }
+
+  export type SettlementOrderModelSumOrderByAggregateInput = {
+    price?: SortOrder
+    yield?: SortOrder
+    value?: SortOrder
+    source?: SortOrder
+    modQuantity?: SortOrder
+    modAccrInt?: SortOrder
+    modConsideration?: SortOrder
+    stampDutyAmount?: SortOrder
+    buyerFundPayinObligation?: SortOrder
+    sellerFundPayoutObligation?: SortOrder
+    settleStatus?: SortOrder
+    secPayinQuantity?: SortOrder
+    fundsPayinAmount?: SortOrder
+  }
+
+  export type EnumYieldTypeSortWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldTypeSort | EnumYieldTypeSortFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeSortWithAggregatesFilter<$PrismaModel> | $Enums.YieldTypeSort
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumYieldTypeSortFilter<$PrismaModel>
+    _max?: NestedEnumYieldTypeSortFilter<$PrismaModel>
+  }
+
+  export type EnumRFQSegmentFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQSegment | EnumRFQSegmentFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQSegmentFilter<$PrismaModel> | $Enums.RFQSegment
+  }
+
   export type EnumDealTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
     in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
     notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumDealTypeFilter<$PrismaModel> | $Enums.DealType
+  }
+
+  export type EnumClientRegTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumClientRegTypeFilter<$PrismaModel> | $Enums.ClientRegType
   }
 
   export type EnumBuySellFilter<$PrismaModel = never> = {
@@ -36722,6 +42472,13 @@ export namespace Prisma {
     not?: NestedEnumCalcMethodNullableFilter<$PrismaModel> | $Enums.CalcMethod | null
   }
 
+  export type EnumYesNoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.YesNo | EnumYesNoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYesNoNullableFilter<$PrismaModel> | $Enums.YesNo | null
+  }
+
   export type IntNullableListFilter<$PrismaModel = never> = {
     equals?: number[] | ListIntFieldRefInput<$PrismaModel> | null
     has?: number | IntFieldRefInput<$PrismaModel> | null
@@ -36730,22 +42487,22 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
-  export type EnumRFQStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumRFQStatusFilter<$PrismaModel> | $Enums.RFQStatus
+  export type EnumStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusFilter<$PrismaModel> | $Enums.Status
   }
 
-  export type NSERfqModelCountOrderByAggregateInput = {
-    key?: SortOrder
+  export type RFQMasterISINCountOrderByAggregateInput = {
+    id?: SortOrder
     number?: SortOrder
     segment?: SortOrder
     isin?: SortOrder
-    date?: SortOrder
     participantCode?: SortOrder
     dealType?: SortOrder
     clientCode?: SortOrder
+    clientRegType?: SortOrder
     buySell?: SortOrder
     quoteType?: SortOrder
     settlementType?: SortOrder
@@ -36774,16 +42531,21 @@ export namespace Prisma {
     category?: SortOrder
     rating?: SortOrder
     remarks?: SortOrder
+    date?: SortOrder
+    quoteTime?: SortOrder
+    settlementDate?: SortOrder
     status?: SortOrder
     userLogin?: SortOrder
     tradedValue?: SortOrder
     confirmedValue?: SortOrder
-    clientRegType?: SortOrder
-    quoteTime?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type NSERfqModelAvgOrderByAggregateInput = {
-    key?: SortOrder
+  export type RFQMasterISINAvgOrderByAggregateInput = {
+    id?: SortOrder
     settlementType?: SortOrder
     value?: SortOrder
     quantity?: SortOrder
@@ -36799,17 +42561,19 @@ export namespace Prisma {
     groupList?: SortOrder
     tradedValue?: SortOrder
     confirmedValue?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
   }
 
-  export type NSERfqModelMaxOrderByAggregateInput = {
-    key?: SortOrder
+  export type RFQMasterISINMaxOrderByAggregateInput = {
+    id?: SortOrder
     number?: SortOrder
     segment?: SortOrder
     isin?: SortOrder
-    date?: SortOrder
     participantCode?: SortOrder
     dealType?: SortOrder
     clientCode?: SortOrder
+    clientRegType?: SortOrder
     buySell?: SortOrder
     quoteType?: SortOrder
     settlementType?: SortOrder
@@ -36836,23 +42600,28 @@ export namespace Prisma {
     category?: SortOrder
     rating?: SortOrder
     remarks?: SortOrder
+    date?: SortOrder
+    quoteTime?: SortOrder
+    settlementDate?: SortOrder
     status?: SortOrder
     userLogin?: SortOrder
     tradedValue?: SortOrder
     confirmedValue?: SortOrder
-    clientRegType?: SortOrder
-    quoteTime?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type NSERfqModelMinOrderByAggregateInput = {
-    key?: SortOrder
+  export type RFQMasterISINMinOrderByAggregateInput = {
+    id?: SortOrder
     number?: SortOrder
     segment?: SortOrder
     isin?: SortOrder
-    date?: SortOrder
     participantCode?: SortOrder
     dealType?: SortOrder
     clientCode?: SortOrder
+    clientRegType?: SortOrder
     buySell?: SortOrder
     quoteType?: SortOrder
     settlementType?: SortOrder
@@ -36879,16 +42648,21 @@ export namespace Prisma {
     category?: SortOrder
     rating?: SortOrder
     remarks?: SortOrder
+    date?: SortOrder
+    quoteTime?: SortOrder
+    settlementDate?: SortOrder
     status?: SortOrder
     userLogin?: SortOrder
     tradedValue?: SortOrder
     confirmedValue?: SortOrder
-    clientRegType?: SortOrder
-    quoteTime?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type NSERfqModelSumOrderByAggregateInput = {
-    key?: SortOrder
+  export type RFQMasterISINSumOrderByAggregateInput = {
+    id?: SortOrder
     settlementType?: SortOrder
     value?: SortOrder
     quantity?: SortOrder
@@ -36904,6 +42678,18 @@ export namespace Prisma {
     groupList?: SortOrder
     tradedValue?: SortOrder
     confirmedValue?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+  }
+
+  export type EnumRFQSegmentWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQSegment | EnumRFQSegmentFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQSegmentWithAggregatesFilter<$PrismaModel> | $Enums.RFQSegment
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRFQSegmentFilter<$PrismaModel>
+    _max?: NestedEnumRFQSegmentFilter<$PrismaModel>
   }
 
   export type EnumDealTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -36914,6 +42700,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDealTypeFilter<$PrismaModel>
     _max?: NestedEnumDealTypeFilter<$PrismaModel>
+  }
+
+  export type EnumClientRegTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumClientRegTypeWithAggregatesFilter<$PrismaModel> | $Enums.ClientRegType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumClientRegTypeFilter<$PrismaModel>
+    _max?: NestedEnumClientRegTypeFilter<$PrismaModel>
   }
 
   export type EnumBuySellWithAggregatesFilter<$PrismaModel = never> = {
@@ -36976,14 +42772,392 @@ export namespace Prisma {
     _max?: NestedEnumCalcMethodNullableFilter<$PrismaModel>
   }
 
-  export type EnumRFQStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumRFQStatusWithAggregatesFilter<$PrismaModel> | $Enums.RFQStatus
+  export type EnumYesNoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YesNo | EnumYesNoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYesNoNullableWithAggregatesFilter<$PrismaModel> | $Enums.YesNo | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumYesNoNullableFilter<$PrismaModel>
+    _max?: NestedEnumYesNoNullableFilter<$PrismaModel>
+  }
+
+  export type EnumStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusWithAggregatesFilter<$PrismaModel> | $Enums.Status
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumRFQStatusFilter<$PrismaModel>
-    _max?: NestedEnumRFQStatusFilter<$PrismaModel>
+    _min?: NestedEnumStatusFilter<$PrismaModel>
+    _max?: NestedEnumStatusFilter<$PrismaModel>
+  }
+
+  export type EnumBuySellNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBuySellNullableFilter<$PrismaModel> | $Enums.BuySell | null
+  }
+
+  export type EnumDealTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDealTypeNullableFilter<$PrismaModel> | $Enums.DealType | null
+  }
+
+  export type EnumClientRegTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumClientRegTypeNullableFilter<$PrismaModel> | $Enums.ClientRegType | null
+  }
+
+  export type EnumNegotiationStatusNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationStatus | EnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationStatusNullableFilter<$PrismaModel> | $Enums.NegotiationStatus | null
+  }
+
+  export type EnumBySideNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.BySide | EnumBySideFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBySideNullableFilter<$PrismaModel> | $Enums.BySide | null
+  }
+
+  export type EnumNegotiationConfirmationStatusNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationConfirmationStatus | EnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationConfirmationStatusNullableFilter<$PrismaModel> | $Enums.NegotiationConfirmationStatus | null
+  }
+
+  export type RFQNegotiationCountOrderByAggregateInput = {
+    rfqNumber?: SortOrder
+    id?: SortOrder
+    date?: SortOrder
+    isin?: SortOrder
+    buySell?: SortOrder
+    initSettlementType?: SortOrder
+    initSettlementDate?: SortOrder
+    initAeCode?: SortOrder
+    initDealType?: SortOrder
+    initClientCode?: SortOrder
+    initClientRegType?: SortOrder
+    initValue?: SortOrder
+    initQuantity?: SortOrder
+    initYieldType?: SortOrder
+    initYield?: SortOrder
+    initCalcMethod?: SortOrder
+    initPrice?: SortOrder
+    initAccruedInterest?: SortOrder
+    initConsideration?: SortOrder
+    initQuoteTime?: SortOrder
+    initGtdFlag?: SortOrder
+    initEndTime?: SortOrder
+    initRemarks?: SortOrder
+    initLoginId?: SortOrder
+    respSettlementType?: SortOrder
+    respSettlementDate?: SortOrder
+    respAeCode?: SortOrder
+    respDealType?: SortOrder
+    respClientCode?: SortOrder
+    respClientRegType?: SortOrder
+    respValue?: SortOrder
+    respQuantity?: SortOrder
+    respYieldType?: SortOrder
+    respYield?: SortOrder
+    respCalcMethod?: SortOrder
+    respPrice?: SortOrder
+    respAccruedInterest?: SortOrder
+    respConsideration?: SortOrder
+    respQuoteTime?: SortOrder
+    respGtdFlag?: SortOrder
+    respEndTime?: SortOrder
+    respRemarks?: SortOrder
+    respLoginId?: SortOrder
+    status?: SortOrder
+    tradeNumber?: SortOrder
+    acceptedSettlementType?: SortOrder
+    acceptedSettlementDate?: SortOrder
+    acceptedValue?: SortOrder
+    acceptedQuantity?: SortOrder
+    acceptedYieldType?: SortOrder
+    acceptedYield?: SortOrder
+    acceptedCalcMethod?: SortOrder
+    acceptedPrice?: SortOrder
+    acceptedPutCallDate?: SortOrder
+    acceptedAccruedInterest?: SortOrder
+    acceptedConsideration?: SortOrder
+    acceptedQuoteTime?: SortOrder
+    acceptedBySide?: SortOrder
+    acceptedByLoginId?: SortOrder
+    confirmStatus?: SortOrder
+    proposedBySide?: SortOrder
+    proposedTime?: SortOrder
+    confirmedPriceQuoteTime?: SortOrder
+    lastActivityTimestamp?: SortOrder
+    tradeSplits?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RFQNegotiationAvgOrderByAggregateInput = {
+    initSettlementType?: SortOrder
+    initValue?: SortOrder
+    initQuantity?: SortOrder
+    initYield?: SortOrder
+    initPrice?: SortOrder
+    initAccruedInterest?: SortOrder
+    initConsideration?: SortOrder
+    respSettlementType?: SortOrder
+    respValue?: SortOrder
+    respQuantity?: SortOrder
+    respYield?: SortOrder
+    respPrice?: SortOrder
+    respAccruedInterest?: SortOrder
+    respConsideration?: SortOrder
+    acceptedSettlementType?: SortOrder
+    acceptedValue?: SortOrder
+    acceptedQuantity?: SortOrder
+    acceptedYield?: SortOrder
+    acceptedPrice?: SortOrder
+    acceptedAccruedInterest?: SortOrder
+    acceptedConsideration?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+  }
+
+  export type RFQNegotiationMaxOrderByAggregateInput = {
+    rfqNumber?: SortOrder
+    id?: SortOrder
+    date?: SortOrder
+    isin?: SortOrder
+    buySell?: SortOrder
+    initSettlementType?: SortOrder
+    initSettlementDate?: SortOrder
+    initAeCode?: SortOrder
+    initDealType?: SortOrder
+    initClientCode?: SortOrder
+    initClientRegType?: SortOrder
+    initValue?: SortOrder
+    initQuantity?: SortOrder
+    initYieldType?: SortOrder
+    initYield?: SortOrder
+    initCalcMethod?: SortOrder
+    initPrice?: SortOrder
+    initAccruedInterest?: SortOrder
+    initConsideration?: SortOrder
+    initQuoteTime?: SortOrder
+    initGtdFlag?: SortOrder
+    initEndTime?: SortOrder
+    initRemarks?: SortOrder
+    initLoginId?: SortOrder
+    respSettlementType?: SortOrder
+    respSettlementDate?: SortOrder
+    respAeCode?: SortOrder
+    respDealType?: SortOrder
+    respClientCode?: SortOrder
+    respClientRegType?: SortOrder
+    respValue?: SortOrder
+    respQuantity?: SortOrder
+    respYieldType?: SortOrder
+    respYield?: SortOrder
+    respCalcMethod?: SortOrder
+    respPrice?: SortOrder
+    respAccruedInterest?: SortOrder
+    respConsideration?: SortOrder
+    respQuoteTime?: SortOrder
+    respGtdFlag?: SortOrder
+    respEndTime?: SortOrder
+    respRemarks?: SortOrder
+    respLoginId?: SortOrder
+    status?: SortOrder
+    tradeNumber?: SortOrder
+    acceptedSettlementType?: SortOrder
+    acceptedSettlementDate?: SortOrder
+    acceptedValue?: SortOrder
+    acceptedQuantity?: SortOrder
+    acceptedYieldType?: SortOrder
+    acceptedYield?: SortOrder
+    acceptedCalcMethod?: SortOrder
+    acceptedPrice?: SortOrder
+    acceptedPutCallDate?: SortOrder
+    acceptedAccruedInterest?: SortOrder
+    acceptedConsideration?: SortOrder
+    acceptedQuoteTime?: SortOrder
+    acceptedBySide?: SortOrder
+    acceptedByLoginId?: SortOrder
+    confirmStatus?: SortOrder
+    proposedBySide?: SortOrder
+    proposedTime?: SortOrder
+    confirmedPriceQuoteTime?: SortOrder
+    lastActivityTimestamp?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RFQNegotiationMinOrderByAggregateInput = {
+    rfqNumber?: SortOrder
+    id?: SortOrder
+    date?: SortOrder
+    isin?: SortOrder
+    buySell?: SortOrder
+    initSettlementType?: SortOrder
+    initSettlementDate?: SortOrder
+    initAeCode?: SortOrder
+    initDealType?: SortOrder
+    initClientCode?: SortOrder
+    initClientRegType?: SortOrder
+    initValue?: SortOrder
+    initQuantity?: SortOrder
+    initYieldType?: SortOrder
+    initYield?: SortOrder
+    initCalcMethod?: SortOrder
+    initPrice?: SortOrder
+    initAccruedInterest?: SortOrder
+    initConsideration?: SortOrder
+    initQuoteTime?: SortOrder
+    initGtdFlag?: SortOrder
+    initEndTime?: SortOrder
+    initRemarks?: SortOrder
+    initLoginId?: SortOrder
+    respSettlementType?: SortOrder
+    respSettlementDate?: SortOrder
+    respAeCode?: SortOrder
+    respDealType?: SortOrder
+    respClientCode?: SortOrder
+    respClientRegType?: SortOrder
+    respValue?: SortOrder
+    respQuantity?: SortOrder
+    respYieldType?: SortOrder
+    respYield?: SortOrder
+    respCalcMethod?: SortOrder
+    respPrice?: SortOrder
+    respAccruedInterest?: SortOrder
+    respConsideration?: SortOrder
+    respQuoteTime?: SortOrder
+    respGtdFlag?: SortOrder
+    respEndTime?: SortOrder
+    respRemarks?: SortOrder
+    respLoginId?: SortOrder
+    status?: SortOrder
+    tradeNumber?: SortOrder
+    acceptedSettlementType?: SortOrder
+    acceptedSettlementDate?: SortOrder
+    acceptedValue?: SortOrder
+    acceptedQuantity?: SortOrder
+    acceptedYieldType?: SortOrder
+    acceptedYield?: SortOrder
+    acceptedCalcMethod?: SortOrder
+    acceptedPrice?: SortOrder
+    acceptedPutCallDate?: SortOrder
+    acceptedAccruedInterest?: SortOrder
+    acceptedConsideration?: SortOrder
+    acceptedQuoteTime?: SortOrder
+    acceptedBySide?: SortOrder
+    acceptedByLoginId?: SortOrder
+    confirmStatus?: SortOrder
+    proposedBySide?: SortOrder
+    proposedTime?: SortOrder
+    confirmedPriceQuoteTime?: SortOrder
+    lastActivityTimestamp?: SortOrder
+    createdAt?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RFQNegotiationSumOrderByAggregateInput = {
+    initSettlementType?: SortOrder
+    initValue?: SortOrder
+    initQuantity?: SortOrder
+    initYield?: SortOrder
+    initPrice?: SortOrder
+    initAccruedInterest?: SortOrder
+    initConsideration?: SortOrder
+    respSettlementType?: SortOrder
+    respValue?: SortOrder
+    respQuantity?: SortOrder
+    respYield?: SortOrder
+    respPrice?: SortOrder
+    respAccruedInterest?: SortOrder
+    respConsideration?: SortOrder
+    acceptedSettlementType?: SortOrder
+    acceptedValue?: SortOrder
+    acceptedQuantity?: SortOrder
+    acceptedYield?: SortOrder
+    acceptedPrice?: SortOrder
+    acceptedAccruedInterest?: SortOrder
+    acceptedConsideration?: SortOrder
+    createdBy?: SortOrder
+    updatedBy?: SortOrder
+  }
+
+  export type EnumBuySellNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBuySellNullableWithAggregatesFilter<$PrismaModel> | $Enums.BuySell | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumBuySellNullableFilter<$PrismaModel>
+    _max?: NestedEnumBuySellNullableFilter<$PrismaModel>
+  }
+
+  export type EnumDealTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDealTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.DealType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumDealTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumDealTypeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumClientRegTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumClientRegTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ClientRegType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumClientRegTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumClientRegTypeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumNegotiationStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationStatus | EnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.NegotiationStatus | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumNegotiationStatusNullableFilter<$PrismaModel>
+    _max?: NestedEnumNegotiationStatusNullableFilter<$PrismaModel>
+  }
+
+  export type EnumBySideNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BySide | EnumBySideFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBySideNullableWithAggregatesFilter<$PrismaModel> | $Enums.BySide | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumBySideNullableFilter<$PrismaModel>
+    _max?: NestedEnumBySideNullableFilter<$PrismaModel>
+  }
+
+  export type EnumNegotiationConfirmationStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationConfirmationStatus | EnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationConfirmationStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.NegotiationConfirmationStatus | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumNegotiationConfirmationStatusNullableFilter<$PrismaModel>
+    _max?: NestedEnumNegotiationConfirmationStatusNullableFilter<$PrismaModel>
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -37053,6 +43227,10 @@ export namespace Prisma {
   export type BondsUpdatecategoriesInput = {
     set?: string[]
     push?: string | string[]
+  }
+
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
   }
 
   export type CustomersAuthDataModelCreateNestedManyWithoutRelationshipManagerInput = {
@@ -37922,16 +44100,28 @@ export namespace Prisma {
     update?: XOR<XOR<NseCbricsParticipantModelUpdateToOneWithWhereWithoutDpAccountListInput, NseCbricsParticipantModelUpdateWithoutDpAccountListInput>, NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
   }
 
-  export type NSERfqModelCreategroupListInput = {
+  export type EnumYieldTypeSortFieldUpdateOperationsInput = {
+    set?: $Enums.YieldTypeSort
+  }
+
+  export type RFQMasterISINCreategroupListInput = {
     set: number[]
   }
 
-  export type NSERfqModelCreateparticipantListInput = {
+  export type RFQMasterISINCreateparticipantListInput = {
     set: string[]
+  }
+
+  export type EnumRFQSegmentFieldUpdateOperationsInput = {
+    set?: $Enums.RFQSegment
   }
 
   export type EnumDealTypeFieldUpdateOperationsInput = {
     set?: $Enums.DealType
+  }
+
+  export type EnumClientRegTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ClientRegType
   }
 
   export type EnumBuySellFieldUpdateOperationsInput = {
@@ -37958,18 +44148,55 @@ export namespace Prisma {
     set?: $Enums.CalcMethod | null
   }
 
-  export type NSERfqModelUpdategroupListInput = {
+  export type NullableEnumYesNoFieldUpdateOperationsInput = {
+    set?: $Enums.YesNo | null
+  }
+
+  export type RFQMasterISINUpdategroupListInput = {
     set?: number[]
     push?: number | number[]
   }
 
-  export type NSERfqModelUpdateparticipantListInput = {
+  export type RFQMasterISINUpdateparticipantListInput = {
     set?: string[]
     push?: string | string[]
   }
 
-  export type EnumRFQStatusFieldUpdateOperationsInput = {
-    set?: $Enums.RFQStatus
+  export type EnumStatusFieldUpdateOperationsInput = {
+    set?: $Enums.Status
+  }
+
+  export type RFQNegotiationCreatetradeSplitsInput = {
+    set: InputJsonValue[]
+  }
+
+  export type NullableEnumBuySellFieldUpdateOperationsInput = {
+    set?: $Enums.BuySell | null
+  }
+
+  export type NullableEnumDealTypeFieldUpdateOperationsInput = {
+    set?: $Enums.DealType | null
+  }
+
+  export type NullableEnumClientRegTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ClientRegType | null
+  }
+
+  export type NullableEnumNegotiationStatusFieldUpdateOperationsInput = {
+    set?: $Enums.NegotiationStatus | null
+  }
+
+  export type NullableEnumBySideFieldUpdateOperationsInput = {
+    set?: $Enums.BySide | null
+  }
+
+  export type NullableEnumNegotiationConfirmationStatusFieldUpdateOperationsInput = {
+    set?: $Enums.NegotiationConfirmationStatus | null
+  }
+
+  export type RFQNegotiationUpdatetradeSplitsInput = {
+    set?: InputJsonValue[]
+    push?: InputJsonValue | InputJsonValue[]
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -38190,6 +44417,11 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -38264,6 +44496,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumCrmUserROLEFilter<$PrismaModel = never> = {
@@ -38523,11 +44763,42 @@ export namespace Prisma {
     _max?: NestedEnumDefaultSelectFilter<$PrismaModel>
   }
 
+  export type NestedEnumYieldTypeSortFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldTypeSort | EnumYieldTypeSortFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeSortFilter<$PrismaModel> | $Enums.YieldTypeSort
+  }
+
+  export type NestedEnumYieldTypeSortWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YieldTypeSort | EnumYieldTypeSortFieldRefInput<$PrismaModel>
+    in?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    notIn?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
+    not?: NestedEnumYieldTypeSortWithAggregatesFilter<$PrismaModel> | $Enums.YieldTypeSort
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumYieldTypeSortFilter<$PrismaModel>
+    _max?: NestedEnumYieldTypeSortFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRFQSegmentFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQSegment | EnumRFQSegmentFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQSegmentFilter<$PrismaModel> | $Enums.RFQSegment
+  }
+
   export type NestedEnumDealTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel>
     in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
     notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumDealTypeFilter<$PrismaModel> | $Enums.DealType
+  }
+
+  export type NestedEnumClientRegTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumClientRegTypeFilter<$PrismaModel> | $Enums.ClientRegType
   }
 
   export type NestedEnumBuySellFilter<$PrismaModel = never> = {
@@ -38572,11 +44843,28 @@ export namespace Prisma {
     not?: NestedEnumCalcMethodNullableFilter<$PrismaModel> | $Enums.CalcMethod | null
   }
 
-  export type NestedEnumRFQStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumRFQStatusFilter<$PrismaModel> | $Enums.RFQStatus
+  export type NestedEnumYesNoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.YesNo | EnumYesNoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYesNoNullableFilter<$PrismaModel> | $Enums.YesNo | null
+  }
+
+  export type NestedEnumStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusFilter<$PrismaModel> | $Enums.Status
+  }
+
+  export type NestedEnumRFQSegmentWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RFQSegment | EnumRFQSegmentFieldRefInput<$PrismaModel>
+    in?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RFQSegment[] | ListEnumRFQSegmentFieldRefInput<$PrismaModel>
+    not?: NestedEnumRFQSegmentWithAggregatesFilter<$PrismaModel> | $Enums.RFQSegment
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRFQSegmentFilter<$PrismaModel>
+    _max?: NestedEnumRFQSegmentFilter<$PrismaModel>
   }
 
   export type NestedEnumDealTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -38587,6 +44875,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDealTypeFilter<$PrismaModel>
     _max?: NestedEnumDealTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumClientRegTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumClientRegTypeWithAggregatesFilter<$PrismaModel> | $Enums.ClientRegType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumClientRegTypeFilter<$PrismaModel>
+    _max?: NestedEnumClientRegTypeFilter<$PrismaModel>
   }
 
   export type NestedEnumBuySellWithAggregatesFilter<$PrismaModel = never> = {
@@ -38649,14 +44947,126 @@ export namespace Prisma {
     _max?: NestedEnumCalcMethodNullableFilter<$PrismaModel>
   }
 
-  export type NestedEnumRFQStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.RFQStatus | EnumRFQStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.RFQStatus[] | ListEnumRFQStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumRFQStatusWithAggregatesFilter<$PrismaModel> | $Enums.RFQStatus
+  export type NestedEnumYesNoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.YesNo | EnumYesNoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.YesNo[] | ListEnumYesNoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumYesNoNullableWithAggregatesFilter<$PrismaModel> | $Enums.YesNo | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumYesNoNullableFilter<$PrismaModel>
+    _max?: NestedEnumYesNoNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Status[] | ListEnumStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusWithAggregatesFilter<$PrismaModel> | $Enums.Status
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumRFQStatusFilter<$PrismaModel>
-    _max?: NestedEnumRFQStatusFilter<$PrismaModel>
+    _min?: NestedEnumStatusFilter<$PrismaModel>
+    _max?: NestedEnumStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBuySellNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBuySellNullableFilter<$PrismaModel> | $Enums.BuySell | null
+  }
+
+  export type NestedEnumDealTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDealTypeNullableFilter<$PrismaModel> | $Enums.DealType | null
+  }
+
+  export type NestedEnumClientRegTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumClientRegTypeNullableFilter<$PrismaModel> | $Enums.ClientRegType | null
+  }
+
+  export type NestedEnumNegotiationStatusNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationStatus | EnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationStatusNullableFilter<$PrismaModel> | $Enums.NegotiationStatus | null
+  }
+
+  export type NestedEnumBySideNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.BySide | EnumBySideFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBySideNullableFilter<$PrismaModel> | $Enums.BySide | null
+  }
+
+  export type NestedEnumNegotiationConfirmationStatusNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationConfirmationStatus | EnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationConfirmationStatusNullableFilter<$PrismaModel> | $Enums.NegotiationConfirmationStatus | null
+  }
+
+  export type NestedEnumBuySellNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BuySell | EnumBuySellFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BuySell[] | ListEnumBuySellFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBuySellNullableWithAggregatesFilter<$PrismaModel> | $Enums.BuySell | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumBuySellNullableFilter<$PrismaModel>
+    _max?: NestedEnumBuySellNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDealTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DealType | EnumDealTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.DealType[] | ListEnumDealTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDealTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.DealType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumDealTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumDealTypeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumClientRegTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ClientRegType | EnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ClientRegType[] | ListEnumClientRegTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumClientRegTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ClientRegType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumClientRegTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumClientRegTypeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumNegotiationStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationStatus | EnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationStatus[] | ListEnumNegotiationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.NegotiationStatus | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumNegotiationStatusNullableFilter<$PrismaModel>
+    _max?: NestedEnumNegotiationStatusNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBySideNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BySide | EnumBySideFieldRefInput<$PrismaModel> | null
+    in?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.BySide[] | ListEnumBySideFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumBySideNullableWithAggregatesFilter<$PrismaModel> | $Enums.BySide | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumBySideNullableFilter<$PrismaModel>
+    _max?: NestedEnumBySideNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumNegotiationConfirmationStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NegotiationConfirmationStatus | EnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.NegotiationConfirmationStatus[] | ListEnumNegotiationConfirmationStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumNegotiationConfirmationStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.NegotiationConfirmationStatus | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumNegotiationConfirmationStatusNullableFilter<$PrismaModel>
+    _max?: NestedEnumNegotiationConfirmationStatusNullableFilter<$PrismaModel>
   }
 
   export type CustomersAuthDataModelCreateWithoutRelationshipManagerInput = {

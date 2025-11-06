@@ -1,11 +1,10 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
-import React from "react";
-import NseCreateParticipant from "./NesCreatePerticepent";
+import NewRfqFormView from "./components/NewRfqForm";
 
 function NseCreate() {
   return (
     <Workspace>
-      <NseCreateParticipant />
+      <NewRfqFormView />
     </Workspace>
   );
 }

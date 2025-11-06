@@ -136,7 +136,7 @@ export class NseCBRICS {
         attempt: number = 2
     ): Promise<T> {
         try {
-            const key = await this.getLoginKey(attempt > 1); // force relogin only if retry
+            const key = await this.getLoginKey(attempt < 1); // force relogin only if retry
             return await apiCall(key);
         } catch (error) {
             if (
@@ -210,7 +210,6 @@ export class NseCBRICS {
 
     public async getAllUnregisteredParticipants(payload: UnregisteredParticipantParams) {
         return this.withReLoginRetry(async (loginKey) => {
-            console.log(loginKey);
             
             const { data } = await this.client.post<UnregisteredParticipantResponse[]>(
                 "/unreg/all",

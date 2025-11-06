@@ -42,6 +42,8 @@ model Bonds {
 
     sortedAt Int @default(0)
 
+    isConvertedDeal Boolean?
+
     @@index([isin])
     @@index([sortedAt])
     @@map("bonds")

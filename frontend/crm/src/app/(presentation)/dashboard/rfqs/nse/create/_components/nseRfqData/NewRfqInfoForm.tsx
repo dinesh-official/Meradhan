@@ -8,15 +8,8 @@ import { INseRFQFormHook } from "./NseFormData";
 import { NseRFQFormData, YIELD_TYPES } from "./nseRfqFormData.schema";
 import z from "zod";
 
-const schemaData = z
+export const schemaData = z
   .object({
-
-
-
-
-
-
-
 
     segment: z.enum(["R", "C"]).default("R"),
     isin: z.string().min(1, "ISIN is required"),

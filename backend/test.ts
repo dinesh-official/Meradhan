@@ -1,25 +1,25 @@
-import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
-import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+// import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
-import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
+// // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+// import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-// import { db } from "@core/database/database";
+// // import { db } from "@core/database/database";
 // import { NSDLApi } from "kyc-providers";
 
 // import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 
 // Initialize
-const participantManager = new ParticipantManager();
-const rfqManager = new NseRfq();
-const cbricsManager = new NseCBRICS();
+// const participantManager = new ParticipantManager();
+// const rfqManager = new NseRfq();
+// const cbricsManager = new NseCBRICS();
 
 
 // Save KYC data to customer
-const data = await participantManager.getAllParticipants();
+// const data = await participantManager.getAllParticipants();
 
-console.log(data);
+// console.log(data);
 
-console.log(data?.[0]?.loginId);
+// console.log(data?.[0]?.loginId);
 
 // try {
 //     const addIsinToRfq = await rfqManager.createRfq({
@@ -53,19 +53,19 @@ console.log(data?.[0]?.loginId);
 
 // } catch (error) {
 // console.log(error?.response?.data);
-    
+
 // }
 
-try {
-    const isins = await rfqManager.getAllRfq({
-        status:"P"
-    });
+// try {
+//     const isins = await rfqManager.getAllRfq({
+//         status:"P"
+//     });
 
-console.log(isins);
+// console.log(isins);
 
-} catch (error) {
-console.log(error.response.data);
-}
+// } catch (error) {
+// console.log(error.response.data);
+// }
 
 
 
@@ -90,7 +90,7 @@ console.log(error.response.data);
 
 
 // try {
-    
+
 //     const isins = await rfqManager.proposeDeal({
 //         ngRfqNumber: "R25110400000036",
 //         ngId: "N25110400000043",
@@ -102,11 +102,11 @@ console.log(error.response.data);
 //         consideration: 1990200, // price * (acceptedValue * ) + accruedInterest
 //         calcMethod: "O",
 //         role: "I",
-        
+
 //     });
 
 //     console.log(isins);
-    
+
 
 // } catch (error) {
 //     console.log(error.response.data);
@@ -114,7 +114,7 @@ console.log(error.response.data);
 
 
 // try {
-    
+
 //     const isins = await rfqManager.acceptOrRejectDeal({
 //         rfqNumber: "R25110400000036",
 //         id: "N25110400000043",
@@ -128,7 +128,7 @@ console.log(error.response.data);
 //     console.log(isins);
 
 // } catch (error) {
-    
+
 //     console.log(error.response.data);
 // }
 
@@ -172,6 +172,12 @@ console.log(error.response.data);
 // const response = await cbricsManager.getSettlementOrders({
 //     filtFromModSettleDate: "01-11-2025",
 //     filtToModSettleDate: "05-11-2025",
+// })
+
+// console.log("response:", response);
+
+// const response = await rfqManager.getAllNegotiations({
+
 // })
 
 // console.log("response:", response);

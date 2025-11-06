@@ -29,17 +29,17 @@ export const addIsinSchema = z
         yieldSell: z.coerce.number({ error: "Enter Sell Yield" }).optional(),
         calcMethodSell: z.enum(["M", "O"]).optional(),
         priceSell: z.coerce.number({ error: "Enter Sell Price" }).optional(),
-        gtdFlag: z.enum(["Y"]).nullable(),
+        gtdFlag: z.enum(["Y"]).nullable().optional(),
         endTime: z.string({ error: "Enter End Time" }).optional(),
-        quoteNegotiable: z.enum(["Y"]).nullable(),
-        valueNegotiable: z.enum(["Y"]).nullable(),
+        quoteNegotiable: z.enum(["Y"]).nullable().optional(),
+        valueNegotiable: z.enum(["Y"]).nullable().optional(),
         minFillValue: z.coerce
             .number({ error: "Enter Minimum Fill Value" })
             .optional(),
         valueStepSize: z.coerce
             .number({ error: "Enter Value Step Size" })
             .optional(),
-        anonymous: z.enum(["Y"]).nullable(),
+        anonymous: z.enum(["Y"]).nullable().optional(),
         access: z.enum(["1", "2", "3"]),
         groupList: z.array(z.number()).optional(),
         participantList: z.array(z.string()).optional(),
@@ -108,7 +108,7 @@ export const addIsinSchema = z
             });
         }
 
-        if (data.gtdFlag === "Y" && !data.endTime) {
+        if (data.gtdFlag != "Y" && !data.endTime) {
             ctx.addIssue({
                 code: "custom",
                 message: "End Time is required when GTD is set",
@@ -116,3 +116,47 @@ export const addIsinSchema = z
             });
         }
     });
+
+
+
+
+export const acceptNegotiationQuoteSchema = z.object({
+    rfqNumber: z.string({ error: "RFQ Number is required" }).min(1, "RFQ Number is required"),
+    acceptedValue: z.float32({ error: "Accepted Value is required" }).min(0, "Accepted Value must be non-negative"),
+    id: z.string().optional(),
+    acceptedSettlementDate: z.string().optional(),
+    acceptedYieldType: z.enum(["YTM", "YTP", "YTC"]).optional(),
+    acceptedYield: z.float32().optional(),
+    acceptedPrice: z.float32().optional(),
+    respDealType: z.enum(["D", "B"]),
+    respClientCode: z.string({ error: "Client Code is required" }).min(1, "Client Code is required"),
+    role: z.enum(["I", "R"]).optional(),
+});
+
+
+export const terminateNegotiationQuoteSchema = z.object({
+    rfqNumber: z.string({ error: "RFQ Number is required" }).min(1, "RFQ Number is required"),
+    id: z.string(),
+    role: z.enum(["I", "R"])
+});
+
+
+export const acceptRejectDealSchema = z.object({
+    rfqNumber: z.string({ error: "RFQ Number is required" }).min(1, "RFQ Number is required"),
+    id: z.string({ error: "Negotiation ID is required" }).min(1, "Negotiation ID is required"),
+    acceptedPrice: z.coerce.number({ error: "Accepted Price is required" }).optional(),
+    acceptedPutCallDate: z.string().optional(),
+    acceptedAccruedInterest: z.coerce.number({ error: "Accepted Accrued Interest is required" }).optional(),
+    acceptedConsideration: z.coerce.number({ error: "Accepted Consideration is required" }).optional(),
+    confirmStatus: z.enum(["PC", "PR"], { error: "Confirm Status is required" })
+});
+
+
+export const rfqFilterSchema = z.object({
+    number: z.string().optional(),
+    date: z.string().optional(),
+    isin: z.string().optional(),
+    participantCode: z.string().optional(),
+    clientRegType: z.enum(["U", "I", "R"]).optional(),
+    status: z.enum(["P", "W", "T"]).optional(),
+}).optional();

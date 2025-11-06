@@ -152,7 +152,7 @@ export class NseRfq {
         attempt: number = 2
     ): Promise<T> {
         try {
-            const key = await this.getLoginKey(attempt > 1);
+            const key = await this.getLoginKey(attempt < 1);
             return await apiCall(key);
         } catch (error) {
             if (
@@ -328,9 +328,9 @@ export class NseRfq {
         });
     }
 
-    public async getAllRfq(payload: GetAllRfqRequest): Promise<GetAllRfqResponse[]> {
+    public async getAllRfq(payload?: GetAllRfqRequest): Promise<GetAllRfqResponse> {
         return this.withReLoginRetry(async (loginKey) => {
-            const { data } = await this.client.post<GetAllRfqResponse[]>(
+            const { data } = await this.client.post<GetAllRfqResponse>(
                 "/rfqmaster/all/isin",
                 payload,
                 { headers: { loginKey } }

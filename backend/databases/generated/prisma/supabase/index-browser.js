@@ -162,7 +162,8 @@ exports.Prisma.BondsScalarFieldEnum = {
   maturityDate: 'maturityDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  sortedAt: 'sortedAt'
+  sortedAt: 'sortedAt',
+  isConvertedDeal: 'isConvertedDeal'
 };
 
 exports.Prisma.CRMUserDataModelScalarFieldEnum = {
@@ -444,15 +445,58 @@ exports.Prisma.NseIsinSecurityReceiptScalarFieldEnum = {
   issuer: 'issuer'
 };
 
-exports.Prisma.NSERfqModelScalarFieldEnum = {
-  key: 'key',
+exports.Prisma.SettlementOrderModelScalarFieldEnum = {
+  id: 'id',
+  orderNumber: 'orderNumber',
+  symbol: 'symbol',
+  buyParticipantLoginId: 'buyParticipantLoginId',
+  sellParticipantLoginId: 'sellParticipantLoginId',
+  price: 'price',
+  yieldType: 'yieldType',
+  yield: 'yield',
+  value: 'value',
+  buyerRefNo: 'buyerRefNo',
+  sellerRefNo: 'sellerRefNo',
+  buyBackofficeLoginId: 'buyBackofficeLoginId',
+  sellBackofficeLoginId: 'sellBackofficeLoginId',
+  buyBrokerLoginId: 'buyBrokerLoginId',
+  sellBrokerLoginId: 'sellBrokerLoginId',
+  source: 'source',
+  modSettleDate: 'modSettleDate',
+  modQuantity: 'modQuantity',
+  modAccrInt: 'modAccrInt',
+  modConsideration: 'modConsideration',
+  settlementNo: 'settlementNo',
+  stampDutyAmount: 'stampDutyAmount',
+  stampDutyBearer: 'stampDutyBearer',
+  buyerFundPayinObligation: 'buyerFundPayinObligation',
+  sellerFundPayoutObligation: 'sellerFundPayoutObligation',
+  fundPayinRefId: 'fundPayinRefId',
+  settleStatus: 'settleStatus',
+  secPayinQuantity: 'secPayinQuantity',
+  secPayinRemarks: 'secPayinRemarks',
+  secPayinTime: 'secPayinTime',
+  fundsPayinAmount: 'fundsPayinAmount',
+  fundsPayinRemarks: 'fundsPayinRemarks',
+  fundsPayinTime: 'fundsPayinTime',
+  payoutRemarks: 'payoutRemarks',
+  payoutTime: 'payoutTime',
+  ifscCode: 'ifscCode',
+  accountNo: 'accountNo',
+  utrNumber: 'utrNumber',
+  dpId: 'dpId',
+  benId: 'benId'
+};
+
+exports.Prisma.RFQMasterISINScalarFieldEnum = {
+  id: 'id',
   number: 'number',
   segment: 'segment',
   isin: 'isin',
-  date: 'date',
   participantCode: 'participantCode',
   dealType: 'dealType',
   clientCode: 'clientCode',
+  clientRegType: 'clientRegType',
   buySell: 'buySell',
   quoteType: 'quoteType',
   settlementType: 'settlementType',
@@ -481,12 +525,89 @@ exports.Prisma.NSERfqModelScalarFieldEnum = {
   category: 'category',
   rating: 'rating',
   remarks: 'remarks',
+  date: 'date',
+  quoteTime: 'quoteTime',
+  settlementDate: 'settlementDate',
   status: 'status',
   userLogin: 'userLogin',
   tradedValue: 'tradedValue',
   confirmedValue: 'confirmedValue',
-  clientRegType: 'clientRegType',
-  quoteTime: 'quoteTime'
+  createdAt: 'createdAt',
+  createdBy: 'createdBy',
+  updatedBy: 'updatedBy',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RFQNegotiationScalarFieldEnum = {
+  rfqNumber: 'rfqNumber',
+  id: 'id',
+  date: 'date',
+  isin: 'isin',
+  buySell: 'buySell',
+  initSettlementType: 'initSettlementType',
+  initSettlementDate: 'initSettlementDate',
+  initAeCode: 'initAeCode',
+  initDealType: 'initDealType',
+  initClientCode: 'initClientCode',
+  initClientRegType: 'initClientRegType',
+  initValue: 'initValue',
+  initQuantity: 'initQuantity',
+  initYieldType: 'initYieldType',
+  initYield: 'initYield',
+  initCalcMethod: 'initCalcMethod',
+  initPrice: 'initPrice',
+  initAccruedInterest: 'initAccruedInterest',
+  initConsideration: 'initConsideration',
+  initQuoteTime: 'initQuoteTime',
+  initGtdFlag: 'initGtdFlag',
+  initEndTime: 'initEndTime',
+  initRemarks: 'initRemarks',
+  initLoginId: 'initLoginId',
+  respSettlementType: 'respSettlementType',
+  respSettlementDate: 'respSettlementDate',
+  respAeCode: 'respAeCode',
+  respDealType: 'respDealType',
+  respClientCode: 'respClientCode',
+  respClientRegType: 'respClientRegType',
+  respValue: 'respValue',
+  respQuantity: 'respQuantity',
+  respYieldType: 'respYieldType',
+  respYield: 'respYield',
+  respCalcMethod: 'respCalcMethod',
+  respPrice: 'respPrice',
+  respAccruedInterest: 'respAccruedInterest',
+  respConsideration: 'respConsideration',
+  respQuoteTime: 'respQuoteTime',
+  respGtdFlag: 'respGtdFlag',
+  respEndTime: 'respEndTime',
+  respRemarks: 'respRemarks',
+  respLoginId: 'respLoginId',
+  status: 'status',
+  tradeNumber: 'tradeNumber',
+  acceptedSettlementType: 'acceptedSettlementType',
+  acceptedSettlementDate: 'acceptedSettlementDate',
+  acceptedValue: 'acceptedValue',
+  acceptedQuantity: 'acceptedQuantity',
+  acceptedYieldType: 'acceptedYieldType',
+  acceptedYield: 'acceptedYield',
+  acceptedCalcMethod: 'acceptedCalcMethod',
+  acceptedPrice: 'acceptedPrice',
+  acceptedPutCallDate: 'acceptedPutCallDate',
+  acceptedAccruedInterest: 'acceptedAccruedInterest',
+  acceptedConsideration: 'acceptedConsideration',
+  acceptedQuoteTime: 'acceptedQuoteTime',
+  acceptedBySide: 'acceptedBySide',
+  acceptedByLoginId: 'acceptedByLoginId',
+  confirmStatus: 'confirmStatus',
+  proposedBySide: 'proposedBySide',
+  proposedTime: 'proposedTime',
+  confirmedPriceQuoteTime: 'confirmedPriceQuoteTime',
+  lastActivityTimestamp: 'lastActivityTimestamp',
+  tradeSplits: 'tradeSplits',
+  createdAt: 'createdAt',
+  createdBy: 'createdBy',
+  updatedBy: 'updatedBy',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -627,9 +748,26 @@ exports.DefaultSelect = exports.$Enums.DefaultSelect = {
   N: 'N'
 };
 
+exports.YieldTypeSort = exports.$Enums.YieldTypeSort = {
+  P: 'P',
+  C: 'C',
+  M: 'M'
+};
+
+exports.RFQSegment = exports.$Enums.RFQSegment = {
+  R: 'R',
+  C: 'C'
+};
+
 exports.DealType = exports.$Enums.DealType = {
   D: 'D',
   B: 'B'
+};
+
+exports.ClientRegType = exports.$Enums.ClientRegType = {
+  R: 'R',
+  I: 'I',
+  U: 'U'
 };
 
 exports.BuySell = exports.$Enums.BuySell = {
@@ -654,10 +792,36 @@ exports.CalcMethod = exports.$Enums.CalcMethod = {
   O: 'O'
 };
 
-exports.RFQStatus = exports.$Enums.RFQStatus = {
+exports.YesNo = exports.$Enums.YesNo = {
+  Y: 'Y'
+};
+
+exports.Status = exports.$Enums.Status = {
   P: 'P',
   W: 'W',
   T: 'T'
+};
+
+exports.NegotiationStatus = exports.$Enums.NegotiationStatus = {
+  N: 'N',
+  R: 'R',
+  A: 'A',
+  C: 'C',
+  E: 'E'
+};
+
+exports.BySide = exports.$Enums.BySide = {
+  I: 'I',
+  R: 'R'
+};
+
+exports.NegotiationConfirmationStatus = exports.$Enums.NegotiationConfirmationStatus = {
+  PP: 'PP',
+  PC: 'PC',
+  PR: 'PR',
+  CA: 'CA',
+  CC: 'CC',
+  CR: 'CR'
 };
 
 exports.Prisma.ModelName = {
@@ -681,7 +845,9 @@ exports.Prisma.ModelName = {
   NSEBankAccount: 'NSEBankAccount',
   NSEDpAccount: 'NSEDpAccount',
   NseIsinSecurityReceipt: 'NseIsinSecurityReceipt',
-  NSERfqModel: 'NSERfqModel'
+  SettlementOrderModel: 'SettlementOrderModel',
+  RFQMasterISIN: 'RFQMasterISIN',
+  RFQNegotiation: 'RFQNegotiation'
 };
 
 /**
