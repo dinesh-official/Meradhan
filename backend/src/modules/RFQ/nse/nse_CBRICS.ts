@@ -58,7 +58,7 @@ export class NseCBRICS {
     private credentials = {
         "domain": "BCISPL",
         "login": "DEV",
-        "password": "dv(En91T$kgS6b"
+        "password": "dv(En91T$kgS6b" // dv(En91T$kgS6b1 for testing only
     };
 
     constructor() {

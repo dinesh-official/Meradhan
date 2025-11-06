@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
 
   }
 
-  // Only protect /dashboard routes
+  // Only protect /dashboard routes 
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     try {
       const session = await fetchUserSession(cookieStore.get('token')?.value || '');

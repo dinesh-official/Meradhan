@@ -78,7 +78,15 @@ const dateTimeUtils = {
 
 export type SchemaType = z.infer<typeof appSchema.rfq.addIsinSchema>;
 
-function NewRfqForm({ onSubmit }: { onSubmit?: (data: SchemaType) => void }) {
+function NewRfqForm({
+  onSubmit,
+  isLoading,
+  initData,
+}: {
+  onSubmit?: (data: SchemaType) => void;
+  isLoading: boolean;
+  initData?: SchemaType;
+}) {
   const {
     handleSubmit,
     watch,
@@ -87,7 +95,7 @@ function NewRfqForm({ onSubmit }: { onSubmit?: (data: SchemaType) => void }) {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(appSchema.rfq.addIsinSchema),
-    defaultValues: {
+    defaultValues: initData || {
       segment: "R",
       dealType: "D",
       buySell: "B",
@@ -261,17 +269,16 @@ function NewRfqForm({ onSubmit }: { onSubmit?: (data: SchemaType) => void }) {
                   error={errors.institutions?.message}
                 />
               )}
-              {watch("dealType") == "B" && (
-                <InputField
-                  id="clientcode"
-                  label="Client Code"
-                  required
-                  placeholder="Enter Client Code"
-                  value={watch("clientCode") || ""}
-                  onChangeAction={(e) => setValue("clientCode", e)}
-                  error={errors.clientCode?.message}
-                />
-              )}
+
+              <InputField
+                id="clientcode"
+                label="Client Code"
+                required
+                placeholder="Enter Client Code"
+                value={watch("clientCode") || ""}
+                onChangeAction={(e) => setValue("clientCode", e)}
+                error={errors.clientCode?.message}
+              />
             </div>
 
             <div className="gap-5 grid md:grid-cols-3 md:col-span-2">
@@ -610,7 +617,9 @@ function NewRfqForm({ onSubmit }: { onSubmit?: (data: SchemaType) => void }) {
         </CardContent>
         <CardFooter className="gap-5">
           <Button variant={`secondary`}>Cancel</Button>
-          <Button onClick={handleSubmit(onSubmitForm)}>Submit RFQ</Button>
+          <Button onClick={handleSubmit(onSubmitForm)} disabled={isLoading}>
+            Submit RFQ
+          </Button>
         </CardFooter>
       </Card>
     </Form>

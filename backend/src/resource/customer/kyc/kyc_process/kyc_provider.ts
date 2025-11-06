@@ -203,7 +203,7 @@ export class KycProvider extends DigioKycFileHelper {
             }
         } catch (error) {
             if (error) {
-                throw new AppError((error as AxiosError<{ error: string,ErrorDescription?:string }>)?.response?.data?.ErrorDescription || error.toString(), { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 });
+                throw new AppError((error as AxiosError<{ error: string, ErrorDescription?: string }>)?.response?.data?.ErrorDescription || error.toString(), { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 });
             }
         }
 

@@ -1,108 +1,105 @@
 import axios, { type AxiosInstance } from "axios";
 import * as crypto from "crypto";
-import type { DemateVerifyResponse } from "../response.types";
 import type { BoPanRequest, BoPanResponse } from "./CDSLApi.response";
+import type { DemateVerifyResponse } from "../response.types";
 
 
-
-// CDSL API class to interact with CDSL's BO-PAN verification service
 export class CDSLApi {
   private readonly axiosInstance: AxiosInstance;
   private readonly AesKey: string;
   private readonly baseUrl: string;
 
-  constructor(data: { AESKey: string, isProd: boolean }) {
-
-
+  constructor(data: { AESKey: string; isProd: boolean }) {
     this.AesKey = data.AESKey;
+    if (this.AesKey.length !== 32)
+      throw new Error("AESKey must be exactly 32 bytes for AES-256.");
 
     this.baseUrl = data.isProd
       ? "https://app.cdslindia.com/EasiEasiestApi/BOPAN"
-      : "https://testapp.cdslindia.com/EasiEasiestApi/BOPAN";
+      : "https://mockapigt.cdsl.co.in/EasiEasiestApi/BOPAN";
 
     this.axiosInstance = axios.create({
       baseURL: this.baseUrl,
-      timeout: 10000,
+      timeout: 30000,
       headers: {
-        "Content-Type": "text/plain", // Encrypted blob is sent as plain text
-        Accept: "application/json",
-        version: "1.0",
+        "Content-Type": "application/json",
+        Version: "1.0",
       },
     });
   }
 
-  /* ============ Utilities ============ */
 
+  private buildIstTimestamps(now = new Date()) {
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
 
-  generateEntityId(prefix = "ENT") {
-    // Generate 6 random bytes (48 bits) and convert to base36 for compactness
-    const randomPart = crypto.randomBytes(6).toString("base64").toUpperCase();
+    const parts = Object.fromEntries(
+      fmt.formatToParts(now).map(p => [p.type, p.value])
+    ) as Record<
+      "day" | "month" | "year" | "hour" | "minute" | "second",
+      string
+    >;
+    const body14 = `${parts.day}${parts.month}${parts.year}${parts.hour}${parts.minute}${parts.second}`;
 
-    // Add last 5 digits of current timestamp to ensure no repetition
-    const timePart = Date.now().toString().slice(-5);
+    // convert IST -> UTC epoch
+    const y = parseInt(parts.year, 10);
+    const M = parseInt(parts.month, 10);
+    const d = parseInt(parts.day, 10);
+    const H = parseInt(parts.hour, 10);
+    const m = parseInt(parts.minute, 10);
+    const s = parseInt(parts.second, 10);
 
-    // Combine prefix + time + random part, trimmed to 16 chars
-    const entityId = (prefix + timePart + randomPart).substring(0, 16);
+    const utcMs = Date.UTC(y, M - 1, d, H, m, s) - (5 * 60 + 30) * 60 * 1000;
+    const headerEpochMs = String(utcMs);
 
-    return entityId;
+    return { body14, headerEpochMs };
   }
 
-  /** Header reqdatetime (milliseconds as string) */
-  private getHeaderTimestamp(): string {
-    return Date.now().toString();
-  }
 
-  /** Body reqdatetime (format ddMMyyyyHHmmss) */
-  private getBodyTimestamp(): string {
-    const d = new Date();
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    return (
-      pad(d.getDate()) +
-      pad(d.getMonth() + 1) +
-      d.getFullYear() +
-      pad(d.getHours()) +
-      pad(d.getMinutes()) +
-      pad(d.getSeconds())
-    );
-  }
+  /** AES-256-CBC encryption with PKCS7 padding and zero IV (per CDSL spec) */
+  private encryptRequestData(requestData: object, iv = Buffer.alloc(16, 0x00)): string {
+    const key = Buffer.from(this.AesKey, "utf8");
+    if (key.length !== 32) throw new Error("Invalid AES-256 key length (must be 32 bytes).");
 
-  /** AES-256-CBC encrypt JSON -> Base64(iv+ciphertext) */
-  private encryptRequestData(requestData: object): string {
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv("aes-256-cbc", this.AesKey, iv);
     const plaintext = JSON.stringify(requestData);
-    const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
-    return Buffer.concat([iv, encrypted]).toString("base64");
+    const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+    const c1 = cipher.update(Buffer.from(plaintext, "utf8"));
+    const c2 = cipher.final();
+    const ciphertext = Buffer.concat([c1, c2]);
+    return ciphertext.toString("base64");
   }
 
-  /** (Optional) Decrypt payload — for testing only */
-  private decryptPayload(base64Data: string) {
-    const buffer = Buffer.from(base64Data, "base64");
-    const iv = buffer.subarray(0, 16);
-    const data = buffer.subarray(16);
-    const decipher = crypto.createDecipheriv("aes-256-cbc", this.AesKey, iv);
+  /** Optional decrypt utility — for internal testing */
+  private decryptPayload(base64Cipher: string, iv = Buffer.alloc(16, 0x00)) {
+    const key = Buffer.from(this.AesKey, "utf8");
+    const data = Buffer.from(base64Cipher, "base64");
+    const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
     const decrypted = Buffer.concat([decipher.update(data), decipher.final()]).toString("utf8");
-    return JSON.parse(decrypted);
+    try {
+      return JSON.parse(decrypted);
+    } catch {
+      return decrypted;
+    }
   }
 
-  /* ============ Main API Method ============ */
-
-  /**
-   * Validate BO–PAN Combination
-   * Endpoint: /PANVerifyRequest/
-   */
+  /** Main API method — PAN Verify Request */
   async panVerifyRequest(request: BoPanRequest): Promise<DemateVerifyResponse<BoPanResponse>> {
-    if (!request.boid || !request.pan1) {
-      throw new Error("boid and pan1 are required.");
-    }
+    if (!request.boid || !request.pan1)
+      throw new Error("Missing required fields: boid and pan1.");
 
-    const headerTimestamp = this.getHeaderTimestamp();
-    const bodyTimestamp = this.getBodyTimestamp();
+    const { body14 } = this.buildIstTimestamps();
 
-    // Prepare the plaintext RequestData structure
     const body = {
       RequestData: {
-        reqdatetime: bodyTimestamp,
+        reqdatetime: body14,
         boid: request.boid,
         pan1: request.pan1,
         pan2: request.pan2 ?? null,
@@ -110,30 +107,35 @@ export class CDSLApi {
       },
     };
 
-    // Encrypt it
+    // Encrypt payload
     const encryptedBody = this.encryptRequestData(body);
 
-    // Send request
+
+    const headers = {
+      "Content-Type": "application/json",
+      Version: "1.0",
+      EntityID: "bond8534",
+      Reqdatetime: body14,
+    };
+
     const response = await this.axiosInstance.post<BoPanResponse>(
-      "/PANVerifyRequest/",
-      encryptedBody,
-      {
-        headers: {
-          entityid: this.generateEntityId(),
-          reqdatetime: headerTimestamp,
-        },
-      }
+      "/PANVerifyRequest",
+      JSON.stringify(encryptedBody),
+      { headers }
     );
 
+    const data = response.data;
+
     return {
+      idNo: data.ReqSeqNo,
       fstHoldrPan: request.pan1,
-      scndHoldrPan: request.pan2 || undefined,
-      thrdHoldrPan: request.pan3 || undefined,
-      idNo: response.data.ReqSeqNo,
-      isVerified: response.data.StatusCode === "01", // "01" means verified,,
-      status: response.data.StatusCode,
-      message: response.data.ErrorDescription,
-      data: response.data,
+      scndHoldrPan: request.pan2 ?? undefined,
+      thrdHoldrPan: request.pan3 ?? undefined,
+      isVerified: data.StatusCode === "01",
+      status: data.StatusCode,
+      message: data.ErrorDescription,
+      data,
     };
   }
 }
+

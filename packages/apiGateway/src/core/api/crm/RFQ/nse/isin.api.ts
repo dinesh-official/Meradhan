@@ -18,7 +18,7 @@ export class RfqIsinApi {
     }
 
     async addIsinToRfq(payload: z.infer<typeof appSchema.rfq.addIsinSchema>, config?: AxiosRequestConfig) {
-        const data = await this.apiClient.post<BaseResponseData<z.infer<typeof appSchema.rfq.addIsinSchema>>>("/crm/rfq/add-isin", payload, config);
+        const data = await this.apiClient.post<BaseResponseData<z.infer<typeof appSchema.rfq.addIsinSchema>>>("/crm/rfq/nse/add-isin", payload, config);
         return data;
     }
 }

@@ -2,10 +2,12 @@
 
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import NewRfqForm, { SchemaType } from "./forms/NewRfqForm";
+import { useCreateRfqHook } from "./forms/useCreateRfqHook";
 
 function NewRfqFormView() {
+  const { newRfqMutation } = useCreateRfqHook();
   const handleFormSubmit = (data: SchemaType) => {
-    console.log("Form submitted:", data);
+    newRfqMutation.mutate(data);
   };
 
   return (
@@ -15,7 +17,11 @@ function NewRfqFormView() {
         description="Create a new Request for Quote record"
         showBack
       />
-      <NewRfqForm onSubmit={handleFormSubmit} />;
+      <NewRfqForm
+        onSubmit={handleFormSubmit}
+        isLoading={newRfqMutation.isPending}
+      />
+      
     </div>
   );
 }
