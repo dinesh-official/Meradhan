@@ -51,7 +51,7 @@ export const useCurrentUserProfileHook = () => {
         try {
             await refetch();
             toast.success("Profile updated successfully");
-        } catch (error) {
+        } catch  {
             toast.error("Failed to refresh profile");
         }
     }, [refetch]);
