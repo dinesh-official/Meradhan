@@ -3,6 +3,9 @@
 // // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 // import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
+// import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
+// import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+
 // // import { db } from "@core/database/database";
 // import { NSDLApi } from "kyc-providers";
 
@@ -181,3 +184,7 @@
 // })
 
 // console.log("response:", response);
+
+
+// const data = await rfqManager.getAllNegotiations({});
+// console.log(data.length);

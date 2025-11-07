@@ -2,7 +2,7 @@ import type { appSchema } from "@root/schema";
 import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
 import type { IApiCaller } from "../../../../connection/apiCaller.interface";
-import type { CreateRfqResponseItem, NseISINResponseData } from "./isin.response";
+import type { CreateNegotiationResponse, CreateRfqResponseItem, NseISINResponseData } from "./isin.response";
 import type { BaseResponseData } from "../../../../../types/base";
 
 export class RfqIsinApi {
@@ -29,4 +29,50 @@ export class RfqIsinApi {
         });
         return data.data;
     }
+
+    async getRfqByNumber(payload?: z.infer<typeof appSchema.rfq.rfqFilterSchema>, config?: AxiosRequestConfig) {
+        const data = await this.apiClient.get<BaseResponseData<CreateRfqResponseItem[]>>("/crm/rfq/nse/find", {
+            ...config,
+            params: payload,
+        });
+        return data.data;
+    }
+
+    async acceptQuoteNegotiation(payload: z.infer<typeof appSchema.rfq.acceptNegotiationQuoteSchema>, config?: AxiosRequestConfig) {
+        const data = await this.apiClient.post<BaseResponseData<CreateRfqResponseItem | null>>("/crm/rfq/nse/negotiate/accept", payload, {
+            ...config,
+        });
+        return data.data;
+    }
+
+    async quoteTermination(payload: z.infer<typeof appSchema.rfq.terminateNegotiationQuoteSchema>, config?: AxiosRequestConfig) {
+        const data = await this.apiClient.post<BaseResponseData<CreateRfqResponseItem | null>>("/crm/rfq/nse/negotiation/terminate", payload, {
+            ...config,
+        });
+        return data.data;
+    }
+
+    async getAllNegotiations(payload?: z.infer<typeof appSchema.rfq.rfqNegotiationFilterSchema>, config?: AxiosRequestConfig) {
+        const data = await this.apiClient.post<BaseResponseData<CreateNegotiationResponse[]>>("/crm/rfq/nse/negotiations", payload, {
+            ...config,
+        });
+        return data.data;
+    }
+
+    async proposeDeal(payload: z.infer<typeof appSchema.rfq.proposeDealSchema>, config?: AxiosRequestConfig) {
+        const data = await this.apiClient.post<BaseResponseData<CreateRfqResponseItem | null>>("/crm/rfq/nse/deal/propose", payload, {
+            ...config,
+        });
+        return data.data;
+    }
+
+
+
+    async acceptRejectDeal(payload: z.infer<typeof appSchema.rfq.acceptRejectDealSchema>, config?: AxiosRequestConfig) {
+        const data = await this.apiClient.post<BaseResponseData<CreateRfqResponseItem | null>>("/crm/rfq/nse/deal/accept-reject", payload, {
+            ...config,
+        });
+        return data.data;
+    }
+
 }

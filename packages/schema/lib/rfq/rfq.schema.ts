@@ -129,7 +129,7 @@ export const acceptNegotiationQuoteSchema = z.object({
     acceptedYield: z.float32().optional(),
     acceptedPrice: z.float32().optional(),
     respDealType: z.enum(["D", "B"]),
-    respClientCode: z.string({ error: "Client Code is required" }).min(1, "Client Code is required"),
+    respClientCode: z.string().optional(),
     role: z.enum(["I", "R"]).optional(),
 });
 
@@ -152,6 +152,8 @@ export const acceptRejectDealSchema = z.object({
 });
 
 
+
+
 export const rfqFilterSchema = z.object({
     number: z.string().optional(),
     date: z.string().optional(),
@@ -160,3 +162,50 @@ export const rfqFilterSchema = z.object({
     clientRegType: z.enum(["U", "I", "R"]).optional(),
     status: z.enum(["P", "W", "T"]).optional(),
 }).optional();
+
+export const rfqNegotiationFilterSchema = z.object({
+    rfqNumber: z.string().max(15).optional(),        // RFQ Number
+    id: z.string().max(15).optional(),               // Negotiation Thread Id
+    date: z.string().optional(),                       // Date
+    isin: z.string().max(12).optional(),             // ISIN
+    buySellType: z.enum(["B", "S"]).optional(),      // Buy/Sell
+    status: z.enum(["N", "R", "A", "C", "E"]).optional(), // Status
+    tradeNumber: z.string().max(15).optional(),      // Trade number
+    confirmStatus: z
+        .enum(["PP", "PC", "PR", "CA", "CC", "CR"])
+        .optional(),                                   // Confirm status
+    fromTimestamp: z.string().optional(),              // From timestamp
+    toTimestamp: z.string().optional(),                // To timestamp
+});
+
+
+export const proposeDealSchema = z.object({
+    ngRfqNumber: z.string({
+        error: "RFQ Number is required",
+    }).min(1).max(15),          // String(15) Yes
+    ngId: z.string({
+        error: "Negotiation ID is required",
+    }).min(1).max(15),                 // String(15) Yes
+    participantCode: z.string({
+        error: "Participant Code is required",
+    }).min(1).max(30),  // String(30) Yes
+    dealType: z.enum(["D", "B"]),              // String(1) Yes
+    clientCode: z.string({
+        error: "Client Code is required",
+    }).min(1).max(30),           // String(30) Yes
+    price: z.float32({
+        error: "Price is required",
+    }).min(1),                        // Decimal(3,4) but string
+    accruedInterest: z.float32({
+        error: "Accrued Interest is required",
+    }),              // Decimal(15,2) but string
+    consideration: z.float32({
+        error: "Consideration is required",
+    }),                // Decimal(15,2) but string
+    calcMethod: z.enum(["M", "O"]),            // String(1) Yes
+    putCallDate: z.string().optional(),              // Date (optional)
+    remarks: z.string().optional(),                  // String(100) optional
+    role: z.enum(["I", "R"]),              // String(1) optional
+});
+
+

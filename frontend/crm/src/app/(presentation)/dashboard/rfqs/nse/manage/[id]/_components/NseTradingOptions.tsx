@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import YesNoIndicator from "@/global/elements/yesNoIndicator/YesNoIndicator";
+import { RfqAccessBadge } from "../../../_components/bages/NseRfqBadges";
 
 export interface TradingOptionsDataProps {
   rfqValidTillMarketClose: boolean;
@@ -10,7 +10,7 @@ export interface TradingOptionsDataProps {
   valueNegotiable: boolean;
   minimumValueCrores: string;
   valueStepSize: string;
-  accessType: string;
+  accessType: number;
   anonymous: boolean;
 }
 
@@ -22,9 +22,9 @@ const NseTradingOptions = (tradingOptionsData: TradingOptionsDataProps) => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-5">
-          <div className="grid md:grid-cols-2 gap-7">
+          <div className="gap-7 grid md:grid-cols-2">
             <LabelView title="RFQ Valid Till Market Close">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 {tradingOptionsData.rfqValidTillMarketClose ? (
                   <YesNoIndicator value={true} size={14} textSize="text-base" />
                 ) : (
@@ -44,7 +44,7 @@ const NseTradingOptions = (tradingOptionsData: TradingOptionsDataProps) => {
             </LabelView>
 
             <LabelView title="Quote Negotiable">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 {tradingOptionsData.quoteNegotiable ? (
                   <YesNoIndicator value={true} size={14} textSize="text-base" />
                 ) : (
@@ -58,7 +58,7 @@ const NseTradingOptions = (tradingOptionsData: TradingOptionsDataProps) => {
             </LabelView>
 
             <LabelView title="Value Negotiable">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 {tradingOptionsData.valueNegotiable ? (
                   <YesNoIndicator value={true} size={14} textSize="text-base" />
                 ) : (
@@ -84,11 +84,11 @@ const NseTradingOptions = (tradingOptionsData: TradingOptionsDataProps) => {
             </LabelView>
 
             <LabelView title="Access Type">
-              <Badge variant="secondary">{tradingOptionsData.accessType}</Badge>
+              <RfqAccessBadge type={tradingOptionsData.accessType} />
             </LabelView>
 
             <LabelView title="Anonymous">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 {tradingOptionsData.anonymous ? (
                   <YesNoIndicator value={true} size={14} textSize="text-base" />
                 ) : (

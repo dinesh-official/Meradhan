@@ -144,3 +144,90 @@ export interface CreateRfqResponseItem {
     updatedBy?: number;
     updatedAt?: string;
 }
+
+
+
+
+export interface CreateNegotiationResponse {
+    rfqNumber: string;
+    id: string;
+    date: string;
+    isin: string;
+    buySell: "B" | "S";
+
+    initSettlementType?: number;
+    initSettlementDate?: string;
+    initAeCode?: string;
+    initDealType?: "D" | "B";
+    initClientCode?: string;
+    initClientRegType?: "R" | "I" | "U";
+    initValue?: number;
+    initQuantity?: number;
+    initYieldType?: "YTM" | "YTP" | "YTC";
+    initYield?: number;
+    initCalcMethod?: "M" | "O";
+    initPrice?: number;
+    initAccruedInterest?: number;
+    initConsideration?: number;
+    initQuoteTime?: string;
+    initGtdFlag?: "Y" | null;
+    initEndTime?: string;
+    initRemarks?: string;
+    initLoginId?: string;
+
+    respSettlementType?: number;
+    respSettlementDate?: string;
+    respAeCode?: string;
+    respDealType?: "D" | "B";
+    respClientCode?: string;
+    respClientRegType?: "R" | "I" | "U";
+    respValue?: number;
+    respQuantity?: number;
+    respYieldType?: "YTM" | "YTP" | "YTC";
+    respYield?: number;
+    respCalcMethod?: "M" | "O";
+    respPrice?: number;
+    respAccruedInterest?: number;
+    respConsideration?: number;
+    respQuoteTime?: string;
+    respGtdFlag?: "Y" | null;
+    respEndTime?: string;
+    respRemarks?: string;
+    respLoginId?: string;
+
+    status: "N" | "R" | "A" | "C" | "E"; // Negotiation status
+    tradeNumber?: string;
+
+    acceptedSettlementType?: number;
+    acceptedSettlementDate?: string;
+    acceptedValue?: number;
+    acceptedQuantity?: number;
+    acceptedYieldType?: "YTM" | "YTP" | "YTC";
+    acceptedYield?: number;
+    acceptedCalcMethod?: "M" | "O";
+    acceptedPrice?: number;
+    acceptedPutCallDate?: string;
+    acceptedAccruedInterest?: number;
+    acceptedConsideration?: number;
+    acceptedQuoteTime?: string;
+    acceptedBySide?: "I" | "R";
+    acceptedByLoginId?: string;
+
+    confirmStatus?: "PP" | "PC" | "PR" | "CA" | "CC" | "CR";
+    proposedBySide?: "I" | "R";
+    proposedTime?: string;
+    confirmedPriceQuoteTime?: string;
+    lastActivityTimestamp: string;
+
+    tradeSplits?: TradeSplit[];
+}
+
+// Optional nested type (if trade splits are included)
+export interface TradeSplit {
+    tradeId: string;
+    value?: number;
+    quantity?: number;
+    yield?: number;
+    price?: number;
+    participantCode?: string;
+}

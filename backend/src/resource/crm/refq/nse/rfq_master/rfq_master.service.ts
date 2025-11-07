@@ -62,6 +62,7 @@ export class RfqMasterService {
 
     async negotiateRfqAccept(data: z.infer<typeof appSchema.rfq.acceptNegotiationQuoteSchema>, createdBy: number) {
         // Negotiate RFQ Quote - Call Service
+
         const negotiateRfqQuote = await this.rfqManager.acceptNegotiationQuote({
             rfqNumber: data.rfqNumber,
             acceptedValue: data.acceptedValue,
@@ -113,12 +114,58 @@ export class RfqMasterService {
 
     async getAllRfqList(filters: z.infer<typeof appSchema.rfq.rfqFilterSchema>) {
         const data = await this.rfqManager.getAllRfq(filters);
+        console.log(data);
+
         const result = data.map(async (rfq) => {
             return await this.rfqDbSyncManager.syncRfqMasterData(rfq);
         });
         const rfqs = await Promise.all(result);
         return rfqs;
     }
+
+
+    async getAllNegotiations(filters: z.infer<typeof appSchema.rfq.rfqNegotiationFilterSchema>, activeUserId?: number) {
+        const data = await this.rfqManager.getAllNegotiations({
+            buySellType: filters.buySellType,
+            rfqNumber: filters.rfqNumber,
+            status: filters.status,
+            date: filters.date,
+            fromTimestamp: filters.fromTimestamp,
+            toTimestamp: filters.toTimestamp,
+            confirmStatus: filters.confirmStatus,
+            id: filters.id,
+            isin: filters.isin,
+            tradeNumber: filters.tradeNumber,
+        });
+
+        const result = data.map(async (negotiation) => {
+            return await this.rfqDbSyncManager.syncNegotiationData(negotiation, activeUserId);
+        });
+        const negotiations = await Promise.all(result);
+        return negotiations;
+    }
+
+    async proposeDeal(data: z.infer<typeof appSchema.rfq.proposeDealSchema>, createdBy: number) {
+        // Propose Deal - Call Service
+        const proposeDeal = await this.rfqManager.proposeDeal({
+            ngRfqNumber: data.ngRfqNumber,
+            ngId: data.ngId,
+            participantCode: data.participantCode,
+            dealType: data.dealType,
+            clientCode: data.clientCode,
+            price: data.price,
+            accruedInterest: data.accruedInterest,
+            consideration: data.consideration,
+            calcMethod: data.calcMethod,
+            role: data.role,
+            putCallDate: data.putCallDate,
+            remarks: data.remarks,
+        });
+
+        // Sync Deal Data to Our Database
+        return await this.rfqDbSyncManager.syncNegotiationData(proposeDeal, createdBy);
+    }
+
 
 
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -7,63 +8,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CardAction, CardHeader } from "@/components/ui/card";
-import { Search } from "lucide-react";
 import { SelectOption } from "@/global/elements/inputs/SelectField";
 
 interface NseRFQSearchFilterBarProps {
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+
+  rfqDateValue?: string;
+  onRfqDateChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+
   statusValue?: string;
   onStatusChange?: (value: string) => void;
-  kycValue?: string;
-  onKycChange?: (value: string) => void;
+
+  regTypeValue?: string;
+  onRegTypeChange?: (value: string) => void;
+
   statusOptions?: SelectOption[];
-  kycOptions?: SelectOption[];
-  placeholder?: string;
+  regTypeOptions?: SelectOption[];
 }
 
 const filterKycStatus: SelectOption[] = [
-  { label: "All Kyc Status", value: "ALL" },
-  { label: "Pending", value: "PENDING" },
-  { label: "Verified", value: "APPROVED" },
-  { label: "Rejected", value: "REJECTED" },
+  { label: "Institution - Regulated", value: "I" },
+  { label: "Institution – Unregulated", value: "U" },
 ];
 
 const filterStatusOptions: SelectOption[] = [
   { label: "All Status", value: "ALL" },
-  { label: "New", value: "New" },
-  { label: "Suspended", value: "SUSPENDED" },
+  { label: "Pending", value: "P" },
+  { label: "Withdrawn", value: "W" },
+  { label: "Fully Traded", value: "T" },
 ];
 
 const NseRFQSearchFilterBar: React.FC<NseRFQSearchFilterBarProps> = ({
   searchValue,
   onSearchChange,
+  rfqDateValue,
+  onRfqDateChange,
   statusValue,
   onStatusChange,
-  kycValue,
-  onKycChange,
+  onRegTypeChange,
+  regTypeValue,
   statusOptions = filterStatusOptions,
-  kycOptions = filterKycStatus,
-  placeholder = "Search...",
+  regTypeOptions = filterKycStatus,
 }) => {
   return (
-    <CardHeader>
-      <div className="relative">
+    <CardHeader className="flex justify-between gap-4">
+      {/* Search and Date Inputs */}
+      <div className="flex flex-wrap items-center gap-5">
         <Input
-          className="peer ps-9 w-64 bg-secondary border-0"
-          placeholder={placeholder}
+          className="peer bg-secondary border-0 w-64"
+          placeholder="RFQ Number"
           type="search"
           value={searchValue}
           onChange={onSearchChange}
         />
-        <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
-          <Search size={16} aria-hidden="true" />
-        </div>
+
+        <Input
+          className="peer bg-secondary border-0 w-48"
+          placeholder="RFQ Date"
+          type="date"
+          value={rfqDateValue}
+          onChange={onRfqDateChange}
+        />
       </div>
-      <CardAction className="flex flex-row gap-3">
+
+      {/* Status and KYC Filters */}
+      <CardContent className="flex flex-row flex-wrap gap-3 p-0">
         <Select value={statusValue} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-[160px] bg-secondary border-none">
+          <SelectTrigger className="bg-secondary border-none w-[160px]">
             <SelectValue placeholder="Apply Status" />
           </SelectTrigger>
           <SelectContent>
@@ -74,31 +86,20 @@ const NseRFQSearchFilterBar: React.FC<NseRFQSearchFilterBarProps> = ({
             ))}
           </SelectContent>
         </Select>
-        <Select value={kycValue} onValueChange={onKycChange}>
-          <SelectTrigger className="w-[160px] bg-secondary border-none">
-            <SelectValue placeholder="Apply Segments" />
+
+        <Select value={regTypeValue} onValueChange={onRegTypeChange}>
+          <SelectTrigger className="bg-secondary border-none w-[160px]">
+            <SelectValue placeholder="Client RegType" />
           </SelectTrigger>
           <SelectContent>
-            {kycOptions.map((option) => (
+            {regTypeOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={kycValue} onValueChange={onKycChange}>
-          <SelectTrigger className="w-[160px] bg-secondary border-none">
-            <SelectValue placeholder="Apply Deal Types" />
-          </SelectTrigger>
-          <SelectContent>
-            {kycOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardAction>
+      </CardContent>
     </CardHeader>
   );
 };

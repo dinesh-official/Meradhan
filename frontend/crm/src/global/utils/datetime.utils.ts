@@ -10,6 +10,7 @@ export type DateFormatToken =
     | "YYYY.MM.DD"
     // Text month names
     | "DD MMM YYYY"
+    | "DD-MMM-YYYY"
     | "DD MMMM YYYY"
     | "MMMM DD, YYYY"
     | "MMM DD, YYYY"
@@ -40,9 +41,9 @@ export const dateTimeUtils = {
     ): string => {
         if (!dateInput) return "";
 
-        const date = dateInput instanceof Date ? dateInput : new Date(dateTimeUtils.parseDate(dateInput.toString())||"");
+        const date = dateInput instanceof Date ? dateInput : new Date(dateTimeUtils.parseDate(dateInput.toString()) || "");
         console.log(date);
-        
+
         if (isNaN(date.getTime())) return "Invalid Date";
 
         const day = date.getDate();

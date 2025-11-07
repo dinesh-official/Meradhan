@@ -10,7 +10,15 @@ import { useRfqisinHook } from "./_components/rfcqLIst/useRfqisinHook";
 import { useRouter } from "nextjs-toploader/app";
 
 function NscRfqView() {
-  const { findRfqSearchMutasion } = useRfqisinHook();
+  const {
+    findRfqSearchMutasion,
+    setStatusValue,
+    setRegTypeValue,
+    filters,
+    resetFilters,
+    setRfqDate,
+    setSearchValue,
+  } = useRfqisinHook();
   const router = useRouter();
 
   return (
@@ -28,13 +36,28 @@ function NscRfqView() {
       />
 
       <Card>
-        <NseRFQSearchFilterBar />
+        <NseRFQSearchFilterBar
+          onStatusChange={(e) => {
+            if (e == "ALL") {
+              setStatusValue(undefined);
+            } else {
+              setStatusValue(e);
+            }
+          }}
+          onRegTypeChange={(e) => setRegTypeValue(e)}
+          rfqDateValue={filters.rfqDate}
+          onRfqDateChange={(e) => setRfqDate(e.target.value)}
+          searchValue={filters.searchValue}
+          onSearchChange={(e) => setSearchValue(e.target.value)}
+        />
         <CardContent>
           <NseTableView
             loading={findRfqSearchMutasion.isLoading}
             data={findRfqSearchMutasion.data?.responseData || []}
             onClick={(e) => {
-              router.push("/dashboard/rfqs/nse/manage/" + e.number);
+              router.push(
+                "/dashboard/rfqs/nse/manage/" + e.number + "?date=" + e.date
+              );
             }}
           />
         </CardContent>

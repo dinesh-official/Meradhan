@@ -1,191 +1,266 @@
+"use client";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCheckbox } from "@/global/elements/inputs/FormCheckbox";
 import { InputField } from "@/global/elements/inputs/InputField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
-import { DealSplitFormData, IDealSplitFormHook } from "./dealSplitFormData";
-import {
-  calculationMethods,
-  dealTypes,
-  goodTillDays,
-  settlementOptions,
-} from "./dealSplitFormData.schema";
+import { CreateNegotiationResponse } from "@root/apiGateway";
+import { useState } from "react";
 
-const DealSplitForm = ({ manager }: { manager: IDealSplitFormHook }) => {
+const DealSplitForm = ({
+  data,
+  onSubmitForm,
+}: {
+  data: CreateNegotiationResponse;
+  onSubmitForm: (data: {
+    calcMethod: string | undefined;
+    dealType: string | undefined;
+    clientCode: string | undefined;
+    price: number | undefined;
+    accruedInterest: number | undefined;
+    consideration: number | undefined;
+    putCallDate: string | undefined;
+    institutionalInvestor: boolean;
+    remarks: string | undefined;
+  }) => void;
+}) => {
+  const [calcMethod, setCalcMethod] = useState<string | undefined>(undefined);
+  const [price, setPrice] = useState<number | undefined>(undefined);
+  const [dealType, setDealType] = useState<string | undefined>(undefined);
+  const [clientCode, setClientCode] = useState<string | undefined>(
+    data.initClientCode
+  );
+  const [accruedInterest, setAccruedInterest] = useState<number | undefined>(
+    undefined
+  );
+  const [consideration, setConsideration] = useState<number | undefined>(
+    undefined
+  );
+  const [putCallDate, setPutCallDate] = useState<string | undefined>(undefined);
+  const [institutionalInvestor, setInstitutionalInvestor] =
+    useState<boolean>(false);
+  const [remarks, setRemarks] = useState<string | undefined>(undefined);
+
+  // Validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validateField = (field: string, value: any) => {
+    let message = "";
+
+    if (
+      [
+        "dealType",
+        "clientCode",
+        "price",
+        "accruedInterest",
+        "calcMethod",
+        "consideration",
+      ].includes(field)
+    ) {
+      if (!value || value === "" || value === undefined || value === null) {
+        message = "This field is required.";
+      }
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [field]: message,
+    }));
+
+    return message === "";
+  };
+
+  const handleSubmit = () => {
+    const validations = [
+      validateField("calcMethod", calcMethod),
+      validateField("dealType", dealType),
+      validateField("clientCode", clientCode),
+      validateField("price", price),
+      validateField("accruedInterest", accruedInterest),
+      validateField("consideration", consideration),
+    ];
+
+    const allValid = validations.every(Boolean);
+
+    if (allValid) {
+      const data = {
+        calcMethod,
+        dealType,
+        clientCode,
+        price,
+        accruedInterest,
+        consideration,
+        putCallDate,
+        institutionalInvestor,
+        remarks,
+      };
+      onSubmitForm(data);
+    } else {
+      console.log("❌ Validation Failed");
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-3 gap-5">
-        <InputField
-          id="value"
-          label="Value"
-          placeholder="Enter value"
-          type="text"
-          value={manager.state.value}
-          onChangeAction={(e) => {
-            manager.setDealSplitData("value", e);
-          }}
-          error={manager?.errors?.value?.[0]}
-        />
-        <InputField
-          id="yield"
-          label="Yield"
-          placeholder="Enter Yield"
-          type="text"
-          value={manager.state.yield}
-          onChangeAction={(e) => {
-            manager.setDealSplitData("yield", e);
-          }}
-          error={manager?.errors?.yield?.[0]}
-        />
-        <SelectField
-          label="Calculation Method"
-          placeholder="Calculation Method"
-          options={calculationMethods.map((option) => ({
-            label: option,
-            value: option,
-          }))}
-          value={manager.state.calculationMethod}
-          onChangeAction={(e) => {
-            manager.setDealSplitData(
-              "calculationMethod",
-              e as DealSplitFormData["calculationMethod"]
-            );
-          }}
-          error={manager?.errors?.calculationMethod?.[0]}
-        />
-        <InputField
-          id="priceTriggeredDate"
-          label="Price Triggered Date"
-          placeholder="Enter Yield"
-          type="date"
-          value={manager.state.priceTriggeredDate}
-          onChangeAction={(e) => {
-            manager.setDealSplitData("priceTriggeredDate", e);
-          }}
-          error={manager?.errors?.priceTriggeredDate?.[0]}
-        />
-        <InputField
-          id="price"
-          label="Price"
-          placeholder="Enter Price"
-          type="text"
-          value={manager.state.price}
-          onChangeAction={(e) => manager.setDealSplitData("price", e)}
-          error={manager?.errors?.price?.[0]}
-        />
-        <InputField
-          id="totalAccruedInterest"
-          label="Total Accrued Interest"
-          placeholder="Enter Total Accrued Interest"
-          type="text"
-          value={manager.state.totalAccruedInterest}
-          onChangeAction={(e) =>
-            manager.setDealSplitData("totalAccruedInterest", e)
-          }
-          error={manager?.errors?.totalAccruedInterest?.[0]}
-        />
-
-        <SelectField
-          label="Settlement Date"
-          placeholder="Settlement Date"
-          options={settlementOptions.map((option) => ({
-            label: option,
-            value: option,
-          }))}
-          value={manager.state.settlementDate}
-          onChangeAction={(e) => {
-            manager.setDealSplitData(
-              "settlementDate",
-              e as DealSplitFormData["settlementDate"]
-            );
-          }}
-          error={manager?.errors?.settlementDate?.[0]}
-        />
-
-        <InputField
-          id="quantity"
-          label="Quantity"
-          placeholder="Enter Quantity"
-          type="text"
-          value={manager.state.quantity}
-          onChangeAction={(e) => manager.setDealSplitData("quantity", e)}
-          error={manager?.errors?.quantity?.[0]}
-        />
-        <SelectField
-          label="Good Till Day"
-          placeholder="Good Till Day"
-          options={goodTillDays.map((option) => ({
-            label: option,
-            value: option,
-          }))}
-          value={manager.state.goodTillDay}
-          onChangeAction={(e) =>
-            manager.setDealSplitData(
-              "goodTillDay",
-              e as DealSplitFormData["goodTillDay"]
-            )
-          }
-          error={manager?.errors?.goodTillDay?.[0]}
-        />
-
-        <InputField
-          id="endTime"
-          label="End Time"
-          placeholder="--:--"
-          type="date"
-          value={manager.state.endTime}
-          onChangeAction={(e) => manager.setDealSplitData("endTime", e)}
-          error={manager?.errors?.endTime?.[0]}
-        />
-        <InputField
-          id="stampDuty"
-          label="Cons. w/o Stamp Duty"
-          placeholder="Enter Stamp Duty"
-          type="text"
-          value={manager.state.stampDuty}
-          onChangeAction={(e) => manager.setDealSplitData("stampDuty", e)}
-          error={manager?.errors?.stampDuty?.[0]}
-        />
-        <SelectField
-          label="Deal Type"
-          placeholder="Deal Type"
-          options={dealTypes.map((option) => ({
-            label: option,
-            value: option,
-          }))}
-          value={manager.state.dealType}
-          onChangeAction={(e) =>
-            manager.setDealSplitData(
-              "dealType",
-              e as DealSplitFormData["dealType"]
-            )
-          }
-        />
-        <InputField
-          id="clientCode"
-          label="Client Code "
-          placeholder="Enter Client Code"
-          type="text"
-          value={manager.state.clientCode}
-          onChangeAction={(e) => manager.setDealSplitData("clientCode", e)}
-          error={manager?.errors?.clientCode?.[0]}
-        />
-        <div className="flex gap-2">
-          <FormCheckbox
-            label="Institution"
-            checked={manager.state.institution}
-            onCheckedChange={(checked) =>
-              manager.setDealSplitData("institution", checked)
-            }
+    <div className="flex flex-col gap-6">
+      <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
+        {/* Calculation Method */}
+        <div className="flex flex-col">
+          <SelectField
+            label="Calculation Method *"
+            placeholder="Calculation Method"
+            value={calcMethod}
+            onChangeAction={(e) => {
+              setCalcMethod(e as string);
+              validateField("calcMethod", e);
+            }}
+            options={[
+              { label: "Money Market", value: "M" },
+              { label: "Other", value: "O" },
+            ]}
           />
+          {errors.calcMethod && (
+            <p className="mt-1 text-red-500 text-sm">{errors.calcMethod}</p>
+          )}
+        </div>
+
+        {/* Price */}
+        <div className="flex flex-col">
+          <InputField
+            id="price"
+            label="Price *"
+            placeholder="Enter Price"
+            type="number"
+            value={price?.toString()}
+            onChangeAction={(e) => {
+              setPrice(Number(e));
+              validateField("price", e);
+            }}
+          />
+          {errors.price && (
+            <p className="mt-1 text-red-500 text-sm">{errors.price}</p>
+          )}
+        </div>
+
+        {/* Total Accrued Interest */}
+        <div className="flex flex-col">
+          <InputField
+            id="totalAccruedInterest"
+            label="Total Accrued Interest *"
+            placeholder="Enter Total Accrued Interest"
+            type="number"
+            value={accruedInterest?.toString()}
+            onChangeAction={(e) => {
+              setAccruedInterest(Number(e));
+              validateField("accruedInterest", e);
+            }}
+          />
+          {errors.accruedInterest && (
+            <p className="mt-1 text-red-500 text-sm">
+              {errors.accruedInterest}
+            </p>
+          )}
+        </div>
+
+        {/* Consideration */}
+        <div className="flex flex-col">
+          <InputField
+            id="consideration"
+            label="Consideration *"
+            placeholder="Enter Consideration"
+            type="number"
+            value={consideration?.toString()}
+            onChangeAction={(e) => {
+              setConsideration(Number(e));
+              validateField("consideration", e);
+            }}
+          />
+          {errors.consideration && (
+            <p className="mt-1 text-red-500 text-sm">{errors.consideration}</p>
+          )}
+        </div>
+
+        {/* Put Call Date */}
+        <div className="flex flex-col">
+          <InputField
+            id="putCallOptionClientCode"
+            label="Put Call Date"
+            placeholder="Enter Date"
+            type="date"
+            value={putCallDate}
+            onChangeAction={(e) => setPutCallDate(e)}
+          />
+        </div>
+
+        {/* Deal Type */}
+        <div className="flex flex-col">
+          <SelectField
+            label="Deal Type *"
+            placeholder="Deal Type"
+            value={dealType}
+            onChangeAction={(e) => {
+              setDealType(e as string);
+              validateField("dealType", e);
+            }}
+            options={[
+              { label: "Direct", value: "D" },
+              { label: "Brokered", value: "B" },
+            ]}
+          />
+          {errors.dealType && (
+            <p className="mt-1 text-red-500 text-sm">{errors.dealType}</p>
+          )}
+        </div>
+
+        {/* Institution Checkbox (for Brokered only) */}
+        {dealType === "B" && (
+          <div className="flex flex-col justify-end">
+            <FormCheckbox
+              checked={institutionalInvestor}
+              onCheckedChange={(e) => setInstitutionalInvestor(e)}
+              label="Institution"
+            />
+          </div>
+        )}
+
+        {/* Client Code */}
+        <div className="flex flex-col">
+          <InputField
+            id="clientCode"
+            label="Client Code *"
+            placeholder="Enter Client Code"
+            type="text"
+            value={clientCode}
+            onChangeAction={(e) => {
+              setClientCode(e);
+              validateField("clientCode", e);
+            }}
+          />
+          {errors.clientCode && (
+            <p className="mt-1 text-red-500 text-sm">{errors.clientCode}</p>
+          )}
         </div>
       </div>
 
-      <Textarea
-        id="notes"
-        placeholder="Add any notes..."
-        value={manager.state.notes}
-        onChange={(e) => manager.setDealSplitData("notes", e.target.value)}
-      />
+      {/* Remarks */}
+      <div className="flex flex-col">
+        <Textarea
+          id="remarks"
+          placeholder="Add any remarks..."
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
+        />
+      </div>
+
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4">
+        <button
+          type="button"
+          className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-md font-medium text-white transition-colors"
+          onClick={handleSubmit}
+        >
+          Submit
+        </button>
+      </div>
     </div>
   );
 };

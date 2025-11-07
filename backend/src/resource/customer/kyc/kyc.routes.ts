@@ -7,7 +7,7 @@ const kycRoutes = Router();
 const controller = new CustomerKycKycController();
 
 
-
+// pan
 kycRoutes.post("/api/customer/kyc/pan/request", customerAuthMiddleware, (req, res) => controller.createPanVerifyRequest(req, res));
 kycRoutes.get("/api/customer/kyc/pan/response/:kid", customerAuthMiddleware, (req, res) => controller.verifyPanResponse(req, res));
 

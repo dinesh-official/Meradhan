@@ -1,6 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
-import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import {
+  DealTypeBadge,
+  NseRfqSegmentBadge,
+  PriceYieldTypeBadge,
+  RfqStatusBadge,
+  TradeTypeBadge,
+  YieldTypeBadge
+} from "../../../_components/bages/NseRfqBadges";
 
 export interface RfqInformationDataProps {
   isin: string;
@@ -26,27 +33,24 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-5">
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="gap-5 grid md:grid-cols-3">
             <LabelView title="ISIN">
               <p className="font-medium text-sm">{RfqInformationData.isin}</p>
             </LabelView>
 
             <LabelView title="segment">
-              <StatusBadge value={`${RfqInformationData.segment}`} />
-
+              <NseRfqSegmentBadge type={`${RfqInformationData.segment}`} />
             </LabelView>
             <LabelView title="Buy/Sell">
-              <StatusBadge value={`${RfqInformationData.buySell}`} />
+              <TradeTypeBadge type={`${RfqInformationData.buySell}`} />
             </LabelView>
 
             <LabelView title="Quote Type">
-              <p className="font-medium text-sm">
-                {RfqInformationData.quoteType}
-              </p>
+              <PriceYieldTypeBadge type={`${RfqInformationData.quoteType}`} />
             </LabelView>
 
             <LabelView title="Deal Type">
-              <StatusBadge value={`${RfqInformationData.dealType}`} />
+              <DealTypeBadge type={`${RfqInformationData.dealType}`} />
             </LabelView>
 
             <LabelView title="RFQ Size (Value in Crores)">
@@ -60,9 +64,7 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
               </p>
             </LabelView>
             <LabelView title="Yield Type">
-              <p className="font-medium text-sm">
-                {RfqInformationData.yieldType}
-              </p>
+              <YieldTypeBadge type={RfqInformationData.yieldType} />
             </LabelView>
             <LabelView title="Yield">
               <p className="font-medium text-sm">{RfqInformationData.yield}</p>
@@ -83,7 +85,7 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
               </p>
             </LabelView>
             <LabelView title="Status">
-              <p className="font-medium text-sm">{RfqInformationData.status}</p>
+              <RfqStatusBadge status={`${RfqInformationData.status}`} />
             </LabelView>
           </div>
         </div>

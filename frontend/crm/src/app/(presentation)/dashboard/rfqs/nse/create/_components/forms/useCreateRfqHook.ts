@@ -2,6 +2,7 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller"
 import apiGateway, { ApiError } from "@root/apiGateway"
 import { appSchema } from "@root/schema"
 import { useMutation } from "@tanstack/react-query"
+import { useRouter } from "nextjs-toploader/app"
 import { toast } from "sonner"
 import Swal from "sweetalert2"
 import z from "zod"
@@ -9,6 +10,7 @@ import z from "zod"
 export const useCreateRfqHook = () => {
 
     const rfqApi = new apiGateway.crm.rfq.RfqIsinApi(apiClientCaller)
+    const router = useRouter()
 
     const newRfqMutation = useMutation({
         mutationKey: ['create-nse-rfq'],
@@ -20,6 +22,7 @@ export const useCreateRfqHook = () => {
                 timer: 2000,
                 showConfirmButton: true,
             });
+            router.back();
         },
         onError: (error) => {
             if (error instanceof ApiError) {

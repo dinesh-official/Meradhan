@@ -6,17 +6,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import StatusCountCard from "@/global/elements/cards/StatusCountCard";
-import CardPagination from "@/global/elements/table/CardPagination";
-import { Search } from "lucide-react";
-import Table from "../../../Table";
-import Demo from "./_components/Demo";
+import apiGateway from "@root/apiGateway";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import DealProposerSection from "./_tabs/Deal_Proposer/DealProposerSection";
+
 function NSEDealsView() {
+  const [tabs, setTabs] = useState("deal_proposer");
+
+  const rfqApi = new apiGateway.crm.rfq.RfqIsinApi(apiClientCaller);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["nseDealProposers"],
+    queryFn: async () => {
+      const response = await rfqApi.getAllNegotiations({});
+      return response.responseData;
+    },
+    retry: 2,
+  });
+
   return (
     <div className="flex flex-col gap-5 mt-5">
-      <div className="grid 2xl:grid-cols-4 xl:grid-cols-3  gap-5">
+      <div className="gap-5 grid 2xl:grid-cols-4 xl:grid-cols-3">
         <StatusCountCard
           title="Deal Submit (Proposer)"
           value={10}
@@ -36,35 +50,46 @@ function NSEDealsView() {
           variant="greenGradient"
         />
       </div>
-      <Demo />
+
       <Card>
         <CardHeader>
           <CardTitle>Deals Management</CardTitle>
           <CardDescription>
             View and manage deals across different stages
           </CardDescription>
-          <div className="mt-2 flex justify-between items-center gap-5">
-            <Tabs defaultValue="account">
+          <div className="flex justify-between items-center gap-5 mt-2">
+            <Tabs defaultValue="deal_proposer" onValueChange={setTabs}>
               <TabsList>
-                <TabsTrigger value="account">Deal Proposer</TabsTrigger>
-                <TabsTrigger value="password">Deal Counterparty</TabsTrigger>
-                <TabsTrigger value="psdassword">Deal Confirmed</TabsTrigger>
+                <TabsTrigger value="deal_proposer">Deal Proposer</TabsTrigger>
+                <TabsTrigger value="deal_counterparty">
+                  Deal Counterparty
+                </TabsTrigger>
+                <TabsTrigger value="deal_confirmed">Deal Confirmed</TabsTrigger>
               </TabsList>
             </Tabs>
-            <div className="relative">
-              <Input className="peer ps-9" placeholder="Search..." />
-              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
-                <Search size={16} aria-hidden="true" />
-              </div>
-            </div>
           </div>
         </CardHeader>
 
         <CardContent>
-          <Table />
+          {tabs === "deal_proposer" && (
+            <DealProposerSection
+              data={data?.filter((e) => !e.confirmStatus) || []}
+              loading={isLoading}
+            />
+          )}
+          {tabs === "deal_counterparty" && (
+            <DealProposerSection
+              data={data?.filter((e) => e.confirmStatus == "PC") || []}
+              loading={isLoading}
+            />
+          )}
+          {tabs === "deal_confirmed" && (
+            <DealProposerSection
+              data={data?.filter((e) => e.confirmStatus == "CC") || []}
+              loading={isLoading}
+            />
+          )}
         </CardContent>
-
-        <CardPagination onClick={() => {}} page={3} totalPages={10} />
       </Card>
     </div>
   );

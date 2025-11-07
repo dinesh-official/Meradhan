@@ -1,5 +1,5 @@
 import { db, type DataBaseSchema } from "@core/database/database";
-import type { AcceptNegotiationQuoteResponse, CreateRfqResponseItem } from "@modules/RFQ/nse/rfq.types";
+import type { CreateNegotiationResponse, CreateRfqResponseItem } from "@modules/RFQ/nse/rfq.types";
 import type { appSchema } from "@root/schema";
 import z from "zod";
 
@@ -71,7 +71,7 @@ export class RfqMasterDbSyncManager {
     }
 
     // Negotiation Sync Method 
-    async syncNegotiationData(negotiationData: AcceptNegotiationQuoteResponse, taskUser: number) {
+    async syncNegotiationData(negotiationData: CreateNegotiationResponse, taskUser?: number) {
 
         const data: DataBaseSchema.RFQNegotiationCreateInput = {
             rfqNumber: negotiationData.rfqNumber,
