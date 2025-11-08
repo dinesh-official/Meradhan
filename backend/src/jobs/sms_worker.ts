@@ -14,6 +14,7 @@ startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
         otpCode: otp,
         userName
     }));
+    
     await emailSend.sendEmail({
         to: email,
         subject: subject,

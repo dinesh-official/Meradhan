@@ -178,13 +178,13 @@ function AddDematAccountForm() {
 
             {/* //  Primary Account Holder Details (PAN & Name) - Auto filled from Step 1 */}
             <LabelInput
-              label="Primary Account Holder Name"
+              label="Primary Account Holder PAN"
               required
               error={error?.panNumber?.[0]}
             >
               <Input
                 value={data?.panNumber[0]}
-                onChange={(e) => updateData("panNumber", e.target.value)}
+                onChange={(e) => updateData("panNumber", [e.target.value, ...data.panNumber?.slice(1)])}
                 // disabled
                 // adminMode
               />

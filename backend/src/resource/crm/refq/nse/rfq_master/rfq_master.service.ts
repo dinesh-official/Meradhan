@@ -94,24 +94,6 @@ export class RfqMasterService {
         return await this.rfqDbSyncManager.syncNegotiationData(negotiateRfqQuote, createdBy);
     }
 
-
-    async acceptRejectDeal(data: z.infer<typeof appSchema.rfq.acceptRejectDealSchema>, createdBy: number) {
-        // Accept/Reject RFQ Deal - Call Service
-        const acceptRejectDeal = await this.rfqManager.acceptOrRejectDeal({
-            rfqNumber: data.rfqNumber,
-            id: data.id,
-            acceptedPrice: data.acceptedPrice,
-            acceptedPutCallDate: data.acceptedPutCallDate,
-            acceptedAccruedInterest: data.acceptedAccruedInterest,
-            acceptedConsideration: data.acceptedConsideration,
-            confirmStatus: data.confirmStatus,
-        });
-
-        // Sync Deal Data to Our Database
-        return await this.rfqDbSyncManager.syncNegotiationData(acceptRejectDeal, createdBy);
-    }
-
-
     async getAllRfqList(filters: z.infer<typeof appSchema.rfq.rfqFilterSchema>) {
         const data = await this.rfqManager.getAllRfq(filters);
         console.log(data);
@@ -166,6 +148,20 @@ export class RfqMasterService {
         return await this.rfqDbSyncManager.syncNegotiationData(proposeDeal, createdBy);
     }
 
+    async acceptRejectDeal(data: z.infer<typeof appSchema.rfq.acceptRejectDealSchema>, createdBy: number) {
+        // Accept/Reject RFQ Deal - Call Service
+        const acceptRejectDeal = await this.rfqManager.acceptOrRejectDeal({
+            rfqNumber: data.rfqNumber,
+            id: data.id,
+            acceptedPrice: data.acceptedPrice,
+            acceptedPutCallDate: data.acceptedPutCallDate,
+            acceptedAccruedInterest: data.acceptedAccruedInterest,
+            acceptedConsideration: data.acceptedConsideration,
+            confirmStatus: data.confirmStatus,
+        });
 
+        // Sync Deal Data to Our Database
+        return await this.rfqDbSyncManager.syncNegotiationData(acceptRejectDeal, createdBy);
+    }
 
 }

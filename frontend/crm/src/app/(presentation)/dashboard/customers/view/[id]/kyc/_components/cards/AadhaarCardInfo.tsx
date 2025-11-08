@@ -49,6 +49,7 @@ function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
           <LabelView title="Date of Birth">
             <p className="font-medium text-sm">
               {addressCardInfoData.dateOfBirth}
+              
             </p>
           </LabelView>
           <LabelView title="Gender">

@@ -62,34 +62,39 @@ export const dataMatcherUtils = {
 
 
     /** ✅ Compare two dates (match only date, ignore time) */
+
+
     areDatesMatched(a?: Date | string, b?: Date | string): boolean {
+        function normalizeDate(input?: Date | string): string | null {
+            if (!input) return null;
 
+            const d = (input instanceof Date) ? input : new Date(input);
 
+            if (isNaN(d.getTime())) {
+                // try to handle dd/mm/yyyy
+                const parts = String(input).split("/");
+                if (parts.length === 3) {
+                    // convert DD/MM/YYYY -> YYYY-MM-DD
+                    const [d3, m3, y3] = parts;
+                    return `${y3}-${m3.padStart(2, "0")}-${d3.padStart(2, "0")}`;
+                }
+                return null;
+            }
 
-        if (!a || !b) {
-            return false;
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            return `${yyyy}-${mm}-${dd}`;
         }
-        const a1 = dateTimeUtils.parseDate(a);
-        const b1 = dateTimeUtils.parseDate(b);
 
-        if (!a1 || !b1) {
-            return false;
-        }
+        const A = normalizeDate(a);
+        const B = normalizeDate(b);
 
-        const dateA = new Date(a1);
-        const dateB = new Date(b1);
-        console.log(dateA, dateB);
+        if (!A || !B) return false;
 
-        console.log(dateA.getFullYear() === dateB.getFullYear(),
-            dateA.getMonth() === dateB.getMonth(),
-            dateA.getDate() === dateB.getDate());
+        return A === B;
+    }
 
-        return (
-            dateA.getFullYear() === dateB.getFullYear() &&
-            dateA.getMonth() === dateB.getMonth() &&
-            dateA.getDate() === dateB.getDate()
-        );
-    },
 
 
 };

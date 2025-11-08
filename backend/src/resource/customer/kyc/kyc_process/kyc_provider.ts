@@ -13,6 +13,8 @@ class DigioKycFileHelper {
 
     // get pan aadhar document files from digio rid
     async getPanAadharDocumentFiles(bytes: string) {
+        console.log(bytes);
+        
         const zipBuffer = Buffer.from(bytes);
         const zip = new AdmZip(zipBuffer);
 

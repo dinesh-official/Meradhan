@@ -32,7 +32,8 @@ export class CustomerKycKycService {
 
     // get pan aadhar document files
     async getPanAadharDocumentFiles(kid: string) {
-        const files = await this.kycProvider.getPanAadharDocumentFiles(kid);
+        const bytes = await this.kycProvider.getMediaFileDataBytes(kid);
+        const files = await this.kycProvider.getPanAadharDocumentFiles(bytes);
         return files
     }
 

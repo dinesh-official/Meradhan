@@ -33,12 +33,12 @@ export const config = {
     },
     monitoring: {
         jobName: "Backend",
-        lokiUrl: "http://3.110.126.202:3100",
+        lokiUrl: "http://13.203.69.142:3100",
     },
     redis: {
         username: getEnvVar("REDIS_USERNAME", "default"),
         password: getEnvVar("REDIS_PASSWORD", "sourav"),
-        host: getEnvVar("REDIS_HOST", "3.110.126.202"),
+        host: getEnvVar("REDIS_HOST", "13.203.69.142"),
         port: parseInt(getEnvVar("REDIS_PORT", "6379"))
     }
 };
