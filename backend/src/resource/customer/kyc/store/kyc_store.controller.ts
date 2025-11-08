@@ -1,6 +1,7 @@
 import { db } from "@core/database/database";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
+import { CustomerKycKycService } from "../kyc_process/customer_kyc.service";
 
 
 // KYC store controller class to get and set kyc data in kyc_flow table to track kyc progress for customer to resume later
@@ -55,6 +56,18 @@ export class KycStoreController {
             responseData: {
                 success: true
             }
+        })
+    }
+
+    async setKycLevel(req: Request, res: Response) {
+        const customerId = Number(req.params.customerId);
+        const kyc = new CustomerKycKycService()
+
+        const level = await kyc.getKycLevel(customerId);
+
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: level
         })
     }
 }

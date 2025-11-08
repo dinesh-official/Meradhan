@@ -1,6 +1,7 @@
 import { db } from "@core/database/database";
 import type { $Enums } from "@databases/generated/prisma/supabase";
 import type { KycDataStorage } from "./kyc";
+import type { CustomerProfileService } from "@resource/crm/customers/customer.service";
 
 export class CustomerKycManager {
 
@@ -339,4 +340,250 @@ export class CustomerKycManager {
         });
         return customer?.kycStatus || null;
     }
+
+
+
+
+
+    // i need to show formatted profile data for kyc view on dashboard need same as getFullCustomerProfile but with kyc flow data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async getUserKycFlowDataWithFormattedFullProfile(customerId: number): Promise<any> {
+        // Fetch both user and KYC data
+        const user = await db.dataBase.customerProfileDataModel.findUnique({
+            where: { id: customerId },
+            include: {
+                aadhaarCard: true,
+                panCard: true,
+                personalInformation: true,
+                currentAddress: true,
+                permanentAddress: true,
+                bankAccounts: true,
+                dematAccounts: true,
+                riskProfile: true,
+                utility: true
+            }
+        });
+
+        const kycFlow = await db.dataBase.kYC_FLOW.findUnique({
+            where: { userID: customerId }
+        });
+
+        // Remove sensitive information
+
+
+        if (!kycFlow) return user;
+
+        const kycData = kycFlow.data as KycDataStorage;
+
+        // Extract data from KYC steps with fallbacks
+        const step1 = kycData.step_1;
+        const step2 = kycData.step_2;
+        const step3 = kycData.step_3 || [];
+        const step4 = kycData.step_4 || [];
+        const step5 = kycData.step_5 || [];
+        const step6 = kycData.step_6;
+
+        // Get identity data with fallbacks
+        const panData = step1?.pan?.response?.details?.pan;
+        const aadhaarData = step1?.pan?.response?.details?.aadhaar;
+        const firstName = step1?.pan?.firstName || user?.firstName || "------";
+        const lastName = step1?.pan?.lastName || user?.lastName || "------";
+        const middleName = step1?.pan?.middleName || user?.middleName || null;
+        const gender = this.mapGender(panData?.gender) || user?.gender || "MALE";
+
+        const data: Awaited<ReturnType<CustomerProfileService["getFullCustomerProfile"]>> = {
+            aADHAARCardModelId: null,
+            currentAddressModelId: null,
+            customerPersonalInfoModelId: null,
+            nseDataSet: null,
+            customersRiskProfileModelId: null,
+            customersAuthDataModelId: 0,
+            panCardModelId: null,
+            permanentAddressModelId: null,
+            id: customerId,
+            firstName,
+            lastName,
+            middleName: middleName || "",
+            gender,
+            emailAddress: user?.emailAddress || "------",
+            phoneNo: user?.phoneNo || "------",
+            whatsAppNo: user?.whatsAppNo || "------",
+            userName: user?.userName || "------",
+            userType: user?.userType || "INDIVIDUAL",
+            kycStatus: user?.kycStatus || "VERIFIED",
+            verifyDate: user?.verifyDate || new Date(),
+            VerifiedBy: user?.VerifiedBy || null,
+            avatar: step1?.face?.url || user?.avatar || "------",
+            createdAt: user?.createdAt || new Date(),
+            updatedAt: user?.updatedAt || new Date(),
+            createdBy: user?.createdBy || null,
+
+            // Aadhaar Card data - prioritize KYC data, fallback to existing user data
+            aadhaarCard: aadhaarData || user?.aadhaarCard ? {
+                id: user?.aadhaarCard?.id || 0,
+                aadhaarNo: aadhaarData?.id_number || user?.aadhaarCard?.aadhaarNo || "------",
+                dateOfBirth: aadhaarData?.dob || user?.aadhaarCard?.dateOfBirth || "------",
+                fatherName: aadhaarData?.father_name || user?.aadhaarCard?.fatherName || "------",
+                firstName: firstName,
+                lastName: lastName,
+                middleName: middleName,
+                gender: gender,
+                image: aadhaarData?.image || user?.aadhaarCard?.image || "------",
+                fileUrl: aadhaarData?.file_url || user?.aadhaarCard?.fileUrl || "------",
+                isVerified: user?.aadhaarCard?.isVerified || true,
+                verifyDate: user?.aadhaarCard?.verifyDate || new Date(),
+                createdAt: user?.aadhaarCard?.createdAt || new Date(),
+                updatedAt: user?.aadhaarCard?.updatedAt || new Date(),
+            } : null,
+
+            // PAN Card data - prioritize KYC data, fallback to existing user data
+            panCard: panData || user?.panCard ? {
+                id: user?.panCard?.id || 0,
+                panCardNo: panData?.id_number || user?.panCard?.panCardNo || "------",
+                firstName: firstName,
+                lastName: lastName,
+                middleName: middleName,
+                dateOfBirth: step1?.pan?.dateOfBirth || user?.panCard?.dateOfBirth || "------",
+                gender: gender,
+                image: aadhaarData?.image || user?.panCard?.image || "------",
+                fileUrl: panData?.file_url || user?.panCard?.fileUrl || "------",
+                isVerified: user?.panCard?.isVerified || true,
+                verifyDate: user?.panCard?.verifyDate || new Date(),
+                createdAt: user?.panCard?.createdAt || new Date(),
+                updatedAt: user?.panCard?.updatedAt || new Date(),
+            } : null,
+
+            // Personal Information - prioritize KYC data, fallback to existing user data
+            personalInformation: step2 || user?.personalInformation ? {
+                id: user?.personalInformation?.id || 0,
+                maritalStatus: step2?.maritalStatus || user?.personalInformation?.maritalStatus || "------",
+                occupationType: step2?.occupationType || user?.personalInformation?.occupationType || "------",
+                annualGrossIncome: step2?.annualGrossIncome || user?.personalInformation?.annualGrossIncome || "------",
+                fatherOrSpouseName: step2?.fatSpuName || user?.personalInformation?.fatherOrSpouseName || "------",
+                relationshipWithPerson: step2?.reelWithPerson || user?.personalInformation?.relationshipWithPerson || "------",
+                mothersName: step2?.motherName || user?.personalInformation?.mothersName || "------",
+                nationality: step2?.nationality || user?.personalInformation?.nationality || "------",
+                residentialStatus: step2?.residentialStatus || user?.personalInformation?.residentialStatus || "------",
+                qualification: step2?.qualification || user?.personalInformation?.qualification || "------",
+                dateOfBirth: step1?.pan?.dateOfBirth || user?.personalInformation?.dateOfBirth || "------",
+                SignatureUrl: step1?.sign?.url || user?.personalInformation?.SignatureUrl || "------",
+                signPdfUrl: step6?.response?.fileUrl || user?.personalInformation?.signPdfUrl || "------",
+                maidenName: user?.personalInformation?.maidenName || null,
+                politicallyExposedPerson: user?.personalInformation?.politicallyExposedPerson || null,
+                createdAt: user?.personalInformation?.createdAt || new Date(),
+                updatedAt: user?.personalInformation?.updatedAt || new Date(),
+            } : null,
+
+            // Current Address - prioritize KYC data, fallback to existing user data
+            currentAddress: aadhaarData?.current_address_details || user?.currentAddress ? {
+                id: user?.currentAddress?.id || 0,
+                line1: aadhaarData?.current_address_details?.address || user?.currentAddress?.line1 || "------",
+                line2: user?.currentAddress?.line2 || null,
+                line3: user?.currentAddress?.line3 || null,
+                postOffice: aadhaarData?.current_address_details?.locality_or_post_office || user?.currentAddress?.postOffice || "------",
+                cityOrDistrict: aadhaarData?.current_address_details?.district_or_city || user?.currentAddress?.cityOrDistrict || "------",
+                state: aadhaarData?.current_address_details?.state || user?.currentAddress?.state || "------",
+                pinCode: aadhaarData?.current_address_details?.pincode || user?.currentAddress?.pinCode || "------",
+                country: user?.currentAddress?.country || "India",
+                fullAddress: aadhaarData?.current_address || user?.currentAddress?.fullAddress || "------",
+                createdAt: user?.currentAddress?.createdAt || new Date(),
+                updatedAt: user?.currentAddress?.updatedAt || new Date(),
+            } : null,
+
+            // Permanent Address - prioritize KYC data, fallback to existing user data
+            permanentAddress: aadhaarData?.permanent_address_details || user?.permanentAddress ? {
+                id: user?.permanentAddress?.id || 0,
+                line1: aadhaarData?.permanent_address_details?.address || user?.permanentAddress?.line1 || "------",
+                line2: user?.permanentAddress?.line2 || null,
+                line3: user?.permanentAddress?.line3 || null,
+                postOffice: aadhaarData?.permanent_address_details?.locality_or_post_office || user?.permanentAddress?.postOffice || "------",
+                cityOrDistrict: aadhaarData?.permanent_address_details?.district_or_city || user?.permanentAddress?.cityOrDistrict || "------",
+                state: aadhaarData?.permanent_address_details?.state || user?.permanentAddress?.state || "------",
+                pinCode: aadhaarData?.permanent_address_details?.pincode || user?.permanentAddress?.pinCode || "------",
+                country: user?.permanentAddress?.country || "India",
+                fullAddress: aadhaarData?.permanent_address || user?.permanentAddress?.fullAddress || "------",
+                createdAt: user?.permanentAddress?.createdAt || new Date(),
+                updatedAt: user?.permanentAddress?.updatedAt || new Date(),
+            } : null,
+
+            // Bank Accounts - prioritize KYC data, fallback to existing user data
+            bankAccounts: step3.length > 0 ? step3.map((bank, index) => ({
+                id: index,
+                customerProfileDataModelId: customerId,
+                accountNumber: bank.accountNumber || "------",
+                ifscCode: bank.ifscCode || "------",
+                bankName: bank.bankName || "------",
+                branch: bank.branchName || "------",
+                accountHolderName: bank.beneficiary_name || "------",
+                bankAccountType: bank.bankAccountType || "------",
+                isPrimary: bank.isDefault || false,
+                isVerified: bank.isVerified || false,
+                verifyDate: bank.isVerified ? new Date() : null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })) : user?.bankAccounts || [],
+
+            // Demat Accounts - prioritize KYC data, fallback to existing user data
+            dematAccounts: step4.length > 0 ? step4.map((demat, index) => ({
+                id: index,
+                customerProfileDataModelId: customerId,
+                depositoryName: this.mapDepository(demat.depositoryName || "NSDL"),
+                dpId: demat.dpId || "------",
+                clientId: demat.beneficiaryClientId || "------",
+                accountType: this.mapAccountType(demat.accountType || "SINGLE"),
+                depositoryParticipantName: demat.depositoryParticipantName || "------",
+                primaryPanNumber: (demat.panNumber && demat.panNumber[0]) || "------",
+                sndPanNumber: (demat.panNumber && demat.panNumber[1]) || null,
+                trdPanNumber: (demat.panNumber && demat.panNumber[2]) || null,
+                accountHolderName: demat.accountHolderName || "------",
+                isPrimary: demat.isDefault || false,
+                isVerified: demat.isVerified || false,
+                verifyDate: demat.isVerified ? new Date() : null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })) : user?.dematAccounts || [],
+
+            // Risk Profile - prioritize KYC data, fallback to existing user data
+            riskProfile: (step5 && step5.length > 0) || user?.riskProfile ? {
+                id: user?.riskProfile?.id || 0,
+                data: step5 && step5.length > 0 ? step5 : user?.riskProfile?.data || [],
+                createdAt: user?.riskProfile?.createdAt || new Date(),
+                updatedAt: user?.riskProfile?.updatedAt || new Date(),
+            } : null,
+
+            // Utility data - use existing user data or defaults
+            utility: user?.utility || {
+                id: 0,
+                accountStatus: "ACTIVE",
+                isEmailVerified: false,
+                isPhoneVerified: false,
+                signinWith: "CREDENTIALS",
+                termsAccepted: true,
+                lastLogin: null,
+                whatsAppNotificationAllow: false,
+                cRMUserDataModelId: null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                password: "",
+                socialLoginId: null,
+            },
+
+            // Count object for related entities
+            _count: {
+                riskProfile: (step5 && step5.length > 0) || user?.riskProfile ? 1 : 0,
+                utility: user?.utility ? 1 : 1, // Always 1 since we provide default
+                aadhaarCard: aadhaarData || user?.aadhaarCard ? 1 : 0,
+                panCard: panData || user?.panCard ? 1 : 0,
+                personalInformation: step2 || user?.personalInformation ? 1 : 0,
+                currentAddress: aadhaarData?.current_address_details || user?.currentAddress ? 1 : 0,
+                permanentAddress: aadhaarData?.permanent_address_details || user?.permanentAddress ? 1 : 0,
+                bankAccounts: (step3.length > 0 ? step3.length : user?.bankAccounts?.length) || 0,
+                dematAccounts: (step4.length > 0 ? step4.length : user?.dematAccounts?.length) || 0,
+                nseDataSet: 0, // Assuming no NSE data for now
+            }
+        };
+
+        return data;
+    }
+
 }

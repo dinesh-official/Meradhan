@@ -190,4 +190,29 @@ export class CustomerKycKycService {
         const pdfData = await this.kycProvider.getEsignPdf(document_id);
         return pdfData;
     }
+
+    async getKycLevel(id: number) {
+
+        const steps = [
+            "Identity Validation",
+            "Personal Details",
+            "Bank Account",
+            "Demat Account",
+            "Risk Profiling",
+            "e-Signature",
+            "100%",
+        ];
+
+
+        const kycData = await db.dataBase.kYC_FLOW.findUnique({ where: { userID: id } });
+
+        if (!kycData) {
+            return "Not Started"
+        }
+
+        if (kycData.step) {
+            return steps[kycData.step - 1] || "Unknown";
+        }
+        return "Unknown";
+    }
 }

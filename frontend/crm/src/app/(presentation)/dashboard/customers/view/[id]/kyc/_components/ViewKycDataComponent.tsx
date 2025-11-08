@@ -1,9 +1,10 @@
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { areNamesMatched } from "@/lib/utils";
-import { CustomerByIdPayload } from "@root/apiGateway";
+import apiGateway, { CustomerByIdPayload } from "@root/apiGateway";
 import StickyHeader from "./StickyHeader";
 import AadhaarCardInfo from "./cards/AadhaarCardInfo";
 import AdharaCard from "./cards/AdharaCard";
@@ -17,8 +18,22 @@ import PersonalInformationCard from "./cards/PersonalInformationCard";
 import RiskProfileQuestion, {
   RiskProfileAnsOption,
 } from "./cards/riskprofile/RiskProfileQuestion";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { useQuery } from "@tanstack/react-query";
 
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
+  const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
+    apiClientCaller
+  );
+
+  const getLevelQuery = useQuery({
+    queryKey: ["KycLevel", data.id],
+    queryFn: async () => {
+      const leveldata = await api.getKycLevel(data.id);
+      return leveldata.responseData;
+    },
+  });
+
   return (
     <div className="relative flex flex-col gap-5 mt-5">
       <div className="gap-5 grid xl:grid-cols-2">
@@ -35,8 +50,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           kycStatus={data.kycStatus}
         />
         <KYCVerificationStatusCard
-          kycLevel="Full"
-          overallStatus="PENDING"
+          kycLevel={getLevelQuery.data || "-----"}
+          overallStatus={data.kycStatus}
           verifiedBy="--"
           verifiedDate={
             !data.verifyDate
@@ -340,13 +355,13 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           <CardContent>
             <CardTitle className="text-sm">Compliance Confirmations</CardTitle>
             <p className="flex justify-start items-center gap-3 mt-3">
-              <Checkbox checked /> I hereby confirm that I am not a Politically Exposed
-              Person (PEP) nor related to any PEP
+              <Checkbox checked /> I hereby confirm that I am not a Politically
+              Exposed Person (PEP) nor related to any PEP
             </p>
             <p className="flex justify-start items-center gap-3 mt-2">
-              <Checkbox checked /> I hereby confirm that I am not a person and/or entity
-              debarred from accessing the securities market or dealing in
-              securities, as per directions or orders issued by SEBI
+              <Checkbox checked /> I hereby confirm that I am not a person
+              and/or entity debarred from accessing the securities market or
+              dealing in securities, as per directions or orders issued by SEBI
             </p>
           </CardContent>
         </Card>

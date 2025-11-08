@@ -81,7 +81,6 @@ export class RfqMasterService {
 
     }
 
-
     async terminateNegotiation(data: z.infer<typeof appSchema.rfq.terminateNegotiationQuoteSchema>, createdBy: number) {
         // Negotiate RFQ Quote - Call Service
         const negotiateRfqQuote = await this.rfqManager.terminateNegotiationThread({
@@ -104,7 +103,6 @@ export class RfqMasterService {
         const rfqs = await Promise.all(result);
         return rfqs;
     }
-
 
     async getAllNegotiations(filters: z.infer<typeof appSchema.rfq.rfqNegotiationFilterSchema>, activeUserId?: number) {
         const data = await this.rfqManager.getAllNegotiations({

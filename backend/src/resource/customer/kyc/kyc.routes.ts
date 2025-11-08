@@ -32,6 +32,9 @@ kycRoutes.get("/api/customer/kyc/esign/verify/:doc", customerAuthMiddleware, (re
 const storeKyc = new KycStoreController();
 kycRoutes.get("/api/customer/kyc/store/get", customerAuthMiddleware, (req, res) => storeKyc.getKycData(req, res));
 kycRoutes.post("/api/customer/kyc/store/:step", customerAuthMiddleware, (req, res) => storeKyc.setKycData(req, res));
+kycRoutes.get("/api/customer/kyc/level/:customerId", (req, res) => storeKyc.setKycLevel(req, res));
+
+
 
 
 export default kycRoutes

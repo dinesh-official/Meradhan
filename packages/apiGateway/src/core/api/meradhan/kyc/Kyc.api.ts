@@ -4,6 +4,7 @@ import type { AxiosRequestConfig } from "axios";
 
 import type z from "zod";
 import type { I_IFSCResponse, IBankKycVerifyResponse, IDmatKycVerifyResponse, IEsignKycRequest, IPANKycRequestResponse, IPANKycVerifyResponse, ISelfireKycRequestResponse, ISelfireKycVerifyResponse, ISignKycRequestResponse, ISignKycVerifyResponse, IStoreKycGETResponse, IStoreKycSETResponse } from "./Kyc.response";
+import type { BaseResponseData } from "../../../../types/base";
 
 export class CustomerKycApi {
     private schema = appSchema.kyc;
@@ -83,6 +84,11 @@ export class CustomerKycApi {
 
     async esignVerifyResponse(docId: string, config?: AxiosRequestConfig) {
         const { data } = await this.apiClient.get<IEsignKycRequest>(`/customer/kyc/esign/verify/${docId}`, config);
+        return data;
+    }
+
+    async getKycLevel(customerId: number, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<BaseResponseData<string>>(`/customer/kyc/level/${customerId}`, config);
         return data;
     }
 

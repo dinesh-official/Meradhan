@@ -1,5 +1,6 @@
 import { db, type DataBaseSchema } from "@core/database/database";
 import { fullCustomerProfileSelect } from "@services/customer/customer_manager_selector";
+import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 
 import { AppError } from "@utils/error/AppError";
 
@@ -39,8 +40,15 @@ export class CustomerProfileRepo {
             },
             select: fullCustomerProfileSelect
         });
+
+
         if (!user) {
             throw new AppError("User Not Found", { code: "USER_NOT_FOUND", statusCode: 404 })
+        }
+        const kycData = new CustomerKycManager()
+
+        if (user.kycStatus != "VERIFIED") {
+            return await kycData.getUserKycFlowDataWithFormattedFullProfile(user.id)
         }
         return user;
     }

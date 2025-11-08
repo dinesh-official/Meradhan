@@ -112,7 +112,7 @@ export class CustomerProfileService extends CustomerProfileManager {
 
     }
 
-    getFullCustomerProfile(customerId: number) {
-        return this.customerRepo.getFullCustomerProfile(customerId);
+    async getFullCustomerProfile(customerId: number) {
+        return await this.customerRepo.getFullCustomerProfile(customerId);
     }
 }
