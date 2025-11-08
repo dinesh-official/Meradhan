@@ -24,9 +24,10 @@ export class RfqMasterController {
             })
         } catch (error) {
             if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.messages[0]?.msg || error.response?.data?.messages || error.response?.data.toString() || "Internal Server Error";
                 res.sendResponse({
                     statusCode: error.response?.status || 500,
-                    responseData: error.response?.data?.messages || error.response?.data || "Internal Server Error"
+                    responseData: [errorMessage]
                 });
             }
             throw error;
@@ -47,9 +48,10 @@ export class RfqMasterController {
             });
         } catch (error) {
             if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.messages[0]?.msg || error.response?.data?.messages || error.response?.data.toString() || "Internal Server Error";
                 res.sendResponse({
                     statusCode: error.response?.status || 500,
-                    responseData: error.response?.data?.messages || error.response?.data || "Internal Server Error"
+                    responseData: [errorMessage]
                 });
             }
             throw error;

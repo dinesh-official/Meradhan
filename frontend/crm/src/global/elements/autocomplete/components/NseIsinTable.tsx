@@ -1,5 +1,7 @@
 "use client";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { formatNumberTS } from "@/global/utils/formate";
 import { NSE_ISIN_DATA } from "@root/apiGateway";
 
 function NseIsinTable({
@@ -27,7 +29,12 @@ function NseIsinTable({
           type: "date",
         },
         { key: "couponRate", label: "Coupon Rate" },
-        { key: "faceValue", label: "Face Value" },
+        {
+          key: "faceValue", label: "Face Value",
+         cell(row) {
+             return formatNumberTS(row.faceValue);
+         }, 
+        },
         { key: "issueCategory", label: "Issue Category" },
         { key: "listed", label: "Listed" },
         {
