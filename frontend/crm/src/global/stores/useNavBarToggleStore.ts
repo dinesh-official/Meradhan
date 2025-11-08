@@ -6,7 +6,7 @@ interface UseNavOpenProp {
 }
 
 export const useNavBarToggleStore = create<UseNavOpenProp>()((set) => ({
-  isOpen: true,
+  isOpen: false,
   setNavOpen(isOpen) {
     set(() => ({ isOpen }));
   },

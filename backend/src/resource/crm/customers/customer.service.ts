@@ -33,7 +33,9 @@ export class CustomerProfileService extends CustomerProfileManager {
         const page = Number(payload.page) || 1;
         const pageSize = 10; // You can make this configurable if needed
         const skip = (page - 1) * pageSize;
-        const filters: DataBaseSchema.CustomerProfileDataModelWhereInput = {};
+        const filters: DataBaseSchema.CustomerProfileDataModelWhereInput = {
+            isDeleted: false
+        };
 
         if (payload.accountStatus) {
             filters.utility = {

@@ -69,13 +69,13 @@ export const SideBarItems = ({
     }
     if (role != "ADMIN") {
       return (
-        <p className="uppercase px-3 mt-6 text-gray-600  text-sm mb-1 ">
+        <p className="mt-6 mb-1 px-3 text-gray-600 text-sm uppercase">
           TOOLS & Tracking
         </p>
       );
     }
     return (
-      <p className="uppercase px-3 mt-6 text-gray-600  text-sm mb-1 ">
+      <p className="mt-6 mb-1 px-3 text-gray-600 text-sm uppercase">
         {item.label}
       </p>
     );
@@ -87,21 +87,21 @@ export const SideBarItems = ({
       <div
         onClick={toggleOpen}
         className={cn(
-          "flex items-center justify-between gap-3 px-2 py-2 rounded-lg cursor-pointer transition-all duration-200",
+          "flex justify-between items-center gap-3 px-2 py-2 rounded-lg transition-all duration-200 cursor-pointer",
           isActive ? "bg-primary/10 text-primary" : "hover:bg-gray-100",
           `pl-${level * 5}`
         )}
       >
         {/* render link or icons  menu */}
         <LDiv
-          className="flex items-center gap-3 font-medium w-full"
+          className="flex items-center gap-3 w-full font-medium"
           path={item.path}
         >
           {/* render if icon exist  */}
           {item.icon && (
             <div
               className={cn(
-                "flex items-center justify-center min-w-8 min-h-8 rounded-md transition-colors duration-200",
+                "flex justify-center items-center rounded-md min-w-8 min-h-8 transition-colors duration-200",
                 isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-600"
               )}
             >
@@ -111,7 +111,7 @@ export const SideBarItems = ({
           {/* Label of link menu  */}
           <span
             className={cn(
-              "text-sm opacity-100 transition-all",
+              "opacity-100 text-sm transition-all",
               compacted && "opacity-0"
             )}
           >
@@ -124,7 +124,7 @@ export const SideBarItems = ({
           <ChevronDown
             size={18}
             className={cn(
-              "transition-transform duration-200 text-gray-500",
+              "text-gray-500 transition-transform duration-200",
               isOpen && "rotate-180"
             )}
           />
@@ -133,7 +133,7 @@ export const SideBarItems = ({
 
       {/* Loop Nested Menus levels */}
       {item.children && isOpen && !compacted && (
-        <div className="flex flex-col mt-1 border-l border-gray-200 ml-2 pl-2 transition-all">
+        <div className="flex flex-col mt-1 ml-2 pl-2 border-gray-200 border-l transition-all">
           {item.children.map((child) => (
             <SideBarItems
               role={role}

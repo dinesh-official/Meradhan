@@ -38,7 +38,7 @@ function DealProposerTable({
   onClick?: (item: CreateNegotiationResponse) => void;
 }) {
   return (
-    <div className="p-4">
+    <div >
       <UniversalTable<CreateNegotiationResponse>
         initialPageSize={10}
         isLoading={loading}

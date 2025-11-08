@@ -64,8 +64,8 @@ function SideBar({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "lg:w-[73px] h-[calc(100vh-65px)] transition-all overflow-hidden flex text-nowrap select-none sticky top-[65px] left-0 flex-col bg-white lg:border-r border-gray-100 p-3 overflow-y-auto font-medium",
-        (isOpen || tmpNavOpen || isMobile) && "lg:w-[270px]"
+        "top-[65px] left-0 sticky flex flex-col bg-white p-3 border-gray-100 lg:border-r lg:w-[73px] h-[calc(100vh-65px)] overflow-hidden overflow-y-auto font-medium text-nowrap transition-all select-none",
+        (isOpen || tmpNavOpen || isMobile) && "lg:w-[265px]"
       )}
     >
       {navItems.map((item, i) => (

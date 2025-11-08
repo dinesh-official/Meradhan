@@ -113,11 +113,11 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="overflow-hidden">
+      <div className="border-1 rounded-xl overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}>
+              <TableRow key={hg.id}  className="bg-gray-50" >
                 {hg.headers.map((header) => {
                   const stickyRight =
                     stickyRightColumnId &&
@@ -125,11 +125,12 @@ export function DataTable<TData, TValue>({
                   return (
                     <TableHead
                       key={header.id}
-                      className={
+                      className={cn(
+                        "px-4 py-2 last:border-0 border-r font-normal",
                         stickyRight
-                          ? "sticky right-0 z-20 bg-white text-center"
+                          ? "sticky right-0 z-20  text-center "
                           : undefined
-                      }
+                      )}
                     >
                       {header.isPlaceholder
                         ? null
@@ -170,7 +171,10 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={onRowClickAction ? "cursor-pointer" : undefined}
+                  className={cn(
+                    "last:border-0",
+                    onRowClickAction ? "cursor-pointer " : undefined
+                  )}
                   onClick={
                     onRowClickAction
                       ? () => onRowClickAction(row.original)
@@ -184,11 +188,12 @@ export function DataTable<TData, TValue>({
                     return (
                       <TableCell
                         key={cell.id}
-                        className={
+                        className={cn(
+                          "px-4 py-2 last:border-0 border-r",
                           stickyRight
-                            ? "sticky right-0 z-10 bg-white text-center"
+                            ? "sticky right-0 z-10 bg-white text-center "
                             : undefined
-                        }
+                        )}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

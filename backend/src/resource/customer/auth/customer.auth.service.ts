@@ -42,13 +42,21 @@ export class CustomerAuthService {
         }
 
         const user = await db.dataBase.customerProfileDataModel.findUnique({
-            where: query,
+            where: {
+                ...query,
+                isDeleted: false,
+
+            },
             include: {
-                utility: true
+                utility: true,
             }
         });
         if (!user) {
             throw new AppError("Invalid email or mobile number", { code: "USER_NOT_FOUND" });
+        }
+
+        if (user.utility.accountStatus == "SUSPENDED") {
+            throw new AppError("Your account is suspended", { code: "ACCOUNT_SUSPENDED" });
         }
 
         this.checkUserSigninWith(user, data.identifier);

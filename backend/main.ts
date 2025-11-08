@@ -14,6 +14,7 @@ import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes
 import crmUsersRoutes from "@resource/crm/users/crmuser.route";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.route";
 import kycRoutes from "@resource/customer/kyc/kyc.routes";
+import trashRoutes from "@resource/trash/trash.routes";
 import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";
 import dotenv from "dotenv";
@@ -54,7 +55,9 @@ server.addRoutes([
     kycRoutes,
 
     // bond routes
-    bondRoute
+    bondRoute,
+
+    trashRoutes
 ]);
 
 

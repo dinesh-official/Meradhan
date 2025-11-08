@@ -8374,6 +8374,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: number | null
+    isDeleted: boolean | null
   }
 
   export type CustomerProfileDataModelMaxAggregateOutputType = {
@@ -8401,6 +8402,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: number | null
+    isDeleted: boolean | null
   }
 
   export type CustomerProfileDataModelCountAggregateOutputType = {
@@ -8428,6 +8430,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     createdBy: number
+    isDeleted: number
     _all: number
   }
 
@@ -8483,6 +8486,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     createdBy?: true
+    isDeleted?: true
   }
 
   export type CustomerProfileDataModelMaxAggregateInputType = {
@@ -8510,6 +8514,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     createdBy?: true
+    isDeleted?: true
   }
 
   export type CustomerProfileDataModelCountAggregateInputType = {
@@ -8537,6 +8542,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     createdBy?: true
+    isDeleted?: true
     _all?: true
   }
 
@@ -8651,6 +8657,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     createdBy: number | null
+    isDeleted: boolean
     _count: CustomerProfileDataModelCountAggregateOutputType | null
     _avg: CustomerProfileDataModelAvgAggregateOutputType | null
     _sum: CustomerProfileDataModelSumAggregateOutputType | null
@@ -8697,6 +8704,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    isDeleted?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
@@ -8735,6 +8743,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    isDeleted?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
@@ -8769,6 +8778,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    isDeleted?: boolean
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
     aadhaarCard?: boolean | CustomerProfileDataModel$aadhaarCardArgs<ExtArgs>
@@ -8803,9 +8813,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    isDeleted?: boolean
   }
 
-  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "verifyDate" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "createdAt" | "updatedAt" | "createdBy", ExtArgs["result"]["customerProfileDataModel"]>
+  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "verifyDate" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "createdAt" | "updatedAt" | "createdBy" | "isDeleted", ExtArgs["result"]["customerProfileDataModel"]>
   export type CustomerProfileDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
@@ -8889,6 +8900,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       createdBy: number | null
+      isDeleted: boolean
     }, ExtArgs["result"]["customerProfileDataModel"]>
     composites: {}
   }
@@ -9346,6 +9358,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly createdBy: FieldRef<"CustomerProfileDataModel", 'Int'>
+    readonly isDeleted: FieldRef<"CustomerProfileDataModel", 'Boolean'>
   }
     
 
@@ -32999,7 +33012,8 @@ export namespace Prisma {
     permanentAddressModelId: 'permanentAddressModelId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    createdBy: 'createdBy'
+    createdBy: 'createdBy',
+    isDeleted: 'isDeleted'
   };
 
   export type CustomerProfileDataModelScalarFieldEnum = (typeof CustomerProfileDataModelScalarFieldEnum)[keyof typeof CustomerProfileDataModelScalarFieldEnum]
@@ -34454,6 +34468,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    isDeleted?: BoolFilter<"CustomerProfileDataModel"> | boolean
     riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
     utility?: XOR<CustomersAuthDataModelScalarRelationFilter, CustomersAuthDataModelWhereInput>
     aadhaarCard?: XOR<AADHAARCardModelNullableScalarRelationFilter, AADHAARCardModelWhereInput> | null
@@ -34491,6 +34506,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrderInput | SortOrder
+    isDeleted?: SortOrder
     riskProfile?: CustomersRiskProfileModelOrderByWithRelationInput
     utility?: CustomersAuthDataModelOrderByWithRelationInput
     aadhaarCard?: AADHAARCardModelOrderByWithRelationInput
@@ -34531,6 +34547,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    isDeleted?: BoolFilter<"CustomerProfileDataModel"> | boolean
     riskProfile?: XOR<CustomersRiskProfileModelNullableScalarRelationFilter, CustomersRiskProfileModelWhereInput> | null
     utility?: XOR<CustomersAuthDataModelScalarRelationFilter, CustomersAuthDataModelWhereInput>
     aadhaarCard?: XOR<AADHAARCardModelNullableScalarRelationFilter, AADHAARCardModelWhereInput> | null
@@ -34568,6 +34585,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrderInput | SortOrder
+    isDeleted?: SortOrder
     _count?: CustomerProfileDataModelCountOrderByAggregateInput
     _avg?: CustomerProfileDataModelAvgOrderByAggregateInput
     _max?: CustomerProfileDataModelMaxOrderByAggregateInput
@@ -34603,6 +34621,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
     createdBy?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
+    isDeleted?: BoolWithAggregatesFilter<"CustomerProfileDataModel"> | boolean
   }
 
   export type CustomerPersonalInfoModelWhereInput = {
@@ -37388,6 +37407,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -37425,6 +37445,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -37447,6 +37468,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -37484,6 +37506,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -37514,6 +37537,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
   }
 
   export type CustomerProfileDataModelUpdateManyMutationInput = {
@@ -37533,6 +37557,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CustomerProfileDataModelUncheckedUpdateManyInput = {
@@ -37560,6 +37585,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CustomerPersonalInfoModelCreateInput = {
@@ -41070,6 +41096,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    isDeleted?: SortOrder
   }
 
   export type CustomerProfileDataModelAvgOrderByAggregateInput = {
@@ -41110,6 +41137,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    isDeleted?: SortOrder
   }
 
   export type CustomerProfileDataModelMinOrderByAggregateInput = {
@@ -41137,6 +41165,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    isDeleted?: SortOrder
   }
 
   export type CustomerProfileDataModelSumOrderByAggregateInput = {
@@ -45273,6 +45302,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -45308,6 +45338,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -45386,6 +45417,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -45421,6 +45453,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46164,6 +46197,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46199,6 +46233,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46237,6 +46272,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46272,6 +46308,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46294,6 +46331,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46329,6 +46367,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46367,6 +46406,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46402,6 +46442,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46424,6 +46465,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46459,6 +46501,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46497,6 +46540,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46532,6 +46576,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46554,6 +46599,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
     panCard?: PanCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46589,6 +46635,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46627,6 +46674,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     panCard?: PanCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46662,6 +46710,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46684,6 +46733,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46719,6 +46769,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46746,6 +46797,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46781,6 +46833,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46819,6 +46872,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46854,6 +46908,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46887,6 +46942,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46922,6 +46978,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -46944,6 +47001,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -46980,6 +47038,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
@@ -47017,6 +47076,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -47053,6 +47113,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
@@ -47074,6 +47135,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -47110,6 +47172,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     nseDataSet?: NseDataSetUncheckedCreateNestedOneWithoutCustomerProfileDataModelInput
   }
@@ -47147,6 +47210,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -47183,6 +47247,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     nseDataSet?: NseDataSetUncheckedUpdateOneWithoutCustomerProfileDataModelNestedInput
   }
@@ -47278,6 +47343,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     riskProfile?: CustomersRiskProfileModelCreateNestedOneWithoutCustomerProfileDataModelInput
     utility: CustomersAuthDataModelCreateNestedOneWithoutCustomerProfileDataModelInput
     aadhaarCard?: AADHAARCardModelCreateNestedOneWithoutCustomerProfileDataModelInput
@@ -47314,6 +47380,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
+    isDeleted?: boolean
     bankAccounts?: CustomersBankAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
     dematAccounts?: CustomersDematAccountModelUncheckedCreateNestedManyWithoutCustomerProfileDataModelInput
   }
@@ -47417,6 +47484,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     riskProfile?: CustomersRiskProfileModelUpdateOneWithoutCustomerProfileDataModelNestedInput
     utility?: CustomersAuthDataModelUpdateOneRequiredWithoutCustomerProfileDataModelNestedInput
     aadhaarCard?: AADHAARCardModelUpdateOneWithoutCustomerProfileDataModelNestedInput
@@ -47453,6 +47521,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
     bankAccounts?: CustomersBankAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
     dematAccounts?: CustomersDematAccountModelUncheckedUpdateManyWithoutCustomerProfileDataModelNestedInput
   }

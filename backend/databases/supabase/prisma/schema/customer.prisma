@@ -44,7 +44,7 @@ model CustomerProfileDataModel {
 
     /// Contact details
     emailAddress String  @unique
-    phoneNo      String?  @unique
+    phoneNo      String? @unique
     whatsAppNo   String?
 
     /// Profile visuals and type
@@ -55,8 +55,6 @@ model CustomerProfileDataModel {
     kycStatus  KYCStatus @default(PENDING)
     VerifiedBy Int?
     verifyDate DateTime?
-
-
 
     // One-to-one relations
     riskProfile                 CustomersRiskProfileModel? @relation(fields: [customersRiskProfileModelId], references: [id], onDelete: Cascade)
@@ -89,6 +87,7 @@ model CustomerProfileDataModel {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     createdBy Int?
+    isDeleted Boolean  @default(false)
 
     @@index([emailAddress, userName])
     @@map("customers_profile_data")
@@ -136,7 +135,7 @@ model AADHAARCardModel {
     gender      Gender
     image       String
 
-    isVerified Boolean  @default(false)
+    isVerified Boolean   @default(false)
     verifyDate DateTime?
     fileUrl    String
 
@@ -160,9 +159,9 @@ model PanCardModel {
     dateOfBirth String
     gender      Gender
     image       String
-    isVerified Boolean  @default(false)
-    verifyDate DateTime?
-    fileUrl    String
+    isVerified  Boolean   @default(false)
+    verifyDate  DateTime?
+    fileUrl     String
 
     // 1-to-1 back reference
     customerProfileDataModel CustomerProfileDataModel?
@@ -223,8 +222,8 @@ model CustomersBankAccountModel {
     bankName          String
     branch            String
 
-    isPrimary  Boolean  @default(false)
-    isVerified Boolean  @default(false)
+    isPrimary  Boolean   @default(false)
+    isVerified Boolean   @default(false)
     verifyDate DateTime?
 
     CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
@@ -251,8 +250,8 @@ model CustomersDematAccountModel {
     trdPanNumber      String?
     accountHolderName String
 
-    isPrimary  Boolean  @default(false)
-    isVerified Boolean  @default(false)
+    isPrimary  Boolean   @default(false)
+    isVerified Boolean   @default(false)
     verifyDate DateTime?
 
     CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])

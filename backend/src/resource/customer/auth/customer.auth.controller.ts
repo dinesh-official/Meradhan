@@ -148,16 +148,18 @@ export class CustomerAuthController {
         }
 
         const session = await db.dataBase.customerProfileDataModel.findUnique({
-            where: { id }, select: {
+            where: { id, isDeleted: false, utility: { accountStatus: "ACTIVE" } }, select: {
                 id: true,
                 firstName: true,
                 middleName: true,
                 lastName: true,
                 avatar: true,
                 emailAddress: true,
-                userName: true
+                userName: true,
             }
         });
+
+
 
         await cacheStorage.set(`USER_SESSION:${id}`, session, 60);
         res.sendResponse({

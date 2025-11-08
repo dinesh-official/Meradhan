@@ -1,4 +1,4 @@
-import { geistMono, geistSans } from "@/global/font/font";
+import { geistSans } from "@/global/font/font";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import React from "react";
@@ -18,7 +18,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.className} antialiased`}
       >
         <NextTopLoader color="#003569" />
         <Client>{children}</Client>

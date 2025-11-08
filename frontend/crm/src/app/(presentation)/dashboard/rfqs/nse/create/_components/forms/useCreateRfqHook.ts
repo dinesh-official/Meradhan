@@ -1,3 +1,4 @@
+import { queryClient } from "@/core/config/reactQuery"
 import { apiClientCaller } from "@/core/connection/apiClientCaller"
 import apiGateway, { ApiError } from "@root/apiGateway"
 import { appSchema } from "@root/schema"
@@ -22,6 +23,7 @@ export const useCreateRfqHook = () => {
                 timer: 2000,
                 showConfirmButton: true,
             });
+            queryClient.invalidateQueries({ queryKey: ['find-rfq'] });
             router.back();
         },
         onError: (error) => {

@@ -159,6 +159,28 @@ export class CustomerProfileManager {
     return updatedCustomerProfileData;
   }
 
+  async softDeleteCustomerProfile(customerProfileId: number) {
+    const existing = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerProfileId },
+    });
+
+    if (!existing) {
+      throw new AppError(`Customer with ID ${customerProfileId} not found`, {
+        statusCode: 404,
+        code: "CUSTOMER_NOT_FOUND",
+      });
+    }
+
+    await db.dataBase.customerProfileDataModel.update({
+      where: { id: customerProfileId },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+    return true; // we can change this
+  }
+
   async removeCustomerProfile(customerProfileId: number) {
     const existing = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerProfileId },

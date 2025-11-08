@@ -249,7 +249,7 @@ export const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Recycle Bin',
-        path: '#',
+        path: '/dashboard/bin',
         icon: Trash2,
         module: 'bin',
         allowOnly: ['create:bin', 'view:bin', 'edit:bin', 'delete:bin']

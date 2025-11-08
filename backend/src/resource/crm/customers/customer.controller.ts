@@ -31,6 +31,15 @@ export class CustomerProfileController {
         })
     }
 
+        async softDeleteCustomer(req: Request, res: Response): Promise<void> {
+        const customerId = req.params.customerId;
+        const response = await this.profileService.softDeleteCustomerProfile(Number(customerId))
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: response
+        })
+    }
+
     async updateCustomer(req: Request, res: Response): Promise<void> {
         const customerId = req.params.customerId;
         const payload = appSchema.customer.updateCustomerProfileSchema.parse(req.body);

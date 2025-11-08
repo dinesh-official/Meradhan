@@ -244,7 +244,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
             reason: "User inactive for 5 minutes",
           });
         }
-      }, 5 * 60 * 1000); // 5 minutes
+      }, 500 * 60 * 1000); // 5 minutes
     };
 
     events.forEach((event) => window.addEventListener(event, resetIdleTimer));

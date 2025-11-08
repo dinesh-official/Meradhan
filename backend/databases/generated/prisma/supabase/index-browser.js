@@ -220,7 +220,8 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   permanentAddressModelId: 'permanentAddressModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  createdBy: 'createdBy'
+  createdBy: 'createdBy',
+  isDeleted: 'isDeleted'
 };
 
 exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {

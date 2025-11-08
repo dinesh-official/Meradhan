@@ -11,7 +11,9 @@ export class ForgetPasswordService {
     async sendForgetPassword(data: { email: string }) {
         const user = await db.dataBase.customerProfileDataModel.findUnique({
             where: {
-                emailAddress: data.email
+                emailAddress: data.email,
+                isDeleted: false
+
             },
             include: {
                 utility: true
