@@ -15,7 +15,14 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-left",
   },
+  webpack: (config) => {
+    // Prevent canvas.node from being bundled
+    config.externals.push({
+      canvas: 'commonjs canvas',
+    });
 
+    return config;
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
