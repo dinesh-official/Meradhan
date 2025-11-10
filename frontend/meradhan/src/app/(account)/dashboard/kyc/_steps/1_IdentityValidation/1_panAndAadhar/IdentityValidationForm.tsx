@@ -64,12 +64,10 @@ function IdentityValidationForm() {
                       )
                     : ""
                 }
-                onChange={(e) =>
-                  setStep1PanData(
-                    "dateOfBirth",
-                    dateTimeUtils.formatDateTime(e.target.value, "YYYY-MM-DD")
-                  )
-                }
+                onChange={(e) => {
+                  setStep1PanData("dateOfBirth", e.target.value);
+                  console.log(e.target.value);
+                }}
               />
             </LabelInput>
           </div>

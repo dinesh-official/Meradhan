@@ -41,7 +41,7 @@ export function DatePicker({ value, onChange, ...props }: DatePickerProps) {
     setSelected(date);
     setOpen(false);
     if (onChange && date) {
-      const formatted = format(date, "dd/MM/yyyy");
+      const formatted = format(date, "yyyy-MM-dd");
       const syntheticEvent = {
         target: {
           value: formatted,

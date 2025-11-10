@@ -46,7 +46,7 @@ function IdentityValidationPanInfo() {
   );
 
   const isDobMatched = dataMatcherUtils.areDatesMatched(
-    data.response?.details.pan.dob,
+    data.response?.details.pan.dob.replaceAll("/","-").split("-").reverse().join("-"),
     data.dateOfBirth
   );
 

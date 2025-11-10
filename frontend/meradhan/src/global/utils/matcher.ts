@@ -71,12 +71,14 @@ export const dataMatcherUtils = {
             const d = (input instanceof Date) ? input : new Date(input);
 
             if (isNaN(d.getTime())) {
-                // try to handle dd/mm/yyyy
+                // Try to handle dd/mm/yyyy or d/m/yyyy
                 const parts = String(input).split("/");
                 if (parts.length === 3) {
-                    // convert DD/MM/YYYY -> YYYY-MM-DD
-                    const [d3, m3, y3] = parts;
-                    return `${y3}-${m3.padStart(2, "0")}-${d3.padStart(2, "0")}`;
+                    const [day, month, year] = parts.map(p => p.trim());
+                    if (!/^\d{1,2}$/.test(day) || !/^\d{1,2}$/.test(month) || !/^\d{4}$/.test(year)) {
+                        return null;
+                    }
+                    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
                 }
                 return null;
             }
@@ -84,6 +86,7 @@ export const dataMatcherUtils = {
             const yyyy = d.getFullYear();
             const mm = String(d.getMonth() + 1).padStart(2, "0");
             const dd = String(d.getDate()).padStart(2, "0");
+
             return `${yyyy}-${mm}-${dd}`;
         }
 
