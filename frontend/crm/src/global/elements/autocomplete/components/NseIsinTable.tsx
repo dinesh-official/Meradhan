@@ -28,9 +28,12 @@ function NseIsinTable({
           type: "date",
         },
         { key: "couponRate", label: "Coupon Rate" },
-        { key: "faceValue", label: "Face Value",cell(row) {
-            return formatNumberTS(row.faceValue);
-        }, },
+        {
+          key: "faceValue", label: "Face Value",
+         cell(row) {
+             return formatNumberTS(row.faceValue);
+         }, 
+        },
         { key: "issueCategory", label: "Issue Category" },
         { key: "listed", label: "Listed" },
         {

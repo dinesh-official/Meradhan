@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { NSE_ISIN_DATA } from "@root/apiGateway";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { InputField } from "../inputs/InputField";
 import { SelectField } from "../inputs/SelectField";
 import NseIsinTable from "./components/NseIsinTable";
@@ -26,18 +26,27 @@ function NseIsinPicker({
   onSelect?: (isin: NSE_ISIN_DATA) => void;
   children: ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
   const { filters, handleChange, resetFilters, searchIsinMutation } =
     useNseIsinPickerState();
 
+  useEffect(() => {
+    if (!open) {
+      resetFilters();
+    } else {
+      searchIsinMutation.mutate();
+    }
+  }, [open]);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>{children}</DialogTrigger>
 
       <DialogContent className="min-w-[60vw]">
         <DialogHeader>
           <DialogTitle>ISIN Lookup</DialogTitle>
           <DialogDescription>
-            <div className="grid grid-cols-3 gap-5 mt-5">
+            <div className="gap-5 grid grid-cols-3 mt-5">
               <InputField
                 label="Symbol (ISIN)"
                 id="symbol"
@@ -123,11 +132,14 @@ function NseIsinPicker({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-auto mt-4 max-h-96">
+        <div className="mt-4 max-h-96 overflow-auto">
           <NseIsinTable
             data={searchIsinMutation.data?.data?.responseData.data || []}
             loading={searchIsinMutation.isPending}
-            onClickRow={onSelect}
+            onClickRow={(e) => {
+              onSelect?.(e);
+              setOpen(false);
+            }}
           />
         </div>
 
