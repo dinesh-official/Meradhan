@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ModuleName, Permission } from './role.constants';
 import React from "react";
+import { FaMoneyBill } from 'react-icons/fa';
 
 /**
  * Define the structure of nested navigation items (up to 4 levels)
@@ -111,17 +112,23 @@ export const NAV_ITEMS: NavItem[] = [
                         allowOnly: ['edit:rfq'],
                     },
                     {
+                        label: 'Settle Orders',
+                        path: '/dashboard/rfqs/nse/settle-orders',
+                        module: 'rfq',
+                        allowOnly: ['edit:rfq'],
+                    },
+                    {
                         label: 'Participants',
                         path: '/dashboard/rfqs/nse/participants',
                         module: 'rfq',
                         allowOnly: ['view:rfq'],
                     },
-                    {
-                        label: 'Add Participant',
-                        path: '/dashboard/rfqs/nse/participants/create',
-                        module: 'rfq',
-                        allowOnly: ['create:rfq'],
-                    },
+                    // {
+                    //     label: 'Add Participant',
+                    //     path: '/dashboard/rfqs/nse/participants/create',
+                    //     module: 'rfq',
+                    //     allowOnly: ['create:rfq'],
+                    // },
                 ]
             }
         ]
@@ -154,7 +161,13 @@ export const NAV_ITEMS: NavItem[] = [
             },
         ]
     },
-
+    {
+        label: 'Bonds',
+        path: '/dashboard/bonds',
+        icon: FaMoneyBill,
+        module: 'bonds',
+        allowOnly: ["view:bonds"]
+    },
     {
         label: 'Reports',
         icon: BarChart,
@@ -207,16 +220,16 @@ export const NAV_ITEMS: NavItem[] = [
                     },
                     {
                         label: 'Authentication Logs',
-                        path: '#',
+                        path: '/dashboard/audit-logs/crm/authentication',
                         module: 'crmauditlogs',
                         allowOnly: ['view:crmauditlogs'],
                     },
-                    {
-                        label: 'Session Analytics',
-                        path: '#',
-                        module: 'crmauditlogs',
-                        allowOnly: ['view:crmauditlogs'],
-                    }
+                    // {
+                    //     label: 'Session Analytics',
+                    //     path: '#',
+                    //     module: 'crmauditlogs',
+                    //     allowOnly: ['view:crmauditlogs'],
+                    // }
                 ]
             },
             {
@@ -226,13 +239,13 @@ export const NAV_ITEMS: NavItem[] = [
                 children: [
                     {
                         label: 'Activity Logs',
-                        path: '#',
+                        path: '/dashboard/audit-logs/web/activity',
                         module: 'webauditlogs',
                         allowOnly: ['view:webauditlogs'],
                     },
                     {
                         label: 'Session Logs',
-                        path: '#',
+                        path: '/dashboard/audit-logs/web/authentication',
                         module: 'webauditlogs',
                         allowOnly: ['view:webauditlogs'],
                     }
@@ -240,13 +253,13 @@ export const NAV_ITEMS: NavItem[] = [
             },
         ]
     },
-    {
-        label: 'Website Analytics',
-        path: '#',
-        icon: Earth,
-        module: 'bin',
-        allowOnly: ['view:webanalytics']
-    },
+    // {
+    //     label: 'Website Analytics',
+    //     path: '#',
+    //     icon: Earth,
+    //     module: 'bin',
+    //     allowOnly: ['view:webanalytics']
+    // },
     {
         label: 'Recycle Bin',
         path: '/dashboard/bin',

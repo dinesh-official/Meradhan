@@ -7,13 +7,13 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactNode } from "react";
 import { CookiesProvider } from "react-cookie";
 import { Toaster } from "react-hot-toast";
-
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 function Client({ children }: { children: ReactNode }) {
   return (
     <CookiesProvider>
       <UserTrackingProvider>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster
             position="top-right"
             reverseOrder={false}

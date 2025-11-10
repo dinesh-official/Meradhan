@@ -31,6 +31,15 @@ function NseIsinPicker({
     useNseIsinPickerState();
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      searchIsinMutation.mutate();
+    }, 500);
+    console.log("Filtering...");
+
+    return () => clearTimeout(timer);
+  }, [filters]);
+
+  useEffect(() => {
     if (!open) {
       resetFilters();
     } else {

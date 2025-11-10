@@ -98,9 +98,10 @@ function ErrorState({ error, onRetry }: { error: Error; onRetry: () => void }) {
 
 export default function AdminProfileCard() {
   const [update, setUpdate] = useState(false);
-  const { userProfile, isLoading, error, refetch, refreshProfile, isEnabled } = useCurrentUserProfileHook();
+  const { userProfile, isLoading, error, refetch, refreshProfile, isEnabled } =
+    useCurrentUserProfileHook();
   const { refreshProfileData } = useProfileActions();
-  
+
   const handleEditProfile = () => {
     setUpdate(true);
   };
@@ -159,16 +160,24 @@ export default function AdminProfileCard() {
           <div className="md:col-span-2 p-6">
             <div className="flex items-center gap-4">
               <Avatar className="w-16 h-16">
-                <AvatarImage src={genMediaUrl(userProfile.avatar)} alt={userProfile.name} />
+                <AvatarImage
+                  src={genMediaUrl(userProfile.avatar)}
+                  alt={userProfile.name}
+                />
                 <AvatarFallback className="font-semibold text-lg">
-                  {userProfile.name.split(' ').map(n => n[0]).join('')}
+                  {userProfile.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h3 className="font-semibold text-xl leading-none">
                   {userProfile.name}
                 </h3>
-                <p className="mt-1 text-muted-foreground text-sm">{userProfile.email}</p>
+                <p className="mt-1 text-muted-foreground text-sm">
+                  {userProfile.email}
+                </p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="secondary" className="uppercase">
                     {userProfile.role}
@@ -196,22 +205,24 @@ export default function AdminProfileCard() {
               </CardDescription>
               <CardAction>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="font-medium"
                     onClick={handleEditProfile}
                   >
                     Edit Profile
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="font-medium"
                     onClick={handleRefresh}
                     disabled={isLoading}
                   >
-                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+                    />
                   </Button>
                 </div>
               </CardAction>
@@ -223,7 +234,9 @@ export default function AdminProfileCard() {
                     <User className="w-4 h-4" />
                     <div className="text-sm">Phone</div>
                   </div>
-                  <div className="font-medium text-sm">{userProfile.phoneNo || "Not provided"}</div>
+                  <div className="font-medium text-sm">
+                    {userProfile.phoneNo || "Not provided"}
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -232,7 +245,9 @@ export default function AdminProfileCard() {
                     <div className="text-sm">Last login</div>
                   </div>
                   <div className="font-medium text-sm">
-                    {userProfile.lastLogin ? formatDateISO(userProfile.lastLogin) : "Never"}
+                    {userProfile.lastLogin
+                      ? formatDateISO(userProfile.lastLogin)
+                      : "Never"}
                   </div>
                 </div>
 
@@ -256,9 +271,9 @@ export default function AdminProfileCard() {
         </CardFooter>
       </Card>
       {userProfile && (
-        <UpdateUserPopup 
-          user={userProfile} 
-          showPopup={update} 
+        <UpdateUserPopup
+          user={userProfile}
+          showPopup={update}
           onPopupClose={handleUserUpdate}
         />
       )}

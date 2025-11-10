@@ -2,85 +2,91 @@ import { UserSessionDataResponse } from '@root/apiGateway';
 import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-// Environment detection for middleware
-const isProduction = process.env.NODE_ENV === "production";
 
-// Helper: Generate Basic Auth header
-const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64");
+const isProduction = process.env.NODE_ENV === 'production';
 
-const fetchUserSession = async (token: string) => {
+// ✅ Basic Auth Header
+const BASIC_AUTH_HEADER = 'Basic ' + Buffer.from('admin:admin').toString('base64');
+
+// ✅ Fetch user session from backend
+const fetchUserSession = async (token: string): Promise<UserSessionDataResponse | null> => {
+  if (!token) return null;
+
   try {
-    const sessionResponse = fetch("http://localhost:4000/api/session", {
+    const res = await fetch('http://localhost:4000/api/session', {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-    }).then(res => res.json());
-    return sessionResponse as Promise<UserSessionDataResponse>;
-  } catch (error) {
-    console.error("Error fetching user session:", error);
-    throw error;
-  }
-}
+    });
 
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data as UserSessionDataResponse;
+  } catch (error) {
+    console.error('❌ Error fetching user session:', error);
+    return null;
+  }
+};
 
 export async function middleware(request: NextRequest) {
-  const cookieStore = await cookies();
   const { pathname } = request.nextUrl;
+  const cookieStore = await cookies();
 
-  // ✅ 1. Basic Auth protection for production
-  if (isProduction && !pathname.startsWith("/api") && !pathname.startsWith("/assets") && !pathname.startsWith("/_next")) {
-    const authHeader = request.headers.get("authorization");
+  // ✅ 1. Basic Auth for production (only for non-static, non-api routes)
+  if (
+    isProduction &&
+    !pathname.startsWith('/api') &&
+    !pathname.startsWith('/assets') &&
+    !pathname.startsWith('/_next')
+  ) {
+    const authHeader = request.headers.get('authorization');
 
     if (authHeader !== BASIC_AUTH_HEADER) {
-      return new Response("Unauthorized", {
+      return new Response('Unauthorized', {
         status: 401,
         headers: {
-          "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
+          'WWW-Authenticate': "Basic realm='MeraDhan Subdomain'",
         },
       });
     }
-
   }
 
-  // Only protect /dashboard routes 
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    try {
-      const session = await fetchUserSession(cookieStore.get('token')?.value || '');
+  // ✅ 2. Protect /dashboard routes
+  if (pathname.startsWith('/dashboard')) {
+    const token = cookieStore.get('token')?.value;
+    const roleCookie = cookieStore.get('role')?.value;
 
-
-      const roleCookie = cookieStore.get('role')?.value;
-
-      // If role mismatch or session is invalid, clear cookies and redirect
-      if (!session?.responseData?.role || session.responseData.role !== roleCookie) {
-        // Create a response object to delete cookies
-        const response = NextResponse.redirect(new URL('/logout', request.url));
-
-        response.cookies.delete('token');
-        response.cookies.delete('userId');
-        response.cookies.delete('role');
-
-        return response;
-      }
-    } catch {
-
+    if (!token) {
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('token');
       response.cookies.delete('userId');
       response.cookies.delete('role');
+      return response;
+    }
 
+    const session = await fetchUserSession(token);
+    console.log(session);
+    
+
+    // ❌ Invalid session or role mismatch → force logout
+    if (!session?.responseData?.role || session.responseData.role !== roleCookie) {
+      const response = NextResponse.redirect(new URL('/logout', request.url));
+      response.cookies.delete('token');
+      response.cookies.delete('userId');
+      response.cookies.delete('role');
       return response;
     }
   }
 
-  // Allow request to continue if everything is fine
+  // ✅ 3. Continue normally
   return NextResponse.next();
 }
 
-// ✅ Match all paths (you can narrow this if needed)
+// ✅ 4. Middleware config — match all except _next/static, images, favicon, etc.
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)', // This means "match everything except api, static, image, favicon"
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

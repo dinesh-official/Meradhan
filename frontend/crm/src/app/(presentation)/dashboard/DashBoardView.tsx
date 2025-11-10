@@ -24,7 +24,7 @@ const DashBoardView = () => {
         actions={<DbTopActionCards />}
       />
 
-      <div className="grid xl:grid-cols-4 md:grid-cols-2 gap-5">
+      <div className="gap-5 grid md:grid-cols-2 xl:grid-cols-4">
         <StatusCountCard
           title="Active Leads"
           value="10K+"
@@ -57,13 +57,13 @@ const DashBoardView = () => {
           variant="grayGradient"
         />
       </div>
-      <div className="grid lg:grid-cols-7 gap-5">
+      <div className="gap-5 grid lg:grid-cols-7">
         <Card className="lg:col-span-5">
           <CardHeader>
             <CardTitle>Sales Performance</CardTitle>
             <CardDescription></CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-end items-end  h-full">
+          <CardContent className="flex justify-end items-end h-full">
             <SalesPerformanceChart />
           </CardContent>
         </Card>

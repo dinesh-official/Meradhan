@@ -233,3 +233,108 @@ export function RfqStatusBadge({ status }: RfqStatusBadgeProps) {
     </Badge>
   );
 }
+
+// ✅ Settlement Status Badge
+interface SettlementStatusBadgeProps {
+  status?: number | undefined;
+}
+
+export function SettlementStatusBadge({ status }: SettlementStatusBadgeProps) {
+  const labels: Record<number, string> = {
+    0: "Pending",
+    1: "Sec Payin Done",
+    2: "Funds Payin Done", 
+    3: "Both Payin Done",
+    4: "Payout Processing",
+    5: "Payout Done",
+    6: "Settlement Complete",
+    7: "Partial Settlement",
+    8: "Failed",
+    9: "Cancelled",
+  };
+
+  const getStatusColor = (statusCode?: number) => {
+    switch (statusCode) {
+      case 6: // Settlement Complete
+      case 5: // Payout Done
+        return "bg-green-100 text-green-800 border-green-300";
+      case 0: // Pending
+      case 1: // Sec Payin Done
+      case 2: // Funds Payin Done
+      case 3: // Both Payin Done
+      case 4: // Payout Processing
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case 7: // Partial Settlement
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      case 8: // Failed
+        return "bg-red-100 text-red-800 border-red-300";
+      case 9: // Cancelled
+        return "bg-gray-100 text-gray-800 border-gray-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
+  return (
+    <Badge
+      className={cn(
+        "px-2 py-1 border rounded-full font-medium text-xs",
+        getStatusColor(status)
+      )}
+    >
+      {labels[status ?? -1] ?? "Unknown"}
+    </Badge>
+  );
+}
+
+// ✅ Yield Type Badge for Settlement
+interface SettlementYieldTypeBadgeProps {
+  type?: "P" | "C" | "M" | undefined;
+}
+
+export function SettlementYieldTypeBadge({ type }: SettlementYieldTypeBadgeProps) {
+  const labels: Record<string, string> = {
+    P: "Price",
+    C: "Clean Price", 
+    M: "Dirty Price",
+  };
+
+  return (
+    <Badge
+      className={cn(
+        "px-2 py-1 border rounded-full font-medium text-xs",
+        type === "P" && "bg-blue-100 text-blue-800 border-blue-300",
+        type === "C" && "bg-green-100 text-green-800 border-green-300",
+        type === "M" && "bg-purple-100 text-purple-800 border-purple-300"
+      )}
+    >
+      {labels[type ?? ""] ?? "Unknown"}
+    </Badge>
+  );
+}
+
+// ✅ Source Badge
+interface SourceBadgeProps {
+  source?: 1 | 4 | 5 | undefined;
+}
+
+export function SourceBadge({ source }: SourceBadgeProps) {
+  const labels: Record<number, string> = {
+    1: "NSE CBRICS",
+    4: "FTRAC",
+    5: "NSE RFQ",
+  };
+
+  return (
+    <Badge
+      className={cn(
+        "px-2 py-1 border rounded-full font-medium text-xs",
+        source === 1 && "bg-blue-100 text-blue-800 border-blue-300",
+        source === 4 && "bg-orange-100 text-orange-800 border-orange-300",
+        source === 5 && "bg-green-100 text-green-800 border-green-300"
+      )}
+    >
+      {labels[source ?? 0] ?? "Unknown"}
+    </Badge>
+  );
+}

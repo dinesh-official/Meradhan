@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCheckbox } from "@/global/elements/inputs/FormCheckbox";
 import { InputField } from "@/global/elements/inputs/InputField";
@@ -9,8 +10,10 @@ import { useState } from "react";
 const DealSplitForm = ({
   data,
   onSubmitForm,
+  loading
 }: {
-  data: CreateNegotiationResponse;
+    data: CreateNegotiationResponse;
+  loading?: boolean;
   onSubmitForm: (data: {
     calcMethod: string | undefined;
     dealType: string | undefined;
@@ -253,13 +256,13 @@ const DealSplitForm = ({
 
       {/* Submit Button */}
       <div className="flex justify-end mt-4">
-        <button
+        <Button
           type="button"
-          className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-md font-medium text-white transition-colors"
           onClick={handleSubmit}
+          disabled={loading}
         >
-          Submit
-        </button>
+          {loading ? "Submitting..." : "Submit"}
+        </Button>
       </div>
     </div>
   );

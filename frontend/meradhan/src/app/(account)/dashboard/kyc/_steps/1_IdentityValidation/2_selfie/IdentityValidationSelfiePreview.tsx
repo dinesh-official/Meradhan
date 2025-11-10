@@ -11,10 +11,11 @@ import { MdOutlineArrowRight } from "react-icons/md";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { genMediaUrl } from "@/global/utils/url.utils";
+import Swal from "sweetalert2";
 
 function IdentityValidationSelfiePreview() {
   const { pushUserKycState } = useKycDataProvider();
-  const { state, nextLocalStep,prevLocalStep } = useKycDataStorage();
+  const { state, nextLocalStep, prevLocalStep } = useKycDataStorage();
   return (
     <Card accountMode>
       <CardHeader accountMode>
@@ -30,7 +31,12 @@ function IdentityValidationSelfiePreview() {
             className="bg- border border-gray-200 rounded-2xl w-48 object-cover aspect-[3/4]"
           />
           <div>
-            <p className="font-medium text-primary text-lg cursor-pointer" onClick={()=>prevLocalStep()} >Recapture</p>
+            <p
+              className="font-medium text-primary text-lg cursor-pointer"
+              onClick={() => prevLocalStep()}
+            >
+              Recapture
+            </p>
             <p className="text-gray-600 text-sm">(Instructions)</p>
           </div>
         </div>
@@ -47,11 +53,18 @@ function IdentityValidationSelfiePreview() {
         </Button>
         <Button
           variant={`link`}
-          onClick={() => {
-            const ask = window.confirm(
-              "Are you sure you want to exit kyc process?"
-            );
-            if (ask) pushUserKycState({ exit: true });
+          onClick={async () => {
+            const result = await Swal.fire({
+              text: "Are you sure you want to exit the KYC process?",
+              imageUrl: "/images/icons/sad-emoji.svg",
+              showCancelButton: true,
+              confirmButtonText: "Yes, Exit",
+              cancelButtonText: "Cancel",
+            });
+
+            if (result.isConfirmed) {
+              pushUserKycState({ exit: true });
+            }
           }}
         >
           Save & Exit

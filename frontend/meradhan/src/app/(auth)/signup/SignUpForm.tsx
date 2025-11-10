@@ -1,7 +1,5 @@
 "use client";
 
-import React, { memo } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,13 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import PasswordInput from "../_components/PasswordInput";
+import Link from "next/link";
+import React, { memo } from "react";
 import ErrorBox from "../_components/ErrorBox";
+import PasswordInput from "../_components/PasswordInput";
 import VerifyOtpPopUp from "./_components/VerifyOtpPopUp";
 
+import { cn } from "@/lib/utils";
 import { useSignUpAuthFlow } from "./_hooks/useSignUpAuthFlow";
 import { useSignUpFormDataState } from "./_hooks/useSignUpFormDataState";
-import { cn } from "@/lib/utils";
  
 // ✅ Reusable field wrapper with error display
 const Field: React.FC<{

@@ -1,18 +1,20 @@
 import { ActivityDetails, ActivityType } from "./types";
 export const ActivityTypes = [
-  "login",
-  'logout', 
-  "page_view",
-  "auto_logout",
-  "click",
-  "scroll_depth",
-  "otp_request",
-  "page_duration",
-  "create_entry",
-  "delete_entry",
-  "update_entry",
-  "refresh",
-  "activity"
+    "login",
+    'logout',
+    "page_view",
+    "auto_logout",
+    "click",
+    "scroll_depth",
+    "otp_request",
+    "page_duration",
+    "create_entry",
+    "delete_entry",
+    "update_entry",
+    "refresh",
+    "activity",
+    "otp_verify",
+    "session"
 ] as const;
 
 export interface AnalyticsEvent {
@@ -20,20 +22,20 @@ export interface AnalyticsEvent {
     sessionId: string;
     type: ActivityType;
     props?: ActivityDetails;
+    trackId: string;
     ts: string;
     ua: string;
 }
 
 // -------------------- Configuration --------------------
 const ENDPOINT = "/api/server/crm/tracking";
-const BATCH_SIZE = 1;
 
 // -------------------- Utility Functions --------------------
 function generateId(): string {
     return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-function getSessionId(): string {
+export function getSessionId(): string {
     try {
         let id = localStorage.getItem("analytics_session");
         if (!id) {
@@ -66,13 +68,11 @@ export function track(type: ActivityType, props: ActivityDetails = {}): void {
         props,
         ts: new Date().toISOString(),
         ua: navigator.userAgent ?? "unknown",
+        trackId: localStorage.getItem("analytics_session") || "",
     };
 
     queue.push(event);
-
-    if (queue.length >= BATCH_SIZE) {
-        flush();
-    }
+    flush();
 }
 
 
@@ -82,13 +82,18 @@ export function track(type: ActivityType, props: ActivityDetails = {}): void {
  * Send queued events to server
  */
 export async function flush(): Promise<void> {
+    console.log("send1");
+
     if (isSending || queue.length === 0) return;
+    console.log("send2");
 
     isSending = true;
     const payload = [...queue];
     queue = [];
 
     try {
+        console.log(payload);
+        console.log("send3");
 
         await fetch(ENDPOINT, {
             method: "POST",
@@ -101,7 +106,10 @@ export async function flush(): Promise<void> {
                 localStorage.clear();
                 window.location.replace("/logout")
             }
-        })
+        }).catch((error) => {
+            console.error("Analytics send error:", error);
+        });
+        console.log("Analytics events sent:", payload.length);
 
     } catch (error) {
         console.error("Analytics flush failed:", error);

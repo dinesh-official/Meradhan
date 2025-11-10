@@ -42,19 +42,19 @@ function BankViewCard({
         <DataInfoLabel
           title="Name"
           status={isNameMatched ? "SUCCESS" : "ERROR"}
-          statusLabel={isNameMatched ? "Matched" : "Invalid"}
+          statusLabel={isNameMatched ? "Matched" : "Not Matched"}
           showStatus
         >
-          <p>{bank.beneficiary_name}</p>
+          <p className="font-medium text-sm">{bank.beneficiary_name}</p>
         </DataInfoLabel>
       </div>
 
       <div className="gap-5 grid sm:grid-cols-2 lg:grid-cols-4">
         <DataInfoLabel title="Account Number ">
-          <p>{bank.accountNumber}</p>
+          <p className="font-medium text-sm">{bank.accountNumber}</p>
         </DataInfoLabel>
         <DataInfoLabel title="IFSC Code ">
-          <p>{bank.ifscCode}</p>
+          <p className="font-medium text-sm">{bank.ifscCode}</p>
         </DataInfoLabel>
 
         <DataInfoLabel title="Bank Account Type">
@@ -66,15 +66,12 @@ function BankViewCard({
           showStatus
           statusLabel={bank.isVerified ? "Verified" : "Invalid"}
         >
-          <p>{bank.branchName}</p>
+          <p className="font-medium text-sm">{bank.branchName}</p>
         </DataInfoLabel>
       </div>
-      <label className="flex lg:items-center gap-2 mt-3 text-sm">
-        <Checkbox
-          checked={bank.isDefault}
-          onClick={() => setDefault()}
-        />
-        <p>
+      <label className="flex lg:items-center gap-2 mt-3 text-sm cursor-pointer">
+        <Checkbox checked={bank.isDefault} onClick={() => setDefault()} />
+        <p className="text-sm">
           Set this account as default bank account for making future investments
           on MeraDhan
         </p>

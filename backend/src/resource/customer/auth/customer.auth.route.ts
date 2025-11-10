@@ -30,5 +30,7 @@ const forgetPasswordController = new ForgetPasswordController();
 customerAuthRoutes.post("/api/auth/customer/send-forget-password", (req, res) => forgetPasswordController.sendForgetPassword(req, res))
 customerAuthRoutes.post("/api/auth/customer/reset-password", (req, res) => forgetPasswordController.resetPassword(req, res))
 
+customerAuthRoutes.get("/api/auth/customer/send-verify-email", customerAuthMiddleware, (req, res) => controller.sendVerifyEmail(req, res))
+customerAuthRoutes.get("/api/auth/customer/verify-email", (req, res) => controller.verifyEmail(req, res))
 
 export default customerAuthRoutes;

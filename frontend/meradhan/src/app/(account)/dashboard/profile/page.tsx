@@ -29,7 +29,7 @@ async function page() {
         </>
       }
     >
-      <ProfilePage profile={userData.data.responseData} />
+      <ProfilePage profileData={userData.data.responseData} />
     </AccountViewPort>
   );
 }

@@ -48,9 +48,13 @@ function DematAccountView({
 
         <DataInfoLabel
           title="PAN"
-          status={account.panNumber.includes(myPan) ? "SUCCESS" : "ERROR"}
+          // status={account.panNumber.includes(myPan) ? "SUCCESS" : "ERROR"}
+          // statusLabel={
+          //   account.panNumber.includes(myPan) ? "Matched" : "Invalid"
+          // }
+           status={account.isVerified  ? "SUCCESS" : "ERROR"}
           statusLabel={
-            account.panNumber.includes(myPan) ? "Matched" : "Invalid"
+            account.isVerified  ? "Matched" : "Not Matched"
           }
           showStatus
         >

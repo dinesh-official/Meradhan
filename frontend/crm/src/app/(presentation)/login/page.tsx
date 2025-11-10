@@ -42,18 +42,6 @@ function LoginPage() {
             <div className="mt-6">
               <LoginForm />
             </div>
-
-            <div className="mt-7 text-center">
-              <p className="text-gray-500 text-xs">
-                Need help?{" "}
-                <a
-                  href="#"
-                  className="font-medium text-primary hover:underline"
-                >
-                  Contact Support
-                </a>
-              </p>
-            </div>
           </CardContent>
         </Card>
 

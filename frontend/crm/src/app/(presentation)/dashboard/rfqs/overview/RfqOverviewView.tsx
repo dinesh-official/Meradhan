@@ -1,13 +1,10 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
-import StatusCountCard from "@/global/elements/cards/StatusCountCard";
-import CardPagination from "@/global/elements/table/CardPagination";
-import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import Table from "../../Table";
-import RefqOverviewSearchFilterBar from "./_components/RefqOverviewSearchFilterBar";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import StatusCountCard from "@/global/elements/cards/StatusCountCard";
+import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
+import Link from "next/link";
+import SettleOrdersView from "../nse/settle-orders/SettleOrdersView";
 
 function RfqOverviewView() {
   return (
@@ -23,7 +20,7 @@ function RfqOverviewView() {
           </Link>
         }
       />
-      <div className="grid grid-cols-4 gap-5">
+      <div className="gap-5 grid grid-cols-4">
         <StatusCountCard
           title="Total RFQs"
           value={100}
@@ -54,13 +51,7 @@ function RfqOverviewView() {
         />
       </div>
 
-      <Card>
-        <RefqOverviewSearchFilterBar />
-        <CardContent>
-          <Table />
-        </CardContent>
-        <CardPagination onClick={() => {}} page={1} totalPages={10} />
-      </Card>
+      <SettleOrdersView />
     </div>
   );
 }

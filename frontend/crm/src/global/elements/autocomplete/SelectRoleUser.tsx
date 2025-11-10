@@ -69,7 +69,7 @@ export function SelectRoleUser({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="shadow-none justify-between w-full font-normal"
+          className="justify-between shadow-none w-full font-normal"
         >
           {value ? value.name : placeholder || "Search  user..."}
         </Button>
@@ -85,8 +85,8 @@ export function SelectRoleUser({
           />
           <CommandList>
             {isLoading && (
-              <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching...
+              <div className="flex justify-center items-center py-4 text-muted-foreground text-sm">
+                <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Searching...
               </div>
             )}
 
@@ -102,21 +102,21 @@ export function SelectRoleUser({
                     value={user.id.toString()}
                     onSelect={() => handleSelect(user)}
                   >
-                    <div className="flex flex-row gap-2 ">
+                    <div className="flex flex-row gap-2">
                       <Avatar>
                         <AvatarImage src={ASSETS_URL + "/" + user.avatar} />
                         <AvatarFallback></AvatarFallback>
                       </Avatar>
                       <div className="w-full">
                         <p>{user.name}</p>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                           {user.email}
                         </span>
                       </div>
                     </div>
                     <Check
                       className={cn(
-                        "ml-auto h-4 w-4",
+                        "ml-auto w-4 h-4",
                         value?.id === user.id ? "opacity-100" : "opacity-0"
                       )}
                     />

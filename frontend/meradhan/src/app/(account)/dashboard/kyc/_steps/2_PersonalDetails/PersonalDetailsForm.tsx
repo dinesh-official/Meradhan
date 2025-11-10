@@ -31,7 +31,8 @@ import { usePersonalDetailsFormHook } from "./usePersonalDetailsFormHook";
 
 function PersonalDetailsForm() {
   const { setStep2PersonalData, state } = useKycDataStorage();
-  const { handelPersonalSubmit, error } = usePersonalDetailsFormHook();
+  const { handelPersonalSubmit, error, removeError } =
+    usePersonalDetailsFormHook();
 
   const data = state.step_2;
 
@@ -50,7 +51,10 @@ function PersonalDetailsForm() {
             error={error?.maritalStatus?.[0]}
           >
             <Select
-              onValueChange={(e) => setStep2PersonalData("maritalStatus", e)}
+              onValueChange={(e) => {
+                setStep2PersonalData("maritalStatus", e);
+                removeError("maritalStatus");
+              }}
               value={data.maritalStatus}
             >
               <SelectTrigger className="w-full">
@@ -75,9 +79,10 @@ function PersonalDetailsForm() {
             <Input
               type="text"
               value={data.fatSpuName}
-              onChange={(e) =>
-                setStep2PersonalData("fatSpuName", e.target.value)
-              }
+              onChange={(e) => {
+                setStep2PersonalData("fatSpuName", e.target.value);
+                removeError("fatSpuName");
+              }}
             />
           </LabelInput>
 
@@ -88,7 +93,10 @@ function PersonalDetailsForm() {
             error={error?.reelWithPerson?.[0]}
           >
             <Select
-              onValueChange={(e) => setStep2PersonalData("reelWithPerson", e)}
+              onValueChange={(e) => {
+                setStep2PersonalData("reelWithPerson", e);
+                removeError("reelWithPerson");
+              }}
               value={data.reelWithPerson}
             >
               <SelectTrigger className="w-full">
@@ -111,7 +119,10 @@ function PersonalDetailsForm() {
             error={error?.qualification?.[0]}
           >
             <Select
-              onValueChange={(e) => setStep2PersonalData("qualification", e)}
+              onValueChange={(e) => {
+                setStep2PersonalData("qualification", e);
+                removeError("qualification");
+              }}
               value={data.qualification}
             >
               <SelectTrigger className="w-full">
@@ -134,7 +145,10 @@ function PersonalDetailsForm() {
             error={error?.occupationType?.[0]}
           >
             <Select
-              onValueChange={(e) => setStep2PersonalData("occupationType", e)}
+              onValueChange={(e) => {
+                setStep2PersonalData("occupationType", e);
+                removeError("occupationType");
+              }}
               value={data.occupationType}
             >
               <SelectTrigger className="w-full">
@@ -157,9 +171,10 @@ function PersonalDetailsForm() {
             error={error?.annualGrossIncome?.[0]}
           >
             <Select
-              onValueChange={(e) =>
-                setStep2PersonalData("annualGrossIncome", e)
-              }
+              onValueChange={(e) => {
+                setStep2PersonalData("annualGrossIncome", e);
+                removeError("annualGrossIncome");
+              }}
               value={data.annualGrossIncome}
             >
               <SelectTrigger className="w-full">
@@ -184,9 +199,10 @@ function PersonalDetailsForm() {
             <Input
               type="text"
               value={data.motherName}
-              onChange={(e) =>
-                setStep2PersonalData("motherName", e.target.value)
-              }
+              onChange={(e) => {
+                setStep2PersonalData("motherName", e.target.value);
+                removeError("motherName");
+              }}
             />
           </LabelInput>
 
@@ -197,7 +213,10 @@ function PersonalDetailsForm() {
             error={error?.nationality?.[0]}
           >
             <Select
-              onValueChange={(e) => setStep2PersonalData("nationality", e)}
+              onValueChange={(e) => {
+                setStep2PersonalData("nationality", e);
+                removeError("nationality");
+              }}
               value={data.nationality}
             >
               <SelectTrigger className="w-full">
@@ -220,9 +239,10 @@ function PersonalDetailsForm() {
             error={error?.residentialStatus?.[0]}
           >
             <Select
-              onValueChange={(e) =>
-                setStep2PersonalData("residentialStatus", e)
-              }
+              onValueChange={(e) => {
+                setStep2PersonalData("residentialStatus", e);
+                removeError("residentialStatus");
+              }}
               value={data.residentialStatus}
             >
               <SelectTrigger className="w-full">

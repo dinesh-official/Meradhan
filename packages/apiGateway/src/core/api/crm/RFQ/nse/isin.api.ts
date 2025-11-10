@@ -2,7 +2,7 @@ import type { appSchema } from "@root/schema";
 import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
 import type { IApiCaller } from "../../../../connection/apiCaller.interface";
-import type { CreateNegotiationResponse, CreateRfqResponseItem, NseISINResponseData } from "./isin.response";
+import type { CreateNegotiationResponse, CreateRfqResponseItem, NseISINResponseData, SettleOrderData } from "./isin.response";
 import type { BaseResponseData } from "../../../../../types/base";
 
 export class RfqIsinApi {
@@ -70,6 +70,14 @@ export class RfqIsinApi {
 
     async acceptRejectDeal(payload: z.infer<typeof appSchema.rfq.acceptRejectDealSchema>, config?: AxiosRequestConfig) {
         const data = await this.apiClient.post<BaseResponseData<CreateRfqResponseItem | null>>("/crm/rfq/nse/deal/accept-reject", payload, {
+            ...config,
+        });
+        return data.data;
+    }
+
+
+    async getAllSettledOrders(payload?: z.infer<typeof appSchema.rfq.settleOrderFilterSchema>, config?: AxiosRequestConfig) {
+        const data = await this.apiClient.post<BaseResponseData<SettleOrderData[]>>("/crm/rfq/nse/settle/orders", payload, {
             ...config,
         });
         return data.data;

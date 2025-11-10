@@ -54,7 +54,14 @@ export class NSDLApi {
 
     async checkDANstatus(body: DanRequest): Promise<DemateVerifyResponse<DanResponse>> {
         const timestamp = this.getCurrentTimestamp();
-        const signature = this.generateSignature(timestamp, body);
+        const signature = this.generateSignature(timestamp, {
+            transactionId: body.transactionId,
+            dpId: body.dpId,
+            clientId: body.clientId,
+            fstHoldrPan: body.fstHoldrPan,
+            scndHoldrPan: body.scndHoldrPan,
+            thrdHoldrPan: body.thrdHoldrPan,
+        });
 
 
 

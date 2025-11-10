@@ -1,3 +1,5 @@
+import { getSessionId } from "@/analytics/analytics";
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useCurrentUserData } from "@/global/stores/useCurrentUserData.store";
 import apiGateway, { ApiError } from "@root/apiGateway";
@@ -9,6 +11,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 export const useLoginApiHook = () => {
+  const { trackActivity } = useUserTracking();
   const authApi = new apiGateway.auth.AuthApi(apiClientCaller);
   const [step, setStep] = useState<"EMAIL" | "OTP">("EMAIL");
   const router = useRouter();
@@ -20,6 +23,10 @@ export const useLoginApiHook = () => {
       return response.data;
     },
     onSuccess() {
+      trackActivity("otp_request", {
+        method: "otp",
+        reason: "User logged in otp request",
+      });
       toast.success("Otp Send successfully.");
       setStep("OTP");
     },
@@ -32,6 +39,22 @@ export const useLoginApiHook = () => {
     },
   });
 
+
+  const auditAPi = new apiGateway.crm.auditlogs.AuditLogsApi(apiClientCaller);
+
+  const revalidateTracking = async (payload?: {
+    trackId: string;
+    token: string;
+    userId: number;
+  }) => {
+    try {
+      await auditAPi.revalidateAuditLogs(payload);
+    } catch (error) {
+      console.log(error);
+
+    }
+  }
+
   const otpVerificationMutation = useMutation({
     mutationKey: ["otpVerification"],
     mutationFn: async (
@@ -42,6 +65,10 @@ export const useLoginApiHook = () => {
     },
     onSuccess(data) {
       toast.success("Login Successful");
+      trackActivity("otp_verify", {
+        method: "otp",
+        reason: "User logged in successfully via OTP",
+      });
       usersStore.setUserData({
         name: data.responseData.name,
         role: data.responseData.role,
@@ -49,6 +76,11 @@ export const useLoginApiHook = () => {
         avatar: data.responseData.avatar,
         id: data.responseData.id,
         phoneNo: data.responseData.phoneNo,
+      });
+      revalidateTracking({
+        trackId: localStorage.getItem("analytics_session") || getSessionId(),
+        token: data.responseData.token,
+        userId: data.responseData.id,
       });
       router.replace("/dashboard");
     },

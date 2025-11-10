@@ -1,4 +1,5 @@
 import { db, type DataBaseSchema } from "@core/database/database";
+import type { SettleOrderData } from "@modules/RFQ/nse/cbrics.types";
 import type { CreateNegotiationResponse, CreateRfqResponseItem } from "@modules/RFQ/nse/rfq.types";
 import type { appSchema } from "@root/schema";
 import z from "zod";
@@ -158,6 +159,72 @@ export class RfqMasterDbSyncManager {
 
     }
 
+    // Settlement Order Sync Method
+    async syncSettlementOrderData(order: SettleOrderData) {
+        // Implementation for syncing settlement order data
+        const data: DataBaseSchema.SettleOrderModelCreateInput = {
+            id: order.id,
+            buyParticipantLoginId: order.buyParticipantLoginId,
+            sellParticipantLoginId: order.sellParticipantLoginId,
+
+            orderNumber: order.orderNumber,
+            price: order.price,
+            settleStatus: order.settleStatus,
+            source: order.source,
+            symbol: order.symbol,
+            value: order.value,
+            yield: order.yield,
+            yieldType: order.yieldType,
+            accountNo: order.accountNo,
+            buyBackofficeLoginId: order.buyBackofficeLoginId,
+            sellBackofficeLoginId: order.sellBackofficeLoginId,
+            buyBrokerLoginId: order.buyBrokerLoginId,
+            sellBrokerLoginId: order.sellBrokerLoginId,
+            buyerFundPayinObligation: order.buyerFundPayinObligation,
+            sellerFundPayoutObligation: order.sellerFundPayoutObligation,
+            buyerRefNo: order.buyerRefNo,
+            sellerRefNo: order.sellerRefNo,
+            benId: order.benId,
+            dpId: order.dpId,
+            fundPayinRefId: order.fundPayinRefId,
+            fundsPayinAmount: order.fundsPayinAmount,
+            fundsPayinRemarks: order.fundsPayinRemarks,
+            fundsPayinTime: order.fundsPayinTime,
+            ifscCode: order.ifscCode,
+            modAccrInt: order.modAccrInt,
+            modConsideration: order.modConsideration,
+            modQuantity: order.modQuantity,
+            modSettleDate: order.modSettleDate,
+            payoutRemarks: order.payoutRemarks,
+            payoutTime: order.payoutTime,
+            secPayinQuantity: order.secPayinQuantity,
+            secPayinRemarks: order.secPayinRemarks,
+            secPayinTime: order.secPayinTime,
+
+            stampDutyAmount: order.stampDutyAmount,
+            stampDutyBearer: order.stampDutyBearer,
+            utrNumber: order.utrNumber,
+            settlementNo: order.settlementNo,
+
+        }
+
+
+        const store = await db.dataBase.settleOrderModel.upsert({
+            where: {
+                id: order.id,
+            },
+            create: {
+                ...data,
+
+            },
+            update: {
+                ...data,
+
+            }
+        });
+        return store;
+
+    }
 
 
 }

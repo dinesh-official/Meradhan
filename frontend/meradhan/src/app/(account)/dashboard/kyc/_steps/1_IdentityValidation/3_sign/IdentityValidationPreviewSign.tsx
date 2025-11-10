@@ -12,8 +12,9 @@ import { MdOutlineArrowRight } from "react-icons/md";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { genMediaUrl } from "@/global/utils/url.utils";
-import SignDoNotDO from "../_dialogs/SignDoNotDO";
+import SignDoNotDO, { signDrawGuidelines } from "../_dialogs/SignDoNotDO";
 import { useKycStepStore } from "../../../_store/useKycStepStore";
+import Swal from "sweetalert2";
 
 function IdentityValidationPreviewSign() {
   const { pushUserKycState } = useKycDataProvider();
@@ -41,7 +42,7 @@ function IdentityValidationPreviewSign() {
             >
               Remove and Add New Signature
             </p>
-            <SignDoNotDO>
+            <SignDoNotDO data={signDrawGuidelines} >
               <p className="text-gray-600 text-sm">(Instructions)</p>
             </SignDoNotDO>
           </div>
@@ -61,11 +62,18 @@ function IdentityValidationPreviewSign() {
           Continue & Confirm <MdOutlineArrowRight />
         </Button>
         <Button
-          onClick={() => {
-            const ask = window.confirm(
-              "Are you sure you want to exit kyc process?"
-            );
-            if (ask) pushUserKycState({ exit: true });
+          onClick={async () => {
+            const result = await Swal.fire({
+              text: "Are you sure you want to exit the KYC process?",
+              imageUrl: "/images/icons/sad-emoji.svg",
+              showCancelButton: true,
+              confirmButtonText: "Yes, Exit",
+              cancelButtonText: "Cancel",
+            });
+
+            if (result.isConfirmed) {
+              pushUserKycState({ exit: true });
+            }
           }}
           variant={`link`}
         >

@@ -30,7 +30,7 @@ function CustomerKycView({ id }: { id: number }) {
   if (!data) {
     return (
       <div className="flex justify-center items-center h-96">
-        <p>NO Kyc Data Found</p>
+        <p>NO KYC Data Found</p>
       </div>
     );
   }

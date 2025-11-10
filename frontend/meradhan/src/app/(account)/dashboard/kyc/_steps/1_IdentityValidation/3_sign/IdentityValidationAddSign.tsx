@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FaSignature } from "react-icons/fa";
-import SignDoNotDO from "../_dialogs/SignDoNotDO";
+import SignDoNotDO, { signDrawGuidelines, signUploadGuidelines } from "../_dialogs/SignDoNotDO";
 import { useSignVerifyHook } from "./_hooks/useSignVerifyHook";
 
 export default function IdentityValidationAddSign() {
@@ -34,7 +34,7 @@ export default function IdentityValidationAddSign() {
           <Section title="If You Are Uploading Your Signature:">
             <ul className="mt-2 ml-8 list-disc">
               <li className="text-primary">
-                <SignDoNotDO>Do’s and Don’ts for signature upload</SignDoNotDO>
+                <SignDoNotDO data={signUploadGuidelines} title="Signature Upload – Do’s & Don’ts" >Do’s and Don’ts for signature upload</SignDoNotDO>
               </li>
             </ul>
           </Section>
@@ -42,7 +42,7 @@ export default function IdentityValidationAddSign() {
           <Section title="If You Are Drawing Your Signature On-Screen:">
             <ul className="mt-2 ml-8 list-disc">
               <li className="text-primary">
-                <SignDoNotDO>
+                <SignDoNotDO data={signDrawGuidelines} title="Signature Draw (On-Screen) – Do’s & Don’ts">
                   Do’s and Don’ts for drawing your signature
                 </SignDoNotDO>
               </li>

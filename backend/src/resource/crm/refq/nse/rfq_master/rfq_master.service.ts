@@ -2,10 +2,13 @@ import type { appSchema } from "@root/schema";
 import { NseRfqManager } from "@services/refq/nse/nseisin_manager.service";
 import type z from "zod";
 import { RfqMasterDbSyncManager } from "./rfq_master.manager";
+import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 
 export class RfqMasterService {
 
     private rfqManager = new NseRfqManager();
+    private cbricsManager = new NseCBRICS();
+
     private rfqDbSyncManager = new RfqMasterDbSyncManager();
 
     async createNewRfq(data: z.infer<typeof appSchema.rfq.addIsinSchema>, createdBy: number) {
@@ -160,6 +163,15 @@ export class RfqMasterService {
 
         // Sync Deal Data to Our Database
         return await this.rfqDbSyncManager.syncNegotiationData(acceptRejectDeal, createdBy);
+    }
+
+
+    async getAllSettledOrders(filters: z.infer<typeof appSchema.rfq.settleOrderFilterSchema>) {
+        const data = await this.cbricsManager.getSettlementOrders(filters);
+        const settledOrders = data.map(async (order) => {
+            return await this.rfqDbSyncManager.syncSettlementOrderData(order);
+        })
+        return await Promise.all(settledOrders);
     }
 
 }

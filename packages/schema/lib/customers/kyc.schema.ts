@@ -8,20 +8,17 @@ export const kycPanInfoDataSchema = z.object({
         .max(10, "PAN must be 10 characters"),
     dateOfBirth: z
         .string()
-        .min(1, "Date of birth is required")
-        .regex(
-            /^\d{4}-\d{2}-\d{2}$/,
-            "Date of birth must be in YYYY-MM-DD format"
-        ),
-    firstName: z.string().min(1, "First name is required"),
-    middleName: z.string().optional(), // can be empty
-    lastName: z.string().min(1, "Last name is required"),
+        .min(8, "Date of birth is required"),
+    firstName: z.string().min(1, "First name is required").trim(),
+    middleName: z.string().optional().default(""), // can be empty
+    lastName: z.string().optional().default(""), // can be empty
     checkTerms1: z
         .boolean()
-        .refine(val => val === true, { message: "You must agree to terms 1" }),
+        .refine(val => val === true, { message: "Please confirm you are not a PEP or related to one." }),
     checkTerms2: z
         .boolean()
-        .refine(val => val === true, { message: "You must agree to terms 2" }),
+        .refine(val => val === true, { message: "Please confirm that you are not debarred from accessing or dealing in the securities market." }),
+    isFatca: z.boolean({ error: 'Please confirm that you are solely a tax resident of India (FATCA).' }).refine(val => val === true, { message: "Please confirm that you are solely a tax resident of India (FATCA)." }),
 })
 
 export const selfieSignRequestSchema = z.object({
@@ -37,7 +34,7 @@ export const personalInfoSchema = z.object({
     qualification: z.string().min(1, "Qualification is required"),
     occupationType: z.string().min(1, "Occupation type is required"),
     annualGrossIncome: z.string().min(1, "Annual gross income is required"),
-    motherName: z.string().min(1, "Mother name is required"),
+    motherName: z.string().min(1, "Mother's name is required"),
     nationality: z.string().min(1, "Nationality is required"),
     residentialStatus: z.string().min(1, "Residential status is required"),
 });
@@ -48,18 +45,18 @@ export const bankInfoSchema = z.object({
     branchName: z.string().min(1, "Branch name is required"),
     ifscCode: z
         .string()
-        .min(11, "IFSC code must be 11 characters long")
-        .max(11, "IFSC code must be 11 characters long")
+        .min(11, "IFSC code must be 11 characters")
+        .max(11, "IFSC code must be 11 characters")
         .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format"),
     accountNumber: z
         .string()
         .min(8, "Account number must be at least 8 digits")
         .max(18, "Account number cannot exceed 18 digits")
-        .regex(/^[0-9]+$/, "Account number must contain only digits"),
+        .regex(/^[0-9]+$/, "Account number must contain digits only"),
     isDefault: z.boolean(),
     checkTerms: z
         .boolean()
-        .refine(val => val === true, { message: "You must agree to the terms" }),
+        .refine(val => val === true, { message: "Authorization to verify your bank account via a ₹1 validation transfer is required." }),
     beneficiary_name: z.string().min(1, "Beneficiary name is required"),
 });
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
@@ -72,14 +69,13 @@ export const dpAccountInfoSchema = z
 
         dpId: z.string(),
 
-        beneficiaryClientId: z
-            .string()
-            .min(8, "Beneficiary Client ID must be at least 8 characters")
-            .max(16, "Beneficiary Client ID cannot exceed 16 characters"),
+        beneficiaryClientId: z.string({
+            error: "Beneficiary/Client ID is required",
+        }).min(1, "Beneficiary/Client ID is required"),
 
         depositoryParticipantName: z
-            .string()
-            .min(1, "Depository participant name is required"),
+            .string().optional(),
+            // .min(1, "Depository participant name is required"),
 
 
         //  pan numbers validation not here, handled separately
@@ -123,28 +119,50 @@ export const dpAccountInfoSchema = z
 
         checkTerms: z
             .boolean()
-            .refine((val) => val === true, { message: "You must agree to the terms" }),
+            .refine((val) => val === true, { message: "Authorization to verify Demat account details is required." }),
     }).superRefine((_data, _ctx) => {
 
         if (_data.depositoryName === "NSDL") {
             if (!_data.dpId?.trim()) {
                 _ctx.addIssue({
                     code: "custom",
-                    message: "DP ID is required for NSDL",
+                    message: "DP ID is required.",
                     path: ["dpId"],
                 });
             } else if (
-                _data.dpId.length < 8 ||
-                _data.dpId.length > 16
+                _data.dpId.length != 8
             ) {
                 _ctx.addIssue({
                     code: "custom",
-                    message: "DP ID must be between 8 and 16 characters",
+                    message: "DP ID must be 8 digits.",
                     path: ["dpId"],
                 });
             }
-        }
+            if (_data.beneficiaryClientId.length != 8) {
+                _ctx.addIssue({
+                    code: "custom",
+                    message: "Beneficiary/Client ID must be 8 digits.",
+                    path: ["beneficiaryClientId"],
+                });
+            }
 
+        } else if (_data.depositoryName === "CDSL") {
+
+            if (_data.beneficiaryClientId.trim().length == 0) {
+                _ctx.addIssue({
+                    code: "custom",
+                    message: "Beneficiary/Client ID is required.",
+                    path: ["beneficiaryClientId"],
+                });
+            } if (_data.beneficiaryClientId.length != 16) {
+                _ctx.addIssue({
+                    code: "custom",
+                    message: "Beneficiary/Client ID must be 16 digits.",
+                    path: ["beneficiaryClientId"],
+                });
+            }
+
+        }
     });
 
 

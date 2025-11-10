@@ -85,3 +85,15 @@ export const sendPasswordResetSuccessEmail = async (data: { email: string, userN
         removeOnFail: true
     })
 }
+
+
+export const sendEmailVerificationLink = async (data: { email: string, userName: string, link: string }) => {
+    await forgotPasswordLinkSenderQueue.add({
+        ...data,
+        subject: `Verify Your Email – MeraDhan ${getFormattedTimestamp()}`
+    }, {
+        removeOnComplete: true,
+        attempts: 1,
+        removeOnFail: true
+    })
+}

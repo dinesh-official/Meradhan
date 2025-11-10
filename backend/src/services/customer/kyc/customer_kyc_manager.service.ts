@@ -47,8 +47,8 @@ export class CustomerKycManager {
     private mapAccountType(type: string): $Enums.DematAccountType {
         const upper = type.toUpperCase();
         if (upper === "JOINT") return "JOINT";
-        if (upper === "HUF") return "HUF";
-        return "SINGLE";
+        if (upper === "SOLO") return "SOLO";
+        return "SOLO";
     }
 
     /**

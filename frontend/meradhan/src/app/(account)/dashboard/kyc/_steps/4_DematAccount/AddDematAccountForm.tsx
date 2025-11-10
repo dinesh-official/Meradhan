@@ -32,13 +32,15 @@ function AddDematAccountForm() {
   const { updateDepository, state, removeDepository, nextLocalStep } =
     useKycDataStorage();
   const data = state.step_4[state.step_4.length - 1];
-  const { handelSubmit, error, isPending } = useDematAccountFormHook();
+  const { handelSubmit, error, isPending, removeError } =
+    useDematAccountFormHook();
 
   // user for update state data with type safety
   const updateData = (
     key: keyof KycDataStorage["step_4"][number],
     data: string | boolean | unknown
   ) => {
+    removeError(key);
     updateDepository(state.step_4.length - 1, {
       [key]: data,
     });
@@ -72,7 +74,12 @@ function AddDematAccountForm() {
       <CardContent accountMode>
         <div className="flex flex-col gap-3 md:gap-5">
           {/* 3 for CDSL  */}
-          <div className={cn("gap-3 md:gap-5 grid lg:grid-cols-4", data.depositoryName === "CDSL" && "lg:grid-cols-3")}>
+          <div
+            className={cn(
+              "gap-3 md:gap-5 grid md:grid-cols-2 lg:grid-cols-4",
+              
+            )}
+          >
             <LabelInput
               label="Depository Name"
               required
@@ -98,6 +105,9 @@ function AddDematAccountForm() {
               </Select>
             </LabelInput>
 
+            
+            
+
             {/* // Only for NSDL */}
             {data.depositoryName == "NSDL" && (
               <LabelInput label="DP ID" required error={error?.dpId?.[0]}>
@@ -113,6 +123,7 @@ function AddDematAccountForm() {
               label="Beneficiary / Client ID"
               required
               error={error?.beneficiaryClientId?.[0]}
+              className={data.depositoryName == "CDSL" ? "lg:col-span-2" : ""}
             >
               <Input
                 value={data.beneficiaryClientId}
@@ -162,8 +173,8 @@ function AddDematAccountForm() {
             </p>
           )}
 
-          <div className="gap-3 md:gap-5 grid lg:grid-cols-3">
-            <LabelInput
+          <div className="gap-3 md:gap-5 grid md:grid-cols-3">
+            {/* <LabelInput
               label="Depository Participant Name"
               required
               error={error?.depositoryParticipantName?.[0]}
@@ -174,7 +185,7 @@ function AddDematAccountForm() {
                   updateData("depositoryParticipantName", e.target.value)
                 }
               />
-            </LabelInput>
+            </LabelInput> */}
 
             {/* //  Primary Account Holder Details (PAN & Name) - Auto filled from Step 1 */}
             <LabelInput
@@ -184,7 +195,12 @@ function AddDematAccountForm() {
             >
               <Input
                 value={data?.panNumber[0]}
-                onChange={(e) => updateData("panNumber", [e.target.value, ...data.panNumber?.slice(1)])}
+                onChange={(e) =>
+                  updateData("panNumber", [
+                    e.target.value,
+                    ...data.panNumber?.slice(1),
+                  ])
+                }
                 // disabled
                 // adminMode
               />

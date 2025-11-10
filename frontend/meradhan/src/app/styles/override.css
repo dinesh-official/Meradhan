@@ -129,3 +129,55 @@ input[type="range"]::-moz-range-thumb {
     max-width: 1320px;
   }
 }
+
+/* Popup box */
+.swal2-popup {
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Title text */
+.swal2-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #1e293b !important; /* slate-800 */
+}
+
+.swal2-image {
+  width: auto !important;
+  height: 56px !important;
+}
+
+/* Message text */
+.swal2-html-container {
+  font-size: 14px !important;
+  color: #475569 !important; /* slate-600 */
+}
+
+/* Buttons wrapper */
+.swal2-actions {
+  gap: 10px !important;
+}
+
+/* Confirm button */
+.swal2-confirm {
+  background: #dc2626 !important; /* red-600 */
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+  font-weight: 600 !important;
+}
+
+/* Cancel button */
+.swal2-cancel {
+  background: #e2e8f0 !important; /* slate-200 */
+  color: #1e293b !important; /* slate-800 */
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+  font-weight: 600 !important;
+}
+
+.rpv-toolbar {
+  font-size: 12px !important;
+}

@@ -1,5 +1,6 @@
+import { config } from "@config/config";
 import { db, type DataBaseSchema } from "@core/database/database";
-import { sendCustomerSigninOtpEmail } from "@jobs/helper/send_emails";
+import { sendCustomerSigninOtpEmail, sendEmailVerificationLink } from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
 import type { appSchema } from "@root/schema";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
@@ -298,6 +299,57 @@ export class CustomerAuthService {
         }
     }
 
+    async sendEmailVerification(customerId: number): Promise<boolean> {
+        // Logic to send email verification (implementation not shown)
+        console.log(`Email verification sent for customer ${customerId}`);
+
+        const customer = await db.dataBase.customerProfileDataModel.findUnique({
+            where: {
+                id: customerId
+            }
+        });
+
+        if (!customer) {
+            throw new AppError("Customer not found.");
+        }
+        
+        const token = tokenUtils.generateToken({ customerId }, '15m');
+        console.log(`${config.clientUrl}/verify-email?token=${token}`);
+        // Send verification email with the token (implementation not shown)
+        console.log(`Verification token: ${token}`);
+        await sendEmailVerificationLink({
+            email: customer.emailAddress,
+            userName: customer.firstName + " " + customer.lastName,
+            link: `${config.clientUrl}/verify-email?token=${token}`
+        });
+        return true;
+    }
+
+    async verifyEmailToken(token: string): Promise<boolean> {
+        try {
+            const decoded = tokenUtils.verifyToken<{ customerId: number }>(token);
+            const customerId = decoded.customerId;
+
+            await db.dataBase.customerProfileDataModel.update({
+                data: {
+                    utility: {
+                        update: {
+                            isEmailVerified: true
+                        }
+                    }
+                },
+                where: {
+                    id: customerId
+                }
+            });
+
+            console.log(`Email verified for customer ${customerId}`);
+            return true;
+        } catch (error) {
+            console.error("Email verification failed:", error);
+            throw new AppError("Invalid or expired token.");
+        }
+    }
 
     async throwEmailOrPhoneExists(emailOrMob: string) {
         const user = await this.customerProfileService.getCustomerProfileByEmail(emailOrMob);

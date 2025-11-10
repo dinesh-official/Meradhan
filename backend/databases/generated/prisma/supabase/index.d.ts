@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type CrmAuditLogs = $Result.DefaultSelection<Prisma.$CrmAuditLogsPayload>
 /**
+ * Model WebAuditLogs
+ * 
+ */
+export type WebAuditLogs = $Result.DefaultSelection<Prisma.$WebAuditLogsPayload>
+/**
  * Model Bonds
  * 
  */
@@ -114,10 +119,10 @@ export type NSEDpAccount = $Result.DefaultSelection<Prisma.$NSEDpAccountPayload>
  */
 export type NseIsinSecurityReceipt = $Result.DefaultSelection<Prisma.$NseIsinSecurityReceiptPayload>
 /**
- * Model SettlementOrderModel
+ * Model SettleOrderModel
  * 
  */
-export type SettlementOrderModel = $Result.DefaultSelection<Prisma.$SettlementOrderModelPayload>
+export type SettleOrderModel = $Result.DefaultSelection<Prisma.$SettleOrderModelPayload>
 /**
  * Model RFQMasterISIN
  * 
@@ -225,9 +230,8 @@ export type DepositoryName = (typeof DepositoryName)[keyof typeof DepositoryName
 
 
 export const DematAccountType: {
-  SINGLE: 'SINGLE',
-  JOINT: 'JOINT',
-  HUF: 'HUF'
+  SOLO: 'SOLO',
+  JOINT: 'JOINT'
 };
 
 export type DematAccountType = (typeof DematAccountType)[keyof typeof DematAccountType]
@@ -644,6 +648,16 @@ export class PrismaClient<
   get crmAuditLogs(): Prisma.CrmAuditLogsDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.webAuditLogs`: Exposes CRUD operations for the **WebAuditLogs** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more WebAuditLogs
+    * const webAuditLogs = await prisma.webAuditLogs.findMany()
+    * ```
+    */
+  get webAuditLogs(): Prisma.WebAuditLogsDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.bonds`: Exposes CRUD operations for the **Bonds** model.
     * Example usage:
     * ```ts
@@ -834,14 +848,14 @@ export class PrismaClient<
   get nseIsinSecurityReceipt(): Prisma.NseIsinSecurityReceiptDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.settlementOrderModel`: Exposes CRUD operations for the **SettlementOrderModel** model.
+   * `prisma.settleOrderModel`: Exposes CRUD operations for the **SettleOrderModel** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more SettlementOrderModels
-    * const settlementOrderModels = await prisma.settlementOrderModel.findMany()
+    * // Fetch zero or more SettleOrderModels
+    * const settleOrderModels = await prisma.settleOrderModel.findMany()
     * ```
     */
-  get settlementOrderModel(): Prisma.SettlementOrderModelDelegate<ExtArgs, ClientOptions>;
+  get settleOrderModel(): Prisma.SettleOrderModelDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.rFQMasterISIN`: Exposes CRUD operations for the **RFQMasterISIN** model.
@@ -1303,6 +1317,7 @@ export namespace Prisma {
 
   export const ModelName: {
     CrmAuditLogs: 'CrmAuditLogs',
+    WebAuditLogs: 'WebAuditLogs',
     Bonds: 'Bonds',
     CRMUserDataModel: 'CRMUserDataModel',
     CustomersAuthDataModel: 'CustomersAuthDataModel',
@@ -1322,7 +1337,7 @@ export namespace Prisma {
     NSEBankAccount: 'NSEBankAccount',
     NSEDpAccount: 'NSEDpAccount',
     NseIsinSecurityReceipt: 'NseIsinSecurityReceipt',
-    SettlementOrderModel: 'SettlementOrderModel',
+    SettleOrderModel: 'SettleOrderModel',
     RFQMasterISIN: 'RFQMasterISIN',
     RFQNegotiation: 'RFQNegotiation'
   };
@@ -1343,7 +1358,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "settlementOrderModel" | "rFQMasterISIN" | "rFQNegotiation"
+      modelProps: "crmAuditLogs" | "webAuditLogs" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "settleOrderModel" | "rFQMasterISIN" | "rFQNegotiation"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1418,6 +1433,80 @@ export namespace Prisma {
           count: {
             args: Prisma.CrmAuditLogsCountArgs<ExtArgs>
             result: $Utils.Optional<CrmAuditLogsCountAggregateOutputType> | number
+          }
+        }
+      }
+      WebAuditLogs: {
+        payload: Prisma.$WebAuditLogsPayload<ExtArgs>
+        fields: Prisma.WebAuditLogsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.WebAuditLogsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.WebAuditLogsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>
+          }
+          findFirst: {
+            args: Prisma.WebAuditLogsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.WebAuditLogsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>
+          }
+          findMany: {
+            args: Prisma.WebAuditLogsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>[]
+          }
+          create: {
+            args: Prisma.WebAuditLogsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>
+          }
+          createMany: {
+            args: Prisma.WebAuditLogsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.WebAuditLogsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>[]
+          }
+          delete: {
+            args: Prisma.WebAuditLogsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>
+          }
+          update: {
+            args: Prisma.WebAuditLogsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>
+          }
+          deleteMany: {
+            args: Prisma.WebAuditLogsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.WebAuditLogsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WebAuditLogsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>[]
+          }
+          upsert: {
+            args: Prisma.WebAuditLogsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WebAuditLogsPayload>
+          }
+          aggregate: {
+            args: Prisma.WebAuditLogsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateWebAuditLogs>
+          }
+          groupBy: {
+            args: Prisma.WebAuditLogsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<WebAuditLogsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.WebAuditLogsCountArgs<ExtArgs>
+            result: $Utils.Optional<WebAuditLogsCountAggregateOutputType> | number
           }
         }
       }
@@ -2827,77 +2916,77 @@ export namespace Prisma {
           }
         }
       }
-      SettlementOrderModel: {
-        payload: Prisma.$SettlementOrderModelPayload<ExtArgs>
-        fields: Prisma.SettlementOrderModelFieldRefs
+      SettleOrderModel: {
+        payload: Prisma.$SettleOrderModelPayload<ExtArgs>
+        fields: Prisma.SettleOrderModelFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.SettlementOrderModelFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload> | null
+            args: Prisma.SettleOrderModelFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.SettlementOrderModelFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
+            args: Prisma.SettleOrderModelFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>
           }
           findFirst: {
-            args: Prisma.SettlementOrderModelFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload> | null
+            args: Prisma.SettleOrderModelFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.SettlementOrderModelFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
+            args: Prisma.SettleOrderModelFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>
           }
           findMany: {
-            args: Prisma.SettlementOrderModelFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>[]
+            args: Prisma.SettleOrderModelFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>[]
           }
           create: {
-            args: Prisma.SettlementOrderModelCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
+            args: Prisma.SettleOrderModelCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>
           }
           createMany: {
-            args: Prisma.SettlementOrderModelCreateManyArgs<ExtArgs>
+            args: Prisma.SettleOrderModelCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.SettlementOrderModelCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>[]
+            args: Prisma.SettleOrderModelCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>[]
           }
           delete: {
-            args: Prisma.SettlementOrderModelDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
+            args: Prisma.SettleOrderModelDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>
           }
           update: {
-            args: Prisma.SettlementOrderModelUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
+            args: Prisma.SettleOrderModelUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>
           }
           deleteMany: {
-            args: Prisma.SettlementOrderModelDeleteManyArgs<ExtArgs>
+            args: Prisma.SettleOrderModelDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.SettlementOrderModelUpdateManyArgs<ExtArgs>
+            args: Prisma.SettleOrderModelUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.SettlementOrderModelUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>[]
+            args: Prisma.SettleOrderModelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>[]
           }
           upsert: {
-            args: Prisma.SettlementOrderModelUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SettlementOrderModelPayload>
+            args: Prisma.SettleOrderModelUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SettleOrderModelPayload>
           }
           aggregate: {
-            args: Prisma.SettlementOrderModelAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateSettlementOrderModel>
+            args: Prisma.SettleOrderModelAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSettleOrderModel>
           }
           groupBy: {
-            args: Prisma.SettlementOrderModelGroupByArgs<ExtArgs>
-            result: $Utils.Optional<SettlementOrderModelGroupByOutputType>[]
+            args: Prisma.SettleOrderModelGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SettleOrderModelGroupByOutputType>[]
           }
           count: {
-            args: Prisma.SettlementOrderModelCountArgs<ExtArgs>
-            result: $Utils.Optional<SettlementOrderModelCountAggregateOutputType> | number
+            args: Prisma.SettleOrderModelCountArgs<ExtArgs>
+            result: $Utils.Optional<SettleOrderModelCountAggregateOutputType> | number
           }
         }
       }
@@ -3146,6 +3235,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     crmAuditLogs?: CrmAuditLogsOmit
+    webAuditLogs?: WebAuditLogsOmit
     bonds?: BondsOmit
     cRMUserDataModel?: CRMUserDataModelOmit
     customersAuthDataModel?: CustomersAuthDataModelOmit
@@ -3165,7 +3255,7 @@ export namespace Prisma {
     nSEBankAccount?: NSEBankAccountOmit
     nSEDpAccount?: NSEDpAccountOmit
     nseIsinSecurityReceipt?: NseIsinSecurityReceiptOmit
-    settlementOrderModel?: SettlementOrderModelOmit
+    settleOrderModel?: SettleOrderModelOmit
     rFQMasterISIN?: RFQMasterISINOmit
     rFQNegotiation?: RFQNegotiationOmit
   }
@@ -3403,6 +3493,7 @@ export namespace Prisma {
     userId: number | null
     type: string | null
     token: string | null
+    trackId: string | null
     url: string | null
     createdAt: Date | null
   }
@@ -3412,6 +3503,7 @@ export namespace Prisma {
     userId: number | null
     type: string | null
     token: string | null
+    trackId: string | null
     url: string | null
     createdAt: Date | null
   }
@@ -3421,6 +3513,7 @@ export namespace Prisma {
     userId: number
     type: number
     token: number
+    trackId: number
     url: number
     data: number
     createdAt: number
@@ -3443,6 +3536,7 @@ export namespace Prisma {
     userId?: true
     type?: true
     token?: true
+    trackId?: true
     url?: true
     createdAt?: true
   }
@@ -3452,6 +3546,7 @@ export namespace Prisma {
     userId?: true
     type?: true
     token?: true
+    trackId?: true
     url?: true
     createdAt?: true
   }
@@ -3461,6 +3556,7 @@ export namespace Prisma {
     userId?: true
     type?: true
     token?: true
+    trackId?: true
     url?: true
     data?: true
     createdAt?: true
@@ -3558,6 +3654,7 @@ export namespace Prisma {
     userId: number | null
     type: string
     token: string | null
+    trackId: string | null
     url: string | null
     data: JsonValue
     createdAt: Date
@@ -3587,6 +3684,7 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     token?: boolean
+    trackId?: boolean
     url?: boolean
     data?: boolean
     createdAt?: boolean
@@ -3597,6 +3695,7 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     token?: boolean
+    trackId?: boolean
     url?: boolean
     data?: boolean
     createdAt?: boolean
@@ -3607,6 +3706,7 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     token?: boolean
+    trackId?: boolean
     url?: boolean
     data?: boolean
     createdAt?: boolean
@@ -3617,12 +3717,13 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     token?: boolean
+    trackId?: boolean
     url?: boolean
     data?: boolean
     createdAt?: boolean
   }
 
-  export type CrmAuditLogsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "token" | "url" | "data" | "createdAt", ExtArgs["result"]["crmAuditLogs"]>
+  export type CrmAuditLogsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "token" | "trackId" | "url" | "data" | "createdAt", ExtArgs["result"]["crmAuditLogs"]>
 
   export type $CrmAuditLogsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CrmAuditLogs"
@@ -3632,6 +3733,7 @@ export namespace Prisma {
       userId: number | null
       type: string
       token: string | null
+      trackId: string | null
       url: string | null
       data: Prisma.JsonValue
       createdAt: Date
@@ -4062,6 +4164,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"CrmAuditLogs", 'Int'>
     readonly type: FieldRef<"CrmAuditLogs", 'String'>
     readonly token: FieldRef<"CrmAuditLogs", 'String'>
+    readonly trackId: FieldRef<"CrmAuditLogs", 'String'>
     readonly url: FieldRef<"CrmAuditLogs", 'String'>
     readonly data: FieldRef<"CrmAuditLogs", 'Json'>
     readonly createdAt: FieldRef<"CrmAuditLogs", 'DateTime'>
@@ -4428,6 +4531,1074 @@ export namespace Prisma {
      * Omit specific fields from the CrmAuditLogs
      */
     omit?: CrmAuditLogsOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model WebAuditLogs
+   */
+
+  export type AggregateWebAuditLogs = {
+    _count: WebAuditLogsCountAggregateOutputType | null
+    _avg: WebAuditLogsAvgAggregateOutputType | null
+    _sum: WebAuditLogsSumAggregateOutputType | null
+    _min: WebAuditLogsMinAggregateOutputType | null
+    _max: WebAuditLogsMaxAggregateOutputType | null
+  }
+
+  export type WebAuditLogsAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type WebAuditLogsSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type WebAuditLogsMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    type: string | null
+    token: string | null
+    trackId: string | null
+    url: string | null
+    createdAt: Date | null
+  }
+
+  export type WebAuditLogsMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    type: string | null
+    token: string | null
+    trackId: string | null
+    url: string | null
+    createdAt: Date | null
+  }
+
+  export type WebAuditLogsCountAggregateOutputType = {
+    id: number
+    userId: number
+    type: number
+    token: number
+    trackId: number
+    url: number
+    data: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type WebAuditLogsAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type WebAuditLogsSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type WebAuditLogsMinAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    token?: true
+    trackId?: true
+    url?: true
+    createdAt?: true
+  }
+
+  export type WebAuditLogsMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    token?: true
+    trackId?: true
+    url?: true
+    createdAt?: true
+  }
+
+  export type WebAuditLogsCountAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    token?: true
+    trackId?: true
+    url?: true
+    data?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type WebAuditLogsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WebAuditLogs to aggregate.
+     */
+    where?: WebAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WebAuditLogs to fetch.
+     */
+    orderBy?: WebAuditLogsOrderByWithRelationInput | WebAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: WebAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WebAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WebAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned WebAuditLogs
+    **/
+    _count?: true | WebAuditLogsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: WebAuditLogsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: WebAuditLogsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: WebAuditLogsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: WebAuditLogsMaxAggregateInputType
+  }
+
+  export type GetWebAuditLogsAggregateType<T extends WebAuditLogsAggregateArgs> = {
+        [P in keyof T & keyof AggregateWebAuditLogs]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateWebAuditLogs[P]>
+      : GetScalarType<T[P], AggregateWebAuditLogs[P]>
+  }
+
+
+
+
+  export type WebAuditLogsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WebAuditLogsWhereInput
+    orderBy?: WebAuditLogsOrderByWithAggregationInput | WebAuditLogsOrderByWithAggregationInput[]
+    by: WebAuditLogsScalarFieldEnum[] | WebAuditLogsScalarFieldEnum
+    having?: WebAuditLogsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: WebAuditLogsCountAggregateInputType | true
+    _avg?: WebAuditLogsAvgAggregateInputType
+    _sum?: WebAuditLogsSumAggregateInputType
+    _min?: WebAuditLogsMinAggregateInputType
+    _max?: WebAuditLogsMaxAggregateInputType
+  }
+
+  export type WebAuditLogsGroupByOutputType = {
+    id: number
+    userId: number | null
+    type: string
+    token: string | null
+    trackId: string | null
+    url: string | null
+    data: JsonValue
+    createdAt: Date
+    _count: WebAuditLogsCountAggregateOutputType | null
+    _avg: WebAuditLogsAvgAggregateOutputType | null
+    _sum: WebAuditLogsSumAggregateOutputType | null
+    _min: WebAuditLogsMinAggregateOutputType | null
+    _max: WebAuditLogsMaxAggregateOutputType | null
+  }
+
+  type GetWebAuditLogsGroupByPayload<T extends WebAuditLogsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<WebAuditLogsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof WebAuditLogsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], WebAuditLogsGroupByOutputType[P]>
+            : GetScalarType<T[P], WebAuditLogsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type WebAuditLogsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    trackId?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["webAuditLogs"]>
+
+  export type WebAuditLogsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    trackId?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["webAuditLogs"]>
+
+  export type WebAuditLogsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    trackId?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["webAuditLogs"]>
+
+  export type WebAuditLogsSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    token?: boolean
+    trackId?: boolean
+    url?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }
+
+  export type WebAuditLogsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "token" | "trackId" | "url" | "data" | "createdAt", ExtArgs["result"]["webAuditLogs"]>
+
+  export type $WebAuditLogsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "WebAuditLogs"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number | null
+      type: string
+      token: string | null
+      trackId: string | null
+      url: string | null
+      data: Prisma.JsonValue
+      createdAt: Date
+    }, ExtArgs["result"]["webAuditLogs"]>
+    composites: {}
+  }
+
+  type WebAuditLogsGetPayload<S extends boolean | null | undefined | WebAuditLogsDefaultArgs> = $Result.GetResult<Prisma.$WebAuditLogsPayload, S>
+
+  type WebAuditLogsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<WebAuditLogsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: WebAuditLogsCountAggregateInputType | true
+    }
+
+  export interface WebAuditLogsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['WebAuditLogs'], meta: { name: 'WebAuditLogs' } }
+    /**
+     * Find zero or one WebAuditLogs that matches the filter.
+     * @param {WebAuditLogsFindUniqueArgs} args - Arguments to find a WebAuditLogs
+     * @example
+     * // Get one WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends WebAuditLogsFindUniqueArgs>(args: SelectSubset<T, WebAuditLogsFindUniqueArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one WebAuditLogs that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {WebAuditLogsFindUniqueOrThrowArgs} args - Arguments to find a WebAuditLogs
+     * @example
+     * // Get one WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends WebAuditLogsFindUniqueOrThrowArgs>(args: SelectSubset<T, WebAuditLogsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WebAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WebAuditLogsFindFirstArgs} args - Arguments to find a WebAuditLogs
+     * @example
+     * // Get one WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends WebAuditLogsFindFirstArgs>(args?: SelectSubset<T, WebAuditLogsFindFirstArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WebAuditLogs that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WebAuditLogsFindFirstOrThrowArgs} args - Arguments to find a WebAuditLogs
+     * @example
+     * // Get one WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends WebAuditLogsFindFirstOrThrowArgs>(args?: SelectSubset<T, WebAuditLogsFindFirstOrThrowArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more WebAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WebAuditLogsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.findMany()
+     * 
+     * // Get first 10 WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const webAuditLogsWithIdOnly = await prisma.webAuditLogs.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends WebAuditLogsFindManyArgs>(args?: SelectSubset<T, WebAuditLogsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a WebAuditLogs.
+     * @param {WebAuditLogsCreateArgs} args - Arguments to create a WebAuditLogs.
+     * @example
+     * // Create one WebAuditLogs
+     * const WebAuditLogs = await prisma.webAuditLogs.create({
+     *   data: {
+     *     // ... data to create a WebAuditLogs
+     *   }
+     * })
+     * 
+     */
+    create<T extends WebAuditLogsCreateArgs>(args: SelectSubset<T, WebAuditLogsCreateArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many WebAuditLogs.
+     * @param {WebAuditLogsCreateManyArgs} args - Arguments to create many WebAuditLogs.
+     * @example
+     * // Create many WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends WebAuditLogsCreateManyArgs>(args?: SelectSubset<T, WebAuditLogsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many WebAuditLogs and returns the data saved in the database.
+     * @param {WebAuditLogsCreateManyAndReturnArgs} args - Arguments to create many WebAuditLogs.
+     * @example
+     * // Create many WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many WebAuditLogs and only return the `id`
+     * const webAuditLogsWithIdOnly = await prisma.webAuditLogs.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends WebAuditLogsCreateManyAndReturnArgs>(args?: SelectSubset<T, WebAuditLogsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a WebAuditLogs.
+     * @param {WebAuditLogsDeleteArgs} args - Arguments to delete one WebAuditLogs.
+     * @example
+     * // Delete one WebAuditLogs
+     * const WebAuditLogs = await prisma.webAuditLogs.delete({
+     *   where: {
+     *     // ... filter to delete one WebAuditLogs
+     *   }
+     * })
+     * 
+     */
+    delete<T extends WebAuditLogsDeleteArgs>(args: SelectSubset<T, WebAuditLogsDeleteArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one WebAuditLogs.
+     * @param {WebAuditLogsUpdateArgs} args - Arguments to update one WebAuditLogs.
+     * @example
+     * // Update one WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends WebAuditLogsUpdateArgs>(args: SelectSubset<T, WebAuditLogsUpdateArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more WebAuditLogs.
+     * @param {WebAuditLogsDeleteManyArgs} args - Arguments to filter WebAuditLogs to delete.
+     * @example
+     * // Delete a few WebAuditLogs
+     * const { count } = await prisma.webAuditLogs.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends WebAuditLogsDeleteManyArgs>(args?: SelectSubset<T, WebAuditLogsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WebAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WebAuditLogsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends WebAuditLogsUpdateManyArgs>(args: SelectSubset<T, WebAuditLogsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WebAuditLogs and returns the data updated in the database.
+     * @param {WebAuditLogsUpdateManyAndReturnArgs} args - Arguments to update many WebAuditLogs.
+     * @example
+     * // Update many WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WebAuditLogs and only return the `id`
+     * const webAuditLogsWithIdOnly = await prisma.webAuditLogs.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WebAuditLogsUpdateManyAndReturnArgs>(args: SelectSubset<T, WebAuditLogsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one WebAuditLogs.
+     * @param {WebAuditLogsUpsertArgs} args - Arguments to update or create a WebAuditLogs.
+     * @example
+     * // Update or create a WebAuditLogs
+     * const webAuditLogs = await prisma.webAuditLogs.upsert({
+     *   create: {
+     *     // ... data to create a WebAuditLogs
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the WebAuditLogs we want to update
+     *   }
+     * })
+     */
+    upsert<T extends WebAuditLogsUpsertArgs>(args: SelectSubset<T, WebAuditLogsUpsertArgs<ExtArgs>>): Prisma__WebAuditLogsClient<$Result.GetResult<Prisma.$WebAuditLogsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of WebAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WebAuditLogsCountArgs} args - Arguments to filter WebAuditLogs to count.
+     * @example
+     * // Count the number of WebAuditLogs
+     * const count = await prisma.webAuditLogs.count({
+     *   where: {
+     *     // ... the filter for the WebAuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends WebAuditLogsCountArgs>(
+      args?: Subset<T, WebAuditLogsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], WebAuditLogsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a WebAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WebAuditLogsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends WebAuditLogsAggregateArgs>(args: Subset<T, WebAuditLogsAggregateArgs>): Prisma.PrismaPromise<GetWebAuditLogsAggregateType<T>>
+
+    /**
+     * Group by WebAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WebAuditLogsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends WebAuditLogsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: WebAuditLogsGroupByArgs['orderBy'] }
+        : { orderBy?: WebAuditLogsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, WebAuditLogsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetWebAuditLogsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the WebAuditLogs model
+   */
+  readonly fields: WebAuditLogsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for WebAuditLogs.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__WebAuditLogsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the WebAuditLogs model
+   */
+  interface WebAuditLogsFieldRefs {
+    readonly id: FieldRef<"WebAuditLogs", 'Int'>
+    readonly userId: FieldRef<"WebAuditLogs", 'Int'>
+    readonly type: FieldRef<"WebAuditLogs", 'String'>
+    readonly token: FieldRef<"WebAuditLogs", 'String'>
+    readonly trackId: FieldRef<"WebAuditLogs", 'String'>
+    readonly url: FieldRef<"WebAuditLogs", 'String'>
+    readonly data: FieldRef<"WebAuditLogs", 'Json'>
+    readonly createdAt: FieldRef<"WebAuditLogs", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * WebAuditLogs findUnique
+   */
+  export type WebAuditLogsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which WebAuditLogs to fetch.
+     */
+    where: WebAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * WebAuditLogs findUniqueOrThrow
+   */
+  export type WebAuditLogsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which WebAuditLogs to fetch.
+     */
+    where: WebAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * WebAuditLogs findFirst
+   */
+  export type WebAuditLogsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which WebAuditLogs to fetch.
+     */
+    where?: WebAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WebAuditLogs to fetch.
+     */
+    orderBy?: WebAuditLogsOrderByWithRelationInput | WebAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WebAuditLogs.
+     */
+    cursor?: WebAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WebAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WebAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WebAuditLogs.
+     */
+    distinct?: WebAuditLogsScalarFieldEnum | WebAuditLogsScalarFieldEnum[]
+  }
+
+  /**
+   * WebAuditLogs findFirstOrThrow
+   */
+  export type WebAuditLogsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which WebAuditLogs to fetch.
+     */
+    where?: WebAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WebAuditLogs to fetch.
+     */
+    orderBy?: WebAuditLogsOrderByWithRelationInput | WebAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WebAuditLogs.
+     */
+    cursor?: WebAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WebAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WebAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WebAuditLogs.
+     */
+    distinct?: WebAuditLogsScalarFieldEnum | WebAuditLogsScalarFieldEnum[]
+  }
+
+  /**
+   * WebAuditLogs findMany
+   */
+  export type WebAuditLogsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which WebAuditLogs to fetch.
+     */
+    where?: WebAuditLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WebAuditLogs to fetch.
+     */
+    orderBy?: WebAuditLogsOrderByWithRelationInput | WebAuditLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing WebAuditLogs.
+     */
+    cursor?: WebAuditLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WebAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WebAuditLogs.
+     */
+    skip?: number
+    distinct?: WebAuditLogsScalarFieldEnum | WebAuditLogsScalarFieldEnum[]
+  }
+
+  /**
+   * WebAuditLogs create
+   */
+  export type WebAuditLogsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a WebAuditLogs.
+     */
+    data: XOR<WebAuditLogsCreateInput, WebAuditLogsUncheckedCreateInput>
+  }
+
+  /**
+   * WebAuditLogs createMany
+   */
+  export type WebAuditLogsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many WebAuditLogs.
+     */
+    data: WebAuditLogsCreateManyInput | WebAuditLogsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WebAuditLogs createManyAndReturn
+   */
+  export type WebAuditLogsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data used to create many WebAuditLogs.
+     */
+    data: WebAuditLogsCreateManyInput | WebAuditLogsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WebAuditLogs update
+   */
+  export type WebAuditLogsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a WebAuditLogs.
+     */
+    data: XOR<WebAuditLogsUpdateInput, WebAuditLogsUncheckedUpdateInput>
+    /**
+     * Choose, which WebAuditLogs to update.
+     */
+    where: WebAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * WebAuditLogs updateMany
+   */
+  export type WebAuditLogsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update WebAuditLogs.
+     */
+    data: XOR<WebAuditLogsUpdateManyMutationInput, WebAuditLogsUncheckedUpdateManyInput>
+    /**
+     * Filter which WebAuditLogs to update
+     */
+    where?: WebAuditLogsWhereInput
+    /**
+     * Limit how many WebAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WebAuditLogs updateManyAndReturn
+   */
+  export type WebAuditLogsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * The data used to update WebAuditLogs.
+     */
+    data: XOR<WebAuditLogsUpdateManyMutationInput, WebAuditLogsUncheckedUpdateManyInput>
+    /**
+     * Filter which WebAuditLogs to update
+     */
+    where?: WebAuditLogsWhereInput
+    /**
+     * Limit how many WebAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WebAuditLogs upsert
+   */
+  export type WebAuditLogsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the WebAuditLogs to update in case it exists.
+     */
+    where: WebAuditLogsWhereUniqueInput
+    /**
+     * In case the WebAuditLogs found by the `where` argument doesn't exist, create a new WebAuditLogs with this data.
+     */
+    create: XOR<WebAuditLogsCreateInput, WebAuditLogsUncheckedCreateInput>
+    /**
+     * In case the WebAuditLogs was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<WebAuditLogsUpdateInput, WebAuditLogsUncheckedUpdateInput>
+  }
+
+  /**
+   * WebAuditLogs delete
+   */
+  export type WebAuditLogsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
+    /**
+     * Filter which WebAuditLogs to delete.
+     */
+    where: WebAuditLogsWhereUniqueInput
+  }
+
+  /**
+   * WebAuditLogs deleteMany
+   */
+  export type WebAuditLogsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WebAuditLogs to delete
+     */
+    where?: WebAuditLogsWhereInput
+    /**
+     * Limit how many WebAuditLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * WebAuditLogs without action
+   */
+  export type WebAuditLogsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WebAuditLogs
+     */
+    select?: WebAuditLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WebAuditLogs
+     */
+    omit?: WebAuditLogsOmit<ExtArgs> | null
   }
 
 
@@ -7411,7 +8582,7 @@ export namespace Prisma {
        */
       accountStatus: $Enums.AccountStatus
       /**
-       * Verification flags
+       * Verification Jo
        */
       isPhoneVerified: boolean
       isEmailVerified: boolean
@@ -27775,59 +28946,61 @@ export namespace Prisma {
 
 
   /**
-   * Model SettlementOrderModel
+   * Model SettleOrderModel
    */
 
-  export type AggregateSettlementOrderModel = {
-    _count: SettlementOrderModelCountAggregateOutputType | null
-    _avg: SettlementOrderModelAvgAggregateOutputType | null
-    _sum: SettlementOrderModelSumAggregateOutputType | null
-    _min: SettlementOrderModelMinAggregateOutputType | null
-    _max: SettlementOrderModelMaxAggregateOutputType | null
+  export type AggregateSettleOrderModel = {
+    _count: SettleOrderModelCountAggregateOutputType | null
+    _avg: SettleOrderModelAvgAggregateOutputType | null
+    _sum: SettleOrderModelSumAggregateOutputType | null
+    _min: SettleOrderModelMinAggregateOutputType | null
+    _max: SettleOrderModelMaxAggregateOutputType | null
   }
 
-  export type SettlementOrderModelAvgAggregateOutputType = {
-    price: number | null
-    yield: number | null
-    value: number | null
+  export type SettleOrderModelAvgAggregateOutputType = {
+    id: number | null
+    price: Decimal | null
+    yield: Decimal | null
+    value: Decimal | null
     source: number | null
-    modQuantity: number | null
-    modAccrInt: number | null
-    modConsideration: number | null
-    stampDutyAmount: number | null
-    buyerFundPayinObligation: number | null
-    sellerFundPayoutObligation: number | null
+    modQuantity: Decimal | null
+    modAccrInt: Decimal | null
+    modConsideration: Decimal | null
+    stampDutyAmount: Decimal | null
+    buyerFundPayinObligation: Decimal | null
+    sellerFundPayoutObligation: Decimal | null
     settleStatus: number | null
-    secPayinQuantity: number | null
-    fundsPayinAmount: number | null
+    secPayinQuantity: Decimal | null
+    fundsPayinAmount: Decimal | null
   }
 
-  export type SettlementOrderModelSumAggregateOutputType = {
-    price: number | null
-    yield: number | null
-    value: number | null
+  export type SettleOrderModelSumAggregateOutputType = {
+    id: number | null
+    price: Decimal | null
+    yield: Decimal | null
+    value: Decimal | null
     source: number | null
-    modQuantity: number | null
-    modAccrInt: number | null
-    modConsideration: number | null
-    stampDutyAmount: number | null
-    buyerFundPayinObligation: number | null
-    sellerFundPayoutObligation: number | null
+    modQuantity: Decimal | null
+    modAccrInt: Decimal | null
+    modConsideration: Decimal | null
+    stampDutyAmount: Decimal | null
+    buyerFundPayinObligation: Decimal | null
+    sellerFundPayoutObligation: Decimal | null
     settleStatus: number | null
-    secPayinQuantity: number | null
-    fundsPayinAmount: number | null
+    secPayinQuantity: Decimal | null
+    fundsPayinAmount: Decimal | null
   }
 
-  export type SettlementOrderModelMinAggregateOutputType = {
-    id: string | null
+  export type SettleOrderModelMinAggregateOutputType = {
+    id: number | null
     orderNumber: string | null
     symbol: string | null
     buyParticipantLoginId: string | null
     sellParticipantLoginId: string | null
-    price: number | null
+    price: Decimal | null
     yieldType: $Enums.YieldTypeSort | null
-    yield: number | null
-    value: number | null
+    yield: Decimal | null
+    value: Decimal | null
     buyerRefNo: string | null
     sellerRefNo: string | null
     buyBackofficeLoginId: string | null
@@ -27836,20 +29009,20 @@ export namespace Prisma {
     sellBrokerLoginId: string | null
     source: number | null
     modSettleDate: string | null
-    modQuantity: number | null
-    modAccrInt: number | null
-    modConsideration: number | null
+    modQuantity: Decimal | null
+    modAccrInt: Decimal | null
+    modConsideration: Decimal | null
     settlementNo: string | null
-    stampDutyAmount: number | null
+    stampDutyAmount: Decimal | null
     stampDutyBearer: string | null
-    buyerFundPayinObligation: number | null
-    sellerFundPayoutObligation: number | null
+    buyerFundPayinObligation: Decimal | null
+    sellerFundPayoutObligation: Decimal | null
     fundPayinRefId: string | null
     settleStatus: number | null
-    secPayinQuantity: number | null
+    secPayinQuantity: Decimal | null
     secPayinRemarks: string | null
     secPayinTime: string | null
-    fundsPayinAmount: number | null
+    fundsPayinAmount: Decimal | null
     fundsPayinRemarks: string | null
     fundsPayinTime: string | null
     payoutRemarks: string | null
@@ -27859,18 +29032,20 @@ export namespace Prisma {
     utrNumber: string | null
     dpId: string | null
     benId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
   }
 
-  export type SettlementOrderModelMaxAggregateOutputType = {
-    id: string | null
+  export type SettleOrderModelMaxAggregateOutputType = {
+    id: number | null
     orderNumber: string | null
     symbol: string | null
     buyParticipantLoginId: string | null
     sellParticipantLoginId: string | null
-    price: number | null
+    price: Decimal | null
     yieldType: $Enums.YieldTypeSort | null
-    yield: number | null
-    value: number | null
+    yield: Decimal | null
+    value: Decimal | null
     buyerRefNo: string | null
     sellerRefNo: string | null
     buyBackofficeLoginId: string | null
@@ -27879,20 +29054,20 @@ export namespace Prisma {
     sellBrokerLoginId: string | null
     source: number | null
     modSettleDate: string | null
-    modQuantity: number | null
-    modAccrInt: number | null
-    modConsideration: number | null
+    modQuantity: Decimal | null
+    modAccrInt: Decimal | null
+    modConsideration: Decimal | null
     settlementNo: string | null
-    stampDutyAmount: number | null
+    stampDutyAmount: Decimal | null
     stampDutyBearer: string | null
-    buyerFundPayinObligation: number | null
-    sellerFundPayoutObligation: number | null
+    buyerFundPayinObligation: Decimal | null
+    sellerFundPayoutObligation: Decimal | null
     fundPayinRefId: string | null
     settleStatus: number | null
-    secPayinQuantity: number | null
+    secPayinQuantity: Decimal | null
     secPayinRemarks: string | null
     secPayinTime: string | null
-    fundsPayinAmount: number | null
+    fundsPayinAmount: Decimal | null
     fundsPayinRemarks: string | null
     fundsPayinTime: string | null
     payoutRemarks: string | null
@@ -27902,9 +29077,11 @@ export namespace Prisma {
     utrNumber: string | null
     dpId: string | null
     benId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
   }
 
-  export type SettlementOrderModelCountAggregateOutputType = {
+  export type SettleOrderModelCountAggregateOutputType = {
     id: number
     orderNumber: number
     symbol: number
@@ -27945,11 +29122,14 @@ export namespace Prisma {
     utrNumber: number
     dpId: number
     benId: number
+    createdAt: number
+    updatedAt: number
     _all: number
   }
 
 
-  export type SettlementOrderModelAvgAggregateInputType = {
+  export type SettleOrderModelAvgAggregateInputType = {
+    id?: true
     price?: true
     yield?: true
     value?: true
@@ -27965,7 +29145,8 @@ export namespace Prisma {
     fundsPayinAmount?: true
   }
 
-  export type SettlementOrderModelSumAggregateInputType = {
+  export type SettleOrderModelSumAggregateInputType = {
+    id?: true
     price?: true
     yield?: true
     value?: true
@@ -27981,7 +29162,7 @@ export namespace Prisma {
     fundsPayinAmount?: true
   }
 
-  export type SettlementOrderModelMinAggregateInputType = {
+  export type SettleOrderModelMinAggregateInputType = {
     id?: true
     orderNumber?: true
     symbol?: true
@@ -28022,9 +29203,11 @@ export namespace Prisma {
     utrNumber?: true
     dpId?: true
     benId?: true
+    createdAt?: true
+    updatedAt?: true
   }
 
-  export type SettlementOrderModelMaxAggregateInputType = {
+  export type SettleOrderModelMaxAggregateInputType = {
     id?: true
     orderNumber?: true
     symbol?: true
@@ -28065,9 +29248,11 @@ export namespace Prisma {
     utrNumber?: true
     dpId?: true
     benId?: true
+    createdAt?: true
+    updatedAt?: true
   }
 
-  export type SettlementOrderModelCountAggregateInputType = {
+  export type SettleOrderModelCountAggregateInputType = {
     id?: true
     orderNumber?: true
     symbol?: true
@@ -28108,158 +29293,162 @@ export namespace Prisma {
     utrNumber?: true
     dpId?: true
     benId?: true
+    createdAt?: true
+    updatedAt?: true
     _all?: true
   }
 
-  export type SettlementOrderModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which SettlementOrderModel to aggregate.
+     * Filter which SettleOrderModel to aggregate.
      */
-    where?: SettlementOrderModelWhereInput
+    where?: SettleOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of SettlementOrderModels to fetch.
+     * Determine the order of SettleOrderModels to fetch.
      */
-    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
+    orderBy?: SettleOrderModelOrderByWithRelationInput | SettleOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: SettlementOrderModelWhereUniqueInput
+    cursor?: SettleOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` SettlementOrderModels from the position of the cursor.
+     * Take `±n` SettleOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` SettlementOrderModels.
+     * Skip the first `n` SettleOrderModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned SettlementOrderModels
+     * Count returned SettleOrderModels
     **/
-    _count?: true | SettlementOrderModelCountAggregateInputType
+    _count?: true | SettleOrderModelCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to average
     **/
-    _avg?: SettlementOrderModelAvgAggregateInputType
+    _avg?: SettleOrderModelAvgAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to sum
     **/
-    _sum?: SettlementOrderModelSumAggregateInputType
+    _sum?: SettleOrderModelSumAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: SettlementOrderModelMinAggregateInputType
+    _min?: SettleOrderModelMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: SettlementOrderModelMaxAggregateInputType
+    _max?: SettleOrderModelMaxAggregateInputType
   }
 
-  export type GetSettlementOrderModelAggregateType<T extends SettlementOrderModelAggregateArgs> = {
-        [P in keyof T & keyof AggregateSettlementOrderModel]: P extends '_count' | 'count'
+  export type GetSettleOrderModelAggregateType<T extends SettleOrderModelAggregateArgs> = {
+        [P in keyof T & keyof AggregateSettleOrderModel]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateSettlementOrderModel[P]>
-      : GetScalarType<T[P], AggregateSettlementOrderModel[P]>
+        : GetScalarType<T[P], AggregateSettleOrderModel[P]>
+      : GetScalarType<T[P], AggregateSettleOrderModel[P]>
   }
 
 
 
 
-  export type SettlementOrderModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: SettlementOrderModelWhereInput
-    orderBy?: SettlementOrderModelOrderByWithAggregationInput | SettlementOrderModelOrderByWithAggregationInput[]
-    by: SettlementOrderModelScalarFieldEnum[] | SettlementOrderModelScalarFieldEnum
-    having?: SettlementOrderModelScalarWhereWithAggregatesInput
+  export type SettleOrderModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SettleOrderModelWhereInput
+    orderBy?: SettleOrderModelOrderByWithAggregationInput | SettleOrderModelOrderByWithAggregationInput[]
+    by: SettleOrderModelScalarFieldEnum[] | SettleOrderModelScalarFieldEnum
+    having?: SettleOrderModelScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: SettlementOrderModelCountAggregateInputType | true
-    _avg?: SettlementOrderModelAvgAggregateInputType
-    _sum?: SettlementOrderModelSumAggregateInputType
-    _min?: SettlementOrderModelMinAggregateInputType
-    _max?: SettlementOrderModelMaxAggregateInputType
+    _count?: SettleOrderModelCountAggregateInputType | true
+    _avg?: SettleOrderModelAvgAggregateInputType
+    _sum?: SettleOrderModelSumAggregateInputType
+    _min?: SettleOrderModelMinAggregateInputType
+    _max?: SettleOrderModelMaxAggregateInputType
   }
 
-  export type SettlementOrderModelGroupByOutputType = {
-    id: string
+  export type SettleOrderModelGroupByOutputType = {
+    id: number
     orderNumber: string
     symbol: string
     buyParticipantLoginId: string
     sellParticipantLoginId: string
-    price: number
+    price: Decimal
     yieldType: $Enums.YieldTypeSort
-    yield: number
-    value: number
+    yield: Decimal
+    value: Decimal
     buyerRefNo: string | null
-    sellerRefNo: string
+    sellerRefNo: string | null
     buyBackofficeLoginId: string | null
     sellBackofficeLoginId: string | null
-    buyBrokerLoginId: string
+    buyBrokerLoginId: string | null
     sellBrokerLoginId: string | null
     source: number
-    modSettleDate: string
-    modQuantity: number
-    modAccrInt: number | null
-    modConsideration: number
-    settlementNo: string
-    stampDutyAmount: number
-    stampDutyBearer: string
-    buyerFundPayinObligation: number
-    sellerFundPayoutObligation: number
-    fundPayinRefId: string
+    modSettleDate: string | null
+    modQuantity: Decimal | null
+    modAccrInt: Decimal | null
+    modConsideration: Decimal | null
+    settlementNo: string | null
+    stampDutyAmount: Decimal | null
+    stampDutyBearer: string | null
+    buyerFundPayinObligation: Decimal | null
+    sellerFundPayoutObligation: Decimal | null
+    fundPayinRefId: string | null
     settleStatus: number
-    secPayinQuantity: number | null
+    secPayinQuantity: Decimal | null
     secPayinRemarks: string | null
     secPayinTime: string | null
-    fundsPayinAmount: number | null
+    fundsPayinAmount: Decimal | null
     fundsPayinRemarks: string | null
     fundsPayinTime: string | null
     payoutRemarks: string | null
     payoutTime: string | null
-    ifscCode: string
-    accountNo: string
+    ifscCode: string | null
+    accountNo: string | null
     utrNumber: string | null
-    dpId: string
-    benId: string
-    _count: SettlementOrderModelCountAggregateOutputType | null
-    _avg: SettlementOrderModelAvgAggregateOutputType | null
-    _sum: SettlementOrderModelSumAggregateOutputType | null
-    _min: SettlementOrderModelMinAggregateOutputType | null
-    _max: SettlementOrderModelMaxAggregateOutputType | null
+    dpId: string | null
+    benId: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: SettleOrderModelCountAggregateOutputType | null
+    _avg: SettleOrderModelAvgAggregateOutputType | null
+    _sum: SettleOrderModelSumAggregateOutputType | null
+    _min: SettleOrderModelMinAggregateOutputType | null
+    _max: SettleOrderModelMaxAggregateOutputType | null
   }
 
-  type GetSettlementOrderModelGroupByPayload<T extends SettlementOrderModelGroupByArgs> = Prisma.PrismaPromise<
+  type GetSettleOrderModelGroupByPayload<T extends SettleOrderModelGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<SettlementOrderModelGroupByOutputType, T['by']> &
+      PickEnumerable<SettleOrderModelGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof SettlementOrderModelGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof SettleOrderModelGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], SettlementOrderModelGroupByOutputType[P]>
-            : GetScalarType<T[P], SettlementOrderModelGroupByOutputType[P]>
+              : GetScalarType<T[P], SettleOrderModelGroupByOutputType[P]>
+            : GetScalarType<T[P], SettleOrderModelGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type SettlementOrderModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type SettleOrderModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     orderNumber?: boolean
     symbol?: boolean
@@ -28300,9 +29489,11 @@ export namespace Prisma {
     utrNumber?: boolean
     dpId?: boolean
     benId?: boolean
-  }, ExtArgs["result"]["settlementOrderModel"]>
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["settleOrderModel"]>
 
-  export type SettlementOrderModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type SettleOrderModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     orderNumber?: boolean
     symbol?: boolean
@@ -28343,9 +29534,11 @@ export namespace Prisma {
     utrNumber?: boolean
     dpId?: boolean
     benId?: boolean
-  }, ExtArgs["result"]["settlementOrderModel"]>
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["settleOrderModel"]>
 
-  export type SettlementOrderModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type SettleOrderModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     orderNumber?: boolean
     symbol?: boolean
@@ -28386,9 +29579,11 @@ export namespace Prisma {
     utrNumber?: boolean
     dpId?: boolean
     benId?: boolean
-  }, ExtArgs["result"]["settlementOrderModel"]>
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["settleOrderModel"]>
 
-  export type SettlementOrderModelSelectScalar = {
+  export type SettleOrderModelSelectScalar = {
     id?: boolean
     orderNumber?: boolean
     symbol?: boolean
@@ -28429,184 +29624,188 @@ export namespace Prisma {
     utrNumber?: boolean
     dpId?: boolean
     benId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
   }
 
-  export type SettlementOrderModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "symbol" | "buyParticipantLoginId" | "sellParticipantLoginId" | "price" | "yieldType" | "yield" | "value" | "buyerRefNo" | "sellerRefNo" | "buyBackofficeLoginId" | "sellBackofficeLoginId" | "buyBrokerLoginId" | "sellBrokerLoginId" | "source" | "modSettleDate" | "modQuantity" | "modAccrInt" | "modConsideration" | "settlementNo" | "stampDutyAmount" | "stampDutyBearer" | "buyerFundPayinObligation" | "sellerFundPayoutObligation" | "fundPayinRefId" | "settleStatus" | "secPayinQuantity" | "secPayinRemarks" | "secPayinTime" | "fundsPayinAmount" | "fundsPayinRemarks" | "fundsPayinTime" | "payoutRemarks" | "payoutTime" | "ifscCode" | "accountNo" | "utrNumber" | "dpId" | "benId", ExtArgs["result"]["settlementOrderModel"]>
+  export type SettleOrderModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "symbol" | "buyParticipantLoginId" | "sellParticipantLoginId" | "price" | "yieldType" | "yield" | "value" | "buyerRefNo" | "sellerRefNo" | "buyBackofficeLoginId" | "sellBackofficeLoginId" | "buyBrokerLoginId" | "sellBrokerLoginId" | "source" | "modSettleDate" | "modQuantity" | "modAccrInt" | "modConsideration" | "settlementNo" | "stampDutyAmount" | "stampDutyBearer" | "buyerFundPayinObligation" | "sellerFundPayoutObligation" | "fundPayinRefId" | "settleStatus" | "secPayinQuantity" | "secPayinRemarks" | "secPayinTime" | "fundsPayinAmount" | "fundsPayinRemarks" | "fundsPayinTime" | "payoutRemarks" | "payoutTime" | "ifscCode" | "accountNo" | "utrNumber" | "dpId" | "benId" | "createdAt" | "updatedAt", ExtArgs["result"]["settleOrderModel"]>
 
-  export type $SettlementOrderModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "SettlementOrderModel"
+  export type $SettleOrderModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SettleOrderModel"
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
-      id: string
+      id: number
       orderNumber: string
       symbol: string
       buyParticipantLoginId: string
       sellParticipantLoginId: string
-      price: number
+      price: Prisma.Decimal
       yieldType: $Enums.YieldTypeSort
-      yield: number
-      value: number
+      yield: Prisma.Decimal
+      value: Prisma.Decimal
       buyerRefNo: string | null
-      sellerRefNo: string
+      sellerRefNo: string | null
       buyBackofficeLoginId: string | null
       sellBackofficeLoginId: string | null
-      buyBrokerLoginId: string
+      buyBrokerLoginId: string | null
       sellBrokerLoginId: string | null
       source: number
-      modSettleDate: string
-      modQuantity: number
-      modAccrInt: number | null
-      modConsideration: number
-      settlementNo: string
-      stampDutyAmount: number
-      stampDutyBearer: string
-      buyerFundPayinObligation: number
-      sellerFundPayoutObligation: number
-      fundPayinRefId: string
+      modSettleDate: string | null
+      modQuantity: Prisma.Decimal | null
+      modAccrInt: Prisma.Decimal | null
+      modConsideration: Prisma.Decimal | null
+      settlementNo: string | null
+      stampDutyAmount: Prisma.Decimal | null
+      stampDutyBearer: string | null
+      buyerFundPayinObligation: Prisma.Decimal | null
+      sellerFundPayoutObligation: Prisma.Decimal | null
+      fundPayinRefId: string | null
       settleStatus: number
-      secPayinQuantity: number | null
+      secPayinQuantity: Prisma.Decimal | null
       secPayinRemarks: string | null
       secPayinTime: string | null
-      fundsPayinAmount: number | null
+      fundsPayinAmount: Prisma.Decimal | null
       fundsPayinRemarks: string | null
       fundsPayinTime: string | null
       payoutRemarks: string | null
       payoutTime: string | null
-      ifscCode: string
-      accountNo: string
+      ifscCode: string | null
+      accountNo: string | null
       utrNumber: string | null
-      dpId: string
-      benId: string
-    }, ExtArgs["result"]["settlementOrderModel"]>
+      dpId: string | null
+      benId: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["settleOrderModel"]>
     composites: {}
   }
 
-  type SettlementOrderModelGetPayload<S extends boolean | null | undefined | SettlementOrderModelDefaultArgs> = $Result.GetResult<Prisma.$SettlementOrderModelPayload, S>
+  type SettleOrderModelGetPayload<S extends boolean | null | undefined | SettleOrderModelDefaultArgs> = $Result.GetResult<Prisma.$SettleOrderModelPayload, S>
 
-  type SettlementOrderModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<SettlementOrderModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: SettlementOrderModelCountAggregateInputType | true
+  type SettleOrderModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SettleOrderModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SettleOrderModelCountAggregateInputType | true
     }
 
-  export interface SettlementOrderModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SettlementOrderModel'], meta: { name: 'SettlementOrderModel' } }
+  export interface SettleOrderModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SettleOrderModel'], meta: { name: 'SettleOrderModel' } }
     /**
-     * Find zero or one SettlementOrderModel that matches the filter.
-     * @param {SettlementOrderModelFindUniqueArgs} args - Arguments to find a SettlementOrderModel
+     * Find zero or one SettleOrderModel that matches the filter.
+     * @param {SettleOrderModelFindUniqueArgs} args - Arguments to find a SettleOrderModel
      * @example
-     * // Get one SettlementOrderModel
-     * const settlementOrderModel = await prisma.settlementOrderModel.findUnique({
+     * // Get one SettleOrderModel
+     * const settleOrderModel = await prisma.settleOrderModel.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends SettlementOrderModelFindUniqueArgs>(args: SelectSubset<T, SettlementOrderModelFindUniqueArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends SettleOrderModelFindUniqueArgs>(args: SelectSubset<T, SettleOrderModelFindUniqueArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one SettlementOrderModel that matches the filter or throw an error with `error.code='P2025'`
+     * Find one SettleOrderModel that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {SettlementOrderModelFindUniqueOrThrowArgs} args - Arguments to find a SettlementOrderModel
+     * @param {SettleOrderModelFindUniqueOrThrowArgs} args - Arguments to find a SettleOrderModel
      * @example
-     * // Get one SettlementOrderModel
-     * const settlementOrderModel = await prisma.settlementOrderModel.findUniqueOrThrow({
+     * // Get one SettleOrderModel
+     * const settleOrderModel = await prisma.settleOrderModel.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends SettlementOrderModelFindUniqueOrThrowArgs>(args: SelectSubset<T, SettlementOrderModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends SettleOrderModelFindUniqueOrThrowArgs>(args: SelectSubset<T, SettleOrderModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first SettlementOrderModel that matches the filter.
+     * Find the first SettleOrderModel that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {SettlementOrderModelFindFirstArgs} args - Arguments to find a SettlementOrderModel
+     * @param {SettleOrderModelFindFirstArgs} args - Arguments to find a SettleOrderModel
      * @example
-     * // Get one SettlementOrderModel
-     * const settlementOrderModel = await prisma.settlementOrderModel.findFirst({
+     * // Get one SettleOrderModel
+     * const settleOrderModel = await prisma.settleOrderModel.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends SettlementOrderModelFindFirstArgs>(args?: SelectSubset<T, SettlementOrderModelFindFirstArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends SettleOrderModelFindFirstArgs>(args?: SelectSubset<T, SettleOrderModelFindFirstArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first SettlementOrderModel that matches the filter or
+     * Find the first SettleOrderModel that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {SettlementOrderModelFindFirstOrThrowArgs} args - Arguments to find a SettlementOrderModel
+     * @param {SettleOrderModelFindFirstOrThrowArgs} args - Arguments to find a SettleOrderModel
      * @example
-     * // Get one SettlementOrderModel
-     * const settlementOrderModel = await prisma.settlementOrderModel.findFirstOrThrow({
+     * // Get one SettleOrderModel
+     * const settleOrderModel = await prisma.settleOrderModel.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends SettlementOrderModelFindFirstOrThrowArgs>(args?: SelectSubset<T, SettlementOrderModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends SettleOrderModelFindFirstOrThrowArgs>(args?: SelectSubset<T, SettleOrderModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more SettlementOrderModels that matches the filter.
+     * Find zero or more SettleOrderModels that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {SettlementOrderModelFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {SettleOrderModelFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all SettlementOrderModels
-     * const settlementOrderModels = await prisma.settlementOrderModel.findMany()
+     * // Get all SettleOrderModels
+     * const settleOrderModels = await prisma.settleOrderModel.findMany()
      * 
-     * // Get first 10 SettlementOrderModels
-     * const settlementOrderModels = await prisma.settlementOrderModel.findMany({ take: 10 })
+     * // Get first 10 SettleOrderModels
+     * const settleOrderModels = await prisma.settleOrderModel.findMany({ take: 10 })
      * 
      * // Only select the `id`
-     * const settlementOrderModelWithIdOnly = await prisma.settlementOrderModel.findMany({ select: { id: true } })
+     * const settleOrderModelWithIdOnly = await prisma.settleOrderModel.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends SettlementOrderModelFindManyArgs>(args?: SelectSubset<T, SettlementOrderModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends SettleOrderModelFindManyArgs>(args?: SelectSubset<T, SettleOrderModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a SettlementOrderModel.
-     * @param {SettlementOrderModelCreateArgs} args - Arguments to create a SettlementOrderModel.
+     * Create a SettleOrderModel.
+     * @param {SettleOrderModelCreateArgs} args - Arguments to create a SettleOrderModel.
      * @example
-     * // Create one SettlementOrderModel
-     * const SettlementOrderModel = await prisma.settlementOrderModel.create({
+     * // Create one SettleOrderModel
+     * const SettleOrderModel = await prisma.settleOrderModel.create({
      *   data: {
-     *     // ... data to create a SettlementOrderModel
+     *     // ... data to create a SettleOrderModel
      *   }
      * })
      * 
      */
-    create<T extends SettlementOrderModelCreateArgs>(args: SelectSubset<T, SettlementOrderModelCreateArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends SettleOrderModelCreateArgs>(args: SelectSubset<T, SettleOrderModelCreateArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many SettlementOrderModels.
-     * @param {SettlementOrderModelCreateManyArgs} args - Arguments to create many SettlementOrderModels.
+     * Create many SettleOrderModels.
+     * @param {SettleOrderModelCreateManyArgs} args - Arguments to create many SettleOrderModels.
      * @example
-     * // Create many SettlementOrderModels
-     * const settlementOrderModel = await prisma.settlementOrderModel.createMany({
+     * // Create many SettleOrderModels
+     * const settleOrderModel = await prisma.settleOrderModel.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends SettlementOrderModelCreateManyArgs>(args?: SelectSubset<T, SettlementOrderModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends SettleOrderModelCreateManyArgs>(args?: SelectSubset<T, SettleOrderModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many SettlementOrderModels and returns the data saved in the database.
-     * @param {SettlementOrderModelCreateManyAndReturnArgs} args - Arguments to create many SettlementOrderModels.
+     * Create many SettleOrderModels and returns the data saved in the database.
+     * @param {SettleOrderModelCreateManyAndReturnArgs} args - Arguments to create many SettleOrderModels.
      * @example
-     * // Create many SettlementOrderModels
-     * const settlementOrderModel = await prisma.settlementOrderModel.createManyAndReturn({
+     * // Create many SettleOrderModels
+     * const settleOrderModel = await prisma.settleOrderModel.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many SettlementOrderModels and only return the `id`
-     * const settlementOrderModelWithIdOnly = await prisma.settlementOrderModel.createManyAndReturn({
+     * // Create many SettleOrderModels and only return the `id`
+     * const settleOrderModelWithIdOnly = await prisma.settleOrderModel.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -28616,28 +29815,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends SettlementOrderModelCreateManyAndReturnArgs>(args?: SelectSubset<T, SettlementOrderModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends SettleOrderModelCreateManyAndReturnArgs>(args?: SelectSubset<T, SettleOrderModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a SettlementOrderModel.
-     * @param {SettlementOrderModelDeleteArgs} args - Arguments to delete one SettlementOrderModel.
+     * Delete a SettleOrderModel.
+     * @param {SettleOrderModelDeleteArgs} args - Arguments to delete one SettleOrderModel.
      * @example
-     * // Delete one SettlementOrderModel
-     * const SettlementOrderModel = await prisma.settlementOrderModel.delete({
+     * // Delete one SettleOrderModel
+     * const SettleOrderModel = await prisma.settleOrderModel.delete({
      *   where: {
-     *     // ... filter to delete one SettlementOrderModel
+     *     // ... filter to delete one SettleOrderModel
      *   }
      * })
      * 
      */
-    delete<T extends SettlementOrderModelDeleteArgs>(args: SelectSubset<T, SettlementOrderModelDeleteArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends SettleOrderModelDeleteArgs>(args: SelectSubset<T, SettleOrderModelDeleteArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one SettlementOrderModel.
-     * @param {SettlementOrderModelUpdateArgs} args - Arguments to update one SettlementOrderModel.
+     * Update one SettleOrderModel.
+     * @param {SettleOrderModelUpdateArgs} args - Arguments to update one SettleOrderModel.
      * @example
-     * // Update one SettlementOrderModel
-     * const settlementOrderModel = await prisma.settlementOrderModel.update({
+     * // Update one SettleOrderModel
+     * const settleOrderModel = await prisma.settleOrderModel.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -28647,30 +29846,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends SettlementOrderModelUpdateArgs>(args: SelectSubset<T, SettlementOrderModelUpdateArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends SettleOrderModelUpdateArgs>(args: SelectSubset<T, SettleOrderModelUpdateArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more SettlementOrderModels.
-     * @param {SettlementOrderModelDeleteManyArgs} args - Arguments to filter SettlementOrderModels to delete.
+     * Delete zero or more SettleOrderModels.
+     * @param {SettleOrderModelDeleteManyArgs} args - Arguments to filter SettleOrderModels to delete.
      * @example
-     * // Delete a few SettlementOrderModels
-     * const { count } = await prisma.settlementOrderModel.deleteMany({
+     * // Delete a few SettleOrderModels
+     * const { count } = await prisma.settleOrderModel.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends SettlementOrderModelDeleteManyArgs>(args?: SelectSubset<T, SettlementOrderModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends SettleOrderModelDeleteManyArgs>(args?: SelectSubset<T, SettleOrderModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more SettlementOrderModels.
+     * Update zero or more SettleOrderModels.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {SettlementOrderModelUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {SettleOrderModelUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many SettlementOrderModels
-     * const settlementOrderModel = await prisma.settlementOrderModel.updateMany({
+     * // Update many SettleOrderModels
+     * const settleOrderModel = await prisma.settleOrderModel.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -28680,14 +29879,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends SettlementOrderModelUpdateManyArgs>(args: SelectSubset<T, SettlementOrderModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends SettleOrderModelUpdateManyArgs>(args: SelectSubset<T, SettleOrderModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more SettlementOrderModels and returns the data updated in the database.
-     * @param {SettlementOrderModelUpdateManyAndReturnArgs} args - Arguments to update many SettlementOrderModels.
+     * Update zero or more SettleOrderModels and returns the data updated in the database.
+     * @param {SettleOrderModelUpdateManyAndReturnArgs} args - Arguments to update many SettleOrderModels.
      * @example
-     * // Update many SettlementOrderModels
-     * const settlementOrderModel = await prisma.settlementOrderModel.updateManyAndReturn({
+     * // Update many SettleOrderModels
+     * const settleOrderModel = await prisma.settleOrderModel.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -28696,8 +29895,8 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more SettlementOrderModels and only return the `id`
-     * const settlementOrderModelWithIdOnly = await prisma.settlementOrderModel.updateManyAndReturn({
+     * // Update zero or more SettleOrderModels and only return the `id`
+     * const settleOrderModelWithIdOnly = await prisma.settleOrderModel.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -28710,56 +29909,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends SettlementOrderModelUpdateManyAndReturnArgs>(args: SelectSubset<T, SettlementOrderModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends SettleOrderModelUpdateManyAndReturnArgs>(args: SelectSubset<T, SettleOrderModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one SettlementOrderModel.
-     * @param {SettlementOrderModelUpsertArgs} args - Arguments to update or create a SettlementOrderModel.
+     * Create or update one SettleOrderModel.
+     * @param {SettleOrderModelUpsertArgs} args - Arguments to update or create a SettleOrderModel.
      * @example
-     * // Update or create a SettlementOrderModel
-     * const settlementOrderModel = await prisma.settlementOrderModel.upsert({
+     * // Update or create a SettleOrderModel
+     * const settleOrderModel = await prisma.settleOrderModel.upsert({
      *   create: {
-     *     // ... data to create a SettlementOrderModel
+     *     // ... data to create a SettleOrderModel
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the SettlementOrderModel we want to update
+     *     // ... the filter for the SettleOrderModel we want to update
      *   }
      * })
      */
-    upsert<T extends SettlementOrderModelUpsertArgs>(args: SelectSubset<T, SettlementOrderModelUpsertArgs<ExtArgs>>): Prisma__SettlementOrderModelClient<$Result.GetResult<Prisma.$SettlementOrderModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends SettleOrderModelUpsertArgs>(args: SelectSubset<T, SettleOrderModelUpsertArgs<ExtArgs>>): Prisma__SettleOrderModelClient<$Result.GetResult<Prisma.$SettleOrderModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of SettlementOrderModels.
+     * Count the number of SettleOrderModels.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {SettlementOrderModelCountArgs} args - Arguments to filter SettlementOrderModels to count.
+     * @param {SettleOrderModelCountArgs} args - Arguments to filter SettleOrderModels to count.
      * @example
-     * // Count the number of SettlementOrderModels
-     * const count = await prisma.settlementOrderModel.count({
+     * // Count the number of SettleOrderModels
+     * const count = await prisma.settleOrderModel.count({
      *   where: {
-     *     // ... the filter for the SettlementOrderModels we want to count
+     *     // ... the filter for the SettleOrderModels we want to count
      *   }
      * })
     **/
-    count<T extends SettlementOrderModelCountArgs>(
-      args?: Subset<T, SettlementOrderModelCountArgs>,
+    count<T extends SettleOrderModelCountArgs>(
+      args?: Subset<T, SettleOrderModelCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], SettlementOrderModelCountAggregateOutputType>
+          : GetScalarType<T['select'], SettleOrderModelCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a SettlementOrderModel.
+     * Allows you to perform aggregations operations on a SettleOrderModel.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {SettlementOrderModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {SettleOrderModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -28779,13 +29978,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends SettlementOrderModelAggregateArgs>(args: Subset<T, SettlementOrderModelAggregateArgs>): Prisma.PrismaPromise<GetSettlementOrderModelAggregateType<T>>
+    aggregate<T extends SettleOrderModelAggregateArgs>(args: Subset<T, SettleOrderModelAggregateArgs>): Prisma.PrismaPromise<GetSettleOrderModelAggregateType<T>>
 
     /**
-     * Group by SettlementOrderModel.
+     * Group by SettleOrderModel.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {SettlementOrderModelGroupByArgs} args - Group by arguments.
+     * @param {SettleOrderModelGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -28800,14 +29999,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends SettlementOrderModelGroupByArgs,
+      T extends SettleOrderModelGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: SettlementOrderModelGroupByArgs['orderBy'] }
-        : { orderBy?: SettlementOrderModelGroupByArgs['orderBy'] },
+        ? { orderBy: SettleOrderModelGroupByArgs['orderBy'] }
+        : { orderBy?: SettleOrderModelGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -28856,20 +30055,20 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, SettlementOrderModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSettlementOrderModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, SettleOrderModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSettleOrderModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the SettlementOrderModel model
+   * Fields of the SettleOrderModel model
    */
-  readonly fields: SettlementOrderModelFieldRefs;
+  readonly fields: SettleOrderModelFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for SettlementOrderModel.
+   * The delegate class that acts as a "Promise-like" for SettleOrderModel.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__SettlementOrderModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__SettleOrderModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -28897,412 +30096,414 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the SettlementOrderModel model
+   * Fields of the SettleOrderModel model
    */
-  interface SettlementOrderModelFieldRefs {
-    readonly id: FieldRef<"SettlementOrderModel", 'String'>
-    readonly orderNumber: FieldRef<"SettlementOrderModel", 'String'>
-    readonly symbol: FieldRef<"SettlementOrderModel", 'String'>
-    readonly buyParticipantLoginId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly sellParticipantLoginId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly price: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly yieldType: FieldRef<"SettlementOrderModel", 'YieldTypeSort'>
-    readonly yield: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly value: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly buyerRefNo: FieldRef<"SettlementOrderModel", 'String'>
-    readonly sellerRefNo: FieldRef<"SettlementOrderModel", 'String'>
-    readonly buyBackofficeLoginId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly sellBackofficeLoginId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly buyBrokerLoginId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly sellBrokerLoginId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly source: FieldRef<"SettlementOrderModel", 'Int'>
-    readonly modSettleDate: FieldRef<"SettlementOrderModel", 'String'>
-    readonly modQuantity: FieldRef<"SettlementOrderModel", 'Int'>
-    readonly modAccrInt: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly modConsideration: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly settlementNo: FieldRef<"SettlementOrderModel", 'String'>
-    readonly stampDutyAmount: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly stampDutyBearer: FieldRef<"SettlementOrderModel", 'String'>
-    readonly buyerFundPayinObligation: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly sellerFundPayoutObligation: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly fundPayinRefId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly settleStatus: FieldRef<"SettlementOrderModel", 'Int'>
-    readonly secPayinQuantity: FieldRef<"SettlementOrderModel", 'Int'>
-    readonly secPayinRemarks: FieldRef<"SettlementOrderModel", 'String'>
-    readonly secPayinTime: FieldRef<"SettlementOrderModel", 'String'>
-    readonly fundsPayinAmount: FieldRef<"SettlementOrderModel", 'Float'>
-    readonly fundsPayinRemarks: FieldRef<"SettlementOrderModel", 'String'>
-    readonly fundsPayinTime: FieldRef<"SettlementOrderModel", 'String'>
-    readonly payoutRemarks: FieldRef<"SettlementOrderModel", 'String'>
-    readonly payoutTime: FieldRef<"SettlementOrderModel", 'String'>
-    readonly ifscCode: FieldRef<"SettlementOrderModel", 'String'>
-    readonly accountNo: FieldRef<"SettlementOrderModel", 'String'>
-    readonly utrNumber: FieldRef<"SettlementOrderModel", 'String'>
-    readonly dpId: FieldRef<"SettlementOrderModel", 'String'>
-    readonly benId: FieldRef<"SettlementOrderModel", 'String'>
+  interface SettleOrderModelFieldRefs {
+    readonly id: FieldRef<"SettleOrderModel", 'Int'>
+    readonly orderNumber: FieldRef<"SettleOrderModel", 'String'>
+    readonly symbol: FieldRef<"SettleOrderModel", 'String'>
+    readonly buyParticipantLoginId: FieldRef<"SettleOrderModel", 'String'>
+    readonly sellParticipantLoginId: FieldRef<"SettleOrderModel", 'String'>
+    readonly price: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly yieldType: FieldRef<"SettleOrderModel", 'YieldTypeSort'>
+    readonly yield: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly value: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly buyerRefNo: FieldRef<"SettleOrderModel", 'String'>
+    readonly sellerRefNo: FieldRef<"SettleOrderModel", 'String'>
+    readonly buyBackofficeLoginId: FieldRef<"SettleOrderModel", 'String'>
+    readonly sellBackofficeLoginId: FieldRef<"SettleOrderModel", 'String'>
+    readonly buyBrokerLoginId: FieldRef<"SettleOrderModel", 'String'>
+    readonly sellBrokerLoginId: FieldRef<"SettleOrderModel", 'String'>
+    readonly source: FieldRef<"SettleOrderModel", 'Int'>
+    readonly modSettleDate: FieldRef<"SettleOrderModel", 'String'>
+    readonly modQuantity: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly modAccrInt: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly modConsideration: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly settlementNo: FieldRef<"SettleOrderModel", 'String'>
+    readonly stampDutyAmount: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly stampDutyBearer: FieldRef<"SettleOrderModel", 'String'>
+    readonly buyerFundPayinObligation: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly sellerFundPayoutObligation: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly fundPayinRefId: FieldRef<"SettleOrderModel", 'String'>
+    readonly settleStatus: FieldRef<"SettleOrderModel", 'Int'>
+    readonly secPayinQuantity: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly secPayinRemarks: FieldRef<"SettleOrderModel", 'String'>
+    readonly secPayinTime: FieldRef<"SettleOrderModel", 'String'>
+    readonly fundsPayinAmount: FieldRef<"SettleOrderModel", 'Decimal'>
+    readonly fundsPayinRemarks: FieldRef<"SettleOrderModel", 'String'>
+    readonly fundsPayinTime: FieldRef<"SettleOrderModel", 'String'>
+    readonly payoutRemarks: FieldRef<"SettleOrderModel", 'String'>
+    readonly payoutTime: FieldRef<"SettleOrderModel", 'String'>
+    readonly ifscCode: FieldRef<"SettleOrderModel", 'String'>
+    readonly accountNo: FieldRef<"SettleOrderModel", 'String'>
+    readonly utrNumber: FieldRef<"SettleOrderModel", 'String'>
+    readonly dpId: FieldRef<"SettleOrderModel", 'String'>
+    readonly benId: FieldRef<"SettleOrderModel", 'String'>
+    readonly createdAt: FieldRef<"SettleOrderModel", 'DateTime'>
+    readonly updatedAt: FieldRef<"SettleOrderModel", 'DateTime'>
   }
     
 
   // Custom InputTypes
   /**
-   * SettlementOrderModel findUnique
+   * SettleOrderModel findUnique
    */
-  export type SettlementOrderModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which SettlementOrderModel to fetch.
+     * Filter, which SettleOrderModel to fetch.
      */
-    where: SettlementOrderModelWhereUniqueInput
+    where: SettleOrderModelWhereUniqueInput
   }
 
   /**
-   * SettlementOrderModel findUniqueOrThrow
+   * SettleOrderModel findUniqueOrThrow
    */
-  export type SettlementOrderModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which SettlementOrderModel to fetch.
+     * Filter, which SettleOrderModel to fetch.
      */
-    where: SettlementOrderModelWhereUniqueInput
+    where: SettleOrderModelWhereUniqueInput
   }
 
   /**
-   * SettlementOrderModel findFirst
+   * SettleOrderModel findFirst
    */
-  export type SettlementOrderModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which SettlementOrderModel to fetch.
+     * Filter, which SettleOrderModel to fetch.
      */
-    where?: SettlementOrderModelWhereInput
+    where?: SettleOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of SettlementOrderModels to fetch.
+     * Determine the order of SettleOrderModels to fetch.
      */
-    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
+    orderBy?: SettleOrderModelOrderByWithRelationInput | SettleOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for SettlementOrderModels.
+     * Sets the position for searching for SettleOrderModels.
      */
-    cursor?: SettlementOrderModelWhereUniqueInput
+    cursor?: SettleOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` SettlementOrderModels from the position of the cursor.
+     * Take `±n` SettleOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` SettlementOrderModels.
+     * Skip the first `n` SettleOrderModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of SettlementOrderModels.
+     * Filter by unique combinations of SettleOrderModels.
      */
-    distinct?: SettlementOrderModelScalarFieldEnum | SettlementOrderModelScalarFieldEnum[]
+    distinct?: SettleOrderModelScalarFieldEnum | SettleOrderModelScalarFieldEnum[]
   }
 
   /**
-   * SettlementOrderModel findFirstOrThrow
+   * SettleOrderModel findFirstOrThrow
    */
-  export type SettlementOrderModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which SettlementOrderModel to fetch.
+     * Filter, which SettleOrderModel to fetch.
      */
-    where?: SettlementOrderModelWhereInput
+    where?: SettleOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of SettlementOrderModels to fetch.
+     * Determine the order of SettleOrderModels to fetch.
      */
-    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
+    orderBy?: SettleOrderModelOrderByWithRelationInput | SettleOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for SettlementOrderModels.
+     * Sets the position for searching for SettleOrderModels.
      */
-    cursor?: SettlementOrderModelWhereUniqueInput
+    cursor?: SettleOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` SettlementOrderModels from the position of the cursor.
+     * Take `±n` SettleOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` SettlementOrderModels.
+     * Skip the first `n` SettleOrderModels.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of SettlementOrderModels.
+     * Filter by unique combinations of SettleOrderModels.
      */
-    distinct?: SettlementOrderModelScalarFieldEnum | SettlementOrderModelScalarFieldEnum[]
+    distinct?: SettleOrderModelScalarFieldEnum | SettleOrderModelScalarFieldEnum[]
   }
 
   /**
-   * SettlementOrderModel findMany
+   * SettleOrderModel findMany
    */
-  export type SettlementOrderModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * Filter, which SettlementOrderModels to fetch.
+     * Filter, which SettleOrderModels to fetch.
      */
-    where?: SettlementOrderModelWhereInput
+    where?: SettleOrderModelWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of SettlementOrderModels to fetch.
+     * Determine the order of SettleOrderModels to fetch.
      */
-    orderBy?: SettlementOrderModelOrderByWithRelationInput | SettlementOrderModelOrderByWithRelationInput[]
+    orderBy?: SettleOrderModelOrderByWithRelationInput | SettleOrderModelOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing SettlementOrderModels.
+     * Sets the position for listing SettleOrderModels.
      */
-    cursor?: SettlementOrderModelWhereUniqueInput
+    cursor?: SettleOrderModelWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` SettlementOrderModels from the position of the cursor.
+     * Take `±n` SettleOrderModels from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` SettlementOrderModels.
+     * Skip the first `n` SettleOrderModels.
      */
     skip?: number
-    distinct?: SettlementOrderModelScalarFieldEnum | SettlementOrderModelScalarFieldEnum[]
+    distinct?: SettleOrderModelScalarFieldEnum | SettleOrderModelScalarFieldEnum[]
   }
 
   /**
-   * SettlementOrderModel create
+   * SettleOrderModel create
    */
-  export type SettlementOrderModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * The data needed to create a SettlementOrderModel.
+     * The data needed to create a SettleOrderModel.
      */
-    data: XOR<SettlementOrderModelCreateInput, SettlementOrderModelUncheckedCreateInput>
+    data: XOR<SettleOrderModelCreateInput, SettleOrderModelUncheckedCreateInput>
   }
 
   /**
-   * SettlementOrderModel createMany
+   * SettleOrderModel createMany
    */
-  export type SettlementOrderModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many SettlementOrderModels.
+     * The data used to create many SettleOrderModels.
      */
-    data: SettlementOrderModelCreateManyInput | SettlementOrderModelCreateManyInput[]
+    data: SettleOrderModelCreateManyInput | SettleOrderModelCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * SettlementOrderModel createManyAndReturn
+   * SettleOrderModel createManyAndReturn
    */
-  export type SettlementOrderModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelectCreateManyAndReturn<ExtArgs> | null
+    select?: SettleOrderModelSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * The data used to create many SettlementOrderModels.
+     * The data used to create many SettleOrderModels.
      */
-    data: SettlementOrderModelCreateManyInput | SettlementOrderModelCreateManyInput[]
+    data: SettleOrderModelCreateManyInput | SettleOrderModelCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * SettlementOrderModel update
+   * SettleOrderModel update
    */
-  export type SettlementOrderModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * The data needed to update a SettlementOrderModel.
+     * The data needed to update a SettleOrderModel.
      */
-    data: XOR<SettlementOrderModelUpdateInput, SettlementOrderModelUncheckedUpdateInput>
+    data: XOR<SettleOrderModelUpdateInput, SettleOrderModelUncheckedUpdateInput>
     /**
-     * Choose, which SettlementOrderModel to update.
+     * Choose, which SettleOrderModel to update.
      */
-    where: SettlementOrderModelWhereUniqueInput
+    where: SettleOrderModelWhereUniqueInput
   }
 
   /**
-   * SettlementOrderModel updateMany
+   * SettleOrderModel updateMany
    */
-  export type SettlementOrderModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update SettlementOrderModels.
+     * The data used to update SettleOrderModels.
      */
-    data: XOR<SettlementOrderModelUpdateManyMutationInput, SettlementOrderModelUncheckedUpdateManyInput>
+    data: XOR<SettleOrderModelUpdateManyMutationInput, SettleOrderModelUncheckedUpdateManyInput>
     /**
-     * Filter which SettlementOrderModels to update
+     * Filter which SettleOrderModels to update
      */
-    where?: SettlementOrderModelWhereInput
+    where?: SettleOrderModelWhereInput
     /**
-     * Limit how many SettlementOrderModels to update.
+     * Limit how many SettleOrderModels to update.
      */
     limit?: number
   }
 
   /**
-   * SettlementOrderModel updateManyAndReturn
+   * SettleOrderModel updateManyAndReturn
    */
-  export type SettlementOrderModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: SettleOrderModelSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * The data used to update SettlementOrderModels.
+     * The data used to update SettleOrderModels.
      */
-    data: XOR<SettlementOrderModelUpdateManyMutationInput, SettlementOrderModelUncheckedUpdateManyInput>
+    data: XOR<SettleOrderModelUpdateManyMutationInput, SettleOrderModelUncheckedUpdateManyInput>
     /**
-     * Filter which SettlementOrderModels to update
+     * Filter which SettleOrderModels to update
      */
-    where?: SettlementOrderModelWhereInput
+    where?: SettleOrderModelWhereInput
     /**
-     * Limit how many SettlementOrderModels to update.
+     * Limit how many SettleOrderModels to update.
      */
     limit?: number
   }
 
   /**
-   * SettlementOrderModel upsert
+   * SettleOrderModel upsert
    */
-  export type SettlementOrderModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * The filter to search for the SettlementOrderModel to update in case it exists.
+     * The filter to search for the SettleOrderModel to update in case it exists.
      */
-    where: SettlementOrderModelWhereUniqueInput
+    where: SettleOrderModelWhereUniqueInput
     /**
-     * In case the SettlementOrderModel found by the `where` argument doesn't exist, create a new SettlementOrderModel with this data.
+     * In case the SettleOrderModel found by the `where` argument doesn't exist, create a new SettleOrderModel with this data.
      */
-    create: XOR<SettlementOrderModelCreateInput, SettlementOrderModelUncheckedCreateInput>
+    create: XOR<SettleOrderModelCreateInput, SettleOrderModelUncheckedCreateInput>
     /**
-     * In case the SettlementOrderModel was found with the provided `where` argument, update it with this data.
+     * In case the SettleOrderModel was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<SettlementOrderModelUpdateInput, SettlementOrderModelUncheckedUpdateInput>
+    update: XOR<SettleOrderModelUpdateInput, SettleOrderModelUncheckedUpdateInput>
   }
 
   /**
-   * SettlementOrderModel delete
+   * SettleOrderModel delete
    */
-  export type SettlementOrderModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
     /**
-     * Filter which SettlementOrderModel to delete.
+     * Filter which SettleOrderModel to delete.
      */
-    where: SettlementOrderModelWhereUniqueInput
+    where: SettleOrderModelWhereUniqueInput
   }
 
   /**
-   * SettlementOrderModel deleteMany
+   * SettleOrderModel deleteMany
    */
-  export type SettlementOrderModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which SettlementOrderModels to delete
+     * Filter which SettleOrderModels to delete
      */
-    where?: SettlementOrderModelWhereInput
+    where?: SettleOrderModelWhereInput
     /**
-     * Limit how many SettlementOrderModels to delete.
+     * Limit how many SettleOrderModels to delete.
      */
     limit?: number
   }
 
   /**
-   * SettlementOrderModel without action
+   * SettleOrderModel without action
    */
-  export type SettlementOrderModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type SettleOrderModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the SettlementOrderModel
+     * Select specific fields to fetch from the SettleOrderModel
      */
-    select?: SettlementOrderModelSelect<ExtArgs> | null
+    select?: SettleOrderModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the SettlementOrderModel
+     * Omit specific fields from the SettleOrderModel
      */
-    omit?: SettlementOrderModelOmit<ExtArgs> | null
+    omit?: SettleOrderModelOmit<ExtArgs> | null
   }
 
 
@@ -32905,12 +34106,27 @@ export namespace Prisma {
     userId: 'userId',
     type: 'type',
     token: 'token',
+    trackId: 'trackId',
     url: 'url',
     data: 'data',
     createdAt: 'createdAt'
   };
 
   export type CrmAuditLogsScalarFieldEnum = (typeof CrmAuditLogsScalarFieldEnum)[keyof typeof CrmAuditLogsScalarFieldEnum]
+
+
+  export const WebAuditLogsScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    token: 'token',
+    trackId: 'trackId',
+    url: 'url',
+    data: 'data',
+    createdAt: 'createdAt'
+  };
+
+  export type WebAuditLogsScalarFieldEnum = (typeof WebAuditLogsScalarFieldEnum)[keyof typeof WebAuditLogsScalarFieldEnum]
 
 
   export const BondsScalarFieldEnum: {
@@ -33286,7 +34502,7 @@ export namespace Prisma {
   export type NseIsinSecurityReceiptScalarFieldEnum = (typeof NseIsinSecurityReceiptScalarFieldEnum)[keyof typeof NseIsinSecurityReceiptScalarFieldEnum]
 
 
-  export const SettlementOrderModelScalarFieldEnum: {
+  export const SettleOrderModelScalarFieldEnum: {
     id: 'id',
     orderNumber: 'orderNumber',
     symbol: 'symbol',
@@ -33326,10 +34542,12 @@ export namespace Prisma {
     accountNo: 'accountNo',
     utrNumber: 'utrNumber',
     dpId: 'dpId',
-    benId: 'benId'
+    benId: 'benId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
   };
 
-  export type SettlementOrderModelScalarFieldEnum = (typeof SettlementOrderModelScalarFieldEnum)[keyof typeof SettlementOrderModelScalarFieldEnum]
+  export type SettleOrderModelScalarFieldEnum = (typeof SettleOrderModelScalarFieldEnum)[keyof typeof SettleOrderModelScalarFieldEnum]
 
 
   export const RFQMasterISINScalarFieldEnum: {
@@ -33808,6 +35026,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Decimal'
+   */
+  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal[]'
+   */
+  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+  /**
    * Reference to a field of type 'YieldTypeSort'
    */
   export type EnumYieldTypeSortFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'YieldTypeSort'>
@@ -34000,6 +35232,7 @@ export namespace Prisma {
     userId?: IntNullableFilter<"CrmAuditLogs"> | number | null
     type?: StringFilter<"CrmAuditLogs"> | string
     token?: StringNullableFilter<"CrmAuditLogs"> | string | null
+    trackId?: StringNullableFilter<"CrmAuditLogs"> | string | null
     url?: StringNullableFilter<"CrmAuditLogs"> | string | null
     data?: JsonFilter<"CrmAuditLogs">
     createdAt?: DateTimeFilter<"CrmAuditLogs"> | Date | string
@@ -34010,6 +35243,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     type?: SortOrder
     token?: SortOrderInput | SortOrder
+    trackId?: SortOrderInput | SortOrder
     url?: SortOrderInput | SortOrder
     data?: SortOrder
     createdAt?: SortOrder
@@ -34023,6 +35257,7 @@ export namespace Prisma {
     userId?: IntNullableFilter<"CrmAuditLogs"> | number | null
     type?: StringFilter<"CrmAuditLogs"> | string
     token?: StringNullableFilter<"CrmAuditLogs"> | string | null
+    trackId?: StringNullableFilter<"CrmAuditLogs"> | string | null
     url?: StringNullableFilter<"CrmAuditLogs"> | string | null
     data?: JsonFilter<"CrmAuditLogs">
     createdAt?: DateTimeFilter<"CrmAuditLogs"> | Date | string
@@ -34033,6 +35268,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     type?: SortOrder
     token?: SortOrderInput | SortOrder
+    trackId?: SortOrderInput | SortOrder
     url?: SortOrderInput | SortOrder
     data?: SortOrder
     createdAt?: SortOrder
@@ -34051,9 +35287,79 @@ export namespace Prisma {
     userId?: IntNullableWithAggregatesFilter<"CrmAuditLogs"> | number | null
     type?: StringWithAggregatesFilter<"CrmAuditLogs"> | string
     token?: StringNullableWithAggregatesFilter<"CrmAuditLogs"> | string | null
+    trackId?: StringNullableWithAggregatesFilter<"CrmAuditLogs"> | string | null
     url?: StringNullableWithAggregatesFilter<"CrmAuditLogs"> | string | null
     data?: JsonWithAggregatesFilter<"CrmAuditLogs">
     createdAt?: DateTimeWithAggregatesFilter<"CrmAuditLogs"> | Date | string
+  }
+
+  export type WebAuditLogsWhereInput = {
+    AND?: WebAuditLogsWhereInput | WebAuditLogsWhereInput[]
+    OR?: WebAuditLogsWhereInput[]
+    NOT?: WebAuditLogsWhereInput | WebAuditLogsWhereInput[]
+    id?: IntFilter<"WebAuditLogs"> | number
+    userId?: IntNullableFilter<"WebAuditLogs"> | number | null
+    type?: StringFilter<"WebAuditLogs"> | string
+    token?: StringNullableFilter<"WebAuditLogs"> | string | null
+    trackId?: StringNullableFilter<"WebAuditLogs"> | string | null
+    url?: StringNullableFilter<"WebAuditLogs"> | string | null
+    data?: JsonFilter<"WebAuditLogs">
+    createdAt?: DateTimeFilter<"WebAuditLogs"> | Date | string
+  }
+
+  export type WebAuditLogsOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    token?: SortOrderInput | SortOrder
+    trackId?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type WebAuditLogsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: WebAuditLogsWhereInput | WebAuditLogsWhereInput[]
+    OR?: WebAuditLogsWhereInput[]
+    NOT?: WebAuditLogsWhereInput | WebAuditLogsWhereInput[]
+    userId?: IntNullableFilter<"WebAuditLogs"> | number | null
+    type?: StringFilter<"WebAuditLogs"> | string
+    token?: StringNullableFilter<"WebAuditLogs"> | string | null
+    trackId?: StringNullableFilter<"WebAuditLogs"> | string | null
+    url?: StringNullableFilter<"WebAuditLogs"> | string | null
+    data?: JsonFilter<"WebAuditLogs">
+    createdAt?: DateTimeFilter<"WebAuditLogs"> | Date | string
+  }, "id">
+
+  export type WebAuditLogsOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    token?: SortOrderInput | SortOrder
+    trackId?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    _count?: WebAuditLogsCountOrderByAggregateInput
+    _avg?: WebAuditLogsAvgOrderByAggregateInput
+    _max?: WebAuditLogsMaxOrderByAggregateInput
+    _min?: WebAuditLogsMinOrderByAggregateInput
+    _sum?: WebAuditLogsSumOrderByAggregateInput
+  }
+
+  export type WebAuditLogsScalarWhereWithAggregatesInput = {
+    AND?: WebAuditLogsScalarWhereWithAggregatesInput | WebAuditLogsScalarWhereWithAggregatesInput[]
+    OR?: WebAuditLogsScalarWhereWithAggregatesInput[]
+    NOT?: WebAuditLogsScalarWhereWithAggregatesInput | WebAuditLogsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"WebAuditLogs"> | number
+    userId?: IntNullableWithAggregatesFilter<"WebAuditLogs"> | number | null
+    type?: StringWithAggregatesFilter<"WebAuditLogs"> | string
+    token?: StringNullableWithAggregatesFilter<"WebAuditLogs"> | string | null
+    trackId?: StringNullableWithAggregatesFilter<"WebAuditLogs"> | string | null
+    url?: StringNullableWithAggregatesFilter<"WebAuditLogs"> | string | null
+    data?: JsonWithAggregatesFilter<"WebAuditLogs">
+    createdAt?: DateTimeWithAggregatesFilter<"WebAuditLogs"> | Date | string
   }
 
   export type BondsWhereInput = {
@@ -35992,53 +37298,55 @@ export namespace Prisma {
     issuer?: StringWithAggregatesFilter<"NseIsinSecurityReceipt"> | string
   }
 
-  export type SettlementOrderModelWhereInput = {
-    AND?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
-    OR?: SettlementOrderModelWhereInput[]
-    NOT?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
-    id?: StringFilter<"SettlementOrderModel"> | string
-    orderNumber?: StringFilter<"SettlementOrderModel"> | string
-    symbol?: StringFilter<"SettlementOrderModel"> | string
-    buyParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
-    sellParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
-    price?: FloatFilter<"SettlementOrderModel"> | number
-    yieldType?: EnumYieldTypeSortFilter<"SettlementOrderModel"> | $Enums.YieldTypeSort
-    yield?: FloatFilter<"SettlementOrderModel"> | number
-    value?: FloatFilter<"SettlementOrderModel"> | number
-    buyerRefNo?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    sellerRefNo?: StringFilter<"SettlementOrderModel"> | string
-    buyBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    sellBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    buyBrokerLoginId?: StringFilter<"SettlementOrderModel"> | string
-    sellBrokerLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    source?: IntFilter<"SettlementOrderModel"> | number
-    modSettleDate?: StringFilter<"SettlementOrderModel"> | string
-    modQuantity?: IntFilter<"SettlementOrderModel"> | number
-    modAccrInt?: FloatNullableFilter<"SettlementOrderModel"> | number | null
-    modConsideration?: FloatFilter<"SettlementOrderModel"> | number
-    settlementNo?: StringFilter<"SettlementOrderModel"> | string
-    stampDutyAmount?: FloatFilter<"SettlementOrderModel"> | number
-    stampDutyBearer?: StringFilter<"SettlementOrderModel"> | string
-    buyerFundPayinObligation?: FloatFilter<"SettlementOrderModel"> | number
-    sellerFundPayoutObligation?: FloatFilter<"SettlementOrderModel"> | number
-    fundPayinRefId?: StringFilter<"SettlementOrderModel"> | string
-    settleStatus?: IntFilter<"SettlementOrderModel"> | number
-    secPayinQuantity?: IntNullableFilter<"SettlementOrderModel"> | number | null
-    secPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    secPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    fundsPayinAmount?: FloatNullableFilter<"SettlementOrderModel"> | number | null
-    fundsPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    fundsPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    payoutRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    payoutTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    ifscCode?: StringFilter<"SettlementOrderModel"> | string
-    accountNo?: StringFilter<"SettlementOrderModel"> | string
-    utrNumber?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    dpId?: StringFilter<"SettlementOrderModel"> | string
-    benId?: StringFilter<"SettlementOrderModel"> | string
+  export type SettleOrderModelWhereInput = {
+    AND?: SettleOrderModelWhereInput | SettleOrderModelWhereInput[]
+    OR?: SettleOrderModelWhereInput[]
+    NOT?: SettleOrderModelWhereInput | SettleOrderModelWhereInput[]
+    id?: IntFilter<"SettleOrderModel"> | number
+    orderNumber?: StringFilter<"SettleOrderModel"> | string
+    symbol?: StringFilter<"SettleOrderModel"> | string
+    buyParticipantLoginId?: StringFilter<"SettleOrderModel"> | string
+    sellParticipantLoginId?: StringFilter<"SettleOrderModel"> | string
+    price?: DecimalFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    yieldType?: EnumYieldTypeSortFilter<"SettleOrderModel"> | $Enums.YieldTypeSort
+    yield?: DecimalFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    value?: DecimalFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    buyerRefNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    sellerRefNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    buyBackofficeLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    sellBackofficeLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    buyBrokerLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    sellBrokerLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    source?: IntFilter<"SettleOrderModel"> | number
+    modSettleDate?: StringNullableFilter<"SettleOrderModel"> | string | null
+    modQuantity?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    modConsideration?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    settlementNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    stampDutyAmount?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: StringNullableFilter<"SettleOrderModel"> | string | null
+    buyerFundPayinObligation?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    settleStatus?: IntFilter<"SettleOrderModel"> | number
+    secPayinQuantity?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    secPayinRemarks?: StringNullableFilter<"SettleOrderModel"> | string | null
+    secPayinTime?: StringNullableFilter<"SettleOrderModel"> | string | null
+    fundsPayinAmount?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    fundsPayinRemarks?: StringNullableFilter<"SettleOrderModel"> | string | null
+    fundsPayinTime?: StringNullableFilter<"SettleOrderModel"> | string | null
+    payoutRemarks?: StringNullableFilter<"SettleOrderModel"> | string | null
+    payoutTime?: StringNullableFilter<"SettleOrderModel"> | string | null
+    ifscCode?: StringNullableFilter<"SettleOrderModel"> | string | null
+    accountNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    utrNumber?: StringNullableFilter<"SettleOrderModel"> | string | null
+    dpId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    benId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    createdAt?: DateTimeFilter<"SettleOrderModel"> | Date | string
+    updatedAt?: DateTimeFilter<"SettleOrderModel"> | Date | string
   }
 
-  export type SettlementOrderModelOrderByWithRelationInput = {
+  export type SettleOrderModelOrderByWithRelationInput = {
     id?: SortOrder
     orderNumber?: SortOrder
     symbol?: SortOrder
@@ -36049,22 +37357,22 @@ export namespace Prisma {
     yield?: SortOrder
     value?: SortOrder
     buyerRefNo?: SortOrderInput | SortOrder
-    sellerRefNo?: SortOrder
+    sellerRefNo?: SortOrderInput | SortOrder
     buyBackofficeLoginId?: SortOrderInput | SortOrder
     sellBackofficeLoginId?: SortOrderInput | SortOrder
-    buyBrokerLoginId?: SortOrder
+    buyBrokerLoginId?: SortOrderInput | SortOrder
     sellBrokerLoginId?: SortOrderInput | SortOrder
     source?: SortOrder
-    modSettleDate?: SortOrder
-    modQuantity?: SortOrder
+    modSettleDate?: SortOrderInput | SortOrder
+    modQuantity?: SortOrderInput | SortOrder
     modAccrInt?: SortOrderInput | SortOrder
-    modConsideration?: SortOrder
-    settlementNo?: SortOrder
-    stampDutyAmount?: SortOrder
-    stampDutyBearer?: SortOrder
-    buyerFundPayinObligation?: SortOrder
-    sellerFundPayoutObligation?: SortOrder
-    fundPayinRefId?: SortOrder
+    modConsideration?: SortOrderInput | SortOrder
+    settlementNo?: SortOrderInput | SortOrder
+    stampDutyAmount?: SortOrderInput | SortOrder
+    stampDutyBearer?: SortOrderInput | SortOrder
+    buyerFundPayinObligation?: SortOrderInput | SortOrder
+    sellerFundPayoutObligation?: SortOrderInput | SortOrder
+    fundPayinRefId?: SortOrderInput | SortOrder
     settleStatus?: SortOrder
     secPayinQuantity?: SortOrderInput | SortOrder
     secPayinRemarks?: SortOrderInput | SortOrder
@@ -36074,60 +37382,64 @@ export namespace Prisma {
     fundsPayinTime?: SortOrderInput | SortOrder
     payoutRemarks?: SortOrderInput | SortOrder
     payoutTime?: SortOrderInput | SortOrder
-    ifscCode?: SortOrder
-    accountNo?: SortOrder
+    ifscCode?: SortOrderInput | SortOrder
+    accountNo?: SortOrderInput | SortOrder
     utrNumber?: SortOrderInput | SortOrder
-    dpId?: SortOrder
-    benId?: SortOrder
+    dpId?: SortOrderInput | SortOrder
+    benId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type SettlementOrderModelWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    orderNumber?: string
-    AND?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
-    OR?: SettlementOrderModelWhereInput[]
-    NOT?: SettlementOrderModelWhereInput | SettlementOrderModelWhereInput[]
-    symbol?: StringFilter<"SettlementOrderModel"> | string
-    buyParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
-    sellParticipantLoginId?: StringFilter<"SettlementOrderModel"> | string
-    price?: FloatFilter<"SettlementOrderModel"> | number
-    yieldType?: EnumYieldTypeSortFilter<"SettlementOrderModel"> | $Enums.YieldTypeSort
-    yield?: FloatFilter<"SettlementOrderModel"> | number
-    value?: FloatFilter<"SettlementOrderModel"> | number
-    buyerRefNo?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    sellerRefNo?: StringFilter<"SettlementOrderModel"> | string
-    buyBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    sellBackofficeLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    buyBrokerLoginId?: StringFilter<"SettlementOrderModel"> | string
-    sellBrokerLoginId?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    source?: IntFilter<"SettlementOrderModel"> | number
-    modSettleDate?: StringFilter<"SettlementOrderModel"> | string
-    modQuantity?: IntFilter<"SettlementOrderModel"> | number
-    modAccrInt?: FloatNullableFilter<"SettlementOrderModel"> | number | null
-    modConsideration?: FloatFilter<"SettlementOrderModel"> | number
-    settlementNo?: StringFilter<"SettlementOrderModel"> | string
-    stampDutyAmount?: FloatFilter<"SettlementOrderModel"> | number
-    stampDutyBearer?: StringFilter<"SettlementOrderModel"> | string
-    buyerFundPayinObligation?: FloatFilter<"SettlementOrderModel"> | number
-    sellerFundPayoutObligation?: FloatFilter<"SettlementOrderModel"> | number
-    fundPayinRefId?: StringFilter<"SettlementOrderModel"> | string
-    settleStatus?: IntFilter<"SettlementOrderModel"> | number
-    secPayinQuantity?: IntNullableFilter<"SettlementOrderModel"> | number | null
-    secPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    secPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    fundsPayinAmount?: FloatNullableFilter<"SettlementOrderModel"> | number | null
-    fundsPayinRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    fundsPayinTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    payoutRemarks?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    payoutTime?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    ifscCode?: StringFilter<"SettlementOrderModel"> | string
-    accountNo?: StringFilter<"SettlementOrderModel"> | string
-    utrNumber?: StringNullableFilter<"SettlementOrderModel"> | string | null
-    dpId?: StringFilter<"SettlementOrderModel"> | string
-    benId?: StringFilter<"SettlementOrderModel"> | string
-  }, "id" | "orderNumber">
+  export type SettleOrderModelWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: SettleOrderModelWhereInput | SettleOrderModelWhereInput[]
+    OR?: SettleOrderModelWhereInput[]
+    NOT?: SettleOrderModelWhereInput | SettleOrderModelWhereInput[]
+    orderNumber?: StringFilter<"SettleOrderModel"> | string
+    symbol?: StringFilter<"SettleOrderModel"> | string
+    buyParticipantLoginId?: StringFilter<"SettleOrderModel"> | string
+    sellParticipantLoginId?: StringFilter<"SettleOrderModel"> | string
+    price?: DecimalFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    yieldType?: EnumYieldTypeSortFilter<"SettleOrderModel"> | $Enums.YieldTypeSort
+    yield?: DecimalFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    value?: DecimalFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    buyerRefNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    sellerRefNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    buyBackofficeLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    sellBackofficeLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    buyBrokerLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    sellBrokerLoginId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    source?: IntFilter<"SettleOrderModel"> | number
+    modSettleDate?: StringNullableFilter<"SettleOrderModel"> | string | null
+    modQuantity?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    modConsideration?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    settlementNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    stampDutyAmount?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: StringNullableFilter<"SettleOrderModel"> | string | null
+    buyerFundPayinObligation?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    settleStatus?: IntFilter<"SettleOrderModel"> | number
+    secPayinQuantity?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    secPayinRemarks?: StringNullableFilter<"SettleOrderModel"> | string | null
+    secPayinTime?: StringNullableFilter<"SettleOrderModel"> | string | null
+    fundsPayinAmount?: DecimalNullableFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    fundsPayinRemarks?: StringNullableFilter<"SettleOrderModel"> | string | null
+    fundsPayinTime?: StringNullableFilter<"SettleOrderModel"> | string | null
+    payoutRemarks?: StringNullableFilter<"SettleOrderModel"> | string | null
+    payoutTime?: StringNullableFilter<"SettleOrderModel"> | string | null
+    ifscCode?: StringNullableFilter<"SettleOrderModel"> | string | null
+    accountNo?: StringNullableFilter<"SettleOrderModel"> | string | null
+    utrNumber?: StringNullableFilter<"SettleOrderModel"> | string | null
+    dpId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    benId?: StringNullableFilter<"SettleOrderModel"> | string | null
+    createdAt?: DateTimeFilter<"SettleOrderModel"> | Date | string
+    updatedAt?: DateTimeFilter<"SettleOrderModel"> | Date | string
+  }, "id">
 
-  export type SettlementOrderModelOrderByWithAggregationInput = {
+  export type SettleOrderModelOrderByWithAggregationInput = {
     id?: SortOrder
     orderNumber?: SortOrder
     symbol?: SortOrder
@@ -36138,22 +37450,22 @@ export namespace Prisma {
     yield?: SortOrder
     value?: SortOrder
     buyerRefNo?: SortOrderInput | SortOrder
-    sellerRefNo?: SortOrder
+    sellerRefNo?: SortOrderInput | SortOrder
     buyBackofficeLoginId?: SortOrderInput | SortOrder
     sellBackofficeLoginId?: SortOrderInput | SortOrder
-    buyBrokerLoginId?: SortOrder
+    buyBrokerLoginId?: SortOrderInput | SortOrder
     sellBrokerLoginId?: SortOrderInput | SortOrder
     source?: SortOrder
-    modSettleDate?: SortOrder
-    modQuantity?: SortOrder
+    modSettleDate?: SortOrderInput | SortOrder
+    modQuantity?: SortOrderInput | SortOrder
     modAccrInt?: SortOrderInput | SortOrder
-    modConsideration?: SortOrder
-    settlementNo?: SortOrder
-    stampDutyAmount?: SortOrder
-    stampDutyBearer?: SortOrder
-    buyerFundPayinObligation?: SortOrder
-    sellerFundPayoutObligation?: SortOrder
-    fundPayinRefId?: SortOrder
+    modConsideration?: SortOrderInput | SortOrder
+    settlementNo?: SortOrderInput | SortOrder
+    stampDutyAmount?: SortOrderInput | SortOrder
+    stampDutyBearer?: SortOrderInput | SortOrder
+    buyerFundPayinObligation?: SortOrderInput | SortOrder
+    sellerFundPayoutObligation?: SortOrderInput | SortOrder
+    fundPayinRefId?: SortOrderInput | SortOrder
     settleStatus?: SortOrder
     secPayinQuantity?: SortOrderInput | SortOrder
     secPayinRemarks?: SortOrderInput | SortOrder
@@ -36163,62 +37475,66 @@ export namespace Prisma {
     fundsPayinTime?: SortOrderInput | SortOrder
     payoutRemarks?: SortOrderInput | SortOrder
     payoutTime?: SortOrderInput | SortOrder
-    ifscCode?: SortOrder
-    accountNo?: SortOrder
+    ifscCode?: SortOrderInput | SortOrder
+    accountNo?: SortOrderInput | SortOrder
     utrNumber?: SortOrderInput | SortOrder
-    dpId?: SortOrder
-    benId?: SortOrder
-    _count?: SettlementOrderModelCountOrderByAggregateInput
-    _avg?: SettlementOrderModelAvgOrderByAggregateInput
-    _max?: SettlementOrderModelMaxOrderByAggregateInput
-    _min?: SettlementOrderModelMinOrderByAggregateInput
-    _sum?: SettlementOrderModelSumOrderByAggregateInput
+    dpId?: SortOrderInput | SortOrder
+    benId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SettleOrderModelCountOrderByAggregateInput
+    _avg?: SettleOrderModelAvgOrderByAggregateInput
+    _max?: SettleOrderModelMaxOrderByAggregateInput
+    _min?: SettleOrderModelMinOrderByAggregateInput
+    _sum?: SettleOrderModelSumOrderByAggregateInput
   }
 
-  export type SettlementOrderModelScalarWhereWithAggregatesInput = {
-    AND?: SettlementOrderModelScalarWhereWithAggregatesInput | SettlementOrderModelScalarWhereWithAggregatesInput[]
-    OR?: SettlementOrderModelScalarWhereWithAggregatesInput[]
-    NOT?: SettlementOrderModelScalarWhereWithAggregatesInput | SettlementOrderModelScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    orderNumber?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    symbol?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    buyParticipantLoginId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    sellParticipantLoginId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    price?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
-    yieldType?: EnumYieldTypeSortWithAggregatesFilter<"SettlementOrderModel"> | $Enums.YieldTypeSort
-    yield?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
-    value?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
-    buyerRefNo?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    sellerRefNo?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    buyBackofficeLoginId?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    sellBackofficeLoginId?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    buyBrokerLoginId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    sellBrokerLoginId?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    source?: IntWithAggregatesFilter<"SettlementOrderModel"> | number
-    modSettleDate?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    modQuantity?: IntWithAggregatesFilter<"SettlementOrderModel"> | number
-    modAccrInt?: FloatNullableWithAggregatesFilter<"SettlementOrderModel"> | number | null
-    modConsideration?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
-    settlementNo?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    stampDutyAmount?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
-    stampDutyBearer?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    buyerFundPayinObligation?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
-    sellerFundPayoutObligation?: FloatWithAggregatesFilter<"SettlementOrderModel"> | number
-    fundPayinRefId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    settleStatus?: IntWithAggregatesFilter<"SettlementOrderModel"> | number
-    secPayinQuantity?: IntNullableWithAggregatesFilter<"SettlementOrderModel"> | number | null
-    secPayinRemarks?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    secPayinTime?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    fundsPayinAmount?: FloatNullableWithAggregatesFilter<"SettlementOrderModel"> | number | null
-    fundsPayinRemarks?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    fundsPayinTime?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    payoutRemarks?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    payoutTime?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    ifscCode?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    accountNo?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    utrNumber?: StringNullableWithAggregatesFilter<"SettlementOrderModel"> | string | null
-    dpId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
-    benId?: StringWithAggregatesFilter<"SettlementOrderModel"> | string
+  export type SettleOrderModelScalarWhereWithAggregatesInput = {
+    AND?: SettleOrderModelScalarWhereWithAggregatesInput | SettleOrderModelScalarWhereWithAggregatesInput[]
+    OR?: SettleOrderModelScalarWhereWithAggregatesInput[]
+    NOT?: SettleOrderModelScalarWhereWithAggregatesInput | SettleOrderModelScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"SettleOrderModel"> | number
+    orderNumber?: StringWithAggregatesFilter<"SettleOrderModel"> | string
+    symbol?: StringWithAggregatesFilter<"SettleOrderModel"> | string
+    buyParticipantLoginId?: StringWithAggregatesFilter<"SettleOrderModel"> | string
+    sellParticipantLoginId?: StringWithAggregatesFilter<"SettleOrderModel"> | string
+    price?: DecimalWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    yieldType?: EnumYieldTypeSortWithAggregatesFilter<"SettleOrderModel"> | $Enums.YieldTypeSort
+    yield?: DecimalWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    value?: DecimalWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string
+    buyerRefNo?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    sellerRefNo?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    buyBackofficeLoginId?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    sellBackofficeLoginId?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    buyBrokerLoginId?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    sellBrokerLoginId?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    source?: IntWithAggregatesFilter<"SettleOrderModel"> | number
+    modSettleDate?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    modQuantity?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    modConsideration?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    settlementNo?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    stampDutyAmount?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    buyerFundPayinObligation?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    settleStatus?: IntWithAggregatesFilter<"SettleOrderModel"> | number
+    secPayinQuantity?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    secPayinRemarks?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    secPayinTime?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    fundsPayinAmount?: DecimalNullableWithAggregatesFilter<"SettleOrderModel"> | Decimal | DecimalJsLike | number | string | null
+    fundsPayinRemarks?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    fundsPayinTime?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    payoutRemarks?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    payoutTime?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    ifscCode?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    accountNo?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    utrNumber?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    dpId?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    benId?: StringNullableWithAggregatesFilter<"SettleOrderModel"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"SettleOrderModel"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SettleOrderModel"> | Date | string
   }
 
   export type RFQMasterISINWhereInput = {
@@ -36863,6 +38179,7 @@ export namespace Prisma {
     userId?: number | null
     type: string
     token?: string | null
+    trackId?: string | null
     url?: string | null
     data: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -36873,6 +38190,7 @@ export namespace Prisma {
     userId?: number | null
     type: string
     token?: string | null
+    trackId?: string | null
     url?: string | null
     data: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -36882,6 +38200,7 @@ export namespace Prisma {
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     type?: StringFieldUpdateOperationsInput | string
     token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
     url?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36892,6 +38211,7 @@ export namespace Prisma {
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     type?: StringFieldUpdateOperationsInput | string
     token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
     url?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36902,6 +38222,7 @@ export namespace Prisma {
     userId?: number | null
     type: string
     token?: string | null
+    trackId?: string | null
     url?: string | null
     data: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -36911,6 +38232,7 @@ export namespace Prisma {
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     type?: StringFieldUpdateOperationsInput | string
     token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
     url?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36921,6 +38243,81 @@ export namespace Prisma {
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     type?: StringFieldUpdateOperationsInput | string
     token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WebAuditLogsCreateInput = {
+    userId?: number | null
+    type: string
+    token?: string | null
+    trackId?: string | null
+    url?: string | null
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type WebAuditLogsUncheckedCreateInput = {
+    id?: number
+    userId?: number | null
+    type: string
+    token?: string | null
+    trackId?: string | null
+    url?: string | null
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type WebAuditLogsUpdateInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WebAuditLogsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WebAuditLogsCreateManyInput = {
+    id?: number
+    userId?: number | null
+    type: string
+    token?: string | null
+    trackId?: string | null
+    url?: string | null
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type WebAuditLogsUpdateManyMutationInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WebAuditLogsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    type?: StringFieldUpdateOperationsInput | string
+    token?: NullableStringFieldUpdateOperationsInput | string | null
+    trackId?: NullableStringFieldUpdateOperationsInput | string | null
     url?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39127,305 +40524,319 @@ export namespace Prisma {
     issuer?: StringFieldUpdateOperationsInput | string
   }
 
-  export type SettlementOrderModelCreateInput = {
-    id: string
+  export type SettleOrderModelCreateInput = {
+    id: number
     orderNumber: string
     symbol: string
     buyParticipantLoginId: string
     sellParticipantLoginId: string
-    price: number
+    price: Decimal | DecimalJsLike | number | string
     yieldType: $Enums.YieldTypeSort
-    yield: number
-    value: number
+    yield: Decimal | DecimalJsLike | number | string
+    value: Decimal | DecimalJsLike | number | string
     buyerRefNo?: string | null
-    sellerRefNo: string
+    sellerRefNo?: string | null
     buyBackofficeLoginId?: string | null
     sellBackofficeLoginId?: string | null
-    buyBrokerLoginId: string
+    buyBrokerLoginId?: string | null
     sellBrokerLoginId?: string | null
     source: number
-    modSettleDate: string
-    modQuantity: number
-    modAccrInt?: number | null
-    modConsideration: number
-    settlementNo: string
-    stampDutyAmount: number
-    stampDutyBearer: string
-    buyerFundPayinObligation: number
-    sellerFundPayoutObligation: number
-    fundPayinRefId: string
+    modSettleDate?: string | null
+    modQuantity?: Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: Decimal | DecimalJsLike | number | string | null
+    modConsideration?: Decimal | DecimalJsLike | number | string | null
+    settlementNo?: string | null
+    stampDutyAmount?: Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: string | null
+    buyerFundPayinObligation?: Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: string | null
     settleStatus: number
-    secPayinQuantity?: number | null
+    secPayinQuantity?: Decimal | DecimalJsLike | number | string | null
     secPayinRemarks?: string | null
     secPayinTime?: string | null
-    fundsPayinAmount?: number | null
+    fundsPayinAmount?: Decimal | DecimalJsLike | number | string | null
     fundsPayinRemarks?: string | null
     fundsPayinTime?: string | null
     payoutRemarks?: string | null
     payoutTime?: string | null
-    ifscCode: string
-    accountNo: string
+    ifscCode?: string | null
+    accountNo?: string | null
     utrNumber?: string | null
-    dpId: string
-    benId: string
+    dpId?: string | null
+    benId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
-  export type SettlementOrderModelUncheckedCreateInput = {
-    id: string
+  export type SettleOrderModelUncheckedCreateInput = {
+    id: number
     orderNumber: string
     symbol: string
     buyParticipantLoginId: string
     sellParticipantLoginId: string
-    price: number
+    price: Decimal | DecimalJsLike | number | string
     yieldType: $Enums.YieldTypeSort
-    yield: number
-    value: number
+    yield: Decimal | DecimalJsLike | number | string
+    value: Decimal | DecimalJsLike | number | string
     buyerRefNo?: string | null
-    sellerRefNo: string
+    sellerRefNo?: string | null
     buyBackofficeLoginId?: string | null
     sellBackofficeLoginId?: string | null
-    buyBrokerLoginId: string
+    buyBrokerLoginId?: string | null
     sellBrokerLoginId?: string | null
     source: number
-    modSettleDate: string
-    modQuantity: number
-    modAccrInt?: number | null
-    modConsideration: number
-    settlementNo: string
-    stampDutyAmount: number
-    stampDutyBearer: string
-    buyerFundPayinObligation: number
-    sellerFundPayoutObligation: number
-    fundPayinRefId: string
+    modSettleDate?: string | null
+    modQuantity?: Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: Decimal | DecimalJsLike | number | string | null
+    modConsideration?: Decimal | DecimalJsLike | number | string | null
+    settlementNo?: string | null
+    stampDutyAmount?: Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: string | null
+    buyerFundPayinObligation?: Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: string | null
     settleStatus: number
-    secPayinQuantity?: number | null
+    secPayinQuantity?: Decimal | DecimalJsLike | number | string | null
     secPayinRemarks?: string | null
     secPayinTime?: string | null
-    fundsPayinAmount?: number | null
+    fundsPayinAmount?: Decimal | DecimalJsLike | number | string | null
     fundsPayinRemarks?: string | null
     fundsPayinTime?: string | null
     payoutRemarks?: string | null
     payoutTime?: string | null
-    ifscCode: string
-    accountNo: string
+    ifscCode?: string | null
+    accountNo?: string | null
     utrNumber?: string | null
-    dpId: string
-    benId: string
+    dpId?: string | null
+    benId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
-  export type SettlementOrderModelUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
+  export type SettleOrderModelUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
     orderNumber?: StringFieldUpdateOperationsInput | string
     symbol?: StringFieldUpdateOperationsInput | string
     buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
     sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
-    price?: FloatFieldUpdateOperationsInput | number
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
-    yield?: FloatFieldUpdateOperationsInput | number
-    value?: FloatFieldUpdateOperationsInput | number
+    yield?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
-    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    sellerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
     buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
-    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    buyBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     source?: IntFieldUpdateOperationsInput | number
-    modSettleDate?: StringFieldUpdateOperationsInput | string
-    modQuantity?: IntFieldUpdateOperationsInput | number
-    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
-    modConsideration?: FloatFieldUpdateOperationsInput | number
-    settlementNo?: StringFieldUpdateOperationsInput | string
-    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
-    stampDutyBearer?: StringFieldUpdateOperationsInput | string
-    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
-    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
-    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    modSettleDate?: NullableStringFieldUpdateOperationsInput | string | null
+    modQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modConsideration?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    settlementNo?: NullableStringFieldUpdateOperationsInput | string | null
+    stampDutyAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: NullableStringFieldUpdateOperationsInput | string | null
+    buyerFundPayinObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: NullableStringFieldUpdateOperationsInput | string | null
     settleStatus?: IntFieldUpdateOperationsInput | number
-    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
-    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
     payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
-    ifscCode?: StringFieldUpdateOperationsInput | string
-    accountNo?: StringFieldUpdateOperationsInput | string
+    ifscCode?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNo?: NullableStringFieldUpdateOperationsInput | string | null
     utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    dpId?: StringFieldUpdateOperationsInput | string
-    benId?: StringFieldUpdateOperationsInput | string
+    dpId?: NullableStringFieldUpdateOperationsInput | string | null
+    benId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type SettlementOrderModelUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
+  export type SettleOrderModelUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
     orderNumber?: StringFieldUpdateOperationsInput | string
     symbol?: StringFieldUpdateOperationsInput | string
     buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
     sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
-    price?: FloatFieldUpdateOperationsInput | number
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
-    yield?: FloatFieldUpdateOperationsInput | number
-    value?: FloatFieldUpdateOperationsInput | number
+    yield?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
-    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    sellerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
     buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
-    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    buyBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     source?: IntFieldUpdateOperationsInput | number
-    modSettleDate?: StringFieldUpdateOperationsInput | string
-    modQuantity?: IntFieldUpdateOperationsInput | number
-    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
-    modConsideration?: FloatFieldUpdateOperationsInput | number
-    settlementNo?: StringFieldUpdateOperationsInput | string
-    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
-    stampDutyBearer?: StringFieldUpdateOperationsInput | string
-    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
-    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
-    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    modSettleDate?: NullableStringFieldUpdateOperationsInput | string | null
+    modQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modConsideration?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    settlementNo?: NullableStringFieldUpdateOperationsInput | string | null
+    stampDutyAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: NullableStringFieldUpdateOperationsInput | string | null
+    buyerFundPayinObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: NullableStringFieldUpdateOperationsInput | string | null
     settleStatus?: IntFieldUpdateOperationsInput | number
-    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
-    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
     payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
-    ifscCode?: StringFieldUpdateOperationsInput | string
-    accountNo?: StringFieldUpdateOperationsInput | string
+    ifscCode?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNo?: NullableStringFieldUpdateOperationsInput | string | null
     utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    dpId?: StringFieldUpdateOperationsInput | string
-    benId?: StringFieldUpdateOperationsInput | string
+    dpId?: NullableStringFieldUpdateOperationsInput | string | null
+    benId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type SettlementOrderModelCreateManyInput = {
-    id: string
+  export type SettleOrderModelCreateManyInput = {
+    id: number
     orderNumber: string
     symbol: string
     buyParticipantLoginId: string
     sellParticipantLoginId: string
-    price: number
+    price: Decimal | DecimalJsLike | number | string
     yieldType: $Enums.YieldTypeSort
-    yield: number
-    value: number
+    yield: Decimal | DecimalJsLike | number | string
+    value: Decimal | DecimalJsLike | number | string
     buyerRefNo?: string | null
-    sellerRefNo: string
+    sellerRefNo?: string | null
     buyBackofficeLoginId?: string | null
     sellBackofficeLoginId?: string | null
-    buyBrokerLoginId: string
+    buyBrokerLoginId?: string | null
     sellBrokerLoginId?: string | null
     source: number
-    modSettleDate: string
-    modQuantity: number
-    modAccrInt?: number | null
-    modConsideration: number
-    settlementNo: string
-    stampDutyAmount: number
-    stampDutyBearer: string
-    buyerFundPayinObligation: number
-    sellerFundPayoutObligation: number
-    fundPayinRefId: string
+    modSettleDate?: string | null
+    modQuantity?: Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: Decimal | DecimalJsLike | number | string | null
+    modConsideration?: Decimal | DecimalJsLike | number | string | null
+    settlementNo?: string | null
+    stampDutyAmount?: Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: string | null
+    buyerFundPayinObligation?: Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: string | null
     settleStatus: number
-    secPayinQuantity?: number | null
+    secPayinQuantity?: Decimal | DecimalJsLike | number | string | null
     secPayinRemarks?: string | null
     secPayinTime?: string | null
-    fundsPayinAmount?: number | null
+    fundsPayinAmount?: Decimal | DecimalJsLike | number | string | null
     fundsPayinRemarks?: string | null
     fundsPayinTime?: string | null
     payoutRemarks?: string | null
     payoutTime?: string | null
-    ifscCode: string
-    accountNo: string
+    ifscCode?: string | null
+    accountNo?: string | null
     utrNumber?: string | null
-    dpId: string
-    benId: string
+    dpId?: string | null
+    benId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
-  export type SettlementOrderModelUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
+  export type SettleOrderModelUpdateManyMutationInput = {
+    id?: IntFieldUpdateOperationsInput | number
     orderNumber?: StringFieldUpdateOperationsInput | string
     symbol?: StringFieldUpdateOperationsInput | string
     buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
     sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
-    price?: FloatFieldUpdateOperationsInput | number
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
-    yield?: FloatFieldUpdateOperationsInput | number
-    value?: FloatFieldUpdateOperationsInput | number
+    yield?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
-    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    sellerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
     buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
-    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    buyBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     source?: IntFieldUpdateOperationsInput | number
-    modSettleDate?: StringFieldUpdateOperationsInput | string
-    modQuantity?: IntFieldUpdateOperationsInput | number
-    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
-    modConsideration?: FloatFieldUpdateOperationsInput | number
-    settlementNo?: StringFieldUpdateOperationsInput | string
-    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
-    stampDutyBearer?: StringFieldUpdateOperationsInput | string
-    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
-    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
-    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    modSettleDate?: NullableStringFieldUpdateOperationsInput | string | null
+    modQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modConsideration?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    settlementNo?: NullableStringFieldUpdateOperationsInput | string | null
+    stampDutyAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: NullableStringFieldUpdateOperationsInput | string | null
+    buyerFundPayinObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: NullableStringFieldUpdateOperationsInput | string | null
     settleStatus?: IntFieldUpdateOperationsInput | number
-    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
-    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
     payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
-    ifscCode?: StringFieldUpdateOperationsInput | string
-    accountNo?: StringFieldUpdateOperationsInput | string
+    ifscCode?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNo?: NullableStringFieldUpdateOperationsInput | string | null
     utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    dpId?: StringFieldUpdateOperationsInput | string
-    benId?: StringFieldUpdateOperationsInput | string
+    dpId?: NullableStringFieldUpdateOperationsInput | string | null
+    benId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type SettlementOrderModelUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
+  export type SettleOrderModelUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
     orderNumber?: StringFieldUpdateOperationsInput | string
     symbol?: StringFieldUpdateOperationsInput | string
     buyParticipantLoginId?: StringFieldUpdateOperationsInput | string
     sellParticipantLoginId?: StringFieldUpdateOperationsInput | string
-    price?: FloatFieldUpdateOperationsInput | number
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     yieldType?: EnumYieldTypeSortFieldUpdateOperationsInput | $Enums.YieldTypeSort
-    yield?: FloatFieldUpdateOperationsInput | number
-    value?: FloatFieldUpdateOperationsInput | number
+    yield?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     buyerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
-    sellerRefNo?: StringFieldUpdateOperationsInput | string
+    sellerRefNo?: NullableStringFieldUpdateOperationsInput | string | null
     buyBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBackofficeLoginId?: NullableStringFieldUpdateOperationsInput | string | null
-    buyBrokerLoginId?: StringFieldUpdateOperationsInput | string
+    buyBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     sellBrokerLoginId?: NullableStringFieldUpdateOperationsInput | string | null
     source?: IntFieldUpdateOperationsInput | number
-    modSettleDate?: StringFieldUpdateOperationsInput | string
-    modQuantity?: IntFieldUpdateOperationsInput | number
-    modAccrInt?: NullableFloatFieldUpdateOperationsInput | number | null
-    modConsideration?: FloatFieldUpdateOperationsInput | number
-    settlementNo?: StringFieldUpdateOperationsInput | string
-    stampDutyAmount?: FloatFieldUpdateOperationsInput | number
-    stampDutyBearer?: StringFieldUpdateOperationsInput | string
-    buyerFundPayinObligation?: FloatFieldUpdateOperationsInput | number
-    sellerFundPayoutObligation?: FloatFieldUpdateOperationsInput | number
-    fundPayinRefId?: StringFieldUpdateOperationsInput | string
+    modSettleDate?: NullableStringFieldUpdateOperationsInput | string | null
+    modQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modAccrInt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    modConsideration?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    settlementNo?: NullableStringFieldUpdateOperationsInput | string | null
+    stampDutyAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stampDutyBearer?: NullableStringFieldUpdateOperationsInput | string | null
+    buyerFundPayinObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellerFundPayoutObligation?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fundPayinRefId?: NullableStringFieldUpdateOperationsInput | string | null
     settleStatus?: IntFieldUpdateOperationsInput | number
-    secPayinQuantity?: NullableIntFieldUpdateOperationsInput | number | null
+    secPayinQuantity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     secPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     secPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
-    fundsPayinAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    fundsPayinAmount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fundsPayinRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     fundsPayinTime?: NullableStringFieldUpdateOperationsInput | string | null
     payoutRemarks?: NullableStringFieldUpdateOperationsInput | string | null
     payoutTime?: NullableStringFieldUpdateOperationsInput | string | null
-    ifscCode?: StringFieldUpdateOperationsInput | string
-    accountNo?: StringFieldUpdateOperationsInput | string
+    ifscCode?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNo?: NullableStringFieldUpdateOperationsInput | string | null
     utrNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    dpId?: StringFieldUpdateOperationsInput | string
-    benId?: StringFieldUpdateOperationsInput | string
+    dpId?: NullableStringFieldUpdateOperationsInput | string | null
+    benId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RFQMasterISINCreateInput = {
@@ -40375,6 +41786,7 @@ export namespace Prisma {
     userId?: SortOrder
     type?: SortOrder
     token?: SortOrder
+    trackId?: SortOrder
     url?: SortOrder
     data?: SortOrder
     createdAt?: SortOrder
@@ -40390,6 +41802,7 @@ export namespace Prisma {
     userId?: SortOrder
     type?: SortOrder
     token?: SortOrder
+    trackId?: SortOrder
     url?: SortOrder
     createdAt?: SortOrder
   }
@@ -40399,6 +41812,7 @@ export namespace Prisma {
     userId?: SortOrder
     type?: SortOrder
     token?: SortOrder
+    trackId?: SortOrder
     url?: SortOrder
     createdAt?: SortOrder
   }
@@ -40514,6 +41928,47 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type WebAuditLogsCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    token?: SortOrder
+    trackId?: SortOrder
+    url?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type WebAuditLogsAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type WebAuditLogsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    token?: SortOrder
+    trackId?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type WebAuditLogsMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    token?: SortOrder
+    trackId?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type WebAuditLogsSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -42260,6 +43715,17 @@ export namespace Prisma {
     faceValue?: SortOrder
   }
 
+  export type DecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
   export type EnumYieldTypeSortFilter<$PrismaModel = never> = {
     equals?: $Enums.YieldTypeSort | EnumYieldTypeSortFieldRefInput<$PrismaModel>
     in?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
@@ -42267,7 +43733,18 @@ export namespace Prisma {
     not?: NestedEnumYieldTypeSortFilter<$PrismaModel> | $Enums.YieldTypeSort
   }
 
-  export type SettlementOrderModelCountOrderByAggregateInput = {
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type SettleOrderModelCountOrderByAggregateInput = {
     id?: SortOrder
     orderNumber?: SortOrder
     symbol?: SortOrder
@@ -42308,9 +43785,12 @@ export namespace Prisma {
     utrNumber?: SortOrder
     dpId?: SortOrder
     benId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type SettlementOrderModelAvgOrderByAggregateInput = {
+  export type SettleOrderModelAvgOrderByAggregateInput = {
+    id?: SortOrder
     price?: SortOrder
     yield?: SortOrder
     value?: SortOrder
@@ -42326,7 +43806,7 @@ export namespace Prisma {
     fundsPayinAmount?: SortOrder
   }
 
-  export type SettlementOrderModelMaxOrderByAggregateInput = {
+  export type SettleOrderModelMaxOrderByAggregateInput = {
     id?: SortOrder
     orderNumber?: SortOrder
     symbol?: SortOrder
@@ -42367,9 +43847,11 @@ export namespace Prisma {
     utrNumber?: SortOrder
     dpId?: SortOrder
     benId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type SettlementOrderModelMinOrderByAggregateInput = {
+  export type SettleOrderModelMinOrderByAggregateInput = {
     id?: SortOrder
     orderNumber?: SortOrder
     symbol?: SortOrder
@@ -42410,9 +43892,12 @@ export namespace Prisma {
     utrNumber?: SortOrder
     dpId?: SortOrder
     benId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type SettlementOrderModelSumOrderByAggregateInput = {
+  export type SettleOrderModelSumOrderByAggregateInput = {
+    id?: SortOrder
     price?: SortOrder
     yield?: SortOrder
     value?: SortOrder
@@ -42426,6 +43911,22 @@ export namespace Prisma {
     settleStatus?: SortOrder
     secPayinQuantity?: SortOrder
     fundsPayinAmount?: SortOrder
+  }
+
+  export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
   }
 
   export type EnumYieldTypeSortWithAggregatesFilter<$PrismaModel = never> = {
@@ -42436,6 +43937,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumYieldTypeSortFilter<$PrismaModel>
     _max?: NestedEnumYieldTypeSortFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type EnumRFQSegmentFilter<$PrismaModel = never> = {
@@ -44129,8 +45646,24 @@ export namespace Prisma {
     update?: XOR<XOR<NseCbricsParticipantModelUpdateToOneWithWhereWithoutDpAccountListInput, NseCbricsParticipantModelUpdateWithoutDpAccountListInput>, NseCbricsParticipantModelUncheckedUpdateWithoutDpAccountListInput>
   }
 
+  export type DecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
   export type EnumYieldTypeSortFieldUpdateOperationsInput = {
     set?: $Enums.YieldTypeSort
+  }
+
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
   }
 
   export type RFQMasterISINCreategroupListInput = {
@@ -44792,11 +46325,49 @@ export namespace Prisma {
     _max?: NestedEnumDefaultSelectFilter<$PrismaModel>
   }
 
+  export type NestedDecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
   export type NestedEnumYieldTypeSortFilter<$PrismaModel = never> = {
     equals?: $Enums.YieldTypeSort | EnumYieldTypeSortFieldRefInput<$PrismaModel>
     in?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
     notIn?: $Enums.YieldTypeSort[] | ListEnumYieldTypeSortFieldRefInput<$PrismaModel>
     not?: NestedEnumYieldTypeSortFilter<$PrismaModel> | $Enums.YieldTypeSort
+  }
+
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
   }
 
   export type NestedEnumYieldTypeSortWithAggregatesFilter<$PrismaModel = never> = {
@@ -44807,6 +46378,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumYieldTypeSortFilter<$PrismaModel>
     _max?: NestedEnumYieldTypeSortFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumRFQSegmentFilter<$PrismaModel = never> = {

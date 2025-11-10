@@ -3,6 +3,20 @@ import * as crypto from "crypto";
 import type { BoPanRequest, BoPanResponse } from "./CDSLApi.response";
 import type { DemateVerifyResponse } from "../response.types";
 
+const StatusCodeMessages: Record<string, string> = {
+  "1": "Valid BO-PAN",
+  "2": "Invalid BOID",
+  "4": "BOID is closed",
+  "5": "PAN not matching with the First Holder",
+  "6": "PAN not matching with the Second Holder",
+  "7": "PAN not matching with the Third Holder",
+  "8": "Frozen for Credit",
+  "9": "Frozen for Debit",
+  "10": "Frozen for Both Debit And Credit",
+  "-1": "Failure",
+  "01": "Success",
+  "00": "Failure",
+}
 
 export class CDSLApi {
   private readonly axiosInstance: AxiosInstance;
@@ -133,7 +147,7 @@ export class CDSLApi {
       thrdHoldrPan: request.pan3 ?? undefined,
       isVerified: data.StatusCode === "01",
       status: data.StatusCode,
-      message: data.ErrorDescription,
+      message: StatusCodeMessages[data.StatusCode] || "Unknown Status Code",
       data,
     };
   }

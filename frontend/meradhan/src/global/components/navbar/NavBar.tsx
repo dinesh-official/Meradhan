@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
@@ -7,6 +8,8 @@ import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
 import { userSessionStore } from "@/core/auth/userSessionStore";
 import { useEffect } from "react";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import { getSessionId } from "@/analytics/analytics";
 
 function NavBar({
   session,
@@ -15,9 +18,18 @@ function NavBar({
 }) {
   // save data on session store
   const { setSession } = userSessionStore();
+  const { cookies, clearCookies } = useAppCookie();
 
   useEffect(() => {
     setSession(session);
+
+    if (!session) {
+      if (cookies.token) {
+        clearCookies();
+        localStorage.clear();
+        getSessionId(); // create new session id
+      }
+    }
   }, [session, setSession]);
 
   return (

@@ -9,23 +9,28 @@ import { memo } from "react";
 function SignInOtpInput({
   otp,
   setOtp,
+  length = 4,
 }: {
   otp: string;
-  setOtp: (otp: string) => void;
+    setOtp: (otp: string) => void;
+  length?: number;
 }) {
   return (
     <InputOTP
-      maxLength={4}
+      maxLength={length}
       className="w-full"
       pattern={REGEXP_ONLY_DIGITS}
       value={otp}
       onChange={setOtp}
     >
       <InputOTPGroup className="flex justify-between items-center gap-3 sm:gap-5 w-full font-medium">
-        <InputOTPSlot index={0} className="bg-muted py-5 border-none rounded-md w-full" />
-        <InputOTPSlot index={1} className="bg-muted py-5 border-none rounded-md w-full" />
-        <InputOTPSlot index={2} className="bg-muted py-5 border-none rounded-md w-full" />
-        <InputOTPSlot index={3} className="bg-muted py-5 border-none rounded-md w-full" />
+        {Array.from({ length }).map((_, index) => (
+          <InputOTPSlot
+            key={index}
+            index={index}
+            className="bg-muted py-5 border-none rounded-md w-full"
+          />
+        ))}
       </InputOTPGroup>
     </InputOTP>
   );

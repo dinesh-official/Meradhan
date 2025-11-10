@@ -168,4 +168,22 @@ export class CustomerAuthController {
             responseData: session
         })
     }
+
+    async sendVerifyEmail(req: Request, res: Response): Promise<void> {
+        console.log(req.customer);
+        
+        await this.customerAuthService.sendEmailVerification(req.customer!.id);
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            message: "Verification email sent successfully.",
+        });
+    }
+    async verifyEmail(req: Request, res: Response): Promise<void> {
+        const { token } = req.query;
+        await this.customerAuthService.verifyEmailToken(token as string);
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            message: "Email verified successfully.",
+        });
+    }
 }

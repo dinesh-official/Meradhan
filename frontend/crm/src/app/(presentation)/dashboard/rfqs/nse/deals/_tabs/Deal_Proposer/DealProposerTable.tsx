@@ -55,26 +55,26 @@ function DealProposerTable({
           {
             key: "buyerParticipant",
             label: "Buyer Participant",
-            cell: (row) =>
-              row.buySell === "B" ? row.initAeCode : row.respAeCode,
+            cell: (row) => row.initAeCode
+              // row.buySell === "B" ? row.initAeCode : row.respAeCode,
           },
           {
             key: "buyerClient",
             label: "Buyer Client",
-            cell: (row) =>
-              row.buySell === "B" ? row.initClientCode : row.respClientCode,
+            cell: (row) => row.initClientCode
+              // row.buySell === "B" ? row.initClientCode : row.respClientCode,
           },
           {
             key: "sellerParticipant",
             label: "Seller Participant",
-            cell: (row) =>
-              row.buySell === "S" ? row.initAeCode : row.respAeCode,
+            cell: (row) => row.respAeCode
+              // row.buySell === "S" ? row.initAeCode : row.respAeCode,
           },
           {
             key: "sellerClient",
             label: "Seller Client",
-            cell: (row) =>
-              row.buySell === "S" ? row.initClientCode : row.respClientCode,
+            cell: (row) => row.respClientCode
+              // row.buySell === "S" ? row.initClientCode : row.respClientCode,
           },
           { key: "acceptedValue", label: "Value (Crores)" },
           { key: "acceptedQuantity", label: "Quantity" },
@@ -139,14 +139,14 @@ function DealProposerTable({
           {
             key: "buyerUser",
             label: "Buyer User",
-            cell: (row) =>
-              row.buySell === "B" ? row.initLoginId : row.respLoginId,
+            cell: (row) => row.initLoginId
+              // row.buySell === "B" ? row.initLoginId : row.respLoginId,
           },
           {
             key: "sellerUser",
             label: "Seller User",
-            cell: (row) =>
-              row.buySell === "S" ? row.initLoginId : row.respLoginId,
+            cell: (row) => row.respLoginId
+              // row.buySell === "S" ? row.initLoginId : row.respLoginId,
           },
         ]}
       />

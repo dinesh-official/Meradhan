@@ -73,10 +73,27 @@ export async function getUserIpData(): Promise<GeoData | null> {
 
     localStorage.setItem(
       LOCAL_STORAGE_KEY,
-      JSON.stringify({ timestamp: Date.now(), data: geoJson })
+      JSON.stringify({
+        timestamp: Date.now(),
+        data: {
+          ip: geoJson.ip,
+          city: geoJson.city,
+          latitude: geoJson.latitude,
+          longitude: geoJson.longitude,
+          country: geoJson.country,
+          org: geoJson.org,
+        },
+      })
     );
 
-    return geoJson;
+    return {
+      ip: geoJson.ip,
+      city: geoJson.city,
+      latitude: geoJson.latitude,
+      longitude: geoJson.longitude,
+      country: geoJson.country,
+      org: geoJson.org,
+    };
   } catch (err) {
     console.error("getUserIpData error:", err);
     return null;

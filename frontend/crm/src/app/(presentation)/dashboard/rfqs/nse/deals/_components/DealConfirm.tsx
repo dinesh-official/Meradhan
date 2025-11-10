@@ -13,7 +13,7 @@ import apiGateway, {
   ApiError,
   CreateNegotiationResponse,
 } from "@root/apiGateway";
-import React from "react";
+import React, { useState } from "react";
 import DealSplitForm from "./deal-split-form/DealSplitForm";
 import DealSplitInformation from "./deal-split-form/DealSplitInformation";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
@@ -30,6 +30,7 @@ const DealConfirmPopup = ({
   children: React.ReactNode;
   data: CreateNegotiationResponse;
 }) => {
+  const [open, setOpen] = useState(false);
   const api = new apiGateway.crm.rfq.RfqIsinApi(apiClientCaller);
 
   const dealSplitSubmit = useMutation({
@@ -50,7 +51,7 @@ const DealConfirmPopup = ({
 
     onError: (error) => {
       console.log(error);
-
+      setOpen(false);
       // Properly type guard for ApiError
       if (error instanceof ApiError) {
         Swal.fire({
@@ -73,7 +74,7 @@ const DealConfirmPopup = ({
   });
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>{children}</DialogTrigger>
 
       <DialogContent className="min-w-4xl">
@@ -86,6 +87,7 @@ const DealConfirmPopup = ({
         <DealSplitInformation data={data} />
         <DealSplitForm
           data={data}
+          loading={dealSplitSubmit.isPending}
           onSubmitForm={(e) => {
             dealSplitSubmit.mutate({
               accruedInterest: e.accruedInterest as any,

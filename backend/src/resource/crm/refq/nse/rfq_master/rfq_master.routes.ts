@@ -14,4 +14,7 @@ rfqMasterRouter.post("/api/crm/rfq/nse/deal/propose", withCrmAuthMiddleware, (re
 rfqMasterRouter.post("/api/crm/rfq/nse/negotiate/terminate", withCrmAuthMiddleware, (req, res) => controller.negotiateRfqTerminate(req, res));
 rfqMasterRouter.post("/api/crm/rfq/nse/deal/accept-reject", withCrmAuthMiddleware, (req, res) => controller.acceptRejectDeal(req, res));
 
+rfqMasterRouter.post("/api/crm/rfq/nse/settle/orders", (req, res) => controller.getAllSettledOrders(req, res));
+
+
 export default rfqMasterRouter;

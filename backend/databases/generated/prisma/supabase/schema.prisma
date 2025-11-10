@@ -3,11 +3,25 @@ model CrmAuditLogs {
   userId    Int?
   type      String
   token     String?
+  trackId   String?
   url       String?
   data      Json
   createdAt DateTime @default(now())
 
   @@map("crm_audit_logs")
+}
+
+model WebAuditLogs {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  type      String
+  token     String?
+  trackId   String?
+  url       String?
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@map("web_audit_logs")
 }
 
 model Bonds {
@@ -117,7 +131,7 @@ model CustomersAuthDataModel {
   /// Account status (e.g., ACTIVE, INACTIVE, SUSPENDED)
   accountStatus AccountStatus @default(ACTIVE)
 
-  /// Verification flags
+  /// Verification Jo
   isPhoneVerified           Boolean   @default(false)
   isEmailVerified           Boolean   @default(false)
   whatsAppNotificationAllow Boolean   @default(false)
@@ -428,9 +442,8 @@ enum DepositoryName {
 
 /// Type of Demat (trading) account ownership
 enum DematAccountType {
-  SINGLE
+  SOLO
   JOINT
-  HUF
 }
 
 /// KYC (Know Your Customer) verification status
@@ -630,53 +643,59 @@ model NseIsinSecurityReceipt {
   @@map("nse_isin_security_receipts")
 }
 
-model SettlementOrderModel {
-  id                     String        @unique
-  orderNumber            String        @unique
-  symbol                 String
-  buyParticipantLoginId  String
-  sellParticipantLoginId String
-  price                  Float
+model SettleOrderModel {
+  id                     Int           @unique
+  orderNumber            String        @db.VarChar(30)
+  symbol                 String        @db.VarChar(30)
+  buyParticipantLoginId  String        @db.VarChar(30)
+  sellParticipantLoginId String        @db.VarChar(30)
+  price                  Decimal       @db.Decimal(15, 4)
   yieldType              YieldTypeSort
-  yield                  Float
-  value                  Float
+  yield                  Decimal       @db.Decimal(15, 4)
+  value                  Decimal       @db.Decimal(17, 2)
+  buyerRefNo             String?       @db.VarChar(50)
+  sellerRefNo            String?       @db.VarChar(50)
+  buyBackofficeLoginId   String?       @db.VarChar(30)
+  sellBackofficeLoginId  String?       @db.VarChar(30)
+  buyBrokerLoginId       String?       @db.VarChar(30)
+  sellBrokerLoginId      String?       @db.VarChar(30)
+  source                 Int
 
-  buyerRefNo            String?
-  sellerRefNo           String
-  buyBackofficeLoginId  String?
-  sellBackofficeLoginId String?
+  modSettleDate    String?
+  modQuantity      Decimal? @db.Decimal(17, 2)
+  modAccrInt       Decimal? @db.Decimal(17, 2)
+  modConsideration Decimal?
 
-  buyBrokerLoginId String
+  settlementNo               String?
+  stampDutyAmount            Decimal? @db.Decimal(17, 2)
+  stampDutyBearer            String?  @db.VarChar(30)
+  buyerFundPayinObligation   Decimal? @db.Decimal(17, 2)
+  sellerFundPayoutObligation Decimal? @db.Decimal(17, 2)
+  fundPayinRefId             String?  @db.VarChar(50)
 
-  sellBrokerLoginId String?
+  settleStatus Int
 
-  source                     Int
-  modSettleDate              String
-  modQuantity                Int
-  modAccrInt                 Float?
-  modConsideration           Float
-  settlementNo               String
-  stampDutyAmount            Float
-  stampDutyBearer            String
-  buyerFundPayinObligation   Float
-  sellerFundPayoutObligation Float
-  fundPayinRefId             String
-  settleStatus               Int
+  secPayinQuantity Decimal? @db.Decimal(17, 2)
+  secPayinRemarks  String?  @db.VarChar(50)
+  secPayinTime     String?
 
-  secPayinQuantity  Int?
-  secPayinRemarks   String?
-  secPayinTime      String?
-  fundsPayinAmount  Float?
-  fundsPayinRemarks String?
+  fundsPayinAmount  Decimal? @db.Decimal(17, 2)
+  fundsPayinRemarks String?  @db.VarChar(50)
   fundsPayinTime    String?
-  payoutRemarks     String?
-  payoutTime        String?
-  ifscCode          String
-  accountNo         String
-  utrNumber         String?
 
-  dpId  String
-  benId String
+  payoutRemarks String? @db.VarChar(50)
+  payoutTime    String?
+
+  ifscCode  String? @db.VarChar(11)
+  accountNo String? @db.VarChar(62)
+  utrNumber String? @db.VarChar(16)
+  dpId      String? @db.VarChar(8)
+  benId     String? @db.VarChar(16)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settle_order")
 }
 
 enum YieldTypeSort {

@@ -90,6 +90,7 @@ const initData: KycDataStorage = {
             lastName: "",
             checkTerms1: false,
             checkTerms2: false,
+            isFatca: false
         },
         face: {
             url: "",

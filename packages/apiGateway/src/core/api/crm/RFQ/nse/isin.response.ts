@@ -231,3 +231,48 @@ export interface TradeSplit {
     price?: number;
     participantCode?: string;
 }
+
+
+
+export interface SettleOrderData {
+    id: number;
+    orderNumber: string;
+    symbol: string;
+    buyParticipantLoginId: string;
+    sellParticipantLoginId: string;
+    price: number;
+    yieldType: "P" | "C" | "M";
+    yield: number;
+    value: number;
+    buyerRefNo?: string;
+    sellerRefNo?: string;
+    buyBackofficeLoginId?: string;
+    sellBackofficeLoginId?: string;
+    buyBrokerLoginId?: string;
+    sellBrokerLoginId?: string;
+    source: 1 | 4 | 5; // 1=NSE CBRICS, 4=FTRAC, 5=NSE RFQ
+    modSettleDate: string;
+    modQuantity: number;
+    modAccrInt: number;
+    modConsideration?: number;
+    settlementNo?: string;
+    stampDutyAmount?: number;
+    stampDutyBearer?: string;
+    buyerFundPayinObligation?: number;
+    sellerFundPayoutObligation?: number;
+    fundPayinRefId?: string;
+    settleStatus: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+    secPayinQuantity?: number;
+    secPayinRemarks?: string;
+    secPayinTime?: string;
+    fundsPayinAmount?: number;
+    fundsPayinRemarks?: string;
+    fundsPayinTime?: string;
+    payoutRemarks?: string;
+    payoutTime?: string;
+    ifscCode?: string;
+    accountNo?: string;
+    utrNumber?: string;
+    dpId?: string;
+    benId?: string;
+}

@@ -11,6 +11,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "nextjs-toploader/app";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import { COOKIE_OPTIONS } from "@/core/config/cookies.config";
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
 export const useSignUpAuthFlow = () => {
     const router = useRouter();
@@ -29,6 +30,10 @@ export const useSignUpAuthFlow = () => {
         openOtpPopup,
         setOpenOtpPopup,
     } = useTrackUserVerifyFlowStore();
+
+    const { trackActivity } = useUserTracking();
+
+
     const timer = useTimer({
         duration: 180,
         isCountdown: true,
@@ -75,6 +80,7 @@ export const useSignUpAuthFlow = () => {
             }),
         onSuccess() {
             setSuccessMessage("mobile", "OTP sent successfully");
+            trackActivity("session", { method: "Send email OTP : Attempt " + mobile.try });
             incrementTry("mobile");
             timer.reset();
             setShowCaptcha(false);
@@ -99,6 +105,7 @@ export const useSignUpAuthFlow = () => {
                 setOpenOtpPopup(true);
             }
             setSuccessMessage("email", "OTP sent successfully");
+            trackActivity("session", { method: "Send email OTP : Attempt " + email.try });
             incrementTry("email");
             timer.reset();
             setShowCaptcha(false);
@@ -135,7 +142,8 @@ export const useSignUpAuthFlow = () => {
             setAuthCookiesAndRedirect({
                 token: data.responseData.token,
                 id: data.responseData.id.toString(),
-            })
+            });
+            trackActivity("session", { method: "Sign up with credentials" });
         },
     });
 
@@ -186,9 +194,11 @@ export const useSignUpAuthFlow = () => {
 
         // redirect to dashboard
         if (localStorage.getItem("redirect")) {
+            trackActivity("session", { method: "Sign Up  success | Redirect to " + localStorage.getItem("redirect") });
             router.replace(localStorage.getItem("redirect") as string);
             localStorage.removeItem("redirect");
         } else {
+            trackActivity("session", { method: "Sign Up  success | Redirect to dashboard" });
             router.replace("/dashboard");
         }
 

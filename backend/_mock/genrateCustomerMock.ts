@@ -85,7 +85,7 @@ const generateMockCustomer = async () => {
             dematAccounts: {
                 create: {
                     accountHolderName: faker.person.fullName(),
-                    accountType: 'SINGLE',
+                    accountType: 'SOLO',
                     clientId: faker.string.numeric(8),
                     verifyDate: new Date(),
                     depositoryName: 'NSDL',

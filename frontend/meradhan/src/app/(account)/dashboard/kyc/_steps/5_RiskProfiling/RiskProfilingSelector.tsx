@@ -10,7 +10,7 @@ function RiskProfilingSelector() {
       {riskProfiling.map((question, idx) => (
         <div key={idx} className="flex flex-col gap-2">
           <p className="font-medium text-sm">{question.qus}</p>
-          <div className="gap-5 grid lg:grid-cols-4 text-sm">
+          <div className="gap-5 grid md:grid-cols-2 lg:grid-cols-4 text-sm">
             {question.opt.map((option, n_idx) => (
               <div
                 key={n_idx}

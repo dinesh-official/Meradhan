@@ -15,6 +15,14 @@ export const usePersonalDetailsFormHook = () => {
 
     const [error, setError] = useState<Partial<Record<keyof KycDataStorage['step_2'], string[]>>>();
 
+    const removeError = (field: keyof KycDataStorage['step_2']) => {
+        if (error && error[field]) {
+            const newError = { ...error };
+            delete newError[field];
+            setError(newError);
+        }
+    }
+
     const handelPersonalSubmit = () => {
 
         try {
@@ -38,6 +46,7 @@ export const usePersonalDetailsFormHook = () => {
 
     return {
         error,
-        handelPersonalSubmit
+        handelPersonalSubmit,
+        removeError
     };
 };

@@ -17,6 +17,7 @@ import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 import { DatePicker } from "@/components/custom/DatePicker";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import Swal from "sweetalert2";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -31,8 +32,8 @@ function IdentityValidationForm() {
 
       <CardContent accountMode>
         {/* PAN and DOB */}
-        <div className="gap-3 md:gap-5 grid lg:grid-cols-3">
-          <div className="gap-3 md:gap-5 grid lg:grid-cols-2 lg:col-span-3">
+        <div className="flex flex-col gap-3 md:gap-5">
+          <div className="gap-3 grid md:grid-cols-2">
             <LabelInput
               label="PAN Number"
               required
@@ -74,32 +75,38 @@ function IdentityValidationForm() {
           </div>
 
           {/* Name Fields */}
-          <LabelInput label="First Name" required error={error?.firstName?.[0]}>
-            <Input
-              type="text"
-              value={data.firstName}
-              onChange={(e) => setStep1PanData("firstName", e.target.value)}
-              placeholder="Enter first name"
-            />
-          </LabelInput>
+          <div className="gap-3 grid md:grid-cols-3">
+            <LabelInput
+              label="First Name"
+              required
+              error={error?.firstName?.[0]}
+            >
+              <Input
+                type="text"
+                value={data.firstName}
+                onChange={(e) => setStep1PanData("firstName", e.target.value)}
+                placeholder="Enter first name"
+              />
+            </LabelInput>
 
-          <LabelInput label="Middle Name" error={error?.middleName?.[0]}>
-            <Input
-              type="text"
-              value={data.middleName}
-              onChange={(e) => setStep1PanData("middleName", e.target.value)}
-              placeholder="Enter middle name"
-            />
-          </LabelInput>
+            <LabelInput label="Middle Name" error={error?.middleName?.[0]}>
+              <Input
+                type="text"
+                value={data.middleName}
+                onChange={(e) => setStep1PanData("middleName", e.target.value)}
+                placeholder="Enter middle name"
+              />
+            </LabelInput>
 
-          <LabelInput label="Last Name" required error={error?.lastName?.[0]}>
-            <Input
-              type="text"
-              value={data.lastName}
-              onChange={(e) => setStep1PanData("lastName", e.target.value)}
-              placeholder="Enter last name"
-            />
-          </LabelInput>
+            <LabelInput label="Last Name" error={error?.lastName?.[0]}>
+              <Input
+                type="text"
+                value={data.lastName}
+                onChange={(e) => setStep1PanData("lastName", e.target.value)}
+                placeholder="Enter last name"
+              />
+            </LabelInput>
+          </div>
         </div>
 
         <p className="mt-2 text-gray-500 text-xs">
@@ -124,7 +131,7 @@ function IdentityValidationForm() {
               checked={data.checkTerms2}
               onCheckedChange={(val) => setStep1PanData("checkTerms2", val)}
               checkClass="text-white"
-              className="mt-[2px] border border-gray-200"
+              className="mt-0.5 border border-gray-200"
             />
             I hereby confirm that I am not a person and/or entity debarred from
             accessing the securities market or dealing in securities, as per
@@ -133,6 +140,18 @@ function IdentityValidationForm() {
             regulatory authorities from time to time.
           </label>
           <small className="text-red-600">{error?.checkTerms2?.[0]}</small>
+
+          <label className="flex items-start gap-3 text-sm">
+            <Checkbox
+              checked={data.isFatca}
+              onCheckedChange={(val) => setStep1PanData("isFatca", val)}
+              checkClass="text-white"
+              className="mt-0.5 border border-gray-200"
+            />
+            I confirm that I am an Indian citizen and solely a tax resident of
+            India, not of any other country (FATCA)
+          </label>
+          <small className="text-red-600">{error?.isFatca?.[0]}</small>
 
           <div className="space-y-3 text-sm">
             <p>By continue:</p>
@@ -165,15 +184,22 @@ function IdentityValidationForm() {
           onClick={handelPanVerification}
           disabled={isPending}
         >
-          Continue to verify <MdOutlineArrowRight />
+          Continue to Verify <MdOutlineArrowRight />
         </Button>
         <Button
           variant="link"
-          onClick={() => {
-            const ask = window.confirm(
-              "Are you sure you want to exit kyc process?"
-            );
-            if (ask) pushUserKycState({ exit: true });
+          onClick={async () => {
+            const result = await Swal.fire({
+              text: "Are you sure you want to exit the KYC process?",
+              imageUrl: "/images/icons/sad-emoji.svg",
+              showCancelButton: true,
+              confirmButtonText: "Yes, Exit",
+              cancelButtonText: "Cancel",
+            });
+
+            if (result.isConfirmed) {
+              pushUserKycState({ exit: true });
+            }
           }}
         >
           Save & Exit

@@ -3,9 +3,23 @@ model CrmAuditLogs {
     userId    Int?
     type      String
     token     String?
+    trackId   String?
     url       String?
     data      Json
     createdAt DateTime @default(now())
 
     @@map("crm_audit_logs")
+}
+
+model WebAuditLogs {
+    id        Int      @id @default(autoincrement())
+    userId    Int?
+    type      String
+    token     String?
+    trackId   String?
+    url       String?
+    data      Json
+    createdAt DateTime @default(now())
+
+    @@map("web_audit_logs")
 }

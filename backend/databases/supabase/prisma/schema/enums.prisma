@@ -58,9 +58,8 @@ enum DepositoryName {
 
 /// Type of Demat (trading) account ownership
 enum DematAccountType {
-  SINGLE
+  SOLO
   JOINT
-  HUF
 }
 
 /// KYC (Know Your Customer) verification status

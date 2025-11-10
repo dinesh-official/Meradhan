@@ -1,4 +1,5 @@
 "use client";
+import { getSessionId } from "@/analytics/analytics";
 import { Spinner } from "@/components/ui/spinner";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import React from "react";
@@ -20,6 +21,7 @@ function Logout() {
 
     // Clear local storage
     localStorage.clear();
+    getSessionId(); // create new session id
 
     // Redirect to homepage
     window.location.href = "/";

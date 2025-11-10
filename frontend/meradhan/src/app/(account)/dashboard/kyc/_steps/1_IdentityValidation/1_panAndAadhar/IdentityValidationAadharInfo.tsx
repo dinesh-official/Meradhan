@@ -12,7 +12,12 @@ import { dataMatcherUtils } from "@/global/utils/matcher";
 import { MdOutlineArrowRight } from "react-icons/md";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-
+import dynamic from "next/dynamic";
+import { genMediaUrl } from "@/global/utils/url.utils";
+import Swal from "sweetalert2";
+const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
+  ssr: false,
+});
 function IdentityValidationAadharInfo() {
   const { pushUserKycState } = useKycDataProvider();
   const { state, nextLocalStep } = useKycDataStorage();
@@ -51,7 +56,7 @@ function IdentityValidationAadharInfo() {
             <DataInfoLabel
               title="Name"
               status={isNameMatched ? "SUCCESS" : "ERROR"}
-              statusLabel={isNameMatched ? "Verified" : "Invalid"}
+              statusLabel={isNameMatched ? "Matched" : "Not Matched"}
               showStatus
             >
               <p className="font-medium">
@@ -71,13 +76,19 @@ function IdentityValidationAadharInfo() {
                 </>
               }
             >
-              <p className="font-medium">
-                {data.response?.details.aadhaar.current_address}
+              <p className="font-medium text-wrap">
+                {data.response?.details.aadhaar.current_address.replaceAll(
+                  ",",
+                  ", "
+                )}
               </p>
             </DataInfoLabel>
           </div>
           <div className="col-span-3">
-            <div className="bg-gray-200 rounded-2xl w-full h-80"></div>
+            <RenderPdf
+              file={genMediaUrl(data.response?.details.aadhaar.file_url || "")}
+              height={320}
+            />
           </div>
         </div>
         <div className="gap-5 grid md:grid-cols-3 md:mt-10 py-5 border-gray-200 md:border-t md:border-b">
@@ -110,15 +121,22 @@ function IdentityValidationAadharInfo() {
             pushUserKycState();
           }}
         >
-          Continue to verify <MdOutlineArrowRight />
+          Continue to Verify <MdOutlineArrowRight />
         </Button>
         <Button
           variant={`link`}
-          onClick={() => {
-            const ask = window.confirm(
-              "Are you sure you want to exit kyc process?"
-            );
-            if (ask) pushUserKycState({ exit: true });
+          onClick={async () => {
+            const result = await Swal.fire({
+              text: "Are you sure you want to exit the KYC process?",
+              imageUrl: "/images/icons/sad-emoji.svg",
+              showCancelButton: true,
+              confirmButtonText: "Yes, Exit",
+              cancelButtonText: "Cancel",
+            });
+
+            if (result.isConfirmed) {
+              pushUserKycState({ exit: true });
+            }
           }}
         >
           Save & Exit

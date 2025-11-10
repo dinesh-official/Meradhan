@@ -21,6 +21,7 @@ import { useViewModeStore } from "../_hooks/useViewModeStore";
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import CompareView from "../_components/CompareView";
 
 function BondsView({
   bondsData,
@@ -81,6 +82,7 @@ function BondsView({
           />
         )}
       </SectionViewWrapper>
+      <CompareView />
     </>
   );
 }

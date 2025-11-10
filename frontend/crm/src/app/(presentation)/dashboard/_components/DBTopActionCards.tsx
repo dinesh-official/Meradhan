@@ -16,7 +16,7 @@ const DbTopActionCards = () => {
   return (
     <div className={`flex items-center md:w-auto w-full gap-3`}>
       <Select>
-        <SelectTrigger className="md:w-[150px] w-full bg-white">
+        <SelectTrigger className="bg-white w-full md:w-[150px]">
           <SelectValue placeholder="Last 30 Days" />
         </SelectTrigger>
         <SelectContent>

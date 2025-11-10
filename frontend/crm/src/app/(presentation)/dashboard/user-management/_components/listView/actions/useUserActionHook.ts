@@ -1,3 +1,4 @@
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 import { queryClient } from "@/core/config/reactQuery";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
@@ -7,7 +8,7 @@ import { toast } from "sonner";
 export const useUserActionHook = () => {
 
     const userApi = new apiGateway.crm.user.CrmUsersApi(apiClientCaller);
-
+    const { trackActivity } = useUserTracking();
     const deleteUserMutation = useMutation({
         mutationKey: ['deleteUserMutation'],
         mutationFn: async (id: number) => {
@@ -16,6 +17,9 @@ export const useUserActionHook = () => {
         onSuccess() {
             queryClient.invalidateQueries({ queryKey: ['searchCRMUsers'] });
             toast.success("Profile delete successfully")
+            trackActivity("delete_entry", {
+                reason: "User profile deleted successfully",
+            });
         },
         onError(error) {
             toast.error(error.message);
@@ -30,6 +34,9 @@ export const useUserActionHook = () => {
         onSuccess(_, payload) {
             queryClient.invalidateQueries({ queryKey: ['searchCRMUsers'] });
             toast.success(`Profile ${payload.status.toLowerCase()} successfully`)
+            trackActivity("update_entry", {
+                reason: `User profile ${payload.status.toLowerCase()} successfully`,
+            });
         },
         onError(error) {
             toast.error(error.message);

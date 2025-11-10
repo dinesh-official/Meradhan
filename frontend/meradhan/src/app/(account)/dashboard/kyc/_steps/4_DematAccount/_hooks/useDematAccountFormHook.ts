@@ -4,7 +4,6 @@ import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import { ZodError } from "zod";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
@@ -27,6 +26,14 @@ export const useDematAccountFormHook = () => {
     const { state, nextLocalStep, updateDepository } = useKycDataStorage();
     const data = state.step_4[state.step_4.length - 1];
 
+    const removeError = (key: keyof KycDataStorage['step_4'][number]) => {
+        if (error && error[key]) {
+            const newError = { ...error };
+            delete newError[key];
+            setError(newError);
+        }
+    }
+
     const verifyDematAccount = useMutation({
         mutationFn: async () => kycApi.verifyDematAccount(data),
         onSuccess: (data) => {
@@ -39,7 +46,11 @@ export const useDematAccountFormHook = () => {
                     response: data.responseData
                 })
             } else {
-                toast.error(statusCodes?.[data.responseData.status as keyof typeof statusCodes] || "Something went wrong");
+                Swal.fire({
+                    imageUrl: "/images/icons/sad-emoji.svg",
+                    text: statusCodes?.[data.responseData.status as keyof typeof statusCodes] || "Something went wrong",
+                })
+
             }
 
         },
@@ -47,13 +58,16 @@ export const useDematAccountFormHook = () => {
             if (error instanceof ApiError) {
                 const errorMessage = error.response?.data?.message || error.message;
                 Swal.fire({
-                    icon: 'error',
+                    imageUrl: "/images/icons/sad-emoji.svg",
                     title: 'Demat verification Failed!',
                     text: errorMessage,
                 });
             } else {
                 console.log(error);
-                toast.error("Something went wrong");
+                Swal.fire({
+                    imageUrl: "/images/icons/sad-emoji.svg",
+                    text: 'Demat account Verification Failed!',
+                })
             }
         },
     })
@@ -70,7 +84,7 @@ export const useDematAccountFormHook = () => {
 
             if (existingAccount) {
                 Swal.fire({
-                    icon: 'error',
+                    imageUrl: "/images/icons/sad-emoji.svg",
                     title: 'Demat account already exist!',
                     text: 'Please add another demat account',
                 })
@@ -96,7 +110,12 @@ export const useDematAccountFormHook = () => {
                 });
             } else {
                 console.log(error);
-                toast.error("Something went wrong");
+                Swal.fire({
+
+                    imageUrl: "/images/icons/sad-emoji.svg",
+                    title: 'Demat account Verification Failed!',
+                    text: '',
+                })
             }
         }
 
@@ -105,7 +124,8 @@ export const useDematAccountFormHook = () => {
     return {
         handelSubmit,
         isPending: verifyDematAccount.isPending,
-        error
+        error,
+        removeError
     };
 };
 
@@ -116,26 +136,26 @@ export const useDematAccountFormHook = () => {
 // 3. All PANs must match the regex if filled
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 export const validatePanNumbers = (panNumber: string[]): string[] => {
-  // create an error array matching the same length
-  const errors = Array(panNumber.length).fill("");
+    // create an error array matching the same length
+    const errors = Array(panNumber.length).fill("");
 
-  panNumber.forEach((value, index) => {
-    const isLast = index === panNumber.length - 1;
+    panNumber.forEach((value, index) => {
+        const isLast = index === panNumber.length - 1;
 
-    if (isLast) {
-      // Last one optional but must match if filled
-      if (value && !panRegex.test(value)) {
-        errors[index] = "Invalid PAN format (e.g., ABCDE1234F)";
-      }
-    } else {
-      // All before last are required and must match
-      if (!value) {
-        errors[index] = "PAN number is required";
-      } else if (!panRegex.test(value)) {
-        errors[index] = "Invalid PAN format (e.g., ABCDE1234F)";
-      }
-    }
-  });
+        if (isLast) {
+            // Last one optional but must match if filled
+            if (value && !panRegex.test(value)) {
+                errors[index] = "Invalid PAN format (e.g., ABCDE1234F)";
+            }
+        } else {
+            // All before last are required and must match
+            if (!value) {
+                errors[index] = "PAN number is required";
+            } else if (!panRegex.test(value)) {
+                errors[index] = "Invalid PAN format (e.g., ABCDE1234F)";
+            }
+        }
+    });
 
-  return errors;
+    return errors;
 };

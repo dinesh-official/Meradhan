@@ -9,6 +9,8 @@ import { useLoginDataStore } from "./useLoginDataStore";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import { useRouter } from "nextjs-toploader/app";
 import { COOKIE_OPTIONS } from "@/core/config/cookies.config";
+import { getSessionId } from "@/analytics/analytics";
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
 /**
  * Utility function to validate input as either email or phone number
@@ -49,6 +51,7 @@ const validateIfEmailOrPhoneNo = (emailOrPhoneNo: string) => {
  * - Timer management for OTP resend
  */
 export const useLoginFormHook = () => {
+    const { trackActivity } = useUserTracking();
     // Initialize API instance
     const signinApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(apiClientCaller);
     const router = useRouter();
@@ -96,6 +99,7 @@ export const useLoginFormHook = () => {
         onSuccess: () => {
             dataStore.setMode("verify");
             dataStore.setType("password");
+            trackActivity("login", { reason: "Create login request" });
         },
         onError: (error) => {
             if (error instanceof ApiError) {
@@ -122,6 +126,7 @@ export const useLoginFormHook = () => {
 
             dataStore.setSuccessMessage("OTP sent successfully");
             dataStore.setOtp("");
+            trackActivity("login", { reason: "Send OTP to " + state.emailOrPhoneNo });
             dataStore.setCurrentOtpTry(state.currentOtpTry + 1);
             dataStore.setAllowedResend(false);
         },
@@ -133,6 +138,25 @@ export const useLoginFormHook = () => {
             }
         },
     });
+
+
+
+
+    const auditAPi = new apiGateway.crm.auditlogs.AuditLogsApi(apiClientCaller);
+
+    const revalidateTracking = async (payload?: {
+        trackId: string;
+        token: string;
+        userId: number;
+    }) => {
+        try {
+            await auditAPi.revalidateWebAuditLogs(payload);
+        } catch (error) {
+            console.log(error);
+
+        }
+    }
+
 
     // -------------------------------
     // 🔹 3. Sign in with Password
@@ -146,6 +170,12 @@ export const useLoginFormHook = () => {
                 password: state.password,
             }),
         onSuccess: (data) => {
+            revalidateTracking({
+                trackId: localStorage.getItem("analytics_session") || getSessionId(),
+                token: data.responseData.token,
+                userId: data.responseData.id,
+            });
+            trackActivity("login", { reason: "Sign in with password" });
             setAuthCookiesAndRedirect({
                 token: data.responseData.token,
                 id: data.responseData.id.toString(),

@@ -70,7 +70,7 @@ export const testCreateParticipant = async () => {
             dematAccounts: {
                 create: {
                     accountHolderName: "Rohan Shah",
-                    accountType: "SINGLE",
+                    accountType: "SOLO",
                     clientId: "11000002",
                     depositoryName: "NSDL",
                     depositoryParticipantName: "Rohan Shah",

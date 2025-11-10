@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,6 +15,7 @@ import { RiShareFill } from "react-icons/ri";
 import BondAddToWatchList from "./BondAddToWatchList";
 import { BondInfoLabel } from "./BondInfoLabel";
 import CreditRatingBadge from "./CreaditRatingBadge";
+import { useCompareSelectStore } from "@/app/(bonds)/_hooks/useCompareSelectStore";
 
 export function BondListCard({
   gridMode,
@@ -24,10 +26,9 @@ export function BondListCard({
   onlyShare?: boolean;
   data: BondDetailsResponse;
 }) {
+  const { addItem, removeItem, selectedItems } = useCompareSelectStore();
   return (
-    <Card
-      className={cn("even:bg-white odd:bg-muted even:border odd:border-0")}
-    >
+    <Card className={cn("even:bg-white odd:bg-muted even:border odd:border-0")}>
       <CardContent>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
@@ -61,6 +62,14 @@ export function BondListCard({
                   <Checkbox
                     className="bg-white data-[state=checked]:bg-secondary border-gray-200 data-[state=checked]:border-secondary"
                     checkClass="text-white"
+                    checked={selectedItems.some((item) => item.id === data.id)}
+                    onClick={() => {
+                      if (selectedItems.some((item) => item.id === data.id)) {
+                        removeItem(data.id);
+                      } else {
+                        addItem(data);
+                      }
+                    }}
                   />
                   <span className="text-gray-800 text-sm">Add to Compare</span>
                 </label>
@@ -68,7 +77,10 @@ export function BondListCard({
               {onlyShare && (
                 <Label className="font-normal text-gray-600">Share this</Label>
               )}
-              <SharePopupTrigger title="Share Bond" url={HOST_URL+"/detail/"+data.isin}>
+              <SharePopupTrigger
+                title="Share Bond"
+                url={HOST_URL + "/detail/" + data.isin}
+              >
                 <RiShareFill
                   className="text-gray-600 cursor-pointer"
                   size={18}

@@ -1051,7 +1051,7 @@ export interface SettleOrderListRequest {
 /**
  * Settlement order record returned in response.
  */
-export interface SettleOrder {
+export interface SettleOrderData {
     id: number;
     orderNumber: string;
     symbol: string;
@@ -1097,7 +1097,7 @@ export interface SettleOrder {
 /**
  * Response for POST /rest/v1/settle/order/all
  */
-export type SettleOrderListResponse = SettleOrder[];
+export type SettleOrderListResponse = SettleOrderData[];
 
 /**
  * Request for POST /rest/v1/settle/order/update
@@ -1130,7 +1130,7 @@ export interface SettleOrderUpdateRequest {
  * Response for POST /rest/v1/settle/order/update
  * Same as POST /rest/v1/settle/order/all
  */
-export type SettleOrderUpdateResponse = SettleOrder;
+export type SettleOrderUpdateResponse = SettleOrderData;
 
 
 /**

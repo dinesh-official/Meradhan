@@ -3,6 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import * as React from "react";
+import { MailIcon } from "lucide-react";
 
 interface InputFieldProps {
   id?: string;
@@ -62,6 +63,7 @@ export function InputField({
         readOnly={readonly}
         className="disabled:bg-gray-200 disabled:opacity-100 mt-2 disabled:border-0 disabled:text-black"
       />
+      
       {error && <p className="mt-1 text-destructive text-xs text-left">{error}</p>}
     </div>
   );

@@ -4,10 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "nextjs-toploader/app";
 import NseRFQSearchFilterBar from "./_components/rfcqLIst/NseRFQSearchFilterBar";
 import NseTableView from "./_components/rfcqLIst/NseTableView";
 import { useRfqisinHook } from "./_components/rfcqLIst/useRfqisinHook";
-import { useRouter } from "nextjs-toploader/app";
 
 function NscRfqView() {
   const {
@@ -15,7 +15,6 @@ function NscRfqView() {
     setStatusValue,
     setRegTypeValue,
     filters,
-    resetFilters,
     setRfqDate,
     setSearchValue,
   } = useRfqisinHook();
@@ -49,6 +48,7 @@ function NscRfqView() {
           onRfqDateChange={(e) => setRfqDate(e.target.value)}
           searchValue={filters.searchValue}
           onSearchChange={(e) => setSearchValue(e.target.value)}
+          
         />
         <CardContent>
           <NseTableView

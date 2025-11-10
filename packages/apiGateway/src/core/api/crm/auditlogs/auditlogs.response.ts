@@ -4,7 +4,16 @@ import type { BaseResponseData, PaginationMeta } from "../../../../types/base"
 
 export type AuditLogDataResponse = BaseResponseData<{
     meta: PaginationMeta
-    data: AuditLogData[]
+    sessions: {
+        trackId: string
+        user: {
+            id: number
+            name: string
+            email: string
+            role: string
+        }
+        records: AuditLogData[]
+    }[]
 }>
 
 
@@ -38,6 +47,8 @@ interface Data {
         email?: string,
         role?: string,
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any
 }
 
 interface IpData {

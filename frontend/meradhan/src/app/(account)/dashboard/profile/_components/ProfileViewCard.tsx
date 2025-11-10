@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { makeFullname } from "@/global/utils/formate";
 import { genMediaUrl } from "@/global/utils/url.utils";
+import { cn } from "@/lib/utils";
 import { GetCustomerResponseById } from "@root/apiGateway";
+import { Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { IoWarning } from "react-icons/io5";
@@ -37,17 +39,36 @@ function ProfileViewCard({
         </div>
 
         <div className="flex sm:flex-row justify-between md:justify-end items-center gap-3 lg:gap-5 w-full md:w-auto text-center">
-          <p className="flex items-center gap-2 font-medium text-secondary text-lg">
+          <p
+            className={cn(
+              "flex items-center gap-2 font-medium text-secondary text-lg",
+              profile.kycStatus == "VERIFIED"
+                ? "text-green-600"
+                : "text-red-600"
+            )}
+          >
             KYC: Not Done <IoWarning />
           </p>
-          <Link href={`/dashboard/kyc`}>
-            <Button variant={`secondary`}>
-              Complete Your KYC
-              <div className="w-3 text-3xl">
-                <RiArrowRightSFill className="w-4 h-5" size={33} />
-              </div>
-            </Button>
-          </Link>
+          {profile.kycStatus == "VERIFIED" && (
+            <Link href={`/dashboard/kyc`}>
+              <Button variant={`defaultLight`}>
+                KYC Copy
+                <div className="w-3 text-3xl">
+                  <Download className="w-4 h-5" size={33} />
+                </div>
+              </Button>
+            </Link>
+          )}
+          {profile.kycStatus !== "VERIFIED" && (
+            <Link href={`/dashboard/kyc`}>
+              <Button variant={`secondary`}>
+                Complete Your KYC
+                <div className="w-3 text-3xl">
+                  <RiArrowRightSFill className="w-4 h-5" size={33} />
+                </div>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

@@ -17,7 +17,7 @@ export const generateMetadata = async () => {
 async function page() {
   return (
     <ViewPort>
-      <div className="mb-[4rem] md:w-[80%] container">
+      <div className="mb-16 container">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>

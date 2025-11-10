@@ -55,7 +55,7 @@ model RFQMasterISIN {
 
 model RFQNegotiation {
     rfqNumber               String
-    id                      String         @unique
+    id                      String                         @unique
     date                    String
     isin                    String?
     buySell                 BuySell?
@@ -119,13 +119,15 @@ model RFQNegotiation {
     confirmedPriceQuoteTime String?
     lastActivityTimestamp   String?
     tradeSplits             Json[]
-    createdAt               DateTime       @default(now())
+    createdAt               DateTime                       @default(now())
     createdBy               Int?
     updatedBy               Int?
-    updatedAt               DateTime       @updatedAt
+    updatedAt               DateTime                       @updatedAt
 
     @@map("rfq_negotiable")
 }
+
+
 
 enum RFQSegment {
     R

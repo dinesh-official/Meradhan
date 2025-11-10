@@ -12,7 +12,7 @@ model CustomersAuthDataModel {
     /// Account status (e.g., ACTIVE, INACTIVE, SUSPENDED)
     accountStatus AccountStatus @default(ACTIVE)
 
-    /// Verification flags
+    /// Verification Jo
     isPhoneVerified           Boolean   @default(false)
     isEmailVerified           Boolean   @default(false)
     whatsAppNotificationAllow Boolean   @default(false)

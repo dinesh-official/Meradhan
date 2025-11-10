@@ -62,4 +62,80 @@ export class CustomerAuthApi {
         const { data } = await this.apiClient.get<ISessionResponse>(`/customer/session`, config);
         return data;
     }
+
+    async sendEmailVerifyLink(config?: AxiosRequestConfig) {
+        return await this.apiClient.get<{ message: string }>(`/auth/customer/send-verify-email`, config)
+    }
+
+    async verifyEmail(token: string, config?: AxiosRequestConfig) {
+        return await this.apiClient.get<{ message: string }>(`/auth/customer/verify-email?token=${token}`, config)
+    }
+
+    async updateMobileNumber(payload: z.infer<typeof this.schema.customerMobileUpdateRequestSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{ message: string }>(`/auth/customer/profile/mobile`, payload, config);
+        return data;
+    }
+
+    async sendMobileVerifyOtp(payload: z.infer<typeof this.schema.sendMobileOtpSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{ otpToken: string }>("/auth/customer/profile/mobile/send-otp", payload, config);
+        return data;
+    }
+
+
+    async verifyMobileOtp(payload: z.infer<typeof this.schema.customerMobileVerifyRequestSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{
+            success: boolean;
+            message: string;
+        }>("/auth/customer/profile/mobile/verify", payload, config);
+        return data;
+    }
+
+
+    async toggleWhatsAppNotification(status?: boolean, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{
+            success: boolean;
+            message: string;
+        }>("/auth/customer/profile/whatsapp", {
+            enableWhatsApp: status
+        }, config);
+        return data;
+    }
+
+    async addBankAccount(payload: z.infer<typeof appSchema.kyc.bankInfoSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{ message: string }>("/auth/customer/profile/bank-account", payload, config);
+        return data;
+    }
+
+    async removeBankAccount(bankId: number, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.delete<{ message: string }>(`/auth/customer/profile/bank-account/${bankId}`, config);
+        return data;
+    }
+
+    async setPrimaryBankAccount(bankId: number, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{ message: string }>(`/auth/customer/profile/bank-account/primary/${bankId}`, {}, config);
+        return data;
+    }
+
+
+    async addDematAccount(payload: z.infer<typeof appSchema.customer.createDematAccountSchema>, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{ message: string }>("/auth/customer/profile/demat-account", payload, config);
+        return data;
+    }
+
+    async removeDematAccount(dematId: number, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.delete<{ message: string }>(`/auth/customer/profile/demat-account/${dematId}`, config);
+        return data;
+    }
+
+    async setPrimaryDematAccount(dematId: number, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{ message: string }>(`/auth/customer/profile/demat-account/primary/${dematId}`, {}, config);
+        return data;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setRiskProfile(payload: any[], config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<{ message: string }>("/auth/customer/profile/risk-profile", payload, config);
+        return data;
+    }
+
 }

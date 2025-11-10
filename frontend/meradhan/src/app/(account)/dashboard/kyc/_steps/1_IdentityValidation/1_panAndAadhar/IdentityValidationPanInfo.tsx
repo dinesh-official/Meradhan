@@ -15,7 +15,12 @@ import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { dataMatcherUtils } from "@/global/utils/matcher";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
+import dynamic from "next/dynamic";
+import Swal from "sweetalert2";
 
+const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
+  ssr: false,
+});
 function IdentityValidationPanInfo() {
   const { pushUserKycState } = useKycDataProvider();
   const { state, nextLocalStep } = useKycDataStorage();
@@ -79,9 +84,7 @@ function IdentityValidationPanInfo() {
             statusLabel={isDobMatched ? "Verified" : "Invalid"}
             showStatus
           >
-            <p className="font-medium">
-              {data.response?.details.pan.dob}
-            </p>
+            <p className="font-medium">{data.response?.details.pan.dob.replaceAll("/","-")}</p>
           </DataInfoLabel>
           {data.response?.details.aadhaar.father_name && (
             <DataInfoLabel
@@ -113,10 +116,13 @@ function IdentityValidationPanInfo() {
               alt="PAN Card"
               width={840}
               height={397}
-              className="bg-gray-50 rounded-2xl w-48 object-cover aspect-[3/4]"
+              className="bg-gray-50 rounded-2xl w-48 object-cover aspect-3/4"
             />
             <div className="md:col-span-2">
-              <div className="bg-gray-200 rounded-2xl w-full h-64"></div>
+              <RenderPdf
+                file={genMediaUrl(data.response?.details.pan.file_url)}
+                height={280}
+              />
             </div>
           </div>
         </div>
@@ -130,15 +136,22 @@ function IdentityValidationPanInfo() {
             pushUserKycState();
           }}
         >
-          Continue to verify <MdOutlineArrowRight />
+          Continue to Verify <MdOutlineArrowRight />
         </Button>
         <Button
           variant={`link`}
-          onClick={() => {
-            const ask = window.confirm(
-              "Are you sure you want to exit kyc process?"
-            );
-            if (ask) pushUserKycState({ exit: true });
+          onClick={async () => {
+            const result = await Swal.fire({
+              text: "Are you sure you want to exit the KYC process?",
+              imageUrl: "/images/icons/sad-emoji.svg",
+              showCancelButton: true,
+              confirmButtonText: "Yes, Exit",
+              cancelButtonText: "Cancel",
+            });
+
+            if (result.isConfirmed) {
+              pushUserKycState({ exit: true });
+            }
           }}
         >
           Save & Exit

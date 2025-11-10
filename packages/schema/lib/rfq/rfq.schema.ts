@@ -40,7 +40,9 @@ export const addIsinSchema = z
             .number({ error: "Enter Value Step Size" })
             .optional(),
         anonymous: z.enum(["Y"]).nullable().optional(),
-        access: z.enum(["1", "2", "3"]),
+        access: z.enum(["1", "2", "3"], {
+            error: "Access type is required",
+        }),
         groupList: z.array(z.number()).optional(),
         participantList: z.array(z.string()).optional(),
         category: z.string().optional(),
@@ -208,4 +210,13 @@ export const proposeDealSchema = z.object({
     role: z.enum(["I", "R"]),              // String(1) optional
 });
 
+
+
+export const settleOrderFilterSchema = z.object({
+    id: z.number().optional(),
+    orderNumber: z.string().max(15).optional(),
+    filtFromModSettleDate: z.string(),
+    filtToModSettleDate: z.string(),
+    filtCounterParty: z.string().max(30).optional(),
+});
 

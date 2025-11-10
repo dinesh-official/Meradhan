@@ -3,6 +3,8 @@
 // // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 // import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
+// import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+
 // import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 
@@ -61,13 +63,13 @@
 
 // try {
 //     const isins = await rfqManager.getAllRfq({
-//         status:"P"
+//         status: "P"
 //     });
 
-// console.log(isins);
+//     console.log(isins);
 
 // } catch (error) {
-// console.log(error.response.data);
+//     console.log(error.response.data);
 // }
 
 

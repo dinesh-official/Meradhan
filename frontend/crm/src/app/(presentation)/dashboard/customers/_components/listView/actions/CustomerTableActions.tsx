@@ -11,8 +11,10 @@ import { CustomerProfile } from "@root/apiGateway";
 import { MoreHorizontal } from "lucide-react";
 import Swal from "sweetalert2";
 import { useCustomerTableActions } from "./useCustomerTableActionHook";
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
 const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
+  const { trackActivity } = useUserTracking();
   const {
     handleViewKyc,
     handleProfileView,
@@ -71,6 +73,16 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
                 });
 
                 if (result.isConfirmed) {
+                  trackActivity("update_entry", {
+                    customerId: profile.id,
+                    reason: `update customer profile status | ID: ${
+                      profile.id
+                    } | Status: ${
+                      profile.utility.accountStatus === "ACTIVE"
+                        ? "SUSPENDED"
+                        : "ACTIVE"
+                    } | Name: ${profile.firstName} ${profile.lastName}`,
+                  });
                   // ✅ Pass correct payload
                   manageSuspendCustomerMutation.mutate({
                     data: {
@@ -104,6 +116,10 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
                 });
 
                 if (result.isConfirmed) {
+                  trackActivity("delete_entry", {
+                    customerId: profile.id,
+                    reason: `Attempting to delete customer profile | ID: ${profile.id} Name: ${profile.firstName} ${profile.lastName}`,
+                  });
                   deleteProfileMutation.mutate();
                 }
               }}

@@ -2,7 +2,7 @@
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 export type BankAccountType = "SAVING" | "CURRENT" | "SALARY";
 export type DepositoryName = "NSDL" | "CDSL";
-export type DematAccountType = "SINGLE" | "JOINT";
+export type DematAccountType = "SOLO" | "JOINT";
 export type AccountStatus = "ACTIVE" | "SUSPENDED";
 export type SigninWith = "CREDENTIALS" | "GOOGLE" | "GITHUB" | "APPLE";
 export type CustomerUserType = "INDIVIDUAL" |

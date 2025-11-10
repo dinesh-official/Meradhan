@@ -18,6 +18,9 @@ interface CardPaginationProps {
 }
 
 function CardPagination({ page, totalPages, onClick }: CardPaginationProps) {
+  if (page == 1 && totalPages == 1) {
+    return null;
+  }
   const getPageNumbers = () => {
     const pages: (number | "ellipsis")[] = [];
     const delta = 2; // number of pages to show around the current page

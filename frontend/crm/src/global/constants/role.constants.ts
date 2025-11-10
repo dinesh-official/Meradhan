@@ -14,6 +14,7 @@ export const MODULES = [
     'webauditlogs',
     'crmauditlogs',
     "webanalytics",
+    "bonds"
 ] as const;
 export type ModuleName = typeof MODULES[number];
 
@@ -85,6 +86,8 @@ export const PERMISSIONS: Permission[] = [
 
     // website analytics
     "view:webanalytics",
+
+    "view:bonds"
 ];
 
 // 6️ Map roles to permissions
@@ -97,7 +100,9 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
         'view:customer', 'edit:customer',
         'view:sales', 'create:sales', 'edit:sales',
         'view:rfq', 'create:rfq', 'edit:rfq',
-        'view:reports'
+        'view:reports',
+        "view:bonds"
+
     ],
 
     SUPPORT: [
@@ -106,20 +111,25 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
         'view:support', 'create:support', 'edit:support',
         'view:reports',
         'view:webanalytics',
-        'view:webauditlogs'
+        'view:webauditlogs',
+        "view:bonds"
+
     ],
 
     RELATIONSHIP_MANAGER: [
         'view:dashboard',
         'view:customer',
         'edit:customer',
-        'view:reports'
+        'view:reports',
+        "view:bonds"
+
     ],
 
     VIEWER: [
         'view:dashboard',
         'view:reports',
-        'view:webanalytics'
+        'view:webanalytics',
+        "view:bonds"
     ]
 };
 

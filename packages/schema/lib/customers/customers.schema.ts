@@ -172,7 +172,7 @@ export const updateBackAccountBankAccountSchema =
 
 // Enums (define these based on your app logic)
 export const DepositoryNameEnum = z.enum(["NSDL", "CDSL"]);
-export const DematAccountTypeEnum = z.enum(["SINGLE", "JOINT", "HUF"]);
+export const DematAccountTypeEnum = z.enum(["SOLO", "JOINT"]);
 
 export const createDematAccountSchema = z.object({
   // Depository info
@@ -290,3 +290,43 @@ export const createPersonalInfoSchema = z.object({
 });
 
 export const updatePersonalInfoSchema = createPersonalInfoSchema.partial();
+
+
+export const customerMobileUpdateRequestSchema = z.object({
+  mobile: z
+    .string({ error: "Mobile number is required" })
+    .min(10, { message: "Mobile number must be at least 10 digits long" })
+    .max(14, { message: "Mobile number must be at most 14 digits long" }),
+  newWhatsAppNo: z
+    .string({ error: "WhatsApp number is required" })
+    .min(10, { message: "WhatsApp number must be at least 10 digits long" })
+    .max(14, { message: "WhatsApp number must be at most 14 digits long" })
+    .optional(),
+});
+
+export const customerMobileSendOtpRequestSchema = z.object({
+  mobile: z
+    .string({ error: "Mobile number is required" })
+    .min(10, { message: "Mobile number must be at least 10 digits long" })
+    .max(14, { message: "Mobile number must be at most 14 digits long" }),
+});
+
+export const customerMobileVerifyRequestSchema = z.object({
+  mobile: z
+    .string({ error: "Mobile number is required" })
+    .min(10, { message: "Mobile number must be at least 10 digits long" })
+    .max(14, { message: "Mobile number must be at most 14 digits long" }),
+  otp: z.string({ error: "OTP is required" }).min(4, {
+    message: "OTP must be at least 4 characters long",
+  }),
+  token: z.string({ error: "Token is required" }).min(1, {
+    message: "Token must be at least 1 character long",
+  }),
+
+});
+
+export const customerWhatsAppPreferenceSchema = z.object({
+  enableWhatsApp: z.boolean({
+    error: "WhatsApp preference is required",
+  }),
+});

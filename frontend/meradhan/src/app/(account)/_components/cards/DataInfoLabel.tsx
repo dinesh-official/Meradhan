@@ -11,13 +11,13 @@ function DataInfoLabel({
   className,
   subtext,
 }: {
-  title: string;
+  title: React.ReactNode;
   children?: React.ReactNode;
   subtext?: React.ReactNode;
 
   showStatus?: boolean;
   status?: "ERROR" | "SUCCESS" | "WARNING";
-  statusLabel?: string;
+  statusLabel?: React.ReactNode | string;
   className?: string;
 }) {
   const getStatus = (status: "ERROR" | "SUCCESS" | "WARNING") => {
@@ -34,7 +34,7 @@ function DataInfoLabel({
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <p className="flex items-center gap-2 font-medium text-gray-600 text-xs">
+      <p className="flex items-center gap-2 font-normal text-gray-600 text-xs">
         {title}
         {showStatus && (
           <>
@@ -43,7 +43,7 @@ function DataInfoLabel({
           </>
         )}
       </p>
-        {subtext}
+      {subtext}
 
       {children}
     </div>

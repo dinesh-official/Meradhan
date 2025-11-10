@@ -14,6 +14,7 @@ import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 import BankViewCard from "./_elements/BankViewCard";
 import { makeFullname } from "@/global/utils/formate";
+import Swal from "sweetalert2";
 
 function VerifyBankAccount() {
   const {
@@ -83,11 +84,18 @@ function VerifyBankAccount() {
           </Button>
           <Button
             variant={`link`}
-            onClick={() => {
-              const ask = window.confirm(
-                "Are you sure you want to exit kyc process?"
-              );
-              if (ask) pushUserKycState({ exit: true });
+            onClick={async () => {
+              const result = await Swal.fire({
+                text: "Are you sure you want to exit the KYC process?",
+                imageUrl: "/images/icons/sad-emoji.svg",
+                showCancelButton: true,
+                confirmButtonText: "Yes, Exit",
+                cancelButtonText: "Cancel",
+              });
+
+              if (result.isConfirmed) {
+                pushUserKycState({ exit: true });
+              }
             }}
           >
             Save & Exit

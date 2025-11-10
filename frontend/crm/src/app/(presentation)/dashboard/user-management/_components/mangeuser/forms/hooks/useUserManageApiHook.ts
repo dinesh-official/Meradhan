@@ -1,3 +1,4 @@
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 import { queryClient } from "@/core/config/reactQuery";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway, { ApiError } from "@root/apiGateway";
@@ -8,10 +9,14 @@ import z from "zod";
 
 export const useUserManageApiHook = ({ onSuccess }: { onSuccess?: () => void }) => {
   const userApi = new apiGateway.crm.user.CrmUsersApi(apiClientCaller);
+  const { trackActivity } = useUserTracking();
 
   const handleSuccess = (msg: string) => {
     toast.success(msg);
     queryClient.invalidateQueries({ queryKey: ["searchCRMUsers"] });
+    trackActivity("create_entry", {
+      reason: msg,
+    });
     onSuccess?.();
   };
 

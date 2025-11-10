@@ -7,16 +7,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import NseIsinPicker from "@/global/elements/autocomplete/NseIsinPicker";
 import { FormCheckbox } from "@/global/elements/inputs/FormCheckbox";
 import { InputField } from "@/global/elements/inputs/InputField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
+import { formatNumberTS } from "@/global/utils/formate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { NSE_ISIN_DATA } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { addDays } from "date-fns";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Form, SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
@@ -93,8 +96,13 @@ function NewRfqForm({
     control,
     setValue,
     formState: { errors },
+
+    clearErrors,
   } = useForm({
     resolver: zodResolver(appSchema.rfq.addIsinSchema),
+    mode: "onChange", // re-checks validation on every change
+    reValidateMode: "onChange", // ensures validation runs again when fields update
+
     defaultValues: initData || {
       segment: "R",
       dealType: "D",
@@ -105,6 +113,8 @@ function NewRfqForm({
       calcMethod: "O",
       institutions: false,
       participantCode: "BCISPL",
+      clientCode: "BCISPL",
+      access: "2",
     },
   });
 
@@ -117,6 +127,18 @@ function NewRfqForm({
   console.log("Errors:", errors);
 
   const [isin, setIsin] = useState<NSE_ISIN_DATA | undefined>(undefined);
+
+  const calculateQuantity = (
+    valueInCrores: number | undefined,
+    isinData: NSE_ISIN_DATA | undefined
+  ) => {
+    if (valueInCrores && isinData) {
+      const faceValue = isinData.faceValue;
+      const quantity = (valueInCrores * 10000000) / faceValue;
+      return Math.floor(quantity); // Round down to nearest whole number
+    }
+    return undefined;
+  };
 
   return (
     <Form control={control} className="space-y-6">
@@ -137,7 +159,7 @@ function NewRfqForm({
               <div className="gap-y-1 grid grid-cols-1 md:grid-cols-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">Face Value:</span>{" "}
-                  {isin.faceValue}
+                  {formatNumberTS(isin.faceValue)}
                 </div>
                 <div>
                   <span className="text-muted-foreground">Coupon:</span>{" "}
@@ -164,14 +186,36 @@ function NewRfqForm({
               onSelect={(e) => {
                 setValue("isin", e.symbol);
                 setIsin(e);
+                clearErrors("isin");
               }}
             >
-              <InputField
+              {/* <InputField
                 value={watch("isin")}
                 label="ISIN"
                 required
                 error={errors.isin?.message}
-              />
+              /> */}
+              <div className="space-y-2">
+                <Label htmlFor="isin">
+                  ISIN <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    className="peer pe-9"
+                    placeholder="ISIN"
+                    type="text"
+                    value={watch("isin")}
+                  />
+                  <div className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 pe-3 text-muted-foreground/80 pointer-events-none end-0">
+                    <Plus size={16} aria-hidden="true" />
+                  </div>
+                </div>
+                {errors.isin && (
+                  <p className="mt-1 text-destructive text-xs text-left">
+                    {errors.isin.message}
+                  </p>
+                )}
+              </div>
             </NseIsinPicker>
 
             <SelectField
@@ -188,9 +232,10 @@ function NewRfqForm({
                 },
               ]}
               value={watch("segment")}
-              onChangeAction={(e) =>
-                setValue("segment", e as SchemaType["segment"])
-              }
+              onChangeAction={(e) => {
+                setValue("segment", e as SchemaType["segment"]);
+                clearErrors("segment");
+              }}
               error={errors.segment?.message}
             />
 
@@ -213,9 +258,10 @@ function NewRfqForm({
                 },
               ]}
               value={watch("buySell")}
-              onChangeAction={(e) =>
-                setValue("buySell", e as SchemaType["buySell"])
-              }
+              onChangeAction={(e) => {
+                clearErrors("isin");
+                setValue("buySell", e as SchemaType["buySell"]);
+              }}
               error={errors.buySell?.message}
             />
 
@@ -234,9 +280,10 @@ function NewRfqForm({
                 },
               ]}
               value={watch("quoteType")}
-              onChangeAction={(e) =>
-                setValue("quoteType", e as SchemaType["quoteType"])
-              }
+              onChangeAction={(e) => {
+                clearErrors("quoteType");
+                setValue("quoteType", e as SchemaType["quoteType"]);
+              }}
               error={errors.quoteType?.message}
             />
 
@@ -256,9 +303,17 @@ function NewRfqForm({
                   },
                 ]}
                 value={watch("dealType")}
-                onChangeAction={(e) =>
-                  setValue("dealType", e as SchemaType["dealType"])
-                }
+                onChangeAction={(e) => {
+                  setValue("dealType", e as SchemaType["dealType"]);
+                  if (e == "D") {
+                    setValue("institutions", false);
+                    setValue("clientCode", "BCISPL");
+                    clearErrors("clientCode");
+                  } else {
+                    setValue("clientCode", "");
+                    clearErrors("clientCode");
+                  }
+                }}
                 error={errors.dealType?.message}
               />
               {watch("dealType") == "B" && (
@@ -270,15 +325,17 @@ function NewRfqForm({
                 />
               )}
 
-              <InputField
-                id="clientcode"
-                label="Client Code"
-                required
-                placeholder="Enter Client Code"
-                value={watch("clientCode") || ""}
-                onChangeAction={(e) => setValue("clientCode", e)}
-                error={errors.clientCode?.message}
-              />
+              {watch("dealType") == "B" && (
+                <InputField
+                  id="clientcode"
+                  label="Client Code"
+                  required
+                  placeholder="Enter Client Code"
+                  value={watch("clientCode") || ""}
+                  onChangeAction={(e) => setValue("clientCode", e)}
+                  error={errors.clientCode?.message}
+                />
+              )}
             </div>
 
             <div className="gap-5 grid md:grid-cols-3 md:col-span-2">
@@ -289,7 +346,15 @@ function NewRfqForm({
                 value={watch("value")?.toString()}
                 type="number"
                 required
-                onChangeAction={(e) => setValue("value", e)}
+                onChangeAction={(e) => {
+                  setValue("value", e);
+                  clearErrors("value");
+                  const quantity = calculateQuantity(
+                    Number(e),
+                    isin?.faceValue ? isin : undefined
+                  );
+                  setValue("quantity", quantity);
+                }}
                 error={errors.value?.message}
               />
 
@@ -314,9 +379,10 @@ function NewRfqForm({
                 ]}
                 required
                 value={watch("settlementType")}
-                onChangeAction={(e) =>
-                  setValue("settlementType", e as SchemaType["settlementType"])
-                }
+                onChangeAction={(e) => {
+                  setValue("settlementType", e as SchemaType["settlementType"]);
+                  clearErrors("settlementType");
+                }}
                 error={errors.settlementType?.message}
               />
               <InputField
@@ -337,9 +403,10 @@ function NewRfqForm({
                 options={YIELD_TYPES.map((s) => ({ label: s, value: s }))}
                 value={watch("yieldType")}
                 required
-                onChangeAction={(e) =>
-                  setValue("yieldType", e as SchemaType["yieldType"])
-                }
+                onChangeAction={(e) => {
+                  setValue("yieldType", e as SchemaType["yieldType"]);
+                  clearErrors("yieldType");
+                }}
                 error={errors.yieldType?.message}
               />
 
@@ -349,7 +416,10 @@ function NewRfqForm({
                 placeholder="Enter yield %"
                 type="number"
                 value={watch("yield")?.toString()}
-                onChangeAction={(e) => setValue("yield", Number(e))}
+                onChangeAction={(e) => {
+                  setValue("yield", Number(e));
+                  clearErrors("yield");
+                }}
                 error={errors.yield?.message}
                 required
               />
@@ -418,7 +488,10 @@ function NewRfqForm({
                     placeholder="Enter Yield Sell"
                     type="number"
                     value={watch("yieldSell")?.toString()}
-                    onChangeAction={(e) => setValue("yieldSell", Number(e))}
+                    onChangeAction={(e) => {
+                      setValue("yieldSell", Number(e));
+                      clearErrors("yieldSell");
+                    }}
                     error={errors.yieldSell?.message}
                   />
                   <SelectField
@@ -429,12 +502,13 @@ function NewRfqForm({
                       { label: "Other", value: "O" },
                     ]}
                     value={watch("calcMethodSell") || ""}
-                    onChangeAction={(e) =>
+                    onChangeAction={(e) => {
                       setValue(
                         "calcMethodSell",
                         e as SchemaType["calcMethodSell"]
-                      )
-                    }
+                      );
+                      clearErrors("calcMethodSell");
+                    }}
                     error={errors.calcMethodSell?.message}
                   />
                   <InputField
@@ -443,7 +517,10 @@ function NewRfqForm({
                     type="number"
                     placeholder="Enter Price Sell"
                     value={watch("priceSell")?.toString()}
-                    onChangeAction={(e) => setValue("priceSell", Number(e))}
+                    onChangeAction={(e) => {
+                      setValue("priceSell", Number(e));
+                      clearErrors("priceSell");
+                    }}
                     error={errors.priceSell?.message}
                   />
                 </div>
@@ -465,6 +542,7 @@ function NewRfqForm({
               onCheckedChange={(e) => {
                 setValue("gtdFlag", e ? "Y" : null);
                 setValue("endTime", undefined);
+                clearErrors("endTime");
               }}
             />
 
@@ -474,7 +552,10 @@ function NewRfqForm({
               placeholder="--:--"
               type="time"
               value={watch("endTime") || ""}
-              onChangeAction={(e) => setValue("endTime", e)}
+              onChangeAction={(e) => {
+                setValue("endTime", e);
+                clearErrors("endTime");
+              }}
               error={errors.endTime?.message}
               disabled={watch("gtdFlag") == "Y"}
             />
@@ -487,6 +568,7 @@ function NewRfqForm({
                   "quoteNegotiable",
                   watch("quoteNegotiable") == "Y" ? null : "Y"
                 );
+                clearErrors("quoteNegotiable");
               }}
               error={errors.quoteNegotiable?.message}
             />
@@ -499,6 +581,7 @@ function NewRfqForm({
                   "valueNegotiable",
                   watch("valueNegotiable") == "Y" ? null : "Y"
                 );
+                clearErrors("valueNegotiable");
               }}
               error={errors.valueNegotiable?.message}
             />
@@ -509,9 +592,10 @@ function NewRfqForm({
               placeholder="Enter min value"
               type="number"
               value={watch("minFillValue")?.toString() || ""}
-              onChangeAction={(e) =>
-                setValue("minFillValue", Number(e) || undefined)
-              }
+              onChangeAction={(e) => {
+                setValue("minFillValue", Number(e) || undefined);
+                clearErrors("minFillValue");
+              }}
               error={errors.minFillValue?.message}
             />
 
@@ -548,9 +632,50 @@ function NewRfqForm({
               checked={watch("anonymous") == "Y"}
               onCheckedChange={() => {
                 setValue("anonymous", watch("anonymous") == "Y" ? null : "Y");
+                clearErrors("anonymous");
               }}
               error={errors.anonymous?.message}
             />
+          </div>
+
+          <div className="gap-5 grid grid-cols-2 mt-5">
+            {watch("access") == "2" && (
+              <InputField
+                id="group"
+                label="Group List"
+                placeholder="Enter Group List"
+                type="text"
+                value={watch("groupList")?.join(", ") || ""}
+                onChangeAction={(value) => {
+                  const cleaned = value
+                    ?.split(",")
+                    .map((s) => s.trim())
+                    .filter((s) => /^\d+$/.test(s)) // keep only digits
+                    .map(Number);
+
+                  setValue("groupList", cleaned?.length ? cleaned : undefined);
+                  clearErrors("groupList");
+                }}
+                error={errors.groupList?.message}
+              />
+            )}
+            {watch("access") == "2" && (
+              <InputField
+                id="participantlist"
+                label="Participant List"
+                placeholder="Enter Participant List"
+                type="text"
+                value={watch("participantList")?.join(", ") || ""}
+                onChangeAction={(e) => {
+                  setValue(
+                    "participantList",
+                    e ? e.split(",").map((s) => s.trim()) : undefined
+                  );
+                  clearErrors("participantList");
+                }}
+                error={errors.participantList?.message}
+              />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -560,25 +685,10 @@ function NewRfqForm({
           <CardTitle>Additional Options</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="gap-4 grid md:grid-cols-3">
-            <InputField
-              id="participantlist"
-              label="Participant List"
-              placeholder="Enter Participant List"
-              type="text"
-              value={watch("participantList")?.join(", ") || ""}
-              onChangeAction={(e) =>
-                setValue(
-                  "participantList",
-                  e ? e.split(",").map((s) => s.trim()) : undefined
-                )
-              }
-              error={errors.participantList?.message}
-            />
-
+          <div className="gap-4 grid md:grid-cols-2">
             <SelectField
-              label="Category"
-              placeholder="Select Category"
+              label="Sector (Category)" 
+              placeholder="Select Sector"
               options={SECTORS.map((s) => ({
                 label: s.description,
                 value: s.code,

@@ -125,6 +125,18 @@ exports.Prisma.CrmAuditLogsScalarFieldEnum = {
   userId: 'userId',
   type: 'type',
   token: 'token',
+  trackId: 'trackId',
+  url: 'url',
+  data: 'data',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.WebAuditLogsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  token: 'token',
+  trackId: 'trackId',
   url: 'url',
   data: 'data',
   createdAt: 'createdAt'
@@ -446,7 +458,7 @@ exports.Prisma.NseIsinSecurityReceiptScalarFieldEnum = {
   issuer: 'issuer'
 };
 
-exports.Prisma.SettlementOrderModelScalarFieldEnum = {
+exports.Prisma.SettleOrderModelScalarFieldEnum = {
   id: 'id',
   orderNumber: 'orderNumber',
   symbol: 'symbol',
@@ -486,7 +498,9 @@ exports.Prisma.SettlementOrderModelScalarFieldEnum = {
   accountNo: 'accountNo',
   utrNumber: 'utrNumber',
   dpId: 'dpId',
-  benId: 'benId'
+  benId: 'benId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.RFQMasterISINScalarFieldEnum = {
@@ -711,9 +725,8 @@ exports.DepositoryName = exports.$Enums.DepositoryName = {
 };
 
 exports.DematAccountType = exports.$Enums.DematAccountType = {
-  SINGLE: 'SINGLE',
-  JOINT: 'JOINT',
-  HUF: 'HUF'
+  SOLO: 'SOLO',
+  JOINT: 'JOINT'
 };
 
 exports.LeadSource = exports.$Enums.LeadSource = {
@@ -827,6 +840,7 @@ exports.NegotiationConfirmationStatus = exports.$Enums.NegotiationConfirmationSt
 
 exports.Prisma.ModelName = {
   CrmAuditLogs: 'CrmAuditLogs',
+  WebAuditLogs: 'WebAuditLogs',
   Bonds: 'Bonds',
   CRMUserDataModel: 'CRMUserDataModel',
   CustomersAuthDataModel: 'CustomersAuthDataModel',
@@ -846,7 +860,7 @@ exports.Prisma.ModelName = {
   NSEBankAccount: 'NSEBankAccount',
   NSEDpAccount: 'NSEDpAccount',
   NseIsinSecurityReceipt: 'NseIsinSecurityReceipt',
-  SettlementOrderModel: 'SettlementOrderModel',
+  SettleOrderModel: 'SettleOrderModel',
   RFQMasterISIN: 'RFQMasterISIN',
   RFQNegotiation: 'RFQNegotiation'
 };

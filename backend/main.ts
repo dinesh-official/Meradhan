@@ -12,8 +12,10 @@ import participantsRouter from "@resource/crm/refq/nse/cbrics/cbrics.routes";
 import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
 import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
 import crmUsersRoutes from "@resource/crm/users/crmuser.route";
+import webAuditLogsRouter from "@resource/crm/web_audit_logs/audit_logs_route";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.route";
 import kycRoutes from "@resource/customer/kyc/kyc.routes";
+import customerProfileRoutes from "@resource/customer/profile/c_profile.routes";
 import trashRoutes from "@resource/trash/trash.routes";
 import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";
@@ -52,12 +54,14 @@ server.addRoutes([
 
     // customer routes
     customerAuthRoutes,
+    customerProfileRoutes,
     kycRoutes,
 
     // bond routes
     bondRoute,
 
-    trashRoutes
+    trashRoutes,
+    webAuditLogsRouter
 ]);
 
 
@@ -70,4 +74,5 @@ checkConnectToDatabases()
         logger.logError("Error connecting to databases:", error);
         process.exit(1);
     });
+
 

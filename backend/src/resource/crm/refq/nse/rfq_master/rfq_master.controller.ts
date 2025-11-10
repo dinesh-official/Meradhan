@@ -119,9 +119,10 @@ export class RfqMasterController {
             });
         } catch (error) {
             if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.messages[0]?.msg || error.response?.data?.messages || error.response?.data.toString() || "Internal Server Error";
                 res.sendResponse({
                     statusCode: error.response?.status || 500,
-                    responseData: error.response?.data?.messages || error.response?.data || "Internal Server Error"
+                    responseData: [errorMessage]
                 });
             }
             throw error;
@@ -140,15 +141,29 @@ export class RfqMasterController {
             });
         } catch (error) {
             if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.messages[0]?.msg || error.response?.data?.messages || error.response?.data.toString() || "Internal Server Error";
                 res.sendResponse({
                     statusCode: error.response?.status || 500,
-                    responseData: error.response?.data?.messages || error.response?.data || "Internal Server Error"
+                    responseData: [errorMessage]
                 });
             }
             throw error;
         }
     }
 
+
+    async getAllSettledOrders(req: Request, res: Response) {
+        const data = appSchema.rfq.settleOrderFilterSchema.parse(req.body);
+        console.log(data);
+        
+        const result = await this.rfqMasterService.getAllSettledOrders(data);
+        console.log(result);
+        
+        res.sendResponse({
+            statusCode: 200,
+            responseData: result
+        });
+    }
 
 
 

@@ -11,27 +11,52 @@ import {
 import { Button } from "@/components/ui/button";
 
 // Configurable data for Do's and Don'ts
-const signGuidelines = {
+export const signDrawGuidelines = {
   dos: [
-    "Ensure your signature is clear and legible.",
-    "Use a high-resolution image for upload.",
-    "Keep the background of the image plain.",
-    "Ensure the signature is in black or blue ink.",
+    "Draw your signature smoothly and completely within the provided box.",
+    "Use a stylus, mouse, or fingertip for better control.",
+    "Match your drawn signature exactly with your official records.",
+    "Ensure strokes are clear, continuous, and visible.",
+    "Practice once if needed before submitting.",
   ],
   donts: [
-    "Do not upload a blurry or pixelated image.",
-    "Avoid colored or patterned backgrounds.",
-    "Do not use pencil or light-colored ink.",
-    "Avoid cropping or resizing that cuts off parts of the signature.",
+    "Don’t go outside the drawing box.",
+    "Don’t make the signature too small or too large.",
+    "Don’t create initials or scribbles if your PAN signature is full name (and vice versa).",
+    "Don’t lift your finger/stylus excessively, causing broken strokes.",
+    "Don’t draw symbols, shapes, or marks that are different from your registered signature.",
   ],
 };
+
+
+export const signUploadGuidelines = {
+  dos: [
+    "Upload a clear, high-quality image of your signature.",
+    "Sign on plain white paper before scanning or clicking a photo.",
+    "Use dark blue or black ink for best visibility.",
+    "Keep your signature straight, centered, and within the frame.",
+    "Ensure the image is well-lit, without shadows or glare.",
+    "Match your signature exactly with your PAN Card/KYC records.",
+    "Crop the image so only the signature area is visible.",
+  ],
+  donts: [
+    "Don’t upload blurred, tilted, or low-resolution image.",
+    "Don’t use colored backgrounds, ruled paper, or textured surfaces.",
+    "Don’t upload signature with shadows, flash reflections, or watermarks.",
+    "Don’t alter or edit the signature digitally.",
+    "Don’t upload signature different from your official KYC signature.",
+  ],
+};
+
 
 export default function SignDoNotDO({
   title = "Signature Guidelines",
   children,
+   data
 }: {
   title?: string;
-  children?: React.ReactNode;
+    children?: React.ReactNode;
+  data: typeof signDrawGuidelines | typeof signUploadGuidelines;
 }) {
   return (
     <Dialog>
@@ -48,12 +73,12 @@ export default function SignDoNotDO({
           <GuidelineList
             title="Do’s"
             icon={<FaCircleCheck className="text-green-600" />}
-            items={signGuidelines.dos}
+            items={data.dos}
           />
           <GuidelineList
             title="Don’ts"
             icon={<IoIosCloseCircle size={20} className="text-red-600" />}
-            items={signGuidelines.donts}
+            items={data.donts}
           />
         </div>
 

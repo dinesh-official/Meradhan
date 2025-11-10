@@ -23,6 +23,7 @@ function LeadsView() {
       !filterApiManager.fetchLeadsQuery.isPending
     );
   };
+  
   return (
     <div>
       <PageInfoBar

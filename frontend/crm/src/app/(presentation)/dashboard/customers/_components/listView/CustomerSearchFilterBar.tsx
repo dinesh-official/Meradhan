@@ -23,7 +23,7 @@ interface CustomerSearchFilterBarProps {
   placeholder?: string;
 }
 const filterKycStatus: SelectOption[] = [
-  { label: "All Kyc Status", value: "ALL" },
+  { label: "All KYC Status", value: "ALL" },
   { label: "Pending", value: "PENDING" },
   { label: "Verified", value: "VERIFIED" },
   { label: "Rejected", value: "REJECTED" },
@@ -49,7 +49,7 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
     <CardHeader>
       <div className="relative">
         <Input
-          className="peer ps-9 w-64 bg-secondary border-0"
+          className="peer bg-secondary ps-9 border-0 w-64"
           placeholder={placeholder}
           type="search"
           value={searchValue}
@@ -57,13 +57,13 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
             onSearchChange?.(e.target.value)
           }}
         />
-        <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
+        <div className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 ps-3 text-muted-foreground/80 pointer-events-none start-0">
           <Search size={16} aria-hidden="true" />
         </div>
       </div>
       <CardAction className="flex flex-row gap-3">
         <Select value={statusValue} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-[160px] bg-secondary border-none">
+          <SelectTrigger className="bg-secondary border-none w-[160px]">
             <SelectValue placeholder="Apply Status" />
           </SelectTrigger>
           <SelectContent>
@@ -75,8 +75,8 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
           </SelectContent>
         </Select>
         <Select value={kycValue} onValueChange={onKycChange}>
-          <SelectTrigger className="w-[160px] bg-secondary border-none">
-            <SelectValue placeholder="Kyc Status" />
+          <SelectTrigger className="bg-secondary border-none w-[160px]">
+            <SelectValue placeholder="KYC Status" />
           </SelectTrigger>
           <SelectContent>
             {kycOptions.map((option) => (

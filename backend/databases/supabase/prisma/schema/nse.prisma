@@ -105,56 +105,59 @@ model NseIsinSecurityReceipt {
     @@map("nse_isin_security_receipts")
 }
 
+model SettleOrderModel {
+    id                     Int           @unique
+    orderNumber            String        @db.VarChar(30)
+    symbol                 String        @db.VarChar(30)
+    buyParticipantLoginId  String        @db.VarChar(30)
+    sellParticipantLoginId String        @db.VarChar(30)
+    price                  Decimal       @db.Decimal(15, 4)
+    yieldType              YieldTypeSort
+    yield                  Decimal       @db.Decimal(15, 4)
+    value                  Decimal       @db.Decimal(17, 2)
+    buyerRefNo             String?       @db.VarChar(50)
+    sellerRefNo            String?       @db.VarChar(50)
+    buyBackofficeLoginId   String?       @db.VarChar(30)
+    sellBackofficeLoginId  String?       @db.VarChar(30)
+    buyBrokerLoginId       String?       @db.VarChar(30)
+    sellBrokerLoginId      String?       @db.VarChar(30)
+    source                 Int
 
+    modSettleDate    String?
+    modQuantity      Decimal? @db.Decimal(17, 2)
+    modAccrInt       Decimal? @db.Decimal(17, 2)
+    modConsideration Decimal?
 
-model SettlementOrderModel{
-id String @unique
-orderNumber String @unique
-symbol String
-buyParticipantLoginId String
-sellParticipantLoginId String
-price Float
-yieldType YieldTypeSort
-yield Float
-value Float
+    settlementNo               String?
+    stampDutyAmount            Decimal? @db.Decimal(17, 2)
+    stampDutyBearer            String?  @db.VarChar(30)
+    buyerFundPayinObligation   Decimal? @db.Decimal(17, 2)
+    sellerFundPayoutObligation Decimal? @db.Decimal(17, 2)
+    fundPayinRefId             String?  @db.VarChar(50)
 
+    settleStatus Int
 
-buyerRefNo String?
-sellerRefNo String
-buyBackofficeLoginId String?
-sellBackofficeLoginId String?
+    secPayinQuantity Decimal? @db.Decimal(17, 2)
+    secPayinRemarks  String?  @db.VarChar(50)
+    secPayinTime     String?
 
-buyBrokerLoginId String
+    fundsPayinAmount  Decimal? @db.Decimal(17, 2)
+    fundsPayinRemarks String?  @db.VarChar(50)
+    fundsPayinTime    String?
 
-sellBrokerLoginId String?
+    payoutRemarks String? @db.VarChar(50)
+    payoutTime    String?
 
-source Int
-modSettleDate String
-modQuantity Int
-modAccrInt Float?
-modConsideration Float
-settlementNo String
-stampDutyAmount Float
-stampDutyBearer String
-buyerFundPayinObligation Float
-sellerFundPayoutObligation Float
-fundPayinRefId String
-settleStatus Int
+    ifscCode  String? @db.VarChar(11)
+    accountNo String? @db.VarChar(62)
+    utrNumber String? @db.VarChar(16)
+    dpId      String? @db.VarChar(8)
+    benId     String? @db.VarChar(16)
 
-secPayinQuantity Int?
-secPayinRemarks String?
-secPayinTime String?
-fundsPayinAmount Float?
-fundsPayinRemarks String?
-fundsPayinTime String?
-payoutRemarks String?
-payoutTime String?
-ifscCode String
-accountNo String
-utrNumber String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-dpId String
-benId String
+    @@map("settle_order")
 }
 
 enum YieldTypeSort {

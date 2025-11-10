@@ -1,4 +1,5 @@
 import LabelView from "@/global/elements/wrapper/LabelView";
+import { formatNumberTS } from "@/global/utils/formate";
 import { cn } from "@/lib/utils";
 import { CreateNegotiationResponse } from "@root/apiGateway";
 
@@ -11,12 +12,12 @@ const DealSplitInformation = ({
 }) => {
   return (
     <div className={cn("gap-5 gap-y-6 grid md:grid-cols-5 my-3", className)}>
-      <LabelView title="Initiator">
-        <p className="font-medium text-sm">{data.initClientCode}</p>
+      <LabelView title="Participant Code ">
+        <p className="font-medium text-sm">{data.initAeCode}</p>
       </LabelView>
 
-      <LabelView title="client Code">
-        <p className="font-medium text-sm">{data.respClientCode}</p>
+      <LabelView title="Client Code">
+        <p className="font-medium text-sm">{data.initClientCode}</p>
       </LabelView>
 
       <LabelView title="Deal Type">
@@ -33,7 +34,7 @@ const DealSplitInformation = ({
 
       <LabelView title="Face Value">
         <p className="font-medium text-sm">
-          {Number(data.initValue) * 10000000}
+          {formatNumberTS(Number(data.initValue) * 10000000)}
         </p>
       </LabelView>
 
@@ -47,14 +48,14 @@ const DealSplitInformation = ({
 
       <LabelView title="value (Crores)">
         <p className="font-medium text-sm">
-          {Number(data.initValue) * 10000000}
+          {formatNumberTS(Number(data.initValue) * 10000000)}
         </p>
       </LabelView>
 
       <LabelView title="Value Remaining">
         <p className="font-medium text-sm">
-          {Number(data.initValue) * 10000000 -
-            Number(data.initValue) * 10000000}
+          {formatNumberTS(Number(data.initValue) * 10000000 -
+            Number(data.initValue) * 10000000)}
         </p>
       </LabelView>
     </div>

@@ -24,8 +24,10 @@ export const useFollowUpApiHook = () => {
       return response.data;
     },
     onSuccess: () => {
-      toast.success("FollowUp Lead Successfully Created!");
+
+      toast.success("Follow up note added successfully");
       queryClient.invalidateQueries({ queryKey: ["followUpsNotes"] });
+
     },
     onError(error) {
       console.log("error", error);
@@ -44,7 +46,7 @@ export const useFollowUpApiHook = () => {
       return response.data;
     },
     onSuccess: () => {
-      toast.success("FollowUp Lead Successfully Deleted!");
+      toast.success("Follow up note deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["followUpsNotes"] });
     },
     onError(error) {
