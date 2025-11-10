@@ -8,8 +8,12 @@ import Link from "next/link";
 
 export const revalidate = 0; // No revalidation (server-rendered every time)
 
-async function page({ searchParams }: { searchParams?: { token?: string } }) {
-  const token = searchParams?.token;
+async function page({
+  searchParams,
+}: {
+  searchParams?: Promise<{ token?: string }>;
+}) {
+  const token = (await searchParams)?.token;
 
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
     apiServerCaller
