@@ -1,6 +1,5 @@
-import React from "react";
-import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import DbTopActionCards from "@/app/(presentation)/dashboard/_components/DBTopActionCards";
+import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 
 import {
   Card,
@@ -10,10 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import StatusCountCard from "@/global/elements/cards/StatusCountCard";
-import { SalesPerformanceChart } from "./_components/chart/SalesPerformanceChart";
 import { LeadSourcesPiChart } from "./_components/chart/LeadSourcesPiChart";
-import CrmActivityLogsView from "./audit-logs/crm/activity/CrmActivityLogsView";
-import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import { SalesPerformanceChart } from "./_components/chart/SalesPerformanceChart";
 
 const DashBoardView = () => {
   return (
@@ -78,9 +75,9 @@ const DashBoardView = () => {
           </CardContent>
         </Card>
       </div>
-      <AllowOnlyView permissions={["view:crmauditlogs"]}>
+      {/* <AllowOnlyView permissions={["view:crmauditlogs"]}>
         <CrmActivityLogsView />
-      </AllowOnlyView>
+      </AllowOnlyView> */}
     </div>
   );
 };

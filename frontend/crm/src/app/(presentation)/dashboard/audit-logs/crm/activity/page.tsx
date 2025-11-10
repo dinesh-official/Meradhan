@@ -1,5 +1,4 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
-import AuthenticationActivityLogsView from "./CrmActivityLogsView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 
 function CrmAAcitivityuditLogsPage() {
@@ -11,7 +10,7 @@ function CrmAAcitivityuditLogsPage() {
           description="Comprehensive tracking of user actions and system events within the CRM"
           showBack
         />
-        <AuthenticationActivityLogsView />
+        {/* <AuthenticationActivityLogsView /> */}
       </div>
     </Workspace>
   );
