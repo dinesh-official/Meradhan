@@ -66,7 +66,7 @@ export class NseCBRICS {
             baseURL: "https://bricsonlinereguat.nseindia.com/bondsnew/rest/v1",
             withCredentials: true,
             headers: {
-                "User-Agent": "MeraDhan/0.0.1",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
                 "Content-Type": "application/json",
                 'Accept': 'application/json, text/javascript, */*; q=0.01',
                 'Accept-Language': 'en-US,en;q=0.5',
