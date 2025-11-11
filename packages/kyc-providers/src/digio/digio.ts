@@ -121,7 +121,7 @@ export class DigioSDK {
                 display_on_page: "custom",
                 "sign_coordinates": {
                     [email]: Object.fromEntries(
-                        Array.from({ length: 33 }, (_, i) => [
+                        Array.from({ length: 52 }, (_, i) => [
                             (i + 1).toString(),
                             [{ llx: 420, lly: 50, urx: 555, ury: 100 }],
                         ])

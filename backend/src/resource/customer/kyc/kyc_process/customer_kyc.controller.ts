@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import { CustomerKycKycService } from "./customer_kyc.service";
 import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import fs from "fs";
+import path from "path";
 
 export class CustomerKycKycController {
     private panKycService = new CustomerKycKycService()
@@ -154,6 +156,49 @@ export class CustomerKycKycController {
                 fileUrl: data,
             }
         })
+    }
+
+    // download kyc pdf
+    async downloadKycPdf(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id!);
+
+            // Generate PDF and get file path
+            const filePath = await this.panKycService.downloadKycPdf(id);
+
+            // Resolve absolute path (in case the service returns a relative one)
+            const absolutePath = path.resolve(filePath);
+
+            // Check if file exists
+            if (!fs.existsSync(absolutePath)) {
+                return res.status(404).json({ message: "File not found" });
+            }
+
+            // Set headers for download
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader(
+                "Content-Disposition",
+                `attachment; filename="kyc-${id}.pdf"`
+            );
+
+            // Stream the file to the client
+            const fileStream = fs.createReadStream(absolutePath);
+            fileStream.pipe(res);
+
+            // Optionally delete the file after sending
+            fileStream.on("close", () => {
+                fs.unlink(absolutePath, (err) => {
+                    if (err) console.error("Error deleting temp file:", err);
+                });
+            });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            console.error("Error serving KYC PDF:", error);
+            res.status(500).json({
+                success: false,
+                message: error.message || "Failed to serve KYC PDF",
+            });
+        }
     }
 
 

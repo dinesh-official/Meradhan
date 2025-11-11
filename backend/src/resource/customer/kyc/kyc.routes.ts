@@ -35,7 +35,7 @@ kycRoutes.post("/api/customer/kyc/store/:step", customerAuthMiddleware, (req, re
 kycRoutes.get("/api/customer/kyc/level/:customerId", (req, res) => storeKyc.setKycLevel(req, res));
 kycRoutes.post("/api/customer/kyc/audit-log/:customerId", customerAuthMiddleware, (req, res) => storeKyc.addAuditLog(req, res));
 kycRoutes.post("/api/customer/kyc/current-step/:customerId", customerAuthMiddleware, (req, res) => storeKyc.setCurrentStep(req, res));
-
+kycRoutes.get("/api/customer/kyc/download-pdf/:id",  (req, res) => controller.downloadKycPdf(req, res));
 
 
 
