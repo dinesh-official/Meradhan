@@ -6,24 +6,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { genMediaUrl } from "@/global/utils/url.utils";
 import Image from "next/image";
 import { MdOutlineArrowRight } from "react-icons/md";
+import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { genMediaUrl } from "@/global/utils/url.utils";
-import Swal from "sweetalert2";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { KycSelfieGuide } from "./IdentityValidationCaptureSelfie";
 function IdentityValidationSelfiePreview() {
-  const { pushUserKycState } = useKycDataProvider();
-  const { state, nextLocalStep, prevLocalStep } = useKycDataStorage();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
+  const { state, nextLocalStep, prevLocalStep, setStep1SelfieFaceData } =
+    useKycDataStorage();
   return (
     <Card accountMode>
       <CardHeader accountMode>
@@ -41,16 +35,24 @@ function IdentityValidationSelfiePreview() {
           <div>
             <p
               className="font-medium text-primary text-sm cursor-pointer"
-              onClick={() => prevLocalStep()}
+              onClick={() => {
+                addAuditLog({
+                  type: "RECAPTURE_SELFIE",
+                  desc: "User chose to recapture the selfie during KYC process.",
+                });
+                prevLocalStep();
+              }}
             >
               Recapture
             </p>
 
             <Dialog>
-              <DialogTrigger>min
-                <p className="text-gray-600 text-xs cursor-pointer">(Instructions)</p>
+              <DialogTrigger>
+                <p className="text-gray-600 text-xs cursor-pointer">
+                  (Instructions)
+                </p>
               </DialogTrigger>
-              <DialogContent className="lg:min-w-[800px]" >
+              <DialogContent className="lg:min-w-[800px]">
                 <KycSelfieGuide />
               </DialogContent>
             </Dialog>
@@ -61,6 +63,11 @@ function IdentityValidationSelfiePreview() {
         <Button
           className="w-full sm:w-auto"
           onClick={() => {
+            addAuditLog({
+              type: "CONFIRM_SELFIE",
+              desc: "User confirmed the selfie during KYC process.",
+            });
+            setStep1SelfieFaceData("timestamp", new Date().toISOString());
             nextLocalStep();
             pushUserKycState();
           }}
@@ -79,6 +86,10 @@ function IdentityValidationSelfiePreview() {
             });
 
             if (result.isConfirmed) {
+              addAuditLog({
+                type: "KYC_PROCESS_EXITED",
+                desc: "User chose to save and exit the KYC process : Selfie Verification step.",
+              });
               pushUserKycState({ exit: true });
             }
           }}

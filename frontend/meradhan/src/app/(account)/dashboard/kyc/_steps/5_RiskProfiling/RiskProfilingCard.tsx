@@ -17,15 +17,20 @@ import { useKycStepStore } from "../../_store/useKycStepStore";
 function RiskProfilingCard() {
   const { state, setStepIndex } = useKycDataStorage();
   const riskProfiling = state.step_5;
+  
 
   const isAllowToContinue = () => {
     const defaltSelcted = riskProfiling.filter((item) => !item.ans);
     return defaltSelcted.length === 0;
   };
-
-  const { pushUserKycState } = useKycDataProvider();
+  
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { nextStep } = useKycStepStore();
   const jumpNext = () => {
+    addAuditLog({
+      type: "RISK_PROFILING_STEP_COMPLETED",
+      desc: "User completed the Risk Profiling step during KYC process.",
+    });
     pushUserKycState();
     setStepIndex(0);
     nextStep();

@@ -22,8 +22,8 @@ const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
 function IdentityValidationPanInfo() {
-  const { pushUserKycState } = useKycDataProvider();
-  const { state, nextLocalStep } = useKycDataStorage();
+  const { pushUserKycState ,addAuditLog} = useKycDataProvider();
+  const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
 
   const data = state.step_1.pan;
   const genders = {
@@ -46,7 +46,11 @@ function IdentityValidationPanInfo() {
   );
 
   const isDobMatched = dataMatcherUtils.areDatesMatched(
-    data.response?.details.pan.dob.replaceAll("/","-").split("-").reverse().join("-"),
+    data.response?.details.pan.dob
+      .replaceAll("/", "-")
+      .split("-")
+      .reverse()
+      .join("-"),
     data.dateOfBirth
   );
 
@@ -84,7 +88,9 @@ function IdentityValidationPanInfo() {
             statusLabel={isDobMatched ? "Verified" : "Invalid"}
             showStatus
           >
-            <p className="font-medium">{data.response?.details.pan.dob.replaceAll("/","-")}</p>
+            <p className="font-medium">
+              {data.response?.details.pan.dob.replaceAll("/", "-")}
+            </p>
           </DataInfoLabel>
           {data.response?.details.aadhaar.father_name && (
             <DataInfoLabel
@@ -132,6 +138,11 @@ function IdentityValidationPanInfo() {
           className="w-full sm:w-auto"
           disabled={!isAllowToContinue}
           onClick={() => {
+            setStep1PanData("confirmPanTimestamp", new Date().toISOString());
+            addAuditLog({
+              type: "KYC_PROCESS_CONTINUED",
+              desc: "User chose to continue the KYC process : PAN and Identity Validation step.",
+            });
             nextLocalStep();
             pushUserKycState();
           }}
@@ -150,6 +161,10 @@ function IdentityValidationPanInfo() {
             });
 
             if (result.isConfirmed) {
+              addAuditLog({
+                type: "KYC_PROCESS_EXITED",
+                desc: "User chose to save and exit the KYC process : PAN and Identity Validation step.",
+              });
               pushUserKycState({ exit: true });
             }
           }}

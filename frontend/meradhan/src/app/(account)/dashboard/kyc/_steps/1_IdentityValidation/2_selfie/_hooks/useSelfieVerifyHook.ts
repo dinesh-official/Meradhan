@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 
 export const useSelfieVerifyHook = () => {
-    const { pushUserKycState } = useKycDataProvider();
+    const { pushUserKycState, addAuditLog } = useKycDataProvider();
     const { state, nextLocalStep, setStep1SelfieFaceData } = useKycDataStorage();
     const digio = useDigioSDK();
 
@@ -87,6 +87,10 @@ export const useSelfieVerifyHook = () => {
 
     const handelSelfieVerification = () => {
         requestSelfieMutation.mutate();
+        addAuditLog({
+            type: "START_SELFIE_VERIFICATION",
+            desc: "User started the KYC process : Selfie Verification step.",
+        });
     }
     return {
         handelSelfieVerification,

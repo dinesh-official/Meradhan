@@ -1,7 +1,5 @@
 "use client";
-import {
-  useKycDataStorage
-} from "../../_store/useKycDataStorage";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import NewBankForm from "./_hooks/NewBankForm";
 import { useAddBankAccountFormHook } from "./_hooks/useAddBankAccountFormHook";
 
@@ -23,13 +21,13 @@ function AddBankAccountForm() {
       error={error}
       fetchBankIfsc={() => {
         fetchBankIfsc.mutate();
-        
       }}
       isPending={isPending}
       handleBankAccountSubmit={handleBankAccountSubmit}
       showCancel={state.step_3.length > 1}
       onCancel={() => {
         removeBankAccount(state.step_3.length - 1);
+        
         nextLocalStep();
       }}
     />

@@ -26,7 +26,7 @@ function VerifyDematAccount() {
     setStepIndex,
   } = useKycDataStorage();
 
-  const { pushUserKycState } = useKycDataProvider();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { nextStep } = useKycStepStore();
 
   const isAllowToContinue = () => {
@@ -37,6 +37,10 @@ function VerifyDematAccount() {
   };
 
   const jumpNext = () => {
+    addAuditLog({
+      type: "DEMAT_KYC_STEP_COMPLETED",
+      desc: "User completed the Demat Account Verification step during KYC process.",
+    });
     pushUserKycState();
     setStepIndex(0);
     nextStep();
@@ -61,10 +65,18 @@ function VerifyDematAccount() {
                 lastName: state.step_1.pan.lastName,
               })}
               setDefault={() => {
+                addAuditLog({
+                  type: "SET_DEFAULT_DEMAT_ACCOUNT",
+                  desc: `User set a Demat account at index ${item.beneficiaryClientId} as default during KYC process.`,
+                });
                 setDefaultDepository(index);
               }}
               onDelete={() => {
                 removeDepository(index);
+                addAuditLog({
+                  type: "REMOVE_DEMAT_ACCOUNT",
+                  desc: `User removed a Demat account at index ${item.beneficiaryClientId} during KYC process.`,
+                });
                 if (accounts.length === 1) {
                   addDepository();
                   prevLocalStep();
@@ -89,7 +101,6 @@ function VerifyDematAccount() {
           <Button
             variant={`link`}
             onClick={async () => {
-
               const result = await Swal.fire({
                 text: "Are you sure you want to save and exit the KYC process?",
                 imageUrl: "/images/icons/sad-emoji.svg",
@@ -97,11 +108,14 @@ function VerifyDematAccount() {
                 confirmButtonText: "Yes, Exit",
                 cancelButtonText: "Cancel",
               });
-              
+
               if (result.isConfirmed) {
+                addAuditLog({
+                  type: "KYC_PROCESS_EXITED",
+                  desc: "User chose to save and exit the KYC process : Demat Account Verification step.",
+                });
                 pushUserKycState({ exit: true });
               }
-
             }}
           >
             Save & Exit
@@ -111,6 +125,10 @@ function VerifyDematAccount() {
           <Button
             variant={`link`}
             onClick={() => {
+              addAuditLog({
+                type: "ADD_DEMAT_ACCOUNT",
+                desc: "User added a new Demat account during KYC process.",
+              });
               addDepository();
               prevLocalStep();
             }}

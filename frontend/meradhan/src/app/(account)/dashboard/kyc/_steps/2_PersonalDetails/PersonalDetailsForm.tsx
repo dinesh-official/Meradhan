@@ -31,6 +31,7 @@ import { usePersonalDetailsFormHook } from "./usePersonalDetailsFormHook";
 
 function PersonalDetailsForm() {
   const { setStep2PersonalData, state } = useKycDataStorage();
+
   const { handelPersonalSubmit, error, removeError } =
     usePersonalDetailsFormHook();
 

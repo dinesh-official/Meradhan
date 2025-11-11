@@ -13,7 +13,7 @@ import { makeFullname } from "@/global/utils/formate";
 
 export const useAddBankAccountFormHook = () => {
     const { state, updateBankAccount, nextLocalStep } = useKycDataStorage();
-    const { pushUserKycState } = useKycDataProvider();
+    const { pushUserKycState, addAuditLog } = useKycDataProvider();
     const [error, setError] = useState<Partial<Record<keyof KycDataStorage['step_3'][number], string[]>>>();
     const data = state.step_3[state.step_3.length - 1];
     const updateData = (
@@ -63,15 +63,32 @@ export const useAddBankAccountFormHook = () => {
                 updateData("response", data.responseData)
                 updateData("beneficiary_name", data.responseData.beneficiary_name_with_bank)
                 updateData("isVerified", data.responseData.verified)
+
+                // set confirm timestamp
+                updateData("confirmBankTimestamp", new Date().toISOString());
+                updateData("verifyTimestamp", new Date().toISOString());
+
+
                 nextLocalStep();
                 pushUserKycState();
+                addAuditLog({
+                    type: "BANK_ACCOUNT_VERIFIED",
+                    desc: "User bank account verified successfully during KYC process.",
+                });
+            } else {
+
+                Swal.fire({
+                    imageUrl: '/images',
+                    title: 'Bank verification Failed!',
+                    text: 'The bank account could not be verified. Please check the details and try again.',
+                });
             }
         },
         onError(error) {
             if (error instanceof ApiError) {
                 const errorMessage = error.response?.data?.message || error.message;
                 Swal.fire({
-                    icon: 'error',
+                    imageUrl: "/images/icons/sad-emoji.svg",
                     title: 'Bank verification Failed!',
                     text: errorMessage,
                 });
@@ -96,7 +113,7 @@ export const useAddBankAccountFormHook = () => {
 
             if (existingAccount) {
                 Swal.fire({
-                    icon: 'error',
+                    imageUrl: "/images/icons/sad-emoji.svg",
                     title: 'Bank account already exist!',
                     text: 'Please add another bank account',
                 })
@@ -105,6 +122,10 @@ export const useAddBankAccountFormHook = () => {
 
             setError(undefined);
             verifyBankAccountMutation.mutate(data);
+            addAuditLog({
+                type: "START_BANK_ACCOUNT_VERIFICATION",
+                desc: "User added a bank account during KYC process.",
+            });
         } catch (error) {
             console.log(error);
 
@@ -112,7 +133,12 @@ export const useAddBankAccountFormHook = () => {
                 const errorMessage = zodErrorToErrorMap(error);
                 setError(errorMessage);
                 console.log(errorMessage);
+
             } else {
+                addAuditLog({
+                    type: "FAILED_BANK_ACCOUNT_VERIFICATION",
+                    desc: "User bank account verification failed during KYC process. " + (error as Error).toString(),
+                });
                 console.log(error);
                 toast.error("Something went wrong");
             }

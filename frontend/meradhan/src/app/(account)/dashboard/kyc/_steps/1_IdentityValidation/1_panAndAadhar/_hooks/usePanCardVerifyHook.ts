@@ -15,7 +15,7 @@ export const usePanCardVerifyHook = () => {
     const [error, setError] = useState<Partial<Record<keyof KycDataStorage['step_1']['pan'], string[]>>>();
     const panKycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(apiClientCaller);
     const { state, nextLocalStep, setStep1PanData } = useKycDataStorage()
-    const { pushUserKycState } = useKycDataProvider()
+    const { pushUserKycState, addAuditLog } = useKycDataProvider()
 
 
     const digio = useDigioSDK();
@@ -83,6 +83,10 @@ export const usePanCardVerifyHook = () => {
             if (error instanceof ApiError) {
                 const errorMessage = error.response?.data?.message || error.message;
                 toast.error(errorMessage);
+                addAuditLog({
+                    type: 'PAN_VERIFICATION_FAILED',
+                    desc: `PAN verification failed with error: ${errorMessage}`,
+                })
             } else {
                 console.log(error);
                 toast.error("Something went wrong");
@@ -93,8 +97,13 @@ export const usePanCardVerifyHook = () => {
     const handelPanVerification = () => {
 
         try {
+
             const panData = appSchema.kyc.kycPanInfoDataSchema.parse(state.step_1.pan);
             requestPanCardVerificationMutation.mutate(panData);
+            addAuditLog({
+                type: 'PAN_VERIFICATION_INITIATED',
+                desc: 'User initiated PAN verification process',
+            })
         } catch (error) {
 
             if (error instanceof ZodError) {

@@ -21,7 +21,7 @@ import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
   const data = state.step_1.pan;
-  const { pushUserKycState } = useKycDataProvider();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { handelPanVerification, isPending, error } = usePanCardVerifyHook();
   return (
     <Card accountMode>
@@ -196,6 +196,10 @@ function IdentityValidationForm() {
             });
 
             if (result.isConfirmed) {
+              addAuditLog({
+                type: "KYC_PROCESS_EXITED",
+                desc: "User chose to save and exit the KYC process : PAN and Identity Validation step.",
+              });
               pushUserKycState({ exit: true });
             }
           }}

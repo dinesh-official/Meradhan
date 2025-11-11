@@ -17,8 +17,9 @@ import { useKycStepStore } from "../../../_store/useKycStepStore";
 import Swal from "sweetalert2";
 
 function IdentityValidationPreviewSign() {
-  const { pushUserKycState } = useKycDataProvider();
-  const { state, setStepIndex, prevLocalStep } = useKycDataStorage();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
+  const { state, setStepIndex, prevLocalStep, setStep1SignData } =
+    useKycDataStorage();
   const { nextStep } = useKycStepStore();
 
   return (
@@ -38,7 +39,13 @@ function IdentityValidationPreviewSign() {
           <div className="flex flex-col gap-2">
             <p
               className="font-medium text-primary text-sm cursor-pointer"
-              onClick={() => prevLocalStep()}
+              onClick={() => {
+                addAuditLog({
+                  type: "RECAPTURE_SIGN",
+                  desc: "User chose to recapture the sign during KYC process.",
+                });
+                prevLocalStep();
+              }}
             >
               Remove and Add New Signature
             </p>
@@ -55,6 +62,11 @@ function IdentityValidationPreviewSign() {
             // this is the last `local step` for "step 1"
             setStepIndex(0);
             // this is the first `global step` for "step 2"
+            setStep1SignData("timestamp", new Date().toISOString());
+            addAuditLog({
+              type: "CONFIRM_SIGN",
+              desc: "User confirmed the sign during KYC process.",
+            });
             nextStep();
             pushUserKycState();
           }}
@@ -72,6 +84,10 @@ function IdentityValidationPreviewSign() {
             });
 
             if (result.isConfirmed) {
+              addAuditLog({
+                type: "KYC_PROCESS_EXITED",
+                desc: "User chose to save and exit the KYC process : Sign Verification step.",
+              });
               pushUserKycState({ exit: true });
             }
           }}

@@ -19,8 +19,8 @@ const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
 function IdentityValidationAadharInfo() {
-  const { pushUserKycState } = useKycDataProvider();
-  const { state, nextLocalStep } = useKycDataStorage();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
+  const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
 
   const data = state.step_1.pan;
 
@@ -117,6 +117,14 @@ function IdentityValidationAadharInfo() {
           className="w-full sm:w-auto"
           disabled={!isNameMatched}
           onClick={() => {
+            setStep1PanData(
+              "confirmAadhaarTimestamp",
+              new Date().toISOString()
+            );
+            addAuditLog({
+              type: "KYC_PROCESS_CONTINUED",
+              desc: "User chose to continue the KYC process : Aadhar and Address Validation step.",
+            });
             nextLocalStep();
             pushUserKycState();
           }}
@@ -135,6 +143,10 @@ function IdentityValidationAadharInfo() {
             });
 
             if (result.isConfirmed) {
+              addAuditLog({
+                type: "KYC_PROCESS_EXITED",
+                desc: "User chose to save and exit the KYC process : Aadhar and Address Validation step.",
+              });
               pushUserKycState({ exit: true });
             }
           }}

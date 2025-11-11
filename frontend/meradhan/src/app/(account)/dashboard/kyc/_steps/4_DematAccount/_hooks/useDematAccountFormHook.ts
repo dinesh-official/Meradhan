@@ -19,7 +19,7 @@ const statusCodes = {
 };
 
 export const useDematAccountFormHook = () => {
-    const { pushUserKycState } = useKycDataProvider()
+    const { pushUserKycState, addAuditLog } = useKycDataProvider()
     const [error, setError] = useState<Partial<Record<keyof KycDataStorage['step_4'][number], string[]>>>();
     const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(apiClientCaller);
 
@@ -43,9 +43,19 @@ export const useDematAccountFormHook = () => {
                 pushUserKycState();
                 updateDepository(state.step_4.length - 1, {
                     isVerified: true,
+                    verifyTimestamp: new Date().toISOString(),
                     response: data.responseData
                 })
+                updateDepository(state.step_4.length - 1, {
+                    confirmDematTimestamp: new Date().toISOString()
+                })
             } else {
+                addAuditLog({
+                    type: "DEMATE_ACCOUNT_VERIFICATION_FAILED",
+                    desc: "Demat account verification failed during KYC process. " +
+                        `Status Code: ${data.responseData.status}, ` +
+                        `Status Description: ${statusCodes?.[data.responseData.status as keyof typeof statusCodes] || "Unknown status code"}`,
+                });
                 Swal.fire({
                     imageUrl: "/images/icons/sad-emoji.svg",
                     text: statusCodes?.[data.responseData.status as keyof typeof statusCodes] || "Something went wrong",
@@ -94,6 +104,10 @@ export const useDematAccountFormHook = () => {
 
             setError(undefined);
             verifyDematAccount.mutate();
+            addAuditLog({
+                type: "START_DEMAT_ACCOUNT_VERIFICATION",
+                desc: "User completed the Demat Account Verification step during KYC process.",
+            });
         } catch (error) {
             console.log(error);
 
@@ -110,6 +124,10 @@ export const useDematAccountFormHook = () => {
                 });
             } else {
                 console.log(error);
+                addAuditLog({
+                    type: "DEMATE_ACCOUNT_VERIFICATION_FAILED",
+                    desc: "Demat account verification failed during KYC process.",
+                });
                 Swal.fire({
 
                     imageUrl: "/images/icons/sad-emoji.svg",

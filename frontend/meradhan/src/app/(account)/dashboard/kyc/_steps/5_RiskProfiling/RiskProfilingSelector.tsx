@@ -1,6 +1,5 @@
-import React from "react";
-import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { cn } from "@/lib/utils";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
 
 function RiskProfilingSelector() {
   const { state, selectStep5RiskProfileAnswer } = useKycDataStorage();

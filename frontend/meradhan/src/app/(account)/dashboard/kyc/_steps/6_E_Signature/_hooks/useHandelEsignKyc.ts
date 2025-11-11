@@ -10,7 +10,7 @@ import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 export const useHandelEsignKyc = () => {
     const digio = useDigioSDK();
     const { nextStep, setIsComplete } = useKycStepStore();
-    const { pushUserKycState } = useKycDataProvider()
+    const { pushUserKycState, addAuditLog } = useKycDataProvider()
     const { state, setStep6Data } = useKycDataStorage();
     const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(apiClientCaller);
 
@@ -23,6 +23,10 @@ export const useHandelEsignKyc = () => {
         onSuccess: async (data) => {
             toast.success("KYC e-Sign completed successfully");
             setStep6Data("response", data);
+            addAuditLog({
+                type: "E_SIGN_KYC_COMPLETED",
+                desc: "User completed the e-Sign step during KYC process.",
+            });
             nextStep();
             setIsComplete(true);
             pushUserKycState();
@@ -45,7 +49,6 @@ export const useHandelEsignKyc = () => {
                 const kycWindow = digio.createInstance({
                     callback(response) {
                         console.log(response);
-
                         if (response.error_code) {
                             toast.error(response.message || "Something went wrong");
                         } else if (response.digio_doc_id) {
@@ -70,6 +73,11 @@ export const useHandelEsignKyc = () => {
             toast.error("Please agree to the following terms to proceed");
             return;
         }
+        addAuditLog({
+            type: "E_SIGN_STARTED",
+            desc: "e-sign process started"
+        })
+
         esignRequestMutasion.mutate();
     }
 

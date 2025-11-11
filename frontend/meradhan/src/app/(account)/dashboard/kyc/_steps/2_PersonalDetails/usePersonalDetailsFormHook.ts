@@ -7,8 +7,8 @@ import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 
 export const usePersonalDetailsFormHook = () => {
-    const { state, setStepIndex } = useKycDataStorage();
-    const { pushUserKycState } = useKycDataProvider()
+    const { state, setStepIndex, setStep2PersonalData } = useKycDataStorage();
+    const { pushUserKycState, addAuditLog } = useKycDataProvider()
     const { nextStep } = useKycStepStore();
 
     const data = state.step_2;
@@ -29,6 +29,11 @@ export const usePersonalDetailsFormHook = () => {
             appSchema.kyc.personalInfoSchema.parse(data);
 
             // this is the last `local step` for "step 2"
+            addAuditLog({
+                type: "PERSONAL_DETAILS_SUBMITTED",
+                desc: "User submitted personal details during KYC process.",
+            });
+            setStep2PersonalData("confirmPersonalInfoTimestamp", new Date().toISOString());
             setStepIndex(0);
             // this is the first `global step` for "step "
             nextStep();

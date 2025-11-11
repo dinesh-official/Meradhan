@@ -39,7 +39,6 @@ function NewBankForm({
   showCancel,
   onCancel,
   showSetDefault,
-  
 }: {
   data: BankAccountData;
   updateData: (

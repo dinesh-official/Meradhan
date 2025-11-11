@@ -26,7 +26,7 @@ function VerifyBankAccount() {
     setStepIndex,
   } = useKycDataStorage();
   const data = state.step_3;
-  const { pushUserKycState } = useKycDataProvider();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { nextStep } = useKycStepStore();
 
   const isAllowToContinue = () => {
@@ -37,6 +37,10 @@ function VerifyBankAccount() {
   };
 
   const jumpNext = () => {
+    addAuditLog({
+      type: "BANK_KYC_STEP_COMPLETED",
+      desc: "User completed the Bank Account Verification step during KYC process.",
+    });
     pushUserKycState();
     setStepIndex(0);
     nextStep();
@@ -59,9 +63,17 @@ function VerifyBankAccount() {
             })}
             setDefault={() => {
               setDefaultBankAccount(index);
+              addAuditLog({
+                type: "SET_DEFAULT_BANK_ACCOUNT",
+                desc: `User set bank account at index ${item.bankName}:${item.accountNumber}  as default during KYC process.`,
+              });
             }}
             onDelete={() => {
               removeBankAccount(index);
+              addAuditLog({
+                type: "REMOVE_BANK_ACCOUNT",
+                desc: `User removed bank account at index ${item.bankName}:${item.accountNumber} during KYC process.`,
+              });
               if (data.length === 1) {
                 addBankAccount();
                 prevLocalStep();
@@ -94,6 +106,10 @@ function VerifyBankAccount() {
               });
 
               if (result.isConfirmed) {
+                addAuditLog({
+                  type: "KYC_PROCESS_EXITED",
+                  desc: "User chose to save and exit the KYC process : Bank Account Verification step.",
+                });
                 pushUserKycState({ exit: true });
               }
             }}
@@ -105,6 +121,10 @@ function VerifyBankAccount() {
           <Button
             variant={`link`}
             onClick={() => {
+              addAuditLog({
+                type: "ADD_BANK_ACCOUNT",
+                desc: "User chose to add a new bank account during KYC process.",
+              });
               addBankAccount();
               prevLocalStep();
             }}

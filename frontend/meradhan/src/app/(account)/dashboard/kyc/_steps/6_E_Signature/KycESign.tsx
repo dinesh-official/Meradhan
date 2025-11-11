@@ -11,8 +11,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaDownload } from "react-icons/fa";
 import { MdOutlineArrowRight } from "react-icons/md";
-import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
+import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
 
 function KycESign() {
   const { handleEsignKyc, isPending } = useHandelEsignKyc();

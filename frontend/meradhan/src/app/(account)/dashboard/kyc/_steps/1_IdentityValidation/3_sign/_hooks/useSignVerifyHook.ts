@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 
 export const useSignVerifyHook = () => {
-    const { pushUserKycState } = useKycDataProvider();
+    const { pushUserKycState, addAuditLog } = useKycDataProvider();
     const { state, nextLocalStep, setStep1SignData } = useKycDataStorage();
     const digio = useDigioSDK();
 
@@ -87,6 +87,10 @@ export const useSignVerifyHook = () => {
 
     const handelSignVerification = () => {
         requestSignMutation.mutate();
+        addAuditLog({
+            type: "START_SIGN_VERIFICATION",
+            desc: "User started the KYC process : Sign Verification step.",
+        });
     }
     return {
         handelSignVerification,

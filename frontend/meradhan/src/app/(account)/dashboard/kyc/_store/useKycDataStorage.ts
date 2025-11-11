@@ -20,6 +20,7 @@ export interface PanData<T = unknown> extends z.infer<schema['kycPanInfoDataSche
 
 export interface FileData<T> {
     url: string;
+    timestamp?: string;
     response?: T;
 }
 
