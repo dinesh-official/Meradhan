@@ -92,4 +92,19 @@ export class CustomerKycApi {
         return data;
     }
 
+    async addKycAuditLog(customerId: number, action: {
+        type: string;
+        description: string;
+        timestamp?: string;
+        step?: number;
+    }, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<BaseResponseData<{ success: true }>>(`/customer/kyc/audit-log/${customerId}`, action, config);
+        return data;
+    }
+
+    async setCurrentKycStep(customerId: number, currentStepName: string, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.post<BaseResponseData<{ success: true }>>(`/customer/kyc/current-step/${customerId}`, { currentStepName }, config);
+        return data;
+    }
+
 }

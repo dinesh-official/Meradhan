@@ -27,27 +27,23 @@ export class KycStoreController {
         const data = req.body;
         const complete = req.query.complete === 'true';
 
-        const user = await db.dataBase.kYC_FLOW.findUnique({ where: { userID: id } });
 
-        if (!user) {
-            await db.dataBase.kYC_FLOW.create({
-                data: {
-                    userID: id,
 
-                }
-            })
-        }
-
-        await db.dataBase.kYC_FLOW.update({
+        await db.dataBase.kYC_FLOW.upsert({
             where: {
                 userID: id
             },
-            data: {
+            create: {
                 data: data,
                 userID: id,
                 step: Number(step),
                 complete
             },
+            update: {
+                data: data,
+                step: Number(step),
+                complete
+            }
 
         });
 
@@ -70,4 +66,46 @@ export class KycStoreController {
             responseData: level
         })
     }
+
+    async addAuditLog(req: Request, res: Response) {
+        const customerId = Number(req.params.customerId);
+
+        await db.dataBase.kYC_FLOW.updateMany({
+            where: {
+                userID: customerId
+            },
+            data: {
+                auditLog: {
+                    push: req.body
+                }
+            }
+        });
+
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: {
+                success: true
+            }
+        })
+    }
+
+    async setCurrentStep(req: Request, res: Response) {
+        const customerId = Number(req.params.customerId);
+        const currentStepName = (req.body.currentStepName);
+        await db.dataBase.kYC_FLOW.updateMany({
+            where: {
+                userID: customerId
+            },
+            data: {
+                currentStepName: currentStepName
+            }
+        });
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: {
+                success: true
+            }
+        })
+    }
+
 }

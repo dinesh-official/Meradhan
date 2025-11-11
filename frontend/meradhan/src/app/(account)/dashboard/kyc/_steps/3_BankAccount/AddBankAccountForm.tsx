@@ -1,26 +1,20 @@
 "use client";
 import {
-  KycDataStorage,
-  useKycDataStorage,
+  useKycDataStorage
 } from "../../_store/useKycDataStorage";
 import NewBankForm from "./_hooks/NewBankForm";
 import { useAddBankAccountFormHook } from "./_hooks/useAddBankAccountFormHook";
 
 function AddBankAccountForm() {
-  const { error, handleBankAccountSubmit, fetchBankIfsc, isPending } =
-    useAddBankAccountFormHook();
-  const { updateBankAccount, state, removeBankAccount, nextLocalStep } =
-    useKycDataStorage();
+  const {
+    error,
+    handleBankAccountSubmit,
+    fetchBankIfsc,
+    isPending,
+    updateData,
+  } = useAddBankAccountFormHook();
+  const { state, removeBankAccount, nextLocalStep } = useKycDataStorage();
   const data = state.step_3[state.step_3.length - 1];
-
-  const updateData = (
-    key: keyof KycDataStorage["step_3"][number],
-    data: string | boolean | unknown
-  ) => {
-    updateBankAccount(state.step_3.length - 1, {
-      [key]: data,
-    });
-  };
 
   return (
     <NewBankForm
@@ -29,6 +23,7 @@ function AddBankAccountForm() {
       error={error}
       fetchBankIfsc={() => {
         fetchBankIfsc.mutate();
+        
       }}
       isPending={isPending}
       handleBankAccountSubmit={handleBankAccountSubmit}

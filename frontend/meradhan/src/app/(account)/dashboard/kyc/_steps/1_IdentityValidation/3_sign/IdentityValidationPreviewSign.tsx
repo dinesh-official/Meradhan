@@ -27,23 +27,23 @@ function IdentityValidationPreviewSign() {
         <CardTitle className="font-normal">Confirm Signature</CardTitle>
       </CardHeader>
       <CardContent accountMode>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-col gap-5">
           <Image
             src={genMediaUrl(state.step_1.sign.url)}
             alt="PAN Card"
             width={1140}
             height={597}
-            className="bg-gray-50 border border-gray-200 rounded-2xl w-48 object-cover aspect-[4/3]"
+            className="bg-gray-50 border border-gray-200 rounded-2xl w-80 object-cover"
           />
-          <div>
+          <div className="flex flex-col gap-2">
             <p
-              className="font-medium text-primary text-lg cursor-pointer"
+              className="font-medium text-primary text-sm cursor-pointer"
               onClick={() => prevLocalStep()}
             >
               Remove and Add New Signature
             </p>
-            <SignDoNotDO data={signDrawGuidelines} >
-              <p className="text-gray-600 text-sm">(Instructions)</p>
+            <SignDoNotDO data={signDrawGuidelines}>
+              <p className="text-gray-600 text-xs">(Instructions)</p>
             </SignDoNotDO>
           </div>
         </div>
@@ -64,7 +64,7 @@ function IdentityValidationPreviewSign() {
         <Button
           onClick={async () => {
             const result = await Swal.fire({
-              text: "Are you sure you want to exit the KYC process?",
+              text: "Are you sure you want to save and exit the KYC process?",
               imageUrl: "/images/icons/sad-emoji.svg",
               showCancelButton: true,
               confirmButtonText: "Yes, Exit",

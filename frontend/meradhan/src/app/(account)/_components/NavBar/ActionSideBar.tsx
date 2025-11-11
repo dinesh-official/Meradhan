@@ -46,21 +46,21 @@ export const accountMenuItems: MenuItem[] = [
     label: "Dashboard",
     href: "/dashboard",
   },
-  {
-    icon: <FaChartPie size={18} />,
-    label: "Portfolio",
-    href: "/dashboard/portfolio",
-  },
-  {
-    icon: <HiRectangleStack size={18} />,
-    label: "My Orders",
-    href: "/dashboard/orders",
-  },
-  {
-    icon: <FaSackDollar size={18} />,
-    label: "Bond Requests",
-    href: "/dashboard/requests",
-  },
+  // {
+  //   icon: <FaChartPie size={18} />,
+  //   label: "Portfolio",
+  //   href: "/dashboard/portfolio",
+  // },
+  // {
+  //   icon: <HiRectangleStack size={18} />,
+  //   label: "My Orders",
+  //   href: "/dashboard/orders",
+  // },
+  // {
+  //   icon: <FaSackDollar size={18} />,
+  //   label: "Bond Requests",
+  //   href: "/dashboard/requests",
+  // },
   { icon: <FaUser size={18} />, label: "Profile", href: "/dashboard/profile" },
 ];
 

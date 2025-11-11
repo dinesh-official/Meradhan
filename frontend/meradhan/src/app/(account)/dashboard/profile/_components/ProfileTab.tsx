@@ -50,7 +50,7 @@ export const ProfileTabs: React.FC<TabsProps> = ({
   return (
     <div ref={containerRef} className="w-full overflow-x-auto scrollbar-hide">
       <div
-        className={`relative flex justify-start items-center gap-5 border-gray-200 border-b-[3px] min-w-[710px] w-full lg:text-base text-sm font-semibold text-gray-600 text-nowrap select-none ${
+        className={`relative flex justify-start items-center gap-5 border-gray-200 border-b-[3px] min-w-[710px] w-full  text-sm font-semibold text-gray-600 text-nowrap select-none ${
           className || ""
         }`}
       >

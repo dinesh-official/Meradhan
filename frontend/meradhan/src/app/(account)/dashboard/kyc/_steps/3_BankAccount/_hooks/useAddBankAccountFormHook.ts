@@ -20,11 +20,21 @@ export const useAddBankAccountFormHook = () => {
         key: keyof KycDataStorage["step_3"][number],
         data: string | boolean | unknown
     ) => {
+        removeError(key);
         updateBankAccount(state.step_3.length - 1, {
             [key]: data,
         });
 
     };
+
+    const removeError = (key: keyof KycDataStorage['step_3'][number]) => {
+        if (error && error[key]) {
+            const newError = { ...error };
+            delete newError[key];
+            setError(newError);
+        }
+    }
+
     const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(apiClientCaller);
 
 
@@ -34,6 +44,7 @@ export const useAddBankAccountFormHook = () => {
         onSuccess: (data) => {
             updateData("bankName", data?.responseData.BANK);
             updateData("branchName", data?.responseData.BRANCH);
+            setError(undefined);
             updateData("beneficiary_name", makeFullname({
                 firstName: state.step_1.pan.firstName,
                 middleName: state.step_1.pan.middleName,
@@ -47,6 +58,7 @@ export const useAddBankAccountFormHook = () => {
         mutationKey: ["verifyBankAccount"],
         mutationFn: async (data: KycDataStorage["step_3"][number]) => await kycApi.verifyBankAccount(data),
         onSuccess: (data) => {
+            setError(undefined);
             if (data.responseData.verified) {
                 updateData("response", data.responseData)
                 updateData("beneficiary_name", data.responseData.beneficiary_name_with_bank)
@@ -111,7 +123,8 @@ export const useAddBankAccountFormHook = () => {
         handleBankAccountSubmit,
         error,
         fetchBankIfsc,
-        isPending: verifyBankAccountMutation.isPending || fetchBankIfsc.isPending
+        isPending: verifyBankAccountMutation.isPending || fetchBankIfsc.isPending,
+        updateData
     }
 
 

@@ -9542,6 +9542,9 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
+    isAFatcaCustomer: boolean | null
+    isAPep: boolean | null
+    allowSEBITerms: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: number | null
@@ -9570,6 +9573,9 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
+    isAFatcaCustomer: boolean | null
+    isAPep: boolean | null
+    allowSEBITerms: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: number | null
@@ -9598,6 +9604,9 @@ export namespace Prisma {
     customerPersonalInfoModelId: number
     currentAddressModelId: number
     permanentAddressModelId: number
+    isAFatcaCustomer: number
+    isAPep: number
+    allowSEBITerms: number
     createdAt: number
     updatedAt: number
     createdBy: number
@@ -9654,6 +9663,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
+    isAFatcaCustomer?: true
+    isAPep?: true
+    allowSEBITerms?: true
     createdAt?: true
     updatedAt?: true
     createdBy?: true
@@ -9682,6 +9694,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
+    isAFatcaCustomer?: true
+    isAPep?: true
+    allowSEBITerms?: true
     createdAt?: true
     updatedAt?: true
     createdBy?: true
@@ -9710,6 +9725,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: true
     currentAddressModelId?: true
     permanentAddressModelId?: true
+    isAFatcaCustomer?: true
+    isAPep?: true
+    allowSEBITerms?: true
     createdAt?: true
     updatedAt?: true
     createdBy?: true
@@ -9825,6 +9843,9 @@ export namespace Prisma {
     customerPersonalInfoModelId: number | null
     currentAddressModelId: number | null
     permanentAddressModelId: number | null
+    isAFatcaCustomer: boolean
+    isAPep: boolean
+    allowSEBITerms: boolean
     createdAt: Date
     updatedAt: Date
     createdBy: number | null
@@ -9872,6 +9893,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
@@ -9911,6 +9935,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
@@ -9946,6 +9973,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
@@ -9981,13 +10011,16 @@ export namespace Prisma {
     customerPersonalInfoModelId?: boolean
     currentAddressModelId?: boolean
     permanentAddressModelId?: boolean
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
     isDeleted?: boolean
   }
 
-  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "verifyDate" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "createdAt" | "updatedAt" | "createdBy" | "isDeleted", ExtArgs["result"]["customerProfileDataModel"]>
+  export type CustomerProfileDataModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "firstName" | "middleName" | "lastName" | "gender" | "emailAddress" | "phoneNo" | "whatsAppNo" | "avatar" | "userType" | "kycStatus" | "VerifiedBy" | "verifyDate" | "customersRiskProfileModelId" | "customersAuthDataModelId" | "aADHAARCardModelId" | "panCardModelId" | "customerPersonalInfoModelId" | "currentAddressModelId" | "permanentAddressModelId" | "isAFatcaCustomer" | "isAPep" | "allowSEBITerms" | "createdAt" | "updatedAt" | "createdBy" | "isDeleted", ExtArgs["result"]["customerProfileDataModel"]>
   export type CustomerProfileDataModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     riskProfile?: boolean | CustomerProfileDataModel$riskProfileArgs<ExtArgs>
     utility?: boolean | CustomersAuthDataModelDefaultArgs<ExtArgs>
@@ -10068,6 +10101,9 @@ export namespace Prisma {
       customerPersonalInfoModelId: number | null
       currentAddressModelId: number | null
       permanentAddressModelId: number | null
+      isAFatcaCustomer: boolean
+      isAPep: boolean
+      allowSEBITerms: boolean
       createdAt: Date
       updatedAt: Date
       createdBy: number | null
@@ -10526,6 +10562,9 @@ export namespace Prisma {
     readonly customerPersonalInfoModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly currentAddressModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
     readonly permanentAddressModelId: FieldRef<"CustomerProfileDataModel", 'Int'>
+    readonly isAFatcaCustomer: FieldRef<"CustomerProfileDataModel", 'Boolean'>
+    readonly isAPep: FieldRef<"CustomerProfileDataModel", 'Boolean'>
+    readonly allowSEBITerms: FieldRef<"CustomerProfileDataModel", 'Boolean'>
     readonly createdAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomerProfileDataModel", 'DateTime'>
     readonly createdBy: FieldRef<"CustomerProfileDataModel", 'Int'>
@@ -11161,6 +11200,7 @@ export namespace Prisma {
     politicallyExposedPerson: string | null
     dateOfBirth: string | null
     signPdfUrl: string | null
+    confirmTimeStamp: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11181,6 +11221,7 @@ export namespace Prisma {
     politicallyExposedPerson: string | null
     dateOfBirth: string | null
     signPdfUrl: string | null
+    confirmTimeStamp: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11201,6 +11242,7 @@ export namespace Prisma {
     politicallyExposedPerson: number
     dateOfBirth: number
     signPdfUrl: number
+    confirmTimeStamp: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -11231,6 +11273,7 @@ export namespace Prisma {
     politicallyExposedPerson?: true
     dateOfBirth?: true
     signPdfUrl?: true
+    confirmTimeStamp?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11251,6 +11294,7 @@ export namespace Prisma {
     politicallyExposedPerson?: true
     dateOfBirth?: true
     signPdfUrl?: true
+    confirmTimeStamp?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11271,6 +11315,7 @@ export namespace Prisma {
     politicallyExposedPerson?: true
     dateOfBirth?: true
     signPdfUrl?: true
+    confirmTimeStamp?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -11378,6 +11423,7 @@ export namespace Prisma {
     politicallyExposedPerson: string | null
     dateOfBirth: string | null
     signPdfUrl: string | null
+    confirmTimeStamp: Date | null
     createdAt: Date
     updatedAt: Date
     _count: CustomerPersonalInfoModelCountAggregateOutputType | null
@@ -11417,6 +11463,7 @@ export namespace Prisma {
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
     signPdfUrl?: boolean
+    confirmTimeStamp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     customerProfileDataModel?: boolean | CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs>
@@ -11438,6 +11485,7 @@ export namespace Prisma {
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
     signPdfUrl?: boolean
+    confirmTimeStamp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -11458,6 +11506,7 @@ export namespace Prisma {
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
     signPdfUrl?: boolean
+    confirmTimeStamp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -11478,11 +11527,12 @@ export namespace Prisma {
     politicallyExposedPerson?: boolean
     dateOfBirth?: boolean
     signPdfUrl?: boolean
+    confirmTimeStamp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CustomerPersonalInfoModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "SignatureUrl" | "maritalStatus" | "occupationType" | "annualGrossIncome" | "fatherOrSpouseName" | "relationshipWithPerson" | "mothersName" | "nationality" | "maidenName" | "residentialStatus" | "qualification" | "politicallyExposedPerson" | "dateOfBirth" | "signPdfUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["customerPersonalInfoModel"]>
+  export type CustomerPersonalInfoModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "SignatureUrl" | "maritalStatus" | "occupationType" | "annualGrossIncome" | "fatherOrSpouseName" | "relationshipWithPerson" | "mothersName" | "nationality" | "maidenName" | "residentialStatus" | "qualification" | "politicallyExposedPerson" | "dateOfBirth" | "signPdfUrl" | "confirmTimeStamp" | "createdAt" | "updatedAt", ExtArgs["result"]["customerPersonalInfoModel"]>
   export type CustomerPersonalInfoModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customerProfileDataModel?: boolean | CustomerPersonalInfoModel$customerProfileDataModelArgs<ExtArgs>
   }
@@ -11510,6 +11560,7 @@ export namespace Prisma {
       politicallyExposedPerson: string | null
       dateOfBirth: string | null
       signPdfUrl: string | null
+      confirmTimeStamp: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["customerPersonalInfoModel"]>
@@ -11951,6 +12002,7 @@ export namespace Prisma {
     readonly politicallyExposedPerson: FieldRef<"CustomerPersonalInfoModel", 'String'>
     readonly dateOfBirth: FieldRef<"CustomerPersonalInfoModel", 'String'>
     readonly signPdfUrl: FieldRef<"CustomerPersonalInfoModel", 'String'>
+    readonly confirmTimeStamp: FieldRef<"CustomerPersonalInfoModel", 'DateTime'>
     readonly createdAt: FieldRef<"CustomerPersonalInfoModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomerPersonalInfoModel", 'DateTime'>
   }
@@ -12410,6 +12462,8 @@ export namespace Prisma {
     image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -12427,6 +12481,8 @@ export namespace Prisma {
     image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -12444,6 +12500,8 @@ export namespace Prisma {
     image: number
     isVerified: number
     verifyDate: number
+    confirmTimeStamp: number
+    allowTerms: number
     fileUrl: number
     createdAt: number
     updatedAt: number
@@ -12471,6 +12529,8 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     fileUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -12488,6 +12548,8 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     fileUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -12505,6 +12567,8 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     fileUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -12609,6 +12673,8 @@ export namespace Prisma {
     image: string
     isVerified: boolean
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean
     fileUrl: string
     createdAt: Date
     updatedAt: Date
@@ -12645,6 +12711,8 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -12663,6 +12731,8 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -12680,6 +12750,8 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -12697,12 +12769,14 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AADHAARCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "fatherName" | "aadhaarNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "fileUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["aADHAARCardModel"]>
+  export type AADHAARCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "fatherName" | "aadhaarNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "confirmTimeStamp" | "allowTerms" | "fileUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["aADHAARCardModel"]>
   export type AADHAARCardModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customerProfileDataModel?: boolean | AADHAARCardModel$customerProfileDataModelArgs<ExtArgs>
   }
@@ -12726,6 +12800,8 @@ export namespace Prisma {
       image: string
       isVerified: boolean
       verifyDate: Date | null
+      confirmTimeStamp: Date | null
+      allowTerms: boolean
       fileUrl: string
       createdAt: Date
       updatedAt: Date
@@ -13164,6 +13240,8 @@ export namespace Prisma {
     readonly image: FieldRef<"AADHAARCardModel", 'String'>
     readonly isVerified: FieldRef<"AADHAARCardModel", 'Boolean'>
     readonly verifyDate: FieldRef<"AADHAARCardModel", 'DateTime'>
+    readonly confirmTimeStamp: FieldRef<"AADHAARCardModel", 'DateTime'>
+    readonly allowTerms: FieldRef<"AADHAARCardModel", 'Boolean'>
     readonly fileUrl: FieldRef<"AADHAARCardModel", 'String'>
     readonly createdAt: FieldRef<"AADHAARCardModel", 'DateTime'>
     readonly updatedAt: FieldRef<"AADHAARCardModel", 'DateTime'>
@@ -13623,6 +13701,8 @@ export namespace Prisma {
     image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -13639,6 +13719,8 @@ export namespace Prisma {
     image: string | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     fileUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -13655,6 +13737,8 @@ export namespace Prisma {
     image: number
     isVerified: number
     verifyDate: number
+    confirmTimeStamp: number
+    allowTerms: number
     fileUrl: number
     createdAt: number
     updatedAt: number
@@ -13681,6 +13765,8 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     fileUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -13697,6 +13783,8 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     fileUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -13713,6 +13801,8 @@ export namespace Prisma {
     image?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     fileUrl?: true
     createdAt?: true
     updatedAt?: true
@@ -13816,6 +13906,8 @@ export namespace Prisma {
     image: string
     isVerified: boolean
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean
     fileUrl: string
     createdAt: Date
     updatedAt: Date
@@ -13851,6 +13943,8 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -13868,6 +13962,8 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -13884,6 +13980,8 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -13900,12 +13998,14 @@ export namespace Prisma {
     image?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     fileUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PanCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "panCardNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "fileUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["panCardModel"]>
+  export type PanCardModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "panCardNo" | "dateOfBirth" | "gender" | "image" | "isVerified" | "verifyDate" | "confirmTimeStamp" | "allowTerms" | "fileUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["panCardModel"]>
   export type PanCardModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customerProfileDataModel?: boolean | PanCardModel$customerProfileDataModelArgs<ExtArgs>
   }
@@ -13928,6 +14028,8 @@ export namespace Prisma {
       image: string
       isVerified: boolean
       verifyDate: Date | null
+      confirmTimeStamp: Date | null
+      allowTerms: boolean
       fileUrl: string
       createdAt: Date
       updatedAt: Date
@@ -14365,6 +14467,8 @@ export namespace Prisma {
     readonly image: FieldRef<"PanCardModel", 'String'>
     readonly isVerified: FieldRef<"PanCardModel", 'Boolean'>
     readonly verifyDate: FieldRef<"PanCardModel", 'DateTime'>
+    readonly confirmTimeStamp: FieldRef<"PanCardModel", 'DateTime'>
+    readonly allowTerms: FieldRef<"PanCardModel", 'Boolean'>
     readonly fileUrl: FieldRef<"PanCardModel", 'String'>
     readonly createdAt: FieldRef<"PanCardModel", 'DateTime'>
     readonly updatedAt: FieldRef<"PanCardModel", 'DateTime'>
@@ -17117,6 +17221,8 @@ export namespace Prisma {
     isPrimary: boolean | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     customerProfileDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -17133,6 +17239,8 @@ export namespace Prisma {
     isPrimary: boolean | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     customerProfileDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -17149,6 +17257,8 @@ export namespace Prisma {
     isPrimary: number
     isVerified: number
     verifyDate: number
+    confirmTimeStamp: number
+    allowTerms: number
     customerProfileDataModelId: number
     createdAt: number
     updatedAt: number
@@ -17177,6 +17287,8 @@ export namespace Prisma {
     isPrimary?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     customerProfileDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -17193,6 +17305,8 @@ export namespace Prisma {
     isPrimary?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     customerProfileDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -17209,6 +17323,8 @@ export namespace Prisma {
     isPrimary?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     customerProfileDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -17312,6 +17428,8 @@ export namespace Prisma {
     isPrimary: boolean
     isVerified: boolean
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean
     customerProfileDataModelId: number | null
     createdAt: Date
     updatedAt: Date
@@ -17347,6 +17465,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -17364,6 +17484,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -17381,6 +17503,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -17398,12 +17522,14 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CustomersBankAccountModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountHolderName" | "bankAccountType" | "accountNumber" | "ifscCode" | "bankName" | "branch" | "isPrimary" | "isVerified" | "verifyDate" | "customerProfileDataModelId" | "createdAt" | "updatedAt", ExtArgs["result"]["customersBankAccountModel"]>
+  export type CustomersBankAccountModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountHolderName" | "bankAccountType" | "accountNumber" | "ifscCode" | "bankName" | "branch" | "isPrimary" | "isVerified" | "verifyDate" | "confirmTimeStamp" | "allowTerms" | "customerProfileDataModelId" | "createdAt" | "updatedAt", ExtArgs["result"]["customersBankAccountModel"]>
   export type CustomersBankAccountModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     CustomerProfileDataModel?: boolean | CustomersBankAccountModel$CustomerProfileDataModelArgs<ExtArgs>
   }
@@ -17430,6 +17556,8 @@ export namespace Prisma {
       isPrimary: boolean
       isVerified: boolean
       verifyDate: Date | null
+      confirmTimeStamp: Date | null
+      allowTerms: boolean
       customerProfileDataModelId: number | null
       createdAt: Date
       updatedAt: Date
@@ -17867,6 +17995,8 @@ export namespace Prisma {
     readonly isPrimary: FieldRef<"CustomersBankAccountModel", 'Boolean'>
     readonly isVerified: FieldRef<"CustomersBankAccountModel", 'Boolean'>
     readonly verifyDate: FieldRef<"CustomersBankAccountModel", 'DateTime'>
+    readonly confirmTimeStamp: FieldRef<"CustomersBankAccountModel", 'DateTime'>
+    readonly allowTerms: FieldRef<"CustomersBankAccountModel", 'Boolean'>
     readonly customerProfileDataModelId: FieldRef<"CustomersBankAccountModel", 'Int'>
     readonly createdAt: FieldRef<"CustomersBankAccountModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomersBankAccountModel", 'DateTime'>
@@ -18339,6 +18469,8 @@ export namespace Prisma {
     isPrimary: boolean | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     customerProfileDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -18358,6 +18490,8 @@ export namespace Prisma {
     isPrimary: boolean | null
     isVerified: boolean | null
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean | null
     customerProfileDataModelId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -18377,6 +18511,8 @@ export namespace Prisma {
     isPrimary: number
     isVerified: number
     verifyDate: number
+    confirmTimeStamp: number
+    allowTerms: number
     customerProfileDataModelId: number
     createdAt: number
     updatedAt: number
@@ -18408,6 +18544,8 @@ export namespace Prisma {
     isPrimary?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     customerProfileDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -18427,6 +18565,8 @@ export namespace Prisma {
     isPrimary?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     customerProfileDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -18446,6 +18586,8 @@ export namespace Prisma {
     isPrimary?: true
     isVerified?: true
     verifyDate?: true
+    confirmTimeStamp?: true
+    allowTerms?: true
     customerProfileDataModelId?: true
     createdAt?: true
     updatedAt?: true
@@ -18552,6 +18694,8 @@ export namespace Prisma {
     isPrimary: boolean
     isVerified: boolean
     verifyDate: Date | null
+    confirmTimeStamp: Date | null
+    allowTerms: boolean
     customerProfileDataModelId: number | null
     createdAt: Date
     updatedAt: Date
@@ -18590,6 +18734,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18610,6 +18756,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18630,6 +18778,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18650,12 +18800,14 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: boolean
+    confirmTimeStamp?: boolean
+    allowTerms?: boolean
     customerProfileDataModelId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CustomersDematAccountModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "depositoryName" | "dpId" | "clientId" | "accountType" | "depositoryParticipantName" | "primaryPanNumber" | "sndPanNumber" | "trdPanNumber" | "accountHolderName" | "isPrimary" | "isVerified" | "verifyDate" | "customerProfileDataModelId" | "createdAt" | "updatedAt", ExtArgs["result"]["customersDematAccountModel"]>
+  export type CustomersDematAccountModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "depositoryName" | "dpId" | "clientId" | "accountType" | "depositoryParticipantName" | "primaryPanNumber" | "sndPanNumber" | "trdPanNumber" | "accountHolderName" | "isPrimary" | "isVerified" | "verifyDate" | "confirmTimeStamp" | "allowTerms" | "customerProfileDataModelId" | "createdAt" | "updatedAt", ExtArgs["result"]["customersDematAccountModel"]>
   export type CustomersDematAccountModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     CustomerProfileDataModel?: boolean | CustomersDematAccountModel$CustomerProfileDataModelArgs<ExtArgs>
   }
@@ -18685,6 +18837,8 @@ export namespace Prisma {
       isPrimary: boolean
       isVerified: boolean
       verifyDate: Date | null
+      confirmTimeStamp: Date | null
+      allowTerms: boolean
       customerProfileDataModelId: number | null
       createdAt: Date
       updatedAt: Date
@@ -19125,6 +19279,8 @@ export namespace Prisma {
     readonly isPrimary: FieldRef<"CustomersDematAccountModel", 'Boolean'>
     readonly isVerified: FieldRef<"CustomersDematAccountModel", 'Boolean'>
     readonly verifyDate: FieldRef<"CustomersDematAccountModel", 'DateTime'>
+    readonly confirmTimeStamp: FieldRef<"CustomersDematAccountModel", 'DateTime'>
+    readonly allowTerms: FieldRef<"CustomersDematAccountModel", 'Boolean'>
     readonly customerProfileDataModelId: FieldRef<"CustomersDematAccountModel", 'Int'>
     readonly createdAt: FieldRef<"CustomersDematAccountModel", 'DateTime'>
     readonly updatedAt: FieldRef<"CustomersDematAccountModel", 'DateTime'>
@@ -19589,6 +19745,7 @@ export namespace Prisma {
     id: number | null
     userID: number | null
     step: number | null
+    currentStepName: string | null
     complete: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -19598,6 +19755,7 @@ export namespace Prisma {
     id: number | null
     userID: number | null
     step: number | null
+    currentStepName: string | null
     complete: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -19608,6 +19766,8 @@ export namespace Prisma {
     userID: number
     step: number
     data: number
+    auditLog: number
+    currentStepName: number
     complete: number
     createdAt: number
     updatedAt: number
@@ -19631,6 +19791,7 @@ export namespace Prisma {
     id?: true
     userID?: true
     step?: true
+    currentStepName?: true
     complete?: true
     createdAt?: true
     updatedAt?: true
@@ -19640,6 +19801,7 @@ export namespace Prisma {
     id?: true
     userID?: true
     step?: true
+    currentStepName?: true
     complete?: true
     createdAt?: true
     updatedAt?: true
@@ -19650,6 +19812,8 @@ export namespace Prisma {
     userID?: true
     step?: true
     data?: true
+    auditLog?: true
+    currentStepName?: true
     complete?: true
     createdAt?: true
     updatedAt?: true
@@ -19747,6 +19911,8 @@ export namespace Prisma {
     userID: number
     step: number
     data: JsonValue | null
+    auditLog: JsonValue[]
+    currentStepName: string | null
     complete: boolean
     createdAt: Date
     updatedAt: Date
@@ -19776,6 +19942,8 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    auditLog?: boolean
+    currentStepName?: boolean
     complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -19786,6 +19954,8 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    auditLog?: boolean
+    currentStepName?: boolean
     complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -19796,6 +19966,8 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    auditLog?: boolean
+    currentStepName?: boolean
     complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -19806,12 +19978,14 @@ export namespace Prisma {
     userID?: boolean
     step?: boolean
     data?: boolean
+    auditLog?: boolean
+    currentStepName?: boolean
     complete?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type KYC_FLOWOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userID" | "step" | "data" | "complete" | "createdAt" | "updatedAt", ExtArgs["result"]["kYC_FLOW"]>
+  export type KYC_FLOWOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userID" | "step" | "data" | "auditLog" | "currentStepName" | "complete" | "createdAt" | "updatedAt", ExtArgs["result"]["kYC_FLOW"]>
 
   export type $KYC_FLOWPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KYC_FLOW"
@@ -19821,6 +19995,8 @@ export namespace Prisma {
       userID: number
       step: number
       data: Prisma.JsonValue | null
+      auditLog: Prisma.JsonValue[]
+      currentStepName: string | null
       complete: boolean
       /**
        * Timestamps
@@ -20254,6 +20430,8 @@ export namespace Prisma {
     readonly userID: FieldRef<"KYC_FLOW", 'Int'>
     readonly step: FieldRef<"KYC_FLOW", 'Int'>
     readonly data: FieldRef<"KYC_FLOW", 'Json'>
+    readonly auditLog: FieldRef<"KYC_FLOW", 'Json[]'>
+    readonly currentStepName: FieldRef<"KYC_FLOW", 'String'>
     readonly complete: FieldRef<"KYC_FLOW", 'Boolean'>
     readonly createdAt: FieldRef<"KYC_FLOW", 'DateTime'>
     readonly updatedAt: FieldRef<"KYC_FLOW", 'DateTime'>
@@ -34226,6 +34404,9 @@ export namespace Prisma {
     customerPersonalInfoModelId: 'customerPersonalInfoModelId',
     currentAddressModelId: 'currentAddressModelId',
     permanentAddressModelId: 'permanentAddressModelId',
+    isAFatcaCustomer: 'isAFatcaCustomer',
+    isAPep: 'isAPep',
+    allowSEBITerms: 'allowSEBITerms',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     createdBy: 'createdBy',
@@ -34251,6 +34432,7 @@ export namespace Prisma {
     politicallyExposedPerson: 'politicallyExposedPerson',
     dateOfBirth: 'dateOfBirth',
     signPdfUrl: 'signPdfUrl',
+    confirmTimeStamp: 'confirmTimeStamp',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -34270,6 +34452,8 @@ export namespace Prisma {
     image: 'image',
     isVerified: 'isVerified',
     verifyDate: 'verifyDate',
+    confirmTimeStamp: 'confirmTimeStamp',
+    allowTerms: 'allowTerms',
     fileUrl: 'fileUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -34289,6 +34473,8 @@ export namespace Prisma {
     image: 'image',
     isVerified: 'isVerified',
     verifyDate: 'verifyDate',
+    confirmTimeStamp: 'confirmTimeStamp',
+    allowTerms: 'allowTerms',
     fileUrl: 'fileUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -34336,6 +34522,8 @@ export namespace Prisma {
     isPrimary: 'isPrimary',
     isVerified: 'isVerified',
     verifyDate: 'verifyDate',
+    confirmTimeStamp: 'confirmTimeStamp',
+    allowTerms: 'allowTerms',
     customerProfileDataModelId: 'customerProfileDataModelId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -34358,6 +34546,8 @@ export namespace Prisma {
     isPrimary: 'isPrimary',
     isVerified: 'isVerified',
     verifyDate: 'verifyDate',
+    confirmTimeStamp: 'confirmTimeStamp',
+    allowTerms: 'allowTerms',
     customerProfileDataModelId: 'customerProfileDataModelId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -34371,6 +34561,8 @@ export namespace Prisma {
     userID: 'userID',
     step: 'step',
     data: 'data',
+    auditLog: 'auditLog',
+    currentStepName: 'currentStepName',
     complete: 'complete',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -35771,6 +35963,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
+    isAFatcaCustomer?: BoolFilter<"CustomerProfileDataModel"> | boolean
+    isAPep?: BoolFilter<"CustomerProfileDataModel"> | boolean
+    allowSEBITerms?: BoolFilter<"CustomerProfileDataModel"> | boolean
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
@@ -35809,6 +36004,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrderInput | SortOrder
     currentAddressModelId?: SortOrderInput | SortOrder
     permanentAddressModelId?: SortOrderInput | SortOrder
+    isAFatcaCustomer?: SortOrder
+    isAPep?: SortOrder
+    allowSEBITerms?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrderInput | SortOrder
@@ -35850,6 +36048,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFilter<"CustomerProfileDataModel"> | $Enums.KYCStatus
     VerifiedBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
     verifyDate?: DateTimeNullableFilter<"CustomerProfileDataModel"> | Date | string | null
+    isAFatcaCustomer?: BoolFilter<"CustomerProfileDataModel"> | boolean
+    isAPep?: BoolFilter<"CustomerProfileDataModel"> | boolean
+    allowSEBITerms?: BoolFilter<"CustomerProfileDataModel"> | boolean
     createdAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerProfileDataModel"> | Date | string
     createdBy?: IntNullableFilter<"CustomerProfileDataModel"> | number | null
@@ -35888,6 +36089,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrderInput | SortOrder
     currentAddressModelId?: SortOrderInput | SortOrder
     permanentAddressModelId?: SortOrderInput | SortOrder
+    isAFatcaCustomer?: SortOrder
+    isAPep?: SortOrder
+    allowSEBITerms?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrderInput | SortOrder
@@ -35924,6 +36128,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     currentAddressModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
     permanentAddressModelId?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
+    isAFatcaCustomer?: BoolWithAggregatesFilter<"CustomerProfileDataModel"> | boolean
+    isAPep?: BoolWithAggregatesFilter<"CustomerProfileDataModel"> | boolean
+    allowSEBITerms?: BoolWithAggregatesFilter<"CustomerProfileDataModel"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomerProfileDataModel"> | Date | string
     createdBy?: IntNullableWithAggregatesFilter<"CustomerProfileDataModel"> | number | null
@@ -35949,6 +36156,7 @@ export namespace Prisma {
     politicallyExposedPerson?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     dateOfBirth?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     signPdfUrl?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomerPersonalInfoModel"> | Date | string | null
     createdAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -35970,6 +36178,7 @@ export namespace Prisma {
     politicallyExposedPerson?: SortOrderInput | SortOrder
     dateOfBirth?: SortOrderInput | SortOrder
     signPdfUrl?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     customerProfileDataModel?: CustomerProfileDataModelOrderByWithRelationInput
@@ -35994,6 +36203,7 @@ export namespace Prisma {
     politicallyExposedPerson?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     dateOfBirth?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
     signPdfUrl?: StringNullableFilter<"CustomerPersonalInfoModel"> | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomerPersonalInfoModel"> | Date | string | null
     createdAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomerPersonalInfoModel"> | Date | string
     customerProfileDataModel?: XOR<CustomerProfileDataModelNullableScalarRelationFilter, CustomerProfileDataModelWhereInput> | null
@@ -36015,6 +36225,7 @@ export namespace Prisma {
     politicallyExposedPerson?: SortOrderInput | SortOrder
     dateOfBirth?: SortOrderInput | SortOrder
     signPdfUrl?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CustomerPersonalInfoModelCountOrderByAggregateInput
@@ -36043,6 +36254,7 @@ export namespace Prisma {
     politicallyExposedPerson?: StringNullableWithAggregatesFilter<"CustomerPersonalInfoModel"> | string | null
     dateOfBirth?: StringNullableWithAggregatesFilter<"CustomerPersonalInfoModel"> | string | null
     signPdfUrl?: StringNullableWithAggregatesFilter<"CustomerPersonalInfoModel"> | string | null
+    confirmTimeStamp?: DateTimeNullableWithAggregatesFilter<"CustomerPersonalInfoModel"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomerPersonalInfoModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomerPersonalInfoModel"> | Date | string
   }
@@ -36062,6 +36274,8 @@ export namespace Prisma {
     image?: StringFilter<"AADHAARCardModel"> | string
     isVerified?: BoolFilter<"AADHAARCardModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"AADHAARCardModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"AADHAARCardModel"> | Date | string | null
+    allowTerms?: BoolFilter<"AADHAARCardModel"> | boolean
     fileUrl?: StringFilter<"AADHAARCardModel"> | string
     createdAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
@@ -36080,6 +36294,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36101,6 +36317,8 @@ export namespace Prisma {
     image?: StringFilter<"AADHAARCardModel"> | string
     isVerified?: BoolFilter<"AADHAARCardModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"AADHAARCardModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"AADHAARCardModel"> | Date | string | null
+    allowTerms?: BoolFilter<"AADHAARCardModel"> | boolean
     fileUrl?: StringFilter<"AADHAARCardModel"> | string
     createdAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"AADHAARCardModel"> | Date | string
@@ -36119,6 +36337,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36144,6 +36364,8 @@ export namespace Prisma {
     image?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
     isVerified?: BoolWithAggregatesFilter<"AADHAARCardModel"> | boolean
     verifyDate?: DateTimeNullableWithAggregatesFilter<"AADHAARCardModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableWithAggregatesFilter<"AADHAARCardModel"> | Date | string | null
+    allowTerms?: BoolWithAggregatesFilter<"AADHAARCardModel"> | boolean
     fileUrl?: StringWithAggregatesFilter<"AADHAARCardModel"> | string
     createdAt?: DateTimeWithAggregatesFilter<"AADHAARCardModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AADHAARCardModel"> | Date | string
@@ -36163,6 +36385,8 @@ export namespace Prisma {
     image?: StringFilter<"PanCardModel"> | string
     isVerified?: BoolFilter<"PanCardModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"PanCardModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"PanCardModel"> | Date | string | null
+    allowTerms?: BoolFilter<"PanCardModel"> | boolean
     fileUrl?: StringFilter<"PanCardModel"> | string
     createdAt?: DateTimeFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"PanCardModel"> | Date | string
@@ -36180,6 +36404,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36200,6 +36426,8 @@ export namespace Prisma {
     image?: StringFilter<"PanCardModel"> | string
     isVerified?: BoolFilter<"PanCardModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"PanCardModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"PanCardModel"> | Date | string | null
+    allowTerms?: BoolFilter<"PanCardModel"> | boolean
     fileUrl?: StringFilter<"PanCardModel"> | string
     createdAt?: DateTimeFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeFilter<"PanCardModel"> | Date | string
@@ -36217,6 +36445,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36241,6 +36471,8 @@ export namespace Prisma {
     image?: StringWithAggregatesFilter<"PanCardModel"> | string
     isVerified?: BoolWithAggregatesFilter<"PanCardModel"> | boolean
     verifyDate?: DateTimeNullableWithAggregatesFilter<"PanCardModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableWithAggregatesFilter<"PanCardModel"> | Date | string | null
+    allowTerms?: BoolWithAggregatesFilter<"PanCardModel"> | boolean
     fileUrl?: StringWithAggregatesFilter<"PanCardModel"> | string
     createdAt?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PanCardModel"> | Date | string
@@ -36407,6 +36639,8 @@ export namespace Prisma {
     isPrimary?: BoolFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersBankAccountModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
+    allowTerms?: BoolFilter<"CustomersBankAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
@@ -36424,6 +36658,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36444,6 +36680,8 @@ export namespace Prisma {
     isPrimary?: BoolFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersBankAccountModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
+    allowTerms?: BoolFilter<"CustomersBankAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
@@ -36461,6 +36699,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36485,6 +36725,8 @@ export namespace Prisma {
     isPrimary?: BoolWithAggregatesFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolWithAggregatesFilter<"CustomersBankAccountModel"> | boolean
     verifyDate?: DateTimeNullableWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string | null
+    allowTerms?: BoolWithAggregatesFilter<"CustomersBankAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableWithAggregatesFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersBankAccountModel"> | Date | string
@@ -36507,6 +36749,8 @@ export namespace Prisma {
     isPrimary?: BoolFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersDematAccountModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
+    allowTerms?: BoolFilter<"CustomersDematAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
@@ -36527,6 +36771,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36550,6 +36796,8 @@ export namespace Prisma {
     isPrimary?: BoolFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersDematAccountModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
+    allowTerms?: BoolFilter<"CustomersDematAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
@@ -36570,6 +36818,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrderInput | SortOrder
+    confirmTimeStamp?: SortOrderInput | SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36597,6 +36847,8 @@ export namespace Prisma {
     isPrimary?: BoolWithAggregatesFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolWithAggregatesFilter<"CustomersDematAccountModel"> | boolean
     verifyDate?: DateTimeNullableWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string | null
+    allowTerms?: BoolWithAggregatesFilter<"CustomersDematAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableWithAggregatesFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
@@ -36610,6 +36862,8 @@ export namespace Prisma {
     userID?: IntFilter<"KYC_FLOW"> | number
     step?: IntFilter<"KYC_FLOW"> | number
     data?: JsonNullableFilter<"KYC_FLOW">
+    auditLog?: JsonNullableListFilter<"KYC_FLOW">
+    currentStepName?: StringNullableFilter<"KYC_FLOW"> | string | null
     complete?: BoolFilter<"KYC_FLOW"> | boolean
     createdAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
     updatedAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
@@ -36620,6 +36874,8 @@ export namespace Prisma {
     userID?: SortOrder
     step?: SortOrder
     data?: SortOrderInput | SortOrder
+    auditLog?: SortOrder
+    currentStepName?: SortOrderInput | SortOrder
     complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36633,6 +36889,8 @@ export namespace Prisma {
     NOT?: KYC_FLOWWhereInput | KYC_FLOWWhereInput[]
     step?: IntFilter<"KYC_FLOW"> | number
     data?: JsonNullableFilter<"KYC_FLOW">
+    auditLog?: JsonNullableListFilter<"KYC_FLOW">
+    currentStepName?: StringNullableFilter<"KYC_FLOW"> | string | null
     complete?: BoolFilter<"KYC_FLOW"> | boolean
     createdAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
     updatedAt?: DateTimeFilter<"KYC_FLOW"> | Date | string
@@ -36643,6 +36901,8 @@ export namespace Prisma {
     userID?: SortOrder
     step?: SortOrder
     data?: SortOrderInput | SortOrder
+    auditLog?: SortOrder
+    currentStepName?: SortOrderInput | SortOrder
     complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -36661,6 +36921,8 @@ export namespace Prisma {
     userID?: IntWithAggregatesFilter<"KYC_FLOW"> | number
     step?: IntWithAggregatesFilter<"KYC_FLOW"> | number
     data?: JsonNullableWithAggregatesFilter<"KYC_FLOW">
+    auditLog?: JsonNullableListFilter<"KYC_FLOW">
+    currentStepName?: StringNullableWithAggregatesFilter<"KYC_FLOW"> | string | null
     complete?: BoolWithAggregatesFilter<"KYC_FLOW"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"KYC_FLOW"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"KYC_FLOW"> | Date | string
@@ -38801,6 +39063,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -38839,6 +39104,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -38862,6 +39130,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -38900,6 +39171,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -38931,6 +39205,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -38951,6 +39228,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -38979,6 +39259,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -39000,6 +39283,7 @@ export namespace Prisma {
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
     signPdfUrl?: string | null
+    confirmTimeStamp?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutPersonalInformationInput
@@ -39021,6 +39305,7 @@ export namespace Prisma {
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
     signPdfUrl?: string | null
+    confirmTimeStamp?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedCreateNestedOneWithoutPersonalInformationInput
@@ -39041,6 +39326,7 @@ export namespace Prisma {
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutPersonalInformationNestedInput
@@ -39062,6 +39348,7 @@ export namespace Prisma {
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerProfileDataModel?: CustomerProfileDataModelUncheckedUpdateOneWithoutPersonalInformationNestedInput
@@ -39083,6 +39370,7 @@ export namespace Prisma {
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
     signPdfUrl?: string | null
+    confirmTimeStamp?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39102,6 +39390,7 @@ export namespace Prisma {
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39122,6 +39411,7 @@ export namespace Prisma {
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39137,6 +39427,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39155,6 +39447,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39172,6 +39466,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39190,6 +39486,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39208,6 +39506,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39224,6 +39524,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39241,6 +39543,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39256,6 +39560,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39273,6 +39579,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39289,6 +39597,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39306,6 +39616,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39323,6 +39635,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39338,6 +39652,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39354,6 +39670,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39529,6 +39847,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutBankAccountsInput
@@ -39545,6 +39865,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39560,6 +39882,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutBankAccountsNestedInput
@@ -39576,6 +39900,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39592,6 +39918,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39607,6 +39935,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39622,6 +39952,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39640,6 +39972,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelCreateNestedOneWithoutDematAccountsInput
@@ -39659,6 +39993,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39677,6 +40013,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     CustomerProfileDataModel?: CustomerProfileDataModelUpdateOneWithoutDematAccountsNestedInput
@@ -39696,6 +40034,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39715,6 +40055,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     customerProfileDataModelId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39733,6 +40075,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39751,6 +40095,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39760,6 +40106,8 @@ export namespace Prisma {
     userID: number
     step?: number
     data?: NullableJsonNullValueInput | InputJsonValue
+    auditLog?: KYC_FLOWCreateauditLogInput | InputJsonValue[]
+    currentStepName?: string | null
     complete?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39770,6 +40118,8 @@ export namespace Prisma {
     userID: number
     step?: number
     data?: NullableJsonNullValueInput | InputJsonValue
+    auditLog?: KYC_FLOWCreateauditLogInput | InputJsonValue[]
+    currentStepName?: string | null
     complete?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39779,6 +40129,8 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    auditLog?: KYC_FLOWUpdateauditLogInput | InputJsonValue[]
+    currentStepName?: NullableStringFieldUpdateOperationsInput | string | null
     complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39789,6 +40141,8 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    auditLog?: KYC_FLOWUpdateauditLogInput | InputJsonValue[]
+    currentStepName?: NullableStringFieldUpdateOperationsInput | string | null
     complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39799,6 +40153,8 @@ export namespace Prisma {
     userID: number
     step?: number
     data?: NullableJsonNullValueInput | InputJsonValue
+    auditLog?: KYC_FLOWCreateauditLogInput | InputJsonValue[]
+    currentStepName?: string | null
     complete?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -39808,6 +40164,8 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    auditLog?: KYC_FLOWUpdateauditLogInput | InputJsonValue[]
+    currentStepName?: NullableStringFieldUpdateOperationsInput | string | null
     complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39818,6 +40176,8 @@ export namespace Prisma {
     userID?: IntFieldUpdateOperationsInput | number
     step?: IntFieldUpdateOperationsInput | number
     data?: NullableJsonNullValueInput | InputJsonValue
+    auditLog?: KYC_FLOWUpdateauditLogInput | InputJsonValue[]
+    currentStepName?: NullableStringFieldUpdateOperationsInput | string | null
     complete?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42548,6 +42908,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
+    isAFatcaCustomer?: SortOrder
+    isAPep?: SortOrder
+    allowSEBITerms?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
@@ -42589,6 +42952,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
+    isAFatcaCustomer?: SortOrder
+    isAPep?: SortOrder
+    allowSEBITerms?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
@@ -42617,6 +42983,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: SortOrder
     currentAddressModelId?: SortOrder
     permanentAddressModelId?: SortOrder
+    isAFatcaCustomer?: SortOrder
+    isAPep?: SortOrder
+    allowSEBITerms?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
@@ -42682,6 +43051,7 @@ export namespace Prisma {
     politicallyExposedPerson?: SortOrder
     dateOfBirth?: SortOrder
     signPdfUrl?: SortOrder
+    confirmTimeStamp?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -42706,6 +43076,7 @@ export namespace Prisma {
     politicallyExposedPerson?: SortOrder
     dateOfBirth?: SortOrder
     signPdfUrl?: SortOrder
+    confirmTimeStamp?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -42726,6 +43097,7 @@ export namespace Prisma {
     politicallyExposedPerson?: SortOrder
     dateOfBirth?: SortOrder
     signPdfUrl?: SortOrder
+    confirmTimeStamp?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -42753,6 +43125,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -42774,6 +43148,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -42791,6 +43167,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -42821,6 +43199,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -42841,6 +43221,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -42857,6 +43239,8 @@ export namespace Prisma {
     image?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     fileUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -42971,6 +43355,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -42992,6 +43378,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -43008,6 +43396,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -43046,6 +43436,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -43070,6 +43462,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -43089,6 +43483,8 @@ export namespace Prisma {
     isPrimary?: SortOrder
     isVerified?: SortOrder
     verifyDate?: SortOrder
+    confirmTimeStamp?: SortOrder
+    allowTerms?: SortOrder
     customerProfileDataModelId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -43147,6 +43543,8 @@ export namespace Prisma {
     userID?: SortOrder
     step?: SortOrder
     data?: SortOrder
+    auditLog?: SortOrder
+    currentStepName?: SortOrder
     complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -43162,6 +43560,7 @@ export namespace Prisma {
     id?: SortOrder
     userID?: SortOrder
     step?: SortOrder
+    currentStepName?: SortOrder
     complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -43171,6 +43570,7 @@ export namespace Prisma {
     id?: SortOrder
     userID?: SortOrder
     step?: SortOrder
+    currentStepName?: SortOrder
     complete?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -45410,6 +45810,15 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerProfileDataModelUpdateToOneWithWhereWithoutDematAccountsInput, CustomerProfileDataModelUpdateWithoutDematAccountsInput>, CustomerProfileDataModelUncheckedUpdateWithoutDematAccountsInput>
   }
 
+  export type KYC_FLOWCreateauditLogInput = {
+    set: InputJsonValue[]
+  }
+
+  export type KYC_FLOWUpdateauditLogInput = {
+    set?: InputJsonValue[]
+    push?: InputJsonValue | InputJsonValue[]
+  }
+
   export type CRMUserDataModelCreateNestedOneWithoutLeadsModelInput = {
     create?: XOR<CRMUserDataModelCreateWithoutLeadsModelInput, CRMUserDataModelUncheckedCreateWithoutLeadsModelInput>
     connectOrCreate?: CRMUserDataModelCreateOrConnectWithoutLeadsModelInput
@@ -46886,6 +47295,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -46922,6 +47334,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -47001,6 +47416,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -47037,6 +47455,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -47111,6 +47532,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -47128,6 +47551,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -47148,6 +47573,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -47164,6 +47591,8 @@ export namespace Prisma {
     image: string
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     fileUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -47189,6 +47618,7 @@ export namespace Prisma {
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
     signPdfUrl?: string | null
+    confirmTimeStamp?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -47209,6 +47639,7 @@ export namespace Prisma {
     politicallyExposedPerson?: string | null
     dateOfBirth?: string | null
     signPdfUrl?: string | null
+    confirmTimeStamp?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -47300,6 +47731,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -47315,6 +47748,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -47342,6 +47777,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -47360,6 +47797,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -47476,6 +47915,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47493,6 +47934,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47519,6 +47962,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47535,6 +47980,8 @@ export namespace Prisma {
     image?: StringFieldUpdateOperationsInput | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     fileUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -47566,6 +48013,7 @@ export namespace Prisma {
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -47586,6 +48034,7 @@ export namespace Prisma {
     politicallyExposedPerson?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableStringFieldUpdateOperationsInput | string | null
     signPdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -47704,6 +48153,8 @@ export namespace Prisma {
     isPrimary?: BoolFilter<"CustomersBankAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersBankAccountModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomersBankAccountModel"> | Date | string | null
+    allowTerms?: BoolFilter<"CustomersBankAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableFilter<"CustomersBankAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersBankAccountModel"> | Date | string
@@ -47742,6 +48193,8 @@ export namespace Prisma {
     isPrimary?: BoolFilter<"CustomersDematAccountModel"> | boolean
     isVerified?: BoolFilter<"CustomersDematAccountModel"> | boolean
     verifyDate?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
+    confirmTimeStamp?: DateTimeNullableFilter<"CustomersDematAccountModel"> | Date | string | null
+    allowTerms?: BoolFilter<"CustomersDematAccountModel"> | boolean
     customerProfileDataModelId?: IntNullableFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeFilter<"CustomersDematAccountModel"> | Date | string
@@ -47781,6 +48234,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -47817,6 +48273,9 @@ export namespace Prisma {
     panCardModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -47856,6 +48315,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -47892,6 +48354,9 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -47915,6 +48380,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -47951,6 +48419,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -47990,6 +48461,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48026,6 +48500,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48049,6 +48526,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48085,6 +48565,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48124,6 +48607,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48160,6 +48646,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48183,6 +48672,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48219,6 +48711,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48258,6 +48753,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48294,6 +48792,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48317,6 +48818,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48353,6 +48857,9 @@ export namespace Prisma {
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48381,6 +48888,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48417,6 +48927,9 @@ export namespace Prisma {
     panCardModelId?: number | null
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48456,6 +48969,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48492,6 +49008,9 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48526,6 +49045,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48562,6 +49084,9 @@ export namespace Prisma {
     panCardModelId?: NullableIntFieldUpdateOperationsInput | number | null
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48585,6 +49110,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48622,6 +49150,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48660,6 +49191,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48697,6 +49231,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48719,6 +49256,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48756,6 +49296,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48794,6 +49337,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48831,6 +49377,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -48927,6 +49476,9 @@ export namespace Prisma {
     kycStatus?: $Enums.KYCStatus
     VerifiedBy?: number | null
     verifyDate?: Date | string | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -48964,6 +49516,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: number | null
     currentAddressModelId?: number | null
     permanentAddressModelId?: number | null
+    isAFatcaCustomer?: boolean
+    isAPep?: boolean
+    allowSEBITerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: number | null
@@ -49068,6 +49623,9 @@ export namespace Prisma {
     kycStatus?: EnumKYCStatusFieldUpdateOperationsInput | $Enums.KYCStatus
     VerifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -49105,6 +49663,9 @@ export namespace Prisma {
     customerPersonalInfoModelId?: NullableIntFieldUpdateOperationsInput | number | null
     currentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
     permanentAddressModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    isAFatcaCustomer?: BoolFieldUpdateOperationsInput | boolean
+    isAPep?: BoolFieldUpdateOperationsInput | boolean
+    allowSEBITerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -49770,6 +50331,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -49788,6 +50351,8 @@ export namespace Prisma {
     isPrimary?: boolean
     isVerified?: boolean
     verifyDate?: Date | string | null
+    confirmTimeStamp?: Date | string | null
+    allowTerms?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -49802,6 +50367,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -49817,6 +50384,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -49832,6 +50401,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -49849,6 +50420,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -49867,6 +50440,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -49885,6 +50460,8 @@ export namespace Prisma {
     isPrimary?: BoolFieldUpdateOperationsInput | boolean
     isVerified?: BoolFieldUpdateOperationsInput | boolean
     verifyDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allowTerms?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -230,6 +230,9 @@ exports.Prisma.CustomerProfileDataModelScalarFieldEnum = {
   customerPersonalInfoModelId: 'customerPersonalInfoModelId',
   currentAddressModelId: 'currentAddressModelId',
   permanentAddressModelId: 'permanentAddressModelId',
+  isAFatcaCustomer: 'isAFatcaCustomer',
+  isAPep: 'isAPep',
+  allowSEBITerms: 'allowSEBITerms',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   createdBy: 'createdBy',
@@ -252,6 +255,7 @@ exports.Prisma.CustomerPersonalInfoModelScalarFieldEnum = {
   politicallyExposedPerson: 'politicallyExposedPerson',
   dateOfBirth: 'dateOfBirth',
   signPdfUrl: 'signPdfUrl',
+  confirmTimeStamp: 'confirmTimeStamp',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -268,6 +272,8 @@ exports.Prisma.AADHAARCardModelScalarFieldEnum = {
   image: 'image',
   isVerified: 'isVerified',
   verifyDate: 'verifyDate',
+  confirmTimeStamp: 'confirmTimeStamp',
+  allowTerms: 'allowTerms',
   fileUrl: 'fileUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -284,6 +290,8 @@ exports.Prisma.PanCardModelScalarFieldEnum = {
   image: 'image',
   isVerified: 'isVerified',
   verifyDate: 'verifyDate',
+  confirmTimeStamp: 'confirmTimeStamp',
+  allowTerms: 'allowTerms',
   fileUrl: 'fileUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -322,6 +330,8 @@ exports.Prisma.CustomersBankAccountModelScalarFieldEnum = {
   isPrimary: 'isPrimary',
   isVerified: 'isVerified',
   verifyDate: 'verifyDate',
+  confirmTimeStamp: 'confirmTimeStamp',
+  allowTerms: 'allowTerms',
   customerProfileDataModelId: 'customerProfileDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -341,6 +351,8 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
   isPrimary: 'isPrimary',
   isVerified: 'isVerified',
   verifyDate: 'verifyDate',
+  confirmTimeStamp: 'confirmTimeStamp',
+  allowTerms: 'allowTerms',
   customerProfileDataModelId: 'customerProfileDataModelId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -351,6 +363,8 @@ exports.Prisma.KYC_FLOWScalarFieldEnum = {
   userID: 'userID',
   step: 'step',
   data: 'data',
+  auditLog: 'auditLog',
+  currentStepName: 'currentStepName',
   complete: 'complete',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

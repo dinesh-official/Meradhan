@@ -1,9 +1,11 @@
 model KYC_FLOW {
-    id       Int     @id @default(autoincrement())
-    userID   Int     @unique
-    step     Int     @default(1)
-    data     Json?
-    complete Boolean @default(false)
+    id              Int     @id @default(autoincrement())
+    userID          Int     @unique
+    step            Int     @default(1)
+    data            Json?
+    auditLog        Json[]
+    currentStepName String? @default("Not Started")
+    complete        Boolean @default(false)
 
     /// Timestamps
     createdAt DateTime @default(now())

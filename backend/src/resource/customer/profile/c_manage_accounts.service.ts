@@ -67,7 +67,7 @@ export class CustomerManageAccountsService {
         });
 
         if (!bankAccount) {
-            throw new AppError("Bank account not found.");
+            throw new AppError("Bank Account Numbert found.");
         }
 
         if (bankAccount.isPrimary) {
@@ -92,7 +92,7 @@ export class CustomerManageAccountsService {
         });
 
         if (!bankAccount) {
-            throw new AppError("Bank account not found.");
+            throw new AppError("Bank Account Numbert found.");
         }
 
         // Unset existing primary account
@@ -172,7 +172,7 @@ export class CustomerManageAccountsService {
         });
 
         if (!dematAccount) {
-            throw new AppError("Demat account not found.");
+            throw new AppError("Demat Account Numbert found.");
         }
 
         if (dematAccount.isPrimary) {
@@ -197,7 +197,7 @@ export class CustomerManageAccountsService {
         });
 
         if (!dematAccount) {
-            throw new AppError("Demat account not found.");
+            throw new AppError("Demat Account Numbert found.");
         }
 
         if (dematAccount.isPrimary) {

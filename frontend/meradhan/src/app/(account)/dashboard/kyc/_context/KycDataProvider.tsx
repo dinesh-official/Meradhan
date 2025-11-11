@@ -14,6 +14,7 @@ import { useKycDataStorage } from "../_store/useKycDataStorage";
 import { useKycStepStore } from "../_store/useKycStepStore";
 import { BiLoaderCircle } from "react-icons/bi";
 import { useRouter } from "nextjs-toploader/app";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 
 type TCallBack = {
   exit?: boolean;
@@ -25,6 +26,8 @@ interface KycContextType {
   pushUserKycState: (e?: TCallBack) => void;
   pullUserKycState: () => void;
   isLoading: boolean;
+  setCurrentStep: (currentStepName: string) => void;
+  addAuditLog: (data: { desc: string; type: string }) => void;
 }
 
 const KycDataContext = createContext<KycContextType | undefined>(undefined);
@@ -35,6 +38,7 @@ function KycDataProvider({ children }: { children: ReactNode }) {
 
   const kycDataStorage = useKycDataStorage();
   const kycStep = useKycStepStore();
+  const { cookies } = useAppCookie();
 
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
@@ -90,6 +94,39 @@ function KycDataProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const addAuditLogMutation = useMutation({
+    mutationKey: ["addKycAuditLog"],
+    mutationFn: async ({ desc, type }: { type: string; desc: string }) => {
+      await api.addKycAuditLog(Number(cookies.userId), {
+        type: type,
+        description: desc,
+        step: kycDataStorage.state.stepIndex,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to add KYC audit log:", error);
+    },
+  });
+
+  const setCurrentStepMutation = useMutation({
+    mutationKey: ["setCurrentKycStep"],
+    mutationFn: async (currentStepName: string) => {
+      await api.setCurrentKycStep(Number(cookies.userId), currentStepName);
+    },
+    onError: (error) => {
+      console.error("Failed to set current KYC step:", error);
+    },
+  });
+
+  const addAuditLog = (data: { desc: string; type: string }) => {
+    addAuditLogMutation.mutate(data);
+  };
+
+  const setCurrentStep = (currentStepName: string) => {
+    setCurrentStepMutation.mutate(currentStepName);
+  };
+
   const pushUserKycState = (e?: TCallBack) =>
     pushUserKycProgressMutation.mutate(e);
   const pullUserKycState = () => pullUserKycProgressMutation.mutate();
@@ -106,6 +143,8 @@ function KycDataProvider({ children }: { children: ReactNode }) {
         pushUserKycState,
         pullUserKycState,
         isLoading,
+        setCurrentStep,
+        addAuditLog,
       }}
     >
       {/* Loading Overlay */}
@@ -114,7 +153,6 @@ function KycDataProvider({ children }: { children: ReactNode }) {
           <BiLoaderCircle className="text-primary animate-spin" size={40} />
         </div>
       )}
-
       {children}
     </KycDataContext.Provider>
   );

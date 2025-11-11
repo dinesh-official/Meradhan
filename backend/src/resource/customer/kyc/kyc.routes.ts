@@ -33,6 +33,8 @@ const storeKyc = new KycStoreController();
 kycRoutes.get("/api/customer/kyc/store/get", customerAuthMiddleware, (req, res) => storeKyc.getKycData(req, res));
 kycRoutes.post("/api/customer/kyc/store/:step", customerAuthMiddleware, (req, res) => storeKyc.setKycData(req, res));
 kycRoutes.get("/api/customer/kyc/level/:customerId", (req, res) => storeKyc.setKycLevel(req, res));
+kycRoutes.post("/api/customer/kyc/audit-log/:customerId", customerAuthMiddleware, (req, res) => storeKyc.addAuditLog(req, res));
+kycRoutes.post("/api/customer/kyc/current-step/:customerId", customerAuthMiddleware, (req, res) => storeKyc.setCurrentStep(req, res));
 
 
 

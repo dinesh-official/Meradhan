@@ -77,7 +77,7 @@ export default function SignDoNotDO({
           />
           <GuidelineList
             title="Don’ts"
-            icon={<IoIosCloseCircle size={20} className="text-red-600" />}
+            icon={<IoIosCloseCircle size={18} className="text-red-600" />}
             items={data.donts}
           />
         </div>
@@ -108,8 +108,8 @@ function GuidelineList({
       <p className="font-medium text-lg">{title}</p>
       <ul className="flex flex-col gap-3 mt-3">
         {items.map((item, idx) => (
-          <li key={idx} className="flex items-start gap-2 text-sm lg:text-base">
-            <span className="min-w-5">{icon}</span>
+          <li key={idx} className="flex items-start gap-2 text-sm">
+            <span className="mt-1 min-w-5">{icon}</span>
             <span>{item}</span>
           </li>
         ))}

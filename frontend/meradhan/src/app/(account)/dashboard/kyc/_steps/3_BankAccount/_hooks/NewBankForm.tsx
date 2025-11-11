@@ -39,6 +39,7 @@ function NewBankForm({
   showCancel,
   onCancel,
   showSetDefault,
+  
 }: {
   data: BankAccountData;
   updateData: (
@@ -83,7 +84,7 @@ function NewBankForm({
               </Select>
             </LabelInput>
             <LabelInput
-              label="Account NO"
+              label="Account Number"
               required
               error={error?.accountNumber?.[0]}
             >
@@ -138,12 +139,13 @@ function NewBankForm({
               </label>
             )}
           </div>
-          <label className="flex lg:items-center gap-3 text-sm">
+          <label className="flex gap-3 text-sm">
             <Checkbox
               onClick={() => {
                 updateData("checkTerms", !data?.checkTerms);
               }}
               checked={data?.checkTerms}
+              className="mt-0.5"
             />
             <p>
               I hereby authorise MeraDhan to verify the bank account details

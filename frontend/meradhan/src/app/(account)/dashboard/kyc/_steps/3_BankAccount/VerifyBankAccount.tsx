@@ -86,7 +86,7 @@ function VerifyBankAccount() {
             variant={`link`}
             onClick={async () => {
               const result = await Swal.fire({
-                text: "Are you sure you want to exit the KYC process?",
+                text: "Are you sure you want to save and exit the KYC process?",
                 imageUrl: "/images/icons/sad-emoji.svg",
                 showCancelButton: true,
                 confirmButtonText: "Yes, Exit",

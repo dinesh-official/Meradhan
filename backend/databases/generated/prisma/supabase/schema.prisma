@@ -203,6 +203,10 @@ model CustomerProfileDataModel {
 
   nseDataSet NseDataSet?
 
+  isAFatcaCustomer Boolean @default(false)
+  isAPep           Boolean @default(false)
+  allowSEBITerms   Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   createdBy Int?
@@ -231,7 +235,8 @@ model CustomerPersonalInfoModel {
   politicallyExposedPerson String?
   dateOfBirth              String?
   signPdfUrl               String?
-
+  confirmTimeStamp         DateTime?
+  // allowTerms               Boolean                   @default(false)
   // 1-to-1 back reference
   customerProfileDataModel CustomerProfileDataModel?
 
@@ -254,9 +259,11 @@ model AADHAARCardModel {
   gender      Gender
   image       String
 
-  isVerified Boolean   @default(false)
-  verifyDate DateTime?
-  fileUrl    String
+  isVerified       Boolean   @default(false)
+  verifyDate       DateTime?
+  confirmTimeStamp DateTime?
+  allowTerms       Boolean   @default(false)
+  fileUrl          String
 
   // 1-to-1 back reference
   customerProfileDataModel CustomerProfileDataModel?
@@ -271,16 +278,18 @@ model AADHAARCardModel {
 model PanCardModel {
   id Int @id @default(autoincrement())
 
-  firstName   String
-  middleName  String?
-  lastName    String
-  panCardNo   String
-  dateOfBirth String
-  gender      Gender
-  image       String
-  isVerified  Boolean   @default(false)
-  verifyDate  DateTime?
-  fileUrl     String
+  firstName        String
+  middleName       String?
+  lastName         String
+  panCardNo        String
+  dateOfBirth      String
+  gender           Gender
+  image            String
+  isVerified       Boolean   @default(false)
+  verifyDate       DateTime?
+  confirmTimeStamp DateTime?
+  allowTerms       Boolean   @default(false)
+  fileUrl          String
 
   // 1-to-1 back reference
   customerProfileDataModel CustomerProfileDataModel?
@@ -341,9 +350,11 @@ model CustomersBankAccountModel {
   bankName          String
   branch            String
 
-  isPrimary  Boolean   @default(false)
-  isVerified Boolean   @default(false)
-  verifyDate DateTime?
+  isPrimary        Boolean   @default(false)
+  isVerified       Boolean   @default(false)
+  verifyDate       DateTime?
+  confirmTimeStamp DateTime?
+  allowTerms       Boolean   @default(false)
 
   CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
   customerProfileDataModelId Int?
@@ -369,9 +380,11 @@ model CustomersDematAccountModel {
   trdPanNumber      String?
   accountHolderName String
 
-  isPrimary  Boolean   @default(false)
-  isVerified Boolean   @default(false)
-  verifyDate DateTime?
+  isPrimary        Boolean   @default(false)
+  isVerified       Boolean   @default(false)
+  verifyDate       DateTime?
+  confirmTimeStamp DateTime?
+  allowTerms       Boolean   @default(false)
 
   CustomerProfileDataModel   CustomerProfileDataModel? @relation(fields: [customerProfileDataModelId], references: [id])
   customerProfileDataModelId Int?
@@ -483,11 +496,13 @@ enum BondType {
 }
 
 model KYC_FLOW {
-  id       Int     @id @default(autoincrement())
-  userID   Int     @unique
-  step     Int     @default(1)
-  data     Json?
-  complete Boolean @default(false)
+  id              Int     @id @default(autoincrement())
+  userID          Int     @unique
+  step            Int     @default(1)
+  data            Json?
+  auditLog        Json[]
+  currentStepName String? @default("Not Started")
+  complete        Boolean @default(false)
 
   /// Timestamps
   createdAt DateTime @default(now())

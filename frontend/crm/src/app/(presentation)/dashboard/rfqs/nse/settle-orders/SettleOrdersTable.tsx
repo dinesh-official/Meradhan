@@ -409,7 +409,7 @@ function SettleOrdersTable({
           },
           {
             key: "accountNo",
-            label: "Account No",
+            label: "Account Number",
             cell(row) {
               return (
                 <span className="font-mono text-sm">

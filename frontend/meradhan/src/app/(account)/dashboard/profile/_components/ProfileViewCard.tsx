@@ -38,7 +38,7 @@ function ProfileViewCard({
           </div>
         </div>
 
-        <div className="flex sm:flex-row justify-between md:justify-end items-center gap-3 lg:gap-5 w-full md:w-auto text-center">
+        <div className="flex sm:flex-col justify-between md:justify-end items-center gap-3 lg:gap-5 w-full md:w-auto text-center">
           <p
             className={cn(
               "flex items-center gap-2 font-medium text-secondary text-lg",

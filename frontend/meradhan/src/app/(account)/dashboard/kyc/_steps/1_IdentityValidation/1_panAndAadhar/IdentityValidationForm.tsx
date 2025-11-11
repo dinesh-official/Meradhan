@@ -1,5 +1,6 @@
 "use client";
 import LabelInput from "@/app/(account)/_components/wrapper/LableInput";
+import { DatePicker } from "@/components/custom/DatePicker";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,14 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import React from "react";
-import { MdOutlineArrowRight } from "react-icons/md";
-import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { useKycDataProvider } from "../../../_context/KycDataProvider";
-import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
-import { DatePicker } from "@/components/custom/DatePicker";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { MdOutlineArrowRight } from "react-icons/md";
 import Swal from "sweetalert2";
+import { useKycDataProvider } from "../../../_context/KycDataProvider";
+import { useKycDataStorage } from "../../../_store/useKycDataStorage";
+import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -54,6 +53,7 @@ function IdentityValidationForm() {
               required
               error={error?.dateOfBirth?.[0]}
             >
+              {/* <DatePickerWithEdit/> */}
               {/* // fix date formatting issue */}
               <DatePicker
                 value={
@@ -188,7 +188,7 @@ function IdentityValidationForm() {
           variant="link"
           onClick={async () => {
             const result = await Swal.fire({
-              text: "Are you sure you want to exit the KYC process?",
+              text: "Are you sure you want to save and exit the KYC process?",
               imageUrl: "/images/icons/sad-emoji.svg",
               showCancelButton: true,
               confirmButtonText: "Yes, Exit",

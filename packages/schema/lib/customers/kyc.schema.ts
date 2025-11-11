@@ -19,12 +19,16 @@ export const kycPanInfoDataSchema = z.object({
         .boolean()
         .refine(val => val === true, { message: "Please confirm that you are not debarred from accessing or dealing in the securities market." }),
     isFatca: z.boolean({ error: 'Please confirm that you are solely a tax resident of India (FATCA).' }).refine(val => val === true, { message: "Please confirm that you are solely a tax resident of India (FATCA)." }),
+
+    confirmPanTimestamp: z.string().optional(),
+    confirmAadhaarTimestamp: z.string().optional(),
 })
 
 export const selfieSignRequestSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     middleName: z.string().optional(), // can be empty
     lastName: z.string().min(1, "Last name is required"),
+    confirmSelfieTimestamp: z.string().optional(),
 })
 
 export const personalInfoSchema = z.object({
@@ -37,6 +41,7 @@ export const personalInfoSchema = z.object({
     motherName: z.string().min(1, "Mother's name is required"),
     nationality: z.string().min(1, "Nationality is required"),
     residentialStatus: z.string().min(1, "Residential status is required"),
+    confirmPersonalInfoTimestamp: z.string().optional(),
 });
 
 export const bankInfoSchema = z.object({
@@ -44,12 +49,12 @@ export const bankInfoSchema = z.object({
     bankName: z.string().min(1, "Bank name is required"),
     branchName: z.string().min(1, "Branch name is required"),
     ifscCode: z
-        .string()
+        .string().min(1, "IFSC code is required")
         .min(11, "IFSC code must be 11 characters")
         .max(11, "IFSC code must be 11 characters")
         .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format"),
     accountNumber: z
-        .string()
+        .string({ error: "Account number is required" }).min(1, "Account number is required")
         .min(8, "Account number must be at least 8 digits")
         .max(18, "Account number cannot exceed 18 digits")
         .regex(/^[0-9]+$/, "Account number must contain digits only"),
@@ -58,6 +63,9 @@ export const bankInfoSchema = z.object({
         .boolean()
         .refine(val => val === true, { message: "Authorization to verify your bank account via a ₹1 validation transfer is required." }),
     beneficiary_name: z.string().min(1, "Beneficiary name is required"),
+    confirmBankTimestamp: z.string().optional(),
+    verifyTimestamp: z.string().optional(),
+
 });
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 
@@ -75,7 +83,7 @@ export const dpAccountInfoSchema = z
 
         depositoryParticipantName: z
             .string().optional(),
-            // .min(1, "Depository participant name is required"),
+        // .min(1, "Depository participant name is required"),
 
 
         //  pan numbers validation not here, handled separately
@@ -120,6 +128,8 @@ export const dpAccountInfoSchema = z
         checkTerms: z
             .boolean()
             .refine((val) => val === true, { message: "Authorization to verify Demat account details is required." }),
+        confirmDematTimestamp: z.string().optional(),
+        verifyTimestamp: z.string().optional(),
     }).superRefine((_data, _ctx) => {
 
         if (_data.depositoryName === "NSDL") {

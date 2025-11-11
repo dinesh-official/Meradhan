@@ -12,7 +12,15 @@ import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import Swal from "sweetalert2";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { KycSelfieGuide } from "./IdentityValidationCaptureSelfie";
 function IdentityValidationSelfiePreview() {
   const { pushUserKycState } = useKycDataProvider();
   const { state, nextLocalStep, prevLocalStep } = useKycDataStorage();
@@ -32,12 +40,20 @@ function IdentityValidationSelfiePreview() {
           />
           <div>
             <p
-              className="font-medium text-primary text-lg cursor-pointer"
+              className="font-medium text-primary text-sm cursor-pointer"
               onClick={() => prevLocalStep()}
             >
               Recapture
             </p>
-            <p className="text-gray-600 text-sm">(Instructions)</p>
+
+            <Dialog>
+              <DialogTrigger>min
+                <p className="text-gray-600 text-xs cursor-pointer">(Instructions)</p>
+              </DialogTrigger>
+              <DialogContent className="lg:min-w-[800px]" >
+                <KycSelfieGuide />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </CardContent>
@@ -55,7 +71,7 @@ function IdentityValidationSelfiePreview() {
           variant={`link`}
           onClick={async () => {
             const result = await Swal.fire({
-              text: "Are you sure you want to exit the KYC process?",
+              text: "Are you sure you want to save and exit the KYC process?",
               imageUrl: "/images/icons/sad-emoji.svg",
               showCancelButton: true,
               confirmButtonText: "Yes, Exit",
