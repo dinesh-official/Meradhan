@@ -1,8 +1,6 @@
 import { Image, Text, View } from "@react-pdf/renderer";
-import React from "react";
 import { tw } from "../MdPdf";
-import { T_USER_DATA } from "../data";
-import { formatDate, strApi } from "../helper";
+
 
 function Page4(data: {
   name: string;

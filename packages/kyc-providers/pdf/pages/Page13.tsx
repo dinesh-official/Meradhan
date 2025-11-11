@@ -3,7 +3,7 @@ import React from "react";
 import { tw } from "../MdPdf";
 import TextFiled from "../elements/TextFiled";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
-import { strApi } from "../helper";
+
 
 function Page13({
   introducerName = "",

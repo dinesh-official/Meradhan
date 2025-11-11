@@ -1,10 +1,9 @@
 import React from "react";
-import { T_USER_DATA } from "../data";
+
 import { Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
-import TextFiled from "../elements/TextFiled";
-import { CheckBoxRow } from "../elements/CheckBoxRow";
+
 const dataL = [
   {
     nominee: "A",

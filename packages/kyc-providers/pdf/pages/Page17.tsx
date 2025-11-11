@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 import DemateAccount from "../elements/DemateAccount";

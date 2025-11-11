@@ -1,7 +1,7 @@
 import { Image, Text, View } from "@react-pdf/renderer";
 import React from "react";
 import { tw } from "../MdPdf";
-import { strApi } from "../helper";
+
 
 function Page42({
   firstName = "",
@@ -22,7 +22,7 @@ function Page42({
 
   // Signature URL
   const signature = signatureUrl
-    ? strApi + signatureUrl
+    ? signatureUrl
     : "https://via.placeholder.com/150x50?text=Signature";
 
   return (

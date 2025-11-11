@@ -3,8 +3,7 @@ import React from "react";
 import { tw } from "../MdPdf";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
 import TextFiled from "../elements/TextFiled";
-import { T_USER_DATA } from "../data";
-import { strApi } from "../helper";
+
 
 function Page11({
   primaryBank,

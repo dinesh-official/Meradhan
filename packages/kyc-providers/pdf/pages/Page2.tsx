@@ -2,8 +2,7 @@ import { Text, View } from "@react-pdf/renderer";
 import React from "react";
 import { tw } from "../MdPdf";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
-import { getSortCode, T_USER_DATA } from "../data";
-import { getVillageCity, splitAddress } from "../helper";
+
 
 type Address = {
   addressType: "RESIDENTIAL" | "BUSINESS" | "REG_OFFICE" | "UNSPECIFIED";

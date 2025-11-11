@@ -4,7 +4,7 @@ import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
 import TextFiled from "../elements/TextFiled";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
-import { strApi } from "../helper";
+
 
 function Page39({
   firstName = "",
@@ -24,7 +24,7 @@ function Page39({
 
   // Signature URL
   const signature = signatureUrl
-    ? strApi + signatureUrl
+    ?  signatureUrl
     : "https://via.placeholder.com/120x40?text=Sign";
 
   return (

@@ -59,7 +59,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
       </View>
       {TableData1.map((e, i) => {
         return (
-          <View style={tw(`border-b mx-auto flex flex-row border-gray-200`)}>
+          <View style={tw(`border-b mx-auto flex flex-row border-gray-200`)} key={i} >
             <View style={tw(`w-[40%] border-r border-gray-200 p-2  flex `)}>
               <Text style={{ lineHeight: 0.6 }}>{e.name}</Text>
             </View>

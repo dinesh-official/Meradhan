@@ -2,7 +2,7 @@ import { Text, View } from "@react-pdf/renderer";
 import React from "react";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
-import { T_USER_DATA } from "../data";
+
 
 function Page41() {
   return (

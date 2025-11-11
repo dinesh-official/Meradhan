@@ -1,5 +1,4 @@
-import { Text, View } from "@react-pdf/renderer";
-import React from "react";
+import { View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
 

@@ -2,8 +2,8 @@ import { Image, Text, View } from "@react-pdf/renderer";
 import React from "react";
 import { tw } from "../MdPdf";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
-import { T_USER_DATA } from "../data";
-import { formatDate, strApi } from "../helper";
+
+import { formatDate } from "../helper";
 
 function Page1(data: {
   applicationType?: "NEW" | "UPDATE";

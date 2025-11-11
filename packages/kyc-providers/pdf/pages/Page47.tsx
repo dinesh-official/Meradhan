@@ -1,7 +1,7 @@
 import { Image, Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
-import { strApi } from "../helper";
+
 
 function Page47({
   name = "",
@@ -74,7 +74,7 @@ function Page47({
         </View>
         <View style={tw(`flex flex-col gap-8 justify-center items-center`)}>
           <Image
-            src={signatureUrl ? strApi + signatureUrl : ""}
+            src={signatureUrl ?  signatureUrl : ""}
             style={tw(`w-40 h-24 object-contain`)}
           />
           <Text style={tw(`text-sm flex flex-col gap-5`)}>Signature</Text>

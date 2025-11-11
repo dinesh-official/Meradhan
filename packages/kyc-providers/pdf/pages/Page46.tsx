@@ -1,6 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
-import { T_USER_DATA } from "../data";
+
 import TextList from "../elements/TextList";
 
 function Page46() {

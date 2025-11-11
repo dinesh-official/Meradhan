@@ -23,16 +23,17 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "axios": "^1.13.1",
-    "soap": "^1.6.0",
-    "uuid": "^13.0.0",
     "@ag-media/react-pdf-table": "^2.0.3",
     "@react-pdf/renderer": "^4.3.0",
-    "react-pdf-tailwind": "^3.0.0",
+    "axios": "^1.13.1",
     "pdf-poppler": "^0.2.1",
     "pdf-to-img": "^5.0.0",
     "pdf2pic": "^3.2.0",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-icons": "^5.5.0",
+    "react-pdf-tailwind": "^3.0.0",
+    "soap": "^1.6.0",
+    "uuid": "^13.0.0"
   }
 }
