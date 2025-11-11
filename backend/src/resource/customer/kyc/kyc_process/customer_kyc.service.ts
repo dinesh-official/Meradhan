@@ -181,7 +181,8 @@ export class CustomerKycKycService {
 
         return await this.kycProvider.esignRequest({
             email: user.emailAddress,
-            name: fullName
+            name: fullName,
+            userId: userID
         });
     }
 
@@ -214,5 +215,10 @@ export class CustomerKycKycService {
             return steps[kycData.step - 1] || "Unknown";
         }
         return "Unknown";
+    }
+
+
+    async downloadKycPdf(userId: number) {
+        return await this.kycProvider.getKycPdfFile(userId);
     }
 }

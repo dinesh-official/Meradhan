@@ -3,7 +3,7 @@ export * from "./src/digio/genPdfForSign";
 export * from "./src/digio/digio.response";
 export * from "./src/NSDL/NSDLApi.response";
 export * from "./src/response.types";
-
+export * from "./src/renderpdf/pdf";
 
 export * from "./src/NSDL/NSDLApi";
 export * from "./src/CDSL/CDSLAPi";

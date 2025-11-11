@@ -98,7 +98,13 @@ export const useLoginFormHook = () => {
             }),
         onSuccess: () => {
             dataStore.setMode("verify");
-            dataStore.setType("password");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (isNaN(state.emailOrPhoneNo as any)) {
+                dataStore.setType("password");
+            } else {
+                dataStore.setType("otp");
+                handleSendOtp();
+            }
             trackActivity("login", { reason: "Create login request" });
         },
         onError: (error) => {
@@ -209,7 +215,6 @@ export const useLoginFormHook = () => {
                 token: data.responseData.token,
                 id: data.responseData.id.toString(),
             });
-
         },
         onError: (error) => {
             if (error instanceof ApiError) {

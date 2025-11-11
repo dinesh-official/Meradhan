@@ -293,7 +293,7 @@ function LoginForm() {
       {/* ---------------------------------------------------
        * Social Login Buttons
        * --------------------------------------------------- */}
-      <SocialLoginButtons />
+      {/* <SocialLoginButtons /> */}
     </div>
   );
 }

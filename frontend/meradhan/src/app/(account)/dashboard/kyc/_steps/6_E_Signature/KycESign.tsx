@@ -13,29 +13,38 @@ import { FaDownload } from "react-icons/fa";
 import { MdOutlineArrowRight } from "react-icons/md";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import Link from "next/link";
+import { API_SERVER_URL } from "@/global/constants/domains";
 
 function KycESign() {
   const { handleEsignKyc, isPending } = useHandelEsignKyc();
   const { state, setStep6Data } = useKycDataStorage();
+  const { cookies } = useAppCookie();
 
   return (
     <Card accountMode>
       <CardHeader accountMode>
-        <CardTitle className="font-normal" >Kyc Form Generation</CardTitle>
-        <CardDescription className="text-black" >
+        <CardTitle className="font-normal">Kyc Form Generation</CardTitle>
+        <CardDescription className="text-black">
           KYC form generated successfully. Download the form and review it
           before you proceed to e-sign.
         </CardDescription>
       </CardHeader>
       <CardContent accountMode>
         <div className="flex flex-col gap-3">
-          <Button
-            size={`lg`}
-            variant={`defaultLight`}
-            className="gap-5 w-56 font-medium"
+          <Link
+            href={`${API_SERVER_URL}/customer/kyc/download-pdf/${cookies?.userId}`}
+            target="_blank"
           >
-            Download KYC Form <FaDownload />{" "}
-          </Button>
+            <Button
+              size={`lg`}
+              variant={`defaultLight`}
+              className="gap-5 w-56 font-medium"
+            >
+              Download KYC Form <FaDownload />{" "}
+            </Button>
+          </Link>
           <p className="font-medium text-lg">Final Step - Proceed to e-Sign</p>
           <p>
             You’re almost there! Please agree to the following terms to proceed

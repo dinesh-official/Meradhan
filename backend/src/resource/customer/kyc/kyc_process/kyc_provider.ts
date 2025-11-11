@@ -1,9 +1,10 @@
+import { db } from "@core/database/database";
 import { saveFileOnCloud } from "@modules/file_upload/helpers/save_file_on_cloud";
 import { AppError } from "@utils/error/AppError";
 import AdmZip from "adm-zip";
 import { AxiosError } from "axios";
 import * as fs from 'fs';
-import { CDSLApi, DigioSDK, genPdfForSign, NSDLApi, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
+import { CDSLApi, DigioSDK, generateKycPdf, NSDLApi, type DigioAadharPanData, type DigioFaceDataResponse } from 'kyc-providers';
 import os from "os";
 import * as path from 'path';
 
@@ -14,7 +15,7 @@ class DigioKycFileHelper {
     // get pan aadhar document files from digio rid
     async getPanAadharDocumentFiles(bytes: string) {
         console.log(bytes);
-        
+
         const zipBuffer = Buffer.from(bytes);
         const zip = new AdmZip(zipBuffer);
 
@@ -204,8 +205,8 @@ export class KycProvider extends DigioKycFileHelper {
                 return cdslDetails;
             }
         } catch (error) {
-     
-            
+
+
             if (error) {
                 throw new AppError((error as AxiosError<{ error: string, ErrorDescription?: string }>)?.response?.data?.ErrorDescription || (error as AxiosError<{ error: string, message?: string }>)?.response?.data?.error || error.toString(), { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 });
             }
@@ -222,8 +223,8 @@ export class KycProvider extends DigioKycFileHelper {
 
     // KYC STEP 5: E-SIGN Verification ---------------------------------------------
     // esign request to digio
-    async esignRequest({ email, name }: { name: string, email: string }) {
-        const file = genPdfForSign();
+    async esignRequest({ email, name, userId }: { name: string, email: string, userId: number }) {
+        const file = await this.getKycPdfFile(userId); // pass user id here to get kyc pdf file
         const reqData = await this.digio.esignRequest(file, {
             email,
             name
@@ -239,8 +240,29 @@ export class KycProvider extends DigioKycFileHelper {
     }
 
 
+    async getKycPdfFile(userId: number) {
 
+        const userData = await db.dataBase.kYC_FLOW.findUnique({
+            where: {
+                userID: userId
+            }
+        })
+        const user = await db.dataBase.customerProfileDataModel.findUnique({
+            where: {
+                id: userId
+            }
+        })
+        if (!userData || !user) {
+            throw new AppError("User KYC data not found", { code: "KYC_DATA_NOT_FOUND", statusCode: 404 });
+        }
 
+        const filePath = await generateKycPdf({
+            ...((userData.data as object) || {}),
+            user: user
+        });
+
+        return filePath;
+    }
 }
 
 
