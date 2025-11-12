@@ -83,8 +83,7 @@ export const generatePagesMetaData = async (slug: AppRoute): Promise<Metadata> =
         });
 
         const metadata = data?.pagesMetaData?.[0]?.MetaData;
-
-        if (!metadata) {
+        if (!data?.pagesMetaData?.[0]?.MetaData.Title) {
             return {};
         }
         // console.log(metadata);

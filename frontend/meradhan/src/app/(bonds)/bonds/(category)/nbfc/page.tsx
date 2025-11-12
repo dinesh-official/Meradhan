@@ -27,7 +27,7 @@ async function BondPage({
     filters: queryFilter,
     params: {
       page: pageParams.page ? parseInt(pageParams?.page as string, 10) : 1,
-      category: "ndfc",
+      category: "nbfc",
     },
   });
 

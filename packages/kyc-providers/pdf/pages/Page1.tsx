@@ -249,11 +249,30 @@ function Page1(data: {
 
         <View
           style={tw(
-            `w-48 border border-gray-300 border-t-0 flex flex-col justify-center items-center gap-3`
+            `w-48 border border-gray-300 border-t-0 flex flex-col justify-start items-start`
           )}
         >
-          <Image source={data.profilePic} style={tw(`w-28 h-38 max-h-38 object-cover overflow-hidden`)}  />
-          <Image source={data.signature} style={tw(`w-28 h-9 `)} />
+          {/* <Image source={data.profilePic} style={tw(`max-w-28 min-w-28 h-38 min-h-38 object-cover overflow-hidden border`)}  /> */}
+          <view
+            style={{
+              width: 110,
+              height: 120,
+              overflow: "hidden",
+            }}
+          >
+            <Image
+              source={data.profilePic}
+              style={{
+                width: 110,
+                height: 120,
+                objectFit: "cover",
+                overflow: "hidden",
+                marginTop: -6,
+              }}
+            />
+          </view>
+
+          <Image source={data.signature} style={tw(`w-auto h-10 mx-auto`)} />
         </View>
       </View>
 

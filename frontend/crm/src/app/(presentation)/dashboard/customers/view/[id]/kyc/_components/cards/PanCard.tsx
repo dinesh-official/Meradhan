@@ -12,13 +12,13 @@ export interface PanCardProps {
 
 function PanCard(panCardData: PanCardProps) {
   return (
-    <div className="p-5 w-96 aspect-video rounded-2xl  relative shadow bg-gradient-to-br from-[#6c9daf] via-[#8e81ac] to-[#b38590]">
+    <div className="relative bg-gradient-to-br from-[#6c9daf] via-[#8e81ac] to-[#b38590] shadow p-5 rounded-2xl w-96 aspect-video">
       <div className="flex justify-between">
-        <div className="w-96 ">
+        <div className="w-96">
           <p className="font-black">आयकर विभाग</p>
-          <p className="text-[10px] font-semibold">INCOME TAX DEPARTMENT</p>
+          <p className="font-semibold text-[10px]">INCOME TAX DEPARTMENT</p>
         </div>
-        <div className="w-full flex justify-center items-center">
+        <div className="flex justify-center items-center w-full">
           <Image
             alt=""
             src={`/icons/india/emblem.png`}
@@ -27,13 +27,13 @@ function PanCard(panCardData: PanCardProps) {
             className="w-7 h-auto"
           />
         </div>
-        <div className="text-right w-96 ">
+        <div className="w-96 text-right">
           <p className="font-black">भारत सरकार</p>
-          <p className="text-[10px] font-semibold">GOVT. OF INDIA</p>
+          <p className="font-semibold text-[10px]">GOVT. OF INDIA</p>
         </div>
       </div>
-      <div className="text-[10px] text-center mt-2 mb-1">
-        <p className="text-blue-950 font-medium ">Permanent Account Number</p>
+      <div className="mt-2 mb-1 text-[10px] text-center">
+        <p className="font-medium text-blue-950">Permanent Account Number</p>
         <p className="font-bold text-xs">{panCardData.panNumber}</p>
       </div>
 
@@ -53,8 +53,8 @@ function PanCard(panCardData: PanCardProps) {
         </div>
       </div>
       {panCardData.isVerified && (
-        <div className="flex justify-center items-center bg-[#3ac727] absolute bottom-5 right-0 rounded-r-none gap-3 p-2 rounded-full px-3   font-bold text-white ">
-          <CircleCheckBig size={20} className=" text-white " />
+        <div className="right-0 bottom-5 absolute flex justify-center items-center gap-3 bg-[#3ac727] p-2 px-3 rounded-full rounded-r-none font-medium text-white">
+          <CircleCheckBig size={20} className="text-white" />
           <p>Verified</p>
         </div>
       )}

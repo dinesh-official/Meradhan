@@ -47,7 +47,13 @@ export default function BondIsinView({
               {dateTimeUtils.formatDateTime(bond.maturityDate, "DD MMM YYYY")}
             </SortInfoBox>
             <SortInfoBox title="Bond Category">
-              {bond.categories?.[0] || "Coming Soon"}
+              {bond.categories?.[0] == "n/a" ? (
+                "Coming Soon"
+              ) : (
+                <span className="capitalize">
+                  {bond.categories?.[0] || "Coming Soon"}
+                </span>
+              )}
             </SortInfoBox>
             <SortInfoBox title="Interest Payment">
               {dateTimeUtils.formatDateTime(

@@ -23,7 +23,7 @@ function PersonalInformationCard(personalInfoCardData:PersonalInformationCardPro
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
+        <CardTitle className="text-sm" >Personal Information</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="gap-8 grid lg:grid-cols-5">
@@ -41,40 +41,40 @@ function PersonalInformationCard(personalInfoCardData:PersonalInformationCardPro
           </div>
           <div className="gap-5 grid grid-cols-2 lg:grid-cols-3 lg:col-span-3 lg:pl-8">
              <LabelView title="Full Name">
-              <p className="font-medium text-sm">{personalInfoCardData.fullName}</p>
+              <p className="text-sm">{personalInfoCardData.fullName}</p>
             </LabelView>
             <LabelView title="Date of Birth">
-              <p className="font-medium text-sm">{personalInfoCardData.dateOfBirth}</p>
+              <p className="text-sm">{personalInfoCardData.dateOfBirth}</p>
             </LabelView>
             <LabelView title="Gender">
-              <p className="font-medium text-sm">{personalInfoCardData.gender}</p>
+              <p className="text-sm">{personalInfoCardData.gender}</p>
             </LabelView>
             <LabelView title="Marital Status">
-              <p className="font-medium text-sm">{personalInfoCardData.maritalStatus}</p>
+              <p className="text-sm">{personalInfoCardData.maritalStatus}</p>
             </LabelView>
             <LabelView title="Father / Spouse's Name">
-              <p className="font-medium text-sm">{personalInfoCardData.fatherOrSpouseName}</p>
+              <p className="text-sm">{personalInfoCardData.fatherOrSpouseName}</p>
             </LabelView>
             <LabelView title="Relationship with Person">
-              <p className="font-medium text-sm">{personalInfoCardData.relationshipWithPerson}</p>
+              <p className="text-sm">{personalInfoCardData.relationshipWithPerson}</p>
             </LabelView>
             <LabelView title="Mother's Name">
-              <p className="font-medium text-sm">{personalInfoCardData.motherName}</p>
+              <p className="text-sm">{personalInfoCardData.motherName}</p>
             </LabelView>
             <LabelView title="Qualification">
-              <p className="font-medium text-sm">{personalInfoCardData.qualification}</p>
+              <p className="text-sm">{personalInfoCardData.qualification}</p>
             </LabelView>
             <LabelView title="Occupation Type">
-              <p className="font-medium text-sm">{personalInfoCardData.occupationType}</p>
+              <p className="text-sm">{personalInfoCardData.occupationType}</p>
             </LabelView>
             <LabelView title="Annual Gross Income">
-              <p className="font-medium text-sm">{personalInfoCardData.annualGrossIncome}</p>
+              <p className="text-sm">{personalInfoCardData.annualGrossIncome}</p>
             </LabelView>
             <LabelView title="Nationality">
-              <p className="font-medium text-sm">{personalInfoCardData.nationality}</p>
+              <p className="text-sm">{personalInfoCardData.nationality}</p>
             </LabelView>
             <LabelView title="Residential Status">
-              <p className="font-medium text-sm">{personalInfoCardData.residentialStatus}</p>
+              <p className="text-sm">{personalInfoCardData.residentialStatus}</p>
             </LabelView>
           </div>
         </div>

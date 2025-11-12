@@ -23,6 +23,10 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
     VerifiedBy: true,
     verifyDate: true,
     id: true,
+    isAPep: true,
+    allowSEBITerms: true,
+    isAFatcaCustomer: true,
+
     riskProfile: true,
     createdAt: true,
     
@@ -36,7 +40,7 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
             termsAccepted: true,
             lastLogin: true,
             whatsAppNotificationAllow: true,
-            relationshipManager: true
+            relationshipManager: true,
         },
     },
 

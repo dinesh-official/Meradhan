@@ -39,14 +39,10 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       <div className="gap-5 grid xl:grid-cols-2">
         <CustomerOverViewCard
           name={`${data.firstName} ${data.middleName} ${data.lastName}`}
-          customerSince={
-            !data.utility.lastLogin
-              ? "--"
-              : dateTimeUtils.formatDateTime(
-                  data.utility.lastLogin,
-                  "DD MMMM YYYY hh:mm AA"
-                )
-          }
+          customerSince={dateTimeUtils.formatDateTime(
+            data.createdAt,
+            "DD MMM YYYY hh:mm AA"
+          )}
           kycStatus={data.kycStatus}
         />
         <KYCVerificationStatusCard
@@ -58,7 +54,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               ? "--"
               : dateTimeUtils.formatDateTime(
                   data.verifyDate,
-                  "DD MMMM YYYY hh:mm AA"
+                  "DD MMM YYYY hh:mm AA"
                 )
           }
         />
@@ -107,44 +103,67 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       <div className="flex flex-col gap-5 scroll-mt-16" id="identity-docs">
         <Card>
           <CardHeader>
-            <CardTitle>Identity Documents</CardTitle>
+            <CardTitle className="text-sm">Identity Documents</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-8">
-              <PanCard
-                panNumber={data.panCard?.panCardNo || "--------"}
-                name={`${data.panCard?.firstName || "----"} ${
-                  data.panCard?.middleName || ""
-                } ${data.panCard?.lastName || "---"}`}
-                gender={data.panCard?.gender || "----"}
-                dateOfBirth={
-                  data.panCard?.dateOfBirth
-                    ? dateTimeUtils.formatDateTime(
-                        data.panCard?.dateOfBirth,
-                        "DD/MM/YYYY"
-                      )
-                    : "--/--/----"
-                }
-                isVerified={data.panCard?.isVerified || false}
-              />
-              <AdharaCard
-                name={`${data.aadhaarCard?.firstName || "----"} ${
-                  data.aadhaarCard?.middleName || ""
-                } ${data.aadhaarCard?.lastName || "---"}`}
-                gender={data.aadhaarCard?.gender || "----"}
-                aadhaarNumberMasked={
-                  data.aadhaarCard?.aadhaarNo || "----------------"
-                }
-                dateOfBirth={
-                  data.aadhaarCard?.dateOfBirth
-                    ? dateTimeUtils.formatDateTime(
-                        data.aadhaarCard?.dateOfBirth,
-                        "DD/MM/YYYY"
-                      )
-                    : "--/--/----"
-                }
-                isVerified={data.aadhaarCard?.isVerified || false}
-              />
+              <div>
+                <PanCard
+                  panNumber={data.panCard?.panCardNo || "--------"}
+                  name={`${data.panCard?.firstName || "----"} ${
+                    data.panCard?.middleName || ""
+                  } ${data.panCard?.lastName || "---"}`}
+                  gender={data.panCard?.gender || "----"}
+                  dateOfBirth={
+                    data.panCard?.dateOfBirth
+                      ? dateTimeUtils.formatDateTime(
+                          data.panCard?.dateOfBirth,
+                          "DD/MM/YYYY"
+                        )
+                      : "--/--/----"
+                  }
+                  isVerified={data.panCard?.isVerified || false}
+                />
+                {data.panCard?.confirmTimeStamp && (
+                  <p className="mt-5 text-xs text-center">
+                    {" "}
+                    Confirm Date:{" "}
+                    {dateTimeUtils.formatDateTime(
+                      data.panCard?.confirmTimeStamp,
+                      "DD MMM YYYY hh:mm AA"
+                    )}
+                  </p>
+                )}
+              </div>
+              <div>
+                <AdharaCard
+                  name={`${data.aadhaarCard?.firstName || "----"} ${
+                    data.aadhaarCard?.middleName || ""
+                  } ${data.aadhaarCard?.lastName || "---"}`}
+                  gender={data.aadhaarCard?.gender || "----"}
+                  aadhaarNumberMasked={
+                    data.aadhaarCard?.aadhaarNo || "----------------"
+                  }
+                  dateOfBirth={
+                    data.aadhaarCard?.dateOfBirth
+                      ? dateTimeUtils.formatDateTime(
+                          data.aadhaarCard?.dateOfBirth,
+                          "DD/MM/YYYY"
+                        )
+                      : "--/--/----"
+                  }
+                  isVerified={data.aadhaarCard?.isVerified || false}
+                />
+                {data.aadhaarCard?.confirmTimeStamp && (
+                  <p className="mt-5 text-xs text-center">
+                    Confirm Date:{" "}
+                    {dateTimeUtils.formatDateTime(
+                      data.aadhaarCard?.confirmTimeStamp,
+                      "DD MMM YYYY hh:mm AA"
+                    )}
+                  </p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -180,7 +199,15 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               ? "-------"
               : dateTimeUtils.formatDateTime(
                   data.panCard?.verifyDate,
-                  "DD MMMM YYYY hh:mm AA"
+                  "DD MMM YYYY hh:mm AA"
+                )
+          }
+          confirmTimeStamp={
+            !data.panCard?.confirmTimeStamp
+              ? "--/--/----"
+              : dateTimeUtils.formatDateTime(
+                  data.panCard?.confirmTimeStamp,
+                  "DD MMM YYYY hh:mm AA"
                 )
           }
         />
@@ -235,8 +262,16 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           verificationTimeStamp={
             data.aadhaarCard?.verifyDate
               ? dateTimeUtils.formatDateTime(
-                  data.aadhaarCard?.dateOfBirth,
-                  "DD MMMM YYYY hh:mm AA"
+                  data.aadhaarCard?.verifyDate,
+                  "DD MMM YYYY hh:mm AA"
+                )
+              : "--/--/----"
+          }
+          confirmTimeStamp={
+            data.aadhaarCard?.confirmTimeStamp
+              ? dateTimeUtils.formatDateTime(
+                  data.aadhaarCard?.confirmTimeStamp,
+                  "DD MMM YYYY hh:mm AA"
                 )
               : "--/--/----"
           }
@@ -247,10 +282,10 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       <div className="scroll-mt-16" id="demat-accounts">
         <Card>
           <CardHeader>
-            <CardTitle>Demat Accounts Details</CardTitle>
+            <CardTitle className="text-sm">Demat Accounts Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="gap-5 grid lg:grid-cols-3">
+            <div className="gap-5 grid lg:grid-cols-2">
               {data.dematAccounts.map((e) => {
                 return (
                   <DematCard
@@ -273,7 +308,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                       e.verifyDate
                         ? dateTimeUtils.formatDateTime(
                             e.verifyDate,
-                            "DD MMMM YYYY hh:mm AA"
+                            "DD MMM YYYY hh:mm AA"
                           )
                         : "--/--/----"
                     }
@@ -289,10 +324,10 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       <div className="scroll-mt-16" id="bank-accounts">
         <Card>
           <CardHeader>
-            <CardTitle>Bank Accounts</CardTitle>
+            <CardTitle className="text-sm">Bank Accounts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="gap-5 grid lg:grid-cols-3">
+            <div className="gap-5 grid lg:grid-cols-2">
               {data.bankAccounts.map((e) => {
                 return (
                   <BankCard
@@ -306,7 +341,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                       e.verifyDate
                         ? dateTimeUtils.formatDateTime(
                             e.verifyDate,
-                            "DD MMMM YYYY hh:mm AA"
+                            "DD MMM YYYY hh:mm AA"
                           )
                         : "--/--/----"
                     }
@@ -324,7 +359,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       <div className="scroll-mt-16" id="risk-profile">
         <Card>
           <CardHeader>
-            <CardTitle>Risk Profile</CardTitle>
+            <CardTitle className="text-sm">Risk Profile</CardTitle>
           </CardHeader>
           <CardContent>
             <CardTitle className="text-sm">Investment Experience</CardTitle>
@@ -345,23 +380,30 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           </CardContent>
         </Card>
       </div>
-
       {/* Compliance */}
       <div className="scroll-mt-16" id="compliance">
         <Card>
           <CardHeader>
-            <CardTitle>SEBI & Compliance Information</CardTitle>
+            <CardTitle className="text-sm">
+              SEBI & Compliance Information
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <CardTitle className="text-sm">Compliance Confirmations</CardTitle>
             <p className="flex justify-start items-center gap-3 mt-3">
-              <Checkbox checked /> I hereby confirm that I am not a Politically
-              Exposed Person (PEP) nor related to any PEP
+              <Checkbox checked={data.isAPep} /> I hereby confirm that I am not
+              a Politically Exposed Person (PEP) nor related to any PEP
             </p>
             <p className="flex justify-start items-center gap-3 mt-2">
-              <Checkbox checked /> I hereby confirm that I am not a person
-              and/or entity debarred from accessing the securities market or
-              dealing in securities, as per directions or orders issued by SEBI
+              <Checkbox checked={data.allowSEBITerms} /> I hereby confirm that I
+              am not a person and/or entity debarred from accessing the
+              securities market or dealing in securities, as per directions or
+              orders issued by SEBI
+            </p>
+            <p className="flex justify-start items-center gap-3 mt-2">
+              <Checkbox checked={data.isAFatcaCustomer} /> I confirm that I am
+              an Indian citizen and solely a tax resident of India, not of any
+              other country (FATCA)
             </p>
           </CardContent>
         </Card>

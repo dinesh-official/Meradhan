@@ -92,13 +92,13 @@ function Page2({
             </Text>
           </View>
           <View style={tw(`text-xs flex flex-row gap-3`)}>
-            <Text>Line 2:*</Text>
+            <Text>Line 2:</Text>
             <Text style={tw(`font-[500]`)}>
-              {permanentAddress.addressLine2}r
+              {permanentAddress.addressLine2}
             </Text>
           </View>
           <View style={tw(`text-xs flex flex-row gap-3`)}>
-            <Text>Line 3:*</Text>
+            <Text>Line 3:</Text>
             <Text style={tw(`font-[500]`)}>
               {permanentAddress.addressLine3}
             </Text>
@@ -106,7 +106,7 @@ function Page2({
 
           <View style={tw(`flex flex-row`)}>
             <View style={tw(`text-xs flex flex-row gap-3 w-[50%]`)}>
-              <Text>City / Town / Villate*</Text>
+              <Text>City / Town / Village*</Text>
               <Text style={tw(`font-[500]`)}>{permanentAddress.city}</Text>
             </View>
             <View style={tw(`text-xs flex flex-row gap-3 w-[50%]`)}>
@@ -132,13 +132,13 @@ function Page2({
               <Text style={tw(`font-[500]`)}>India</Text>
             </View>
             <View style={tw(`text-xs flex flex-row gap-3 `)}>
-              <Text>State UT Code:*</Text>
+              <Text>State UT Code:</Text>
               <Text style={tw(`font-[500]`)}>
                 {permanentAddress.stateUTCode}
               </Text>
             </View>
             <View style={tw(`text-xs flex flex-row gap-3 `)}>
-              <Text>ISO 3166 Country Code:*</Text>
+              <Text>ISO 3166 Country Code:</Text>
               <Text style={tw(`font-[500]`)}>IN</Text>
             </View>
           </View>
@@ -195,13 +195,13 @@ function Page2({
             </Text>
           </View>
           <View style={tw(`text-xs flex flex-row gap-3`)}>
-            <Text>Line 2:*</Text>
+            <Text>Line 2:</Text>
             <Text style={tw(`font-[500]`)}>
               {currentAddress.data.addressLine2}
             </Text>
           </View>
           <View style={tw(`text-xs flex flex-row gap-3`)}>
-            <Text>Line 3:*</Text>
+            <Text>Line 3:</Text>
             <Text style={tw(`font-[500]`)}>
               {currentAddress.data.addressLine3}
             </Text>
@@ -209,7 +209,7 @@ function Page2({
 
           <View style={tw(`flex flex-row`)}>
             <View style={tw(`text-xs flex flex-row gap-3 w-[50%]`)}>
-              <Text>City / Town / Villate*</Text>
+              <Text>City / Town / Village*</Text>
               <Text style={tw(`font-[500]`)}>{currentAddress.data.city}</Text>
             </View>
             <View style={tw(`text-xs flex flex-row gap-3 w-[50%]`)}>
@@ -239,13 +239,13 @@ function Page2({
               <Text style={tw(`font-[500]`)}>India</Text>
             </View>
             <View style={tw(`text-xs flex flex-row gap-3 `)}>
-              <Text>State UT Code:*</Text>
+              <Text>State UT Code:</Text>
               <Text style={tw(`font-[500]`)}>
                 {currentAddress.data.stateUTCode}
               </Text>
             </View>
             <View style={tw(`text-xs flex flex-row gap-3 `)}>
-              <Text>ISO 3166 Country Code:*</Text>
+              <Text>ISO 3166 Country Code:</Text>
               <Text style={tw(`font-[500]`)}>IN</Text>
             </View>
           </View>

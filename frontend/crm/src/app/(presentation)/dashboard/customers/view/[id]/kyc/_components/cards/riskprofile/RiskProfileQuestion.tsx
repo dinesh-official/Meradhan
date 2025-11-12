@@ -13,7 +13,7 @@ function RiskProfileQuestion({
   return (
     <div>
       <p className="text-sm">{question}</p>
-      <div className={cn("grid lg:grid-cols-4 md:grid-cols-2 lg:gap-5 gap-3 mt-2", className)}>
+      <div className={cn("gap-3 lg:gap-5 grid md:grid-cols-2 lg:grid-cols-4 mt-2", className)}>
         {children}
       </div>
     </div>
@@ -34,7 +34,7 @@ export function RiskProfileAnsOption({
   return (
     <div
       className={cn(
-        "px-4 py-2 bg-gray-100  rounded-xl",
+        "bg-gray-100 px-4 py-2 rounded-xl text-sm",
         active && "bg-primary text-white",
         className
       )}

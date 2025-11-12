@@ -193,7 +193,9 @@ export type CustomerByIdPayload = {
   createdAt: string; // ISO Date
   id: number;
   updatedAt: string; // ISO
-
+  isAFatcaCustomer: boolean;
+  allowSEBITerms: boolean,
+  isAPep: boolean,
   utility: DetailCustomerUtility;
 };
 

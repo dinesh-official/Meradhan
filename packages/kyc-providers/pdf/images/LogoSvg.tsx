@@ -4,7 +4,7 @@ import InternetIcon from "../elements/InternetIcon";
 import PhoneIcon from "../elements/PhoneIcon";
 import { tw } from "../MdPdf";
 
-function LogoSvg({ showAll = true }: { showAll?: boolean }) {
+function LogoSvg({ showAll = false }: { showAll?: boolean }) {
   return (
     <View style={{ fontFamily: "Poppins" }}>
       <View
@@ -41,8 +41,7 @@ function LogoSvg({ showAll = true }: { showAll?: boolean }) {
         BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED
       </Text>
       <Text style={tw("text-center text-xs mt-3")}>
-        Registered Address: 2703, Ashok Tower 'D', Dr. SSR Marg, Parel, Parel,
-        Mumbai, Mumbai- 400012, Maharashtra
+        Registered Address: 2703, Ashok Tower 'D', Dr. SSR Marg, Parel, Mumbai- 400012, Maharashtra
       </Text>
 
       <View style={tw("flex flex-row justify-center mt-4 gap-10")}>

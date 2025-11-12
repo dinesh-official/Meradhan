@@ -11,17 +11,17 @@ function PreviewCard({
   source: string;
 }) {
   return (
-    <div className="border-dashed border-2 p-3 rounded-xl bg-gray-50">
+    <div className="bg-gray-50 p-3 border-2 border-dashed rounded-xl">
       <Image
         src={url}
         alt=""
         width={500}
         height={500}
-        className="aspect-square object-cover rounded-xl"
+        className="rounded-xl object-cover aspect-square"
       />
-      <div className="text-center mt-3">
-        <p className="text-gray-500">{type}</p>
-        <p className="font-medium uppercase text-xs">{source}</p>
+      <div className="mt-3 text-center">
+        <p className="text-gray-500 text-sm">{type}</p>
+        <p className="font-medium text-xs uppercase">{source}</p>
       </div>
     </div>
   );

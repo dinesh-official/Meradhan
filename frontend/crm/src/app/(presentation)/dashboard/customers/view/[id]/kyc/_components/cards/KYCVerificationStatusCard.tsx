@@ -15,12 +15,12 @@ function KYCVerificationStatusCard(
   return (
     <Card>
       <CardHeader>
-        <CardTitle>KYC Verification Status</CardTitle>
+        <CardTitle className="text-sm" >KYC Verification Status</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-4 grid-cols-2 gap-5">
+        <div className="gap-5 grid grid-cols-2 md:grid-cols-4">
           <LabelView title="KYC Level">
-            <p className="font-medium text-sm">
+            <p className="text-sm">
               {KYCVerificationStatusInfo.kycLevel}
             </p>
           </LabelView>
@@ -28,12 +28,12 @@ function KYCVerificationStatusCard(
             <StatusBadge value={KYCVerificationStatusInfo.overallStatus} />
           </LabelView>
           <LabelView title="Verified By">
-            <p className="font-medium text-sm">
+            <p className="text-sm">
               {KYCVerificationStatusInfo.verifiedBy}
             </p>
           </LabelView>
           <LabelView title="Verified Date">
-            <p className="font-medium text-sm">
+            <p className="text-sm">
               {KYCVerificationStatusInfo.verifiedDate}
             </p>
           </LabelView>

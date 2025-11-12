@@ -95,7 +95,7 @@ function Page5(data: {
         </Text>
 
         <View style={tw(`flex flex-row gap-10`)}>
-          <View style={tw(`w-full flex flex-col gap-4 `)}>
+          <View style={tw(`w-[45%] flex flex-col gap-4 `)}>
             <Text style={tw("text-xs")}>IPV Date: {data.ipvDate}</Text>
             <Text style={tw("text-xs")}>Emp. Name: {data.empName}</Text>
             <Text style={tw("text-xs")}>Emp. Code: {data.empCode}</Text>
@@ -121,7 +121,8 @@ function Page5(data: {
               </Text>
             </View>
           </View>
-          <View style={tw(`w-full flex flex-col gap-4 `)}>
+
+          <View style={tw(`w-[55%] flex flex-col gap-4 `)}>
             <Text style={tw("text-xs")}>Institution Details</Text>
             <Text style={tw("text-xs")}>
               Name: BondNest Capital India Securities Private Limited

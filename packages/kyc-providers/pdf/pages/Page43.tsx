@@ -11,7 +11,7 @@ function Page43() {
       )}
     >
       <Text style={tw(`text-center font-[600] uppercase mt-3 mb-3`)}>
-        Declaration Form for opting out of nomination
+        General Terms and Conditions and Other Authorisation
       </Text>
       <View style={tw(`flex flex-row mt-3 justify-between`)}>
         <Text style={tw(`leading-3 `)}>

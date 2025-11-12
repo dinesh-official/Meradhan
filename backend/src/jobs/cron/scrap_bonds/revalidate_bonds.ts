@@ -92,7 +92,13 @@ export const revalidateBonds = async () => {
         index++;
     }
 
-    const emailContent = `Bond Data Processing Summary\\n\\nTotal Bonds: ${parsedRows.length}\\nExpired Bonds: ${expired.length}\\n\\nNew Bonds Added: ${created}\\nBonds Updated: ${updated}\\n`;
+    const emailContent = `
+    Bond Data Processing Summary
+    Total Bonds: ${parsedRows.length}
+    Expired Bonds: ${expired.length}
+    New Bonds Added: ${created}
+    Bonds Updated: ${updated}
+    `;
 
     try {
         const emailer = new EmailCommunication();

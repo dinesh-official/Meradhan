@@ -25,7 +25,7 @@ function LabelView({
 
   return (
     <div className={cn("flex flex-col gap-1")}>
-      <Label className={cn("text-gray-600 font-normal", className)}>
+      <Label className={cn("font-normal text-gray-600 text-xs", className)}>
         {title} {renderStack()}
       </Label>
       {children}

@@ -38,11 +38,7 @@ import Page36_1 from "./pages/Page36_1";
 import Page36_2 from "./pages/Page36_2";
 import Page36_3 from "./pages/Page36_3";
 import Page37 from "./pages/Page37";
-import Page38 from "./pages/Page38";
-import Page39 from "./pages/Page39";
 import Page4 from "./pages/Page4";
-import Page40 from "./pages/Page40";
-import Page41 from "./pages/Page41";
 import Page43 from "./pages/Page43";
 import Page44 from "./pages/Page44";
 import Page45 from "./pages/Page45";
@@ -140,343 +136,332 @@ const MdPdf = ({
     // >
     <Document>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  showAll={true} />
         <Page1 {...pageData.page1} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page2 {...pageData.page2} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page3 {...pageData.page3} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page4 {...pageData.page4} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page5 {...pageData.page5} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page6 {...pageData.page6} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page7 {...pageData.page7} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page8 {...pageData.page8} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page9 {...pageData.page9} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page10 />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page11 {...pageData.page11} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page12 {...pageData.page12} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page13 {...pageData.page13} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page14 {...pageData.page14} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page15 {...pageData.page15} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page16 {...pageData.page16} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page17 {...pageData.page17} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page18 {...pageData.page18} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page19 {...pageData.page19} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page20 {...pageData.page20} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page21 {...pageData.page21} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page22 {...pageData.page22} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page23 {...pageData.page23} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page24 {...pageData.page24} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page25 {...pageData.page25} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page26 {...pageData.page26} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page27 {...pageData.page27} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page28 {...pageData.page28} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page29 {...pageData.page29} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page30 {...pageData.page30} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page31 {...pageData.page31} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page32 {...pageData.page32} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page33 {...pageData.page33} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page34 {...pageData.page34} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page35 {...pageData.page35} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page36 {...pageData.page36} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page36_1 {...pageData.page36_1} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page36_2 {...pageData.page36_2} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page36_3 {...pageData.page36_3} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page37 {...pageData.page37} />
         <Footer />
       </Page>
 
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+      {/* <Page size="A4" style={{ fontFamily: "Poppins" }}>
+        <LogoSvg  />
         <Page38 {...pageData.page38} />
-        <Footer />
-      </Page>
-
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
-        <Page39 {...pageData.page39} />
-        <Footer />
-      </Page>
-
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
-        <Page40 />
-        <Footer />
-      </Page>
-
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
-        <Page41 />
-        <Footer />
-      </Page>
-
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
-        <Page40 {...pageData.page40} />
-        <Footer />
-      </Page>
-      {/* 
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
-        <Page41 {...pageData.page41} />
         <Footer />
       </Page> */}
 
       {/* <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
+        <Page39 {...pageData.page39} />
+        <Footer />
+      </Page> */}
+
+      {/* <Page size="A4" style={{ fontFamily: "Poppins" }}>
+        <LogoSvg  />
+        <Page40 />
+        <Footer />
+      </Page> */}
+
+      {/* <Page size="A4" style={{ fontFamily: "Poppins" }}>
+        <LogoSvg  />
+        <Page41 />
+        <Footer />
+      </Page> */}
+
+
+      {/* <Page size="A4" style={{ fontFamily: "Poppins" }}>
+        <LogoSvg  />
         <Page42 {...pageData.page42} />
         <Footer />
       </Page> */}
 
       {/* <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page43 {...pageData.page43} />
         <Footer />
       </Page> */}
       {/* 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page44 {...pageData.page44} />
         <Footer />
       </Page> */}
       {/* 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page45 {...pageData.page45} />
         <Footer />
       </Page> */}
 
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+      {/* <Page size="A4" style={{ fontFamily: "Poppins" }}>
+        <LogoSvg  />
         <Page46 {...pageData.page46} />
         <Footer />
-      </Page>
+      </Page> */}
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page43 />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page44 />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page45 />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page46 />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page47 {...pageData.page47} />
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll />
+        <LogoSvg  />
         <Page48 {...pageData.page48} />
         <Footer />
       </Page>

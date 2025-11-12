@@ -34,29 +34,29 @@ export function BankCard({
   holderName
 }: BankCardProps) {
   return (
-    <Card className="relative overflow-hidden  bg-gray-50 border-none shadow-sm ">
+    <Card className="relative bg-gray-50 shadow-sm border-none overflow-hidden">
       {/* Background logo */}
-      <div className="absolute -right-14 -bottom-12  opacity-[0.04]">
+      <div className="-right-14 -bottom-12 absolute opacity-[0.04]">
         <Landmark size={190} />
       </div>
 
-      <div className="relative z-10">
+      <div className="z-10 relative">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{bankName}</CardTitle>
+          <CardTitle className="font-semibold">{bankName}</CardTitle>
           <CardAction>
             <StatusBadge value={verified ? "Verified" : "Not Verified"} />
           </CardAction>
         </CardHeader>
 
         <CardContent>
-          <p className="text-xs capitalize text-gray-700 flex flex-row gap-2 justify-start mb-2 items-center">
+          <p className="flex flex-row justify-start items-center gap-2 mb-2 text-gray-700 text-xs capitalize">
             {holderName} <StatusBadge value={isNameVerified?"Verified":"Not Match"} />
           </p>
-          <h4 className="text-2xl font-semibold text-gray-800 tracking-widest">
+          <h4 className="font-semibold text-gray-800 text-xl tracking-widest">
             {accountNumber}
           </h4>
-          <p className="text-sm text-gray-500 mt-2">{ifscCode}</p>
-          <p className="text-sm text-gray-500">Branch: {branch}</p>
+          <p className="mt-2 text-gray-500 text-sm">{ifscCode}</p>
+          <p className="text-gray-500 text-sm">Branch: {branch}</p>
         </CardContent>
 
         <CardFooter className="pt-5">
@@ -64,8 +64,8 @@ export function BankCard({
             <LabelView title="Default Account?">
               <StatusBadge value={isDefault ? "Yes" : "No"} />
             </LabelView>
-            <LabelView title="Verified on" className="text-right block">
-              <p className="text-sm font-medium text-right">{verifiedOn}</p>
+            <LabelView title="Verified on" className="block text-right">
+              <p className="text-sm text-right">{verifiedOn}</p>
             </LabelView>
           </div>
         </CardFooter>

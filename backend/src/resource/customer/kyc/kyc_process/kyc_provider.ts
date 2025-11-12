@@ -30,6 +30,7 @@ class DigioKycFileHelper {
             pan: files?.[0],
             aadhar: files?.[1]
         }
+        
         const aadharUrl = await saveFileOnCloud({
             filePath: pathData.aadhar!,
             directory: "kyc/aadhar/document"

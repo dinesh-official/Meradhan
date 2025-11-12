@@ -14,22 +14,18 @@ function CustomerOverViewCard(
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Customer Overview</CardTitle>
+        <CardTitle className="text-sm">Customer Overview</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-3 grid-cols-2 gap-5">
+        <div className="gap-5 grid grid-cols-2 md:grid-cols-3">
           <LabelView title="Customer Name">
-            <p className="font-medium text-sm">
-              {customerOverViewCardData.name}
-            </p>
+            <p className="text-sm">{customerOverViewCardData.name}</p>
           </LabelView>
           <LabelView title="Current KYC Status">
             <StatusBadge value={customerOverViewCardData.kycStatus} />
           </LabelView>
           <LabelView title="Customer Since">
-            <p className="font-medium text-sm">
-              {customerOverViewCardData.customerSince}
-            </p>
+            <p className="text-sm">{customerOverViewCardData.customerSince}</p>
           </LabelView>
         </div>
       </CardContent>

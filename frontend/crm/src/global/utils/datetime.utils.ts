@@ -24,6 +24,8 @@ export type DateFormatToken =
     | "YYYY-MM-DD HH:mm:ss"
     | "DD MMM YYYY HH:mm"
     | "DD MMMM YYYY hh:mm AA"
+    | "DD MMM YYYY hh:mm AA"
+
     | "MMMM DD, YYYY HH:mm"
     | "YYYY.MM.DD HH:mm:ss"
     | "MM-DD-YYYY hh:mm AA";

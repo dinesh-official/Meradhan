@@ -19,23 +19,24 @@ export interface AadhaarCardInfoDataProps {
   permanentAddress: AddressCardDataProp;
   currentAddress: AddressCardDataProp;
   verificationTimeStamp: string;
+  confirmTimeStamp: string;
 }
 
 function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Aadhaar and Address Information</CardTitle>
+        <CardTitle className="text-sm" >Aadhaar and Address Information</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <div className="gap-5 grid grid-cols-2 lg:grid-cols-4">
           <LabelView title="12-digit Aadhaar Number">
-            <p className="font-medium text-sm">
+            <p className="text-sm">
               {addressCardInfoData.aadhaarNumber}
             </p>
           </LabelView>
           <LabelView title="Name as per Aadhaar">
-            <p className="font-medium text-sm">
+            <p className="text-sm">
               {addressCardInfoData.name}{" "}
               <StatusBadge
                 value={
@@ -47,32 +48,37 @@ function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
             </p>
           </LabelView>
           <LabelView title="Date of Birth">
-            <p className="font-medium text-sm">
+            <p className="text-sm">
               {addressCardInfoData.dateOfBirth}
               
             </p>
           </LabelView>
           <LabelView title="Gender">
-            <p className="font-medium text-sm">{addressCardInfoData.gender}</p>
+            <p className="text-sm">{addressCardInfoData.gender}</p>
           </LabelView>
         </div>
       </CardContent>
       <CardContent className="border-t">
-        <CardTitle className="mb-5 pt-6">Permanent Address</CardTitle>
+        <CardTitle className="mb-5 pt-6 text-sm">Permanent Address</CardTitle>
         <AddressCard {...addressCardInfoData.permanentAddress} />
       </CardContent>
       <CardContent className="border-t">
-        <CardTitle className="mb-5 pt-6">
+        <CardTitle className="mb-5 pt-6 text-sm">
           Current Address as per Aadhaar
         </CardTitle>
         <AddressCard {...addressCardInfoData.currentAddress} />
       </CardContent>
       <CardFooter className="border-t">
-        <div className="flex flex-col gap-4">
-          <CardTitle>Verification Status</CardTitle>
+        <div className="flex flex-col gap-8">
+          <CardTitle className="text-sm" >Verification Status</CardTitle>
           <LabelView title="Verification Timestamp">
-            <p className="font-medium text-sm">
+            <p className="text-sm">
               {addressCardInfoData.verificationTimeStamp}
+            </p>
+          </LabelView>
+            <LabelView title="Confirm Timestamp">
+            <p className="text-sm">
+              {addressCardInfoData.confirmTimeStamp}
             </p>
           </LabelView>
         </div>

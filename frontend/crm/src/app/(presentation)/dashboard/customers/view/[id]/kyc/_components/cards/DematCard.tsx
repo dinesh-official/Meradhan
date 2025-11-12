@@ -39,48 +39,48 @@ export function DematCard({
   verifiedOn,
 }: DematCardProps) {
   return (
-    <Card className="relative overflow-hidden bg-gray-50 border-none shadow-sm">
+    <Card className="relative bg-gray-50 shadow-sm border-none overflow-hidden">
       {/* Background logo */}
-      <div className="absolute -right-5 -bottom-10 opacity-[0.04]">
+      <div className="-right-5 -bottom-10 absolute opacity-[0.04]">
         <ChartNoAxesCombined size={190} />
       </div>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">{depository}</CardTitle>
+        <CardTitle className="font-semibold">{depository}</CardTitle>
         <CardAction>
           <StatusBadge value={isVerified ? "Verified" : "Not Verify"} />
         </CardAction>
       </CardHeader>
 
       <CardContent className="space-y-2">
-        <div className="grid grid-cols-3 gap-5">
+        <div className="gap-5 grid grid-cols-3">
           <LabelView title="DP ID">
-            <p>{dpId}</p>
+            <p className="text-sm" >{dpId}</p>
           </LabelView>
           <LabelView title="Client ID">
-            <p>{clientId}</p>
+            <p className="text-sm" >{clientId}</p>
           </LabelView>
           <LabelView title="Account Type">
-            <p>{accountType}</p>
+            <p className="text-sm" >{accountType}</p>
           </LabelView>
         </div>
 
         <div className="space-y-1">
-          <p className="text-sm text-gray-700 flex gap-2 items-center">
+          <p className="flex items-center gap-2 text-gray-700 text-xs">
             PAN 1 (Primary): {pan1.value}
           </p>
           {pan2 && (
-            <p className="text-sm text-gray-700 flex gap-2 items-center">
+            <p className="flex items-center gap-2 text-gray-700 text-xs">
               PAN 2 (Joint): {pan2.value}
             </p>
           )}
           {pan3 && (
-            <p className="text-sm text-gray-700 flex gap-2 items-center">
+            <p className="flex items-center gap-2 text-gray-700 text-xs">
               PAN 3 (Joint): {pan3.value}
             </p>
           )}
         </div>
 
-        <p className="text-sm text-gray-500">
+        <p className="text-gray-500 text-xs">
           Depository Participant Name: {depositoryParticipantName}
         </p>
       </CardContent>
@@ -90,8 +90,8 @@ export function DematCard({
           <LabelView title="Default Account?">
             <StatusBadge value={isDefault ? "Yes" : "No"} />
           </LabelView>
-          <LabelView title="Verification Status" className="text-right block">
-            <p className="text-sm font-medium text-right">{verifiedOn}</p>
+          <LabelView title="Verification Status" className="block text-right">
+            <p className="text-xs text-right">{verifiedOn}</p>
           </LabelView>
         </div>
       </CardFooter>

@@ -12,7 +12,7 @@ export interface AdharaCardProps {
 
 function AdharaCard(adharaCardInfo: AdharaCardProps) {
   return (
-    <div className="p-5 w-96 aspect-video rounded-2xl  relative shadow bg-white">
+    <div className="relative bg-white shadow p-5 rounded-2xl w-96 aspect-video">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
           <Image
@@ -23,13 +23,13 @@ function AdharaCard(adharaCardInfo: AdharaCardProps) {
             className="w-7 h-auto"
           />
           <div className="flex flex-col leading-tight">
-            <p className="font-bold text-sm text-gray-800">भारत सरकार</p>
-            <p className="font-semibold text-xs text-gray-600">
+            <p className="font-bold text-gray-800 text-sm">भारत सरकार</p>
+            <p className="font-semibold text-gray-600 text-xs">
               Government of India
             </p>
           </div>
         </div>
-        <div className="text-right ">
+        <div className="text-right">
           <Image
             alt=""
             src={`/icons/india/adhar.png`}
@@ -40,7 +40,7 @@ function AdharaCard(adharaCardInfo: AdharaCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 font-medium mt-5">
+      <div className="flex flex-col gap-1 mt-5 pb-10 font-medium">
         <div className="text-xs">
           <p className="text-[9px]">नाम / Name</p>
           <p>{adharaCardInfo.name}</p>
@@ -56,12 +56,14 @@ function AdharaCard(adharaCardInfo: AdharaCardProps) {
         </div>
       </div>
       {adharaCardInfo.isVerified && (
-        <div className="flex justify-center items-center bg-green-500 absolute bottom-14 right-0 rounded-full  rounded-r-none gap-3 p-2 px-3  font-bold text-white ">
-          <CircleCheckBig size={20} className=" text-white " />
+        <div className="right-0 bottom-14 absolute flex justify-center items-center gap-3 bg-green-500 p-2 px-3 rounded-full rounded-r-none font-bold text-white">
+          <CircleCheckBig size={20} className="text-white" />
           <p>Verified</p>
         </div>
       )}
-      <div className="absolute bottom-0 left-0 w-full text-center py-2 font-medium bg-gradient-to-r from-orange-500 via-white to-green-600 rounded-b-2xl">
+      
+      
+      <div className="bottom-0 left-0 absolute bg-gradient-to-r from-orange-500 via-white to-green-600 py-2 rounded-b-2xl w-full font-medium text-center">
         <p>{adharaCardInfo.aadhaarNumberMasked}</p>
       </div>
     </div>

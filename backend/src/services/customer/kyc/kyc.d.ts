@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export type KycDataStorage = {
+export type KycDataStorage =  {
   step_1: {
     pan: {
+      isFatca: boolean
       lastName: string
       response: {
         id: string
@@ -25,12 +26,12 @@ export type KycDataStorage = {
             gender: string
             file_url: string
             id_number: string
+            father_name: string
             document_type: string
             id_proof_type: string
             current_address: string
             last_refresh_date: string
             permanent_address: string
-            father_name?: string
             current_address_details: {
               state: string
               address: string
@@ -65,6 +66,8 @@ export type KycDataStorage = {
       checkTerms1: boolean
       checkTerms2: boolean
       dateOfBirth: string
+      confirmPanTimestamp: string
+      confirmAadhaarTimestamp: string
     }
     face: {
       url: string
@@ -121,6 +124,7 @@ export type KycDataStorage = {
         customer_identifier: string
         reminder_registered: boolean
       }
+      timestamp: string
     }
     sign: {
       url: string
@@ -157,6 +161,7 @@ export type KycDataStorage = {
         customer_identifier: string
         reminder_registered: boolean
       }
+      timestamp: string
     }
   }
   step_2: {
@@ -169,6 +174,7 @@ export type KycDataStorage = {
     reelWithPerson: string
     annualGrossIncome: string
     residentialStatus: string
+    confirmPersonalInfoTimestamp: string
   }
   step_3: Array<{
     bankName: string
@@ -188,17 +194,25 @@ export type KycDataStorage = {
     isVerified: boolean
     accountNumber: string
     bankAccountType: string
+    verifyTimestamp: string
     beneficiary_name: string
+    confirmBankTimestamp: string
   }>
   step_4: Array<{
     dpId: string
     response: {
-      rrn: number
-      dpId: string
+      data: {
+        rrn: number
+        dpId: string
+        status: string
+        clientId: string
+        fstHoldrPan: string
+        transactionId: string
+      }
+      idNo: string
       status: string
-      clientId: string
+      isVerified: boolean
       fstHoldrPan: string
-      transactionId: string
     }
     isDefault: boolean
     panNumber: Array<string>
@@ -206,8 +220,10 @@ export type KycDataStorage = {
     isVerified: boolean
     accountType: string
     depositoryName: string
+    verifyTimestamp: string
     accountHolderName: string
     beneficiaryClientId: string
+    confirmDematTimestamp: string
     depositoryParticipantName: string
   }>
   step_5: Array<{

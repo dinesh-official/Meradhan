@@ -113,7 +113,7 @@ function Page3(data: {
         style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-3")}
       >
         <Text style={tw("text-xs text-white font-[500] leading-[1px]")}>
-          6.Remarks (if any)
+          6. Remarks (if any)
         </Text>
       </View>
     </View>

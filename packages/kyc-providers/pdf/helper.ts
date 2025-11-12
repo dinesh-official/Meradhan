@@ -1,5 +1,7 @@
 export const strApi = "https://spyder.meradhan.co";
 
+import axios from "axios";
+import { pdf } from "pdf-to-img";
 // Define allowed formats as a TypeScript type
 export type DateFormat =
   | "DD-MM-YYYY"
@@ -84,8 +86,6 @@ export function getVillageCity(address: string): string | null {
 }
 
 
-import axios from "axios";
-import { pdf } from "pdf-to-img";
 export async function pdfUrlToBase64(pdfUrl: string, pageNumber: number = 1): Promise<string> {
   // 1. Download PDF as buffer
   const response = await axios.get<ArrayBuffer>(pdfUrl, { responseType: "arraybuffer" });

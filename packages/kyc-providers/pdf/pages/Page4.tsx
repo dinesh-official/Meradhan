@@ -34,7 +34,7 @@ function Page4(data: {
             }}
           >
             <Text style={{ marginRight: 8, marginTop: -4 }}>•</Text>
-            <Text style={{ fontSize: 11, lineHeight: 1.4, width: "100%" }}>
+            <Text style={tw(`text-xs w-full  leading-[5px]`)}>
               I hereby affirm that the information and KYC particulars submitted
               above by me are accurate and complete to the best of my knowledge.
               I undertake to promptly notify MeraDhan of any change or
@@ -51,7 +51,7 @@ function Page4(data: {
             }}
           >
             <Text style={{ marginRight: 8, marginTop: -4 }}>•</Text>
-            <Text style={{ fontSize: 11, lineHeight: 1.4, width: "100%" }}>
+            <Text style={tw(`text-xs w-full  leading-[5px]`)}>
               I consent to receiving updates, alerts, or communication from the
               Central KYC Registry and/or SEBI-registered KRAs via SMS and/or
               email at my registered contact details.
@@ -65,7 +65,7 @@ function Page4(data: {
             }}
           >
             <Text style={{ marginRight: 8, marginTop: -4 }}>•</Text>
-            <Text style={{ fontSize: 11, lineHeight: 1.4, width: "100%" }}>
+            <Text style={tw(`text-xs w-full  leading-[5px]`)}>
               I acknowledge that, in the case of Aadhaar OVD-based KYC, my
               credentials will be authenticated against Aadhaar records. I
               consent to provide my masked Aadhaar card with visible QR code or
@@ -82,7 +82,7 @@ function Page4(data: {
             }}
           >
             <Text style={{ marginRight: 8, marginTop: -4 }}>•</Text>
-            <Text style={{ fontSize: 11, lineHeight: 1.4, width: "100%" }}>
+            <Text style={tw(`text-xs w-full  leading-[5px]`)}>
               I expressly authorize BondNest Capital India Securities Private
               Limited (operating under the brand name “MeraDhan”) to retrieve
               and/or access my KYC information from the Central KYC Registry
@@ -101,7 +101,7 @@ function Page4(data: {
             }}
           >
             <Text style={{ marginRight: 8, marginTop: -4 }}>•</Text>
-            <Text style={{ fontSize: 11, lineHeight: 1.4, width: "100%" }}>
+            <Text style={tw(`text-xs w-full  leading-[5px]`)}>
               I agree and confirm that my KYC records may be shared with
               statutory bodies, regulators, and Know Your Client Registration
               Agencies (KRAs) for verification and compliance purposes, and that
@@ -117,7 +117,7 @@ function Page4(data: {
             }}
           >
             <Text style={{ marginRight: 8, marginTop: -4 }}>•</Text>
-            <Text style={{ fontSize: 11, lineHeight: 1.4, width: "100%" }}>
+            <Text style={tw(`text-xs w-full  leading-[5px]`)}>
               I further consent to receiving product-related communications,
               service notifications, or updates through SMS and/or email from
               BondNest Capital India Securities Private Limited and its
@@ -129,7 +129,7 @@ function Page4(data: {
           {/* // end content  */}
 
           <View style={tw(`flex justify-between flex-row w-full mt-10 `)}>
-            <View style={tw(`text-sm flex flex-col gap-5`)}>
+            <View style={tw(`text-xs flex flex-col gap-5`)}>
               <Text>Name: {data.name}</Text>
               <Text>Date: {data.date}</Text>
               <Text>Place:</Text>
@@ -139,7 +139,7 @@ function Page4(data: {
                 src={data.signatureUrl}
                 style={tw(`w-40 h-24 object-contain`)}
               />
-              <Text style={tw(`text-sm flex flex-col gap-5`)}>Signature</Text>
+              <Text style={tw(`text-xs flex flex-col gap-5`)}>Signature</Text>
             </View>
           </View>
         </View>

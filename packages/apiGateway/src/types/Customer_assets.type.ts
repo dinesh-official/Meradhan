@@ -27,6 +27,9 @@ export type AadhaarCard = {
   image: string;
   isVerified: boolean;
   verifyDate: string;
+  confirmTimeStamp: string | null;
+  
+  allowTerms: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -42,6 +45,9 @@ export type BankAccount = {
   branch: string;
   isPrimary: boolean;
   isVerified: boolean;
+  confirmTimeStamp: string | null;
+  allowTerms: boolean;
+
   customerProfileDataModelId: number;
   verifyDate: string;
   createdAt: string;
@@ -59,6 +65,7 @@ export type Address = {
   state: string;
   pinCode: string;
   country: string;
+
   fullAddress: string;
   createdAt: string;
   updatedAt: string;
@@ -78,10 +85,13 @@ export type DematAccount = {
   accountHolderName: string;
   isPrimary: boolean;
   isVerified: boolean;
+  allowTerms: boolean;
   verifyDate: string;
   customerProfileDataModelId: number;
   createdAt: string;
   updatedAt: string;
+  confirmTimeStamp: string | null;
+
 };
 
 // PAN Card
@@ -94,7 +104,10 @@ export type PanCard = {
   dateOfBirth: string;
   gender: Gender;
   isVerified: boolean;
+  confirmTimeStamp: string | null;
   verifyDate: string;
+  allowTerms: boolean;
+
   createdAt: string;
   updatedAt: string;
 };

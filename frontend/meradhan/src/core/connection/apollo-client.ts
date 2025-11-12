@@ -40,6 +40,9 @@ export const gqlClient = new ApolloClient({
             fetchPolicy: "no-cache",
             errorPolicy: "all",
         },
+        mutate: {
+            errorPolicy: "all",
+        },
     },
 });
 
@@ -49,5 +52,8 @@ export const strApiClient = axios.create({
         Authorization: `Bearer ${API_KEY}`, // Or 'x-api-key' depending on the API requirement
         Accept: "application/json",
         "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        Expires: "0",
     },
 });

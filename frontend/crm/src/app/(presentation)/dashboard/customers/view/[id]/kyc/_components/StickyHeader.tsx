@@ -11,12 +11,12 @@ const navItems = [
 
 export default function StickyHeader() {
   return (
-    <div className="w-full h-16 bg-white z-40 select-none  text-nowrap overflow-auto border-gray-100 sticky -top-8 lg:pt-0 pt-4 border rounded-lg flex flex-row gap-7 justify-start px-7 text-gray-700 font-medium items-center">
+    <div className="-top-8 z-40 sticky flex flex-row justify-start items-center gap-7 bg-white px-7 pt-4 lg:pt-0 border border-gray-100 rounded-lg w-full h-11 overflow-auto text-gray-700 text-nowrap select-none">
       {navItems.map((item) => (
         <a
           key={item.id}
           href={`#${item.id}`}
-          className="transition-all hover:text-primary cursor-pointer"
+          className="font-medium hover:text-primary text-xs transition-all cursor-pointer"
         >
           {item.label}
         </a>

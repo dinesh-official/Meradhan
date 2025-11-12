@@ -206,7 +206,7 @@ export type Page4Props = {
 };
 
 export type Page5Props = {
-    documentsReceived: "Certified" | "Original" | "Self-Attested";
+    documentsReceived: "Certified" | "Original" | "Self-Attested" | "e-document" | "DigitalKYC" | "UIDAI" | "VideoKyc";
     empSignature: string;
 };
 
@@ -460,7 +460,7 @@ export const mapDataForPage1 = (data: Root): Page1Props => ({
     panNo: data.step_1?.pan?.panCardNo || "",
     name: getFullName(data),
     maidanName: data.step_1?.pan?.middleName || "",
-    fatherSpouseName: data.step_1?.pan?.response?.details?.aadhaar?.father_name || "",
+    fatherSpouseName: data.step_2?.fatSpuName || "",
     motherName: data.step_2?.motherName || "",
     dateOfBirth: data.step_1?.pan?.dateOfBirth || "",
     gender: (data.step_1?.pan?.response?.details?.pan?.gender === "M" ? "MALE" : data.step_1?.pan?.response?.details?.pan?.gender === "F" ? "FEMALE" : "OTHER"),
@@ -474,20 +474,45 @@ export const mapDataForPage1 = (data: Root): Page1Props => ({
 });
 
 export const mapDataForPage2 = (data: Root): Page2Props => {
-    const address = data.step_1?.pan?.response?.details?.aadhaar?.current_address_details;
+    let address = data.step_1?.pan?.response?.details?.aadhaar?.current_address_details;
+
+    const cars = ["c/o", "d/o", "s/o", "w/o", "h/o"]
+
+    cars.forEach((car) => {
+        if (address?.address.toLowerCase().includes(car)) {
+            address = {
+                ...address,
+                // remove first ,
+                address: address.address.split(",").slice(1).join(",").trim()
+            }
+        }
+
+    });
+
+    const addresBrake = address.address?.split(",") || [];
+    const cityName = addresBrake?.[addresBrake.length - 5]
+
+    // only first 2 ,  before city name
+    const line1 = (address.address.split("," + cityName)[0] || "").split(",").slice(0, 2).join(",").trim();
+    // next line 2 is rest of address before city name
+    const line2 = (address.address.split("," + cityName)[0] || "").split(",").slice(2).join(",").trim();
+
+
+
+
 
     const permanentAddress: AddressType = {
         addressType: "RESIDENTIAL",
-        addressLine1: address?.address?.split(",")[0] || "",
-        addressLine2: address?.address?.split(",")[1] || "",
-        addressLine3: address?.address?.split(",")[2] || "",
-        city: address?.district_or_city || "",
+        addressLine1: line1,
+        addressLine2: line2,
+        addressLine3: address.locality_or_post_office,
+        city: cityName || "",
         state: address?.state || "",
         district: address?.district_or_city || "",
         pincode: address?.pincode || "",
         country: "India",
         postOffice: address?.locality_or_post_office || "",
-        stateUTCode: "",
+        stateUTCode: "IN",
     };
 
     return {
@@ -503,7 +528,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
 export const mapDataForPage3 = (data: Root): Page3Props => ({
     FATCAdeclaration: data.step_1?.pan?.isFatca || false,
     email: data.user.emailAddress,
-    isAPep: data.step_1.pan.checkTerms1 ? "YES" : "NO",
+    isAPep: !data.step_1.pan.checkTerms1 ? "YES" : "NO",
     mobile: data.user.phoneNo,
 });
 
@@ -514,7 +539,7 @@ export const mapDataForPage4 = (data: Root): Page4Props => ({
 });
 
 export const mapDataForPage5 = (data: Root): Page5Props => ({
-    documentsReceived: "Certified",
+    documentsReceived: "e-document",
     empSignature: "",
 });
 
@@ -784,7 +809,7 @@ export type AllPagesData = {
     page48: Page48Props;
 };
 
-export const mapAllPages =async (data: Root): Promise<AllPagesData> => ({
+export const mapAllPages = async (data: Root): Promise<AllPagesData> => ({
     page1: mapDataForPage1(data),
     page2: mapDataForPage2(data),
     page3: mapDataForPage3(data),
