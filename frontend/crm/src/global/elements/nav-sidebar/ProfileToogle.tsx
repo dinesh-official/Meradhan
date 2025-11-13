@@ -11,10 +11,10 @@ function ProfileTopView({
 }) {
   return (
     <ProfileToggleAction id={session.id}>
-      <div className="flex flex-row justify-center items-center gap-3 select-none cursor-pointer">
-        <div className="lg:flex flex-col hidden text-right">
-          <p className="text-sm font-medium text-gray-800">{session?.name}</p>
-          <p className="text-xs text-gray-500">{session?.role}</p>
+      <div className="flex flex-row justify-center items-center gap-3 cursor-pointer select-none">
+        <div className="hidden lg:flex flex-col text-right">
+          <p className="font-medium text-gray-800 text-xs">{session?.name}</p>
+          <p className="text-[10px] text-gray-500">{session?.role}</p>
         </div>
         <Avatar>
           <AvatarImage src={ASSETS_URL + session?.avatar} />

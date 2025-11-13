@@ -8,21 +8,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Image from "next/image";
-import React from "react";
-import { MdOutlineArrowRight } from "react-icons/md";
-import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { genMediaUrl } from "@/global/utils/url.utils";
 import { dataMatcherUtils } from "@/global/utils/matcher";
-import { useKycDataProvider } from "../../../_context/KycDataProvider";
+import { genMediaUrl } from "@/global/utils/url.utils";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
+import { useKycDataProvider } from "../../../_context/KycDataProvider";
+import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
 function IdentityValidationPanInfo() {
-  const { pushUserKycState ,addAuditLog} = useKycDataProvider();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
 
   const data = state.step_1.pan;
@@ -147,7 +146,10 @@ function IdentityValidationPanInfo() {
             pushUserKycState();
           }}
         >
-          Continue to Verify <MdOutlineArrowRight />
+          Continue to Verify
+          <div className="flex justify-center items-center p-0 h-full">
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
         <Button
           variant={`link`}

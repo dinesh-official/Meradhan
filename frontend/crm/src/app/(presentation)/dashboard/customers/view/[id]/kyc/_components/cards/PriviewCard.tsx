@@ -17,7 +17,7 @@ function PreviewCard({
         alt=""
         width={500}
         height={500}
-        className="rounded-xl object-cover aspect-square"
+        className="rounded-xl object-contain aspect-square"
       />
       <div className="mt-3 text-center">
         <p className="text-gray-500 text-sm">{type}</p>

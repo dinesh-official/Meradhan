@@ -151,6 +151,7 @@
 /* Optional: smooth scrolling for entire site */
 html {
   scroll-behavior: smooth;
+  font-size: 14px;
 }
 
 /* Base popup styling */
@@ -270,3 +271,4 @@ html {
 .animate-slide-out-right {
   animation: slide-out-right 0.3s ease-in forwards;
 }
+

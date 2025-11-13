@@ -17,20 +17,20 @@ function PageInfoBar({
 }) {
   const router = useRouter();
   return (
-    <div className="flex md:flex-row flex-col gap-5 justify-between items-start">
+    <div className="flex md:flex-row flex-col justify-between items-start gap-5">
       <div className="flex flex-row items-center gap-5">
         {showBack && (
           <Button
             onClick={() => router.back()}
-            className="p-0 overflow-hidden w-10 h-10 rounded-full border-gray-200"
+            className="p-0 border-gray-200 rounded-full w-8 h-8 overflow-hidden"
             variant={"outline"}
           >
             <ChevronLeft />
           </Button>
         )}
         <div>
-          <h1 className="text-xl font-bold">{title}</h1>
-          <p className="text-xs text-gray-500">{description}</p>
+          <h1 className="font-bold">{title}</h1>
+          <p className="text-gray-500 text-xs">{description}</p>
         </div>
       </div>
       {actions}

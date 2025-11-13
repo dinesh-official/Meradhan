@@ -3,6 +3,8 @@
 // // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 // import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
+import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
+
 // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 
 // import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
@@ -190,3 +192,9 @@
 
 // const data = await rfqManager.getAllNegotiations({});
 // console.log(data.length);
+
+
+const manager = new CustomerKycManager();
+
+const data = await manager.saveKycToCustomer(105);
+console.log(data);

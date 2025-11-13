@@ -44,7 +44,7 @@ function PanCard(panCardData: PanCardProps) {
         </div>
 
         <div className="text-xs">
-           <p className="text-blue-950">जन्म तिथि / Gender</p>
+           <p className="text-blue-950">लिंग / Gender</p>
           <p>{panCardData.gender}</p>
         </div>
         <div className="text-xs">

@@ -15,18 +15,18 @@ function TopBar({ session }: { session: UserSessionDataResponse }) {
   const { isOpen, setNavOpen } = useNavBarToggleStore();
 
   return (
-    <div className="w-full h-[65px] border-b flex sticky top-0 right-0 left-0 z-50 justify-between items-center px-5 bg-white border-gray-100">
-      <div className="flex justify-start items-center gap-6 h-full ">
+    <div className="top-0 right-0 left-0 z-50 sticky flex justify-between items-center bg-white px-5 border-gray-100 border-b w-full h-[55px]">
+      <div className="flex justify-start items-center gap-6 h-full">
         {/* Mobile Menu Bar */}
         <MobMenuBar role={session.responseData.role} />
 
         <div className="flex justify-start items-center gap-3">
           <div className="flex justify-start items-center gap-6 pl-1">
             <Tooltip  >
-              <TooltipTrigger className="lg:block hidden" >
+              <TooltipTrigger className="hidden lg:block" >
                 <Menu
                   onClick={() => setNavOpen(!isOpen)}
-                  className="cursor-pointer text-primary "
+                  className="text-primary cursor-pointer"
                 />
               </TooltipTrigger>
               <TooltipContent align="start" side="right">
@@ -43,12 +43,12 @@ function TopBar({ session }: { session: UserSessionDataResponse }) {
               alt="meradhan"
               width={500}
               height={500}
-              className="w-11 h-11"
+              className="w-10 h-10"
             />
           </div>
-          <div className="lg:flex hidden flex-col justify-center items-start ">
-            <p className="font-bold text-lg text-gray-800">MeraDhan CRM</p>
-            <p className="text-xs text-gray-500">SEBI Registered OBPP</p>
+          <div className="hidden lg:flex flex-col justify-center items-start">
+            <p className="font-bold text-gray-800">MeraDhan CRM</p>
+            <p className="text-gray-500 text-xs">SEBI Registered OBPP</p>
           </div>
         </div>
       </div>

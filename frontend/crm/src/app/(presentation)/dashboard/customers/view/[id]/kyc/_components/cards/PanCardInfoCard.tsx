@@ -22,7 +22,7 @@ export interface PanCardInfoProps {
 
 export default function PanCardInfoCard(panCardInfoData: PanCardInfoProps) {
   return (
-    <Card>
+    <Card id="pan-details">
       <CardHeader>
         <CardTitle className="text-sm" >PAN Details</CardTitle>
       </CardHeader>

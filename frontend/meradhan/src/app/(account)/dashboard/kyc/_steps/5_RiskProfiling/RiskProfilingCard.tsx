@@ -7,12 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import React from "react";
-import { MdOutlineArrowRight } from "react-icons/md";
-import RiskProfilingSelector from "./RiskProfilingSelector";
-import { useKycDataStorage } from "../../_store/useKycDataStorage";
+import { IoMdArrowDropright } from "react-icons/io";
 import { useKycDataProvider } from "../../_context/KycDataProvider";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../_store/useKycStepStore";
+import RiskProfilingSelector from "./RiskProfilingSelector";
 
 function RiskProfilingCard() {
   const { state, setStepIndex } = useKycDataStorage();
@@ -50,7 +49,9 @@ function RiskProfilingCard() {
           onClick={jumpNext}
           className="w-full sm:w-auto"
         >
-          Save & Continue <MdOutlineArrowRight />
+          Save & Continue  <div className="flex justify-center items-center p-0 h-full">
+                      <IoMdArrowDropright className="p-0 text-4xl" />
+                    </div>
         </Button>
       </CardFooter>
     </Card>

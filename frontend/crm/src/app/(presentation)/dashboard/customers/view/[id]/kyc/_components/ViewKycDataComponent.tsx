@@ -1,26 +1,26 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { areNamesMatched } from "@/lib/utils";
 import apiGateway, { CustomerByIdPayload } from "@root/apiGateway";
+import { useQuery } from "@tanstack/react-query";
 import StickyHeader from "./StickyHeader";
 import AadhaarCardInfo from "./cards/AadhaarCardInfo";
 import AdharaCard from "./cards/AdharaCard";
 import { BankCard } from "./cards/BankCard";
+import CheckedCompances from "./cards/CheckedCompances";
 import CustomerOverViewCard from "./cards/CustomerOverViewCard";
 import { DematCard } from "./cards/DematCard";
 import KYCVerificationStatusCard from "./cards/KYCVerificationStatusCard";
 import PanCard from "./cards/PanCard";
 import PanCardInfoCard from "./cards/PanCardInfoCard";
 import PersonalInformationCard from "./cards/PersonalInformationCard";
+import ShowResponseJson from "./cards/ShowResponseJson";
 import RiskProfileQuestion, {
   RiskProfileAnsOption,
 } from "./cards/riskprofile/RiskProfileQuestion";
-import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { useQuery } from "@tanstack/react-query";
-
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
@@ -98,10 +98,11 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           }
         />
       </div>
+     
 
       {/* Identity Documents */}
-      <div className="flex flex-col gap-5 scroll-mt-16" id="identity-docs">
-        <Card>
+      <div className="flex flex-col gap-5 scroll-mt-16" >
+        <Card id="identity-docs">
           <CardHeader>
             <CardTitle className="text-sm">Identity Documents</CardTitle>
           </CardHeader>
@@ -167,6 +168,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             </div>
           </CardContent>
         </Card>
+         <ShowResponseJson id={data.id} />
         <PanCardInfoCard
           panCardNumber={data.panCard?.panCardNo || "--------"}
           Name={`${data.panCard?.firstName || "----"} ${
@@ -211,6 +213,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                 )
           }
         />
+
         <AadhaarCardInfo
           name={`${data.aadhaarCard?.firstName || "----"} ${
             data.aadhaarCard?.middleName || ""
@@ -285,7 +288,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle className="text-sm">Demat Accounts Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="gap-5 grid lg:grid-cols-2">
+            <div className="gap-5 grid lg:grid-cols-3">
               {data.dematAccounts.map((e) => {
                 return (
                   <DematCard
@@ -327,7 +330,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle className="text-sm">Bank Accounts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="gap-5 grid lg:grid-cols-2">
+            <div className="gap-5 grid lg:grid-cols-3">
               {data.bankAccounts.map((e) => {
                 return (
                   <BankCard
@@ -381,33 +384,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         </Card>
       </div>
       {/* Compliance */}
-      <div className="scroll-mt-16" id="compliance">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">
-              SEBI & Compliance Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardTitle className="text-sm">Compliance Confirmations</CardTitle>
-            <p className="flex justify-start items-center gap-3 mt-3">
-              <Checkbox checked={data.isAPep} /> I hereby confirm that I am not
-              a Politically Exposed Person (PEP) nor related to any PEP
-            </p>
-            <p className="flex justify-start items-center gap-3 mt-2">
-              <Checkbox checked={data.allowSEBITerms} /> I hereby confirm that I
-              am not a person and/or entity debarred from accessing the
-              securities market or dealing in securities, as per directions or
-              orders issued by SEBI
-            </p>
-            <p className="flex justify-start items-center gap-3 mt-2">
-              <Checkbox checked={data.isAFatcaCustomer} /> I confirm that I am
-              an Indian citizen and solely a tax resident of India, not of any
-              other country (FATCA)
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <CheckedCompances id={data.id}/>
     </div>
   );
 }

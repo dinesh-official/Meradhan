@@ -128,7 +128,7 @@ export function DataTable<TData, TValue>({
                       className={cn(
                         "px-4 py-2 last:border-0 border-r font-normal",
                         stickyRight
-                          ? "sticky right-0 z-20  text-center "
+                          ? "sticky right-0 z-20  text-center  bg-gray-50"
                           : undefined
                       )}
                     >
@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={table.getAllLeafColumns().length}
-                  className="h-24 text-center"
+                  className="px-10 h-24 text-left"
                 >
                   {renderEmpty ?? "No results."}
                 </TableCell>

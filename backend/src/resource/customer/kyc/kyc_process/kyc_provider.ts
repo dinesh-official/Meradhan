@@ -14,8 +14,6 @@ class DigioKycFileHelper {
 
     // get pan aadhar document files from digio rid
     async getPanAadharDocumentFiles(bytes: string) {
-        console.log(bytes);
-
         const zipBuffer = Buffer.from(bytes);
         const zip = new AdmZip(zipBuffer);
 
@@ -24,13 +22,18 @@ class DigioKycFileHelper {
         zip.extractAllTo(tempDir, true);
 
         // Step 3: Collect extracted file paths
-        const files = fs.readdirSync(tempDir).map((file) => path.join(tempDir, file));
+        const files = fs
+            .readdirSync(tempDir)
+            .sort((a, b) => a.localeCompare(b)) // A → Z
+            .map((file) => path.join(tempDir, file));
+
+
 
         const pathData = {
             pan: files?.[0],
             aadhar: files?.[1]
         }
-        
+
         const aadharUrl = await saveFileOnCloud({
             filePath: pathData.aadhar!,
             directory: "kyc/aadhar/document"

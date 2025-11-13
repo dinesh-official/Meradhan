@@ -10,8 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import React, { useEffect } from "react";
-import { MdOutlineArrowRight } from "react-icons/md";
 import {
   Select,
   SelectContent,
@@ -19,14 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import ManageDematPanInputs from "./_elements/ManageDematPanInputs";
+import { makeFullname } from "@/global/utils/formate";
+import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import { IoMdArrowDropright } from "react-icons/io";
 import {
   KycDataStorage,
   useKycDataStorage,
 } from "../../_store/useKycDataStorage";
+import ManageDematPanInputs from "./_elements/ManageDematPanInputs";
 import { useDematAccountFormHook } from "./_hooks/useDematAccountFormHook";
-import { makeFullname } from "@/global/utils/formate";
-import { cn } from "@/lib/utils";
 
 function AddDematAccountForm() {
   const { updateDepository, state, removeDepository, nextLocalStep } =
@@ -258,7 +258,9 @@ function AddDematAccountForm() {
           onClick={handelSubmit}
           disabled={isPending}
         >
-          Confirm & Verify <MdOutlineArrowRight />
+          Confirm & Verify  <div className="flex justify-center items-center p-0 h-full">
+                      <IoMdArrowDropright className="p-0 text-4xl" />
+                    </div>
         </Button>
 
         {/* // if add more than 1 demat account then show cancel button */}

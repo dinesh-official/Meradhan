@@ -21,6 +21,23 @@ export class KycStoreController {
         })
     }
 
+
+        async getKycDataById(req: Request, res: Response) {
+        const id = Number(req.params.customerId);
+
+        const response = await db.dataBase.kYC_FLOW.findUnique({
+            where: {
+                userID: id
+            }
+        });
+
+        res.sendResponse({
+            statusCode: HttpStatus.OK,
+            responseData: response
+        })
+    }
+
+
     async setKycData(req: Request, res: Response) {
         const id = req.customer!.id;
         const step = req.params.step!;

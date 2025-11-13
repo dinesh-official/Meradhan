@@ -66,7 +66,7 @@ function PersonalInformationCard(personalInfoCardData:PersonalInformationCardPro
             </LabelView>
             <LabelView title="Occupation Type">
               <p className="text-sm">{personalInfoCardData.occupationType}</p>
-            </LabelView>
+            </LabelView>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
             <LabelView title="Annual Gross Income">
               <p className="text-sm">{personalInfoCardData.annualGrossIncome}</p>
             </LabelView>

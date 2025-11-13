@@ -101,17 +101,17 @@ export const SideBarItems = ({
           {item.icon && (
             <div
               className={cn(
-                "flex justify-center items-center rounded-md min-w-8 min-h-8 transition-colors duration-200",
+                "flex justify-center items-center rounded-md min-w-7 min-h-7 transition-colors duration-200",
                 isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-600"
               )}
             >
-              <item.icon className="w-5 h-5" />
+              <item.icon className="w-4 h-4" />
             </div>
           )}
           {/* Label of link menu  */}
           <span
             className={cn(
-              "opacity-100 text-sm transition-all",
+              "opacity-100 text-xs transition-all",
               compacted && "opacity-0"
             )}
           >
@@ -133,7 +133,7 @@ export const SideBarItems = ({
 
       {/* Loop Nested Menus levels */}
       {item.children && isOpen && !compacted && (
-        <div className="flex flex-col mt-1 ml-2 pl-2 border-gray-200 border-l transition-all">
+        <div className="flex flex-col ml-2 pl-2 border-gray-200 border-l transition-all">
           {item.children.map((child) => (
             <SideBarItems
               role={role}

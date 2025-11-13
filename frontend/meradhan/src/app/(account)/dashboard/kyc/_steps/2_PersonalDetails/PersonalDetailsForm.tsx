@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MdOutlineArrowRight } from "react-icons/md";
+import { IoMdArrowDropright } from "react-icons/io";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import {
   incomeRangeOptions,
@@ -263,7 +263,9 @@ function PersonalDetailsForm() {
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
         <Button className="w-full sm:w-auto" onClick={handelPersonalSubmit}>
-          Save & Continue <MdOutlineArrowRight />
+          Save & Continue  <div className="flex justify-center items-center p-0 h-full">
+                      <IoMdArrowDropright className="p-0 text-4xl" />
+                    </div>
         </Button>
       </CardFooter>
     </Card>

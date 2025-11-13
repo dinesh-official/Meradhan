@@ -9,12 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { dataMatcherUtils } from "@/global/utils/matcher";
-import { MdOutlineArrowRight } from "react-icons/md";
+import { genMediaUrl } from "@/global/utils/url.utils";
+import dynamic from "next/dynamic";
+import { IoMdArrowDropright } from "react-icons/io";
+import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import dynamic from "next/dynamic";
-import { genMediaUrl } from "@/global/utils/url.utils";
-import Swal from "sweetalert2";
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
@@ -92,7 +92,7 @@ function IdentityValidationAadharInfo() {
           </div>
         </div>
         <div className="gap-5 grid md:grid-cols-3 md:mt-10 py-5 border-gray-200 md:border-t md:border-b">
-          <DataInfoLabel title="City">
+          <DataInfoLabel title="City or Dist">
             <p className="font-medium">
               {
                 data.response?.details.aadhaar.current_address_details
@@ -129,7 +129,10 @@ function IdentityValidationAadharInfo() {
             pushUserKycState();
           }}
         >
-          Continue to Verify <MdOutlineArrowRight />
+          Continue to Verify
+          <div className="flex justify-center items-center p-0 h-full">
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
         <Button
           variant={`link`}

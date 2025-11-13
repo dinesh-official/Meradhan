@@ -39,7 +39,7 @@ export function DematCard({
   verifiedOn,
 }: DematCardProps) {
   return (
-    <Card className="relative bg-gray-50 shadow-sm border-none overflow-hidden">
+    <Card className="relative bg-gray-50 border-none overflow-hidden">
       {/* Background logo */}
       <div className="-right-5 -bottom-10 absolute opacity-[0.04]">
         <ChartNoAxesCombined size={190} />

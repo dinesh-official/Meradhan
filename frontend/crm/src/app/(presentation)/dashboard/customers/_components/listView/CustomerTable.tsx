@@ -9,10 +9,10 @@ import CustomerTableActions from "./actions/CustomerTableActions";
 interface UsersTableProps {
   data: CustomerProfile[];
   pageSize?: number;
-  isLoading?:boolean
+  isLoading?: boolean;
 }
 
-function CustomerTable({ data, pageSize = 10,isLoading }: UsersTableProps) {
+function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
   return (
     <UniversalTable<CustomerProfile>
       initialPageSize={pageSize}
@@ -35,7 +35,7 @@ function CustomerTable({ data, pageSize = 10,isLoading }: UsersTableProps) {
               </span>
 
               {row.userName && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   @{row.userName}
                 </span>
               )}
@@ -48,7 +48,7 @@ function CustomerTable({ data, pageSize = 10,isLoading }: UsersTableProps) {
           cell: (row) => (
             <div className="flex flex-col">
               <span className="lowercase">{row.emailAddress}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {row.phoneNo ?? "-"}
               </span>
             </div>
@@ -75,26 +75,23 @@ function CustomerTable({ data, pageSize = 10,isLoading }: UsersTableProps) {
         // },
         {
           key: "createdAt",
-          label: "Created",
+          label: "Created/Update",
           cell: (row) => (
-            <span>
-              {dateTimeUtils.formatDateTime(
-                row.createdAt,
-                "DD MMMM YYYY hh:mm AA"
-              )}
-            </span>
-          ),
-        },
-        {
-          key: "updatedAt",
-          label: "Updated",
-          cell: (row) => (
-            <span>
-              {dateTimeUtils.formatDateTime(
-                row.updatedAt,
-               "DD MMMM YYYY hh:mm AA"
-              )}
-            </span>
+            <div className="">
+              <p>
+                
+                {dateTimeUtils.formatDateTime(
+                  row.updatedAt,
+                  "DD MMM YYYY hh:mm AA"
+                )}
+              </p>
+              <p  className="text-gray-500 text-xs" >
+                {dateTimeUtils.formatDateTime(
+                  row.createdAt,
+                  "DD MMM YYYY hh:mm AA"
+                )}
+              </p>
+            </div>
           ),
         },
 

@@ -12,7 +12,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import { MdOutlineArrowRight } from "react-icons/md";
+import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
@@ -177,13 +177,19 @@ function IdentityValidationForm() {
       </CardContent>
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
+
+
         <Button
           className="flex items-center gap-2 w-full sm:w-auto"
           onClick={handelPanVerification}
           disabled={isPending}
         >
-          Continue to Verify <MdOutlineArrowRight />
+          Continue to Verify
+          <div className="flex justify-center items-center p-0 h-full">
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
+
         <Button
           variant="link"
           onClick={async () => {

@@ -7,14 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { makeFullname } from "@/global/utils/formate";
 import { FaPlusSquare } from "react-icons/fa";
-import { MdOutlineArrowRight } from "react-icons/md";
+import { IoMdArrowDropright } from "react-icons/io";
+import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 import DematAccountView from "./_elements/DematAccountView";
-import { makeFullname } from "@/global/utils/formate";
-import Swal from "sweetalert2";
 
 function VerifyDematAccount() {
   const {
@@ -96,7 +96,9 @@ function VerifyDematAccount() {
             disabled={!isAllowToContinue()}
             onClick={jumpNext}
           >
-            Confirm & Continue <MdOutlineArrowRight />
+            Confirm & Continue  <div className="flex justify-center items-center p-0 h-full">
+                        <IoMdArrowDropright  className="p-0 text-4xl" />
+                      </div>
           </Button>
           <Button
             variant={`link`}

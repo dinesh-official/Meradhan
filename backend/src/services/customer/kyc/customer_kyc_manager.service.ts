@@ -1,7 +1,7 @@
 import { db, type DataBaseSchema } from "@core/database/database";
 import type { $Enums } from "@databases/generated/prisma/supabase";
-import type { KycDataStorage } from "./kyc";
 import type { CustomerProfileService } from "@resource/crm/customers/customer.service";
+import type { KycDataStorage } from "./kyc";
 
 export class CustomerKycManager {
 
@@ -451,8 +451,8 @@ export class CustomerKycManager {
                 image: aadhaarData?.image || user?.aadhaarCard?.image || "------",
                 fileUrl: aadhaarData?.file_url || user?.aadhaarCard?.fileUrl || "------",
                 isVerified: user?.aadhaarCard?.isVerified || true,
-                verifyDate: user?.aadhaarCard?.verifyDate || step1.pan.confirmAadhaarTimestamp || new Date(),
-                confirmTimeStamp: user?.aadhaarCard?.confirmTimeStamp || step1.pan.confirmAadhaarTimestamp || new Date(),
+                verifyDate: user?.aadhaarCard?.verifyDate || step1.pan.confirmAadhaarTimestamp ,
+                confirmTimeStamp: user?.aadhaarCard?.confirmTimeStamp || step1.pan.confirmAadhaarTimestamp ,
                 createdAt: user?.aadhaarCard?.createdAt || new Date(),
                 updatedAt: user?.aadhaarCard?.updatedAt || new Date(),
                 allowTerms: step1?.pan?.checkTerms2 || user?.aadhaarCard?.allowTerms || false,
@@ -470,11 +470,11 @@ export class CustomerKycManager {
                 image: aadhaarData?.image || user?.panCard?.image || "------",
                 fileUrl: panData?.file_url || user?.panCard?.fileUrl || "------",
                 isVerified: user?.panCard?.isVerified || true,
-                verifyDate: user?.panCard?.verifyDate || new Date(),
+                verifyDate: user?.panCard?.verifyDate ,
                 createdAt: user?.panCard?.createdAt || new Date(),
                 updatedAt: user?.panCard?.updatedAt || new Date(),
                 allowTerms: step1?.pan?.checkTerms1 || user?.panCard?.allowTerms || false,
-                confirmTimeStamp: user?.panCard?.confirmTimeStamp || step1?.pan?.confirmPanTimestamp || new Date(),
+                confirmTimeStamp: user?.panCard?.confirmTimeStamp || step1?.pan?.confirmPanTimestamp,
 
             } as DataBaseSchema.PanCardModelCreateInput : null,
 

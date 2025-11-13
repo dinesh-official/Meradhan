@@ -34,7 +34,7 @@ export function BankCard({
   holderName
 }: BankCardProps) {
   return (
-    <Card className="relative bg-gray-50 shadow-sm border-none overflow-hidden">
+    <Card className="relative bg-gray-50 border-none overflow-hidden">
       {/* Background logo */}
       <div className="-right-14 -bottom-12 absolute opacity-[0.04]">
         <Landmark size={190} />

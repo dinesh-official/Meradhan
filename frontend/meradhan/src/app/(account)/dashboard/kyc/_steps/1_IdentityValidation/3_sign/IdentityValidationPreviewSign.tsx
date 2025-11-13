@@ -7,14 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { genMediaUrl } from "@/global/utils/url.utils";
 import Image from "next/image";
-import { MdOutlineArrowRight } from "react-icons/md";
+import { IoMdArrowDropright } from "react-icons/io";
+import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { genMediaUrl } from "@/global/utils/url.utils";
-import SignDoNotDO, { signDrawGuidelines } from "../_dialogs/SignDoNotDO";
 import { useKycStepStore } from "../../../_store/useKycStepStore";
-import Swal from "sweetalert2";
+import SignDoNotDO, { signDrawGuidelines } from "../_dialogs/SignDoNotDO";
 
 function IdentityValidationPreviewSign() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
@@ -71,7 +71,10 @@ function IdentityValidationPreviewSign() {
             pushUserKycState();
           }}
         >
-          Continue & Confirm <MdOutlineArrowRight />
+          Continue & Confirm
+          <div className="flex justify-center items-center p-0 h-full">
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
         <Button
           onClick={async () => {

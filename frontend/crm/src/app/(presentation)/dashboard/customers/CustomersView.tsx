@@ -1,11 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
@@ -35,11 +31,11 @@ function CustomersView() {
         actions={
           <Dialog>
             <DialogTrigger>
-              <Button>
+              <Button size={`sm`}>
                 <Plus /> Add New Customer
               </Button>
             </DialogTrigger>
-            <DialogContent className="mt-0 p-0 min-w-[660px]" >
+            <DialogContent className="mt-0 p-0 min-w-[660px]">
               <NewCustomerView popup />
             </DialogContent>
           </Dialog>

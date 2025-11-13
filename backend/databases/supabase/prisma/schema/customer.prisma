@@ -48,7 +48,7 @@ model CustomerProfileDataModel {
     whatsAppNo   String?
 
     /// Profile visuals and type
-    avatar   String?         @default("person.jpg")
+    avatar   String?         @default("documents/dummy-avatar.jpg")
     userType UserAccountType @default(INDIVIDUAL)
 
     /// KYC (Know Your Customer) related info

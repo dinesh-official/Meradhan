@@ -9,7 +9,7 @@ export class AuthRepo {
         const data = await db.dataBase.cRMUserDataModel.findUnique({
             where: { email }
         });
-        if (!data) throw new AppError("Operation cannot proceed due to missing data.", { statusCode: HttpStatus.UNAUTHORIZED })
+        if (!data) throw new AppError("User does not exist.", { statusCode: HttpStatus.UNAUTHORIZED })
         return data;
     }
 
@@ -17,7 +17,7 @@ export class AuthRepo {
         const data = await db.dataBase.cRMUserDataModel.findUnique({
             where: { id }
         });
-        if (!data) throw new AppError("Operation cannot proceed due to missing data.", { statusCode: HttpStatus.UNAUTHORIZED });
+        if (!data) throw new AppError("User does not exist.", { statusCode: HttpStatus.UNAUTHORIZED });
         return data;
     }
 

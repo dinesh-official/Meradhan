@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/card";
 
 import { FaCheckSquare } from "react-icons/fa";
-import { MdOutlineArrowRight } from "react-icons/md";
+import { IoMdArrowDropright } from "react-icons/io";
 
 function FinishKyc() {
     
@@ -27,7 +27,9 @@ function FinishKyc() {
           </p>
           <div className="mt-3">
             <Button size={`lg`}>
-              Explore Products <MdOutlineArrowRight />
+              Explore Products  <div className="flex justify-center items-center p-0 h-full">
+                          <IoMdArrowDropright className="p-0 text-4xl" />
+                        </div>
             </Button>
           </div>
         </div>

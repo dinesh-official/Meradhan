@@ -9,13 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FaDownload } from "react-icons/fa";
-import { MdOutlineArrowRight } from "react-icons/md";
-import { useKycDataStorage } from "../../_store/useKycDataStorage";
-import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
+import { API_SERVER_URL } from "@/global/constants/domains";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import Link from "next/link";
-import { API_SERVER_URL } from "@/global/constants/domains";
+import { FaDownload } from "react-icons/fa";
+import { IoMdArrowDropright } from "react-icons/io";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
+import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
 
 function KycESign() {
   const { handleEsignKyc, isPending } = useHandelEsignKyc();
@@ -77,7 +77,9 @@ function KycESign() {
           onClick={handleEsignKyc}
           disabled={isPending || !state?.step_6?.terms}
         >
-          Proceed to e-Sign <MdOutlineArrowRight />
+          Proceed to e-Sign  <div className="flex justify-center items-center p-0 h-full">
+                      <IoMdArrowDropright className="p-0 text-4xl" />
+                    </div>
         </Button>
       </CardFooter>
     </Card>

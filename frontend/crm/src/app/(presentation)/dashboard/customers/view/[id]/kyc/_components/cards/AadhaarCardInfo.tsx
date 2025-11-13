@@ -24,7 +24,7 @@ export interface AadhaarCardInfoDataProps {
 
 function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
   return (
-    <Card>
+    <Card id="aadhaar-address" >
       <CardHeader>
         <CardTitle className="text-sm" >Aadhaar and Address Information</CardTitle>
       </CardHeader>

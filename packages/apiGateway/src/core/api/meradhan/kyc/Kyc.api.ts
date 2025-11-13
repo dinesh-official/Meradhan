@@ -107,4 +107,10 @@ export class CustomerKycApi {
         return data;
     }
 
+    async getKycProgressStoreCrm(id: number, config?: AxiosRequestConfig) {
+        const { data } = await this.apiClient.get<IStoreKycGETResponse>("/crm/kyc/store/get/"+id, config);
+        return data;
+    }
+
+
 }

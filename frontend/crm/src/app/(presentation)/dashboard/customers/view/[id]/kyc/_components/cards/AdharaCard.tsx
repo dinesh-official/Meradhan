@@ -51,7 +51,7 @@ function AdharaCard(adharaCardInfo: AdharaCardProps) {
           <p>{adharaCardInfo.dateOfBirth}</p>
         </div>
         <div className="text-xs">
-          <p className="text-[9px]">जन्म तिथि / Gender</p>
+          <p className="text-[9px]">लिंग / Gender</p>
           <p>{adharaCardInfo.gender}</p>
         </div>
       </div>

@@ -17,9 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MdOutlineArrowRight } from "react-icons/md";
-import { BankAccountData } from "../../../_store/useKycDataStorage";
 import { cn } from "@/lib/utils";
+import { IoMdArrowDropright } from "react-icons/io";
+import { BankAccountData } from "../../../_store/useKycDataStorage";
 const accountTypeOptions = [
   { label: "Savings Account", value: "savings" },
   { label: "Current Account", value: "current" },
@@ -163,7 +163,9 @@ function NewBankForm({
           className="w-full sm:w-auto"
           onClick={handleBankAccountSubmit}
         >
-          Confirm & Continue <MdOutlineArrowRight />
+          Confirm & Continue  <div className="flex justify-center items-center p-0 h-full">
+                      <IoMdArrowDropright className="p-0 text-4xl" />
+                    </div>
         </Button>
         {showCancel && (
           <Button

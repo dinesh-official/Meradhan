@@ -18,6 +18,7 @@ function NewCustomerView({ popup }: { popup?: boolean }) {
           <Button
             onClick={manager.validateCustomerData}
             className="w-full md:w-auto"
+        
             disabled={manager.createCustomerMutation.isLoading}
           >
             Save New Customer

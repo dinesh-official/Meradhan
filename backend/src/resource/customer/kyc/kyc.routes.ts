@@ -2,6 +2,7 @@ import { Router } from "express";
 import { CustomerKycKycController } from "./kyc_process/customer_kyc.controller";
 import { KycStoreController } from "./store/kyc_store.controller";
 import { customerAuthMiddleware } from "@middlewares/customer_middleware";
+import { withCrmAuthMiddleware } from "@middlewares/crm_middleware";
 
 const kycRoutes = Router();
 const controller = new CustomerKycKycController();
@@ -36,7 +37,8 @@ kycRoutes.get("/api/customer/kyc/level/:customerId", (req, res) => storeKyc.setK
 kycRoutes.post("/api/customer/kyc/audit-log/:customerId", customerAuthMiddleware, (req, res) => storeKyc.addAuditLog(req, res));
 kycRoutes.post("/api/customer/kyc/current-step/:customerId", customerAuthMiddleware, (req, res) => storeKyc.setCurrentStep(req, res));
 kycRoutes.get("/api/customer/kyc/download-pdf/:id",  (req, res) => controller.downloadKycPdf(req, res));
-
+// for crm access
+kycRoutes.get("/api/crm/kyc/store/get/:customerId", withCrmAuthMiddleware, (req, res) => storeKyc.getKycDataById(req, res));
 
 
 export default kycRoutes
