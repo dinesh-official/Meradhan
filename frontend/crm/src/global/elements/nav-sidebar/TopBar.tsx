@@ -15,7 +15,7 @@ function TopBar({ session }: { session: UserSessionDataResponse }) {
   const { isOpen, setNavOpen } = useNavBarToggleStore();
 
   return (
-    <div className="top-0 right-0 left-0 z-50 sticky flex justify-between items-center bg-white px-5 border-gray-100 border-b w-full h-[55px]">
+    <div className="top-0 right-0 left-0 z-50 sticky flex justify-between items-center bg-white px-5 border-gray-100 border-b w-full h-[65px]">
       <div className="flex justify-start items-center gap-6 h-full">
         {/* Mobile Menu Bar */}
         <MobMenuBar role={session.responseData.role} />
@@ -43,11 +43,11 @@ function TopBar({ session }: { session: UserSessionDataResponse }) {
               alt="meradhan"
               width={500}
               height={500}
-              className="w-10 h-10"
+              className="w-11 h-11"
             />
           </div>
           <div className="hidden lg:flex flex-col justify-center items-start">
-            <p className="font-bold text-gray-800">MeraDhan CRM</p>
+            <p className="font-bold text-gray-800 text-lg">MeraDhan CRM</p>
             <p className="text-gray-500 text-xs">SEBI Registered OBPP</p>
           </div>
         </div>

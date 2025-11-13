@@ -64,7 +64,7 @@ function SideBar({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "top-[55px] left-0 sticky flex flex-col bg-white px-1 border-gray-100 lg:border-r lg:w-[52px] h-[calc(100vh-55px)] overflow-hidden overflow-y-auto font-medium text-nowrap transition-all select-none",
+        "top-[65px] left-0 sticky flex flex-col bg-white p-3 border-gray-100 lg:border-r lg:w-[73px] h-[calc(100vh-65px)] overflow-hidden overflow-y-auto font-medium text-nowrap transition-all select-none",
         (isOpen || tmpNavOpen || isMobile) && "lg:w-[265px]"
       )}
     >

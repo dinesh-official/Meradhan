@@ -20,13 +20,13 @@ export default async function Workspace({
         {/* Top Bar */}
         <TopBar session={session.data} />
         {/* Main Section */}
-        <div className="flex flex-1 overflow-hidden   ">
+        <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
-          <div className="lg:block hidden">
+          <div className="hidden lg:block">
             <SideBar role={session.data.responseData.role} />
           </div>
           {/* Scrollable Content Area */}
-          <main className="relative flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50" id="mainpage" >
+          <main className="relative flex-1 bg-gray-50 p-6 overflow-x-hidden overflow-y-auto" id="mainpage" >
             {children}
           </main>
         </div>

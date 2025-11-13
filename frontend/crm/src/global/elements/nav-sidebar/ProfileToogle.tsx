@@ -13,8 +13,8 @@ function ProfileTopView({
     <ProfileToggleAction id={session.id}>
       <div className="flex flex-row justify-center items-center gap-3 cursor-pointer select-none">
         <div className="hidden lg:flex flex-col text-right">
-          <p className="font-medium text-gray-800 text-xs">{session?.name}</p>
-          <p className="text-[10px] text-gray-500">{session?.role}</p>
+          <p className="font-medium text-gray-800 text-sm">{session?.name}</p>
+          <p className="text-gray-500 text-xs">{session?.role}</p>
         </div>
         <Avatar>
           <AvatarImage src={ASSETS_URL + session?.avatar} />
