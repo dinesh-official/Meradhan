@@ -31,7 +31,7 @@ function CustomersView() {
         actions={
           <Dialog>
             <DialogTrigger>
-              <Button size={`sm`}>
+              <Button >
                 <Plus /> Add New Customer
               </Button>
             </DialogTrigger>

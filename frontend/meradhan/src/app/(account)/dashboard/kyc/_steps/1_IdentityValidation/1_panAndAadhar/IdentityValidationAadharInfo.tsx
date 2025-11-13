@@ -92,7 +92,7 @@ function IdentityValidationAadharInfo() {
           </div>
         </div>
         <div className="gap-5 grid md:grid-cols-3 md:mt-10 py-5 border-gray-200 md:border-t md:border-b">
-          <DataInfoLabel title="City or Dist">
+          <DataInfoLabel title="City or District">
             <p className="font-medium">
               {
                 data.response?.details.aadhaar.current_address_details

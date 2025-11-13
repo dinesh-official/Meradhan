@@ -9,7 +9,7 @@ export const maritalStatusOptions = [
 export const relationshipOptions = [
   { label: "Father", value: "FATHER" },
   { label: "Spouse", value: "SPOUSE" },
-  { label: "Other", value: "OTHER" },
+  // { label: "Other", value: "OTHER" },
 ];
 
 export const qualificationOptions = [

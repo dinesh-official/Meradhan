@@ -18,6 +18,10 @@ function IdentityValidationSelfiePreview() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { state, nextLocalStep, prevLocalStep, setStep1SelfieFaceData } =
     useKycDataStorage();
+
+  
+  
+  
   return (
     <Card accountMode>
       <CardHeader accountMode>

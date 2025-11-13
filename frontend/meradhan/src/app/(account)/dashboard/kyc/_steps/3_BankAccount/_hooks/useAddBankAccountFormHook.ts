@@ -21,6 +21,8 @@ export const useAddBankAccountFormHook = () => {
         data: string | boolean | unknown
     ) => {
         removeError(key);
+        removeError("bankName");
+        removeError("branchName");
         updateBankAccount(state.step_3.length - 1, {
             [key]: data,
         });
@@ -41,9 +43,7 @@ export const useAddBankAccountFormHook = () => {
     const fetchBankIfsc = useMutation({
         mutationKey: ["fetchBankIfsc"],
         mutationFn: async () => await kycApi.verifyIfscCode({ ifsc: data.ifscCode }),
-        onSuccess: (data) => {
-            updateData("bankName", data?.responseData.BANK);
-            updateData("branchName", data?.responseData.BRANCH);
+        onSuccess: () => {
             setError(undefined);
             updateData("beneficiary_name", makeFullname({
                 firstName: state.step_1.pan.firstName,

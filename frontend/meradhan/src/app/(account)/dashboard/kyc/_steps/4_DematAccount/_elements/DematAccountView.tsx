@@ -24,8 +24,12 @@ function DematAccountView({
 
   return (
     <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
-      <div className={cn("gap-5 grid sm:grid-cols-2 xl:grid-cols-4", account.depositoryName === "CDSL" && "xl:grid-cols-3")}>
-
+      <div
+        className={cn(
+          "gap-5 grid sm:grid-cols-2 xl:grid-cols-4",
+          account.depositoryName === "CDSL" && "xl:grid-cols-3"
+        )}
+      >
         {/* // not show dp id for cdsl */}
         {account.depositoryName != "CDSL" && (
           <DataInfoLabel
@@ -47,22 +51,23 @@ function DematAccountView({
         </DataInfoLabel>
 
         <DataInfoLabel
+          className="xl:col-span-2"
           title="PAN"
           // status={account.panNumber.includes(myPan) ? "SUCCESS" : "ERROR"}
           // statusLabel={
           //   account.panNumber.includes(myPan) ? "Matched" : "Invalid"
           // }
-           status={account.isVerified  ? "SUCCESS" : "ERROR"}
-          statusLabel={
-            account.isVerified  ? "Matched" : "Not Matched"
-          }
+          status={account.isVerified ? "SUCCESS" : "ERROR"}
+          statusLabel={account.isVerified ? "Matched" : "Not Matched"}
           showStatus
         >
           <p className="font-medium">{account.panNumber.join(",")}</p>
         </DataInfoLabel>
+      </div>
+      <div className="gap-5 grid sm:grid-cols-2 xl:grid-cols-4">
         <DataInfoLabel title="Depository">
           <p className="flex items-center gap-3 font-medium">
-            {account.depositoryName}{" "}
+            {account.depositoryName || "--------"}{" "}
             <IoMdTrash
               className="text-gray-600 cursor-pointer"
               size={16}
@@ -70,9 +75,12 @@ function DematAccountView({
             />
           </p>
         </DataInfoLabel>
-      </div>
-      <div className="gap-5 grid sm:grid-cols-2 xl:grid-cols-3">
+
+        <DataInfoLabel title="Demat Account Type ">
+          <p className="font-medium">{account.accountType}</p>
+        </DataInfoLabel>
         <DataInfoLabel
+        className="xl:col-span-2"
           title="Depository Participant Name"
           // status={account.isVerified ? "SUCCESS" : "ERROR"}
           // statusLabel={account.isVerified ? "Verified" : "Invalid"}
@@ -80,29 +88,13 @@ function DematAccountView({
         >
           <p className="font-medium">{account.depositoryParticipantName}</p>
         </DataInfoLabel>
-        <DataInfoLabel
-          title="Account Holder Name"
-          // status={isNameMatched ? "SUCCESS" : "ERROR"}
-          // showStatus
-          // statusLabel={isNameMatched ? "Verified" : "Invalid"}
-        >
-          <p className="font-medium">{account.accountHolderName}</p>
-        </DataInfoLabel>
-
-        <DataInfoLabel title="Demat Account Type ">
-          <p className="font-medium">{account.accountType}</p>
-        </DataInfoLabel>
-
-        <DataInfoLabel title="Is Default Demat Account?" status="SUCCESS">
-          <p className="flex items-center gap-2 font-medium">
-            <Checkbox
-              checked={account.isDefault}
-              onClick={() => setDefault()}
-            />
-            Yes
-          </p>
-        </DataInfoLabel>
       </div>
+      <DataInfoLabel title="Is Default Demat Account?" status="SUCCESS">
+        <label className="flex items-center gap-2 font-medium cursor-pointer">
+          <Checkbox checked={account.isDefault} onClick={() => setDefault()} />
+          Yes
+        </label>
+      </DataInfoLabel>
     </div>
   );
 }

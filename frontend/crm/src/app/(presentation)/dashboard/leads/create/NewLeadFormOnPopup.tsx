@@ -24,7 +24,7 @@ function NewLeadFormOnPopup({ children }: { children?: React.ReactNode }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>{children}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="lg:min-w-[800px]">
         <DialogHeader>
           <DialogTitle>Create Lead</DialogTitle>
         </DialogHeader>

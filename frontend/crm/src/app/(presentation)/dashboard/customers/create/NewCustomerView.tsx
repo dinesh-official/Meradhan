@@ -9,7 +9,7 @@ import { useCustomerFromDataHook } from "../_components/manageCustomer/form/useC
 function NewCustomerView({ popup }: { popup?: boolean }) {
   const manager = useCustomerFromDataHook(undefined, !popup);
   return (
-    <div className="mx-auto mt-6 max-w-3xl">
+    <div className="mx-auto mt-6">
       <Card className={popup ? "border-none " : ""}>
         <CardContent>
           <CustomerManagementForm manager={manager} />

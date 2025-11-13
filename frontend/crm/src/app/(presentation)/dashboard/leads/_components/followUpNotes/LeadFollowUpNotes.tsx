@@ -52,7 +52,7 @@ const LeadFollowUpNotes = ({
   console.log("foolowUps", followUps);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent  className="lg:min-w-[800px]" >
         <DialogHeader>
           <DialogTitle>Follow-Up Note</DialogTitle>
         </DialogHeader>
@@ -63,7 +63,7 @@ const LeadFollowUpNotes = ({
           value={manager.state.text}
           onChange={(e) => manager.setFollowUpNoteData("text", e.target.value)}
         />
-        <div className="flex  flex-row gap-5">
+        <div className="flex flex-row gap-5">
           <Input
             type="date"
             placeholder="select date"
@@ -81,14 +81,14 @@ const LeadFollowUpNotes = ({
           </Button>
         </div>
         <div>
-          <p className="font-medium text-sm mb-2 ">Follow-up History</p>
-          <div className="min-h-64 max-h-64 overflow-auto flex flex-col gap-3 ">
+          <p className="mb-2 font-medium text-sm">Follow-up History</p>
+          <div className="flex flex-col gap-3 min-h-64 max-h-64 overflow-auto">
             {isLoadingFollowUps && followUps.length == 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Loading follow-ups...
               </p>
             ) : followUps.length > 0 ? (
-              <div className="min-h-64 max-h-64 overflow-auto flex flex-col gap-3">
+              <div className="flex flex-col gap-3 min-h-64 max-h-64 overflow-auto">
                 {followUps.map((note: NewFollowUpPayload) => (
                   <FollowUpMessageCard
                     key={note.id}
@@ -100,7 +100,7 @@ const LeadFollowUpNotes = ({
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 No follow-ups added yet.
               </p>
             )}

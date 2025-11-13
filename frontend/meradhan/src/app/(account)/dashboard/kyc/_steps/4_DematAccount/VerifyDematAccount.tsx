@@ -30,10 +30,10 @@ function VerifyDematAccount() {
   const { nextStep } = useKycStepStore();
 
   const isAllowToContinue = () => {
-    const defaltSelcted = accounts.filter((item) => !item.isDefault);
-    const allValid = accounts.filter((item) => !item.isVerified);
+    const defaltSelcted = accounts.filter((item) => item.isDefault);
+    const allValid = accounts.filter((item) => item.isVerified);
 
-    return defaltSelcted.length === 0 && allValid.length === 0;
+    return defaltSelcted.length !== 0 && allValid.length !== 0;
   };
 
   const jumpNext = () => {
@@ -96,9 +96,10 @@ function VerifyDematAccount() {
             disabled={!isAllowToContinue()}
             onClick={jumpNext}
           >
-            Confirm & Continue  <div className="flex justify-center items-center p-0 h-full">
-                        <IoMdArrowDropright  className="p-0 text-4xl" />
-                      </div>
+            Confirm & Continue{" "}
+            <div className="flex justify-center items-center p-0 h-full">
+              <IoMdArrowDropright className="p-0 text-4xl" />
+            </div>
           </Button>
           <Button
             variant={`link`}
