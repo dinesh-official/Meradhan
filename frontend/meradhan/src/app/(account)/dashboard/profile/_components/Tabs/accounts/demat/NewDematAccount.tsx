@@ -40,7 +40,7 @@ function NewDematAccount({
   handelSubmit: () => void;
   isPending: boolean;
   myPan: string;
-    showCancel?: boolean;
+  showCancel?: boolean;
   onCancel?: () => void;
 }) {
   return (
@@ -170,8 +170,8 @@ function NewDematAccount({
                     ...data.panNumber?.slice(1),
                   ])
                 }
-                // disabled
-                // adminMode
+              // disabled
+              // adminMode
               />
             </LabelInput>
 
@@ -223,18 +223,18 @@ function NewDematAccount({
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
         <Button
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handelSubmit}
           disabled={isPending}
         >
-          Confirm & Verify <MdOutlineArrowRight />
+          Continue to Verify <MdOutlineArrowRight />
         </Button>
 
         {/* // if add more than 1 demat account then show cancel button */}
         {showCancel && (
           <Button
             variant={`link`}
-            className="w-full sm:w-auto"
+            className="flex items-center gap-1 w-full sm:w-auto"
             disabled={isPending}
             onClick={onCancel}
           >

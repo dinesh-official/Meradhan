@@ -51,13 +51,13 @@ export default function IdentityValidationAddSign() {
         </div>
       </CardContent>
 
-      <CardFooter accountMode className="sm:flex-row flex-col gap-5 lg:mt-2">
+      <CardFooter accountMode className="sm:flex-row flex-col gap-1 lg:mt-2">
         <Button
-          className="w-full lg:w-auto"
+          className="w-full lg:w-auto "
           onClick={handelSignVerification}
           disabled={isPending}
         >
-          Add Signature <FaSignature className="ml-2" />
+          Add Signature <FaSignature />
         </Button>
       </CardFooter>
     </Card>

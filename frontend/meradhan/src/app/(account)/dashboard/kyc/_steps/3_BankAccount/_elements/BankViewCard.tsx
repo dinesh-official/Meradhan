@@ -63,7 +63,6 @@ function BankViewCard({
         <DataInfoLabel
           title="Branch"
           status={bank.isVerified ? "SUCCESS" : "ERROR"}
-          showStatus
           statusLabel={bank.isVerified ? "Verified" : "Invalid"}
         >
           <p className="font-medium text-sm">{bank.branchName}</p>

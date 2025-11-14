@@ -160,17 +160,17 @@ function NewBankForm({
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
         <Button
           disabled={isPending}
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handleBankAccountSubmit}
         >
-          Confirm & Continue  <div className="flex justify-center items-center p-0 h-full">
-                      <IoMdArrowDropright className="p-0 text-4xl" />
-                    </div>
+          Continue to Verify  <div className="flex justify-center items-center p-0 h-full">
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
         {showCancel && (
           <Button
             variant={`link`}
-            className="w-full sm:w-auto"
+            className="flex items-center gap-1 w-full sm:w-auto"
             disabled={isPending}
             onClick={onCancel}
           >

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { pdfUrlToBase64 } from "./helper";
+import { getStateSortCode } from "./states/getStateSortCode";
 
 export type Root = {
     step_1: {
@@ -512,7 +513,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
         pincode: address?.pincode || "",
         country: "India",
         postOffice: address?.locality_or_post_office || "",
-        stateUTCode: "IN",
+        stateUTCode: getStateSortCode(address.state) || "",
     };
 
     return {

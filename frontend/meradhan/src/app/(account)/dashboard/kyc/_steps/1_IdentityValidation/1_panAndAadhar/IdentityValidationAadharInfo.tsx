@@ -37,14 +37,14 @@ function IdentityValidationAadharInfo() {
     <Card accountMode>
       <CardHeader accountMode>
         <CardTitle className="font-medium">
-          Confirm Aadhar & Address Details
+          Confirm Aadhaar & Address Details
         </CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="gap-10 grid lg:grid-cols-5">
           <div className="flex flex-col gap-5 col-span-2">
             <DataInfoLabel
-              title="Aadhar Number (last 4-digits)"
+              title="Aadhaar Number (last 4-digits)"
               status="SUCCESS"
               statusLabel="Fetched"
               showStatus
@@ -114,7 +114,7 @@ function IdentityValidationAadharInfo() {
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
         <Button
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           disabled={!isNameMatched}
           onClick={() => {
             setStep1PanData(
@@ -123,13 +123,13 @@ function IdentityValidationAadharInfo() {
             );
             addAuditLog({
               type: "KYC_PROCESS_CONTINUED",
-              desc: "User chose to continue the KYC process : Aadhar and Address Validation step.",
+              desc: "User chose to continue the KYC process : Aadhaar and Address Validation step.",
             });
             nextLocalStep();
             pushUserKycState();
           }}
         >
-          Continue to Verify
+          Confirm & Continue
           <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
@@ -148,7 +148,7 @@ function IdentityValidationAadharInfo() {
             if (result.isConfirmed) {
               addAuditLog({
                 type: "KYC_PROCESS_EXITED",
-                desc: "User chose to save and exit the KYC process : Aadhar and Address Validation step.",
+                desc: "User chose to save and exit the KYC process : Aadhaar and Address Validation step.",
               });
               pushUserKycState({ exit: true });
             }

@@ -36,7 +36,7 @@ function KycESign() {
       <CardContent accountMode className="pt-0" >
         <div className="flex flex-col">
           <Link
-            href={ clicks <= 3 ? `${API_SERVER_URL}/customer/kyc/download-pdf/${cookies?.userId}` : "#"}
+            href={clicks <= 3 ? `${API_SERVER_URL}/customer/kyc/download-pdf/${cookies?.userId}` : "#"}
             target="_blank"
             onClick={() => setClicks(clicks + 1)}
             download
@@ -81,7 +81,7 @@ function KycESign() {
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 mt-8">
         <Button
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handleEsignKyc}
           disabled={isPending || !state?.step_6?.terms}
         >

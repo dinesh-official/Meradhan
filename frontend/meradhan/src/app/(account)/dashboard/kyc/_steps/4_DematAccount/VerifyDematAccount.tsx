@@ -92,7 +92,7 @@ function VerifyDematAccount() {
       >
         <div className="flex sm:flex-row flex-col gap-5 w-full">
           <Button
-            className="w-full sm:w-auto"
+            className="flex items-center gap-1 w-full sm:w-auto"
             disabled={!isAllowToContinue()}
             onClick={jumpNext}
           >

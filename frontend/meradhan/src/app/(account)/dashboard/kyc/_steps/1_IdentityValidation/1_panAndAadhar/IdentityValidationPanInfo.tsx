@@ -91,18 +91,7 @@ function IdentityValidationPanInfo() {
               {data.response?.details.pan.dob.replaceAll("/", "-")}
             </p>
           </DataInfoLabel>
-          {data.response?.details.aadhaar.father_name && (
-            <DataInfoLabel
-              title="Father’s Name"
-              status="SUCCESS"
-              statusLabel="Fetched"
-              showStatus
-            >
-              <p className="font-medium">
-                {data.response?.details.aadhaar.father_name || "N/A"}
-              </p>
-            </DataInfoLabel>
-          )}
+
           <DataInfoLabel
             title="Gender"
             status="SUCCESS"
@@ -134,7 +123,7 @@ function IdentityValidationPanInfo() {
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 mt-5">
         <Button
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           disabled={!isAllowToContinue}
           onClick={() => {
             setStep1PanData("confirmPanTimestamp", new Date().toISOString());
@@ -146,7 +135,7 @@ function IdentityValidationPanInfo() {
             pushUserKycState();
           }}
         >
-          Continue to Verify
+          Confirm & Continue
           <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>

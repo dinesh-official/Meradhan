@@ -65,7 +65,7 @@ function IdentityValidationSelfiePreview() {
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 lg:mt-5">
         <Button
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           onClick={() => {
             addAuditLog({
               type: "CONFIRM_SELFIE",
@@ -76,7 +76,7 @@ function IdentityValidationSelfiePreview() {
             pushUserKycState();
           }}
         >
-          Continue & Confirm  <div className="flex justify-center items-center p-0 h-full">
+          Confirm & Continue<div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
         </Button>

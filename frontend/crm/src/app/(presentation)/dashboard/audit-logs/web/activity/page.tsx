@@ -1,6 +1,7 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import type { Metadata } from "next";
+import AuthenticationActivityLogsView from "./CrmActivityLogsView";
 
 export const metadata: Metadata = {
   title: "Activity Logs | MeraDhan",
@@ -16,7 +17,7 @@ function CrmAAcitivityuditLogsPage() {
           description="Comprehensive tracking of user actions and system events within the CRM"
           showBack
         />
-        {/* <AuthenticationActivityLogsView /> */}
+        <AuthenticationActivityLogsView />
       </div>
     </Workspace>
   );

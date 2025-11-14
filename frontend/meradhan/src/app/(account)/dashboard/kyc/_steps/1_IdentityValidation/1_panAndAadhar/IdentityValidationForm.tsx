@@ -180,7 +180,7 @@ function IdentityValidationForm() {
 
 
         <Button
-          className="flex items-center gap-2 w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handelPanVerification}
           disabled={isPending}
         >

@@ -16,7 +16,7 @@ export interface GroupQuery {
   search?: string;
 }
 
-function AuthenticationActivityLogsView() {
+function CrmActivityLogsView() {
   const logsApi = new apiGateway.crm.auditlogs.AuditLogsApi(apiClientCaller);
 
   const [filters, setFilters] = useState<GroupQuery>({
@@ -99,4 +99,4 @@ function AuthenticationActivityLogsView() {
   );
 }
 
-export default AuthenticationActivityLogsView;
+export default CrmActivityLogsView;

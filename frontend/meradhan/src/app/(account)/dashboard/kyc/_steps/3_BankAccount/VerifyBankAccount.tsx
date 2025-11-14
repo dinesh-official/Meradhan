@@ -30,12 +30,11 @@ function VerifyBankAccount() {
   const { nextStep } = useKycStepStore();
 
   const isAllowToContinue = () => {
-    const defaltSelcted = data.filter((item) => !item.isDefault);
-    const allValid = data.filter((item) => !item.isVerified);
+    const defaltSelcted = data.filter((item) => item.isDefault);
+    const allValid = data.filter((item) => item.isVerified);
 
-    return defaltSelcted.length === 0 && allValid.length === 0;
+    return defaltSelcted.length !== 0 && allValid.length !== 0;
   };
-
   const jumpNext = () => {
     addAuditLog({
       type: "BANK_KYC_STEP_COMPLETED",
@@ -88,7 +87,7 @@ function VerifyBankAccount() {
       >
         <div className="flex sm:flex-row flex-col gap-5 w-full">
           <Button
-            className="w-full sm:w-auto"
+            className="flex items-center gap-1 w-full sm:w-auto"
             disabled={!isAllowToContinue()}
             onClick={jumpNext}
           >

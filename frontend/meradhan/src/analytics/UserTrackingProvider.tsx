@@ -108,9 +108,9 @@ export interface TrackingContextValue {
 }
 
 export const TrackingContext = createContext<TrackingContextValue>({
-  track: () => {},
+  track: () => { },
   activities: [],
-  trackActivity: () => {},
+  trackActivity: () => { },
 });
 
 interface UserTrackingProviderProps {
@@ -179,10 +179,10 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         user: {
           name: session
             ? makeFullname({
-                firstName: session.firstName,
-                lastName: session.lastName,
-                middleName: session.middleName,
-              })
+              firstName: session.firstName,
+              lastName: session.lastName,
+              middleName: session.middleName,
+            })
             : localStorage.getItem("name"),
           email: session?.emailAddress || localStorage.getItem("email"),
         },
@@ -290,7 +290,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
   return (
     <TrackingContext.Provider value={{ track, activities, trackActivity }}>
       {children}
-      <ActivityWindow activities={activities} />
+      {/* <ActivityWindow activities={activities} /> */}
     </TrackingContext.Provider>
   );
 };

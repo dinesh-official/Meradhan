@@ -16,13 +16,13 @@ import RiskProfilingSelector from "./RiskProfilingSelector";
 function RiskProfilingCard() {
   const { state, setStepIndex } = useKycDataStorage();
   const riskProfiling = state.step_5;
-  
+
 
   const isAllowToContinue = () => {
     const defaltSelcted = riskProfiling.filter((item) => !item.ans);
     return defaltSelcted.length === 0;
   };
-  
+
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { nextStep } = useKycStepStore();
   const jumpNext = () => {
@@ -47,11 +47,11 @@ function RiskProfilingCard() {
         <Button
           disabled={!isAllowToContinue()}
           onClick={jumpNext}
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
         >
           Save & Continue  <div className="flex justify-center items-center p-0 h-full">
-                      <IoMdArrowDropright className="p-0 text-4xl" />
-                    </div>
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
       </CardFooter>
     </Card>

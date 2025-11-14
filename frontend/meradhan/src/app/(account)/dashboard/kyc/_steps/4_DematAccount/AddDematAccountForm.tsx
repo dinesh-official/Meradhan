@@ -77,7 +77,7 @@ function AddDematAccountForm() {
           <div
             className={cn(
               "gap-3 md:gap-5 grid md:grid-cols-2 lg:grid-cols-4",
-              
+
             )}
           >
             <LabelInput
@@ -105,8 +105,8 @@ function AddDematAccountForm() {
               </Select>
             </LabelInput>
 
-            
-            
+
+
 
             {/* // Only for NSDL */}
             {data.depositoryName == "NSDL" && (
@@ -201,8 +201,8 @@ function AddDematAccountForm() {
                     ...data.panNumber?.slice(1),
                   ])
                 }
-                // disabled
-                // adminMode
+              // disabled
+              // adminMode
               />
             </LabelInput>
 
@@ -254,20 +254,20 @@ function AddDematAccountForm() {
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
         <Button
-          className="w-full sm:w-auto"
+          className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handelSubmit}
           disabled={isPending}
         >
-          Confirm & Verify  <div className="flex justify-center items-center p-0 h-full">
-                      <IoMdArrowDropright className="p-0 text-4xl" />
-                    </div>
+          Continue to Verify  <div className="flex justify-center items-center p-0 h-full">
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
 
         {/* // if add more than 1 demat account then show cancel button */}
         {state.step_4.length > 1 && (
           <Button
             variant={`link`}
-            className="w-full sm:w-auto"
+            className="flex items-center gap-1 w-full sm:w-auto"
             disabled={isPending}
             onClick={() => {
               removeDepository(state.step_4.length - 1);
