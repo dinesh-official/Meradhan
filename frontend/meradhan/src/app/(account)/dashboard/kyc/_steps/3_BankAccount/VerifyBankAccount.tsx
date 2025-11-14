@@ -93,8 +93,8 @@ function VerifyBankAccount() {
             onClick={jumpNext}
           >
             Confirm & Continue  <div className="flex justify-center items-center p-0 h-full">
-                        <IoMdArrowDropright className="p-0 text-4xl" />
-                      </div>
+              <IoMdArrowDropright className="p-0 text-4xl" />
+            </div>
           </Button>
           <Button
             variant={`link`}
@@ -103,7 +103,7 @@ function VerifyBankAccount() {
                 text: "Are you sure you want to save and exit the KYC process?",
                 imageUrl: "/images/icons/sad-emoji.svg",
                 showCancelButton: true,
-                confirmButtonText: "Yes, Exit",
+                confirmButtonText: "Save & Exit",
                 cancelButtonText: "Cancel",
               });
 

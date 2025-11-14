@@ -59,9 +59,9 @@ function IdentityValidationForm() {
                 value={
                   data.dateOfBirth
                     ? dateTimeUtils.formatDateTime(
-                        data.dateOfBirth,
-                        "DD/MM/YYYY"
-                      )
+                      data.dateOfBirth,
+                      "DD/MM/YYYY"
+                    )
                     : ""
                 }
                 onChange={(e) => {
@@ -82,7 +82,7 @@ function IdentityValidationForm() {
               <Input
                 type="text"
                 value={data.firstName}
-                onChange={(e) => setStep1PanData("firstName", e.target.value)}
+                onChange={(e) => setStep1PanData("firstName", e.target.value.toUpperCase())}
                 placeholder="Enter first name"
               />
             </LabelInput>
@@ -91,7 +91,7 @@ function IdentityValidationForm() {
               <Input
                 type="text"
                 value={data.middleName}
-                onChange={(e) => setStep1PanData("middleName", e.target.value)}
+                onChange={(e) => setStep1PanData("middleName", e.target.value.toUpperCase())}
                 placeholder="Enter middle name"
               />
             </LabelInput>
@@ -100,7 +100,7 @@ function IdentityValidationForm() {
               <Input
                 type="text"
                 value={data.lastName}
-                onChange={(e) => setStep1PanData("lastName", e.target.value)}
+                onChange={(e) => setStep1PanData("lastName", e.target.value.toUpperCase())}
                 placeholder="Enter last name"
               />
             </LabelInput>
@@ -108,7 +108,7 @@ function IdentityValidationForm() {
         </div>
 
         <p className="mt-2 text-gray-500 text-xs">
-          * Full name must match exactly as on your PAN Card.
+          * Your full name (First, Middle, and Last together) must match exactly as it appears on your PAN Card.
         </p>
 
         {/* Terms & Declarations */}
@@ -197,7 +197,7 @@ function IdentityValidationForm() {
               text: "Are you sure you want to save and exit the KYC process?",
               imageUrl: "/images/icons/sad-emoji.svg",
               showCancelButton: true,
-              confirmButtonText: "Yes, Exit",
+              confirmButtonText: "Save & Exit",
               cancelButtonText: "Cancel",
             });
 

@@ -158,7 +158,7 @@ function IdentityValidationPanInfo() {
               text: "Are you sure you want to save and exit the KYC process?",
               imageUrl: "/images/icons/sad-emoji.svg",
               showCancelButton: true,
-              confirmButtonText: "Yes, Exit",
+              confirmButtonText: "Save & Exit",
               cancelButtonText: "Cancel",
             });
 

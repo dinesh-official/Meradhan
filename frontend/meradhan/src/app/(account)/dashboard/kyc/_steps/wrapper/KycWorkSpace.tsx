@@ -6,7 +6,7 @@ function KycWorkSpace({ children }: { children?: React.ReactNode }) {
   const { step, isComplete } = useKycStepStore();
 
   const steps = [
-    "KYC Pre-Requisites",
+    "KYC Requirements",
     "Identity Validation",
     "Personal Details",
     "Bank Account",
@@ -23,9 +23,9 @@ function KycWorkSpace({ children }: { children?: React.ReactNode }) {
           <h2 className="font-medium text-2xl">
             My <span className="font-semibold">KYC</span>
           </h2>
-       
-            <p className="lg:hidden text-black">Step {step} of 6</p>
-          
+
+          <p className="lg:hidden text-black">Step {step} of 6</p>
+
         </div>
         <StepMenu />
       </div>

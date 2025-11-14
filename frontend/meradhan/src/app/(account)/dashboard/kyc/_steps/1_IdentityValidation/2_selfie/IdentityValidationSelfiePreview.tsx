@@ -19,9 +19,9 @@ function IdentityValidationSelfiePreview() {
   const { state, nextLocalStep, prevLocalStep, setStep1SelfieFaceData } =
     useKycDataStorage();
 
-  
-  
-  
+
+
+
   return (
     <Card accountMode>
       <CardHeader accountMode>
@@ -77,8 +77,8 @@ function IdentityValidationSelfiePreview() {
           }}
         >
           Continue & Confirm  <div className="flex justify-center items-center p-0 h-full">
-                      <IoMdArrowDropright className="p-0 text-4xl" />
-                    </div>
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
         </Button>
         <Button
           variant={`link`}
@@ -87,7 +87,7 @@ function IdentityValidationSelfiePreview() {
               text: "Are you sure you want to save and exit the KYC process?",
               imageUrl: "/images/icons/sad-emoji.svg",
               showCancelButton: true,
-              confirmButtonText: "Yes, Exit",
+              confirmButtonText: "Save & Exit",
               cancelButtonText: "Cancel",
             });
 

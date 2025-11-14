@@ -13,6 +13,7 @@ import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import { useKycStepStore } from "../../_store/useKycStepStore";
+import { IoMdArrowDropright } from "react-icons/io";
 
 function StarterKyc() {
   const apiClient = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
@@ -30,7 +31,7 @@ function StarterKyc() {
   const isAllowTOProcess = () => {
     if (profileData.data?.utility.isPhoneVerified === false) {
       Swal.fire({
-        icon: "warning",
+        imageUrl: "/images/icons/sad-emoji.svg",
         title: "Phone Verification Required",
         text: "Your phone is not verified. Please verify it from your Profile page to continue with KYC.",
         confirmButtonText: "Go to Profile",
@@ -44,7 +45,7 @@ function StarterKyc() {
       return false;
     } else if (profileData.data?.utility.isEmailVerified === false) {
       Swal.fire({
-        icon: "warning",
+        imageUrl: "/images/icons/sad-emoji.svg",
         title: "Email Verification Required",
         text: "Your email is not verified.Please verify it from your Profile page to continue with KYC.",
         confirmButtonText: "Go to Profile",
@@ -96,7 +97,7 @@ function StarterKyc() {
               <span>Signature (to draw or upload)</span>
             </li>
             <CardTitle className="mt-6 mb-6 font-normal">
-              2. Documents & Details Needed
+              2. Device & Access Requirements
             </CardTitle>
             <p className="mb-4 text-sm">Before you proceed, please ensure:</p>
             <li className="flex items-start text-sm">
@@ -119,7 +120,9 @@ function StarterKyc() {
       </CardContent>
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 mt-4 pt-0">
-        <Button onClick={isAllowTOProcess} >Start KYC Process</Button>
+        <Button onClick={isAllowTOProcess} className="gap-1" >Start KYC Process  <div className="flex justify-center items-center p-0 h-full">
+          <IoMdArrowDropright className="p-0 text-4xl" />
+        </div></Button>
       </CardFooter>
     </Card>
   );

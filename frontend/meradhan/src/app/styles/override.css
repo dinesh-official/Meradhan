@@ -1,18 +1,27 @@
 .range_label {
-  --c: #ef4822; /* slider color */
-  --g: round(0.3em, 1px); /* the gap */
-  --l: round(0.15em, 1px); /* line thickness*/
-  --s: round(1.3em, 1px); /* thumb size*/
-  --t: round(0.8em, 1px); /* tooltip tail size */
-  --r: round(0.8em, 1px); /* tooltip radius */
+  --c: #ef4822;
+  /* slider color */
+  --g: round(0.3em, 1px);
+  /* the gap */
+  --l: round(0.15em, 1px);
+  /* line thickness*/
+  --s: round(1.3em, 1px);
+  /* thumb size*/
+  --t: round(0.8em, 1px);
+  /* tooltip tail size */
+  --r: round(0.8em, 1px);
+  /* tooltip radius */
   timeline-scope: --thumb-view;
-  position: relative; /* No, It's not useless so don't remove it (or remove it and see what happens) */
+  position: relative;
+  /* No, It's not useless so don't remove it (or remove it and see what happens) */
   font-size: 24px;
   width: 100%;
 }
+
 input[type="range"] {
   width: 100%;
-  height: var(--s); /* needed for Firefox*/
+  height: var(--s);
+  /* needed for Firefox*/
   --_c: color-mix(in srgb, var(--c), #000 var(--p, 0%));
   appearance: none;
   background: none;
@@ -27,14 +36,14 @@ input[type="range" i]::-webkit-slider-thumb {
   aspect-ratio: 1;
   border-radius: 10px;
   box-shadow: 0 0 0 var(--_b, var(--l)) inset var(--_c);
-  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 /
-    calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
+  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 / calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
   -webkit-appearance: none;
   appearance: none;
   transition: 0.3s;
   anchor-name: --thumb;
   view-timeline: --thumb-view inline;
 }
+
 /* Firefox */
 input[type="range"]::-moz-range-thumb {
   height: var(--s);
@@ -42,8 +51,7 @@ input[type="range"]::-moz-range-thumb {
   background: none;
   border-radius: 10px;
   box-shadow: 0 0 0 var(--_b, var(--l)) inset var(--_c);
-  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 /
-    calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
+  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 / calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
   -moz-appearance: none;
   appearance: none;
   transition: 0.3s;
@@ -60,7 +68,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .react-multi-carousel-dot-list {
-  bottom: -50px !important; /* Move dots lower or higher */
+  bottom: -50px !important;
+  /* Move dots lower or higher */
 }
 
 .react-multi-carousel-dot button {
@@ -68,13 +77,15 @@ input[type="range"]::-moz-range-thumb {
   height: 10px;
   border-radius: 50%;
   border: none;
-  background: var(--color-slate-200); /* gray-300 */
+  background: var(--color-slate-200);
+  /* gray-300 */
   transition: all 0.3s ease;
   margin: 0 5px;
 }
 
 .react-multi-carousel-dot--active button {
-  background: var(--color-primary); /* gray-900 */
+  background: var(--color-primary);
+  /* gray-900 */
 }
 
 *:focus {
@@ -84,6 +95,7 @@ input[type="range"]::-moz-range-thumb {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -141,7 +153,8 @@ input[type="range"]::-moz-range-thumb {
 .swal2-title {
   font-size: 20px !important;
   font-weight: 600 !important;
-  color: #1e293b !important; /* slate-800 */
+  color: #1e293b !important;
+  /* slate-800 */
 }
 
 .swal2-image {
@@ -152,7 +165,8 @@ input[type="range"]::-moz-range-thumb {
 /* Message text */
 .swal2-html-container {
   font-size: 14px !important;
-  color: #475569 !important; /* slate-600 */
+  color: #475569 !important;
+  /* slate-600 */
 }
 
 /* Buttons wrapper */
@@ -162,7 +176,8 @@ input[type="range"]::-moz-range-thumb {
 
 /* Confirm button */
 .swal2-confirm {
-  background: #dc2626 !important; /* red-600 */
+  background: #dc2626 !important;
+  /* red-600 */
   color: #fff !important;
   border-radius: 8px !important;
   padding: 10px 20px !important;
@@ -171,11 +186,18 @@ input[type="range"]::-moz-range-thumb {
 
 /* Cancel button */
 .swal2-cancel {
-  background: #e2e8f0 !important; /* slate-200 */
-  color: #1e293b !important; /* slate-800 */
+  background: #e2e8f0 !important;
+  /* slate-200 */
+  color: #1e293b !important;
+  /* slate-800 */
   border-radius: 8px !important;
   padding: 10px 20px !important;
   font-weight: 600 !important;
+}
+
+.swal2-icon-show {
+  width: 50px !important;
+  height: 50px !important;
 }
 
 .rpv-toolbar {
