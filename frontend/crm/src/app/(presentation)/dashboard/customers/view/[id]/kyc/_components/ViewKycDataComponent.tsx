@@ -316,9 +316,10 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <div className="gap-5 grid lg:grid-cols-3">
               {data.bankAccounts.map((e) => {
                 return (
-                  <div>
+                  <div key={e.id}>
                     <BankCard
-                      key={e.id}
+
+
                       bankName={e.bankName}
                       accountNumber={e.accountNumber}
                       ifscCode={e.ifscCode}
@@ -354,9 +355,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <div className="gap-5 grid lg:grid-cols-3">
               {data.dematAccounts.map((e) => {
                 return (
-                  <div>
+                  <div key={e.dpId + e.id} >
                     <DematCard
-                      key={e.dpId + e.id}
+
                       dpId={e.dpId}
                       clientId={e.clientId}
                       depository={e.depositoryName}

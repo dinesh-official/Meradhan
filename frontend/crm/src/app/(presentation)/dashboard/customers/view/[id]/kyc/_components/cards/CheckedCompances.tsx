@@ -2,12 +2,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Spinner } from "@/components/ui/spinner";
-import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import apiGateway from "@root/apiGateway";
-import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import { fa } from "zod/v4/locales";
 
 export type Root = {
   step_1: {

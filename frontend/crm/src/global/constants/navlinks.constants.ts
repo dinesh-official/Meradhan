@@ -4,7 +4,6 @@ import {
     BarChart,
     Briefcase,
     ClipboardList,
-    Earth,
     FileText,
     HelpCircle,
     PieChart,
@@ -13,9 +12,9 @@ import {
     Trash2,
     Users
 } from 'lucide-react';
-import { ModuleName, Permission } from './role.constants';
 import React from "react";
 import { FaMoneyBill } from 'react-icons/fa';
+import { ModuleName, Permission } from './role.constants';
 
 /**
  * Define the structure of nested navigation items (up to 4 levels)
