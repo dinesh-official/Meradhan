@@ -7,6 +7,7 @@ import { GetCustomerResponseById } from "@root/apiGateway";
 import { Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { FaCheckSquare } from "react-icons/fa";
 import { IoWarning } from "react-icons/io5";
 import { RiArrowRightSFill } from "react-icons/ri";
 function ProfileViewCard({
@@ -17,38 +18,70 @@ function ProfileViewCard({
   return (
     <div>
       <div className="flex md:flex-row flex-col md:justify-between items-center gap-5">
-        <div className="flex md:flex-row flex-col items-center gap-5 md:text-left text-center md:">
-          <Image
-            alt="logo"
-            src={genMediaUrl(profile.avatar)}
-            width={100}
-            height={100}
-            className="p-0.5 border border-primary border-dashed rounded-full w-24 h-24 object-cover"
-          />
-          <div className="flex flex-col gap-1">
-            <p className="font-semibold text-lg">
+        <div className="flex md:flex-row flex-col items-center gap-5 md:text-left text-center">
+          <div className="p-0.5 border border-primary border-dashed rounded-full w-24 h-24 overflow-hidden">
+            <div className="rounded-full overflow-hidden">
+              <Image
+                alt="logo"
+                src={genMediaUrl(profile.avatar)}
+                width={100}
+                height={100}
+                className="border border-primary rounded-full w-full h-full object-cover aspect-square scale-125"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1 md:text-left text-center">
+            <p className="flex justify-center md:justify-start items-center gap-3 font-semibold text-lg uppercase">
               {makeFullname({
                 firstName: profile.firstName,
                 middleName: profile.middleName,
                 lastName: profile.lastName,
               })}
+              {profile.kycStatus == "VERIFIED" && (
+                <FaCheckSquare className="text-green-600" />
+              )}
             </p>
             <p>Client ID: {profile.userName}</p>
             <p>User Type: {profile.userType}</p>
           </div>
         </div>
 
-        <div className="flex sm:flex-col justify-between md:justify-end items-center gap-3 lg:gap-5 w-full md:w-auto text-center">
-          <p
-            className={cn(
-              "flex items-center gap-2 font-medium text-secondary text-lg",
-              profile.kycStatus == "VERIFIED"
-                ? "text-green-600"
-                : "text-red-600"
+        <div className="flex md:flex-col justify-between md:justify-end md:items-end gap-3 lg:gap-5 pt-6 md:pt-0 border-gray-200 border-t md:border-none w-full md:w-auto">
+          <div className="flex flex-col md:justify-end md:items-end gap-3">
+            <p
+              className={cn(
+                "flex items-center gap-2 font-medium text-secondary md:text-lg",
+                profile.kycStatus == "VERIFIED" ? "text-black" : "text-red-600"
+              )}
+            >
+              {profile.kycStatus == "VERIFIED" ? (
+                <>
+                  KYC: <span className="hidden sm:inline-block">Completed</span>
+                  <span className="sm:hidden">Done</span>{" "}
+                  <FaCheckSquare className="text-green-600" />
+                </>
+              ) : (
+                <>
+                  KYC: Not{" "}
+                  <span className="hidden sm:inline-block">Completed</span>
+                  <span className="sm:hidden">Done</span>
+                  <IoWarning size={18} />
+                </>
+              )}
+            </p>
+            {profile.kycStatus == "VERIFIED" && profile.verifyDate && (
+              <p className="text-[#666666] text-xs">
+                {dateTimeUtils.formatDateTime(
+                  profile.verifyDate,
+                  "DD MMM YYYY"
+                ) +
+                  " | " +
+                  dateTimeUtils.formatDateTime(profile.verifyDate, "hh:mm aa")}
+              </p>
             )}
-          >
-            KYC: Not Done <IoWarning />
-          </p>
+          </div>
+
           {profile.kycStatus == "VERIFIED" && (
             <Link href={`/dashboard/kyc`}>
               <Button variant={`defaultLight`}>
@@ -62,7 +95,8 @@ function ProfileViewCard({
           {profile.kycStatus !== "VERIFIED" && (
             <Link href={`/dashboard/kyc`}>
               <Button variant={`secondary`}>
-                Complete Your KYC
+                Complete <span className="hidden md:inline-block">Your</span>{" "}
+                KYC
                 <div className="w-3 text-3xl">
                   <RiArrowRightSFill className="w-4 h-5" size={33} />
                 </div>
@@ -72,13 +106,13 @@ function ProfileViewCard({
         </div>
       </div>
 
-      <div className="flex sm:flex-row flex-col sm:justify-between items-center gap-1 mt-4 text-gray-600 text-xs">
+      <div className="flex flex-row justify-between items-center gap-1 mt-4 text-[#666666] text-xs">
         <p>
-          Joined on:{" "}
+          Joined on: <br className="md:hidden" />
           {dateTimeUtils.formatDateTime(profile.createdAt, "DD MMM YYYY")}
         </p>
-        <p>
-          Last Login:{" "}
+        <p className="text-right">
+          Last Login: <br className="md:hidden" />
           {profile.utility.lastLogin
             ? dateTimeUtils.formatDateTime(
                 profile.utility.lastLogin,

@@ -11,7 +11,7 @@ export interface KycStepStore {
 
 // max 6 min 1
 export const useKycStepStore = create<KycStepStore>((set) => ({
-    step: 1,
+    step: 0,
     isComplete: false,
     setStep: (step: number) => {
         if (step >= 1 && step <= 6) {

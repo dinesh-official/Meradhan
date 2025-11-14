@@ -24,9 +24,9 @@ async function page() {
   return (
     <AccountViewPort
       title={
-        <>
+        <div className="hidden md:flex">
           My <span className="font-bold">Profile</span>
-        </>
+        </div>
       }
     >
       <ProfilePage profileData={userData.data.responseData} />
