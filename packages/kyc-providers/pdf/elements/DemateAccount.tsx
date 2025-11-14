@@ -33,7 +33,7 @@ function DemateAccount({
           <Text>Is it a Primary account?:</Text>
           <View style={tw(`flex flex-row gap-4`)}>
             <CheckBoxRow label="Yes" checked={isPrimary} />
-            <CheckBoxRow label="No" checked={!isPrimary} />
+            <CheckBoxRow label="No" checked={dpId.trim().length != 0 ? !isPrimary : false} />
           </View>
         </View>
 
@@ -50,7 +50,7 @@ function DemateAccount({
       {/* DP & Name */}
       <TextFiled title="DP Name:" value={dpName} className="pr-5" />
       <TextFiled
-        title="Name as per PAN*:"
+        title="Name as per PAN:"
         value={nameAsPerPAN}
         className="pr-7"
       />

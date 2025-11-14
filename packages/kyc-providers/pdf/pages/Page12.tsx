@@ -53,7 +53,7 @@ function Page12({
         <TextFiled
           title={`Details of disputes/dues pending
 from/to such stock broker`}
-          value={detailsOfDisputes}
+          value={" "}
           className="flex-wrap pr-24 leading-2.5"
         />
       </View>
@@ -123,18 +123,18 @@ from/to such stock broker`}
       </View>
       <View style={tw(`w-[90%] mx-auto flex flex-col gap-3  mt-4 text-xs`)}>
         <View style={tw(`flex flex-row gap-20`)}>
-          <CheckBoxRow label="None" checked={investmentExperience == "None"} />
+          <CheckBoxRow label="None" checked={investmentExperience == "None".toLocaleLowerCase()} />
           <CheckBoxRow
             label="Upto 1 year"
-            checked={investmentExperience == "Upto 1 year"}
+            checked={investmentExperience == "Up to 1 year".toLocaleLowerCase()}
           />
           <CheckBoxRow
             label="1 to 5 years"
-            checked={investmentExperience == "1 to 5 years"}
+            checked={investmentExperience == "1 – 5 years".toLocaleLowerCase()}
           />
           <CheckBoxRow
             label="Above 5 years"
-            checked={investmentExperience == "Above 5 years"}
+            checked={investmentExperience == "More than 5 years".toLocaleLowerCase()}
           />
         </View>
       </View>

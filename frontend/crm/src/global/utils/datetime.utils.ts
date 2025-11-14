@@ -24,11 +24,14 @@ export type DateFormatToken =
     | "YYYY-MM-DD HH:mm:ss"
     | "DD MMM YYYY HH:mm"
     | "DD MMMM YYYY hh:mm AA"
+    | "DD MMMM YYYY hh:mm:ss AA"
     | "DD MMM YYYY hh:mm AA"
+    | "DD MMM YYYY hh:mm:ss AA"
 
     | "MMMM DD, YYYY HH:mm"
     | "YYYY.MM.DD HH:mm:ss"
-    | "MM-DD-YYYY hh:mm AA";
+    | "MM-DD-YYYY hh:mm AA"
+    ;
 
 /**
  * DateFormatString type allows either a predefined format or any string

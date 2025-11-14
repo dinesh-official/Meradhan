@@ -43,13 +43,13 @@ function Page17({
 
   return (
     <View>
-      <Text style={tw(`font-bold uppercase text-[7px] text-center pt-6`)}>
+      <Text style={tw(`font-bold uppercase text-[9px] text-center pt-6`)}>
         ANNEXURE 2
       </Text>
 
       <View style={tw("px-4")}>
         <View style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-4")}>
-          <Text style={tw("text-xs text-white font-[500] leading-[1px]")}>
+          <Text style={tw("text-sm text-white font-[500] leading-[1px]")}>
             Additional Demat Account(s) Details
           </Text>
         </View>
@@ -64,7 +64,7 @@ function Page17({
               nameAsPerPAN={d.accountHolderName}
               dpId={d.dpId}
               beneficiaryId={d.clientId}
-              index={idx + 1}
+              index={idx + 2}
             />
           ))}
         </View>

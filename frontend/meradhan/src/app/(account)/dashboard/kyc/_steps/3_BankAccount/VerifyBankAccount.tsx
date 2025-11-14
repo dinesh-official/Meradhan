@@ -24,10 +24,11 @@ function VerifyBankAccount() {
     prevLocalStep,
     addBankAccount,
     setStepIndex,
+    updateBankAccount
   } = useKycDataStorage();
   const data = state.step_3;
-  const { pushUserKycState, addAuditLog } = useKycDataProvider();
-  const { nextStep } = useKycStepStore();
+  const { pushUserKycState, addAuditLog, } = useKycDataProvider();
+  const { nextStep, } = useKycStepStore();
 
   const isAllowToContinue = () => {
     const defaltSelcted = data.filter((item) => item.isDefault);
@@ -40,6 +41,12 @@ function VerifyBankAccount() {
       type: "BANK_KYC_STEP_COMPLETED",
       desc: "User completed the Bank Account Verification step during KYC process.",
     });
+    data.forEach((e, i) => {
+      updateBankAccount(i, {
+        ...e,
+        confirmBankTimestamp: new Date().toISOString()
+      })
+    })
     pushUserKycState();
     setStepIndex(0);
     nextStep();
@@ -126,6 +133,7 @@ function VerifyBankAccount() {
                 type: "ADD_BANK_ACCOUNT",
                 desc: "User chose to add a new bank account during KYC process.",
               });
+
               addBankAccount();
               prevLocalStep();
             }}

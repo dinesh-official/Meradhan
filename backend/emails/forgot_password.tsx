@@ -51,18 +51,18 @@ export default function MeraDhanForgotPasswordEmail({
               {/* Reset Button */}
               <div className="">
                 <div className="block">
-                  <Link
+                  <a
                     href={resetLink}
                     className="inline-block bg-[#002c59] px-8 py-3 rounded-md font-semibold text-white"
                   >
                     Reset Password
-                  </Link>
+                  </a>
                 </div>
 
                 <div className="block mt-6">
-                  <Link href={resetLink} className="text-xs">
+                  <a href={resetLink} className="text-xs">
                     {resetLink}
-                  </Link>
+                  </a>
                 </div>
               </div>
 

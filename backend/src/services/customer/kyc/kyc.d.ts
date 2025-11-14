@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export type KycDataStorage =  {
+export type KycDataStorage = {
   step_1: {
     pan: {
       isFatca: boolean
@@ -68,6 +68,7 @@ export type KycDataStorage =  {
       dateOfBirth: string
       confirmPanTimestamp: string
       confirmAadhaarTimestamp: string
+      fetchedTimestamp: string
     }
     face: {
       url: string

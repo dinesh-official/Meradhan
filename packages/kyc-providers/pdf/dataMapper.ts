@@ -424,9 +424,9 @@ const getSignatureUrl = (data: Root): string => data.step_1?.sign?.url || "";
 
 const getInvestmentExperience = (data: Root): string => {
     const experienceQuestion = data.step_5?.find((q) =>
-        q.qus.toLowerCase().includes("investment experience")
+        q.qus.toLowerCase().includes("How many years of investment experience do you have?".toLocaleLowerCase())
     );
-    return experienceQuestion?.ans || "";
+    return experienceQuestion?.ans.toLowerCase() || "";
 };
 
 const getPrimaryBank = (data: Root) => {
@@ -445,8 +445,8 @@ const getPrimaryDemat = (data: Root) => {
     return {
         depository: demat?.depositoryName || "",
         dpName: demat?.depositoryParticipantName || "",
-        dpId: demat?.dpId || "",
-        clientId: demat?.beneficiaryClientId || "",
+        dpId: (demat?.accountType == "CDSL" ? (splitInto8(demat.beneficiaryClientId)?.[0] || "") : demat?.dpId) || "",
+        clientId: (demat?.accountType == "CDSL" ? (splitInto8(demat.beneficiaryClientId)?.[1] || "") : demat?.beneficiaryClientId) || "",
     };
 };
 
@@ -513,7 +513,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
         pincode: address?.pincode || "",
         country: "India",
         postOffice: address?.locality_or_post_office || "",
-        stateUTCode: getStateSortCode(address.state) || "",
+        stateUTCode: getStateSortCode(address.state) || "N/A",
     };
 
     return {
@@ -577,7 +577,7 @@ export const mapDataForPage11 = (data: Root): Page11Props => {
             micrCode: "",
             isPrimary: true,
             nameAsPerBank: primaryBankAccount?.beneficiary_name || "",
-            accountType: primaryBankAccount?.bankAccountType || "savings",
+            accountType: primaryBankAccount?.bankAccountType || "saving",
         },
         primaryDemat: {
             beneficiaryId: demat.clientId,
@@ -592,12 +592,12 @@ export const mapDataForPage11 = (data: Root): Page11Props => {
 };
 
 export const mapDataForPage12 = (data: Root): Page12Props => ({
-    annualGrossIncome: data.step_2?.annualGrossIncome || "",
-    nameOfStockBroker: "",
-    subBroker: "",
-    clientCode: data.user.userName,
-    exchanges: "",
-    website: "",
+    annualGrossIncome: data.step_2?.annualGrossIncome || " ",
+    nameOfStockBroker: " ",
+    subBroker: " ",
+    clientCode: " ",
+    exchanges: " ",
+    website: " ",
     detailsOfDisputes: "NIL",
     investmentExperience: getInvestmentExperience(data),
 });
@@ -605,13 +605,13 @@ export const mapDataForPage12 = (data: Root): Page12Props => ({
 export const mapDataForPage13 = (data: Root): Page13Props => {
     const address = getAddress(data);
     return {
-        introducerName: "",
-        introducerStatus: "",
-        introducerAddress: "",
-        introducerPhone: "",
+        introducerName: " ",
+        introducerStatus: " ",
+        introducerAddress: " ",
+        introducerPhone: " ",
         email: data.user.emailAddress,
-        firstName: data.step_1?.pan?.firstName || "",
-        lastName: data.step_1?.pan?.lastName || "",
+        firstName: data.step_1?.pan?.firstName || " ",
+        lastName: data.step_1?.pan?.lastName || " ",
         city: address.city,
         state: address.state,
         signatureUrl: getSignatureUrl(data),
@@ -621,15 +621,23 @@ export const mapDataForPage13 = (data: Root): Page13Props => {
 export const mapDataForPage14 = (data: Root): Page14Props => {
     const address = getAddress(data);
     return {
-        firstName: data.step_1?.pan?.firstName || "",
+        firstName: data.step_1?.pan?.firstName || " ",
         middleName: data.step_1?.pan?.middleName || "",
-        lastName: data.step_1?.pan?.lastName || "",
+        lastName: data.step_1?.pan?.lastName || " ",
         participantCode: data.user.userName,
         email: data.user.emailAddress,
         address: address.full,
-        mobile: data.user.phoneNo || "",
+        mobile: data.user.phoneNo || " ",
     };
 };
+
+export function splitInto8(str: string): string[] {
+    const result: string[] = [];
+    for (let i = 0; i < str.length; i += 8) {
+        result.push(str.slice(i, i + 8));
+    }
+    return result;
+}
 
 export const mapDataForPage15 = (data: Root): Page15Props => {
     const bank = getPrimaryBank(data);
@@ -669,8 +677,8 @@ export const mapDataForPage17 = (data: Root): Page17Props => ({
             depository: demat.depositoryName,
             depositoryParticipantName: demat.depositoryParticipantName,
             accountHolderName: demat.accountHolderName,
-            dpId: demat.dpId,
-            clientId: demat.beneficiaryClientId,
+            dpId: (demat?.depositoryName == "CDSL" ? (splitInto8(demat.beneficiaryClientId)?.[0] || "") : demat?.dpId) || "",
+            clientId: (demat?.depositoryName == "CDSL" ? (splitInto8(demat.beneficiaryClientId)?.[1] || "") : demat?.beneficiaryClientId) || "",
             accountType: demat.accountType,
             id: "",
             pan: demat.panNumber?.[0] || "",

@@ -1,8 +1,9 @@
+"use server"
 import { gqlClient } from "@/core/connection/apollo-client";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
- type DynamicPagesGqlResponse = {
+type DynamicPagesGqlResponse = {
     dynamicPages: Array<{
         documentId: string
         Title: string

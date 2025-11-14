@@ -2,6 +2,8 @@ import { Image, Text, View } from "@react-pdf/renderer";
 import React from "react";
 import { tw } from "../MdPdf";
 
+
+
 function Page15({
   bankName = "",
   bankBranch = "",
@@ -81,8 +83,7 @@ function Page15({
         <View
           key={i}
           style={tw(
-            `border-b mx-auto flex flex-row border-gray-200 ${
-              i === 0 ? "border-t" : ""
+            `border-b mx-auto flex flex-row border-gray-200 ${i === 0 ? "border-t" : ""
             }`
           )}
         >

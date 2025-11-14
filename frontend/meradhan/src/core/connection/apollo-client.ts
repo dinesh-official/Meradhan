@@ -35,13 +35,16 @@ export const gqlClient = new ApolloClient({
         watchQuery: {
             fetchPolicy: "no-cache",
             errorPolicy: "all",
+
         },
         query: {
             fetchPolicy: "no-cache",
             errorPolicy: "all",
+
         },
         mutate: {
             errorPolicy: "all",
+
         },
     },
 });
@@ -55,5 +58,6 @@ export const strApiClient = axios.create({
         "Cache-Control": "no-cache",
         Pragma: "no-cache",
         Expires: "0",
+        cache: 'no-store',
     },
 });

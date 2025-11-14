@@ -3,6 +3,7 @@ import React from "react";
 import { tw } from "../MdPdf";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
 import TextFiled from "../elements/TextFiled";
+import { splitInto8 } from "../dataMapper";
 
 
 function Page11({
@@ -61,16 +62,16 @@ function Page11({
               <View style={tw(`flex flex-row gap-4`)}>
                 <CheckBoxRow
                   label="Saving"
-                  checked={primaryBank?.accountType === "saving"}
+                  checked={primaryBank?.accountType === "savings"}
                 />
                 <CheckBoxRow
                   label="Current"
                   checked={primaryBank?.accountType === "current"}
                 />
-                <CheckBoxRow
+                {/* <CheckBoxRow
                   label="Others"
-                  checked={primaryBank?.accountType !== "others"}
-                />
+                  checked={primaryBank?.accountType == "others"}
+                /> */}
               </View>
             </View>
           </View>
@@ -163,12 +164,12 @@ function Page11({
           <View style={tw(`flex flex-row gap-10 w-full`)}>
             <TextFiled
               title="DP ID:"
-              value={primaryDemat?.dpId || ""}
+              value={(primaryDemat?.depository == "CDSL" ? (splitInto8(primaryDemat.beneficiaryId)?.[0] || "") : primaryDemat?.dpId) || ""}
               className="pr-5"
             />
             <TextFiled
               title="Beneficiary ID:"
-              value={primaryDemat?.beneficiaryId || ""}
+              value={(primaryDemat?.depository == "CDSL" ? (splitInto8(primaryDemat.beneficiaryId)?.[0] || "") : primaryDemat?.beneficiaryId) || ""}
               className="pr-10"
             />
           </View>
@@ -219,15 +220,15 @@ function Page11({
               <View style={tw(`border-r border-gray-300 p-3 py-10 w-[33.33%]`)}>
                 <Text>Debt (Online Bond Platform)</Text>
               </View>
-              <View style={tw(`border-gray-300 p-3 py-2 w-[33.33%]`)}>
+              <View style={tw(`border-gray-300 p-3 pb-0 pt-0 w-[33.33%]`)}>
                 <View
-                  style={tw(`flex flex-col  justify-center items-center py-5`)}
+                  style={tw(`flex flex-col  justify-center items-center pb-5`)}
                 >
                   <Image
                     source={signatureUrl}
-                    style={tw(`w-40 h-32 object-contain`)}
+                    style={tw(`w-40 h-auto object-contain`)}
                   />
-                  <Text style={tw(`text-sm text-gray-400`)}>Signature</Text>
+                  <Text style={tw(`text-xs text-gray-400 `)}>Sign Here</Text>
                 </View>
               </View>
             </View>

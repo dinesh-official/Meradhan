@@ -27,7 +27,7 @@ function AddBankAccountForm() {
       showCancel={state.step_3.length > 1}
       onCancel={() => {
         removeBankAccount(state.step_3.length - 1);
-        
+
         nextLocalStep();
       }}
     />

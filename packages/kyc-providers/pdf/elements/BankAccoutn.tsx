@@ -42,7 +42,7 @@ function BankAccoutn({
             />
           </View>
         </View>
-        <View style={tw(`flex flex-row gap-2`)}>
+        <View style={tw(`flex flex-row gap-2 pr-[5.5px]`)}>
           <Text>Account Type:</Text>
           <View style={tw(`flex flex-row gap-4`)}>
             <CheckBoxRow label="Saving" checked={accountType === "saving"} />
@@ -54,9 +54,9 @@ function BankAccoutn({
 
       {/* IFSC + Account Number */}
       <View style={tw(`flex flex-row gap-10 w-full`)}>
-        <TextFiled title="IFSC Code:*" value={ifscCode} className="pr-10" />
+        <TextFiled title="IFSC Code:" value={ifscCode} className="pr-10" />
         <TextFiled
-          title="Account Number:*"
+          title="Account Number:"
           value={accountNumber}
           className="pr-20"
         />
@@ -65,7 +65,7 @@ function BankAccoutn({
       {/* Name + MICR */}
       <View style={tw(`flex flex-row gap-10 w-full`)}>
         <TextFiled
-          title="Name as per Bank:*"
+          title="Name as per Bank:"
           value={nameAsPerBank}
           className="pr-20"
         />

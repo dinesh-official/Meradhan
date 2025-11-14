@@ -1,3 +1,5 @@
+"use server";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gqlClient } from "@/core/connection/apollo-client";
 import { gql } from "@apollo/client";
@@ -38,7 +40,6 @@ export type AccountPageMetaData = {
 }
 
 export const getAccountPagesMetaData = async (slug: string): Promise<Metadata> => {
-
     const data = await gqlClient.query<AccountPageMetaData>({
         query: gql(accountPageKycGql),
         variables: {

@@ -44,7 +44,7 @@ export const CONTACT_INFO = {
 export const ADDRESSES: Record<string, AddressInfo> = {
     registered: {
         title: "Registered Address",
-        address: "D 2703, Ashok Tower, Dr. SSR Road, Parel (East), Mumbai - 400012, Maharashtra",
+        address: "2703, Ashok Tower 'D', Dr. SSR Marg, Parel, Mumbai- 400012, Maharashtra",
     },
     communication: {
         title: "Communication Address",

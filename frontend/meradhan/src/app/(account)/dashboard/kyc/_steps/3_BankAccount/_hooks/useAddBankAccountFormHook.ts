@@ -69,7 +69,6 @@ export const useAddBankAccountFormHook = () => {
                 updateData("isVerified", data.responseData.verified)
 
                 // set confirm timestamp
-                updateData("confirmBankTimestamp", new Date().toISOString());
                 updateData("verifyTimestamp", new Date().toISOString());
 
 

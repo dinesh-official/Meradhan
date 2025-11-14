@@ -59,21 +59,29 @@ const EmailOrPhoneInput = ({
   onChange,
   error,
   readOnly,
+  onEnter
 }: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   readOnly: boolean;
+  onEnter: () => void
 }) => (
   <div className="relative">
     <Input
-      className="peer bg-muted py-5 ps-12 pe-12 border-none placeholder:text-[#7fabd2]"
+      className="peer text-sm  bg-muted py-5 ps-12 border-none placeholder:text-[#7fabd2]"
       placeholder="Email or Phone Number"
       type="text"
       value={value}
       onChange={onChange}
       readOnly={readOnly}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          onEnter(); // your function
+        }
+      }}
     />
+
 
     {/* Left Icon */}
     <div className="absolute inset-y-0 flex items-center ps-4 text-[#7fabd2] pointer-events-none start-0">
@@ -144,9 +152,8 @@ const VerifyModeSection = ({
         ) : (
           // OTP mode options
           <p
-            className={`text-primary cursor-pointer ${
-              !state.allowedResend && "opacity-60"
-            }`}
+            className={`text-primary cursor-pointer ${!state.allowedResend && "opacity-60"
+              }`}
             onClick={state.allowedResend ? handleResendOtp : undefined}
           >
             {state.allowedResend ? "Resend OTP" : formManager.timer.time}
@@ -210,6 +217,7 @@ function LoginForm() {
             onChange={(e) => setEmailOrPhoneNo(e.target.value)}
             readOnly={isVerifyMode}
             error={errors?.emailOrPhone}
+            onEnter={handleContinue}
           />
 
           {/* Verification Section (Password / OTP) */}

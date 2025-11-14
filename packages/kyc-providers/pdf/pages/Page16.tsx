@@ -41,14 +41,14 @@ function Page16({
   return (
     <View>
       {/* Title */}
-      <Text style={tw(`font-bold uppercase text-[7px] text-center pt-6`)}>
-        PART B - TRADING ACCOUNT RELATED INFORMATION
+      <Text style={tw(`font-bold uppercase text-[9px] text-center pt-6`)}>
+        ANNEXURE 1
       </Text>
 
       <View style={tw("px-4")}>
         {/* Section Header */}
         <View style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-4")}>
-          <Text style={tw("text-xs text-white font-[500] leading-[1px]")}>
+          <Text style={tw("text-sm text-white font-[500] leading-[1px]")}>
             Additional Bank Account(s) Details
           </Text>
         </View>
@@ -58,7 +58,7 @@ function Page16({
           {filledBanks.map((bank, idx) => (
             <BankAccoutn
               key={idx}
-              index={idx + 1}
+              index={idx + 2}
               isPrimary={bank.defaultAccount ?? undefined}
               accountType={bank.accountType?.toLowerCase() || " "}
               ifscCode={bank.ifscCode || " "}

@@ -96,7 +96,7 @@ export class KycProvider extends DigioKycFileHelper {
 
     private nsdlApi = new NSDLApi(
         "NR100013",
-        "06b2d035ad7d2f12c5d339bec39d58d4fc6e",
+        "0668afbe8257ebad91be8223b6f7fa6e5c5a",
         false
     ); // false = test mode
     private cdslApi = new CDSLApi({

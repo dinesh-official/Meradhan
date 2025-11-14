@@ -8,7 +8,7 @@ const TableData1 = [
     name: "Account Opening Form",
     value: `A. KYC Form - Document captures the basic information about the constituent and an instruction/checklist. 
 
-B.Document captures the additional information about the constituent relevant to trading account and an instruction / checklist`,
+B. Document captures the additional information about the constituent relevant to trading account and an instruction / checklist`,
   },
   {
     sno: 2,
@@ -42,13 +42,13 @@ B.Document captures the additional information about the constituent relevant to
 ];
 
 const TableData2 = [
+  // {
+  //   sno: 7,
+  //   name: "Nomination Form",
+  //   value: `Nomination form for the Trading account`,
+  // },
   {
     sno: 7,
-    name: "Nomination Form",
-    value: `Nomination form for the Trading account`,
-  },
-  {
-    sno: 8,
     name: "General Terms & Conditions and Other Authorisation",
     value: `General Terms & Conditions and authorisations for trading in debt instruments, covering client responsibilities, regulatory compliance, and consent for communications.`,
   },
@@ -103,8 +103,7 @@ function Page10() {
           return (
             <View
               style={tw(
-                `w-[90%]  border-b mx-auto flex flex-row border-gray-200  ${
-                  i == 0 && "border-t"
+                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs  ${i == 0 && "border-t"
                 }`
               )}
             >
@@ -127,8 +126,7 @@ function Page10() {
           return (
             <View
               style={tw(
-                `w-[90%]  border-b mx-auto flex flex-row border-gray-200  ${
-                  i == 0 && "border-t"
+                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs ${i == 0 && "border-t"
                 }`
               )}
             >
@@ -156,22 +154,21 @@ function Page10() {
         <View style={tw(`flex flex-row gap-4 flex-between`)}>
           <View style={tw(`flex gap-3 flex-row`)}>
             <Text style={tw(`font-[600]`)}>SEBI Registration Number:</Text>
-            <Text>XXXXXXXXXXXXXX</Text>
+            <Text>INZ000330234</Text>
           </View>
           <View style={tw(`flex gap-3 flex-row`)}>
             <Text style={tw(`font-[600]`)}>NSE Trading Member:</Text>
             <Text>90480</Text>
           </View>
-          <View style={tw(`flex gap-3 flex-row`)}>
+          {/* <View style={tw(`flex gap-3 flex-row`)}>
             <Text style={tw(`font-[600]`)}>BSE Trading Member:</Text>
             <Text>XXXXXXX</Text>
-          </View>
+          </View> */}
         </View>
         <View style={tw(`flex gap-3 flex-row`)}>
           <Text style={tw(`font-[600]`)}>Registered Office:</Text>
           <Text>
-            D 2703, Ashok Tower, Dr SSR Road, Parel (East), Mumbai - 400012,
-            Maharashtra (India)
+            2703, Ashok Tower 'D', Dr. SSR Marg, Parel, Mumbai- 400012, Maharashtra
           </Text>
         </View>
         <View style={tw(`flex gap-3 flex-row w-full`)}>
@@ -191,7 +188,7 @@ function Page10() {
         </View>
         <Text style={{ lineHeight: 1.3, fontSize: 8 }}>
           For any grievances please contact at the above address or email at
-          compliance@meradhan.co & Phone no. +91XXXXXXXXXX. In case not
+          compliance@meradhan.co & Phone no. +919831311515. In case not
           satisfied with the response, please contact the concerned exchange at
           NSE: ignse@nse.co.in or contact at 022-26598100 or BSE:
           is@bseindia.com or contact at 022-22728097

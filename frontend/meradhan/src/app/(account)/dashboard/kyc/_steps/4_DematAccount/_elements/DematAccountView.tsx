@@ -26,8 +26,7 @@ function DematAccountView({
     <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
       <div
         className={cn(
-          "gap-5 grid sm:grid-cols-2 xl:grid-cols-4",
-          account.depositoryName === "CDSL" && "xl:grid-cols-3"
+          "gap-5 grid sm:grid-cols-2 xl:grid-cols-4"
         )}
       >
         {/* // not show dp id for cdsl */}
@@ -45,13 +44,14 @@ function DematAccountView({
           title="Beneficiary / Client ID"
           status={account.isVerified ? "SUCCESS" : "ERROR"}
           statusLabel={account.isVerified ? "Verified" : "Invalid"}
+          className={account.depositoryName === "CDSL" ? "xl:col-span-2" : ""}
           showStatus
         >
           <p className="font-medium">{account.beneficiaryClientId}</p>
         </DataInfoLabel>
 
         <DataInfoLabel
-          className="xl:col-span-2"
+          className={"xl:col-span-2"}
           title="PAN"
           // status={account.panNumber.includes(myPan) ? "SUCCESS" : "ERROR"}
           // statusLabel={
@@ -80,13 +80,13 @@ function DematAccountView({
           <p className="font-medium">{account.accountType}</p>
         </DataInfoLabel>
         <DataInfoLabel
-        className="xl:col-span-2"
+          className="xl:col-span-2"
           title="Depository Participant Name"
-          // status={account.isVerified ? "SUCCESS" : "ERROR"}
-          // statusLabel={account.isVerified ? "Verified" : "Invalid"}
-          // showStatus
+        // status={account.isVerified ? "SUCCESS" : "ERROR"}
+        // statusLabel={account.isVerified ? "Verified" : "Invalid"}
+        // showStatus
         >
-          <p className="font-medium">{account.depositoryParticipantName}</p>
+          <p className="font-medium">{account.depositoryParticipantName || "Coming Soon"}</p>
         </DataInfoLabel>
       </div>
       <DataInfoLabel title="Is Default Demat Account?" status="SUCCESS">

@@ -28,6 +28,7 @@ export const usePanCardVerifyHook = () => {
             console.log(data);
             if (data.responseData) {
                 setStep1PanData("response", data.responseData);
+                setStep1PanData("fetchedTimestamp", (new Date(data?.responseData?.completed_at)).toISOString())
                 // its navigate to next step view pan info
                 nextLocalStep();
                 // update step

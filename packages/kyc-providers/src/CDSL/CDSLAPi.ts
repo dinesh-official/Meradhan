@@ -4,17 +4,16 @@ import type { BoPanRequest, BoPanResponse } from "./CDSLApi.response";
 import type { DemateVerifyResponse } from "../response.types";
 
 const StatusCodeMessages: Record<string, string> = {
-  "1": "Valid BO-PAN",
-  "2": "Invalid BOID",
-  "4": "BOID is closed",
-  "5": "PAN not matching with the First Holder",
-  "6": "PAN not matching with the Second Holder",
-  "7": "PAN not matching with the Third Holder",
-  "8": "Frozen for Credit",
-  "9": "Frozen for Debit",
+  "01": "Valid BO-PAN",
+  "02": "Invalid BOID",
+  "04": "BOID is closed",
+  "05": "PAN not matching with the First Holder",
+  "06": "PAN not matching with the Second Holder",
+  "07": "PAN not matching with the Third Holder",
+  "08": "Frozen for Credit",
+  "09": "Frozen for Debit",
   "10": "Frozen for Both Debit And Credit",
   "-1": "Failure",
-  "01": "Success",
   "00": "Failure",
 }
 
@@ -145,9 +144,9 @@ export class CDSLApi {
       fstHoldrPan: request.pan1,
       scndHoldrPan: request.pan2 ?? undefined,
       thrdHoldrPan: request.pan3 ?? undefined,
-      isVerified: data.StatusCode === "01",
-      status: data.StatusCode,
-      message: StatusCodeMessages[data.StatusCode] || "Unknown Status Code",
+      isVerified: data.statuscode === "01",
+      status: data.statuscode,
+      message: StatusCodeMessages[data.statuscode] || "Unknown Status Code",
       data,
     };
   }

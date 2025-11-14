@@ -19,7 +19,7 @@ function Page14({
   address?: string;
   mobile?: string;
 }) {
-  const fullName = `${firstName} ${middleName} ${lastName}`.trim();
+  const fullName = `${firstName}${middleName ? ` ${middleName} ` : " "}${lastName}`.trim();
 
   const tableData = [
     {
@@ -49,7 +49,8 @@ function Page14({
     },
     {
       sno: 6,
-      name: "Phone/Mobile Number of Contact Person (with STD Code)",
+      name: `Phone/Mobile Number of Contact Person
+(with STD Code)`,
       value: mobile ? mobile : "",
     },
   ];

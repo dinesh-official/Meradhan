@@ -6,12 +6,12 @@ import Stamp from "../elements/Stamp";
 
 function Page5(data: {
   documentsReceived: string;
-    // | "Certified"
-    // | "DigitalKYC"
-    // | "e-document"
-    // | "UIDAI"
-    // | "VideoKyc"
-    // | "Offline";
+  // | "Certified"
+  // | "DigitalKYC"
+  // | "e-document"
+  // | "UIDAI"
+  // | "VideoKyc"
+  // | "Offline";
 
   ipvDate?: string;
   empName?: string;
@@ -116,7 +116,7 @@ function Page5(data: {
                   />
                 )}
               </View>
-              <Text style={tw(`text-sm text-gray-400`)}>
+              <Text style={tw(`text-xs text-gray-400`)}>
                 Employee Signature
               </Text>
             </View>
@@ -137,7 +137,7 @@ function Page5(data: {
               <View>
                 <Stamp />
               </View>
-              <Text style={tw(`text-sm text-gray-400`)}>Institution Stamp</Text>
+              <Text style={tw(`text-xs text-gray-400`)}>Institution Stamp</Text>
             </View>
           </View>
         </View>

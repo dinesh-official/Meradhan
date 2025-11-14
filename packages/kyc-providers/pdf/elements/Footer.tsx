@@ -7,7 +7,7 @@ const Footer = () => {
     <View style={styles.footerContainer}>
       <View style={styles.footer}>
         <Text style={tw(`text-[8px]`)}>
-          SEBI Registration No.: INZ000330234 
+          SEBI Registration No.: INZ000330234
         </Text>
         {/* <Text style={tw(`text-[8px]`)}>BSE Member ID: XXXXX</Text> */}
         <Text style={tw(`text-[8px]`)}>NSE Member ID: 90480 </Text>

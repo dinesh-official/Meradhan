@@ -1,3 +1,4 @@
+"use server"
 import { gqlClient } from "@/core/connection/apollo-client";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";

@@ -7,14 +7,8 @@ import { headers } from "next/headers";
 import Script from "next/script";
 import "./styles/globals.css";
 import "./styles/override.css";
-import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 
 export const revalidate = 0;
-
-export const generateMetadata = async () => {
-  return await generatePagesMetaData("index");
-};
-
 export default async function RootLayout({
   children,
 }: Readonly<{

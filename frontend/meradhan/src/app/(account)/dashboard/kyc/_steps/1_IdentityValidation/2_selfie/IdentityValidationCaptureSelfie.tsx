@@ -15,45 +15,7 @@ import { useEffect } from "react";
 function IdentityValidationCaptureSelfie() {
   const { handelSelfieVerification, isPending } = useSelfieVerifyHook();
 
-  async function requestLocationPermission(): Promise<GeolocationPosition | null> {
-    if (!("geolocation" in navigator)) {
-      console.error("Geolocation is not supported by this browser.");
-      return null;
-    }
 
-    try {
-      // Some browsers support Permission API
-      if (navigator.permissions) {
-        const permissionStatus = await navigator.permissions.query({
-          name: "geolocation",
-        });
-
-        if (permissionStatus.state === "denied") {
-          console.error("Location permission is denied.");
-          return null;
-        }
-      }
-
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0,
-          });
-        }
-      );
-
-      return position;
-    } catch (err) {
-      console.error("Failed to get location:", err);
-      return null;
-    }
-  }
-
-  useEffect(() => {
-    requestLocationPermission();
-  }, []);
 
   return (
     <Card accountMode>

@@ -30,7 +30,7 @@ function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <div className="gap-5 grid grid-cols-2 lg:grid-cols-4">
-          <LabelView title="12-digit Aadhaar Number">
+          <LabelView title="Last 4-digit Aadhaar Number">
             <p className="text-sm">
               {addressCardInfoData.aadhaarNumber}
             </p>
@@ -50,7 +50,7 @@ function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
           <LabelView title="Date of Birth">
             <p className="text-sm">
               {addressCardInfoData.dateOfBirth}
-              
+
             </p>
           </LabelView>
           <LabelView title="Gender">
@@ -69,18 +69,20 @@ function AadhaarCardInfo(addressCardInfoData: AadhaarCardInfoDataProps) {
         <AddressCard {...addressCardInfoData.currentAddress} />
       </CardContent>
       <CardFooter className="border-t">
-        <div className="flex flex-col gap-8">
+        <div className="flex  gap-8 flex-col">
           <CardTitle className="text-sm" >Verification Status</CardTitle>
-          <LabelView title="Verification Timestamp">
-            <p className="text-sm">
-              {addressCardInfoData.verificationTimeStamp}
-            </p>
-          </LabelView>
+          <div className="flex gap-8" >
+            <LabelView title="Verification Timestamp">
+              <p className="text-sm">
+                {addressCardInfoData.verificationTimeStamp}
+              </p>
+            </LabelView>
             <LabelView title="Confirm Timestamp">
-            <p className="text-sm">
-              {addressCardInfoData.confirmTimeStamp}
-            </p>
-          </LabelView>
+              <p className="text-sm">
+                {addressCardInfoData.confirmTimeStamp}
+              </p>
+            </LabelView>
+          </div>
         </div>
       </CardFooter>
     </Card>

@@ -3,6 +3,7 @@ import React from "react";
 import PreviewCard from "./PriviewCard";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import { genMediaUrl } from "@/global/utils/url.utils";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 export interface PersonalInformationCardProps {
   photoUrl: string;
   signatureUrl: string;
@@ -18,8 +19,10 @@ export interface PersonalInformationCardProps {
   annualGrossIncome: string;
   nationality: string;
   residentialStatus: string;
+  faceTimeStamp?: string,
+  signTimeStamp?: string
 }
-function PersonalInformationCard(personalInfoCardData:PersonalInformationCardProps) {
+function PersonalInformationCard(personalInfoCardData: PersonalInformationCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -28,19 +31,26 @@ function PersonalInformationCard(personalInfoCardData:PersonalInformationCardPro
       <CardContent>
         <div className="gap-8 grid lg:grid-cols-5">
           <div className="gap-5 grid grid-cols-2 lg:col-span-2">
-            <PreviewCard
-              url={genMediaUrl(personalInfoCardData.photoUrl)}
-              source="uploaded"
-              type="Photograph"
-            />
-            <PreviewCard
-              url={genMediaUrl(personalInfoCardData.signatureUrl)}
-              source="uploaded"
-              type="Signature"
-            />
+            <div>
+              <PreviewCard
+                url={genMediaUrl(personalInfoCardData.photoUrl)}
+                source="uploaded"
+                type="Photograph"
+              />
+              {personalInfoCardData.faceTimeStamp && <p className="text-center text-xs mt-3" >Confirmd At: {dateTimeUtils.formatDateTime(personalInfoCardData.faceTimeStamp, "DD MMM YYYY hh:mm:ss AA")}</p>}
+            </div>
+            <div>
+              <PreviewCard
+                url={genMediaUrl(personalInfoCardData.signatureUrl)}
+                source="uploaded"
+                type="Signature"
+              />
+              {personalInfoCardData.signTimeStamp && <p className="text-center text-xs mt-3" >Confirmd At: {dateTimeUtils.formatDateTime(personalInfoCardData.signTimeStamp, "DD MMM YYYY hh:mm:ss AA")}</p>}
+
+            </div>
           </div>
           <div className="gap-5 grid grid-cols-2 lg:grid-cols-3 lg:col-span-3 lg:pl-8">
-             <LabelView title="Full Name">
+            <LabelView title="Full Name">
               <p className="text-sm">{personalInfoCardData.fullName}</p>
             </LabelView>
             <LabelView title="Date of Birth">
@@ -66,7 +76,7 @@ function PersonalInformationCard(personalInfoCardData:PersonalInformationCardPro
             </LabelView>
             <LabelView title="Occupation Type">
               <p className="text-sm">{personalInfoCardData.occupationType}</p>
-            </LabelView>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+            </LabelView>
             <LabelView title="Annual Gross Income">
               <p className="text-sm">{personalInfoCardData.annualGrossIncome}</p>
             </LabelView>

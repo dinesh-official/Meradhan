@@ -113,7 +113,7 @@ export class CustomerKycManager {
                                 image: aadhaarData.image,
                                 fileUrl: aadhaarData.file_url,
                                 isVerified: true,
-                                verifyDate: step1.pan.confirmAadhaarTimestamp,
+                                verifyDate: step1.pan.fetchedTimestamp,
                                 confirmTimeStamp: step1.pan.confirmAadhaarTimestamp
                             },
                             update: {
@@ -127,7 +127,7 @@ export class CustomerKycManager {
                                 image: aadhaarData.image,
                                 fileUrl: aadhaarData.file_url,
                                 isVerified: true,
-                                verifyDate: step1.pan.confirmAadhaarTimestamp,
+                                verifyDate: step1.pan.fetchedTimestamp,
                                 confirmTimeStamp: step1.pan.confirmAadhaarTimestamp,
                                 allowTerms: step1.pan.checkTerms2
                             }
@@ -147,7 +147,7 @@ export class CustomerKycManager {
                                 image: aadhaarData.image,
                                 fileUrl: panData.file_url,
                                 isVerified: true,
-                                verifyDate: step1.pan.confirmPanTimestamp,
+                                verifyDate: step1.pan.fetchedTimestamp,
                                 confirmTimeStamp: step1.pan.confirmPanTimestamp,
                                 allowTerms: step1.pan.checkTerms1
                             },
@@ -161,7 +161,7 @@ export class CustomerKycManager {
                                 image: aadhaarData.image,
                                 fileUrl: panData.file_url,
                                 isVerified: true,
-                                verifyDate: step1.pan.confirmPanTimestamp,
+                                verifyDate: step1.pan.fetchedTimestamp,
                                 confirmTimeStamp: step1.pan.confirmPanTimestamp,
                                 allowTerms: step1.pan.checkTerms1
                             }
@@ -221,7 +221,6 @@ export class CustomerKycManager {
                                 pinCode: aadhaarData.current_address_details.pincode,
                                 country: "India",
                                 fullAddress: aadhaarData.current_address,
-
                             },
                             update: {
                                 line1: aadhaarData.current_address_details.address,
@@ -297,8 +296,8 @@ export class CustomerKycManager {
                         isPrimary: bank.isDefault,
                         isVerified: bank.isVerified,
                         allowTerms: bank.checkTerms,
-                        confirmTimeStamp: bank.confirmBankTimestamp,
-                        verifyDate: bank.isVerified ? bank.confirmBankTimestamp : new Date(),
+                        confirmTimeStamp: bank.verifyTimestamp,
+                        verifyDate: bank.isVerified ? bank.confirmBankTimestamp : undefined,
                     } as DataBaseSchema.CustomersBankAccountModelCreateManyInput))
                 });
             }
@@ -324,7 +323,7 @@ export class CustomerKycManager {
                         isPrimary: demat.isDefault,
                         isVerified: demat.isVerified,
                         allowTerms: demat.checkTerms,
-                        confirmTimeStamp: demat.confirmDematTimestamp,
+                        confirmTimeStamp: demat.verifyTimestamp,
                         verifyDate: demat.isVerified ? demat.confirmDematTimestamp : new Date(),
                     }))
                 } as DataBaseSchema.CustomersDematAccountModelCreateManyArgs);
@@ -427,14 +426,14 @@ export class CustomerKycManager {
             userName: user?.userName || "------",
             userType: user?.userType || "INDIVIDUAL",
             kycStatus: user?.kycStatus || "VERIFIED",
-            verifyDate: user?.verifyDate || new Date(),
+            verifyDate: user?.verifyDate,
             VerifiedBy: user?.VerifiedBy || null,
             avatar: step1?.face?.url || user?.avatar || "------",
             isAFatcaCustomer: step1?.pan?.isFatca || user?.isAFatcaCustomer || false,
             allowSEBITerms: step1?.pan?.checkTerms2 || user?.allowSEBITerms || false,
             isAPep: step1?.pan?.checkTerms1 || user?.isAPep || false,
-            createdAt: user?.createdAt || new Date(),
-            updatedAt: user?.updatedAt || new Date(),
+            createdAt: user?.createdAt,
+            updatedAt: user?.updatedAt,
             createdBy: user?.createdBy || null,
 
 
@@ -451,10 +450,10 @@ export class CustomerKycManager {
                 image: aadhaarData?.image || user?.aadhaarCard?.image || "------",
                 fileUrl: aadhaarData?.file_url || user?.aadhaarCard?.fileUrl || "------",
                 isVerified: user?.aadhaarCard?.isVerified || true,
-                verifyDate: user?.aadhaarCard?.verifyDate || step1.pan.confirmAadhaarTimestamp ,
-                confirmTimeStamp: user?.aadhaarCard?.confirmTimeStamp || step1.pan.confirmAadhaarTimestamp ,
-                createdAt: user?.aadhaarCard?.createdAt || new Date(),
-                updatedAt: user?.aadhaarCard?.updatedAt || new Date(),
+                verifyDate: user?.aadhaarCard?.verifyDate || step1.pan.confirmAadhaarTimestamp,
+                confirmTimeStamp: user?.aadhaarCard?.confirmTimeStamp || step1.pan.confirmAadhaarTimestamp,
+                createdAt: user?.aadhaarCard?.createdAt,
+                updatedAt: user?.aadhaarCard?.updatedAt,
                 allowTerms: step1?.pan?.checkTerms2 || user?.aadhaarCard?.allowTerms || false,
             } as DataBaseSchema.AADHAARCardModelCreateInput : null,
 
@@ -470,9 +469,9 @@ export class CustomerKycManager {
                 image: aadhaarData?.image || user?.panCard?.image || "------",
                 fileUrl: panData?.file_url || user?.panCard?.fileUrl || "------",
                 isVerified: user?.panCard?.isVerified || true,
-                verifyDate: user?.panCard?.verifyDate ,
-                createdAt: user?.panCard?.createdAt || new Date(),
-                updatedAt: user?.panCard?.updatedAt || new Date(),
+                verifyDate: user?.panCard?.verifyDate,
+                createdAt: user?.panCard?.createdAt,
+                updatedAt: user?.panCard?.updatedAt,
                 allowTerms: step1?.pan?.checkTerms1 || user?.panCard?.allowTerms || false,
                 confirmTimeStamp: user?.panCard?.confirmTimeStamp || step1?.pan?.confirmPanTimestamp,
 
@@ -495,9 +494,9 @@ export class CustomerKycManager {
                 signPdfUrl: step6?.response?.fileUrl || user?.personalInformation?.signPdfUrl || "------",
                 maidenName: user?.personalInformation?.maidenName || null,
                 politicallyExposedPerson: user?.personalInformation?.politicallyExposedPerson,
-                createdAt: user?.personalInformation?.createdAt || new Date(),
-                updatedAt: user?.personalInformation?.updatedAt || new Date(),
-                confirmTimeStamp: user?.personalInformation?.confirmTimeStamp || step2?.confirmPersonalInfoTimestamp || new Date(),
+                createdAt: user?.personalInformation?.createdAt,
+                updatedAt: user?.personalInformation?.updatedAt,
+                confirmTimeStamp: user?.personalInformation?.confirmTimeStamp || step2?.confirmPersonalInfoTimestamp,
 
             } as DataBaseSchema.CustomerPersonalInfoModelCreateInput : null,
 
@@ -513,8 +512,8 @@ export class CustomerKycManager {
                 pinCode: aadhaarData?.current_address_details?.pincode || user?.currentAddress?.pinCode || "------",
                 country: user?.currentAddress?.country || "India",
                 fullAddress: aadhaarData?.current_address || user?.currentAddress?.fullAddress || "------",
-                createdAt: user?.currentAddress?.createdAt || new Date(),
-                updatedAt: user?.currentAddress?.updatedAt || new Date(),
+                createdAt: user?.currentAddress?.createdAt,
+                updatedAt: user?.currentAddress?.updatedAt,
 
             } as DataBaseSchema.AddressModelCreateInput : null,
 
@@ -530,8 +529,8 @@ export class CustomerKycManager {
                 pinCode: aadhaarData?.permanent_address_details?.pincode || user?.permanentAddress?.pinCode || "------",
                 country: user?.permanentAddress?.country || "India",
                 fullAddress: aadhaarData?.permanent_address || user?.permanentAddress?.fullAddress || "------",
-                createdAt: user?.permanentAddress?.createdAt || new Date(),
-                updatedAt: user?.permanentAddress?.updatedAt || new Date(),
+                createdAt: user?.permanentAddress?.createdAt,
+                updatedAt: user?.permanentAddress?.updatedAt,
             } as DataBaseSchema.AddressModelCreateInput : null,
 
             // Bank Accounts - prioritize KYC data, fallback to existing user data
@@ -546,7 +545,7 @@ export class CustomerKycManager {
                 bankAccountType: bank.bankAccountType || "------",
                 isPrimary: bank.isDefault || false,
                 isVerified: bank.isVerified || false,
-                verifyDate: bank.isVerified ? new Date() : null,
+                verifyDate: bank.isVerified ? bank.verifyTimestamp : null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowTerms: bank.checkTerms || false,
@@ -568,7 +567,7 @@ export class CustomerKycManager {
                 accountHolderName: demat.accountHolderName || "------",
                 isPrimary: demat.isDefault || false,
                 isVerified: demat.isVerified || false,
-                verifyDate: demat.isVerified ? new Date() : null,
+                verifyDate: demat.isVerified ? demat.verifyTimestamp : null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowTerms: demat.checkTerms || false,
@@ -580,8 +579,8 @@ export class CustomerKycManager {
             riskProfile: (step5 && step5.length > 0) || user?.riskProfile ? {
                 id: user?.riskProfile?.id || 0,
                 data: step5 && step5.length > 0 ? step5 : user?.riskProfile?.data || [],
-                createdAt: user?.riskProfile?.createdAt || new Date(),
-                updatedAt: user?.riskProfile?.updatedAt || new Date(),
+                createdAt: user?.riskProfile?.createdAt,
+                updatedAt: user?.riskProfile?.updatedAt,
             } : null,
 
             // Utility data - use existing user data or defaults

@@ -24,6 +24,7 @@ function VerifyDematAccount() {
     addDepository,
     prevLocalStep,
     setStepIndex,
+    updateDepository
   } = useKycDataStorage();
 
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
@@ -32,21 +33,29 @@ function VerifyDematAccount() {
   const isAllowToContinue = () => {
     const defaltSelcted = accounts.filter((item) => item.isDefault);
     const allValid = accounts.filter((item) => item.isVerified);
-
     return defaltSelcted.length !== 0 && allValid.length !== 0;
   };
+
+  const accounts = state.step_4;
 
   const jumpNext = () => {
     addAuditLog({
       type: "DEMAT_KYC_STEP_COMPLETED",
       desc: "User completed the Demat Account Verification step during KYC process.",
     });
+
+    accounts.forEach((e, i) => {
+      updateDepository(i, {
+        ...e,
+        confirmDematTimestamp: new Date().toISOString()
+      })
+    })
+
     pushUserKycState();
     setStepIndex(0);
     nextStep();
   };
 
-  const accounts = state.step_4;
   return (
     <Card accountMode>
       <CardHeader accountMode>

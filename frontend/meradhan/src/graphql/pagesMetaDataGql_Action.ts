@@ -1,3 +1,4 @@
+"use server"
 import { gqlClient } from "@/core/connection/apollo-client";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
@@ -83,7 +84,9 @@ export const generatePagesMetaData = async (slug: AppRoute): Promise<Metadata> =
         });
 
         const metadata = data?.pagesMetaData?.[0]?.MetaData;
-        if (!data?.pagesMetaData?.[0]?.MetaData.Title) {
+        console.log(metadata);
+
+        if (!data?.pagesMetaData?.[0]?.MetaData?.Title) {
             return {};
         }
         // console.log(metadata);
@@ -100,7 +103,9 @@ export const generatePagesMetaData = async (slug: AppRoute): Promise<Metadata> =
                 // images: metadata?.Og_Image ? [metadata.Og_Image.url] : undefined,
             },
         }
-    } catch {
+    } catch (e) {
+        console.log(e);
+
         return {}
     }
 }

@@ -76,8 +76,8 @@ function Page13({
       <View style={tw("flex flex-col gap-4 mt-5")}>
         <View style={tw("flex flex-row gap-8 text-xs")}>
           <Text>Whether you wish to receive</Text>
-          <CheckBoxRow label="a) Physical contract note" checked />
-          <CheckBoxRow label="b) Electronic Contract Note (ECN)" />
+          <CheckBoxRow label="a) Physical contract note" />
+          <CheckBoxRow label="b) Electronic Contract Note (ECN)" checked />
         </View>
         <TextFiled
           title={`E-mail id to receive ECN, Electronic Order Receipt,
@@ -114,14 +114,14 @@ internet trading/wireless technology/mobile trading`}</Text>
 
       {/* Signature Block */}
       <View style={tw("flex justify-between flex-row w-full mt-10")}>
-        <View style={tw("text-sm flex flex-col gap-5")}>
+        <View style={tw("text-xs flex flex-col gap-5")}>
           <Text>Name: {fullName}</Text>
           <Text>Date: {today}</Text>
           <Text>Place: {place}</Text>
         </View>
-        <View style={tw(`flex flex-col gap-8 justify-center items-center`)}>
-          <Image src={signatureUrl} style={tw("w-40 h-28 object-contain")} />
-          <Text style={tw(`text-sm`)}>Signature</Text>
+        <View style={tw(`flex flex-col gap-4 justify-center items-center`)}>
+          <Image src={signatureUrl} style={tw("w-40 h-auto object-contain")} />
+          <Text style={tw(`text-xs`)}>Signature</Text>
         </View>
       </View>
     </View>

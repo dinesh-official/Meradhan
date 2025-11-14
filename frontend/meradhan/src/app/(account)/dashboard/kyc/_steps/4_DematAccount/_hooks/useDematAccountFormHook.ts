@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { ZodError } from "zod";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { KycDataStorage, useKycDataStorage } from "../../../_store/useKycDataStorage";
+import { findDpId } from "../../../_utils/nsdlDpid";
 const statusCodes = {
     "00": "VALID Record",
     "01": "DP ID does not match",
@@ -24,7 +25,9 @@ export const useDematAccountFormHook = () => {
     const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(apiClientCaller);
 
     const { state, nextLocalStep, updateDepository } = useKycDataStorage();
-    const data = state.step_4[state.step_4.length - 1];
+    const indexAccount = state.step_4.length - 1
+    const data = state.step_4[indexAccount];
+
 
     const removeError = (key: keyof KycDataStorage['step_4'][number]) => {
         if (error && error[key]) {
@@ -41,14 +44,12 @@ export const useDematAccountFormHook = () => {
             if (data.responseData.isVerified) {
                 nextLocalStep();
                 pushUserKycState();
-                updateDepository(state.step_4.length - 1, {
+                updateDepository(indexAccount, {
                     isVerified: true,
                     verifyTimestamp: new Date().toISOString(),
                     response: data.responseData
                 })
-                updateDepository(state.step_4.length - 1, {
-                    confirmDematTimestamp: new Date().toISOString()
-                })
+
             } else {
                 addAuditLog({
                     type: "DEMATE_ACCOUNT_VERIFICATION_FAILED",
@@ -103,6 +104,12 @@ export const useDematAccountFormHook = () => {
 
 
             setError(undefined);
+            updateDepository(indexAccount, {
+                ...data,
+                depositoryParticipantName: findDpId(data.dpId) || undefined
+            })
+
+
             verifyDematAccount.mutate();
             addAuditLog({
                 type: "START_DEMAT_ACCOUNT_VERIFICATION",

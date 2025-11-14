@@ -8,8 +8,12 @@ import LatestBondReleases from "./_components/LatestBondReleases";
 import ReturnsCalculationSection from "./_components/ReturnsCalculationSection";
 import ToolsOfferedByMeraDhan from "./_components/ToolsOfferedbyMeraDhan";
 import WhyMeraDhanSection from "./_components/WhyMeraDhanSection";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 
 export const revalidate = 0; // Revalidate the page every hour
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("index");
+};
 
 export default async function HomePage() {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);

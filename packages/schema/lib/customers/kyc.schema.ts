@@ -22,6 +22,7 @@ export const kycPanInfoDataSchema = z.object({
 
     confirmPanTimestamp: z.string().optional(),
     confirmAadhaarTimestamp: z.string().optional(),
+    fetchedTimestamp: z.string().optional()
 })
 
 export const selfieSignRequestSchema = z.object({

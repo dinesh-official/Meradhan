@@ -7,7 +7,7 @@ export interface BoPanRequest {
 
 export interface BoPanResponse {
     ReqSeqNo: string;
-    StatusCode: "00" | "01";
+    statuscode: "00" | "01";
     TimeStamp: string;
     ErrorCode: string;
     ErrorDescription: string;

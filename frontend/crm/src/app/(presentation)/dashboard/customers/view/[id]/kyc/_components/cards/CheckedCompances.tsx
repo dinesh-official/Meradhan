@@ -2,10 +2,12 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Spinner } from "@/components/ui/spinner";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
+import { fa } from "zod/v4/locales";
 
 export type Root = {
   step_1: {
@@ -128,6 +130,7 @@ export type Root = {
         customer_identifier: string;
         reminder_registered: boolean;
       };
+      timestamp: string
     };
     sign: {
       url: string;
@@ -164,6 +167,7 @@ export type Root = {
         customer_identifier: string;
         reminder_registered: boolean;
       };
+      timestamp: string
     };
   };
   step_2: {
@@ -238,18 +242,12 @@ export type Root = {
   stepIndex: number;
 };
 
-function CheckedCompances({ id }: { id: number }) {
-  const apiGt = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
-  );
+function CheckedCompances({ data }: { data?: Root }) {
 
-  const { data } = useQuery({
-    queryKey: ["KycProgressStoreCrm"],
-    queryFn: async () => {
-      const data = await apiGt.getKycProgressStoreCrm(id);
-      return data.responseData?.data.data as Root;
-    },
-  });
+
+
+
+
   return (
     <div className="scroll-mt-16" id="compliance">
       <Card>
@@ -258,40 +256,42 @@ function CheckedCompances({ id }: { id: number }) {
             SEBI & Compliance Information
           </CardTitle>
         </CardHeader>
+
+
         <CardContent className="text-sm">
           <CardTitle className="text-sm">Compliance Confirmations</CardTitle>
           <p className="flex justify-start items-center gap-3 mt-3">
-            <Checkbox checked={data?.step_1?.pan?.checkTerms1} /> I hereby
+            <Checkbox checked={data?.step_1?.pan?.checkTerms1 || false} /> I hereby
             confirm that I am not a Politically Exposed Person (PEP) nor related
             to any PEP
           </p>
           <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_1?.pan?.checkTerms2} /> I hereby
+            <Checkbox checked={data?.step_1?.pan?.checkTerms2 || false} /> I hereby
             confirm that I am not a person and/or entity debarred from accessing
             the securities market or dealing in securities, as per directions or
             orders issued by SEBI
           </p>
           <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_1?.pan?.isFatca} /> I confirm that I
+            <Checkbox checked={data?.step_1?.pan?.isFatca || false} /> I confirm that I
             am an Indian citizen and solely a tax resident of India, not of any
             other country (FATCA)
           </p>
 
           <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_3?.[0]?.checkTerms} /> I hereby
+            <Checkbox checked={data?.step_3?.[0]?.checkTerms || false} /> I hereby
             authorise MeraDhan to verify the bank account details provided by
             initiating a nominal amount transfer (₹1) to my account for
             verification purposes
           </p>
 
           <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_4?.[0]?.checkTerms} />I hereby
+            <Checkbox checked={data?.step_4?.[0]?.checkTerms || false} />I hereby
             authorize MeraDhan to verify my Demat account details provided
             herein for the purpose of completing KYC and investment onboarding,
             in accordance with applicable regulatory guidelines.
           </p>
           <p className="flex justify-start items-start gap-3 mt-2">
-            <Checkbox checked={data?.step_6?.terms} className="mt-1" />
+            <Checkbox checked={data?.step_6?.terms || false} className="mt-1" />
             <div>
               <p> By continue, I agree to the following terms:</p>
               <ul className="text-sm list-disc">
