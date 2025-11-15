@@ -1,8 +1,7 @@
 import { Image, Text, View } from "@react-pdf/renderer";
 import React from "react";
 import { tw } from "../MdPdf";
-
-
+import { splitInto8 } from "../dataMapper";
 
 function Page15({
   bankName = "",
@@ -74,8 +73,14 @@ function Page15({
   ];
 
   // DP ID and Client ID split into digits
-  const dpIdDigits = dpId ? dpId.split("") : [];
-  const clientIdDigits = clientId ? clientId.split("") : [];
+  const dpIdDigits =
+    depository == "CDSL"
+      ? splitInto8(clientId)[0]?.split("") || []
+      : dpId.split("");
+  const clientIdDigits =
+    depository == "CDSL"
+      ? splitInto8(clientId)[1]?.split("") || []
+      : clientId.split("");
 
   return (
     <View style={tw("px-4 w-[90%] mx-auto text-xs mt-8")}>
@@ -83,7 +88,8 @@ function Page15({
         <View
           key={i}
           style={tw(
-            `border-b mx-auto flex flex-row border-gray-200 ${i === 0 ? "border-t" : ""
+            `border-b mx-auto flex flex-row border-gray-200 ${
+              i === 0 ? "border-t" : ""
             }`
           )}
         >
@@ -112,7 +118,7 @@ function Page15({
             <View
               key={idx}
               style={tw(
-                `border-r border-gray-200 px-3 flex justify-center items-center`
+                `border-r border-gray-200 text-center min-w-[20px] flex justify-center items-center`
               )}
             >
               <Text>{digit}</Text>
@@ -134,7 +140,7 @@ function Page15({
             <View
               key={idx}
               style={tw(
-                `border-r border-gray-200 px-3 flex justify-center items-center`
+                `border-r border-gray-200 text-center min-w-[20px] flex justify-center items-center`
               )}
             >
               <Text>{digit}</Text>
@@ -164,12 +170,14 @@ function Page15({
       </Text>
 
       {/* Name & Signature */}
-      <Text style={tw(`leading-3 mt-8`)}>
-        Name: {firstName} {middleName} {lastName}
+      <Text style={tw(`leading-3 mt-8 `)}>
+        Name: {firstName}
+        {middleName ? ` ${middleName} ` : " "}
+        {lastName}
       </Text>
 
       <View style={tw(`flex flex-row gap-8 justify-start mt-4 items-center`)}>
-        <Text style={tw(`text-sm flex flex-col gap-5`)}>Signature:</Text>
+        <Text style={tw(` flex flex-col gap-5`)}>Signature:</Text>
         <Image
           src={signatureUrl || ""}
           style={tw(`w-40 h-20 object-contain`)}

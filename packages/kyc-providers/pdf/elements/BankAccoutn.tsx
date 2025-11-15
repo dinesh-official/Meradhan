@@ -38,7 +38,7 @@ function BankAccoutn({
             <CheckBoxRow label="Yes" checked={isPrimary} />
             <CheckBoxRow
               label="No"
-              checked={(isPrimary === false && !!accountNumber)}
+              checked={isPrimary === false && !!accountNumber}
             />
           </View>
         </View>
@@ -67,14 +67,22 @@ function BankAccoutn({
         <TextFiled
           title="Name as per Bank:"
           value={nameAsPerBank}
-          className="pr-20"
+          className="pr-5"
         />
-        <TextFiled title="MICR Code:" value={micrCode} className="pr-10" />
       </View>
 
       {/* Bank + Branch */}
       <TextFiled title="Bank Name:" value={bankName} className="pr-5" />
-      <TextFiled title="Branch:" value={branch} className="pr-5" />
+      <View style={tw(`flex flex-row gap-10 w-full`)}>
+        <TextFiled title="Branch:" value={branch || " "} className="pr-5" />
+        <View style={tw(`w-[200px]`)}>
+          <TextFiled
+            title="MICR Code:"
+            value={micrCode || " "}
+            className="pr-20"
+          />
+        </View>
+      </View>
     </View>
   );
 }

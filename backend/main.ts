@@ -1,8 +1,12 @@
 import { config } from "@config/config";
 import { ExpressServer } from "@core/bootstrap/server";
 import { checkConnectToDatabases } from "@core/database/database";
-import { PrometheusMonitorProvider, PrometheusResponseTimeMonitor } from "@modules/monitoring/prometheus";
+import {
+  PrometheusMonitorProvider,
+  PrometheusResponseTimeMonitor,
+} from "@modules/monitoring/prometheus";
 import bondRoute from "@resource/bonds/bond.routes";
+import commonApiRoutes from "@resource/common/routes";
 import auditLogsRouter from "@resource/crm/audit_logs/audit_logs_route";
 import crmAuthRoutes from "@resource/crm/auth/auth.route";
 import crmCustomersRoutes from "@resource/crm/customers/customers.routes";
@@ -21,58 +25,58 @@ import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";
 import dotenv from "dotenv";
 
-
-
 dotenv.config({ debug: false });
-const monitoring = new PrometheusMonitorProvider()
-const response_time_monitor = new PrometheusResponseTimeMonitor()
-
+const monitoring = new PrometheusMonitorProvider();
+const response_time_monitor = new PrometheusResponseTimeMonitor();
 
 // Initialize server
 const server = new ExpressServer(config.port, {
-    serverMonitor: monitoring,
-    responseTimeHandler(data) {
-        response_time_monitor.recordResponseTime(data.method, data.url, data.duration, data.statusCode);
-    },
+  serverMonitor: monitoring,
+  responseTimeHandler(data) {
+    response_time_monitor.recordResponseTime(
+      data.method,
+      data.url,
+      data.duration,
+      data.statusCode
+    );
+  },
 });
 logger.logInfo((await cacheStorage.isConnected()).toString());
 
 // Add router to server
 server.addRoutes([
-    // crm routes
-    crmAuthRoutes,
-    crmUsersRoutes,
-    crmCustomersRoutes,
-    leadsRoutes,
-    followUpRouter,
-    auditLogsRouter,
-    participantsRouter,
+  // crm routes
+  crmAuthRoutes,
+  crmUsersRoutes,
+  crmCustomersRoutes,
+  leadsRoutes,
+  followUpRouter,
+  auditLogsRouter,
+  participantsRouter,
+  commonApiRoutes,
+  // rfq routes
+  nseIsinRoute,
+  rfqMasterRouter,
 
-    // rfq routes 
-    nseIsinRoute,
-    rfqMasterRouter,
+  // customer routes
+  customerAuthRoutes,
+  customerProfileRoutes,
+  kycRoutes,
 
-    // customer routes
-    customerAuthRoutes,
-    customerProfileRoutes,
-    kycRoutes,
+  // bond routes
+  bondRoute,
 
-    // bond routes
-    bondRoute,
-
-    trashRoutes,
-    webAuditLogsRouter
+  trashRoutes,
+  webAuditLogsRouter,
 ]);
-
 
 // Connect to databases and start server
 checkConnectToDatabases()
-    .then(() => {
-        logger.logInfo("All databases connected successfully.");
-        server.start();
-    }).catch((error) => {
-        logger.logError("Error connecting to databases:", error);
-        process.exit(1);
-    });
-
-
+  .then(() => {
+    logger.logInfo("All databases connected successfully.");
+    server.start();
+  })
+  .catch((error) => {
+    logger.logError("Error connecting to databases:", error);
+    process.exit(1);
+  });

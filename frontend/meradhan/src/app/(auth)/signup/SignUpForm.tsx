@@ -19,7 +19,7 @@ import VerifyOtpPopUp from "./_components/VerifyOtpPopUp";
 import { cn } from "@/lib/utils";
 import { useSignUpAuthFlow } from "./_hooks/useSignUpAuthFlow";
 import { useSignUpFormDataState } from "./_hooks/useSignUpFormDataState";
- 
+
 // ✅ Reusable field wrapper with error display
 const Field: React.FC<{
   error?: string;
@@ -64,14 +64,7 @@ function SignUpForm() {
     <>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-8 lg:p-12">
         {/* Header */}
-        <h2
-          className={cn(
-            "text-2xl quicksand-medium",
-            
-          )}
-        >
-          Create an Account
-        </h2>
+        <h2 className={cn("text-2xl quicksand-medium")}>Create an Account</h2>
 
         {/* --- Form Fields --- */}
         <section className="gap-4 grid lg:grid-cols-2">
@@ -97,7 +90,7 @@ function SignUpForm() {
             />
           </Field>
 
-          <Field error={signUpFormError.email} className="lg:col-span-2" >
+          <Field error={signUpFormError.email} className="lg:col-span-2">
             <Input
               placeholder="Email ID*"
               className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
@@ -214,7 +207,14 @@ function SignUpForm() {
           <label className="flex gap-2">
             <Checkbox
               checkClass="text-white"
-              className="data-[state=checked]:bg-secondary mt-[2px] border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white"
+              checked={signUpFormData.isAcceptedWhatsapp}
+              onClick={() =>
+                handleSignUpFormChange(
+                  "isAcceptedWhatsapp",
+                  !signUpFormData.isAcceptedWhatsapp
+                )
+              }
+              className="data-[state=checked]:bg-secondary mt-0.5 border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white"
             />
             <span>I agree to receive communications via WhatsApp</span>
           </label>

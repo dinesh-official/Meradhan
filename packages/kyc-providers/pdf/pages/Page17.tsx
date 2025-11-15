@@ -2,6 +2,7 @@
 import { Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 import DemateAccount from "../elements/DemateAccount";
+import { splitInto8 } from "../dataMapper";
 
 type DematAccount = {
   defaultAccount?: boolean;
@@ -16,11 +17,7 @@ type DematAccount = {
   response?: any;
 };
 
-function Page17({
-  demates = [],
-}: {
-  demates?: DematAccount[];
-}) {
+function Page17({ demates = [] }: { demates?: DematAccount[] }) {
   // Always render at least 4 demat accounts (blank if missing)
   const nonDefaultDemates = demates.filter((e) => !e.defaultAccount);
   const maxAccounts = 4;
@@ -48,7 +45,9 @@ function Page17({
       </Text>
 
       <View style={tw("px-4")}>
-        <View style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-4")}>
+        <View
+          style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-4")}
+        >
           <Text style={tw("text-sm text-white font-[500] leading-[1px]")}>
             Additional Demat Account(s) Details
           </Text>
@@ -62,8 +61,16 @@ function Page17({
               depository={d.depository as any}
               dpName={d.depositoryParticipantName}
               nameAsPerPAN={d.accountHolderName}
-              dpId={d.dpId}
-              beneficiaryId={d.clientId}
+              dpId={
+                d.depository == "CDSL"
+                  ? splitInto8(d.clientId || "")?.[0] || ""
+                  : d.dpId
+              }
+              beneficiaryId={
+                d.depository == "CDSL"
+                  ? splitInto8(d.clientId || "")?.[1] || ""
+                  : d.clientId
+              }
               index={idx + 2}
             />
           ))}

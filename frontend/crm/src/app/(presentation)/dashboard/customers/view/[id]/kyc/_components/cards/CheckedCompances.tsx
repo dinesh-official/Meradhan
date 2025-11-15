@@ -68,6 +68,9 @@ export type Root = {
       checkTerms1: boolean;
       checkTerms2: boolean;
       dateOfBirth: string;
+      fetchedTimestamp: string;
+      confirmPanTimestamp: string;
+      confirmAadhaarTimestamp: string;
     };
     face: {
       url: string;
@@ -124,7 +127,7 @@ export type Root = {
         customer_identifier: string;
         reminder_registered: boolean;
       };
-      timestamp: string
+      timestamp: string;
     };
     sign: {
       url: string;
@@ -161,7 +164,7 @@ export type Root = {
         customer_identifier: string;
         reminder_registered: boolean;
       };
-      timestamp: string
+      timestamp: string;
     };
   };
   step_2: {
@@ -237,11 +240,6 @@ export type Root = {
 };
 
 function CheckedCompances({ data }: { data?: Root }) {
-
-
-
-
-
   return (
     <div className="scroll-mt-16" id="compliance">
       <Card>
@@ -251,38 +249,37 @@ function CheckedCompances({ data }: { data?: Root }) {
           </CardTitle>
         </CardHeader>
 
-
         <CardContent className="text-sm">
           <CardTitle className="text-sm">Compliance Confirmations</CardTitle>
           <p className="flex justify-start items-center gap-3 mt-3">
-            <Checkbox checked={data?.step_1?.pan?.checkTerms1 || false} /> I hereby
-            confirm that I am not a Politically Exposed Person (PEP) nor related
-            to any PEP
+            <Checkbox checked={data?.step_1?.pan?.checkTerms1 || false} /> I
+            hereby confirm that I am not a Politically Exposed Person (PEP) nor
+            related to any PEP
           </p>
           <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_1?.pan?.checkTerms2 || false} /> I hereby
-            confirm that I am not a person and/or entity debarred from accessing
-            the securities market or dealing in securities, as per directions or
-            orders issued by SEBI
+            <Checkbox checked={data?.step_1?.pan?.checkTerms2 || false} /> I
+            hereby confirm that I am not a person and/or entity debarred from
+            accessing the securities market or dealing in securities, as per
+            directions or orders issued by SEBI
           </p>
           <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_1?.pan?.isFatca || false} /> I confirm that I
-            am an Indian citizen and solely a tax resident of India, not of any
-            other country (FATCA)
-          </p>
-
-          <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_3?.[0]?.checkTerms || false} /> I hereby
-            authorise MeraDhan to verify the bank account details provided by
-            initiating a nominal amount transfer (₹1) to my account for
-            verification purposes
+            <Checkbox checked={data?.step_1?.pan?.isFatca || false} /> I confirm
+            that I am an Indian citizen and solely a tax resident of India, not
+            of any other country (FATCA)
           </p>
 
           <p className="flex justify-start items-center gap-3 mt-2">
-            <Checkbox checked={data?.step_4?.[0]?.checkTerms || false} />I hereby
-            authorize MeraDhan to verify my Demat account details provided
-            herein for the purpose of completing KYC and investment onboarding,
-            in accordance with applicable regulatory guidelines.
+            <Checkbox checked={data?.step_3?.[0]?.checkTerms || false} /> I
+            hereby authorise MeraDhan to verify the bank account details
+            provided by initiating a nominal amount transfer (₹1) to my account
+            for verification purposes
+          </p>
+
+          <p className="flex justify-start items-center gap-3 mt-2">
+            <Checkbox checked={data?.step_4?.[0]?.checkTerms || false} />I
+            hereby authorize MeraDhan to verify my Demat account details
+            provided herein for the purpose of completing KYC and investment
+            onboarding, in accordance with applicable regulatory guidelines.
           </p>
           <p className="flex justify-start items-start gap-3 mt-2">
             <Checkbox checked={data?.step_6?.terms || false} className="mt-1" />

@@ -9,30 +9,29 @@ import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";
 import * as auditlogs from "./lib/crm/auditlogs.schema";
 
-import * as Enum from "./lib/enums"
-import * as  bondsSchema from "./lib/bonds/bonds.schema";
-import * as  rfqSchema from "./lib/rfq/rfq.schema";
-
-
-
+import * as Enum from "./lib/enums";
+import * as bondsSchema from "./lib/bonds/bonds.schema";
+import * as rfqSchema from "./lib/rfq/rfq.schema";
+import * as contactSchema from "./lib/contact.schema";
 
 export const appSchema = {
-   auth: authSchema,
-   crm: {
-      user: userSchema,
-      leads: leadSchema,
-      auditlogs,
-      rfq: {
-         nse: {
-            isin: nseIsinSchema,
-            getParticipants
-         }
-      }
-   },
-   Enum,
-   customer: customerSchema,
-   kyc: customerKycSchema,
-   bonds: bondsSchema,
-   rfq: rfqSchema
+  auth: authSchema,
+  crm: {
+    user: userSchema,
+    leads: leadSchema,
+    auditlogs,
+    rfq: {
+      nse: {
+        isin: nseIsinSchema,
+        getParticipants,
+      },
+    },
+  },
+  Enum,
+  customer: customerSchema,
+  kyc: customerKycSchema,
+  bonds: bondsSchema,
+  rfq: rfqSchema,
 
+  contact: contactSchema,
 };

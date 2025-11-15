@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Text, View } from "@react-pdf/renderer";
 import React from "react";
+import { tw } from "../MdPdf";
 
 function TextList({
   children,
@@ -18,12 +19,11 @@ function TextList({
         width: "100%",
       }}
     >
-      <Text style={{ marginRight: 8, fontSize: fontSize || 10 }}>{count}</Text>
-      <Text
-        style={{ fontSize: fontSize || 10, lineHeight: 1.4, width: "100%" }}
-      >
-        {children}
+      <Text style={tw(`text-xs leading-[5px]  w-[18px] text-left`)}>
+        {count}
       </Text>
+      {/* <Text style={{ fontSize: fontSize || 9, lineHeight: 1.4, width: "100%" }}> */}
+      <Text style={tw(`text-xs leading-[5px] w-full`)}>{children}</Text>
     </View>
   );
 }

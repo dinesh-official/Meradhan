@@ -22,8 +22,8 @@ const TableData1 = [
 ];
 function Page37() {
   return (
-    <View style={tw(`w-[90%]  px-4  mx-auto mt-4 text-xs`)}>
-      <Text style={tw(`font-[600] text-center`)}>TARIFF SHEET</Text>
+    <View style={tw(`w-[90%]  px-4  mx-auto mt-6 text-xs`)}>
+      <Text style={tw(`font-[600] text-center text-sm`)}>TARIFF SHEET</Text>
       <Text style={tw(`text-center mt-3`)}>Tariff Sheet - Trading Account</Text>
       <Text style={tw(`leading-4 mt-8`)}>
         {`To
@@ -59,7 +59,10 @@ Lower Parel, Mumbai, Maharashtra 400013`}
       </View>
       {TableData1.map((e, i) => {
         return (
-          <View style={tw(`border-b mx-auto flex flex-row border-gray-200`)} key={i} >
+          <View
+            style={tw(`border-b mx-auto flex flex-row border-gray-200`)}
+            key={i}
+          >
             <View style={tw(`w-[40%] border-r border-gray-200 p-2  flex `)}>
               <Text style={{ lineHeight: 0.6 }}>{e.name}</Text>
             </View>

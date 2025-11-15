@@ -2,7 +2,6 @@ import { Image, Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
 
-
 function Page47({
   name = "",
   place = "",
@@ -67,20 +66,19 @@ function Page47({
         </TextList>
       </View>
       <View style={tw(`flex flex-row mt-8 justify-between`)}>
-        <View style={tw(`flex flex-col gap-3`)}>
+        <View style={tw(`flex flex-col gap-3 text-xs`)}>
           <Text>Name: {name}</Text>
           <Text>Place: {place}</Text>
           <Text>Date: {date}</Text>
         </View>
         <View style={tw(`flex flex-col gap-8 justify-center items-center`)}>
           <Image
-            src={signatureUrl ?  signatureUrl : ""}
+            src={signatureUrl ? signatureUrl : ""}
             style={tw(`w-40 h-24 object-contain`)}
           />
-          <Text style={tw(`text-sm flex flex-col gap-5`)}>Signature</Text>
+          <Text style={tw(`text-xs flex flex-col gap-5`)}>Signature</Text>
         </View>
       </View>
-      
     </View>
   );
 }

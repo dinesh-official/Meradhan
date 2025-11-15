@@ -48,7 +48,7 @@ const ContactUsPage = () => {
       {/* Contact Information */}
       <ContactInfoSection />
 
-      <div className="lg:mt-10">
+      <div className="lg:mt-28">
         {/* Addresses */}
         <AddressSection
           title={ADDRESSES.registered.title}

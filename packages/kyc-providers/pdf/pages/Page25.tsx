@@ -6,7 +6,11 @@ function Page25() {
   return (
     <View style={tw(`w-[90%]  px-4  mx-auto `)}>
       <View style={tw("bg-main py-2 rounded mt-6")}>
-        <Text style={tw("text-xs text-white font-[600] leading-[1px] text-center uppercase")}>
+        <Text
+          style={tw(
+            "text-sm text-white font-[600] leading-[1px] text-center uppercase"
+          )}
+        >
           Risk Disclosure Document
         </Text>
       </View>

@@ -59,13 +59,13 @@ const EmailOrPhoneInput = ({
   onChange,
   error,
   readOnly,
-  onEnter
+  onEnter,
 }: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   readOnly: boolean;
-  onEnter: () => void
+  onEnter: () => void;
 }) => (
   <div className="relative">
     <Input
@@ -81,7 +81,6 @@ const EmailOrPhoneInput = ({
         }
       }}
     />
-
 
     {/* Left Icon */}
     <div className="absolute inset-y-0 flex items-center ps-4 text-[#7fabd2] pointer-events-none start-0">
@@ -131,7 +130,11 @@ const VerifyModeSection = ({
       {state.type === "otp" && (
         <div className="flex flex-col gap-1.5">
           <p>Please enter OTP</p>
-          <SignInOtpInput otp={state.otp} setOtp={setOtp} />
+          <SignInOtpInput
+            otp={state.otp}
+            setOtp={setOtp}
+            onComplete={() => formManager.verifyOtpMutation.mutate()}
+          />
         </div>
       )}
 
@@ -152,8 +155,9 @@ const VerifyModeSection = ({
         ) : (
           // OTP mode options
           <p
-            className={`text-primary cursor-pointer ${!state.allowedResend && "opacity-60"
-              }`}
+            className={`text-primary cursor-pointer ${
+              !state.allowedResend && "opacity-60"
+            }`}
             onClick={state.allowedResend ? handleResendOtp : undefined}
           >
             {state.allowedResend ? "Resend OTP" : formManager.timer.time}

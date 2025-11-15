@@ -1,7 +1,6 @@
 import { Image, Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 
-
 function Page4(data: {
   name: string;
   date: string;

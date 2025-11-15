@@ -6,7 +6,7 @@ import TextList from "../elements/TextList";
 function Page28() {
   return (
     <View style={tw(`w-[90%]  px-4  mx-auto `)}>
-      <View style={tw(`flex flex-col gap-4 mt-3 text-xs leading-6`)}>
+      <View style={tw(`flex flex-col gap-4 mt-5 text-xs leading-6`)}>
         <Text style={tw(`font-[600]`)}>
           2. As far as Derivatives segments are concerned, please note and get
           yourself acquainted with the following additional features:-
@@ -15,13 +15,12 @@ function Page28() {
           2.1 Effect of "Leverage" or "Gearing":
         </Text>
         <Text>
-          <Text style={tw(`font-[600]`)}>1.4.2</Text> A "limit" order will be In
-          the derivatives market, the amount of margin is small relative to the
-          value of the derivatives contract so the transactions are 'leveraged'
-          or 'geared'. Derivatives trading, which is conducted with a relatively
-          small amount of margin, provides the possibility of great profit or
-          loss in comparison with the margin amount. But transactions in
-          derivatives carry a high degree of risk.
+          In the derivatives market, the amount of margin is small relative to
+          the value of the derivatives contract so the transactions are
+          'leveraged' or 'geared'. Derivatives trading, which is conducted with
+          a relatively small amount of margin, provides the possibility of great
+          profit or loss in comparison with the margin amount. But transactions
+          in derivatives carry a high degree of risk.
         </Text>
         <Text>
           You should therefore completely understand the following statements

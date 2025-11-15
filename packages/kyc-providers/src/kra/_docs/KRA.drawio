@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="DccA5eEPhXLFlxSvqVhr" name="Page-1">
-        <mxGraphModel dx="1813" dy="865" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+        <mxGraphModel dx="2235" dy="1052" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -47,13 +47,13 @@
                     <mxGeometry x="33.25" y="474" width="239.5" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="10" value="Modify Request" style="whiteSpace=wrap;html=1;fillColor=#647687;fontColor=#ffffff;strokeColor=#314354;" parent="1" vertex="1">
-                    <mxGeometry x="-325" y="606" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="-315.5" y="614" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="27" style="edgeStyle=none;html=1;" parent="1" source="11" target="22" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="11" value="Registr" style="whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" parent="1" vertex="1">
-                    <mxGeometry x="91" y="603" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="93" y="594" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="12" value="Time Line KRA.&lt;br&gt;CDSL&lt;div&gt;RFQ&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="-750" y="-129" width="196" height="133" as="geometry"/>
@@ -94,13 +94,13 @@
                 <mxCell id="36" value="What haped if mobile no is defrent?" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="644" y="-172" width="207" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="38" value="All Request Data Shoud Be UpperCase" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=#A50040;fillColor=#d80073;fontColor=#ffffff;" vertex="1" parent="1">
+                <mxCell id="38" value="All Request Data Shoud Be UpperCase" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=#A50040;fillColor=#d80073;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="588" y="119" width="228" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="39" value="Rqu to check.&lt;div&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="39" value="Rqu to check.&lt;div&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="570" y="416" width="91" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="40" value="Text" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="40" value="Text" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="560" y="529" width="40" height="26" as="geometry"/>
                 </mxCell>
             </root>

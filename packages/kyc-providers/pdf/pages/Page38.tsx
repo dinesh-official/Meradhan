@@ -16,7 +16,7 @@ function TableItem({
   return (
     <View
       style={tw(
-        `w-[10%] border-b border-gray-200 flex overflow-hidden text-wrap ${
+        `w-[10%] border-b border-gray-200 flex overflow-hidden text-wrap mt-5 ${
           showBorderRight ? "border-r" : ""
         } ${className}`
       )}

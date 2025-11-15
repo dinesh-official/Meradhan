@@ -3,12 +3,16 @@ import { tw } from "../MdPdf";
 
 function Page34() {
   return (
-    <View style={tw(`w-[90%]  px-4  mx-auto mt-6 text-xs flex flex-col gap-3 leading-6`)}>
+    <View
+      style={tw(
+        `w-[90%]  px-4  mx-auto mt-6 text-xs flex flex-col gap-3 leading-6`
+      )}
+    >
       <View style={tw("bg-main py-2 rounded ")}>
-        <Text style={tw("text-white font-[600] text-center uppercase")}>
+        <Text style={tw("text-white font-[600] text-sm text-center uppercase")}>
           Policies and Procedures
         </Text>
-      </View>  
+      </View>
       <Text style={tw(`font-[600] text-center`)}>
         POLICIES AND PROCEDURES AS PER SEBI CIRCULAR NO. MIRSD/ SE /CIR-19/2009
         DATED 3 DEC, 2009
@@ -82,6 +86,8 @@ function Page34() {
         branch/office through which the client trades or if the circumstances,
         so require, by radio broadcast/television broadcast / newspapers
         advertisements etc; or any other suitable or applicable mode or manner.
+        The client agrees that the postal department/the courier company
+        /newspaper company and the e-mail/voice mail service provider and
       </Text>
     </View>
   );

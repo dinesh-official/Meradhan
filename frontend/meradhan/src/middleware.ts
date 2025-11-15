@@ -1,37 +1,41 @@
-import { UserSessionDataResponse } from '@root/apiGateway';
-import { cookies } from 'next/headers';
-import { NextResponse, type NextRequest } from 'next/server';
-import { API_SERVER_URL } from './global/constants/domains';
+import { UserSessionDataResponse } from "@root/apiGateway";
+import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { API_SERVER_URL } from "./global/constants/domains";
 
 // Helper: Generate Basic Auth header
-const BASIC_AUTH_HEADER = "Basic " + Buffer.from("admin:admin").toString("base64");
-
+const BASIC_AUTH_HEADER =
+  "Basic " + Buffer.from("admin:admin").toString("base64");
 
 const fetchUserSession = async (token: string) => {
   try {
     const sessionResponse = fetch(API_SERVER_URL + "/customer/session", {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    }).then(res => res.json());
+    }).then((res) => res.json());
     return sessionResponse as Promise<UserSessionDataResponse>;
   } catch (error) {
     console.error("Error fetching user session:", error);
     throw error;
   }
-}
-
+};
 
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
   // ✅ 1. Basic Auth protection for production
-  if (process.env.NODE_ENV === "production" && !pathname.startsWith("/api") && !pathname.startsWith("/assets") && !pathname.startsWith("/_next")) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/assets") &&
+    !pathname.startsWith("/_next")
+  ) {
     const authHeader = request.headers.get("authorization");
 
     if (authHeader !== BASIC_AUTH_HEADER) {
@@ -56,7 +60,9 @@ export async function middleware(request: NextRequest) {
         await fetchUserSession(token);
         return NextResponse.next({ headers: requestHeaders });
       } catch (error) {
-        const response = NextResponse.redirect(new URL("/logout", origin), { headers: requestHeaders });
+        const response = NextResponse.redirect(new URL("/logout", origin), {
+          headers: requestHeaders,
+        });
         const allCookies = cookieStore.getAll();
         for (const cookie of allCookies) {
           response.cookies.set({
@@ -80,6 +86,6 @@ export async function middleware(request: NextRequest) {
 // ✅ Match all paths (you can narrow this if needed)
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)', // This means "match everything except api, static, image, favicon"
+    "/((?!_next/static|_next/image|favicon.ico).*)", // This means "match everything except api, static, image, favicon"
   ],
 };

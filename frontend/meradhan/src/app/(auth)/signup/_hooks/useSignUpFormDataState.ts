@@ -22,14 +22,12 @@ const formSchemaZod = z
     isAcceptedTerms: z.boolean().refine((val) => val === true, {
       message: "Must accept terms and conditions",
     }),
-    isAcceptedWhatsapp: z.boolean().default(false),
+    isAcceptedWhatsapp: z.boolean().default(true),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
-
-
 
 export type SignUPFormSchemaType = z.infer<typeof formSchemaZod>;
 
@@ -43,9 +41,8 @@ export const useSignUpFormDataState = () => {
     confirmPassword: "",
     userType: "INDIVIDUAL",
     isAcceptedTerms: false,
-    isAcceptedWhatsapp: false,
+    isAcceptedWhatsapp: true,
   });
-
 
   const [signUpFormError, setSignUpFormError] = useState<
     Record<keyof SignUPFormSchemaType, string>

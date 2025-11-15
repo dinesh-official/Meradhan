@@ -7,7 +7,7 @@ function Page36_2() {
   return (
     <View
       style={tw(
-        `w-[90%]  px-4  mx-auto  text-xs flex flex-col gap-2 leading-6`
+        `w-[90%]  px-4  mx-auto  text-xs flex flex-col gap-2 leading-6 mt-5`
       )}
     >
       <Text>

@@ -7,7 +7,7 @@ function Page31() {
   return (
     <View style={tw(`w-[90%]  px-4  mx-auto mt-6 text-xs flex flex-col gap-3`)}>
       <View style={tw("bg-main py-2 rounded ")}>
-        <Text style={tw("text-white font-[600] text-center uppercase")}>
+        <Text style={tw("text-white font-[600] text-sm text-center uppercase")}>
           Guidance Note
         </Text>
       </View>
@@ -71,7 +71,7 @@ function Page31() {
         broker, stating date, scrip, quantity, towards which bank/ demat account
         such money or securities deposited and from which bank/ demat account.
       </TextList>
-      <TextList count="11.">
+      <TextList count="12.">
         Note that facility of Trade Verification is available on stock
         exchanges’ websites, where details of trade as mentioned in the contract
         note may be verified. Where trade details on the website do not tally

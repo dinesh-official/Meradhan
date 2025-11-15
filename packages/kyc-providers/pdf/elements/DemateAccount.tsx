@@ -26,19 +26,22 @@ function DemateAccount({
   return (
     <View style={tw(`w-[90%] mx-auto flex flex-col gap-3 mt-4`)}>
       {/* Primary & Depository Row */}
-      <View style={tw(`flex justify-between flex-row text-xs`)}>
+      <View style={tw(`flex justify-between flex-row text-xs gap-10`)}>
         {/* Primary Account */}
-        <View style={tw(`flex flex-row gap-2`)}>
+        <View style={tw(`flex flex-row gap-2 w-full`)}>
           <Text style={tw(`font-bold`)}>{index}.</Text>
           <Text>Is it a Primary account?:</Text>
           <View style={tw(`flex flex-row gap-4`)}>
             <CheckBoxRow label="Yes" checked={isPrimary} />
-            <CheckBoxRow label="No" checked={dpId.trim().length != 0 ? !isPrimary : false} />
+            <CheckBoxRow
+              label="No"
+              checked={dpId.trim().length != 0 ? !isPrimary : false}
+            />
           </View>
         </View>
 
         {/* Depository */}
-        <View style={tw(`flex flex-row gap-2`)}>
+        <View style={tw(`flex flex-row gap-2 w-full`)}>
           <Text>Depository:</Text>
           <View style={tw(`flex flex-row gap-4`)}>
             <CheckBoxRow label="CDSL" checked={depository === "CDSL"} />

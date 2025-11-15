@@ -9,7 +9,7 @@ function Page18() {
       <View style={tw("bg-main py-2 rounded mt-4")}>
         <Text
           style={tw(
-            "text-xs text-white font-[600] leading-[1px] text-center uppercase"
+            "text-sm text-white font-[600] leading-[1px] text-center uppercase"
           )}
         >
           Rights and Obligations
@@ -28,8 +28,8 @@ function Page18() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          gap: 6,
-          marginTop: 5,
+          gap: 10,
+          marginTop: 15,
         }}
       >
         <TextList count="1.">

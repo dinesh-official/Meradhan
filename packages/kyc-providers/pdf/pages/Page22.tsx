@@ -11,8 +11,8 @@ function Page22() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          gap: 8,
-          marginTop: 10,
+          gap: 10,
+          marginTop: 15,
         }}
       >
         <TextList count="35.">

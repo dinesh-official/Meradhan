@@ -27,11 +27,11 @@ function page() {
                 </Link>
               </div>
               <div className="text-center">
-                <Link href={`#`} className="text-primary">
+                <Link href={`/privacy-policy`} className="text-primary">
                   Privacy Policy
                 </Link>{" "}
                 |{" "}
-                <Link href={`#`} className="text-primary">
+                <Link href={`/terms-of-use`} className="text-primary">
                   Terms of Use
                 </Link>
               </div>

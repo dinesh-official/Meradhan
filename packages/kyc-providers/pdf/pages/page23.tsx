@@ -11,8 +11,8 @@ function Page23() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          gap: 6,
-          marginTop: 5,
+          gap: 10,
+          marginTop: 15,
         }}
       >
         <Text style={tw(`font-bold uppercase text-xs`)}>
@@ -47,12 +47,8 @@ function Page23() {
           Regulations and circulars/notices issued thereunder of the
           Exchanges/SEBI.
         </TextList>
+
         <TextList count="47.">
-          The client shall note that non-receipt of bounced mail notification by
-          the stock broker shall amount to delivery of the contract note at the
-          e-mail ID of the client.
-        </TextList>
-        <TextList count="48.">
           All additional voluntary clauses/document added by the stock broker
           should not be in contravention with
           rules/regulations/notices/circulars of Exchanges/SEBI. Any changes in
@@ -60,7 +56,7 @@ function Page23() {
           15 days. Any changes in the rights and obligations which are specified
           by Exchanges/SEBI shall also be brought to the notice of the clients.
         </TextList>
-        <TextList count="49.">
+        <TextList count="48.">
           If the rights and obligations of the parties hereto are altered by
           virtue of change in Rules and regulations of SEBI or Bye-laws, Rules
           and Regulations of the relevant stock Exchanges where the trade is
@@ -69,7 +65,7 @@ function Page23() {
           mentioned in this document.
         </TextList>
       </View>
-      <View style={tw(`border-t border-gray-200 w-full my-4`)} />
+      <View style={tw(`border-t border-gray-200 w-full my-6`)} />
       <Text style={tw(`font-bold uppercase text-xs text-center `)}>
         INTERNET & WIRELESS TECHNOLOGY BASED TRADING FACILITY PROVIDED BY STOCK
         BROKERS TO CLIENT
@@ -84,8 +80,8 @@ function Page23() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          gap: 12,
-          marginTop: 10,
+          gap: 10,
+          marginTop: 15,
         }}
       >
         <TextList count="1.">

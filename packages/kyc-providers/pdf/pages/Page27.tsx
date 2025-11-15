@@ -4,8 +4,8 @@ import { tw } from "../MdPdf";
 
 function Page27() {
   return (
-    <View style={tw(`w-[90%]  px-4  mx-auto mt-6`)}>
-      <View style={tw(`flex flex-col gap-4 mt-3 text-xs leading-6`)}>
+    <View style={tw(`w-[90%]  px-4  mx-auto mt-4`)}>
+      <View style={tw(`flex flex-col gap-3 mt-3 text-xs leading-6`)}>
         <Text>
           <Text style={tw(`font-[500]`)}>1.4.2</Text> A "limit" order will be
           executed only at the "limit" price specified for the order or a better
@@ -27,7 +27,7 @@ function Page27() {
           pre-determined price, in which case, the risk of such order not
           getting executed arises, just as with a regular limit order.
         </Text>
-        <Text style={tw(`font-[600] uppercase text-xs`)}>
+        <Text style={tw(`font-[600]  text-xs`)}>
           1.5 Risk of News Announcements:
         </Text>
 
@@ -38,9 +38,7 @@ function Page27() {
           positive or negative movement in the price of the security / contract.
         </Text>
 
-        <Text style={tw(`font-[600] uppercase text-xs`)}>
-          1.6 Risk of Rumors:
-        </Text>
+        <Text style={tw(`font-[600]  text-xs`)}>1.6 Risk of Rumors:</Text>
 
         <Text>
           Rumors about companies / currencies at times float in the market
@@ -48,7 +46,7 @@ function Page27() {
           investors should be wary of and should desist from acting on rumors.
         </Text>
 
-        <Text style={tw(`font-[600] uppercase text-xs`)}>1.7 System Risk:</Text>
+        <Text style={tw(`font-[600]  text-xs`)}>1.7 System Risk:</Text>
 
         <Text>
           High volume trading will frequently occur at the market opening and
@@ -56,23 +54,22 @@ function Page27() {
           the day. These may cause delays in order execution or confirmation.
         </Text>
         <Text>
-          <Text style={tw(`font-[600] uppercase text-xs`)}>1.7.1</Text> Buying or
-          During periods of volatility, on account of market participants
-          continuously modifying their order quantity or prices or placing fresh
-          orders, there may be delays in order execution and its confirmations.
+          <Text style={tw(`font-[600]  text-xs`)}>1.7.1</Text> During periods of
+          volatility, on account of market participants continuously modifying
+          their order quantity or prices or placing fresh orders, there may be
+          delays in order execution and its confirmations.
         </Text>
 
         <Text>
-          <Text style={tw(`font-[600] uppercase text-xs`)}>1.7.2</Text> Buying or
-          1.7.2 Under certain market conditions, it may be difficult or
-          impossible to liquidate a position in the market at a reasonable price
-          or at all, when there are no outstanding orders either on the buy side
-          or the sell side, or if trading is halted in a security / derivatives
-          contract due to any action on account of unusual trading activity or
-          security / derivatives contract hitting circuit filters or for any
-          other reason.
+          <Text style={tw(`font-[600]  text-xs`)}>1.7.2</Text> Under certain
+          market conditions, it may be difficult or impossible to liquidate a
+          position in the market at a reasonable price or at all, when there are
+          no outstanding orders either on the buy side or the sell side, or if
+          trading is halted in a security / derivatives contract due to any
+          action on account of unusual trading activity or security /
+          derivatives contract hitting circuit filters or for any other reason.
         </Text>
-        <Text style={tw(`font-[600] uppercase text-xs`)}>
+        <Text style={tw(`font-[600]  text-xs`)}>
           1.8 System/Network Congestion:
         </Text>
 

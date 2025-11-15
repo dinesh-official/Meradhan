@@ -4,14 +4,12 @@ import { tw } from "../MdPdf";
 
 function Page26() {
   return (
-    <View style={tw(`w-[90%]  px-4  mx-auto `)}>
-      <Text style={tw(`font-[600] uppercase text-xs `)}>
-        1. BASIC RISKS:
-      </Text>
-      <Text style={tw(`font-[600] uppercase text-xs mt-3`)}>
+    <View style={tw(`w-[90%]  px-4  mx-auto mt-[10px]`)}>
+      <Text style={tw(`font-[600] uppercase text-xs `)}>1. BASIC RISKS:</Text>
+      <Text style={tw(`font-[600]  text-xs mt-4`)}>
         1.1 Risk of Higher Volatility:
       </Text>
-      <View style={tw(`flex flex-col gap-3 mt-3 text-xs leading-6`)}>
+      <View style={tw(`flex flex-col gap-3 mt-4  text-xs leading-6`)}>
         <Text>
           Volatility refers to the dynamic changes in price that a
           security/derivatives contract undergoes when trading activity
@@ -25,7 +23,7 @@ function Page26() {
           change substantially thereafter, resulting in notional or real losses.
         </Text>
 
-        <Text style={tw(`font-[600] uppercase text-xs`)}>
+        <Text style={tw(`font-[600]  text-xs`)}>
           1.2 Risk of Lower Liquidity:
         </Text>
 
@@ -46,16 +44,16 @@ function Page26() {
         </Text>
 
         <Text>
-          <Text style={tw(`font-[600] uppercase text-xs`)}>1.2.1</Text> Buying or
-          selling securities / derivatives contracts as part of a day trading
-          strategy may also result into losses, because in such a situation,
-          securities / derivatives contracts may have to be sold / purchased at
-          low / high prices, compared to the expected price levels, so as not to
-          have any open position or obligation to deliver or receive a security
-          / derivatives contract.
+          <Text style={tw(`font-[600]  text-xs`)}>1.2.1</Text> Buying or selling
+          securities / derivatives contracts as part of a day trading strategy
+          may also result into losses, because in such a situation, securities /
+          derivatives contracts may have to be sold / purchased at low / high
+          prices, compared to the expected price levels, so as not to have any
+          open position or obligation to deliver or receive a security /
+          derivatives contract.
         </Text>
 
-        <Text style={tw(`font-[600] uppercase text-xs`)}>
+        <Text style={tw(`font-[600]  text-xs`)}>
           1.3 Risk of Wider Spreads:
         </Text>
 
@@ -68,22 +66,7 @@ function Page26() {
           contracts. This in turn will hamper better price formation.
         </Text>
 
-        <Text style={tw(`font-[600] uppercase text-xs`)}>
-          1.4 Risk-reducing orders:
-        </Text>
-
-        <Text>
-          Spread refers to the difference in best buy price and best sell price.
-          It represents the differential between the price of buying a security
-          / derivatives contract and immediately selling it or vice versa. Lower
-          liquidity and higher volatility may result in wider than normal
-          spreads for less liquid or illiquid securities / derivatives
-          contracts. This in turn will hamper better price formation.
-        </Text>
-
-        <Text style={tw(`font-[600] uppercase text-xs`)}>
-          1.4 Risk-reducing orders:
-        </Text>
+        <Text style={tw(`font-[600]  text-xs`)}>1.4 Risk-reducing orders:</Text>
 
         <Text>
           The placing of orders (e.g., "stop loss” orders, or "limit" orders)
@@ -93,15 +76,14 @@ function Page26() {
         </Text>
 
         <Text>
-          <Text style={tw(`font-[600] uppercase text-xs`)}>1.4.1</Text> Buying or
-          A "market" order will be executed promptly, subject to availability of
-          orders on opposite side, without regard to price and that, while the
-          customer may receive a prompt execution of a "market" order, the
-          execution may be at available prices of outstanding orders, which
-          satisfy the order quantity, on price time priority. It may be
-          understood that these prices may be significantly different from the
-          last traded price or the best price in that security / derivatives
-          contract.
+          <Text style={tw(`font-[600]  text-xs`)}>1.4.1</Text> A "market" order
+          will be executed promptly, subject to availability of orders on
+          opposite side, without regard to price and that, while the customer
+          may receive a prompt execution of a "market" order, the execution may
+          be at available prices of outstanding orders, which satisfy the order
+          quantity, on price time priority. It may be understood that these
+          prices may be significantly different from the last traded price or
+          the best price in that security / derivatives contract. contract.
         </Text>
       </View>
     </View>

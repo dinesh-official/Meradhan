@@ -11,7 +11,7 @@ function Page19() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          gap: 8,
+          gap: 10,
           marginTop: 20,
         }}
       >
@@ -39,13 +39,20 @@ function Page19() {
           TRANSACTIONS AND SETTLEMENTS
         </Text>
         <TextList count="13.">
+          The client shall give any order for buy or sell of a
+          security/derivatives contract in writing or in such form or manner, as
+          may be mutually agreed between the client and the stock broker. The
+          stock broker shall ensure to place orders and execute the trades of
+          the client, only in the Unique Client Code assigned to that client.
+        </TextList>
+        <TextList count="14.">
           The stock broker shall inform the client and keep him apprised about
           trading/settlement cycles, delivery/payment schedules, any changes
           therein from time to time, and it shall be the responsibility in turn
           of the client to comply with such schedules/procedures of the relevant
           stock exchange where the trade is executed.
         </TextList>
-        <TextList count="14.">
+        <TextList count="15.">
           The stock broker shall ensure that the money/securities deposited by
           the client shall be kept in a separate account, distinct from his/its
           own account or account of any other client and shall not be used by
@@ -54,13 +61,13 @@ function Page19() {
           circulars, notices, guidelines of SEBI and/or Rules, Regulations,
           Bye-laws, circulars and notices of Exchange.
         </TextList>
-        <TextList count="15.">
+        <TextList count="16.">
           Where the Exchange(s) cancels trade(s) suo moto all such trades
           including the trade/s done on behalf of the client shall ipso facto
           stand cancelled, stock broker shall be entitled to cancel the
           respective contract(s) with client(s).
         </TextList>
-        <TextList count="16.">
+        <TextList count="17.">
           The transactions executed on the Exchange are subject to Rules,
           Byelaws and Regulations and circulars/notices issued thereunder of the
           Exchanges where the trade is executed and all parties to such trade

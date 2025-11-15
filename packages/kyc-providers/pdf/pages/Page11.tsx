@@ -5,7 +5,6 @@ import { CheckBoxRow } from "../elements/CheckBoxRow";
 import TextFiled from "../elements/TextFiled";
 import { splitInto8 } from "../dataMapper";
 
-
 function Page11({
   primaryBank,
   primaryDemat,
@@ -33,7 +32,7 @@ function Page11({
 }) {
   return (
     <>
-      <Text style={tw(`font-bold uppercase text-[7px] text-center pt-6`)}>
+      <Text style={tw(`font-bold uppercase text-[9px] text-center pt-6`)}>
         PART B - TRADING ACCOUNT RELATED INFORMATION
       </Text>
 
@@ -48,8 +47,8 @@ function Page11({
         </View>
 
         <View style={tw(`w-[90%] mx-auto flex flex-col gap-3 mt-4`)}>
-          <View style={tw(`flex justify-between flex-row text-xs`)}>
-            <View style={tw(`flex flex-row gap-2`)}>
+          <View style={tw(`flex justify-between flex-row text-xs gap-10`)}>
+            <View style={tw(`flex flex-row gap-2 w-full`)}>
               <Text style={tw(`font-bold`)}>1.</Text>
               <Text>Is it a Primary account?:</Text>
               <View style={tw(`flex flex-row gap-4`)}>
@@ -57,7 +56,7 @@ function Page11({
                 <CheckBoxRow label="No" checked={!primaryBank?.isPrimary} />
               </View>
             </View>
-            <View style={tw(`flex flex-row gap-2`)}>
+            <View style={tw(`flex flex-row gap-2 w-full`)}>
               <Text>Account Type:</Text>
               <View style={tw(`flex flex-row gap-4`)}>
                 <CheckBoxRow
@@ -68,10 +67,10 @@ function Page11({
                   label="Current"
                   checked={primaryBank?.accountType === "current"}
                 />
-                {/* <CheckBoxRow
+                <CheckBoxRow
                   label="Others"
                   checked={primaryBank?.accountType == "others"}
-                /> */}
+                />
               </View>
             </View>
           </View>
@@ -119,16 +118,18 @@ function Page11({
       {/* DEMAT ACCOUNT SECTION */}
       <View style={tw("px-4")}>
         <View
-          style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-4")}
+          style={tw(
+            "bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded gap-3 mt-4"
+          )}
         >
           <Text style={tw("text-xs text-white font-[500] leading-[1px]")}>
             2. Primary Demat Account Details (will be used for all transactions)
           </Text>
         </View>
 
-        <View style={tw(`w-[90%] mx-auto flex flex-col gap-3 mt-4`)}>
-          <View style={tw(`flex justify-between flex-row text-xs`)}>
-            <View style={tw(`flex flex-row gap-2`)}>
+        <View style={tw(`w-[90%] mx-auto flex flex-col gap-3  mt-4`)}>
+          <View style={tw(`flex justify-between flex-row text-xs  gap-10`)}>
+            <View style={tw(`flex flex-row gap-2 w-full`)}>
               <Text style={tw(`font-bold`)}>1.</Text>
               <Text>Is it a Primary account?:</Text>
               <View style={tw(`flex flex-row gap-4`)}>
@@ -136,7 +137,7 @@ function Page11({
                 <CheckBoxRow label="No" checked={!primaryDemat?.isPrimary} />
               </View>
             </View>
-            <View style={tw(`flex flex-row gap-2`)}>
+            <View style={tw(`flex flex-row gap-2 w-full `)}>
               <Text>Depository:</Text>
               <View style={tw(`flex flex-row gap-4`)}>
                 <CheckBoxRow
@@ -164,12 +165,20 @@ function Page11({
           <View style={tw(`flex flex-row gap-10 w-full`)}>
             <TextFiled
               title="DP ID:"
-              value={(primaryDemat?.depository == "CDSL" ? (splitInto8(primaryDemat.beneficiaryId)?.[0] || "") : primaryDemat?.dpId) || ""}
+              value={
+                (primaryDemat?.depository == "CDSL"
+                  ? splitInto8(primaryDemat.beneficiaryId)?.[0] || ""
+                  : primaryDemat?.dpId) || ""
+              }
               className="pr-5"
             />
             <TextFiled
               title="Beneficiary ID:"
-              value={(primaryDemat?.depository == "CDSL" ? (splitInto8(primaryDemat.beneficiaryId)?.[0] || "") : primaryDemat?.beneficiaryId) || ""}
+              value={
+                (primaryDemat?.depository == "CDSL"
+                  ? splitInto8(primaryDemat.beneficiaryId)?.[1] || ""
+                  : primaryDemat?.beneficiaryId) || ""
+              }
               className="pr-10"
             />
           </View>

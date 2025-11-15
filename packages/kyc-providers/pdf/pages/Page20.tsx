@@ -11,8 +11,8 @@ function Page20() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          gap: 6,
-          marginTop: 5,
+          gap: 10,
+          marginTop: 15,
         }}
       >
         <Text style={tw(`font-bold uppercase text-xs`)}>

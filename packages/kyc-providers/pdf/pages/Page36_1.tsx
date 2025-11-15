@@ -7,7 +7,7 @@ function Page36_1() {
   return (
     <View
       style={tw(
-        `w-[90%]  px-4  mx-auto  text-xs flex flex-col gap-2 leading-6`
+        `w-[90%]  px-4  mx-auto  text-xs flex flex-col gap-3 leading-6 mt-5`
       )}
     >
       <Text>
@@ -18,7 +18,7 @@ function Page36_1() {
         marking it to market or by any other method as the stock broker may deem
         fit in its absolute discretion.
       </Text>
-      <TextList count="b.">
+      <Text style={tw(`text-xs leading-[5px]`)}>
         The stock broker has the right but not the obligation, to cancel all
         pending orders and to sell/close/liquidate all open positions/
         securities/shares at the pre-defined square off time or when Mark to
@@ -35,7 +35,7 @@ function Page36_1() {
         penalties and charges levied by exchange in actual and losses, if any.
         Without prejudice to the foregoing, theclient shall also be solely
         liable for all and any penalties and charges levied by the exchange(s).
-      </TextList>
+      </Text>
 
       <Text>
         The stock broker is entitled to prescribe the date and time by which the
@@ -56,7 +56,7 @@ function Page36_1() {
       <TextList count="i.">
         To withhold any payout of funds/securities.
       </TextList>
-      <TextList count="i.">
+      <TextList count="ii.">
         To withhold/disable the trading/dealing facility to the client.
       </TextList>
       <TextList count="iii.">

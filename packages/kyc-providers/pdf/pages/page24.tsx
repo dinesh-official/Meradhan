@@ -10,8 +10,8 @@ function Page24() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-start",
-          gap: 12,
-          marginTop: 20,
+          gap: 10,
+          marginTop: 15,
         }}
       >
         <TextList count="3.">

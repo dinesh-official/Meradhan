@@ -7,10 +7,10 @@ function Page36() {
   return (
     <View
       style={tw(
-        `w-[90%]  px-4  mx-auto  text-xs flex flex-col gap-4 leading-6`
+        `w-[90%]  px-4  mx-auto  text-xs flex flex-col gap-3 leading-6 mt-5`
       )}
     >
-      <Text>
+      <Text style={tw(`pl-[18px]`)}>
         admitted to dealings on the Capital Market segment of the Exchange shall
         be 2.5 % of the contract price exclusive of statutory levies. It is
         hereby further clarified that where the sale/purchase value of a share

@@ -11,8 +11,8 @@ function Page6({ eAaDhar }: { eAaDhar: string }) {
           uri: `data:image/png;base64,${eAaDhar}`,
         }}
       />
-      <View style={tw(`w-20 h-20 bg-white absolute left-28 top-8`)} />
-      <View style={tw(`w-96 h-20 bg-white absolute left-42 bottom-8`)} />
+      {/* <View style={tw(`w-20 h-20 bg-white absolute left-28 top-8`)} />
+      <View style={tw(`w-96 h-20 bg-white absolute left-42 bottom-8`)} /> */}
     </View>
   );
 }

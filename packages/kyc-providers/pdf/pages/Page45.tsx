@@ -7,7 +7,7 @@ function Page45() {
   return (
     <View
       style={tw(
-        `w-[90%] px-4 mx-auto  text-xs flex flex-col gap-3 leading-6`
+        `w-[90%] px-4 mx-auto  text-xs flex flex-col gap-3 leading-6 mt-5`
       )}
     >
       <Text style={tw(`font-[600]`)}>5. Not Debarred by Any Regulator</Text>

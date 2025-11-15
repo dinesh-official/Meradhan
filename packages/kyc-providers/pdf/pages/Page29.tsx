@@ -5,8 +5,8 @@ import TextList from "../elements/TextList";
 
 function Page29() {
   return (
-    <View style={tw(`w-[90%]  px-4  mx-auto mt-1`)}>
-      <View style={tw(`flex flex-col gap-2  text-xs leading-6`)}>
+    <View style={tw(`w-[90%]  px-4  mx-auto mt-5`)}>
+      <View style={tw(`flex flex-col gap-3  text-xs leading-6`)}>
         <TextList count="3.">
           Currency prices are highly volatile. Price movements for currencies
           are influenced by, among other things: changing supply-demand
@@ -67,14 +67,6 @@ function Page29() {
           someone who is experienced and knowledgeable with respect to the risks
           and potential rewards of combination transactions under various market
           circumstances.
-        </TextList>
-        <Text style={tw(`font-[600]`)}>2.2 Currency specific risks:</Text>
-        <TextList count="1.">
-          The profit or loss in transactions in foreign currency-denominated
-          contracts, whether they are traded in your own or another
-          jurisdiction, will be affected by fluctuations in currency rates where
-          there is a need to convert from the currency denomination of the
-          contract to another currency.
         </TextList>
 
         <Text style={tw(`font-[600]`)}>

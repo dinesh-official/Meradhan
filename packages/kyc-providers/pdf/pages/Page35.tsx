@@ -7,11 +7,11 @@ function Page35() {
   return (
     <View
       style={tw(
-        `w-[90%]  px-4  mx-auto text-xs flex flex-col gap-3 leading-6`
+        `w-[90%]  px-4  mx-auto text-xs flex flex-col gap-3 leading-6 mt-5`
       )}
     >
       <Text>
-        other service providers shall be the agent of the client and the
+        such other service providers shall be the agent of the client and the
         delivery shall be complete when communication is given to the postal
         department/the courier company/the e-mail/voice mail service provider,
         etc. by the stock broker and the client agrees never to challenge the

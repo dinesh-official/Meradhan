@@ -2,6 +2,6 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'Backend'
+  - job_name: "Backend"
     static_configs:
-      - targets: ['3.110.126.202:4000']
+      - targets: ["3.110.126.202:4000"]

@@ -7,10 +7,10 @@ function Page43() {
   return (
     <View
       style={tw(
-        `w-[90%] px-4 mx-auto mt-4 text-xs flex flex-col gap-3 leading-6`
+        `w-[90%] px-4 mx-auto mt-5 text-xs flex flex-col gap-3 leading-6`
       )}
     >
-      <Text style={tw(`text-center font-[600] uppercase mt-3 mb-3`)}>
+      <Text style={tw(`text-center font-[600] uppercase text-sm mt-3 mb-3`)}>
         General Terms and Conditions and Other Authorisation
       </Text>
       <View style={tw(`flex flex-row mt-3 justify-between`)}>
@@ -38,7 +38,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
         Exchange Platforms, including the Request for Quote (RFQ) platform of
         NSE (hereinafter collectively referred to as “Exchange Platforms”).
       </Text>
-      <TextList fontSize={9} count="a.">
+      <TextList count="a.">
         I request you to register me as your client for participation in the
         debt transaction facilities offered by the Exchange Platforms. I shall
         ensure compliance with the requirements as may be prescribed from time
@@ -47,7 +47,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
         stock broking, and confirm that such details remain true and unchanged
         as on date.
       </TextList>
-      <TextList fontSize={9} count="b.">
+      <TextList count="b.">
         I understand that, at present, stock exchanges are using Real-Time Gross
         Settlement (RTGS) channel as a mode of settlement for trades executed on
         the RFQ platform. I also understand that settlement of trades executed
@@ -55,16 +55,16 @@ Lower Parel, Mumbai, Maharashtra 400013`}
         by banks or payment aggregators duly authorised by the Reserve Bank of
         India, as may be permitted from time to time.
       </TextList>
-      <TextList fontSize={9} count="c.">
+      <TextList count="c.">
         I shall read and fully understand the contents of the Scheme Related
         Documents, Key Information Memoranda, and any addenda prior to
         transacting in Debt Products.
       </TextList>
-      <TextList fontSize={9} count="d.">
+      <TextList count="d.">
         I acknowledge that investments in debt instruments are subject to market
         risks, and I shall be solely responsible for all such risks.
       </TextList>
-      <TextList fontSize={9} count="e.">
+      <TextList count="e.">
         I shall remain liable for any loss (including opportunity loss or
         notional loss), charges, costs, or expenses incurred by me, including
         but not limited to loss relating to Net Asset Value (NAV) due to any
@@ -74,7 +74,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
         its directors, employees, associates, affiliates, or group entities in
         this regard.
       </TextList>
-      <TextList fontSize={9} count="f.">
+      <TextList count="f.">
         I understand and agree that the role of BondNest is limited to providing
         the online platform to clients. The underlying services and products are
         offered by the respective Corporates, Institutions, or Trusts. I further
@@ -82,13 +82,12 @@ Lower Parel, Mumbai, Maharashtra 400013`}
         differences in price data or execution delays arising out of
         connectivity or system issues.
       </TextList>
-      <TextList fontSize={9} count="g.">
+      <TextList count="g.">
         I understand and agree that BondNest is an online bond platform only,
         and does not provide investment advice. Neither BondNest nor any of its
         associates, affiliates, or group entities provide recommendations,
         advisory, or solicitation for transactions in debt instruments.
       </TextList>
-      
     </View>
   );
 }

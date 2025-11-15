@@ -7,7 +7,7 @@ function Page46() {
   return (
     <View
       style={tw(
-        `w-[90%] px-4 mx-auto  text-xs flex flex-col gap-2 leading-6`
+        `w-[90%] px-4 mx-auto  text-xs flex flex-col gap-2 leading-6 mt-5`
       )}
     >
       <TextList count="c.">
@@ -72,7 +72,7 @@ function Page46() {
         confirm that my representatives and related parties under my direction
         or control shall adhere to the same.
       </TextList>
-      <Text style={tw(`pl-4`)}>
+      <Text style={tw(`pl-[18px]`)}>
         For the purposes of this clause, it is immaterial whether the bribery or
         corruption is:
       </Text>

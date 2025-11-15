@@ -10,10 +10,12 @@ function SignInOtpInput({
   otp,
   setOtp,
   length = 4,
+  onComplete,
 }: {
   otp: string;
-    setOtp: (otp: string) => void;
+  setOtp: (otp: string) => void;
   length?: number;
+  onComplete?: () => void;
 }) {
   return (
     <InputOTP
@@ -22,6 +24,7 @@ function SignInOtpInput({
       pattern={REGEXP_ONLY_DIGITS}
       value={otp}
       onChange={setOtp}
+      onComplete={onComplete}
     >
       <InputOTPGroup className="flex justify-between items-center gap-3 sm:gap-5 w-full font-medium">
         {Array.from({ length }).map((_, index) => (

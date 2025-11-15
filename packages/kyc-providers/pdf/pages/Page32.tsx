@@ -6,7 +6,7 @@ import TextList from "../elements/TextList";
 function Page32() {
   return (
     <View
-      style={tw(`w-[90%]  px-4  mx-auto  text-xs flex flex-col gap-2 `)}
+      style={tw(`w-[90%]  px-4  mx-auto mt-5  text-xs flex flex-col gap-3 `)}
     >
       <TextList count="13.">
         In case you have given specific authorization for maintaining running

@@ -7,9 +7,9 @@ function Page36_3() {
   return (
     <View
       style={tw(
-        `w-[90%]  px-4  mx-auto mt-1 text-xs flex flex-col gap-3 leading-6`
+        `w-[90%]  px-4  mx-auto mt-1 text-xs flex flex-col gap-3 leading-6 mt-5`
       )}
-    > 
+    >
       <TextList count="vii.">
         If the Client have taken or suffered to be taken any action for its
         reorganization, liquidation or dissolution;

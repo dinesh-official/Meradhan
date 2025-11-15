@@ -22,19 +22,19 @@ import * as auditlogs from "./src/core/api/crm/auditlogs/auditlogs.api";
 import * as participants from "./src/core/api/crm/RFQ/nse/participants.api";
 import { RfqIsinApi } from "./src/core/api/crm/RFQ/nse/isin.api";
 
-import * as customerAuthApi from "./src/core/api/meradhan/customerauth.api"
-import * as bondsApi from "./src/core/api/bonds/bonds.api"
+import * as customerAuthApi from "./src/core/api/meradhan/customerauth.api";
+import * as bondsApi from "./src/core/api/bonds/bonds.api";
 export type * from "./src/core/api/bonds/bonds.response";
 
 export type * from "./src/core/api/meradhan/customerauth.response";
 
-import * as customerKycApi from "./src/core/api/meradhan/kyc/Kyc.api"
+import * as customerKycApi from "./src/core/api/meradhan/kyc/Kyc.api";
 export type * from "./src/core/api/meradhan/kyc/Kyc.response";
 
+import * as trash from "./src/core/api/trash/trash.api";
+import * as commonApi from "./src/core/api/meradhan/common.api";
 
-import * as trash from "./src/core/api/trash/trash.api"
 export type * from "./src/core/api/trash/trash.response";
-
 
 export default {
   auth,
@@ -46,13 +46,14 @@ export default {
     auditlogs,
     rfq: {
       participants,
-      RfqIsinApi
-    }
+      RfqIsinApi,
+    },
   },
   meradhan: {
     customerAuthApi,
-    customerKycApi
+    customerKycApi,
+    commonApi,
   },
   bondsApi,
-  trash
+  trash,
 };

@@ -1,7 +1,6 @@
 import { Image, Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 
-
 function Page48({
   name = "",
   place = "",
@@ -15,9 +14,9 @@ function Page48({
 }) {
   return (
     <View style={tw(`w-[90%] px-4 mx-auto mt-4 text-xs flex flex-col gap-3`)}>
-      <Text style={tw(`text-center font-[600] uppercase mt-3 mb-3`)}>
+      <Text style={tw(`text-center font-[600] uppercase mt-3 mb-3 text-sm`)}>
         ACKNOWLEDGEMENT
-      </Text>                                                                                                                                                                                         
+      </Text>
       <View style={tw(`flex flex-row mt-3 justify-between`)}>
         <Text style={tw(`leading-3 `)}>
           {`To,
@@ -28,7 +27,7 @@ One World Centre, Senapati Bapat Marg,
 Lower Parel, Mumbai, Maharashtra 400013`}
         </Text>
       </View>
-      <Text>
+      <Text style={tw(`leading-[5px]`)}>
         I acknowledge having received the following documents and confirm that I
         have read and understood all their clauses.
       </Text>
@@ -50,7 +49,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
           "Guidance Note - Do's and Dont's for trading on the Exchange(s) for investors",
           "Policies and Procedures ",
           "Tariff Sheet",
-          "Nomination Declaration Form (whether opted or not)",
+          // "Nomination Declaration Form (whether opted or not)",
           "General Terms & Conditions and Other Authorisation",
         ].map((e, i) => {
           return (
@@ -68,7 +67,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
         wherever required, from the officials of BondNest.
       </Text>
       <View style={tw(`flex flex-row mt-8 justify-between`)}>
-        <View style={tw(`flex flex-col gap-3`)}>
+        <View style={tw(`flex flex-col gap-3 text-xs`)}>
           <Text>Name: {name}</Text>
           <Text>Place: {place}</Text>
           <Text>Date: {date}</Text>
@@ -78,7 +77,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
             src={signatureUrl ? signatureUrl : ""}
             style={tw(`w-40 h-24 object-contain`)}
           />
-          <Text style={tw(`text-sm flex flex-col gap-5`)}>Signature</Text>
+          <Text style={tw(`text-xs flex flex-col gap-5`)}>Signature</Text>
         </View>
       </View>
     </View>

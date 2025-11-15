@@ -49,6 +49,9 @@ function LeadTable({ data, pageSize = 10, isLoading }: LeadsTableProps) {
         {
           key: "bondType",
           label: "Bond Type",
+          cell(row) {
+            return <span>{row.bondType.split("_").join(" ")}</span>;
+          },
         },
         {
           key: "status",
@@ -79,28 +82,25 @@ function LeadTable({ data, pageSize = 10, isLoading }: LeadsTableProps) {
         },
         {
           key: "createdAt",
-          label: "Created",
+          label: "Created/Update",
           cell: (row) => (
-            <span>
-              {dateTimeUtils.formatDateTime(
-                row.createdAt,
-                "DD MMMM YYYY hh:mm AA"
-              )}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm">
+                {dateTimeUtils.formatDateTime(
+                  row.createdAt,
+                  "DD MMMM YYYY hh:mm AA"
+                )}
+              </span>
+              <span className="text-xs text-gray-700">
+                {dateTimeUtils.formatDateTime(
+                  row.updatedAt,
+                  "DD MMMM YYYY hh:mm AA"
+                )}
+              </span>
+            </div>
           ),
         },
-        {
-          key: "updatedAt",
-          label: "Updated",
-          cell: (row) => (
-            <span>
-              {dateTimeUtils.formatDateTime(
-                row.updatedAt,
-                "DD MMMM YYYY hh:mm AA"
-              )}
-            </span>
-          ),
-        },
+
         {
           key: "actions",
           label: "Action",

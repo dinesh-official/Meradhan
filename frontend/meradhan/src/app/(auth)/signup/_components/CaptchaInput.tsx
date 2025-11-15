@@ -9,11 +9,13 @@ type CaptchaInputProps = {
   className?: string;
   placeholder?: string;
   length?: number;
+  onValueChange?: () => void;
 };
 
 export default function CaptchaInput({
   onVerify,
   onChange,
+  onValueChange,
   className = "",
   placeholder = "Captcha Code*",
   length = 6,
@@ -137,8 +139,8 @@ export default function CaptchaInput({
 
   useEffect(() => {
     if (value === "") {
-      onChange?.(false);
       onVerify?.(false);
+      onChange?.(false);
       return;
     }
     const correct = value.trim() === captcha;
@@ -171,7 +173,10 @@ export default function CaptchaInput({
         type="text"
         placeholder={placeholder}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          onValueChange?.();
+          setValue(e.target.value);
+        }}
         className="py-5"
       />
     </div>
