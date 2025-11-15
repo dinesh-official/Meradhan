@@ -170,6 +170,7 @@ export class DigioSDK {
       return data.data;
     } catch (error) {
       //@typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       console.log((error as any)?.response?.data);
       throw error;
     }

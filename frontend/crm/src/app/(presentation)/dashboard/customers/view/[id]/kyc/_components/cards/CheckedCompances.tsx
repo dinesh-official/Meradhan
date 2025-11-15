@@ -2,6 +2,7 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { json } from "zod";
 
 export type Root = {
   step_1: {
@@ -68,6 +69,7 @@ export type Root = {
       checkTerms1: boolean;
       checkTerms2: boolean;
       dateOfBirth: string;
+      checkKycKraConsent: boolean;
       fetchedTimestamp: string;
       confirmPanTimestamp: string;
       confirmAadhaarTimestamp: string;
@@ -249,8 +251,10 @@ function CheckedCompances({ data }: { data?: Root }) {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="text-sm">
-          <CardTitle className="text-sm">Compliance Confirmations</CardTitle>
+        <CardContent className="text-sm flex flex-col gap-1">
+          <CardTitle className="text-sm">
+            Compliance and Consent Confirmations
+          </CardTitle>
           <p className="flex justify-start items-center gap-3 mt-3">
             <Checkbox checked={data?.step_1?.pan?.checkTerms1 || false} /> I
             hereby confirm that I am not a Politically Exposed Person (PEP) nor
@@ -269,6 +273,39 @@ function CheckedCompances({ data }: { data?: Root }) {
           </p>
 
           <p className="flex justify-start items-center gap-3 mt-2">
+            <Checkbox
+              checked={data?.step_1?.pan?.checkKycKraConsent || false}
+            />{" "}
+            By clicking Continue to Verify, I hereby agree to and provide
+            consent for the following:
+          </p>
+
+          <div>
+            <ul className="text-sm list-disc ml-10  flex flex-col gap-2 mt-2">
+              <li>
+                I hereby declare that I am a resident individual as per the
+                applicable laws of India and not a Non-Resident Indian (NRI).
+              </li>
+              <li>
+                I hereby confirm to authorize MeraDhan to access and retrieve my
+                PAN and Aadhaar card details from DigiLocker for the purpose of
+                conducting SEBI-compliant KYC verification. I understand that
+                this information will be used solely for regulatory compliance
+                and will be securely stored in accordance with applicable laws
+                and SEBI guidelines.
+              </li>
+              <li>
+                I hereby provide my consent to MeraDhan to collect, use, store,
+                and process my personal data for Know Your Customer (KYC)
+                purposes in compliance with SEBI regulations. This includes
+                retrieval of KYC records from KYC Registration Agencies (KRAs),
+                as may be required, and share my details with KYC registration
+                agencies.
+              </li>
+            </ul>
+          </div>
+
+          <p className="flex justify-start items-center gap-3 mt-2">
             <Checkbox checked={data?.step_3?.[0]?.checkTerms || false} /> I
             hereby authorise MeraDhan to verify the bank account details
             provided by initiating a nominal amount transfer (₹1) to my account
@@ -281,11 +318,12 @@ function CheckedCompances({ data }: { data?: Root }) {
             provided herein for the purpose of completing KYC and investment
             onboarding, in accordance with applicable regulatory guidelines.
           </p>
+
           <p className="flex justify-start items-start gap-3 mt-2">
             <Checkbox checked={data?.step_6?.terms || false} className="mt-1" />
             <div>
               <p> By continue, I agree to the following terms:</p>
-              <ul className="text-sm list-disc">
+              <ul className="text-sm list-disc ml-3 mt-2 flex flex-col gap-2">
                 <li>
                   I hereby authorize MeraDhan to use my Aadhaar / Virtual ID
                   details (as applicable) solely for the purpose of e-Signing my

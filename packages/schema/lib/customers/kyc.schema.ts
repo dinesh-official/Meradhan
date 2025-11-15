@@ -30,6 +30,10 @@ export const kycPanInfoDataSchema = z.object({
         "Please confirm that you are solely a tax resident of India (FATCA).",
     }),
 
+  checkKycKraConsent: z.boolean().refine((val) => val === true, {
+    message: "Please accept the consent to proceed.",
+  }),
+
   confirmPanTimestamp: z.string().optional(),
   confirmAadhaarTimestamp: z.string().optional(),
   fetchedTimestamp: z.string().optional(),

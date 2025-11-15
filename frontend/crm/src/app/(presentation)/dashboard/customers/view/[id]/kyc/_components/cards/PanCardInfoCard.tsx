@@ -24,18 +24,22 @@ export default function PanCardInfoCard(panCardInfoData: PanCardInfoProps) {
   return (
     <Card id="pan-details">
       <CardHeader>
-        <CardTitle className="text-sm" >PAN Details</CardTitle>
+        <CardTitle className="text-sm">PAN Details</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="gap-5 grid grid-cols-2 lg:grid-cols-4">
           <LabelView title="PAN Number">
             <p className="text-sm">
               {panCardInfoData.panCardNumber}{" "}
-              <StatusBadge
-                value={
-                  panCardInfoData.panVerificationStatus ? "Verified" : "Pending"
-                }
-              />
+              {!panCardInfoData.panCardNumber.startsWith("----") && (
+                <StatusBadge
+                  value={
+                    panCardInfoData.panVerificationStatus
+                      ? "Verified"
+                      : "Pending"
+                  }
+                />
+              )}
             </p>
           </LabelView>
           <LabelView title="Date of Birth">
@@ -46,28 +50,26 @@ export default function PanCardInfoCard(panCardInfoData: PanCardInfoProps) {
           </LabelView>
           <LabelView title="Full Name">
             <p className="text-sm">
-              {panCardInfoData.Name}{" "}
-              <StatusBadge
-                value={
-                  panCardInfoData.nameVerificationStatus
-                    ? "Verified"
-                    : "Not Matched"
-                }
-              />{" "}
+              {panCardInfoData.Name}
+              {!panCardInfoData.panCardNumber.startsWith("----") && (
+                <StatusBadge
+                  value={
+                    panCardInfoData.nameVerificationStatus
+                      ? "Verified"
+                      : "Not Matched"
+                  }
+                />
+              )}
             </p>
           </LabelView>
         </div>
       </CardContent>
       <CardFooter className="flex gap-8 border-t">
         <LabelView title="Verification Timestamp">
-          <p className="text-sm">
-            {panCardInfoData.verificationTimeStamp}
-          </p>
+          <p className="text-sm">{panCardInfoData.verificationTimeStamp}</p>
         </LabelView>
-            <LabelView title="Confirmation Timestamp">
-          <p className="text-sm">
-            {panCardInfoData.confirmTimeStamp}
-          </p>
+        <LabelView title="Confirmation Timestamp">
+          <p className="text-sm">{panCardInfoData.confirmTimeStamp}</p>
         </LabelView>
       </CardFooter>
     </Card>

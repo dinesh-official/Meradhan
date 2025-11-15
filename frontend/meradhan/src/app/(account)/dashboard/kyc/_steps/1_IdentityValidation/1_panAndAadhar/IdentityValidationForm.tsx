@@ -59,9 +59,9 @@ function IdentityValidationForm() {
                 value={
                   data.dateOfBirth
                     ? dateTimeUtils.formatDateTime(
-                      data.dateOfBirth,
-                      "DD/MM/YYYY"
-                    )
+                        data.dateOfBirth,
+                        "DD/MM/YYYY"
+                      )
                     : ""
                 }
                 onChange={(e) => {
@@ -82,7 +82,9 @@ function IdentityValidationForm() {
               <Input
                 type="text"
                 value={data.firstName}
-                onChange={(e) => setStep1PanData("firstName", e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  setStep1PanData("firstName", e.target.value.toUpperCase())
+                }
                 placeholder="Enter first name"
               />
             </LabelInput>
@@ -91,7 +93,9 @@ function IdentityValidationForm() {
               <Input
                 type="text"
                 value={data.middleName}
-                onChange={(e) => setStep1PanData("middleName", e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  setStep1PanData("middleName", e.target.value.toUpperCase())
+                }
                 placeholder="Enter middle name"
               />
             </LabelInput>
@@ -100,7 +104,9 @@ function IdentityValidationForm() {
               <Input
                 type="text"
                 value={data.lastName}
-                onChange={(e) => setStep1PanData("lastName", e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  setStep1PanData("lastName", e.target.value.toUpperCase())
+                }
                 placeholder="Enter last name"
               />
             </LabelInput>
@@ -108,77 +114,106 @@ function IdentityValidationForm() {
         </div>
 
         <p className="mt-2 text-gray-500 text-xs">
-          * Your full name (First, Middle, and Last together) must match exactly as it appears on your PAN Card.
+          * Your full name (First, Middle, and Last together) must match exactly
+          as it appears on your PAN Card.
         </p>
 
         {/* Terms & Declarations */}
         <div className="flex flex-col gap-3 mt-5">
-          <label className="flex gap-3 text-sm">
-            <Checkbox
-              checked={data.checkTerms1}
-              onCheckedChange={(val) => setStep1PanData("checkTerms1", val)}
-              checkClass="text-white"
-              className="mt-0.5 border border-gray-200"
-            />
-            I hereby confirm that I am not a Politically Exposed Person (PEP)
-            nor related to any PEP.
-          </label>
-          <small className="text-red-600">{error?.checkTerms1?.[0]}</small>
-          <label className="flex items-start gap-3 text-sm">
-            <Checkbox
-              checked={data.checkTerms2}
-              onCheckedChange={(val) => setStep1PanData("checkTerms2", val)}
-              checkClass="text-white"
-              className="mt-0.5 border border-gray-200"
-            />
-            I hereby confirm that I am not a person and/or entity debarred from
-            accessing the securities market or dealing in securities, as per
-            directions or orders issued by the Securities and Exchange Board of
-            India (SEBI), any recognized stock exchange, or other competent
-            regulatory authorities from time to time.
-          </label>
-          <small className="text-red-600">{error?.checkTerms2?.[0]}</small>
+          <div>
+            <label className="flex gap-3 text-sm">
+              <Checkbox
+                checked={data.checkTerms1}
+                onCheckedChange={(val) => setStep1PanData("checkTerms1", val)}
+                checkClass="text-white"
+                className="mt-0.5 border border-gray-200"
+              />
+              I hereby confirm that I am not a Politically Exposed Person (PEP)
+              nor related to any PEP.
+            </label>
+            <small className="text-red-600 text-[10px]">
+              {error?.checkTerms1?.[0]}
+            </small>
+          </div>
+          <div>
+            <label className="flex items-start gap-3 text-sm">
+              <Checkbox
+                checked={data.checkTerms2}
+                onCheckedChange={(val) => setStep1PanData("checkTerms2", val)}
+                checkClass="text-white"
+                className="mt-0.5 border border-gray-200"
+              />
+              I hereby confirm that I am not a person and/or entity debarred
+              from accessing the securities market or dealing in securities, as
+              per directions or orders issued by the Securities and Exchange
+              Board of India (SEBI), any recognized stock exchange, or other
+              competent regulatory authorities from time to time.
+            </label>
+            <small className="text-red-600 text-[10px]">
+              {error?.checkTerms2?.[0]}
+            </small>
+          </div>
 
-          <label className="flex items-start gap-3 text-sm">
-            <Checkbox
-              checked={data.isFatca}
-              onCheckedChange={(val) => setStep1PanData("isFatca", val)}
-              checkClass="text-white"
-              className="mt-0.5 border border-gray-200"
-            />
-            I confirm that I am an Indian citizen and solely a tax resident of
-            India, not of any other country (FATCA)
-          </label>
-          <small className="text-red-600">{error?.isFatca?.[0]}</small>
+          <div>
+            <label className="flex items-start gap-3 text-sm">
+              <Checkbox
+                checked={data.isFatca}
+                onCheckedChange={(val) => setStep1PanData("isFatca", val)}
+                checkClass="text-white"
+                className="mt-0.5 border border-gray-200"
+              />
+              I confirm that I am an Indian citizen and solely a tax resident of
+              India, not of any other country (FATCA)
+            </label>
+            <small className="text-red-600 text-[10px]">
+              {error?.isFatca?.[0]}
+            </small>
+          </div>
 
           <div className="space-y-3 text-sm">
-            <p>By continue:</p>
-            <p>
-              I hereby declare that I am a resident individual as per the
-              applicable laws of India and not a Non-Resident Indian (NRI).
-            </p>
-            <p>
-              I hereby confirm to authorize MeraDhan to access and retrieve my
-              PAN and Aadhaar card details from DigiLocker for the purpose of
-              conducting SEBI-compliant KYC verification. I understand that this
-              information will be used solely for regulatory compliance and will
-              be securely stored in accordance with applicable laws and SEBI
-              guidelines.
-            </p>
-            <p>
-              I hereby provide my consent to MeraDhan to collect, use, store,
-              and process my personal data for Know Your Customer (KYC) purposes
-              in compliance with SEBI regulations. This includes retrieval of
-              KYC records from KYC Registration Agencies (KRAs), as may be
-              required, and share my details with KYC registration agencies.{" "}
-            </p>
+            <div>
+              <label className="flex items-start gap-3 ">
+                <Checkbox
+                  className="mt-0.5"
+                  checked={data.checkKycKraConsent}
+                  onCheckedChange={(val) =>
+                    setStep1PanData("checkKycKraConsent", val)
+                  }
+                />{" "}
+                By clicking Continue to Verify, I hereby agree to and provide
+                consent for the following:
+              </label>
+              <small className="text-red-600 text-[10px]">
+                {error?.checkKycKraConsent?.[0]}
+              </small>
+            </div>
+            <ul className="list-disc ml-10 flex flex-col gap-2">
+              <li>
+                I hereby declare that I am a resident individual as per the
+                applicable laws of India and not a Non-Resident Indian (NRI).
+              </li>
+              <li>
+                I hereby confirm to authorize MeraDhan to access and retrieve my
+                PAN and Aadhaar card details from DigiLocker for the purpose of
+                conducting SEBI-compliant KYC verification. I understand that
+                this information will be used solely for regulatory compliance
+                and will be securely stored in accordance with applicable laws
+                and SEBI guidelines.
+              </li>
+              <li>
+                I hereby provide my consent to MeraDhan to collect, use, store,
+                and process my personal data for Know Your Customer (KYC)
+                purposes in compliance with SEBI regulations. This includes
+                retrieval of KYC records from KYC Registration Agencies (KRAs),
+                as may be required, and share my details with KYC registration
+                agencies.{" "}
+              </li>
+            </ul>
           </div>
         </div>
       </CardContent>
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
-
-
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handelPanVerification}

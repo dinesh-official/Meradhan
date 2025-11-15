@@ -20,6 +20,7 @@ import PersonalInformationCard from "./cards/PersonalInformationCard";
 import RiskProfileQuestion, {
   RiskProfileAnsOption,
 } from "./cards/riskprofile/RiskProfileQuestion";
+import { riskProfileData } from "@/global/constants/riskProfileData";
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
@@ -312,6 +313,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle className="text-sm">Bank Accounts</CardTitle>
           </CardHeader>
           <CardContent>
+            {data.bankAccounts.length === 0 && (
+              <p className="text-left text-sm">No bank account added yet.</p>
+            )}
             <div className="gap-5 grid lg:grid-cols-3">
               {data.bankAccounts.map((e) => {
                 return (
@@ -357,6 +361,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle className="text-sm">Demat Accounts Details</CardTitle>
           </CardHeader>
           <CardContent>
+            {data.bankAccounts.length === 0 && (
+              <p className="text-left text-sm">No demat account added yet.</p>
+            )}
             <div className="gap-5 grid lg:grid-cols-3">
               {data.dematAccounts.map((e) => {
                 return (
@@ -411,7 +418,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           <CardContent>
             <CardTitle className="text-sm">Investment Experience</CardTitle>
             <div className="flex flex-col gap-5 mt-4">
-              {data?.riskProfile?.data?.map((e) => (
+              {(data?.riskProfile?.data || riskProfileData.data)?.map((e) => (
                 <RiskProfileQuestion
                   question="How many years of investment experience do you have?"
                   key={e.index}

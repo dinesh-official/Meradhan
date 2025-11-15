@@ -6,7 +6,6 @@ import { tw } from "../MdPdf";
 function TextList({
   children,
   count,
-  fontSize,
 }: {
   children?: any;
   count?: string;
