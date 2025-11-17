@@ -2,6 +2,7 @@ import { getSessionId } from "@/analytics/analytics";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useCurrentUserData } from "@/global/stores/useCurrentUserData.store";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
@@ -12,9 +13,9 @@ import z from "zod";
 
 export const useLoginApiHook = () => {
   const { trackActivity } = useUserTracking();
+  const { cookies, setCookie } = useAppCookie();
   const authApi = new apiGateway.auth.AuthApi(apiClientCaller);
   const [step, setStep] = useState<"EMAIL" | "OTP">("EMAIL");
-  const router = useRouter();
   const usersStore = useCurrentUserData();
   const loginWithOtpMutation = useMutation({
     mutationKey: ["loginWithOtpMutate"],
@@ -39,22 +40,6 @@ export const useLoginApiHook = () => {
     },
   });
 
-
-  const auditAPi = new apiGateway.crm.auditlogs.AuditLogsApi(apiClientCaller);
-
-  const revalidateTracking = async (payload?: {
-    trackId: string;
-    token: string;
-    userId: number;
-  }) => {
-    try {
-      await auditAPi.revalidateAuditLogs(payload);
-    } catch (error) {
-      console.log(error);
-
-    }
-  }
-
   const otpVerificationMutation = useMutation({
     mutationKey: ["otpVerification"],
     mutationFn: async (
@@ -65,10 +50,7 @@ export const useLoginApiHook = () => {
     },
     onSuccess(data) {
       toast.success("Login Successful");
-      trackActivity("otp_verify", {
-        method: "otp",
-        reason: "User logged in successfully via OTP",
-      });
+
       usersStore.setUserData({
         name: data.responseData.name,
         role: data.responseData.role,
@@ -77,12 +59,12 @@ export const useLoginApiHook = () => {
         id: data.responseData.id,
         phoneNo: data.responseData.phoneNo,
       });
-      revalidateTracking({
-        trackId: localStorage.getItem("analytics_session") || getSessionId(),
-        token: data.responseData.token,
-        userId: data.responseData.id,
-      });
-      router.replace("/dashboard");
+
+      setCookie("token", data.responseData.token);
+      setCookie("userId", data.responseData.id.toString());
+      setCookie("role", data.responseData.role.toString());
+
+      window.location.href = "/dashboard";
     },
     onError(error) {
       if (error instanceof ApiError) {

@@ -37,6 +37,7 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
         acceptedValue: data.value,
         respDealType: dealType,
         respClientCode: clientCode || undefined,
+        
       });
     },
     onSuccess: (response) => {

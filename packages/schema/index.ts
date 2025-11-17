@@ -13,6 +13,7 @@ import * as Enum from "./lib/enums";
 import * as bondsSchema from "./lib/bonds/bonds.schema";
 import * as rfqSchema from "./lib/rfq/rfq.schema";
 import * as contactSchema from "./lib/contact.schema";
+import * as auditlogsSchema from "./lib/auditlogs.schema";
 
 export const appSchema = {
   auth: authSchema,
@@ -34,4 +35,5 @@ export const appSchema = {
   rfq: rfqSchema,
 
   contact: contactSchema,
+  auditlogsSchema,
 };

@@ -1,6 +1,6 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import AuthenticationActivityLogsView from "./CrmAuthenticationLogsView";
+import SessionLogsHistory from "./_session_logs/SessionLogsHistory";
 
 function CrmAuditLogsPage() {
   return (
@@ -11,7 +11,7 @@ function CrmAuditLogsPage() {
           description="Login history and session termination tracking with browser and device information"
           showBack
         />
-        <AuthenticationActivityLogsView />
+        <SessionLogsHistory />
       </div>
     </Workspace>
   );

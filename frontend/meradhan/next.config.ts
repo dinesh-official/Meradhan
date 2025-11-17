@@ -2,23 +2,19 @@
 import { BASES } from "@/core/config/base.urls";
 import type { NextConfig } from "next";
 
-
-
 const isDev = process.env.NODE_ENV === "development";
 // Select current environment base
 const BASE = isDev ? BASES.development : BASES.production;
 
 // Next.js configuration
 const nextConfig: NextConfig = {
-  htmlLimitedBots: /.*/,
-  reactStrictMode: false,
   devIndicators: {
     position: "bottom-left",
   },
   webpack: (config) => {
     // Prevent canvas.node from being bundled
     config.externals.push({
-      canvas: 'commonjs canvas',
+      canvas: "commonjs canvas",
     });
 
     return config;
@@ -49,7 +45,6 @@ const nextConfig: NextConfig = {
         source: "/assets/media/:path*",
         destination: `${BASE.ASSETS}/:path*`,
       },
-
     ];
   },
 };

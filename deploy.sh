@@ -19,8 +19,8 @@ echo "✅ Setup complete."
 # --------------------------
 # BACKEND
 # --------------------------
-echo "🧩 Checking backend..."
-cd backend
+echo "🧩 Checking backend...RRRRRRRRRRRRRRRRR
+cdR ackend
 npm run lint
 npm run check
 echo "✅ Backend check complete."
@@ -29,7 +29,6 @@ echo "✅ Backend check complete."
 echo "♻️ Restarting Backend & Worker..."
 pm2 restart MeraDhan-Backend
 pm2 restart MeraDhan-Worker
-
 
 # --------------------------
 # FRONTEND: CLIENT
@@ -58,7 +57,6 @@ echo "✅ CRM build complete."
 # Restart only CRM
 echo "♻️ Restarting CRM app..."
 pm2 restart MeraDhan-CRM
-
 
 # --------------------------
 # SAVE STATE

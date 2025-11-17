@@ -29,10 +29,6 @@ function UsersTable({ data, pageSize, isLoading }: UsersTableProps) {
           cell: (row) => {
             return (
               <div className="flex  justify-start gap-4 items-center">
-                <Avatar>
-                  <AvatarImage src={ASSETS_URL + "/" + row.avatar} />
-                  <AvatarFallback></AvatarFallback>
-                </Avatar>
                 <p className="text-md">{row.name}</p>
               </div>
             );
@@ -72,8 +68,29 @@ function UsersTable({ data, pageSize, isLoading }: UsersTableProps) {
           cell: (row) => <UserRoleBadge value={row.role} />,
         },
         // { key: "createdBy", label: "Created By" },
-        { key: "createdAt", label: "Created At", type: "date" },
-        { key: "updatedAt", label: "Updated At", type: "date" },
+        {
+          key: "createdAt",
+          label: "Created At",
+          type: "datetime",
+          cell(row) {
+            return (
+              <div className="text-sm">
+                <p>
+                  {dateTimeUtils.formatDateTime(
+                    row.createdAt,
+                    "DD MMMM YYYY hh:mm AA"
+                  )}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {dateTimeUtils.formatDateTime(
+                    row.updatedAt,
+                    "DD MMMM YYYY hh:mm AA"
+                  )}
+                </p>
+              </div>
+            );
+          },
+        },
 
         // Actions (sticky)
         {

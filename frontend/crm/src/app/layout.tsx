@@ -17,9 +17,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.className} antialiased`}
-      >
+      <body className={`${geistSans.className} antialiased`}>
         <NextTopLoader color="#003569" />
         <Client>{children}</Client>
       </body>

@@ -2,7 +2,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { json } from "zod";
 
 export type Root = {
   step_1: {

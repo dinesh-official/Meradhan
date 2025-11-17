@@ -23,3 +23,80 @@ model WebAuditLogs {
 
     @@map("web_audit_logs")
 }
+
+model ActivityLogsCRM {
+    id              Int      @id @default(autoincrement())
+    userId          Int
+    name            String?
+    email           String?
+    entityType      String
+    action          String?
+    entityId        String?
+    ipAddress       String?
+    details         Json
+    userAgent       String?
+    browserName     String?
+    deviceType      String?
+    operatingSystem String?
+    url             String?
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    @@map("activity_logs_crm")
+}
+
+model SessionLogsCRM {
+    id              Int              @id @default(autoincrement())
+    userId          Int
+    sessionToken    String
+    ipAddress       String?
+    userAgent       String?
+    browserName     String?
+    deviceType      String?
+    operatingSystem String?
+    endReason       String?
+    startTime       DateTime         @default(now())
+    endTime         DateTime?
+    duration        Int              @default(0)
+    totalPages      Int              @default(0)
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
+    user            CRMUserDataModel @relation(fields: [userId], references: [id])
+
+    @@map("session_logs_crm")
+}
+
+model PageViewLogsCRM {
+    id           Int       @id @default(autoincrement())
+    sessionId    String
+    userId       Int?
+    pagePath     String
+    pageTitle    String?
+    entryTime    DateTime  @default(now())
+    exitTime     DateTime?
+    duration     Int       @default(0)
+    scrollDepth  Int       @default(0)
+    interactions Int       @default(0)
+    referrer     String?
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+
+    @@map("page_view_logs_crm")
+}
+
+model LoginLogsCrm {
+    id              Int      @id @default(autoincrement())
+    userId          Int?
+    name            String?
+    email           String
+    ipAddress       String?
+    userAgent       String?
+    browserName     String?
+    deviceType      String? // desktop, mobile, tablet
+    operatingSystem String?
+    sessionType     String   @default("login") // login, logout, timeout, browser_close
+    success         Boolean
+    createdAt       DateTime @default(now())
+
+    @@map("login_logs_crm")
+}

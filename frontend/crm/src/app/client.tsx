@@ -8,12 +8,14 @@ import { ReactNode } from "react";
 import { CookiesProvider } from "react-cookie";
 import { Toaster } from "react-hot-toast";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { PageTrackingProvider } from "@/analytics/LogTracking";
 function Client({ children }: { children: ReactNode }) {
   return (
     <CookiesProvider>
-      <UserTrackingProvider>
-        <QueryClientProvider client={queryClient}>
-          <NuqsAdapter>{children}</NuqsAdapter>
+      {/* <UserTrackingProvider> */}
+      <QueryClientProvider client={queryClient}>
+        <NuqsAdapter>{children}</NuqsAdapter>
+        <PageTrackingProvider>
           <Toaster
             position="top-right"
             reverseOrder={false}
@@ -27,14 +29,15 @@ function Client({ children }: { children: ReactNode }) {
               },
             }}
           />
-          <SonnerToaster position="top-center" richColors />
-          <ReactQueryDevtools
-            initialIsOpen={false}
-            buttonPosition="bottom-right"
-            position="right"
-          />
-        </QueryClientProvider>
-      </UserTrackingProvider>
+        </PageTrackingProvider>
+        <SonnerToaster position="top-center" richColors />
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-right"
+          position="right"
+        />
+      </QueryClientProvider>
+      {/* </UserTrackingProvider> */}
     </CookiesProvider>
   );
 }

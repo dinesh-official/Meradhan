@@ -47,26 +47,25 @@ const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
         }}
         error={manager?.errors?.phoneNo?.[0]}
       />
-      <HideForMe userId={cookies.userId}>
-        <SelectField
-          label="Select Role"
-          placeholder="Select Role"
-          options={
-            [
-              { label: "Viewer", value: "VIEWER" },
-              { label: "Sales", value: "SALES" },
-              { label: "Relationship manager", value: "RELATIONSHIP_MANAGER" },
-              { label: "Admin", value: "ADMIN" },
-              { label: "Support", value: "SUPPORT" },
-            ] as (SelectOption & { value: Role })[]
-          }
-          value={manager.state.role}
-          onChangeAction={(e) => {
-            manager.setUserData("role", e as UserFormData["role"]);
-          }}
-          error={manager?.errors?.role?.[0]}
-        />
-      </HideForMe>
+
+      <SelectField
+        label="Select Role"
+        placeholder="Select Role"
+        options={
+          [
+            { label: "Viewer", value: "VIEWER" },
+            { label: "Sales", value: "SALES" },
+            { label: "Relationship manager", value: "RELATIONSHIP_MANAGER" },
+            { label: "Admin", value: "ADMIN" },
+            { label: "Support", value: "SUPPORT" },
+          ] as (SelectOption & { value: Role })[]
+        }
+        value={manager.state.role}
+        onChangeAction={(e) => {
+          manager.setUserData("role", e as UserFormData["role"]);
+        }}
+        error={manager?.errors?.role?.[0]}
+      />
     </div>
   );
 };

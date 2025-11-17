@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   typedRoutes: true,
   trailingSlash: false,
+  reactStrictMode: false,
   transpilePackages: ["@root/apiGateway", "@root/schema"],
   devIndicators: {
     position: "bottom-left",

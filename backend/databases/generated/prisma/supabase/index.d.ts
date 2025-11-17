@@ -24,6 +24,26 @@ export type CrmAuditLogs = $Result.DefaultSelection<Prisma.$CrmAuditLogsPayload>
  */
 export type WebAuditLogs = $Result.DefaultSelection<Prisma.$WebAuditLogsPayload>
 /**
+ * Model ActivityLogsCRM
+ * 
+ */
+export type ActivityLogsCRM = $Result.DefaultSelection<Prisma.$ActivityLogsCRMPayload>
+/**
+ * Model SessionLogsCRM
+ * 
+ */
+export type SessionLogsCRM = $Result.DefaultSelection<Prisma.$SessionLogsCRMPayload>
+/**
+ * Model PageViewLogsCRM
+ * 
+ */
+export type PageViewLogsCRM = $Result.DefaultSelection<Prisma.$PageViewLogsCRMPayload>
+/**
+ * Model LoginLogsCrm
+ * 
+ */
+export type LoginLogsCrm = $Result.DefaultSelection<Prisma.$LoginLogsCrmPayload>
+/**
  * Model Bonds
  * 
  */
@@ -656,6 +676,46 @@ export class PrismaClient<
     * ```
     */
   get webAuditLogs(): Prisma.WebAuditLogsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.activityLogsCRM`: Exposes CRUD operations for the **ActivityLogsCRM** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ActivityLogsCRMS
+    * const activityLogsCRMS = await prisma.activityLogsCRM.findMany()
+    * ```
+    */
+  get activityLogsCRM(): Prisma.ActivityLogsCRMDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.sessionLogsCRM`: Exposes CRUD operations for the **SessionLogsCRM** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SessionLogsCRMS
+    * const sessionLogsCRMS = await prisma.sessionLogsCRM.findMany()
+    * ```
+    */
+  get sessionLogsCRM(): Prisma.SessionLogsCRMDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.pageViewLogsCRM`: Exposes CRUD operations for the **PageViewLogsCRM** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PageViewLogsCRMS
+    * const pageViewLogsCRMS = await prisma.pageViewLogsCRM.findMany()
+    * ```
+    */
+  get pageViewLogsCRM(): Prisma.PageViewLogsCRMDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.loginLogsCrm`: Exposes CRUD operations for the **LoginLogsCrm** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoginLogsCrms
+    * const loginLogsCrms = await prisma.loginLogsCrm.findMany()
+    * ```
+    */
+  get loginLogsCrm(): Prisma.LoginLogsCrmDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.bonds`: Exposes CRUD operations for the **Bonds** model.
@@ -1318,6 +1378,10 @@ export namespace Prisma {
   export const ModelName: {
     CrmAuditLogs: 'CrmAuditLogs',
     WebAuditLogs: 'WebAuditLogs',
+    ActivityLogsCRM: 'ActivityLogsCRM',
+    SessionLogsCRM: 'SessionLogsCRM',
+    PageViewLogsCRM: 'PageViewLogsCRM',
+    LoginLogsCrm: 'LoginLogsCrm',
     Bonds: 'Bonds',
     CRMUserDataModel: 'CRMUserDataModel',
     CustomersAuthDataModel: 'CustomersAuthDataModel',
@@ -1358,7 +1422,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "webAuditLogs" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "settleOrderModel" | "rFQMasterISIN" | "rFQNegotiation"
+      modelProps: "crmAuditLogs" | "webAuditLogs" | "activityLogsCRM" | "sessionLogsCRM" | "pageViewLogsCRM" | "loginLogsCrm" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "settleOrderModel" | "rFQMasterISIN" | "rFQNegotiation"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1507,6 +1571,302 @@ export namespace Prisma {
           count: {
             args: Prisma.WebAuditLogsCountArgs<ExtArgs>
             result: $Utils.Optional<WebAuditLogsCountAggregateOutputType> | number
+          }
+        }
+      }
+      ActivityLogsCRM: {
+        payload: Prisma.$ActivityLogsCRMPayload<ExtArgs>
+        fields: Prisma.ActivityLogsCRMFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ActivityLogsCRMFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ActivityLogsCRMFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>
+          }
+          findFirst: {
+            args: Prisma.ActivityLogsCRMFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ActivityLogsCRMFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>
+          }
+          findMany: {
+            args: Prisma.ActivityLogsCRMFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>[]
+          }
+          create: {
+            args: Prisma.ActivityLogsCRMCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>
+          }
+          createMany: {
+            args: Prisma.ActivityLogsCRMCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ActivityLogsCRMCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>[]
+          }
+          delete: {
+            args: Prisma.ActivityLogsCRMDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>
+          }
+          update: {
+            args: Prisma.ActivityLogsCRMUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>
+          }
+          deleteMany: {
+            args: Prisma.ActivityLogsCRMDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ActivityLogsCRMUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ActivityLogsCRMUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>[]
+          }
+          upsert: {
+            args: Prisma.ActivityLogsCRMUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsCRMPayload>
+          }
+          aggregate: {
+            args: Prisma.ActivityLogsCRMAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateActivityLogsCRM>
+          }
+          groupBy: {
+            args: Prisma.ActivityLogsCRMGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogsCRMGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ActivityLogsCRMCountArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogsCRMCountAggregateOutputType> | number
+          }
+        }
+      }
+      SessionLogsCRM: {
+        payload: Prisma.$SessionLogsCRMPayload<ExtArgs>
+        fields: Prisma.SessionLogsCRMFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SessionLogsCRMFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SessionLogsCRMFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>
+          }
+          findFirst: {
+            args: Prisma.SessionLogsCRMFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SessionLogsCRMFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>
+          }
+          findMany: {
+            args: Prisma.SessionLogsCRMFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>[]
+          }
+          create: {
+            args: Prisma.SessionLogsCRMCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>
+          }
+          createMany: {
+            args: Prisma.SessionLogsCRMCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SessionLogsCRMCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>[]
+          }
+          delete: {
+            args: Prisma.SessionLogsCRMDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>
+          }
+          update: {
+            args: Prisma.SessionLogsCRMUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>
+          }
+          deleteMany: {
+            args: Prisma.SessionLogsCRMDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SessionLogsCRMUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SessionLogsCRMUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>[]
+          }
+          upsert: {
+            args: Prisma.SessionLogsCRMUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsCRMPayload>
+          }
+          aggregate: {
+            args: Prisma.SessionLogsCRMAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSessionLogsCRM>
+          }
+          groupBy: {
+            args: Prisma.SessionLogsCRMGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SessionLogsCRMGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SessionLogsCRMCountArgs<ExtArgs>
+            result: $Utils.Optional<SessionLogsCRMCountAggregateOutputType> | number
+          }
+        }
+      }
+      PageViewLogsCRM: {
+        payload: Prisma.$PageViewLogsCRMPayload<ExtArgs>
+        fields: Prisma.PageViewLogsCRMFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PageViewLogsCRMFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PageViewLogsCRMFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>
+          }
+          findFirst: {
+            args: Prisma.PageViewLogsCRMFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PageViewLogsCRMFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>
+          }
+          findMany: {
+            args: Prisma.PageViewLogsCRMFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>[]
+          }
+          create: {
+            args: Prisma.PageViewLogsCRMCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>
+          }
+          createMany: {
+            args: Prisma.PageViewLogsCRMCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PageViewLogsCRMCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>[]
+          }
+          delete: {
+            args: Prisma.PageViewLogsCRMDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>
+          }
+          update: {
+            args: Prisma.PageViewLogsCRMUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>
+          }
+          deleteMany: {
+            args: Prisma.PageViewLogsCRMDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PageViewLogsCRMUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PageViewLogsCRMUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>[]
+          }
+          upsert: {
+            args: Prisma.PageViewLogsCRMUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsCRMPayload>
+          }
+          aggregate: {
+            args: Prisma.PageViewLogsCRMAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePageViewLogsCRM>
+          }
+          groupBy: {
+            args: Prisma.PageViewLogsCRMGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PageViewLogsCRMGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PageViewLogsCRMCountArgs<ExtArgs>
+            result: $Utils.Optional<PageViewLogsCRMCountAggregateOutputType> | number
+          }
+        }
+      }
+      LoginLogsCrm: {
+        payload: Prisma.$LoginLogsCrmPayload<ExtArgs>
+        fields: Prisma.LoginLogsCrmFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoginLogsCrmFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoginLogsCrmFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>
+          }
+          findFirst: {
+            args: Prisma.LoginLogsCrmFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoginLogsCrmFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>
+          }
+          findMany: {
+            args: Prisma.LoginLogsCrmFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>[]
+          }
+          create: {
+            args: Prisma.LoginLogsCrmCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>
+          }
+          createMany: {
+            args: Prisma.LoginLogsCrmCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoginLogsCrmCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>[]
+          }
+          delete: {
+            args: Prisma.LoginLogsCrmDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>
+          }
+          update: {
+            args: Prisma.LoginLogsCrmUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoginLogsCrmDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoginLogsCrmUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoginLogsCrmUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoginLogsCrmUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsCrmPayload>
+          }
+          aggregate: {
+            args: Prisma.LoginLogsCrmAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoginLogsCrm>
+          }
+          groupBy: {
+            args: Prisma.LoginLogsCrmGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoginLogsCrmGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoginLogsCrmCountArgs<ExtArgs>
+            result: $Utils.Optional<LoginLogsCrmCountAggregateOutputType> | number
           }
         }
       }
@@ -3236,6 +3596,10 @@ export namespace Prisma {
   export type GlobalOmitConfig = {
     crmAuditLogs?: CrmAuditLogsOmit
     webAuditLogs?: WebAuditLogsOmit
+    activityLogsCRM?: ActivityLogsCRMOmit
+    sessionLogsCRM?: SessionLogsCRMOmit
+    pageViewLogsCRM?: PageViewLogsCRMOmit
+    loginLogsCrm?: LoginLogsCrmOmit
     bonds?: BondsOmit
     cRMUserDataModel?: CRMUserDataModelOmit
     customersAuthDataModel?: CustomersAuthDataModelOmit
@@ -5599,6 +5963,4622 @@ export namespace Prisma {
      * Omit specific fields from the WebAuditLogs
      */
     omit?: WebAuditLogsOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ActivityLogsCRM
+   */
+
+  export type AggregateActivityLogsCRM = {
+    _count: ActivityLogsCRMCountAggregateOutputType | null
+    _avg: ActivityLogsCRMAvgAggregateOutputType | null
+    _sum: ActivityLogsCRMSumAggregateOutputType | null
+    _min: ActivityLogsCRMMinAggregateOutputType | null
+    _max: ActivityLogsCRMMaxAggregateOutputType | null
+  }
+
+  export type ActivityLogsCRMAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type ActivityLogsCRMSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type ActivityLogsCRMMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    entityType: string | null
+    action: string | null
+    entityId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    url: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ActivityLogsCRMMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    entityType: string | null
+    action: string | null
+    entityId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    url: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ActivityLogsCRMCountAggregateOutputType = {
+    id: number
+    userId: number
+    name: number
+    email: number
+    entityType: number
+    action: number
+    entityId: number
+    ipAddress: number
+    details: number
+    userAgent: number
+    browserName: number
+    deviceType: number
+    operatingSystem: number
+    url: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ActivityLogsCRMAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type ActivityLogsCRMSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type ActivityLogsCRMMinAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    entityType?: true
+    action?: true
+    entityId?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    url?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ActivityLogsCRMMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    entityType?: true
+    action?: true
+    entityId?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    url?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ActivityLogsCRMCountAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    entityType?: true
+    action?: true
+    entityId?: true
+    ipAddress?: true
+    details?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    url?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ActivityLogsCRMAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLogsCRM to aggregate.
+     */
+    where?: ActivityLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsCRMS to fetch.
+     */
+    orderBy?: ActivityLogsCRMOrderByWithRelationInput | ActivityLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ActivityLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ActivityLogsCRMS
+    **/
+    _count?: true | ActivityLogsCRMCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ActivityLogsCRMAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ActivityLogsCRMSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ActivityLogsCRMMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ActivityLogsCRMMaxAggregateInputType
+  }
+
+  export type GetActivityLogsCRMAggregateType<T extends ActivityLogsCRMAggregateArgs> = {
+        [P in keyof T & keyof AggregateActivityLogsCRM]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateActivityLogsCRM[P]>
+      : GetScalarType<T[P], AggregateActivityLogsCRM[P]>
+  }
+
+
+
+
+  export type ActivityLogsCRMGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ActivityLogsCRMWhereInput
+    orderBy?: ActivityLogsCRMOrderByWithAggregationInput | ActivityLogsCRMOrderByWithAggregationInput[]
+    by: ActivityLogsCRMScalarFieldEnum[] | ActivityLogsCRMScalarFieldEnum
+    having?: ActivityLogsCRMScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ActivityLogsCRMCountAggregateInputType | true
+    _avg?: ActivityLogsCRMAvgAggregateInputType
+    _sum?: ActivityLogsCRMSumAggregateInputType
+    _min?: ActivityLogsCRMMinAggregateInputType
+    _max?: ActivityLogsCRMMaxAggregateInputType
+  }
+
+  export type ActivityLogsCRMGroupByOutputType = {
+    id: number
+    userId: number
+    name: string | null
+    email: string | null
+    entityType: string
+    action: string | null
+    entityId: string | null
+    ipAddress: string | null
+    details: JsonValue
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    url: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ActivityLogsCRMCountAggregateOutputType | null
+    _avg: ActivityLogsCRMAvgAggregateOutputType | null
+    _sum: ActivityLogsCRMSumAggregateOutputType | null
+    _min: ActivityLogsCRMMinAggregateOutputType | null
+    _max: ActivityLogsCRMMaxAggregateOutputType | null
+  }
+
+  type GetActivityLogsCRMGroupByPayload<T extends ActivityLogsCRMGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ActivityLogsCRMGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ActivityLogsCRMGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ActivityLogsCRMGroupByOutputType[P]>
+            : GetScalarType<T[P], ActivityLogsCRMGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ActivityLogsCRMSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["activityLogsCRM"]>
+
+  export type ActivityLogsCRMSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["activityLogsCRM"]>
+
+  export type ActivityLogsCRMSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["activityLogsCRM"]>
+
+  export type ActivityLogsCRMSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ActivityLogsCRMOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "email" | "entityType" | "action" | "entityId" | "ipAddress" | "details" | "userAgent" | "browserName" | "deviceType" | "operatingSystem" | "url" | "createdAt" | "updatedAt", ExtArgs["result"]["activityLogsCRM"]>
+
+  export type $ActivityLogsCRMPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ActivityLogsCRM"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number
+      name: string | null
+      email: string | null
+      entityType: string
+      action: string | null
+      entityId: string | null
+      ipAddress: string | null
+      details: Prisma.JsonValue
+      userAgent: string | null
+      browserName: string | null
+      deviceType: string | null
+      operatingSystem: string | null
+      url: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["activityLogsCRM"]>
+    composites: {}
+  }
+
+  type ActivityLogsCRMGetPayload<S extends boolean | null | undefined | ActivityLogsCRMDefaultArgs> = $Result.GetResult<Prisma.$ActivityLogsCRMPayload, S>
+
+  type ActivityLogsCRMCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ActivityLogsCRMFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ActivityLogsCRMCountAggregateInputType | true
+    }
+
+  export interface ActivityLogsCRMDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ActivityLogsCRM'], meta: { name: 'ActivityLogsCRM' } }
+    /**
+     * Find zero or one ActivityLogsCRM that matches the filter.
+     * @param {ActivityLogsCRMFindUniqueArgs} args - Arguments to find a ActivityLogsCRM
+     * @example
+     * // Get one ActivityLogsCRM
+     * const activityLogsCRM = await prisma.activityLogsCRM.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ActivityLogsCRMFindUniqueArgs>(args: SelectSubset<T, ActivityLogsCRMFindUniqueArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ActivityLogsCRM that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ActivityLogsCRMFindUniqueOrThrowArgs} args - Arguments to find a ActivityLogsCRM
+     * @example
+     * // Get one ActivityLogsCRM
+     * const activityLogsCRM = await prisma.activityLogsCRM.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ActivityLogsCRMFindUniqueOrThrowArgs>(args: SelectSubset<T, ActivityLogsCRMFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ActivityLogsCRM that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsCRMFindFirstArgs} args - Arguments to find a ActivityLogsCRM
+     * @example
+     * // Get one ActivityLogsCRM
+     * const activityLogsCRM = await prisma.activityLogsCRM.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ActivityLogsCRMFindFirstArgs>(args?: SelectSubset<T, ActivityLogsCRMFindFirstArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ActivityLogsCRM that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsCRMFindFirstOrThrowArgs} args - Arguments to find a ActivityLogsCRM
+     * @example
+     * // Get one ActivityLogsCRM
+     * const activityLogsCRM = await prisma.activityLogsCRM.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ActivityLogsCRMFindFirstOrThrowArgs>(args?: SelectSubset<T, ActivityLogsCRMFindFirstOrThrowArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ActivityLogsCRMS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsCRMFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ActivityLogsCRMS
+     * const activityLogsCRMS = await prisma.activityLogsCRM.findMany()
+     * 
+     * // Get first 10 ActivityLogsCRMS
+     * const activityLogsCRMS = await prisma.activityLogsCRM.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const activityLogsCRMWithIdOnly = await prisma.activityLogsCRM.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ActivityLogsCRMFindManyArgs>(args?: SelectSubset<T, ActivityLogsCRMFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ActivityLogsCRM.
+     * @param {ActivityLogsCRMCreateArgs} args - Arguments to create a ActivityLogsCRM.
+     * @example
+     * // Create one ActivityLogsCRM
+     * const ActivityLogsCRM = await prisma.activityLogsCRM.create({
+     *   data: {
+     *     // ... data to create a ActivityLogsCRM
+     *   }
+     * })
+     * 
+     */
+    create<T extends ActivityLogsCRMCreateArgs>(args: SelectSubset<T, ActivityLogsCRMCreateArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ActivityLogsCRMS.
+     * @param {ActivityLogsCRMCreateManyArgs} args - Arguments to create many ActivityLogsCRMS.
+     * @example
+     * // Create many ActivityLogsCRMS
+     * const activityLogsCRM = await prisma.activityLogsCRM.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ActivityLogsCRMCreateManyArgs>(args?: SelectSubset<T, ActivityLogsCRMCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ActivityLogsCRMS and returns the data saved in the database.
+     * @param {ActivityLogsCRMCreateManyAndReturnArgs} args - Arguments to create many ActivityLogsCRMS.
+     * @example
+     * // Create many ActivityLogsCRMS
+     * const activityLogsCRM = await prisma.activityLogsCRM.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ActivityLogsCRMS and only return the `id`
+     * const activityLogsCRMWithIdOnly = await prisma.activityLogsCRM.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ActivityLogsCRMCreateManyAndReturnArgs>(args?: SelectSubset<T, ActivityLogsCRMCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ActivityLogsCRM.
+     * @param {ActivityLogsCRMDeleteArgs} args - Arguments to delete one ActivityLogsCRM.
+     * @example
+     * // Delete one ActivityLogsCRM
+     * const ActivityLogsCRM = await prisma.activityLogsCRM.delete({
+     *   where: {
+     *     // ... filter to delete one ActivityLogsCRM
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ActivityLogsCRMDeleteArgs>(args: SelectSubset<T, ActivityLogsCRMDeleteArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ActivityLogsCRM.
+     * @param {ActivityLogsCRMUpdateArgs} args - Arguments to update one ActivityLogsCRM.
+     * @example
+     * // Update one ActivityLogsCRM
+     * const activityLogsCRM = await prisma.activityLogsCRM.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ActivityLogsCRMUpdateArgs>(args: SelectSubset<T, ActivityLogsCRMUpdateArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ActivityLogsCRMS.
+     * @param {ActivityLogsCRMDeleteManyArgs} args - Arguments to filter ActivityLogsCRMS to delete.
+     * @example
+     * // Delete a few ActivityLogsCRMS
+     * const { count } = await prisma.activityLogsCRM.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ActivityLogsCRMDeleteManyArgs>(args?: SelectSubset<T, ActivityLogsCRMDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ActivityLogsCRMS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsCRMUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ActivityLogsCRMS
+     * const activityLogsCRM = await prisma.activityLogsCRM.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ActivityLogsCRMUpdateManyArgs>(args: SelectSubset<T, ActivityLogsCRMUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ActivityLogsCRMS and returns the data updated in the database.
+     * @param {ActivityLogsCRMUpdateManyAndReturnArgs} args - Arguments to update many ActivityLogsCRMS.
+     * @example
+     * // Update many ActivityLogsCRMS
+     * const activityLogsCRM = await prisma.activityLogsCRM.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ActivityLogsCRMS and only return the `id`
+     * const activityLogsCRMWithIdOnly = await prisma.activityLogsCRM.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ActivityLogsCRMUpdateManyAndReturnArgs>(args: SelectSubset<T, ActivityLogsCRMUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ActivityLogsCRM.
+     * @param {ActivityLogsCRMUpsertArgs} args - Arguments to update or create a ActivityLogsCRM.
+     * @example
+     * // Update or create a ActivityLogsCRM
+     * const activityLogsCRM = await prisma.activityLogsCRM.upsert({
+     *   create: {
+     *     // ... data to create a ActivityLogsCRM
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ActivityLogsCRM we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ActivityLogsCRMUpsertArgs>(args: SelectSubset<T, ActivityLogsCRMUpsertArgs<ExtArgs>>): Prisma__ActivityLogsCRMClient<$Result.GetResult<Prisma.$ActivityLogsCRMPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ActivityLogsCRMS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsCRMCountArgs} args - Arguments to filter ActivityLogsCRMS to count.
+     * @example
+     * // Count the number of ActivityLogsCRMS
+     * const count = await prisma.activityLogsCRM.count({
+     *   where: {
+     *     // ... the filter for the ActivityLogsCRMS we want to count
+     *   }
+     * })
+    **/
+    count<T extends ActivityLogsCRMCountArgs>(
+      args?: Subset<T, ActivityLogsCRMCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ActivityLogsCRMCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ActivityLogsCRM.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsCRMAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ActivityLogsCRMAggregateArgs>(args: Subset<T, ActivityLogsCRMAggregateArgs>): Prisma.PrismaPromise<GetActivityLogsCRMAggregateType<T>>
+
+    /**
+     * Group by ActivityLogsCRM.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsCRMGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ActivityLogsCRMGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ActivityLogsCRMGroupByArgs['orderBy'] }
+        : { orderBy?: ActivityLogsCRMGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ActivityLogsCRMGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetActivityLogsCRMGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ActivityLogsCRM model
+   */
+  readonly fields: ActivityLogsCRMFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ActivityLogsCRM.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ActivityLogsCRMClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ActivityLogsCRM model
+   */
+  interface ActivityLogsCRMFieldRefs {
+    readonly id: FieldRef<"ActivityLogsCRM", 'Int'>
+    readonly userId: FieldRef<"ActivityLogsCRM", 'Int'>
+    readonly name: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly email: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly entityType: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly action: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly entityId: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly ipAddress: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly details: FieldRef<"ActivityLogsCRM", 'Json'>
+    readonly userAgent: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly browserName: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly deviceType: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly operatingSystem: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly url: FieldRef<"ActivityLogsCRM", 'String'>
+    readonly createdAt: FieldRef<"ActivityLogsCRM", 'DateTime'>
+    readonly updatedAt: FieldRef<"ActivityLogsCRM", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ActivityLogsCRM findUnique
+   */
+  export type ActivityLogsCRMFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsCRM to fetch.
+     */
+    where: ActivityLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsCRM findUniqueOrThrow
+   */
+  export type ActivityLogsCRMFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsCRM to fetch.
+     */
+    where: ActivityLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsCRM findFirst
+   */
+  export type ActivityLogsCRMFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsCRM to fetch.
+     */
+    where?: ActivityLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsCRMS to fetch.
+     */
+    orderBy?: ActivityLogsCRMOrderByWithRelationInput | ActivityLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogsCRMS.
+     */
+    cursor?: ActivityLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogsCRMS.
+     */
+    distinct?: ActivityLogsCRMScalarFieldEnum | ActivityLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLogsCRM findFirstOrThrow
+   */
+  export type ActivityLogsCRMFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsCRM to fetch.
+     */
+    where?: ActivityLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsCRMS to fetch.
+     */
+    orderBy?: ActivityLogsCRMOrderByWithRelationInput | ActivityLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogsCRMS.
+     */
+    cursor?: ActivityLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogsCRMS.
+     */
+    distinct?: ActivityLogsCRMScalarFieldEnum | ActivityLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLogsCRM findMany
+   */
+  export type ActivityLogsCRMFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsCRMS to fetch.
+     */
+    where?: ActivityLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsCRMS to fetch.
+     */
+    orderBy?: ActivityLogsCRMOrderByWithRelationInput | ActivityLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ActivityLogsCRMS.
+     */
+    cursor?: ActivityLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsCRMS.
+     */
+    skip?: number
+    distinct?: ActivityLogsCRMScalarFieldEnum | ActivityLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLogsCRM create
+   */
+  export type ActivityLogsCRMCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ActivityLogsCRM.
+     */
+    data: XOR<ActivityLogsCRMCreateInput, ActivityLogsCRMUncheckedCreateInput>
+  }
+
+  /**
+   * ActivityLogsCRM createMany
+   */
+  export type ActivityLogsCRMCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ActivityLogsCRMS.
+     */
+    data: ActivityLogsCRMCreateManyInput | ActivityLogsCRMCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLogsCRM createManyAndReturn
+   */
+  export type ActivityLogsCRMCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data used to create many ActivityLogsCRMS.
+     */
+    data: ActivityLogsCRMCreateManyInput | ActivityLogsCRMCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLogsCRM update
+   */
+  export type ActivityLogsCRMUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ActivityLogsCRM.
+     */
+    data: XOR<ActivityLogsCRMUpdateInput, ActivityLogsCRMUncheckedUpdateInput>
+    /**
+     * Choose, which ActivityLogsCRM to update.
+     */
+    where: ActivityLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsCRM updateMany
+   */
+  export type ActivityLogsCRMUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ActivityLogsCRMS.
+     */
+    data: XOR<ActivityLogsCRMUpdateManyMutationInput, ActivityLogsCRMUncheckedUpdateManyInput>
+    /**
+     * Filter which ActivityLogsCRMS to update
+     */
+    where?: ActivityLogsCRMWhereInput
+    /**
+     * Limit how many ActivityLogsCRMS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLogsCRM updateManyAndReturn
+   */
+  export type ActivityLogsCRMUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data used to update ActivityLogsCRMS.
+     */
+    data: XOR<ActivityLogsCRMUpdateManyMutationInput, ActivityLogsCRMUncheckedUpdateManyInput>
+    /**
+     * Filter which ActivityLogsCRMS to update
+     */
+    where?: ActivityLogsCRMWhereInput
+    /**
+     * Limit how many ActivityLogsCRMS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLogsCRM upsert
+   */
+  export type ActivityLogsCRMUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ActivityLogsCRM to update in case it exists.
+     */
+    where: ActivityLogsCRMWhereUniqueInput
+    /**
+     * In case the ActivityLogsCRM found by the `where` argument doesn't exist, create a new ActivityLogsCRM with this data.
+     */
+    create: XOR<ActivityLogsCRMCreateInput, ActivityLogsCRMUncheckedCreateInput>
+    /**
+     * In case the ActivityLogsCRM was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ActivityLogsCRMUpdateInput, ActivityLogsCRMUncheckedUpdateInput>
+  }
+
+  /**
+   * ActivityLogsCRM delete
+   */
+  export type ActivityLogsCRMDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter which ActivityLogsCRM to delete.
+     */
+    where: ActivityLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsCRM deleteMany
+   */
+  export type ActivityLogsCRMDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLogsCRMS to delete
+     */
+    where?: ActivityLogsCRMWhereInput
+    /**
+     * Limit how many ActivityLogsCRMS to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLogsCRM without action
+   */
+  export type ActivityLogsCRMDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsCRM
+     */
+    select?: ActivityLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsCRM
+     */
+    omit?: ActivityLogsCRMOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SessionLogsCRM
+   */
+
+  export type AggregateSessionLogsCRM = {
+    _count: SessionLogsCRMCountAggregateOutputType | null
+    _avg: SessionLogsCRMAvgAggregateOutputType | null
+    _sum: SessionLogsCRMSumAggregateOutputType | null
+    _min: SessionLogsCRMMinAggregateOutputType | null
+    _max: SessionLogsCRMMaxAggregateOutputType | null
+  }
+
+  export type SessionLogsCRMAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    totalPages: number | null
+  }
+
+  export type SessionLogsCRMSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    totalPages: number | null
+  }
+
+  export type SessionLogsCRMMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    sessionToken: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    endReason: string | null
+    startTime: Date | null
+    endTime: Date | null
+    duration: number | null
+    totalPages: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionLogsCRMMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    sessionToken: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    endReason: string | null
+    startTime: Date | null
+    endTime: Date | null
+    duration: number | null
+    totalPages: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionLogsCRMCountAggregateOutputType = {
+    id: number
+    userId: number
+    sessionToken: number
+    ipAddress: number
+    userAgent: number
+    browserName: number
+    deviceType: number
+    operatingSystem: number
+    endReason: number
+    startTime: number
+    endTime: number
+    duration: number
+    totalPages: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SessionLogsCRMAvgAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    totalPages?: true
+  }
+
+  export type SessionLogsCRMSumAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    totalPages?: true
+  }
+
+  export type SessionLogsCRMMinAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionToken?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    endReason?: true
+    startTime?: true
+    endTime?: true
+    duration?: true
+    totalPages?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionLogsCRMMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionToken?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    endReason?: true
+    startTime?: true
+    endTime?: true
+    duration?: true
+    totalPages?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionLogsCRMCountAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionToken?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    endReason?: true
+    startTime?: true
+    endTime?: true
+    duration?: true
+    totalPages?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SessionLogsCRMAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SessionLogsCRM to aggregate.
+     */
+    where?: SessionLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsCRMS to fetch.
+     */
+    orderBy?: SessionLogsCRMOrderByWithRelationInput | SessionLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SessionLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SessionLogsCRMS
+    **/
+    _count?: true | SessionLogsCRMCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SessionLogsCRMAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SessionLogsCRMSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SessionLogsCRMMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SessionLogsCRMMaxAggregateInputType
+  }
+
+  export type GetSessionLogsCRMAggregateType<T extends SessionLogsCRMAggregateArgs> = {
+        [P in keyof T & keyof AggregateSessionLogsCRM]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSessionLogsCRM[P]>
+      : GetScalarType<T[P], AggregateSessionLogsCRM[P]>
+  }
+
+
+
+
+  export type SessionLogsCRMGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SessionLogsCRMWhereInput
+    orderBy?: SessionLogsCRMOrderByWithAggregationInput | SessionLogsCRMOrderByWithAggregationInput[]
+    by: SessionLogsCRMScalarFieldEnum[] | SessionLogsCRMScalarFieldEnum
+    having?: SessionLogsCRMScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SessionLogsCRMCountAggregateInputType | true
+    _avg?: SessionLogsCRMAvgAggregateInputType
+    _sum?: SessionLogsCRMSumAggregateInputType
+    _min?: SessionLogsCRMMinAggregateInputType
+    _max?: SessionLogsCRMMaxAggregateInputType
+  }
+
+  export type SessionLogsCRMGroupByOutputType = {
+    id: number
+    userId: number
+    sessionToken: string
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    endReason: string | null
+    startTime: Date
+    endTime: Date | null
+    duration: number
+    totalPages: number
+    createdAt: Date
+    updatedAt: Date
+    _count: SessionLogsCRMCountAggregateOutputType | null
+    _avg: SessionLogsCRMAvgAggregateOutputType | null
+    _sum: SessionLogsCRMSumAggregateOutputType | null
+    _min: SessionLogsCRMMinAggregateOutputType | null
+    _max: SessionLogsCRMMaxAggregateOutputType | null
+  }
+
+  type GetSessionLogsCRMGroupByPayload<T extends SessionLogsCRMGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SessionLogsCRMGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SessionLogsCRMGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SessionLogsCRMGroupByOutputType[P]>
+            : GetScalarType<T[P], SessionLogsCRMGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SessionLogsCRMSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sessionLogsCRM"]>
+
+  export type SessionLogsCRMSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sessionLogsCRM"]>
+
+  export type SessionLogsCRMSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sessionLogsCRM"]>
+
+  export type SessionLogsCRMSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SessionLogsCRMOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "sessionToken" | "ipAddress" | "userAgent" | "browserName" | "deviceType" | "operatingSystem" | "endReason" | "startTime" | "endTime" | "duration" | "totalPages" | "createdAt" | "updatedAt", ExtArgs["result"]["sessionLogsCRM"]>
+
+  export type $SessionLogsCRMPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SessionLogsCRM"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number
+      sessionToken: string
+      ipAddress: string | null
+      userAgent: string | null
+      browserName: string | null
+      deviceType: string | null
+      operatingSystem: string | null
+      endReason: string | null
+      startTime: Date
+      endTime: Date | null
+      duration: number
+      totalPages: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["sessionLogsCRM"]>
+    composites: {}
+  }
+
+  type SessionLogsCRMGetPayload<S extends boolean | null | undefined | SessionLogsCRMDefaultArgs> = $Result.GetResult<Prisma.$SessionLogsCRMPayload, S>
+
+  type SessionLogsCRMCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SessionLogsCRMFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SessionLogsCRMCountAggregateInputType | true
+    }
+
+  export interface SessionLogsCRMDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SessionLogsCRM'], meta: { name: 'SessionLogsCRM' } }
+    /**
+     * Find zero or one SessionLogsCRM that matches the filter.
+     * @param {SessionLogsCRMFindUniqueArgs} args - Arguments to find a SessionLogsCRM
+     * @example
+     * // Get one SessionLogsCRM
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SessionLogsCRMFindUniqueArgs>(args: SelectSubset<T, SessionLogsCRMFindUniqueArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SessionLogsCRM that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SessionLogsCRMFindUniqueOrThrowArgs} args - Arguments to find a SessionLogsCRM
+     * @example
+     * // Get one SessionLogsCRM
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SessionLogsCRMFindUniqueOrThrowArgs>(args: SelectSubset<T, SessionLogsCRMFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SessionLogsCRM that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsCRMFindFirstArgs} args - Arguments to find a SessionLogsCRM
+     * @example
+     * // Get one SessionLogsCRM
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SessionLogsCRMFindFirstArgs>(args?: SelectSubset<T, SessionLogsCRMFindFirstArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SessionLogsCRM that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsCRMFindFirstOrThrowArgs} args - Arguments to find a SessionLogsCRM
+     * @example
+     * // Get one SessionLogsCRM
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SessionLogsCRMFindFirstOrThrowArgs>(args?: SelectSubset<T, SessionLogsCRMFindFirstOrThrowArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SessionLogsCRMS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsCRMFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SessionLogsCRMS
+     * const sessionLogsCRMS = await prisma.sessionLogsCRM.findMany()
+     * 
+     * // Get first 10 SessionLogsCRMS
+     * const sessionLogsCRMS = await prisma.sessionLogsCRM.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const sessionLogsCRMWithIdOnly = await prisma.sessionLogsCRM.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SessionLogsCRMFindManyArgs>(args?: SelectSubset<T, SessionLogsCRMFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SessionLogsCRM.
+     * @param {SessionLogsCRMCreateArgs} args - Arguments to create a SessionLogsCRM.
+     * @example
+     * // Create one SessionLogsCRM
+     * const SessionLogsCRM = await prisma.sessionLogsCRM.create({
+     *   data: {
+     *     // ... data to create a SessionLogsCRM
+     *   }
+     * })
+     * 
+     */
+    create<T extends SessionLogsCRMCreateArgs>(args: SelectSubset<T, SessionLogsCRMCreateArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SessionLogsCRMS.
+     * @param {SessionLogsCRMCreateManyArgs} args - Arguments to create many SessionLogsCRMS.
+     * @example
+     * // Create many SessionLogsCRMS
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SessionLogsCRMCreateManyArgs>(args?: SelectSubset<T, SessionLogsCRMCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SessionLogsCRMS and returns the data saved in the database.
+     * @param {SessionLogsCRMCreateManyAndReturnArgs} args - Arguments to create many SessionLogsCRMS.
+     * @example
+     * // Create many SessionLogsCRMS
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SessionLogsCRMS and only return the `id`
+     * const sessionLogsCRMWithIdOnly = await prisma.sessionLogsCRM.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SessionLogsCRMCreateManyAndReturnArgs>(args?: SelectSubset<T, SessionLogsCRMCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SessionLogsCRM.
+     * @param {SessionLogsCRMDeleteArgs} args - Arguments to delete one SessionLogsCRM.
+     * @example
+     * // Delete one SessionLogsCRM
+     * const SessionLogsCRM = await prisma.sessionLogsCRM.delete({
+     *   where: {
+     *     // ... filter to delete one SessionLogsCRM
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SessionLogsCRMDeleteArgs>(args: SelectSubset<T, SessionLogsCRMDeleteArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SessionLogsCRM.
+     * @param {SessionLogsCRMUpdateArgs} args - Arguments to update one SessionLogsCRM.
+     * @example
+     * // Update one SessionLogsCRM
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SessionLogsCRMUpdateArgs>(args: SelectSubset<T, SessionLogsCRMUpdateArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SessionLogsCRMS.
+     * @param {SessionLogsCRMDeleteManyArgs} args - Arguments to filter SessionLogsCRMS to delete.
+     * @example
+     * // Delete a few SessionLogsCRMS
+     * const { count } = await prisma.sessionLogsCRM.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SessionLogsCRMDeleteManyArgs>(args?: SelectSubset<T, SessionLogsCRMDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SessionLogsCRMS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsCRMUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SessionLogsCRMS
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SessionLogsCRMUpdateManyArgs>(args: SelectSubset<T, SessionLogsCRMUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SessionLogsCRMS and returns the data updated in the database.
+     * @param {SessionLogsCRMUpdateManyAndReturnArgs} args - Arguments to update many SessionLogsCRMS.
+     * @example
+     * // Update many SessionLogsCRMS
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SessionLogsCRMS and only return the `id`
+     * const sessionLogsCRMWithIdOnly = await prisma.sessionLogsCRM.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SessionLogsCRMUpdateManyAndReturnArgs>(args: SelectSubset<T, SessionLogsCRMUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SessionLogsCRM.
+     * @param {SessionLogsCRMUpsertArgs} args - Arguments to update or create a SessionLogsCRM.
+     * @example
+     * // Update or create a SessionLogsCRM
+     * const sessionLogsCRM = await prisma.sessionLogsCRM.upsert({
+     *   create: {
+     *     // ... data to create a SessionLogsCRM
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SessionLogsCRM we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SessionLogsCRMUpsertArgs>(args: SelectSubset<T, SessionLogsCRMUpsertArgs<ExtArgs>>): Prisma__SessionLogsCRMClient<$Result.GetResult<Prisma.$SessionLogsCRMPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SessionLogsCRMS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsCRMCountArgs} args - Arguments to filter SessionLogsCRMS to count.
+     * @example
+     * // Count the number of SessionLogsCRMS
+     * const count = await prisma.sessionLogsCRM.count({
+     *   where: {
+     *     // ... the filter for the SessionLogsCRMS we want to count
+     *   }
+     * })
+    **/
+    count<T extends SessionLogsCRMCountArgs>(
+      args?: Subset<T, SessionLogsCRMCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SessionLogsCRMCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SessionLogsCRM.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsCRMAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SessionLogsCRMAggregateArgs>(args: Subset<T, SessionLogsCRMAggregateArgs>): Prisma.PrismaPromise<GetSessionLogsCRMAggregateType<T>>
+
+    /**
+     * Group by SessionLogsCRM.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsCRMGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SessionLogsCRMGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SessionLogsCRMGroupByArgs['orderBy'] }
+        : { orderBy?: SessionLogsCRMGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SessionLogsCRMGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSessionLogsCRMGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SessionLogsCRM model
+   */
+  readonly fields: SessionLogsCRMFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SessionLogsCRM.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SessionLogsCRMClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SessionLogsCRM model
+   */
+  interface SessionLogsCRMFieldRefs {
+    readonly id: FieldRef<"SessionLogsCRM", 'Int'>
+    readonly userId: FieldRef<"SessionLogsCRM", 'Int'>
+    readonly sessionToken: FieldRef<"SessionLogsCRM", 'String'>
+    readonly ipAddress: FieldRef<"SessionLogsCRM", 'String'>
+    readonly userAgent: FieldRef<"SessionLogsCRM", 'String'>
+    readonly browserName: FieldRef<"SessionLogsCRM", 'String'>
+    readonly deviceType: FieldRef<"SessionLogsCRM", 'String'>
+    readonly operatingSystem: FieldRef<"SessionLogsCRM", 'String'>
+    readonly endReason: FieldRef<"SessionLogsCRM", 'String'>
+    readonly startTime: FieldRef<"SessionLogsCRM", 'DateTime'>
+    readonly endTime: FieldRef<"SessionLogsCRM", 'DateTime'>
+    readonly duration: FieldRef<"SessionLogsCRM", 'Int'>
+    readonly totalPages: FieldRef<"SessionLogsCRM", 'Int'>
+    readonly createdAt: FieldRef<"SessionLogsCRM", 'DateTime'>
+    readonly updatedAt: FieldRef<"SessionLogsCRM", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SessionLogsCRM findUnique
+   */
+  export type SessionLogsCRMFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsCRM to fetch.
+     */
+    where: SessionLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsCRM findUniqueOrThrow
+   */
+  export type SessionLogsCRMFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsCRM to fetch.
+     */
+    where: SessionLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsCRM findFirst
+   */
+  export type SessionLogsCRMFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsCRM to fetch.
+     */
+    where?: SessionLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsCRMS to fetch.
+     */
+    orderBy?: SessionLogsCRMOrderByWithRelationInput | SessionLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SessionLogsCRMS.
+     */
+    cursor?: SessionLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SessionLogsCRMS.
+     */
+    distinct?: SessionLogsCRMScalarFieldEnum | SessionLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * SessionLogsCRM findFirstOrThrow
+   */
+  export type SessionLogsCRMFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsCRM to fetch.
+     */
+    where?: SessionLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsCRMS to fetch.
+     */
+    orderBy?: SessionLogsCRMOrderByWithRelationInput | SessionLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SessionLogsCRMS.
+     */
+    cursor?: SessionLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SessionLogsCRMS.
+     */
+    distinct?: SessionLogsCRMScalarFieldEnum | SessionLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * SessionLogsCRM findMany
+   */
+  export type SessionLogsCRMFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsCRMS to fetch.
+     */
+    where?: SessionLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsCRMS to fetch.
+     */
+    orderBy?: SessionLogsCRMOrderByWithRelationInput | SessionLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SessionLogsCRMS.
+     */
+    cursor?: SessionLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsCRMS.
+     */
+    skip?: number
+    distinct?: SessionLogsCRMScalarFieldEnum | SessionLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * SessionLogsCRM create
+   */
+  export type SessionLogsCRMCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SessionLogsCRM.
+     */
+    data: XOR<SessionLogsCRMCreateInput, SessionLogsCRMUncheckedCreateInput>
+  }
+
+  /**
+   * SessionLogsCRM createMany
+   */
+  export type SessionLogsCRMCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SessionLogsCRMS.
+     */
+    data: SessionLogsCRMCreateManyInput | SessionLogsCRMCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SessionLogsCRM createManyAndReturn
+   */
+  export type SessionLogsCRMCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data used to create many SessionLogsCRMS.
+     */
+    data: SessionLogsCRMCreateManyInput | SessionLogsCRMCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SessionLogsCRM update
+   */
+  export type SessionLogsCRMUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SessionLogsCRM.
+     */
+    data: XOR<SessionLogsCRMUpdateInput, SessionLogsCRMUncheckedUpdateInput>
+    /**
+     * Choose, which SessionLogsCRM to update.
+     */
+    where: SessionLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsCRM updateMany
+   */
+  export type SessionLogsCRMUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SessionLogsCRMS.
+     */
+    data: XOR<SessionLogsCRMUpdateManyMutationInput, SessionLogsCRMUncheckedUpdateManyInput>
+    /**
+     * Filter which SessionLogsCRMS to update
+     */
+    where?: SessionLogsCRMWhereInput
+    /**
+     * Limit how many SessionLogsCRMS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SessionLogsCRM updateManyAndReturn
+   */
+  export type SessionLogsCRMUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data used to update SessionLogsCRMS.
+     */
+    data: XOR<SessionLogsCRMUpdateManyMutationInput, SessionLogsCRMUncheckedUpdateManyInput>
+    /**
+     * Filter which SessionLogsCRMS to update
+     */
+    where?: SessionLogsCRMWhereInput
+    /**
+     * Limit how many SessionLogsCRMS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SessionLogsCRM upsert
+   */
+  export type SessionLogsCRMUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SessionLogsCRM to update in case it exists.
+     */
+    where: SessionLogsCRMWhereUniqueInput
+    /**
+     * In case the SessionLogsCRM found by the `where` argument doesn't exist, create a new SessionLogsCRM with this data.
+     */
+    create: XOR<SessionLogsCRMCreateInput, SessionLogsCRMUncheckedCreateInput>
+    /**
+     * In case the SessionLogsCRM was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SessionLogsCRMUpdateInput, SessionLogsCRMUncheckedUpdateInput>
+  }
+
+  /**
+   * SessionLogsCRM delete
+   */
+  export type SessionLogsCRMDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter which SessionLogsCRM to delete.
+     */
+    where: SessionLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsCRM deleteMany
+   */
+  export type SessionLogsCRMDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SessionLogsCRMS to delete
+     */
+    where?: SessionLogsCRMWhereInput
+    /**
+     * Limit how many SessionLogsCRMS to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SessionLogsCRM without action
+   */
+  export type SessionLogsCRMDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsCRM
+     */
+    select?: SessionLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsCRM
+     */
+    omit?: SessionLogsCRMOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PageViewLogsCRM
+   */
+
+  export type AggregatePageViewLogsCRM = {
+    _count: PageViewLogsCRMCountAggregateOutputType | null
+    _avg: PageViewLogsCRMAvgAggregateOutputType | null
+    _sum: PageViewLogsCRMSumAggregateOutputType | null
+    _min: PageViewLogsCRMMinAggregateOutputType | null
+    _max: PageViewLogsCRMMaxAggregateOutputType | null
+  }
+
+  export type PageViewLogsCRMAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+  }
+
+  export type PageViewLogsCRMSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+  }
+
+  export type PageViewLogsCRMMinAggregateOutputType = {
+    id: number | null
+    sessionId: string | null
+    userId: number | null
+    pagePath: string | null
+    pageTitle: string | null
+    entryTime: Date | null
+    exitTime: Date | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+    referrer: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PageViewLogsCRMMaxAggregateOutputType = {
+    id: number | null
+    sessionId: string | null
+    userId: number | null
+    pagePath: string | null
+    pageTitle: string | null
+    entryTime: Date | null
+    exitTime: Date | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+    referrer: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PageViewLogsCRMCountAggregateOutputType = {
+    id: number
+    sessionId: number
+    userId: number
+    pagePath: number
+    pageTitle: number
+    entryTime: number
+    exitTime: number
+    duration: number
+    scrollDepth: number
+    interactions: number
+    referrer: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PageViewLogsCRMAvgAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+  }
+
+  export type PageViewLogsCRMSumAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+  }
+
+  export type PageViewLogsCRMMinAggregateInputType = {
+    id?: true
+    sessionId?: true
+    userId?: true
+    pagePath?: true
+    pageTitle?: true
+    entryTime?: true
+    exitTime?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+    referrer?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PageViewLogsCRMMaxAggregateInputType = {
+    id?: true
+    sessionId?: true
+    userId?: true
+    pagePath?: true
+    pageTitle?: true
+    entryTime?: true
+    exitTime?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+    referrer?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PageViewLogsCRMCountAggregateInputType = {
+    id?: true
+    sessionId?: true
+    userId?: true
+    pagePath?: true
+    pageTitle?: true
+    entryTime?: true
+    exitTime?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+    referrer?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PageViewLogsCRMAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PageViewLogsCRM to aggregate.
+     */
+    where?: PageViewLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsCRMS to fetch.
+     */
+    orderBy?: PageViewLogsCRMOrderByWithRelationInput | PageViewLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PageViewLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PageViewLogsCRMS
+    **/
+    _count?: true | PageViewLogsCRMCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PageViewLogsCRMAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PageViewLogsCRMSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PageViewLogsCRMMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PageViewLogsCRMMaxAggregateInputType
+  }
+
+  export type GetPageViewLogsCRMAggregateType<T extends PageViewLogsCRMAggregateArgs> = {
+        [P in keyof T & keyof AggregatePageViewLogsCRM]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePageViewLogsCRM[P]>
+      : GetScalarType<T[P], AggregatePageViewLogsCRM[P]>
+  }
+
+
+
+
+  export type PageViewLogsCRMGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PageViewLogsCRMWhereInput
+    orderBy?: PageViewLogsCRMOrderByWithAggregationInput | PageViewLogsCRMOrderByWithAggregationInput[]
+    by: PageViewLogsCRMScalarFieldEnum[] | PageViewLogsCRMScalarFieldEnum
+    having?: PageViewLogsCRMScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PageViewLogsCRMCountAggregateInputType | true
+    _avg?: PageViewLogsCRMAvgAggregateInputType
+    _sum?: PageViewLogsCRMSumAggregateInputType
+    _min?: PageViewLogsCRMMinAggregateInputType
+    _max?: PageViewLogsCRMMaxAggregateInputType
+  }
+
+  export type PageViewLogsCRMGroupByOutputType = {
+    id: number
+    sessionId: string
+    userId: number | null
+    pagePath: string
+    pageTitle: string | null
+    entryTime: Date
+    exitTime: Date | null
+    duration: number
+    scrollDepth: number
+    interactions: number
+    referrer: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PageViewLogsCRMCountAggregateOutputType | null
+    _avg: PageViewLogsCRMAvgAggregateOutputType | null
+    _sum: PageViewLogsCRMSumAggregateOutputType | null
+    _min: PageViewLogsCRMMinAggregateOutputType | null
+    _max: PageViewLogsCRMMaxAggregateOutputType | null
+  }
+
+  type GetPageViewLogsCRMGroupByPayload<T extends PageViewLogsCRMGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PageViewLogsCRMGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PageViewLogsCRMGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PageViewLogsCRMGroupByOutputType[P]>
+            : GetScalarType<T[P], PageViewLogsCRMGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PageViewLogsCRMSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pageViewLogsCRM"]>
+
+  export type PageViewLogsCRMSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pageViewLogsCRM"]>
+
+  export type PageViewLogsCRMSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pageViewLogsCRM"]>
+
+  export type PageViewLogsCRMSelectScalar = {
+    id?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PageViewLogsCRMOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sessionId" | "userId" | "pagePath" | "pageTitle" | "entryTime" | "exitTime" | "duration" | "scrollDepth" | "interactions" | "referrer" | "createdAt" | "updatedAt", ExtArgs["result"]["pageViewLogsCRM"]>
+
+  export type $PageViewLogsCRMPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PageViewLogsCRM"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      sessionId: string
+      userId: number | null
+      pagePath: string
+      pageTitle: string | null
+      entryTime: Date
+      exitTime: Date | null
+      duration: number
+      scrollDepth: number
+      interactions: number
+      referrer: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["pageViewLogsCRM"]>
+    composites: {}
+  }
+
+  type PageViewLogsCRMGetPayload<S extends boolean | null | undefined | PageViewLogsCRMDefaultArgs> = $Result.GetResult<Prisma.$PageViewLogsCRMPayload, S>
+
+  type PageViewLogsCRMCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PageViewLogsCRMFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PageViewLogsCRMCountAggregateInputType | true
+    }
+
+  export interface PageViewLogsCRMDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PageViewLogsCRM'], meta: { name: 'PageViewLogsCRM' } }
+    /**
+     * Find zero or one PageViewLogsCRM that matches the filter.
+     * @param {PageViewLogsCRMFindUniqueArgs} args - Arguments to find a PageViewLogsCRM
+     * @example
+     * // Get one PageViewLogsCRM
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PageViewLogsCRMFindUniqueArgs>(args: SelectSubset<T, PageViewLogsCRMFindUniqueArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PageViewLogsCRM that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PageViewLogsCRMFindUniqueOrThrowArgs} args - Arguments to find a PageViewLogsCRM
+     * @example
+     * // Get one PageViewLogsCRM
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PageViewLogsCRMFindUniqueOrThrowArgs>(args: SelectSubset<T, PageViewLogsCRMFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PageViewLogsCRM that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsCRMFindFirstArgs} args - Arguments to find a PageViewLogsCRM
+     * @example
+     * // Get one PageViewLogsCRM
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PageViewLogsCRMFindFirstArgs>(args?: SelectSubset<T, PageViewLogsCRMFindFirstArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PageViewLogsCRM that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsCRMFindFirstOrThrowArgs} args - Arguments to find a PageViewLogsCRM
+     * @example
+     * // Get one PageViewLogsCRM
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PageViewLogsCRMFindFirstOrThrowArgs>(args?: SelectSubset<T, PageViewLogsCRMFindFirstOrThrowArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PageViewLogsCRMS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsCRMFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PageViewLogsCRMS
+     * const pageViewLogsCRMS = await prisma.pageViewLogsCRM.findMany()
+     * 
+     * // Get first 10 PageViewLogsCRMS
+     * const pageViewLogsCRMS = await prisma.pageViewLogsCRM.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const pageViewLogsCRMWithIdOnly = await prisma.pageViewLogsCRM.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PageViewLogsCRMFindManyArgs>(args?: SelectSubset<T, PageViewLogsCRMFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PageViewLogsCRM.
+     * @param {PageViewLogsCRMCreateArgs} args - Arguments to create a PageViewLogsCRM.
+     * @example
+     * // Create one PageViewLogsCRM
+     * const PageViewLogsCRM = await prisma.pageViewLogsCRM.create({
+     *   data: {
+     *     // ... data to create a PageViewLogsCRM
+     *   }
+     * })
+     * 
+     */
+    create<T extends PageViewLogsCRMCreateArgs>(args: SelectSubset<T, PageViewLogsCRMCreateArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PageViewLogsCRMS.
+     * @param {PageViewLogsCRMCreateManyArgs} args - Arguments to create many PageViewLogsCRMS.
+     * @example
+     * // Create many PageViewLogsCRMS
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PageViewLogsCRMCreateManyArgs>(args?: SelectSubset<T, PageViewLogsCRMCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PageViewLogsCRMS and returns the data saved in the database.
+     * @param {PageViewLogsCRMCreateManyAndReturnArgs} args - Arguments to create many PageViewLogsCRMS.
+     * @example
+     * // Create many PageViewLogsCRMS
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PageViewLogsCRMS and only return the `id`
+     * const pageViewLogsCRMWithIdOnly = await prisma.pageViewLogsCRM.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PageViewLogsCRMCreateManyAndReturnArgs>(args?: SelectSubset<T, PageViewLogsCRMCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PageViewLogsCRM.
+     * @param {PageViewLogsCRMDeleteArgs} args - Arguments to delete one PageViewLogsCRM.
+     * @example
+     * // Delete one PageViewLogsCRM
+     * const PageViewLogsCRM = await prisma.pageViewLogsCRM.delete({
+     *   where: {
+     *     // ... filter to delete one PageViewLogsCRM
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PageViewLogsCRMDeleteArgs>(args: SelectSubset<T, PageViewLogsCRMDeleteArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PageViewLogsCRM.
+     * @param {PageViewLogsCRMUpdateArgs} args - Arguments to update one PageViewLogsCRM.
+     * @example
+     * // Update one PageViewLogsCRM
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PageViewLogsCRMUpdateArgs>(args: SelectSubset<T, PageViewLogsCRMUpdateArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PageViewLogsCRMS.
+     * @param {PageViewLogsCRMDeleteManyArgs} args - Arguments to filter PageViewLogsCRMS to delete.
+     * @example
+     * // Delete a few PageViewLogsCRMS
+     * const { count } = await prisma.pageViewLogsCRM.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PageViewLogsCRMDeleteManyArgs>(args?: SelectSubset<T, PageViewLogsCRMDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PageViewLogsCRMS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsCRMUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PageViewLogsCRMS
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PageViewLogsCRMUpdateManyArgs>(args: SelectSubset<T, PageViewLogsCRMUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PageViewLogsCRMS and returns the data updated in the database.
+     * @param {PageViewLogsCRMUpdateManyAndReturnArgs} args - Arguments to update many PageViewLogsCRMS.
+     * @example
+     * // Update many PageViewLogsCRMS
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PageViewLogsCRMS and only return the `id`
+     * const pageViewLogsCRMWithIdOnly = await prisma.pageViewLogsCRM.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PageViewLogsCRMUpdateManyAndReturnArgs>(args: SelectSubset<T, PageViewLogsCRMUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PageViewLogsCRM.
+     * @param {PageViewLogsCRMUpsertArgs} args - Arguments to update or create a PageViewLogsCRM.
+     * @example
+     * // Update or create a PageViewLogsCRM
+     * const pageViewLogsCRM = await prisma.pageViewLogsCRM.upsert({
+     *   create: {
+     *     // ... data to create a PageViewLogsCRM
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PageViewLogsCRM we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PageViewLogsCRMUpsertArgs>(args: SelectSubset<T, PageViewLogsCRMUpsertArgs<ExtArgs>>): Prisma__PageViewLogsCRMClient<$Result.GetResult<Prisma.$PageViewLogsCRMPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PageViewLogsCRMS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsCRMCountArgs} args - Arguments to filter PageViewLogsCRMS to count.
+     * @example
+     * // Count the number of PageViewLogsCRMS
+     * const count = await prisma.pageViewLogsCRM.count({
+     *   where: {
+     *     // ... the filter for the PageViewLogsCRMS we want to count
+     *   }
+     * })
+    **/
+    count<T extends PageViewLogsCRMCountArgs>(
+      args?: Subset<T, PageViewLogsCRMCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PageViewLogsCRMCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PageViewLogsCRM.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsCRMAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PageViewLogsCRMAggregateArgs>(args: Subset<T, PageViewLogsCRMAggregateArgs>): Prisma.PrismaPromise<GetPageViewLogsCRMAggregateType<T>>
+
+    /**
+     * Group by PageViewLogsCRM.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsCRMGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PageViewLogsCRMGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PageViewLogsCRMGroupByArgs['orderBy'] }
+        : { orderBy?: PageViewLogsCRMGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PageViewLogsCRMGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPageViewLogsCRMGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PageViewLogsCRM model
+   */
+  readonly fields: PageViewLogsCRMFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PageViewLogsCRM.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PageViewLogsCRMClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PageViewLogsCRM model
+   */
+  interface PageViewLogsCRMFieldRefs {
+    readonly id: FieldRef<"PageViewLogsCRM", 'Int'>
+    readonly sessionId: FieldRef<"PageViewLogsCRM", 'String'>
+    readonly userId: FieldRef<"PageViewLogsCRM", 'Int'>
+    readonly pagePath: FieldRef<"PageViewLogsCRM", 'String'>
+    readonly pageTitle: FieldRef<"PageViewLogsCRM", 'String'>
+    readonly entryTime: FieldRef<"PageViewLogsCRM", 'DateTime'>
+    readonly exitTime: FieldRef<"PageViewLogsCRM", 'DateTime'>
+    readonly duration: FieldRef<"PageViewLogsCRM", 'Int'>
+    readonly scrollDepth: FieldRef<"PageViewLogsCRM", 'Int'>
+    readonly interactions: FieldRef<"PageViewLogsCRM", 'Int'>
+    readonly referrer: FieldRef<"PageViewLogsCRM", 'String'>
+    readonly createdAt: FieldRef<"PageViewLogsCRM", 'DateTime'>
+    readonly updatedAt: FieldRef<"PageViewLogsCRM", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PageViewLogsCRM findUnique
+   */
+  export type PageViewLogsCRMFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsCRM to fetch.
+     */
+    where: PageViewLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsCRM findUniqueOrThrow
+   */
+  export type PageViewLogsCRMFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsCRM to fetch.
+     */
+    where: PageViewLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsCRM findFirst
+   */
+  export type PageViewLogsCRMFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsCRM to fetch.
+     */
+    where?: PageViewLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsCRMS to fetch.
+     */
+    orderBy?: PageViewLogsCRMOrderByWithRelationInput | PageViewLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PageViewLogsCRMS.
+     */
+    cursor?: PageViewLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PageViewLogsCRMS.
+     */
+    distinct?: PageViewLogsCRMScalarFieldEnum | PageViewLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * PageViewLogsCRM findFirstOrThrow
+   */
+  export type PageViewLogsCRMFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsCRM to fetch.
+     */
+    where?: PageViewLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsCRMS to fetch.
+     */
+    orderBy?: PageViewLogsCRMOrderByWithRelationInput | PageViewLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PageViewLogsCRMS.
+     */
+    cursor?: PageViewLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsCRMS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PageViewLogsCRMS.
+     */
+    distinct?: PageViewLogsCRMScalarFieldEnum | PageViewLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * PageViewLogsCRM findMany
+   */
+  export type PageViewLogsCRMFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsCRMS to fetch.
+     */
+    where?: PageViewLogsCRMWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsCRMS to fetch.
+     */
+    orderBy?: PageViewLogsCRMOrderByWithRelationInput | PageViewLogsCRMOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PageViewLogsCRMS.
+     */
+    cursor?: PageViewLogsCRMWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsCRMS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsCRMS.
+     */
+    skip?: number
+    distinct?: PageViewLogsCRMScalarFieldEnum | PageViewLogsCRMScalarFieldEnum[]
+  }
+
+  /**
+   * PageViewLogsCRM create
+   */
+  export type PageViewLogsCRMCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PageViewLogsCRM.
+     */
+    data: XOR<PageViewLogsCRMCreateInput, PageViewLogsCRMUncheckedCreateInput>
+  }
+
+  /**
+   * PageViewLogsCRM createMany
+   */
+  export type PageViewLogsCRMCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PageViewLogsCRMS.
+     */
+    data: PageViewLogsCRMCreateManyInput | PageViewLogsCRMCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PageViewLogsCRM createManyAndReturn
+   */
+  export type PageViewLogsCRMCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data used to create many PageViewLogsCRMS.
+     */
+    data: PageViewLogsCRMCreateManyInput | PageViewLogsCRMCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PageViewLogsCRM update
+   */
+  export type PageViewLogsCRMUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PageViewLogsCRM.
+     */
+    data: XOR<PageViewLogsCRMUpdateInput, PageViewLogsCRMUncheckedUpdateInput>
+    /**
+     * Choose, which PageViewLogsCRM to update.
+     */
+    where: PageViewLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsCRM updateMany
+   */
+  export type PageViewLogsCRMUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PageViewLogsCRMS.
+     */
+    data: XOR<PageViewLogsCRMUpdateManyMutationInput, PageViewLogsCRMUncheckedUpdateManyInput>
+    /**
+     * Filter which PageViewLogsCRMS to update
+     */
+    where?: PageViewLogsCRMWhereInput
+    /**
+     * Limit how many PageViewLogsCRMS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PageViewLogsCRM updateManyAndReturn
+   */
+  export type PageViewLogsCRMUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * The data used to update PageViewLogsCRMS.
+     */
+    data: XOR<PageViewLogsCRMUpdateManyMutationInput, PageViewLogsCRMUncheckedUpdateManyInput>
+    /**
+     * Filter which PageViewLogsCRMS to update
+     */
+    where?: PageViewLogsCRMWhereInput
+    /**
+     * Limit how many PageViewLogsCRMS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PageViewLogsCRM upsert
+   */
+  export type PageViewLogsCRMUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PageViewLogsCRM to update in case it exists.
+     */
+    where: PageViewLogsCRMWhereUniqueInput
+    /**
+     * In case the PageViewLogsCRM found by the `where` argument doesn't exist, create a new PageViewLogsCRM with this data.
+     */
+    create: XOR<PageViewLogsCRMCreateInput, PageViewLogsCRMUncheckedCreateInput>
+    /**
+     * In case the PageViewLogsCRM was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PageViewLogsCRMUpdateInput, PageViewLogsCRMUncheckedUpdateInput>
+  }
+
+  /**
+   * PageViewLogsCRM delete
+   */
+  export type PageViewLogsCRMDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+    /**
+     * Filter which PageViewLogsCRM to delete.
+     */
+    where: PageViewLogsCRMWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsCRM deleteMany
+   */
+  export type PageViewLogsCRMDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PageViewLogsCRMS to delete
+     */
+    where?: PageViewLogsCRMWhereInput
+    /**
+     * Limit how many PageViewLogsCRMS to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PageViewLogsCRM without action
+   */
+  export type PageViewLogsCRMDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsCRM
+     */
+    select?: PageViewLogsCRMSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsCRM
+     */
+    omit?: PageViewLogsCRMOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model LoginLogsCrm
+   */
+
+  export type AggregateLoginLogsCrm = {
+    _count: LoginLogsCrmCountAggregateOutputType | null
+    _avg: LoginLogsCrmAvgAggregateOutputType | null
+    _sum: LoginLogsCrmSumAggregateOutputType | null
+    _min: LoginLogsCrmMinAggregateOutputType | null
+    _max: LoginLogsCrmMaxAggregateOutputType | null
+  }
+
+  export type LoginLogsCrmAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type LoginLogsCrmSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type LoginLogsCrmMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    sessionType: string | null
+    success: boolean | null
+    createdAt: Date | null
+  }
+
+  export type LoginLogsCrmMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    sessionType: string | null
+    success: boolean | null
+    createdAt: Date | null
+  }
+
+  export type LoginLogsCrmCountAggregateOutputType = {
+    id: number
+    userId: number
+    name: number
+    email: number
+    ipAddress: number
+    userAgent: number
+    browserName: number
+    deviceType: number
+    operatingSystem: number
+    sessionType: number
+    success: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type LoginLogsCrmAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type LoginLogsCrmSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type LoginLogsCrmMinAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    sessionType?: true
+    success?: true
+    createdAt?: true
+  }
+
+  export type LoginLogsCrmMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    sessionType?: true
+    success?: true
+    createdAt?: true
+  }
+
+  export type LoginLogsCrmCountAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    sessionType?: true
+    success?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type LoginLogsCrmAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoginLogsCrm to aggregate.
+     */
+    where?: LoginLogsCrmWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsCrms to fetch.
+     */
+    orderBy?: LoginLogsCrmOrderByWithRelationInput | LoginLogsCrmOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoginLogsCrmWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsCrms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsCrms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoginLogsCrms
+    **/
+    _count?: true | LoginLogsCrmCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LoginLogsCrmAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LoginLogsCrmSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoginLogsCrmMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoginLogsCrmMaxAggregateInputType
+  }
+
+  export type GetLoginLogsCrmAggregateType<T extends LoginLogsCrmAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoginLogsCrm]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoginLogsCrm[P]>
+      : GetScalarType<T[P], AggregateLoginLogsCrm[P]>
+  }
+
+
+
+
+  export type LoginLogsCrmGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoginLogsCrmWhereInput
+    orderBy?: LoginLogsCrmOrderByWithAggregationInput | LoginLogsCrmOrderByWithAggregationInput[]
+    by: LoginLogsCrmScalarFieldEnum[] | LoginLogsCrmScalarFieldEnum
+    having?: LoginLogsCrmScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoginLogsCrmCountAggregateInputType | true
+    _avg?: LoginLogsCrmAvgAggregateInputType
+    _sum?: LoginLogsCrmSumAggregateInputType
+    _min?: LoginLogsCrmMinAggregateInputType
+    _max?: LoginLogsCrmMaxAggregateInputType
+  }
+
+  export type LoginLogsCrmGroupByOutputType = {
+    id: number
+    userId: number | null
+    name: string | null
+    email: string
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    sessionType: string
+    success: boolean
+    createdAt: Date
+    _count: LoginLogsCrmCountAggregateOutputType | null
+    _avg: LoginLogsCrmAvgAggregateOutputType | null
+    _sum: LoginLogsCrmSumAggregateOutputType | null
+    _min: LoginLogsCrmMinAggregateOutputType | null
+    _max: LoginLogsCrmMaxAggregateOutputType | null
+  }
+
+  type GetLoginLogsCrmGroupByPayload<T extends LoginLogsCrmGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoginLogsCrmGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoginLogsCrmGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoginLogsCrmGroupByOutputType[P]>
+            : GetScalarType<T[P], LoginLogsCrmGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoginLogsCrmSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["loginLogsCrm"]>
+
+  export type LoginLogsCrmSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["loginLogsCrm"]>
+
+  export type LoginLogsCrmSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["loginLogsCrm"]>
+
+  export type LoginLogsCrmSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }
+
+  export type LoginLogsCrmOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "email" | "ipAddress" | "userAgent" | "browserName" | "deviceType" | "operatingSystem" | "sessionType" | "success" | "createdAt", ExtArgs["result"]["loginLogsCrm"]>
+
+  export type $LoginLogsCrmPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoginLogsCrm"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number | null
+      name: string | null
+      email: string
+      ipAddress: string | null
+      userAgent: string | null
+      browserName: string | null
+      deviceType: string | null
+      operatingSystem: string | null
+      sessionType: string
+      success: boolean
+      createdAt: Date
+    }, ExtArgs["result"]["loginLogsCrm"]>
+    composites: {}
+  }
+
+  type LoginLogsCrmGetPayload<S extends boolean | null | undefined | LoginLogsCrmDefaultArgs> = $Result.GetResult<Prisma.$LoginLogsCrmPayload, S>
+
+  type LoginLogsCrmCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoginLogsCrmFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoginLogsCrmCountAggregateInputType | true
+    }
+
+  export interface LoginLogsCrmDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoginLogsCrm'], meta: { name: 'LoginLogsCrm' } }
+    /**
+     * Find zero or one LoginLogsCrm that matches the filter.
+     * @param {LoginLogsCrmFindUniqueArgs} args - Arguments to find a LoginLogsCrm
+     * @example
+     * // Get one LoginLogsCrm
+     * const loginLogsCrm = await prisma.loginLogsCrm.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoginLogsCrmFindUniqueArgs>(args: SelectSubset<T, LoginLogsCrmFindUniqueArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoginLogsCrm that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoginLogsCrmFindUniqueOrThrowArgs} args - Arguments to find a LoginLogsCrm
+     * @example
+     * // Get one LoginLogsCrm
+     * const loginLogsCrm = await prisma.loginLogsCrm.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoginLogsCrmFindUniqueOrThrowArgs>(args: SelectSubset<T, LoginLogsCrmFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoginLogsCrm that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsCrmFindFirstArgs} args - Arguments to find a LoginLogsCrm
+     * @example
+     * // Get one LoginLogsCrm
+     * const loginLogsCrm = await prisma.loginLogsCrm.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoginLogsCrmFindFirstArgs>(args?: SelectSubset<T, LoginLogsCrmFindFirstArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoginLogsCrm that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsCrmFindFirstOrThrowArgs} args - Arguments to find a LoginLogsCrm
+     * @example
+     * // Get one LoginLogsCrm
+     * const loginLogsCrm = await prisma.loginLogsCrm.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoginLogsCrmFindFirstOrThrowArgs>(args?: SelectSubset<T, LoginLogsCrmFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoginLogsCrms that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsCrmFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoginLogsCrms
+     * const loginLogsCrms = await prisma.loginLogsCrm.findMany()
+     * 
+     * // Get first 10 LoginLogsCrms
+     * const loginLogsCrms = await prisma.loginLogsCrm.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loginLogsCrmWithIdOnly = await prisma.loginLogsCrm.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoginLogsCrmFindManyArgs>(args?: SelectSubset<T, LoginLogsCrmFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoginLogsCrm.
+     * @param {LoginLogsCrmCreateArgs} args - Arguments to create a LoginLogsCrm.
+     * @example
+     * // Create one LoginLogsCrm
+     * const LoginLogsCrm = await prisma.loginLogsCrm.create({
+     *   data: {
+     *     // ... data to create a LoginLogsCrm
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoginLogsCrmCreateArgs>(args: SelectSubset<T, LoginLogsCrmCreateArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoginLogsCrms.
+     * @param {LoginLogsCrmCreateManyArgs} args - Arguments to create many LoginLogsCrms.
+     * @example
+     * // Create many LoginLogsCrms
+     * const loginLogsCrm = await prisma.loginLogsCrm.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoginLogsCrmCreateManyArgs>(args?: SelectSubset<T, LoginLogsCrmCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoginLogsCrms and returns the data saved in the database.
+     * @param {LoginLogsCrmCreateManyAndReturnArgs} args - Arguments to create many LoginLogsCrms.
+     * @example
+     * // Create many LoginLogsCrms
+     * const loginLogsCrm = await prisma.loginLogsCrm.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoginLogsCrms and only return the `id`
+     * const loginLogsCrmWithIdOnly = await prisma.loginLogsCrm.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoginLogsCrmCreateManyAndReturnArgs>(args?: SelectSubset<T, LoginLogsCrmCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoginLogsCrm.
+     * @param {LoginLogsCrmDeleteArgs} args - Arguments to delete one LoginLogsCrm.
+     * @example
+     * // Delete one LoginLogsCrm
+     * const LoginLogsCrm = await prisma.loginLogsCrm.delete({
+     *   where: {
+     *     // ... filter to delete one LoginLogsCrm
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoginLogsCrmDeleteArgs>(args: SelectSubset<T, LoginLogsCrmDeleteArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoginLogsCrm.
+     * @param {LoginLogsCrmUpdateArgs} args - Arguments to update one LoginLogsCrm.
+     * @example
+     * // Update one LoginLogsCrm
+     * const loginLogsCrm = await prisma.loginLogsCrm.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoginLogsCrmUpdateArgs>(args: SelectSubset<T, LoginLogsCrmUpdateArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoginLogsCrms.
+     * @param {LoginLogsCrmDeleteManyArgs} args - Arguments to filter LoginLogsCrms to delete.
+     * @example
+     * // Delete a few LoginLogsCrms
+     * const { count } = await prisma.loginLogsCrm.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoginLogsCrmDeleteManyArgs>(args?: SelectSubset<T, LoginLogsCrmDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoginLogsCrms.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsCrmUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoginLogsCrms
+     * const loginLogsCrm = await prisma.loginLogsCrm.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoginLogsCrmUpdateManyArgs>(args: SelectSubset<T, LoginLogsCrmUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoginLogsCrms and returns the data updated in the database.
+     * @param {LoginLogsCrmUpdateManyAndReturnArgs} args - Arguments to update many LoginLogsCrms.
+     * @example
+     * // Update many LoginLogsCrms
+     * const loginLogsCrm = await prisma.loginLogsCrm.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoginLogsCrms and only return the `id`
+     * const loginLogsCrmWithIdOnly = await prisma.loginLogsCrm.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoginLogsCrmUpdateManyAndReturnArgs>(args: SelectSubset<T, LoginLogsCrmUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoginLogsCrm.
+     * @param {LoginLogsCrmUpsertArgs} args - Arguments to update or create a LoginLogsCrm.
+     * @example
+     * // Update or create a LoginLogsCrm
+     * const loginLogsCrm = await prisma.loginLogsCrm.upsert({
+     *   create: {
+     *     // ... data to create a LoginLogsCrm
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoginLogsCrm we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoginLogsCrmUpsertArgs>(args: SelectSubset<T, LoginLogsCrmUpsertArgs<ExtArgs>>): Prisma__LoginLogsCrmClient<$Result.GetResult<Prisma.$LoginLogsCrmPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoginLogsCrms.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsCrmCountArgs} args - Arguments to filter LoginLogsCrms to count.
+     * @example
+     * // Count the number of LoginLogsCrms
+     * const count = await prisma.loginLogsCrm.count({
+     *   where: {
+     *     // ... the filter for the LoginLogsCrms we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoginLogsCrmCountArgs>(
+      args?: Subset<T, LoginLogsCrmCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoginLogsCrmCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoginLogsCrm.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsCrmAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoginLogsCrmAggregateArgs>(args: Subset<T, LoginLogsCrmAggregateArgs>): Prisma.PrismaPromise<GetLoginLogsCrmAggregateType<T>>
+
+    /**
+     * Group by LoginLogsCrm.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsCrmGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoginLogsCrmGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoginLogsCrmGroupByArgs['orderBy'] }
+        : { orderBy?: LoginLogsCrmGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoginLogsCrmGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoginLogsCrmGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoginLogsCrm model
+   */
+  readonly fields: LoginLogsCrmFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoginLogsCrm.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoginLogsCrmClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoginLogsCrm model
+   */
+  interface LoginLogsCrmFieldRefs {
+    readonly id: FieldRef<"LoginLogsCrm", 'Int'>
+    readonly userId: FieldRef<"LoginLogsCrm", 'Int'>
+    readonly name: FieldRef<"LoginLogsCrm", 'String'>
+    readonly email: FieldRef<"LoginLogsCrm", 'String'>
+    readonly ipAddress: FieldRef<"LoginLogsCrm", 'String'>
+    readonly userAgent: FieldRef<"LoginLogsCrm", 'String'>
+    readonly browserName: FieldRef<"LoginLogsCrm", 'String'>
+    readonly deviceType: FieldRef<"LoginLogsCrm", 'String'>
+    readonly operatingSystem: FieldRef<"LoginLogsCrm", 'String'>
+    readonly sessionType: FieldRef<"LoginLogsCrm", 'String'>
+    readonly success: FieldRef<"LoginLogsCrm", 'Boolean'>
+    readonly createdAt: FieldRef<"LoginLogsCrm", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoginLogsCrm findUnique
+   */
+  export type LoginLogsCrmFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsCrm to fetch.
+     */
+    where: LoginLogsCrmWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsCrm findUniqueOrThrow
+   */
+  export type LoginLogsCrmFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsCrm to fetch.
+     */
+    where: LoginLogsCrmWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsCrm findFirst
+   */
+  export type LoginLogsCrmFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsCrm to fetch.
+     */
+    where?: LoginLogsCrmWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsCrms to fetch.
+     */
+    orderBy?: LoginLogsCrmOrderByWithRelationInput | LoginLogsCrmOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoginLogsCrms.
+     */
+    cursor?: LoginLogsCrmWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsCrms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsCrms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoginLogsCrms.
+     */
+    distinct?: LoginLogsCrmScalarFieldEnum | LoginLogsCrmScalarFieldEnum[]
+  }
+
+  /**
+   * LoginLogsCrm findFirstOrThrow
+   */
+  export type LoginLogsCrmFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsCrm to fetch.
+     */
+    where?: LoginLogsCrmWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsCrms to fetch.
+     */
+    orderBy?: LoginLogsCrmOrderByWithRelationInput | LoginLogsCrmOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoginLogsCrms.
+     */
+    cursor?: LoginLogsCrmWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsCrms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsCrms.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoginLogsCrms.
+     */
+    distinct?: LoginLogsCrmScalarFieldEnum | LoginLogsCrmScalarFieldEnum[]
+  }
+
+  /**
+   * LoginLogsCrm findMany
+   */
+  export type LoginLogsCrmFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsCrms to fetch.
+     */
+    where?: LoginLogsCrmWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsCrms to fetch.
+     */
+    orderBy?: LoginLogsCrmOrderByWithRelationInput | LoginLogsCrmOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoginLogsCrms.
+     */
+    cursor?: LoginLogsCrmWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsCrms from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsCrms.
+     */
+    skip?: number
+    distinct?: LoginLogsCrmScalarFieldEnum | LoginLogsCrmScalarFieldEnum[]
+  }
+
+  /**
+   * LoginLogsCrm create
+   */
+  export type LoginLogsCrmCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * The data needed to create a LoginLogsCrm.
+     */
+    data: XOR<LoginLogsCrmCreateInput, LoginLogsCrmUncheckedCreateInput>
+  }
+
+  /**
+   * LoginLogsCrm createMany
+   */
+  export type LoginLogsCrmCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoginLogsCrms.
+     */
+    data: LoginLogsCrmCreateManyInput | LoginLogsCrmCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoginLogsCrm createManyAndReturn
+   */
+  export type LoginLogsCrmCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoginLogsCrms.
+     */
+    data: LoginLogsCrmCreateManyInput | LoginLogsCrmCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoginLogsCrm update
+   */
+  export type LoginLogsCrmUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * The data needed to update a LoginLogsCrm.
+     */
+    data: XOR<LoginLogsCrmUpdateInput, LoginLogsCrmUncheckedUpdateInput>
+    /**
+     * Choose, which LoginLogsCrm to update.
+     */
+    where: LoginLogsCrmWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsCrm updateMany
+   */
+  export type LoginLogsCrmUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoginLogsCrms.
+     */
+    data: XOR<LoginLogsCrmUpdateManyMutationInput, LoginLogsCrmUncheckedUpdateManyInput>
+    /**
+     * Filter which LoginLogsCrms to update
+     */
+    where?: LoginLogsCrmWhereInput
+    /**
+     * Limit how many LoginLogsCrms to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoginLogsCrm updateManyAndReturn
+   */
+  export type LoginLogsCrmUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * The data used to update LoginLogsCrms.
+     */
+    data: XOR<LoginLogsCrmUpdateManyMutationInput, LoginLogsCrmUncheckedUpdateManyInput>
+    /**
+     * Filter which LoginLogsCrms to update
+     */
+    where?: LoginLogsCrmWhereInput
+    /**
+     * Limit how many LoginLogsCrms to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoginLogsCrm upsert
+   */
+  export type LoginLogsCrmUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * The filter to search for the LoginLogsCrm to update in case it exists.
+     */
+    where: LoginLogsCrmWhereUniqueInput
+    /**
+     * In case the LoginLogsCrm found by the `where` argument doesn't exist, create a new LoginLogsCrm with this data.
+     */
+    create: XOR<LoginLogsCrmCreateInput, LoginLogsCrmUncheckedCreateInput>
+    /**
+     * In case the LoginLogsCrm was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoginLogsCrmUpdateInput, LoginLogsCrmUncheckedUpdateInput>
+  }
+
+  /**
+   * LoginLogsCrm delete
+   */
+  export type LoginLogsCrmDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
+    /**
+     * Filter which LoginLogsCrm to delete.
+     */
+    where: LoginLogsCrmWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsCrm deleteMany
+   */
+  export type LoginLogsCrmDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoginLogsCrms to delete
+     */
+    where?: LoginLogsCrmWhereInput
+    /**
+     * Limit how many LoginLogsCrms to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoginLogsCrm without action
+   */
+  export type LoginLogsCrmDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsCrm
+     */
+    select?: LoginLogsCrmSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsCrm
+     */
+    omit?: LoginLogsCrmOmit<ExtArgs> | null
   }
 
 
@@ -34307,6 +39287,86 @@ export namespace Prisma {
   export type WebAuditLogsScalarFieldEnum = (typeof WebAuditLogsScalarFieldEnum)[keyof typeof WebAuditLogsScalarFieldEnum]
 
 
+  export const ActivityLogsCRMScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    email: 'email',
+    entityType: 'entityType',
+    action: 'action',
+    entityId: 'entityId',
+    ipAddress: 'ipAddress',
+    details: 'details',
+    userAgent: 'userAgent',
+    browserName: 'browserName',
+    deviceType: 'deviceType',
+    operatingSystem: 'operatingSystem',
+    url: 'url',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ActivityLogsCRMScalarFieldEnum = (typeof ActivityLogsCRMScalarFieldEnum)[keyof typeof ActivityLogsCRMScalarFieldEnum]
+
+
+  export const SessionLogsCRMScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    sessionToken: 'sessionToken',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    browserName: 'browserName',
+    deviceType: 'deviceType',
+    operatingSystem: 'operatingSystem',
+    endReason: 'endReason',
+    startTime: 'startTime',
+    endTime: 'endTime',
+    duration: 'duration',
+    totalPages: 'totalPages',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SessionLogsCRMScalarFieldEnum = (typeof SessionLogsCRMScalarFieldEnum)[keyof typeof SessionLogsCRMScalarFieldEnum]
+
+
+  export const PageViewLogsCRMScalarFieldEnum: {
+    id: 'id',
+    sessionId: 'sessionId',
+    userId: 'userId',
+    pagePath: 'pagePath',
+    pageTitle: 'pageTitle',
+    entryTime: 'entryTime',
+    exitTime: 'exitTime',
+    duration: 'duration',
+    scrollDepth: 'scrollDepth',
+    interactions: 'interactions',
+    referrer: 'referrer',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PageViewLogsCRMScalarFieldEnum = (typeof PageViewLogsCRMScalarFieldEnum)[keyof typeof PageViewLogsCRMScalarFieldEnum]
+
+
+  export const LoginLogsCrmScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    email: 'email',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    browserName: 'browserName',
+    deviceType: 'deviceType',
+    operatingSystem: 'operatingSystem',
+    sessionType: 'sessionType',
+    success: 'success',
+    createdAt: 'createdAt'
+  };
+
+  export type LoginLogsCrmScalarFieldEnum = (typeof LoginLogsCrmScalarFieldEnum)[keyof typeof LoginLogsCrmScalarFieldEnum]
+
+
   export const BondsScalarFieldEnum: {
     id: 'id',
     isin: 'isin',
@@ -34980,6 +40040,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -35032,13 +40099,6 @@ export namespace Prisma {
    * Reference to a field of type 'IS_LISTED[]'
    */
   export type ListEnumIS_LISTEDFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IS_LISTED[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -35552,6 +40612,402 @@ export namespace Prisma {
     url?: StringNullableWithAggregatesFilter<"WebAuditLogs"> | string | null
     data?: JsonWithAggregatesFilter<"WebAuditLogs">
     createdAt?: DateTimeWithAggregatesFilter<"WebAuditLogs"> | Date | string
+  }
+
+  export type ActivityLogsCRMWhereInput = {
+    AND?: ActivityLogsCRMWhereInput | ActivityLogsCRMWhereInput[]
+    OR?: ActivityLogsCRMWhereInput[]
+    NOT?: ActivityLogsCRMWhereInput | ActivityLogsCRMWhereInput[]
+    id?: IntFilter<"ActivityLogsCRM"> | number
+    userId?: IntFilter<"ActivityLogsCRM"> | number
+    name?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    email?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    entityType?: StringFilter<"ActivityLogsCRM"> | string
+    action?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    entityId?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    ipAddress?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    details?: JsonFilter<"ActivityLogsCRM">
+    userAgent?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    browserName?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    deviceType?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    operatingSystem?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    url?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    createdAt?: DateTimeFilter<"ActivityLogsCRM"> | Date | string
+    updatedAt?: DateTimeFilter<"ActivityLogsCRM"> | Date | string
+  }
+
+  export type ActivityLogsCRMOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    entityType?: SortOrder
+    action?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    details?: SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsCRMWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ActivityLogsCRMWhereInput | ActivityLogsCRMWhereInput[]
+    OR?: ActivityLogsCRMWhereInput[]
+    NOT?: ActivityLogsCRMWhereInput | ActivityLogsCRMWhereInput[]
+    userId?: IntFilter<"ActivityLogsCRM"> | number
+    name?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    email?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    entityType?: StringFilter<"ActivityLogsCRM"> | string
+    action?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    entityId?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    ipAddress?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    details?: JsonFilter<"ActivityLogsCRM">
+    userAgent?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    browserName?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    deviceType?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    operatingSystem?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    url?: StringNullableFilter<"ActivityLogsCRM"> | string | null
+    createdAt?: DateTimeFilter<"ActivityLogsCRM"> | Date | string
+    updatedAt?: DateTimeFilter<"ActivityLogsCRM"> | Date | string
+  }, "id">
+
+  export type ActivityLogsCRMOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    entityType?: SortOrder
+    action?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    details?: SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ActivityLogsCRMCountOrderByAggregateInput
+    _avg?: ActivityLogsCRMAvgOrderByAggregateInput
+    _max?: ActivityLogsCRMMaxOrderByAggregateInput
+    _min?: ActivityLogsCRMMinOrderByAggregateInput
+    _sum?: ActivityLogsCRMSumOrderByAggregateInput
+  }
+
+  export type ActivityLogsCRMScalarWhereWithAggregatesInput = {
+    AND?: ActivityLogsCRMScalarWhereWithAggregatesInput | ActivityLogsCRMScalarWhereWithAggregatesInput[]
+    OR?: ActivityLogsCRMScalarWhereWithAggregatesInput[]
+    NOT?: ActivityLogsCRMScalarWhereWithAggregatesInput | ActivityLogsCRMScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ActivityLogsCRM"> | number
+    userId?: IntWithAggregatesFilter<"ActivityLogsCRM"> | number
+    name?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    email?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    entityType?: StringWithAggregatesFilter<"ActivityLogsCRM"> | string
+    action?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    entityId?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    ipAddress?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    details?: JsonWithAggregatesFilter<"ActivityLogsCRM">
+    userAgent?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    browserName?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    deviceType?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    operatingSystem?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    url?: StringNullableWithAggregatesFilter<"ActivityLogsCRM"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ActivityLogsCRM"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ActivityLogsCRM"> | Date | string
+  }
+
+  export type SessionLogsCRMWhereInput = {
+    AND?: SessionLogsCRMWhereInput | SessionLogsCRMWhereInput[]
+    OR?: SessionLogsCRMWhereInput[]
+    NOT?: SessionLogsCRMWhereInput | SessionLogsCRMWhereInput[]
+    id?: IntFilter<"SessionLogsCRM"> | number
+    userId?: IntFilter<"SessionLogsCRM"> | number
+    sessionToken?: StringFilter<"SessionLogsCRM"> | string
+    ipAddress?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    userAgent?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    browserName?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    deviceType?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    operatingSystem?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    endReason?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    startTime?: DateTimeFilter<"SessionLogsCRM"> | Date | string
+    endTime?: DateTimeNullableFilter<"SessionLogsCRM"> | Date | string | null
+    duration?: IntFilter<"SessionLogsCRM"> | number
+    totalPages?: IntFilter<"SessionLogsCRM"> | number
+    createdAt?: DateTimeFilter<"SessionLogsCRM"> | Date | string
+    updatedAt?: DateTimeFilter<"SessionLogsCRM"> | Date | string
+  }
+
+  export type SessionLogsCRMOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    endReason?: SortOrderInput | SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsCRMWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: SessionLogsCRMWhereInput | SessionLogsCRMWhereInput[]
+    OR?: SessionLogsCRMWhereInput[]
+    NOT?: SessionLogsCRMWhereInput | SessionLogsCRMWhereInput[]
+    userId?: IntFilter<"SessionLogsCRM"> | number
+    sessionToken?: StringFilter<"SessionLogsCRM"> | string
+    ipAddress?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    userAgent?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    browserName?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    deviceType?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    operatingSystem?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    endReason?: StringNullableFilter<"SessionLogsCRM"> | string | null
+    startTime?: DateTimeFilter<"SessionLogsCRM"> | Date | string
+    endTime?: DateTimeNullableFilter<"SessionLogsCRM"> | Date | string | null
+    duration?: IntFilter<"SessionLogsCRM"> | number
+    totalPages?: IntFilter<"SessionLogsCRM"> | number
+    createdAt?: DateTimeFilter<"SessionLogsCRM"> | Date | string
+    updatedAt?: DateTimeFilter<"SessionLogsCRM"> | Date | string
+  }, "id">
+
+  export type SessionLogsCRMOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    endReason?: SortOrderInput | SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SessionLogsCRMCountOrderByAggregateInput
+    _avg?: SessionLogsCRMAvgOrderByAggregateInput
+    _max?: SessionLogsCRMMaxOrderByAggregateInput
+    _min?: SessionLogsCRMMinOrderByAggregateInput
+    _sum?: SessionLogsCRMSumOrderByAggregateInput
+  }
+
+  export type SessionLogsCRMScalarWhereWithAggregatesInput = {
+    AND?: SessionLogsCRMScalarWhereWithAggregatesInput | SessionLogsCRMScalarWhereWithAggregatesInput[]
+    OR?: SessionLogsCRMScalarWhereWithAggregatesInput[]
+    NOT?: SessionLogsCRMScalarWhereWithAggregatesInput | SessionLogsCRMScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"SessionLogsCRM"> | number
+    userId?: IntWithAggregatesFilter<"SessionLogsCRM"> | number
+    sessionToken?: StringWithAggregatesFilter<"SessionLogsCRM"> | string
+    ipAddress?: StringNullableWithAggregatesFilter<"SessionLogsCRM"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"SessionLogsCRM"> | string | null
+    browserName?: StringNullableWithAggregatesFilter<"SessionLogsCRM"> | string | null
+    deviceType?: StringNullableWithAggregatesFilter<"SessionLogsCRM"> | string | null
+    operatingSystem?: StringNullableWithAggregatesFilter<"SessionLogsCRM"> | string | null
+    endReason?: StringNullableWithAggregatesFilter<"SessionLogsCRM"> | string | null
+    startTime?: DateTimeWithAggregatesFilter<"SessionLogsCRM"> | Date | string
+    endTime?: DateTimeNullableWithAggregatesFilter<"SessionLogsCRM"> | Date | string | null
+    duration?: IntWithAggregatesFilter<"SessionLogsCRM"> | number
+    totalPages?: IntWithAggregatesFilter<"SessionLogsCRM"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"SessionLogsCRM"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SessionLogsCRM"> | Date | string
+  }
+
+  export type PageViewLogsCRMWhereInput = {
+    AND?: PageViewLogsCRMWhereInput | PageViewLogsCRMWhereInput[]
+    OR?: PageViewLogsCRMWhereInput[]
+    NOT?: PageViewLogsCRMWhereInput | PageViewLogsCRMWhereInput[]
+    id?: IntFilter<"PageViewLogsCRM"> | number
+    sessionId?: StringFilter<"PageViewLogsCRM"> | string
+    userId?: IntNullableFilter<"PageViewLogsCRM"> | number | null
+    pagePath?: StringFilter<"PageViewLogsCRM"> | string
+    pageTitle?: StringNullableFilter<"PageViewLogsCRM"> | string | null
+    entryTime?: DateTimeFilter<"PageViewLogsCRM"> | Date | string
+    exitTime?: DateTimeNullableFilter<"PageViewLogsCRM"> | Date | string | null
+    duration?: IntFilter<"PageViewLogsCRM"> | number
+    scrollDepth?: IntFilter<"PageViewLogsCRM"> | number
+    interactions?: IntFilter<"PageViewLogsCRM"> | number
+    referrer?: StringNullableFilter<"PageViewLogsCRM"> | string | null
+    createdAt?: DateTimeFilter<"PageViewLogsCRM"> | Date | string
+    updatedAt?: DateTimeFilter<"PageViewLogsCRM"> | Date | string
+  }
+
+  export type PageViewLogsCRMOrderByWithRelationInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrderInput | SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsCRMWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PageViewLogsCRMWhereInput | PageViewLogsCRMWhereInput[]
+    OR?: PageViewLogsCRMWhereInput[]
+    NOT?: PageViewLogsCRMWhereInput | PageViewLogsCRMWhereInput[]
+    sessionId?: StringFilter<"PageViewLogsCRM"> | string
+    userId?: IntNullableFilter<"PageViewLogsCRM"> | number | null
+    pagePath?: StringFilter<"PageViewLogsCRM"> | string
+    pageTitle?: StringNullableFilter<"PageViewLogsCRM"> | string | null
+    entryTime?: DateTimeFilter<"PageViewLogsCRM"> | Date | string
+    exitTime?: DateTimeNullableFilter<"PageViewLogsCRM"> | Date | string | null
+    duration?: IntFilter<"PageViewLogsCRM"> | number
+    scrollDepth?: IntFilter<"PageViewLogsCRM"> | number
+    interactions?: IntFilter<"PageViewLogsCRM"> | number
+    referrer?: StringNullableFilter<"PageViewLogsCRM"> | string | null
+    createdAt?: DateTimeFilter<"PageViewLogsCRM"> | Date | string
+    updatedAt?: DateTimeFilter<"PageViewLogsCRM"> | Date | string
+  }, "id">
+
+  export type PageViewLogsCRMOrderByWithAggregationInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrderInput | SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PageViewLogsCRMCountOrderByAggregateInput
+    _avg?: PageViewLogsCRMAvgOrderByAggregateInput
+    _max?: PageViewLogsCRMMaxOrderByAggregateInput
+    _min?: PageViewLogsCRMMinOrderByAggregateInput
+    _sum?: PageViewLogsCRMSumOrderByAggregateInput
+  }
+
+  export type PageViewLogsCRMScalarWhereWithAggregatesInput = {
+    AND?: PageViewLogsCRMScalarWhereWithAggregatesInput | PageViewLogsCRMScalarWhereWithAggregatesInput[]
+    OR?: PageViewLogsCRMScalarWhereWithAggregatesInput[]
+    NOT?: PageViewLogsCRMScalarWhereWithAggregatesInput | PageViewLogsCRMScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PageViewLogsCRM"> | number
+    sessionId?: StringWithAggregatesFilter<"PageViewLogsCRM"> | string
+    userId?: IntNullableWithAggregatesFilter<"PageViewLogsCRM"> | number | null
+    pagePath?: StringWithAggregatesFilter<"PageViewLogsCRM"> | string
+    pageTitle?: StringNullableWithAggregatesFilter<"PageViewLogsCRM"> | string | null
+    entryTime?: DateTimeWithAggregatesFilter<"PageViewLogsCRM"> | Date | string
+    exitTime?: DateTimeNullableWithAggregatesFilter<"PageViewLogsCRM"> | Date | string | null
+    duration?: IntWithAggregatesFilter<"PageViewLogsCRM"> | number
+    scrollDepth?: IntWithAggregatesFilter<"PageViewLogsCRM"> | number
+    interactions?: IntWithAggregatesFilter<"PageViewLogsCRM"> | number
+    referrer?: StringNullableWithAggregatesFilter<"PageViewLogsCRM"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PageViewLogsCRM"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PageViewLogsCRM"> | Date | string
+  }
+
+  export type LoginLogsCrmWhereInput = {
+    AND?: LoginLogsCrmWhereInput | LoginLogsCrmWhereInput[]
+    OR?: LoginLogsCrmWhereInput[]
+    NOT?: LoginLogsCrmWhereInput | LoginLogsCrmWhereInput[]
+    id?: IntFilter<"LoginLogsCrm"> | number
+    userId?: IntNullableFilter<"LoginLogsCrm"> | number | null
+    name?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    email?: StringFilter<"LoginLogsCrm"> | string
+    ipAddress?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    userAgent?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    browserName?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    deviceType?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    operatingSystem?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    sessionType?: StringFilter<"LoginLogsCrm"> | string
+    success?: BoolFilter<"LoginLogsCrm"> | boolean
+    createdAt?: DateTimeFilter<"LoginLogsCrm"> | Date | string
+  }
+
+  export type LoginLogsCrmOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsCrmWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: LoginLogsCrmWhereInput | LoginLogsCrmWhereInput[]
+    OR?: LoginLogsCrmWhereInput[]
+    NOT?: LoginLogsCrmWhereInput | LoginLogsCrmWhereInput[]
+    userId?: IntNullableFilter<"LoginLogsCrm"> | number | null
+    name?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    email?: StringFilter<"LoginLogsCrm"> | string
+    ipAddress?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    userAgent?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    browserName?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    deviceType?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    operatingSystem?: StringNullableFilter<"LoginLogsCrm"> | string | null
+    sessionType?: StringFilter<"LoginLogsCrm"> | string
+    success?: BoolFilter<"LoginLogsCrm"> | boolean
+    createdAt?: DateTimeFilter<"LoginLogsCrm"> | Date | string
+  }, "id">
+
+  export type LoginLogsCrmOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+    _count?: LoginLogsCrmCountOrderByAggregateInput
+    _avg?: LoginLogsCrmAvgOrderByAggregateInput
+    _max?: LoginLogsCrmMaxOrderByAggregateInput
+    _min?: LoginLogsCrmMinOrderByAggregateInput
+    _sum?: LoginLogsCrmSumOrderByAggregateInput
+  }
+
+  export type LoginLogsCrmScalarWhereWithAggregatesInput = {
+    AND?: LoginLogsCrmScalarWhereWithAggregatesInput | LoginLogsCrmScalarWhereWithAggregatesInput[]
+    OR?: LoginLogsCrmScalarWhereWithAggregatesInput[]
+    NOT?: LoginLogsCrmScalarWhereWithAggregatesInput | LoginLogsCrmScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"LoginLogsCrm"> | number
+    userId?: IntNullableWithAggregatesFilter<"LoginLogsCrm"> | number | null
+    name?: StringNullableWithAggregatesFilter<"LoginLogsCrm"> | string | null
+    email?: StringWithAggregatesFilter<"LoginLogsCrm"> | string
+    ipAddress?: StringNullableWithAggregatesFilter<"LoginLogsCrm"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"LoginLogsCrm"> | string | null
+    browserName?: StringNullableWithAggregatesFilter<"LoginLogsCrm"> | string | null
+    deviceType?: StringNullableWithAggregatesFilter<"LoginLogsCrm"> | string | null
+    operatingSystem?: StringNullableWithAggregatesFilter<"LoginLogsCrm"> | string | null
+    sessionType?: StringWithAggregatesFilter<"LoginLogsCrm"> | string
+    success?: BoolWithAggregatesFilter<"LoginLogsCrm"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"LoginLogsCrm"> | Date | string
   }
 
   export type BondsWhereInput = {
@@ -38582,6 +44038,470 @@ export namespace Prisma {
     trackId?: NullableStringFieldUpdateOperationsInput | string | null
     url?: NullableStringFieldUpdateOperationsInput | string | null
     data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsCRMCreateInput = {
+    userId: number
+    name?: string | null
+    email?: string | null
+    entityType: string
+    action?: string | null
+    entityId?: string | null
+    ipAddress?: string | null
+    details: JsonNullValueInput | InputJsonValue
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    url?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ActivityLogsCRMUncheckedCreateInput = {
+    id?: number
+    userId: number
+    name?: string | null
+    email?: string | null
+    entityType: string
+    action?: string | null
+    entityId?: string | null
+    ipAddress?: string | null
+    details: JsonNullValueInput | InputJsonValue
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    url?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ActivityLogsCRMUpdateInput = {
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsCRMUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsCRMCreateManyInput = {
+    id?: number
+    userId: number
+    name?: string | null
+    email?: string | null
+    entityType: string
+    action?: string | null
+    entityId?: string | null
+    ipAddress?: string | null
+    details: JsonNullValueInput | InputJsonValue
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    url?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ActivityLogsCRMUpdateManyMutationInput = {
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsCRMUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionLogsCRMCreateInput = {
+    userId: number
+    sessionToken: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    endReason?: string | null
+    startTime?: Date | string
+    endTime?: Date | string | null
+    duration?: number
+    totalPages?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionLogsCRMUncheckedCreateInput = {
+    id?: number
+    userId: number
+    sessionToken: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    endReason?: string | null
+    startTime?: Date | string
+    endTime?: Date | string | null
+    duration?: number
+    totalPages?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionLogsCRMUpdateInput = {
+    userId?: IntFieldUpdateOperationsInput | number
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionLogsCRMUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionLogsCRMCreateManyInput = {
+    id?: number
+    userId: number
+    sessionToken: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    endReason?: string | null
+    startTime?: Date | string
+    endTime?: Date | string | null
+    duration?: number
+    totalPages?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionLogsCRMUpdateManyMutationInput = {
+    userId?: IntFieldUpdateOperationsInput | number
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionLogsCRMUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsCRMCreateInput = {
+    sessionId: string
+    userId?: number | null
+    pagePath: string
+    pageTitle?: string | null
+    entryTime?: Date | string
+    exitTime?: Date | string | null
+    duration?: number
+    scrollDepth?: number
+    interactions?: number
+    referrer?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageViewLogsCRMUncheckedCreateInput = {
+    id?: number
+    sessionId: string
+    userId?: number | null
+    pagePath: string
+    pageTitle?: string | null
+    entryTime?: Date | string
+    exitTime?: Date | string | null
+    duration?: number
+    scrollDepth?: number
+    interactions?: number
+    referrer?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageViewLogsCRMUpdateInput = {
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsCRMUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsCRMCreateManyInput = {
+    id?: number
+    sessionId: string
+    userId?: number | null
+    pagePath: string
+    pageTitle?: string | null
+    entryTime?: Date | string
+    exitTime?: Date | string | null
+    duration?: number
+    scrollDepth?: number
+    interactions?: number
+    referrer?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageViewLogsCRMUpdateManyMutationInput = {
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsCRMUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsCrmCreateInput = {
+    userId?: number | null
+    name?: string | null
+    email: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    sessionType?: string
+    success: boolean
+    createdAt?: Date | string
+  }
+
+  export type LoginLogsCrmUncheckedCreateInput = {
+    id?: number
+    userId?: number | null
+    name?: string | null
+    email: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    sessionType?: string
+    success: boolean
+    createdAt?: Date | string
+  }
+
+  export type LoginLogsCrmUpdateInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsCrmUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsCrmCreateManyInput = {
+    id?: number
+    userId?: number | null
+    name?: string | null
+    email: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    sessionType?: string
+    success: boolean
+    createdAt?: Date | string
+  }
+
+  export type LoginLogsCrmUpdateManyMutationInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsCrmUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -42331,6 +48251,296 @@ export namespace Prisma {
     userId?: SortOrder
   }
 
+  export type ActivityLogsCRMCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    entityType?: SortOrder
+    action?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    details?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsCRMAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type ActivityLogsCRMMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    entityType?: SortOrder
+    action?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsCRMMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    entityType?: SortOrder
+    action?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsCRMSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type SessionLogsCRMCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    endReason?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsCRMAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+  }
+
+  export type SessionLogsCRMMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    endReason?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsCRMMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    endReason?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsCRMSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type PageViewLogsCRMCountOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsCRMAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+  }
+
+  export type PageViewLogsCRMMaxOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsCRMMinOrderByAggregateInput = {
+    id?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsCRMSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type LoginLogsCrmCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsCrmAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type LoginLogsCrmMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsCrmMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsCrmSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type FloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -42372,17 +48582,6 @@ export namespace Prisma {
     in?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
     notIn?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
     not?: NestedEnumIS_LISTEDFilter<$PrismaModel> | $Enums.IS_LISTED
-  }
-
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -42584,20 +48783,6 @@ export namespace Prisma {
     _max?: NestedEnumIS_LISTEDFilter<$PrismaModel>
   }
 
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
@@ -42719,11 +48904,6 @@ export namespace Prisma {
     not?: NestedEnumSIGNIN_WITHFilter<$PrismaModel> | $Enums.SIGNIN_WITH
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type CRMUserDataModelNullableScalarRelationFilter = {
     is?: CRMUserDataModelWhereInput | null
     isNot?: CRMUserDataModelWhereInput | null
@@ -42800,14 +48980,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumSIGNIN_WITHFilter<$PrismaModel>
     _max?: NestedEnumSIGNIN_WITHFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type EnumGenderNullableFilter<$PrismaModel = never> = {
@@ -45134,6 +51306,14 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type BondsCreatecategoriesInput = {
     set: string[]
   }
@@ -45164,10 +51344,6 @@ export namespace Prisma {
 
   export type EnumIS_LISTEDFieldUpdateOperationsInput = {
     set?: $Enums.IS_LISTED
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
   }
 
   export type BondsUpdatecategoriesInput = {
@@ -45291,10 +51467,6 @@ export namespace Prisma {
 
   export type EnumSIGNIN_WITHFieldUpdateOperationsInput = {
     set?: $Enums.SIGNIN_WITH
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type CRMUserDataModelUpdateOneWithoutCustomersAuthDataModelNestedInput = {
@@ -46356,6 +52528,44 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedEnumTAX_TYPEFilter<$PrismaModel = never> = {
     equals?: $Enums.TAX_TYPE | EnumTAX_TYPEFieldRefInput<$PrismaModel>
     in?: $Enums.TAX_TYPE[] | ListEnumTAX_TYPEFieldRefInput<$PrismaModel>
@@ -46375,17 +52585,6 @@ export namespace Prisma {
     in?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
     notIn?: $Enums.IS_LISTED[] | ListEnumIS_LISTEDFieldRefInput<$PrismaModel>
     not?: NestedEnumIS_LISTEDFilter<$PrismaModel> | $Enums.IS_LISTED
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedBoolNullableFilter<$PrismaModel = never> = {
@@ -46455,20 +52654,6 @@ export namespace Prisma {
     _max?: NestedEnumIS_LISTEDFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
@@ -46518,11 +52703,6 @@ export namespace Prisma {
     not?: NestedEnumSIGNIN_WITHFilter<$PrismaModel> | $Enums.SIGNIN_WITH
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedEnumSIGNIN_WITHWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.SIGNIN_WITH | EnumSIGNIN_WITHFieldRefInput<$PrismaModel>
     in?: $Enums.SIGNIN_WITH[] | ListEnumSIGNIN_WITHFieldRefInput<$PrismaModel>
@@ -46531,14 +52711,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumSIGNIN_WITHFilter<$PrismaModel>
     _max?: NestedEnumSIGNIN_WITHFilter<$PrismaModel>
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumGenderNullableFilter<$PrismaModel = never> = {

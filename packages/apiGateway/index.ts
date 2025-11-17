@@ -24,6 +24,9 @@ import { RfqIsinApi } from "./src/core/api/crm/RFQ/nse/isin.api";
 
 import * as customerAuthApi from "./src/core/api/meradhan/customerauth.api";
 import * as bondsApi from "./src/core/api/bonds/bonds.api";
+import * as auditlog from "./src/core/api/auditlogs/auditlogs.api";
+export type * from "./src/core/api/auditlogs/auditlog.response";
+
 export type * from "./src/core/api/bonds/bonds.response";
 
 export type * from "./src/core/api/meradhan/customerauth.response";
@@ -56,4 +59,5 @@ export default {
   },
   bondsApi,
   trash,
+  auditlog,
 };

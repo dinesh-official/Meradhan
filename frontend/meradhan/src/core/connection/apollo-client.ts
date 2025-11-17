@@ -1,7 +1,7 @@
 // lib/apolloClient.js
 import { CMS_URL, HOST_URL } from "@/global/constants/domains";
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
-import { setContext, SetContextLink } from "@apollo/client/link/context";
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+import { SetContextLink } from "@apollo/client/link/context";
 import axios from "axios";
 export const strApi = HOST_URL;
 export const strAssets = HOST_URL + "/assets/cms/media";
@@ -10,7 +10,7 @@ const API_KEY =
   process.env.GRAPHQL_KEY ||
   "3bf77f973f4d6cc84c4a421dce7abc570452ba8514f93cd1dccc73271761b0996d9a63cc66e18363d4e667da302b16bb4842b6de13878aeba500800776e0a8e89dc90a5a43c1b77157d446a36db21a2d1bdb6087a2fd83606b70fc5027844151c774ef5431c611c09ca08e1fd1883615ebee381e389fe8dc2120ff0143ce3bac"; // Make sure to define this in .env.local
 
-const strapiUrl = () => {
+export const strapiUrl = () => {
   // Determine the correct URL based on the environment
   try {
     // browser environment

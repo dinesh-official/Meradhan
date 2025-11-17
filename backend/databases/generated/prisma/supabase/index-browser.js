@@ -142,6 +142,74 @@ exports.Prisma.WebAuditLogsScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ActivityLogsCRMScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  email: 'email',
+  entityType: 'entityType',
+  action: 'action',
+  entityId: 'entityId',
+  ipAddress: 'ipAddress',
+  details: 'details',
+  userAgent: 'userAgent',
+  browserName: 'browserName',
+  deviceType: 'deviceType',
+  operatingSystem: 'operatingSystem',
+  url: 'url',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SessionLogsCRMScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionToken: 'sessionToken',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  browserName: 'browserName',
+  deviceType: 'deviceType',
+  operatingSystem: 'operatingSystem',
+  endReason: 'endReason',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  duration: 'duration',
+  totalPages: 'totalPages',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PageViewLogsCRMScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  userId: 'userId',
+  pagePath: 'pagePath',
+  pageTitle: 'pageTitle',
+  entryTime: 'entryTime',
+  exitTime: 'exitTime',
+  duration: 'duration',
+  scrollDepth: 'scrollDepth',
+  interactions: 'interactions',
+  referrer: 'referrer',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.LoginLogsCrmScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  email: 'email',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  browserName: 'browserName',
+  deviceType: 'deviceType',
+  operatingSystem: 'operatingSystem',
+  sessionType: 'sessionType',
+  success: 'success',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.BondsScalarFieldEnum = {
   id: 'id',
   isin: 'isin',
@@ -855,6 +923,10 @@ exports.NegotiationConfirmationStatus = exports.$Enums.NegotiationConfirmationSt
 exports.Prisma.ModelName = {
   CrmAuditLogs: 'CrmAuditLogs',
   WebAuditLogs: 'WebAuditLogs',
+  ActivityLogsCRM: 'ActivityLogsCRM',
+  SessionLogsCRM: 'SessionLogsCRM',
+  PageViewLogsCRM: 'PageViewLogsCRM',
+  LoginLogsCrm: 'LoginLogsCrm',
   Bonds: 'Bonds',
   CRMUserDataModel: 'CRMUserDataModel',
   CustomersAuthDataModel: 'CustomersAuthDataModel',

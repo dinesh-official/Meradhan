@@ -7,16 +7,14 @@ import { generateUsername } from "@utils/generate/generate_username";
 import { hashingUtils } from "@utils/hash/hashing_utils";
 import type z from "zod";
 
-
 export class CustomerProfileManager {
   async createCustomerProfile(
     data: z.infer<typeof appSchema.customer.createNewCustomerSchema>,
     createdBy?: number
   ) {
-
-    const user = await this.getCustomerProfileByEmail(data.emailId)
+    const user = await this.getCustomerProfileByEmail(data.emailId);
     if (user) {
-      throw new AppError("Email is already used")
+      throw new AppError("Email is already used");
     }
 
     const hashPassword = await hashingUtils.hashPassword(data.password);
@@ -28,7 +26,9 @@ export class CustomerProfileManager {
           middleName: data.middleName || "",
           lastName: data.lastName,
           gender: data.gender,
-          whatsAppNo: (data.whatsAppNo && "+91" + removeCountryCode(data.whatsAppNo)) || "+91" + removeCountryCode(data.phoneNo),
+          whatsAppNo:
+            (data.whatsAppNo && "+91" + removeCountryCode(data.whatsAppNo)) ||
+            "+91" + removeCountryCode(data.phoneNo),
           phoneNo: "+91" + removeCountryCode(data.phoneNo),
           userName: generateUsername(),
           kycStatus: data.kycStatus,
@@ -44,7 +44,7 @@ export class CustomerProfileManager {
               isPhoneVerified: data.isPhoneVerified,
               termsAccepted: data.termsAccepted,
               whatsAppNotificationAllow: data.whatsAppNotificationAllow,
-              cRMUserDataModelId: data.relationshipManagerId
+              cRMUserDataModelId: data.relationshipManagerId,
             },
           },
         },
@@ -52,8 +52,8 @@ export class CustomerProfileManager {
     // send welcome email
     await sendCustomerWelcomeEmail({
       email: data.emailId,
-      userName: data.firstName
-    })
+      userName: data.firstName,
+    });
     return createdCustomerResponse;
   }
 
@@ -61,7 +61,6 @@ export class CustomerProfileManager {
     const customerProfile =
       await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerProfileId },
-
       });
 
     return customerProfile;
@@ -71,7 +70,6 @@ export class CustomerProfileManager {
     const customerProfile =
       await db.dataBase.customerProfileDataModel.findUnique({
         where: { emailAddress: emailAddress },
-
       });
 
     return customerProfile;
@@ -92,8 +90,6 @@ export class CustomerProfileManager {
         where: { userName: userName },
       });
 
-
-
     return customerProfile;
   }
 
@@ -106,7 +102,6 @@ export class CustomerProfileManager {
     const existing = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerProfileId },
       select: { id: true },
-
     });
 
     if (!existing) {
@@ -115,8 +110,6 @@ export class CustomerProfileManager {
         code: "CUSTOMER_NOT_FOUND",
       });
     }
-
-
 
     const updatedCustomerProfileData =
       await db.dataBase.customerProfileDataModel.update({
@@ -138,13 +131,14 @@ export class CustomerProfileManager {
               termsAccepted: data.termsAccepted,
               isEmailVerified: data.isEmailVerified,
               isPhoneVerified: data.isPhoneVerified,
-              relationshipManager: data.relationshipManagerId ? {
-                connect: {
-                  id: data.relationshipManagerId,
-                }
-              }
-                : undefined
-            }
+              relationshipManager: data.relationshipManagerId
+                ? {
+                    connect: {
+                      id: data.relationshipManagerId,
+                    },
+                  }
+                : undefined,
+            },
           },
         },
       });
@@ -171,14 +165,14 @@ export class CustomerProfileManager {
       });
     }
 
-    await db.dataBase.customerProfileDataModel.update({
+    const deleteCustomer = await db.dataBase.customerProfileDataModel.update({
       where: { id: customerProfileId },
       data: {
         isDeleted: true,
       },
     });
 
-    return true; // we can change this
+    return deleteCustomer; // we can change this
   }
 
   async removeCustomerProfile(customerProfileId: number) {
@@ -193,11 +187,11 @@ export class CustomerProfileManager {
       });
     }
 
-    await db.dataBase.customerProfileDataModel.delete({
+    const deleteUser = await db.dataBase.customerProfileDataModel.delete({
       where: { id: customerProfileId },
     });
 
-    return true; // we can change this
+    return deleteUser; // we can change this
   }
 
   async updateKycStatus(
@@ -244,7 +238,7 @@ export class CustomerProfileManager {
           update: {
             lastLogin: new Date(),
           },
-        }
+        },
       },
     });
   }

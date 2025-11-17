@@ -21,6 +21,7 @@ import customerAuthRoutes from "@resource/customer/auth/customer.auth.route";
 import kycRoutes from "@resource/customer/kyc/kyc.routes";
 import customerProfileRoutes from "@resource/customer/profile/c_profile.routes";
 import trashRoutes from "@resource/trash/trash.routes";
+import auditlogsRoutes from "@services/auditlogs/auditlog.routes";
 import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";
 import dotenv from "dotenv";
@@ -68,6 +69,7 @@ server.addRoutes([
 
   trashRoutes,
   webAuditLogsRouter,
+  auditlogsRoutes,
 ]);
 
 // Connect to databases and start server
