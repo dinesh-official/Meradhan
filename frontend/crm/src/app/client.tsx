@@ -13,9 +13,9 @@ function Client({ children }: { children: ReactNode }) {
   return (
     <CookiesProvider>
       {/* <UserTrackingProvider> */}
-      <QueryClientProvider client={queryClient}>
-        <NuqsAdapter>{children}</NuqsAdapter>
-        <PageTrackingProvider>
+      <PageTrackingProvider>
+        <QueryClientProvider client={queryClient}>
+          <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster
             position="top-right"
             reverseOrder={false}
@@ -29,14 +29,14 @@ function Client({ children }: { children: ReactNode }) {
               },
             }}
           />
-        </PageTrackingProvider>
-        <SonnerToaster position="top-center" richColors />
-        <ReactQueryDevtools
-          initialIsOpen={false}
-          buttonPosition="bottom-right"
-          position="right"
-        />
-      </QueryClientProvider>
+          <SonnerToaster position="top-center" richColors />
+          <ReactQueryDevtools
+            initialIsOpen={false}
+            buttonPosition="bottom-right"
+            position="right"
+          />
+        </QueryClientProvider>
+      </PageTrackingProvider>
       {/* </UserTrackingProvider> */}
     </CookiesProvider>
   );
