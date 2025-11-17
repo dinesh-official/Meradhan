@@ -44,6 +44,9 @@ export class AuditLogRepository {
     sessionToken: string,
     data: Partial<DataBaseSchema.SessionLogsCRMUpdateInput>
   ): Promise<void> {
+    if (!data.userId) {
+      return;
+    }
     // Implementation for ending an audit log session
     await db.dataBase.sessionLogsCRM.updateMany({
       where: { sessionToken },
