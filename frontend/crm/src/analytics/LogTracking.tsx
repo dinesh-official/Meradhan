@@ -22,6 +22,44 @@ export const PageTrackingProvider: React.FC<{
   const visibilityTimeRef = useRef<number>(Date.now());
   const auditApi = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
 
+  // Start page view tracking
+  useEffect(() => {
+    const startPageView = async () => {
+      if (currentPageView && pageViewIdRef.current) {
+        await endPageView();
+      }
+      if (!cookies.userId || !cookies.token) return;
+
+      try {
+        const pageData = {
+          userId: cookies.userId,
+          pagePath: pathname,
+          entryTime: new Date(),
+          sessionId: cookies.token,
+          interactions: 0,
+          scrollDepth: 0,
+          pageTitle: document.title,
+          duration: 0,
+          referrer: document.referrer,
+        };
+
+        const response = await auditApi.startPageTrackingCrm(pageData);
+
+        const pageViewData = response.data.responseData;
+        pageViewIdRef.current = pageViewData.pageViewId;
+        setCurrentPageView({
+          ...pageData,
+          userId: cookies.userId,
+          sessionId: cookies.token,
+        });
+      } catch (error) {
+        console.error("Failed to start page tracking:", error);
+      }
+    };
+
+    startPageView();
+  }, [pathname]);
+
   useEffect(() => {
     let isInternalNavigation = false;
 

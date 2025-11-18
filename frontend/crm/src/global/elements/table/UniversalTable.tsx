@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./DataTable";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 type ColumnType = "text" | "number" | "currency" | "date" | "datetime";
 
@@ -66,10 +67,10 @@ function formatByType(value: unknown, type?: ColumnType, currency = "INR") {
     }
 
     if (type === "date") {
-      return date.toLocaleDateString();
+      return dateTimeUtils.formatDateTime(date, "DD MMM YYYY hh:mm:ss AA");
     }
 
-    return date.toLocaleString();
+    return dateTimeUtils.formatDateTime(date, "DD MMM YYYY hh:mm:ss AA");
   }
 
   if (value === null || value === undefined) {
