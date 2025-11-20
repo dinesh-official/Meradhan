@@ -496,10 +496,11 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
 
 exports.Prisma.KraDataLogsScalarFieldEnum = {
   id: 'id',
-  panId: 'panId',
+  userId: 'userId',
+  kycId: 'kycId',
   requestData: 'requestData',
   responseData: 'responseData',
-  status: 'status',
+  stage: 'stage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -875,6 +876,7 @@ exports.UserAccountType = exports.$Enums.UserAccountType = {
 
 exports.KYCStatus = exports.$Enums.KYCStatus = {
   PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
   VERIFIED: 'VERIFIED',
   REJECTED: 'REJECTED'
 };

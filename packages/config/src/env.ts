@@ -41,7 +41,7 @@ const EnvSchema = z.object(
     KRA_OKRA_CD_MI_ID: z
       .string()
       .min(1, { message: "KRA_OKRA_CD_MI_ID is required" }),
-    KRA_ENV: z.string().min(1, { message: "KRA_ENV is required" }),
+    KRA_ENV: z.enum(["UAT", "PROD"]),
 
     // MSG91
     MSG91_AUTH_KEY: z

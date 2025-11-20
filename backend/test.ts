@@ -3,7 +3,9 @@
 // // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 // import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
+import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+
+// import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 
 // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 
@@ -19,7 +21,6 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 // const participantManager = new ParticipantManager();
 // const rfqManager = new NseRfq();
 // const cbricsManager = new NseCBRICS();
-
 
 // Save KYC data to customer
 // const data = await participantManager.getAllParticipants();
@@ -55,7 +56,6 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 //     gtdFlag: "Y"
 // });
 
-
 // console.log(addIsinToRfq);
 
 // } catch (error) {
@@ -73,9 +73,6 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 // } catch (error) {
 //     console.log(error.response.data);
 // }
-
-
-
 
 // try {
 //     const isins = await rfqManager.acceptNegotiationQuote({
@@ -95,7 +92,6 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 //     console.log(error?.response?.data);
 // }
 
-
 // try {
 
 //     const isins = await rfqManager.proposeDeal({
@@ -114,11 +110,9 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 
 //     console.log(isins);
 
-
 // } catch (error) {
 //     console.log(error.response.data);
 // }
-
 
 // try {
 
@@ -139,18 +133,6 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 //     console.log(error.response.data);
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
 // await revalidateBonds();
 
 // const bonds = await db.dataBase.bonds.findMany({
@@ -165,7 +147,6 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 
 // console.log(bonds.length);
 
-
 // const nsdlApi = new NSDLApi(
 //     "NR100013",
 //     "06b2d035ad7d2f12c5d339bec39d58d4fc6e",
@@ -173,8 +154,6 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 // ); // false = test mode
 
 // const response = await nsdlApi.("INE848L07024");
-
-
 
 // const response = await cbricsManager.getSettlementOrders({
 //     filtFromModSettleDate: "01-11-2025",
@@ -189,12 +168,20 @@ import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.
 
 // console.log("response:", response);
 
-
 // const data = await rfqManager.getAllNegotiations({});
 // console.log(data.length);
 
+// const manager = new CustomerKycManager();
 
-const manager = new CustomerKycManager();
+// const data = await manager.saveKycToCustomer(105);
+// console.log(data);
 
-const data = await manager.saveKycToCustomer(105);
-console.log(data);
+const kraJob = async () => {
+  await addKraWorkerJob({
+    customerId: 112,
+    kycDataStoreId: 175,
+    stage: "ENQUIRY_KRA",
+  });
+};
+
+kraJob();

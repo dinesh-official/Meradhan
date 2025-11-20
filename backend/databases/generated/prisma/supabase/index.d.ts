@@ -284,6 +284,7 @@ export type DematAccountType = (typeof DematAccountType)[keyof typeof DematAccou
 
 export const KYCStatus: {
   PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
   VERIFIED: 'VERIFIED',
   REJECTED: 'REJECTED'
 };
@@ -29782,36 +29783,41 @@ export namespace Prisma {
 
   export type KraDataLogsAvgAggregateOutputType = {
     id: number | null
-    panId: number | null
+    userId: number | null
+    kycId: number | null
   }
 
   export type KraDataLogsSumAggregateOutputType = {
     id: number | null
-    panId: number | null
+    userId: number | null
+    kycId: number | null
   }
 
   export type KraDataLogsMinAggregateOutputType = {
     id: number | null
-    panId: number | null
-    status: string | null
+    userId: number | null
+    kycId: number | null
+    stage: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type KraDataLogsMaxAggregateOutputType = {
     id: number | null
-    panId: number | null
-    status: string | null
+    userId: number | null
+    kycId: number | null
+    stage: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type KraDataLogsCountAggregateOutputType = {
     id: number
-    panId: number
+    userId: number
+    kycId: number
     requestData: number
     responseData: number
-    status: number
+    stage: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -29820,36 +29826,41 @@ export namespace Prisma {
 
   export type KraDataLogsAvgAggregateInputType = {
     id?: true
-    panId?: true
+    userId?: true
+    kycId?: true
   }
 
   export type KraDataLogsSumAggregateInputType = {
     id?: true
-    panId?: true
+    userId?: true
+    kycId?: true
   }
 
   export type KraDataLogsMinAggregateInputType = {
     id?: true
-    panId?: true
-    status?: true
+    userId?: true
+    kycId?: true
+    stage?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type KraDataLogsMaxAggregateInputType = {
     id?: true
-    panId?: true
-    status?: true
+    userId?: true
+    kycId?: true
+    stage?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type KraDataLogsCountAggregateInputType = {
     id?: true
-    panId?: true
+    userId?: true
+    kycId?: true
     requestData?: true
     responseData?: true
-    status?: true
+    stage?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -29943,10 +29954,11 @@ export namespace Prisma {
 
   export type KraDataLogsGroupByOutputType = {
     id: number
-    panId: number
-    requestData: JsonValue
-    responseData: JsonValue
-    status: string
+    userId: number
+    kycId: number
+    requestData: JsonValue | null
+    responseData: JsonValue | null
+    stage: string
     createdAt: Date
     updatedAt: Date
     _count: KraDataLogsCountAggregateOutputType | null
@@ -29972,55 +29984,60 @@ export namespace Prisma {
 
   export type KraDataLogsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    panId?: boolean
+    userId?: boolean
+    kycId?: boolean
     requestData?: boolean
     responseData?: boolean
-    status?: boolean
+    stage?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["kraDataLogs"]>
 
   export type KraDataLogsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    panId?: boolean
+    userId?: boolean
+    kycId?: boolean
     requestData?: boolean
     responseData?: boolean
-    status?: boolean
+    stage?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["kraDataLogs"]>
 
   export type KraDataLogsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    panId?: boolean
+    userId?: boolean
+    kycId?: boolean
     requestData?: boolean
     responseData?: boolean
-    status?: boolean
+    stage?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["kraDataLogs"]>
 
   export type KraDataLogsSelectScalar = {
     id?: boolean
-    panId?: boolean
+    userId?: boolean
+    kycId?: boolean
     requestData?: boolean
     responseData?: boolean
-    status?: boolean
+    stage?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type KraDataLogsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "panId" | "requestData" | "responseData" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["kraDataLogs"]>
+  export type KraDataLogsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "kycId" | "requestData" | "responseData" | "stage" | "createdAt" | "updatedAt", ExtArgs["result"]["kraDataLogs"]>
 
   export type $KraDataLogsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KraDataLogs"
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      panId: number
-      requestData: Prisma.JsonValue
-      responseData: Prisma.JsonValue
-      status: string
+      userId: number
+      kycId: number
+      requestData: Prisma.JsonValue | null
+      responseData: Prisma.JsonValue | null
+      stage: string
       /**
        * Timestamps
        */
@@ -30450,10 +30467,11 @@ export namespace Prisma {
    */
   interface KraDataLogsFieldRefs {
     readonly id: FieldRef<"KraDataLogs", 'Int'>
-    readonly panId: FieldRef<"KraDataLogs", 'Int'>
+    readonly userId: FieldRef<"KraDataLogs", 'Int'>
+    readonly kycId: FieldRef<"KraDataLogs", 'Int'>
     readonly requestData: FieldRef<"KraDataLogs", 'Json'>
     readonly responseData: FieldRef<"KraDataLogs", 'Json'>
-    readonly status: FieldRef<"KraDataLogs", 'String'>
+    readonly stage: FieldRef<"KraDataLogs", 'String'>
     readonly createdAt: FieldRef<"KraDataLogs", 'DateTime'>
     readonly updatedAt: FieldRef<"KraDataLogs", 'DateTime'>
   }
@@ -45823,10 +45841,11 @@ export namespace Prisma {
 
   export const KraDataLogsScalarFieldEnum: {
     id: 'id',
-    panId: 'panId',
+    userId: 'userId',
+    kycId: 'kycId',
     requestData: 'requestData',
     responseData: 'responseData',
-    status: 'status',
+    stage: 'stage',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -48929,20 +48948,22 @@ export namespace Prisma {
     OR?: KraDataLogsWhereInput[]
     NOT?: KraDataLogsWhereInput | KraDataLogsWhereInput[]
     id?: IntFilter<"KraDataLogs"> | number
-    panId?: IntFilter<"KraDataLogs"> | number
-    requestData?: JsonFilter<"KraDataLogs">
-    responseData?: JsonFilter<"KraDataLogs">
-    status?: StringFilter<"KraDataLogs"> | string
+    userId?: IntFilter<"KraDataLogs"> | number
+    kycId?: IntFilter<"KraDataLogs"> | number
+    requestData?: JsonNullableFilter<"KraDataLogs">
+    responseData?: JsonNullableFilter<"KraDataLogs">
+    stage?: StringFilter<"KraDataLogs"> | string
     createdAt?: DateTimeFilter<"KraDataLogs"> | Date | string
     updatedAt?: DateTimeFilter<"KraDataLogs"> | Date | string
   }
 
   export type KraDataLogsOrderByWithRelationInput = {
     id?: SortOrder
-    panId?: SortOrder
-    requestData?: SortOrder
-    responseData?: SortOrder
-    status?: SortOrder
+    userId?: SortOrder
+    kycId?: SortOrder
+    requestData?: SortOrderInput | SortOrder
+    responseData?: SortOrderInput | SortOrder
+    stage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -48952,20 +48973,22 @@ export namespace Prisma {
     AND?: KraDataLogsWhereInput | KraDataLogsWhereInput[]
     OR?: KraDataLogsWhereInput[]
     NOT?: KraDataLogsWhereInput | KraDataLogsWhereInput[]
-    panId?: IntFilter<"KraDataLogs"> | number
-    requestData?: JsonFilter<"KraDataLogs">
-    responseData?: JsonFilter<"KraDataLogs">
-    status?: StringFilter<"KraDataLogs"> | string
+    userId?: IntFilter<"KraDataLogs"> | number
+    kycId?: IntFilter<"KraDataLogs"> | number
+    requestData?: JsonNullableFilter<"KraDataLogs">
+    responseData?: JsonNullableFilter<"KraDataLogs">
+    stage?: StringFilter<"KraDataLogs"> | string
     createdAt?: DateTimeFilter<"KraDataLogs"> | Date | string
     updatedAt?: DateTimeFilter<"KraDataLogs"> | Date | string
   }, "id">
 
   export type KraDataLogsOrderByWithAggregationInput = {
     id?: SortOrder
-    panId?: SortOrder
-    requestData?: SortOrder
-    responseData?: SortOrder
-    status?: SortOrder
+    userId?: SortOrder
+    kycId?: SortOrder
+    requestData?: SortOrderInput | SortOrder
+    responseData?: SortOrderInput | SortOrder
+    stage?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: KraDataLogsCountOrderByAggregateInput
@@ -48980,10 +49003,11 @@ export namespace Prisma {
     OR?: KraDataLogsScalarWhereWithAggregatesInput[]
     NOT?: KraDataLogsScalarWhereWithAggregatesInput | KraDataLogsScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"KraDataLogs"> | number
-    panId?: IntWithAggregatesFilter<"KraDataLogs"> | number
-    requestData?: JsonWithAggregatesFilter<"KraDataLogs">
-    responseData?: JsonWithAggregatesFilter<"KraDataLogs">
-    status?: StringWithAggregatesFilter<"KraDataLogs"> | string
+    userId?: IntWithAggregatesFilter<"KraDataLogs"> | number
+    kycId?: IntWithAggregatesFilter<"KraDataLogs"> | number
+    requestData?: JsonNullableWithAggregatesFilter<"KraDataLogs">
+    responseData?: JsonNullableWithAggregatesFilter<"KraDataLogs">
+    stage?: StringWithAggregatesFilter<"KraDataLogs"> | string
     createdAt?: DateTimeWithAggregatesFilter<"KraDataLogs"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"KraDataLogs"> | Date | string
   }
@@ -53165,68 +53189,75 @@ export namespace Prisma {
   }
 
   export type KraDataLogsCreateInput = {
-    panId: number
-    requestData: JsonNullValueInput | InputJsonValue
-    responseData: JsonNullValueInput | InputJsonValue
-    status?: string
+    userId: number
+    kycId: number
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    stage?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type KraDataLogsUncheckedCreateInput = {
     id?: number
-    panId: number
-    requestData: JsonNullValueInput | InputJsonValue
-    responseData: JsonNullValueInput | InputJsonValue
-    status?: string
+    userId: number
+    kycId: number
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    stage?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type KraDataLogsUpdateInput = {
-    panId?: IntFieldUpdateOperationsInput | number
-    requestData?: JsonNullValueInput | InputJsonValue
-    responseData?: JsonNullValueInput | InputJsonValue
-    status?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    kycId?: IntFieldUpdateOperationsInput | number
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    stage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KraDataLogsUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    panId?: IntFieldUpdateOperationsInput | number
-    requestData?: JsonNullValueInput | InputJsonValue
-    responseData?: JsonNullValueInput | InputJsonValue
-    status?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    kycId?: IntFieldUpdateOperationsInput | number
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    stage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KraDataLogsCreateManyInput = {
     id?: number
-    panId: number
-    requestData: JsonNullValueInput | InputJsonValue
-    responseData: JsonNullValueInput | InputJsonValue
-    status?: string
+    userId: number
+    kycId: number
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    stage?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type KraDataLogsUpdateManyMutationInput = {
-    panId?: IntFieldUpdateOperationsInput | number
-    requestData?: JsonNullValueInput | InputJsonValue
-    responseData?: JsonNullValueInput | InputJsonValue
-    status?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    kycId?: IntFieldUpdateOperationsInput | number
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    stage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KraDataLogsUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    panId?: IntFieldUpdateOperationsInput | number
-    requestData?: JsonNullValueInput | InputJsonValue
-    responseData?: JsonNullValueInput | InputJsonValue
-    status?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    kycId?: IntFieldUpdateOperationsInput | number
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    stage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -57147,42 +57178,6 @@ export namespace Prisma {
     _min?: NestedEnumDematAccountTypeFilter<$PrismaModel>
     _max?: NestedEnumDematAccountTypeFilter<$PrismaModel>
   }
-
-  export type KraDataLogsCountOrderByAggregateInput = {
-    id?: SortOrder
-    panId?: SortOrder
-    requestData?: SortOrder
-    responseData?: SortOrder
-    status?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KraDataLogsAvgOrderByAggregateInput = {
-    id?: SortOrder
-    panId?: SortOrder
-  }
-
-  export type KraDataLogsMaxOrderByAggregateInput = {
-    id?: SortOrder
-    panId?: SortOrder
-    status?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KraDataLogsMinOrderByAggregateInput = {
-    id?: SortOrder
-    panId?: SortOrder
-    status?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KraDataLogsSumOrderByAggregateInput = {
-    id?: SortOrder
-    panId?: SortOrder
-  }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -57205,6 +57200,73 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type KraDataLogsCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    kycId?: SortOrder
+    requestData?: SortOrder
+    responseData?: SortOrder
+    stage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KraDataLogsAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    kycId?: SortOrder
+  }
+
+  export type KraDataLogsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    kycId?: SortOrder
+    stage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KraDataLogsMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    kycId?: SortOrder
+    stage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KraDataLogsSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    kycId?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type KYC_FLOWCountOrderByAggregateInput = {
@@ -57249,32 +57311,6 @@ export namespace Prisma {
     id?: SortOrder
     userID?: SortOrder
     step?: SortOrder
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type EnumLeadSourceFilter<$PrismaModel = never> = {

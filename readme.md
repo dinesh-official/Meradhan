@@ -1,7 +1,10 @@
-
 # MeraDhan
 
 A MeraDhan building scalable full-stack TypeScript projects with Bun, Node.js, Next.js, and Prisma.
+
+
+https://github.com/meradhan/md_test_tw
+
 
 ---
 
@@ -12,7 +15,7 @@ A MeraDhan building scalable full-stack TypeScript projects with Bun, Node.js, N
 - [Prerequisites](#prerequisites)
 - [Setup Instructions](#setup-instructions)
 - [Development Workflow](#development-workflow)
-- [Database & Prisma](#database--prisma)
+- [Database &amp; Prisma](#database--prisma)
 - [Docker Usage](#docker-usage)
 - [Customizing for Your Project](#customizing-for-your-project)
 - [Scripts Overview](#scripts-overview)
@@ -64,6 +67,7 @@ This README is written for the next developer who will pick up this project. It 
 Top-level structure (abridged):
 
 ```
+
 /backend               # Backend API (TypeScript + Bun/Node + Prisma)
   /databases           # Prisma client & database setup (supabase schema included)
   /src                 # Application source (controllers, services, providers)
@@ -78,6 +82,7 @@ docker-compose.yml     # Local observability stack (Prometheus, Loki, Grafana)
 setup.sh               # Installs dependencies and sets up Prisma
 start-dev.sh           # Starts backend & frontend in new terminal tabs
 readme.md              # This file
+
 ```
 
 Read the code under `backend/src` and `frontend/crm/src` to see concrete controllers, routes and UI.
@@ -137,7 +142,6 @@ Note: The project uses a mix of Bun and npm commands in scripts. `setup.sh` expe
 ## Setup (detailed)
 
 1. Ensure Bun and Node are installed.
-
 2. Run the setup script from the repository root:
 
 ```bash
@@ -145,6 +149,7 @@ Note: The project uses a mix of Bun and npm commands in scripts. `setup.sh` expe
 ```
 
 What `setup.sh` does:
+
 - Verifies Bun, Node and npm are installed
 - Installs npm dependencies for `packages/schema`, `packages/apiGateway`, and `backend`
 - Runs `bun install`/`npm install` where configured
@@ -163,6 +168,7 @@ Preferred: Use the convenience starter script:
 ```
 
 This opens new terminal tabs and runs:
+
 - Backend: `bun run dev` inside `backend`
 - Frontend: `npm run dev` inside `frontend/crm`
 
@@ -177,6 +183,7 @@ npm run dev
 ```
 
 Notes:
+
 - Backend listens on port 4000 by default (see `backend/main.ts` / `start.ts` for the exact port). Adjust your environment variables as needed.
 - Frontend is a Next.js app under `frontend/crm` and uses standard Next.js dev commands.
 
