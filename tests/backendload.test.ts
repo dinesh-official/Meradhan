@@ -4,7 +4,7 @@ const TARGET_URL = "http://localhost:4000/api/session";
 
 const COOKIE =
   "role=ADMIN; token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Ikp1YW5hX1NjaHVsdHo0MUBob3RtYWlsLmNvbSIsImlkIjoxNiwiaWF0IjoxNzYwNTU4ODU4LCJleHAiOjE3NjA2NDUyNTh9.PhGhtvK95PhS4n5Ev4Imi6eS07cxKmHRxGVi2TSN-DM; userId=16";
-E
+
 // 👇 configuration
 const TOTAL_REQUESTS = 200000;
 const CONCURRENCY = 20000;

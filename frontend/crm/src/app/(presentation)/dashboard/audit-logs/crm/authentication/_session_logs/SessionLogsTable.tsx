@@ -118,6 +118,21 @@ const getSessionStatus = (
   };
 };
 
+const hashSessionId = (id: number) => {
+  // Generate consistent alphanumeric hash from ID
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let hash = "#";
+  let num = id;
+
+  // Generate 6 character hash consistently for the same ID
+  for (let i = 0; i < 6; i++) {
+    hash += chars[num % chars.length];
+    num = Math.floor(num / chars.length);
+  }
+
+  return hash;
+};
+
 const SessionRow = ({
   session,
 }: {
@@ -133,115 +148,94 @@ const SessionRow = ({
       asChild
       className="gap-0 p-0"
     >
-      <Card className=" overflow-hidden p-0">
+      <Card className="overflow-hidden p-0">
         <CollapsibleTrigger asChild className="p-0">
-          <div className="px-3 cursor-pointer hover:bg-gray-50 transition-colors py-3">
-            <div className="flex items-start justify-between  border-b pb-4">
-              <div className="flex items-start gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-0 h-7 w-7 rounded-full"
-                >
-                  {isOpen ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </Button>
-                <div>
-                  <h3 className="font-semibold text-sm">
-                    Session #{session.id}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    {format(
-                      new Date(session.createdAt),
-                      "MMMM dd, yyyy 'at' hh:mm a"
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className={`${sessionStatus.color} text-xs px-2 py-0.5`}>
-                  {sessionStatus.status}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5"
-                >
-                  {session.pageViews.length} pages
-                </Badge>
-                <div className="flex items-center gap-1 text-gray-600">
-                  <Clock className="h-3.5 w-3.5 text-gray-400" />
-                  <span className="text-xs">
-                    {formatDuration(session.duration)}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start mt-4">
-              <div className="md:col-span-1"></div>
+          <div className="px-5 cursor-pointer hover:bg-gray-50 transition-colors py-4">
+            <div className="flex items-center gap-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-0 h-6 w-6 rounded-full flex-shrink-0"
+              >
+                {isOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
 
-              <div className="md:col-span-3">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-0.5">User</span>
-                  <span className="font-medium text-xs">
-                    {session.user?.name || "N/A"}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {session.user?.email || "N/A"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-0.5">
-                    Session Duration
-                  </span>
-                  <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium">Start:</span>
-                      <span className="text-xs">
-                        {format(new Date(session.startTime), "MMM dd, hh:mm a")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium">End:</span>
-                      {session.endTime ? (
-                        <span className="text-xs">
-                          {format(new Date(session.endTime), "MMM dd, hh:mm a")}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">N/A</span>
-                      )}
-                    </div>
+              <div className="flex items-center gap-5 flex-1 min-w-0">
+                {/* Session ID */}
+                <div className="flex-shrink-0 min-w-[80px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">Session</span>
+                    <span className="font-mono text-xs font-semibold text-gray-700">
+                      {hashSessionId(session.id)}
+                    </span>
                   </div>
                 </div>
-              </div>
 
-              <div className="md:col-span-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-0.5">
-                    IP Address
-                  </span>
-                  <span className="font-mono text-xs">{session.ipAddress}</span>
+                {/* User Info */}
+                <div className="flex-shrink-0 min-w-[200px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">User</span>
+                    <span className="font-medium text-xs truncate">
+                      {session.user?.name || "N/A"}
+                    </span>
+                    <span className="text-xs text-gray-400 truncate">
+                      {session.user?.email || "N/A"}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="md:col-span-2">
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-500 mb-0.5">
-                    Device & Browser
-                  </span>
-                  <div className="flex gap-1.5 flex-wrap">
+                {/* Login Time */}
+                <div className="flex-shrink-0 min-w-[140px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">Login</span>
+                    <span className="text-xs font-medium">
+                      {format(
+                        new Date(session.startTime),
+                        "MMM dd, yyyy hh:mm a"
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Logout Time */}
+                <div className="flex-shrink-0 min-w-[140px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">Logout</span>
+                    {session.endTime ? (
+                      <span className="text-xs font-medium">
+                        {format(
+                          new Date(session.endTime),
+                          "MMM dd, yyyy hh:mm a"
+                        )}
+                      </span>
+                    ) : (
+                      <Badge className="bg-green-100 text-green-800 text-xs px-2 py-0.5">
+                        Active
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex-shrink-0 min-w-[90px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">Status</span>
                     <Badge
-                      className={`${getDeviceBadgeColor(
-                        session.deviceType
-                      )} text-xs px-2 py-0.5`}
+                      className={`${sessionStatus.color} text-xs px-2 py-0.5`}
                     >
-                      {session.deviceType}
+                      {sessionStatus.status}
                     </Badge>
+                  </div>
+                </div>
+
+                {/* Browser */}
+                <div className="flex-shrink-0 min-w-[85px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">Browser</span>
                     <Badge
                       className={`${getBrowserBadgeColor(
                         session.browserName
@@ -251,20 +245,59 @@ const SessionRow = ({
                     </Badge>
                   </div>
                 </div>
-              </div>
 
-              <div className="md:col-span-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-0.5">
-                    Operating System
-                  </span>
+                {/* Device */}
+                <div className="flex-shrink-0 min-w-[75px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">Device</span>
+                    <Badge
+                      className={`${getDeviceBadgeColor(
+                        session.deviceType
+                      )} text-xs px-2 py-0.5`}
+                    >
+                      {session.deviceType}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* OS */}
+                <div className="flex-shrink-0 min-w-[75px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">OS</span>
+                    <Badge
+                      className={`${getOSBadgeColor(
+                        session.operatingSystem
+                      )} text-xs px-2 py-0.5`}
+                    >
+                      {session.operatingSystem}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* IP Address */}
+                <div className="flex-shrink-0 min-w-[120px]">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500">IP Address</span>
+                    <span className="font-mono text-xs text-gray-600">
+                      {session.ipAddress}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Duration & Pages */}
+                <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                   <Badge
-                    className={`${getOSBadgeColor(
-                      session.operatingSystem
-                    )} text-xs px-2 py-0.5`}
+                    variant="outline"
+                    className="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5"
                   >
-                    {session.operatingSystem}
+                    {session.pageViews.length} pages
                   </Badge>
+                  <div className="flex items-center gap-1 text-gray-600">
+                    <Clock className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="text-xs">
+                      {formatDuration(session.duration)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -272,76 +305,79 @@ const SessionRow = ({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="bg-gray-50 p-3 border-t ">
-            <div className="mb-2 flex items-center gap-2">
-              <h4 className="font-semibold text-xs">Page Views Details</h4>
+          <div className="bg-gray-50 p-5 border-t">
+            <div className="mb-4 flex items-center gap-2">
+              <h4 className="font-semibold text-sm">Page Views Details</h4>
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 {session.pageViews.length} total
               </Badge>
             </div>
-            <div className="rounded-md border bg-white">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Page Path</TableHead>
-                    <TableHead>Entry Time</TableHead>
-                    <TableHead>Exit Time</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Scroll Depth</TableHead>
-                    <TableHead>Interactions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {session.pageViews.length === 0 ? (
+            {session.pageViews.length === 0 ? (
+              <div className="text-center text-gray-500 py-8 bg-white rounded-md border">
+                No page views recorded
+              </div>
+            ) : (
+              <div className="rounded-md border bg-white overflow-hidden">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="text-center text-gray-500 py-8"
-                      >
-                        No page views recorded
-                      </TableCell>
+                      <TableHead className="text-xs font-semibold">
+                        Page Path
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold">
+                        Entry Time
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold">
+                        Exit Time
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold">
+                        Duration
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold">
+                        Scroll Depth
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold">
+                        Interactions
+                      </TableHead>
                     </TableRow>
-                  ) : (
-                    session.pageViews.map((pageView) => (
+                  </TableHeader>
+                  <TableBody>
+                    {session.pageViews.map((pageView) => (
                       <TableRow key={pageView.id}>
-                        <TableCell>
-                          <span className="font-mono text-xs text-gray-600">
-                            {pageView.pagePath}
-                          </span>
+                        <TableCell className=" text-xs text-gray-600">
+                          {pageView.pagePath}
                         </TableCell>
-                        <TableCell>
-                          <span className="text-sm">
-                            {format(
-                              new Date(pageView.entryTime),
-                              "MMM dd, hh:mm a"
-                            )}
-                          </span>
+                        <TableCell className="text-xs">
+                          {format(
+                            new Date(pageView.entryTime),
+                            "MMM dd, yyyy hh:mm a"
+                          )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-xs">
                           {pageView.exitTime ? (
-                            <span className="text-sm text-gray-700">
+                            <span>
                               {format(
                                 new Date(pageView.exitTime),
-                                "MMM dd, hh:mm a"
+                                "MMM dd, yyyy hh:mm a"
                               )}
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400">N/A</span>
+                            <span className="text-gray-400">N/A</span>
                           )}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3 text-gray-400" />
-                            <span className="text-sm">
+                            <span className="text-xs">
                               {formatDuration(pageView.duration)}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <div className="w-24 bg-gray-200 rounded-full h-2">
+                            <div className="w-20 bg-gray-200 rounded-full h-1.5">
                               <div
-                                className="bg-blue-600 h-2 rounded-full"
+                                className="bg-blue-600 h-1.5 rounded-full"
                                 style={{
                                   width: `${Math.min(
                                     pageView.scrollDepth,
@@ -350,7 +386,7 @@ const SessionRow = ({
                                 }}
                               />
                             </div>
-                            <span className="text-sm text-gray-600">
+                            <span className="text-xs text-gray-600">
                               {pageView.scrollDepth}%
                             </span>
                           </div>
@@ -358,17 +394,17 @@ const SessionRow = ({
                         <TableCell>
                           <Badge
                             variant="outline"
-                            className="bg-green-50 text-green-700"
+                            className="bg-green-50 text-green-700 text-xs px-2 py-0.5"
                           >
                             {pageView.interactions}
                           </Badge>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
         </CollapsibleContent>
       </Card>

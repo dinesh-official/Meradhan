@@ -35,33 +35,40 @@ export class EmailAuthService {
     callbackFunc?: (status: boolean, userid: number) => Promise<void> | void
   ) {
     const user = await this.authRepo.getAuthUserByEmail(email);
-    const isVerified = await this.optManager.verifyOtp(token, opt);
-    if (!isVerified) {
+    try {
+      const isVerified = await this.optManager.verifyOtp(token, opt);
+      if (!isVerified) {
+        if (callbackFunc) {
+          await callbackFunc?.(false, user.id);
+        }
+        throw new AppError("The OTP provided is invalid.");
+      }
+      const authToken = tokenUtils.generateToken(
+        {
+          email: user.email,
+          id: user.id,
+        },
+        "1d"
+      );
+      await this.authRepo.setLastLoginNow(user.id);
+      if (callbackFunc) {
+        callbackFunc?.(true, user.id);
+      }
+      return {
+        token: authToken,
+        id: user.id,
+        role: user.role,
+        avatar: user.avatar,
+        name: user.name,
+        email: user.email,
+        phoneNo: user.phoneNo,
+      };
+    } catch (error) {
       if (callbackFunc) {
         await callbackFunc?.(false, user.id);
       }
-      throw new AppError("The OTP provided is invalid.");
+      throw error;
     }
-    const authToken = tokenUtils.generateToken(
-      {
-        email: user.email,
-        id: user.id,
-      },
-      "1d"
-    );
-    await this.authRepo.setLastLoginNow(user.id);
-    if (callbackFunc) {
-      callbackFunc?.(true, user.id);
-    }
-    return {
-      token: authToken,
-      id: user.id,
-      role: user.role,
-      avatar: user.avatar,
-      name: user.name,
-      email: user.email,
-      phoneNo: user.phoneNo,
-    };
   }
 
   async getSession(id: number) {

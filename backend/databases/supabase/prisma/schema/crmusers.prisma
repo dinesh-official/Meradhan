@@ -12,7 +12,6 @@ model CRMUserDataModel {
   createdBy              Int?
   CustomersAuthDataModel CustomersAuthDataModel[]
   LeadsModel             LeadsModel[]
-  sessionLogsCRMs        SessionLogsCRM[]
 
   @@index([email])
   @@map("crm_users")

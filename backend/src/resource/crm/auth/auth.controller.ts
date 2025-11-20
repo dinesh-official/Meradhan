@@ -1,9 +1,5 @@
 import { config } from "@config/config";
-import { cookieOptions } from "@config/cookie";
 import { appSchema } from "@root/schema";
-import { HttpStatus } from "@utils/error/AppError";
-import type { Request, Response } from "express";
-import { EmailAuthService } from "./email_auth.service";
 import {
   addCrmLoginBasedAuditLog,
   AuditLogRepository,
@@ -13,6 +9,9 @@ import {
   getClientIP,
   parseBrowserInfo,
 } from "@services/auditlogs/auditlogs.utility";
+import { HttpStatus } from "@utils/error/AppError";
+import type { Request, Response } from "express";
+import { EmailAuthService } from "./email_auth.service";
 
 export class AuthController {
   private auditLogsRepo = new AuditLogRepository();
@@ -57,10 +56,6 @@ export class AuthController {
         });
       }
     );
-
-    res.cookie("token", payload.token, cookieOptions);
-    res.cookie("userId", payload.id, cookieOptions);
-    res.cookie("role", payload.role, cookieOptions);
 
     // Start audit log session
     const infoBrowser = parseBrowserInfo(req.headers["user-agent"] || "");

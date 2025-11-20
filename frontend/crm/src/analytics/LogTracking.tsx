@@ -14,6 +14,8 @@ export const PageTrackingProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { cookies } = useAppCookie();
+  console.log(cookies);
+
   const pathname = usePathname();
   const [currentPageView, setCurrentPageView] = useState<PageView | null>(null);
   const pageViewIdRef = useRef<number | null>(null);
@@ -25,10 +27,13 @@ export const PageTrackingProvider: React.FC<{
   // Start page view tracking
   useEffect(() => {
     const startPageView = async () => {
-      if (currentPageView && pageViewIdRef.current) {
-        await endPageView();
-      }
+      await endPageView();
+
       if (!cookies.userId || !cookies.token) return;
+
+      if (pathname.startsWith("/logout")) {
+        return;
+      }
 
       try {
         const pageData = {
@@ -83,10 +88,10 @@ export const PageTrackingProvider: React.FC<{
           sessionStorage.clear();
 
           // Clear all cookies
-          document.cookie.split(";").forEach((cookie) => {
-            const name = cookie.split("=")[0].trim();
-            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-          });
+          // document.cookie.split(";").forEach((cookie) => {
+          //   const name = cookie.split("=")[0].trim();
+          //   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+          // });
           navigator.sendBeacon(
             "/api/server/auditlogs/crm/page-tracking/end/" +
               pageViewIdRef.current,
@@ -216,6 +221,7 @@ export const PageTrackingProvider: React.FC<{
         const duration = Math.floor(
           (exitTime.getTime() - currentPageView.entryTime!.getTime()) / 1000
         );
+        endPageView();
         // Use sendBeacon for reliable data sending on page unload
         navigator.sendBeacon(
           "/api/server/auditlogs/crm/page-tracking/end/" +

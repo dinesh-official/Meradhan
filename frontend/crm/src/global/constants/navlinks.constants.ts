@@ -218,13 +218,13 @@ export const NAV_ITEMS: NavItem[] = [
         allowOnly: ["view:crmauditlogs"],
         children: [
           {
-            label: "Activity Logs",
+            label: "Activity History",
             path: "/dashboard/audit-logs/crm/logs",
             module: "crmauditlogs",
             allowOnly: ["view:crmauditlogs"],
           },
           {
-            label: "Authentication Logs",
+            label: "Session History",
             path: "/dashboard/audit-logs/crm/authentication",
             module: "crmauditlogs",
             allowOnly: ["view:crmauditlogs"],
@@ -244,13 +244,13 @@ export const NAV_ITEMS: NavItem[] = [
         children: [
           {
             label: "Activity Logs",
-            path: "/dashboard/audit-logs/web/activity",
+            path: "/dashboard/audit-logs/meradhan",
             module: "webauditlogs",
             allowOnly: ["view:webauditlogs"],
           },
           {
             label: "Session Logs",
-            path: "/dashboard/audit-logs/web/authentication",
+            path: "/dashboard/audit-logs/meradhan/session",
             module: "webauditlogs",
             allowOnly: ["view:webauditlogs"],
           },

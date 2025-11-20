@@ -40,10 +40,14 @@ function PersonalDetails({
           <p className="font-medium text-sm uppercase">{profile.firstName}</p>
         </DataInfoLabel>
         <DataInfoLabel title="Middle Name">
-          <p className="font-medium text-sm uppercase">{profile.middleName || "--"}</p>
+          <p className="font-medium text-sm uppercase">
+            {profile.middleName || "--"}
+          </p>
         </DataInfoLabel>
         <DataInfoLabel title="Last Name">
-          <p className="font-medium text-sm uppercase">{profile.lastName || "--"}</p>
+          <p className="font-medium text-sm uppercase">
+            {profile.lastName || "--"}
+          </p>
         </DataInfoLabel>
         <MobileNoVerify profile={profile} />
         <EmailVerification profile={profile} />
@@ -61,26 +65,40 @@ function PersonalDetails({
         )}
 
         <DataInfoLabel title="Line 1" className="md:col-span-3">
-          <p className="font-medium text-sm">{getAddressNotes(profile.permanentAddress?.line1)}</p>
+          <p className="font-medium text-sm">
+            {getAddressNotes(profile.permanentAddress?.line1)}
+          </p>
         </DataInfoLabel>
         <DataInfoLabel title="Line 2" className="md:col-span-3">
-          <p className="font-medium text-sm">{getAddressNotes(profile.permanentAddress?.line2)}</p>
+          <p className="font-medium text-sm">
+            {getAddressNotes(profile.permanentAddress?.line2)}
+          </p>
         </DataInfoLabel>
         <DataInfoLabel title="Line 3" className="md:col-span-3">
-          <p className="font-medium text-sm">{getAddressNotes(profile.permanentAddress?.line3)}</p>
+          <p className="font-medium text-sm">
+            {getAddressNotes(profile.permanentAddress?.line3)}
+          </p>
         </DataInfoLabel>
         <DataInfoLabel title="City / Town / Village">
-          <p className="font-medium text-sm">{getAddressNotes(profile.permanentAddress?.cityOrDistrict)}</p>
+          <p className="font-medium text-sm">
+            {getAddressNotes(profile.permanentAddress?.cityOrDistrict)}
+          </p>
         </DataInfoLabel>
 
         <DataInfoLabel title="District">
-          <p className="font-medium text-sm">{getAddressNotes(profile.permanentAddress?.cityOrDistrict)}</p>
+          <p className="font-medium text-sm">
+            {getAddressNotes(profile.permanentAddress?.cityOrDistrict)}
+          </p>
         </DataInfoLabel>
         <DataInfoLabel title="State">
-          <p className="font-medium text-sm">{getAddressNotes(profile.permanentAddress?.state)}</p>
+          <p className="font-medium text-sm">
+            {getAddressNotes(profile.permanentAddress?.state)}
+          </p>
         </DataInfoLabel>
         <DataInfoLabel title="Pincode ">
-          <p className="font-medium text-sm">{getAddressNotes(profile.permanentAddress?.pinCode)}</p>
+          <p className="font-medium text-sm">
+            {getAddressNotes(profile.permanentAddress?.pinCode)}
+          </p>
         </DataInfoLabel>
         <DataInfoLabel title="Country ">
           <p className="font-medium text-sm">India</p>
@@ -392,8 +410,9 @@ function MobileNoUpdate({
           <div className="relative">
             <Input
               placeholder="Mobile No*"
-              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.mobile ? "border-red-500 border" : ""
-                }`}
+              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
+                errors.mobile ? "border-red-500 border" : ""
+              }`}
               type="text"
               value={mobileNumber}
               onChange={(e) => handleMobileChange(e.target.value)}
@@ -425,8 +444,9 @@ function MobileNoUpdate({
             <div className="relative">
               <Input
                 placeholder="Whatsapp Number"
-                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.whatsapp ? "border-red-500 border" : ""
-                  }`}
+                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
+                  errors.whatsapp ? "border-red-500 border" : ""
+                }`}
                 type="text"
                 value={whatsappNumber}
                 onChange={(e) => handleWhatsappChange(e.target.value)}
@@ -486,7 +506,7 @@ function AllowWhatsAppNotification({
 
   return (
     <DataInfoLabel title="WhatsApp Notification ">
-      <p className="flex items-center gap-2 font-medium text-sm">
+      <label className="flex items-center gap-2 font-medium text-sm cursor-pointer">
         <Checkbox
           checked={profile.utility.whatsAppNotificationAllow}
           disabled={toggleWhatsAppNotificationMutation.isPending}
@@ -497,7 +517,7 @@ function AllowWhatsAppNotification({
           }
         />{" "}
         Allow Notification
-      </p>
+      </label>
     </DataInfoLabel>
   );
 }
@@ -526,9 +546,9 @@ function FullKycInfo({
         <p className="font-medium text-sm">
           {profile.personalInformation?.dateOfBirth
             ? dateTimeUtils.formatDateTime(
-              profile.personalInformation?.dateOfBirth,
-              "DD MMM YYYY"
-            )
+                profile.personalInformation?.dateOfBirth,
+                "DD MMM YYYY"
+              )
             : "--"}
         </p>
       </DataInfoLabel>

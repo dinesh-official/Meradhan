@@ -15,7 +15,7 @@ export async function ViewPort({
   const session = await getSession();
 
   return (
-    <div>
+    <div id="mainpage">
       <NavBar session={session} />
       {children}
       {!headerOnly && (

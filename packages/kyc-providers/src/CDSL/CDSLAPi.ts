@@ -15,7 +15,7 @@ const StatusCodeMessages: Record<string, string> = {
   "10": "Frozen for Both Debit And Credit",
   "-1": "Failure",
   "00": "Failure",
-}
+};
 
 export class CDSLApi {
   private readonly axiosInstance: AxiosInstance;
@@ -41,7 +41,6 @@ export class CDSLApi {
     });
   }
 
-
   private buildIstTimestamps(now = new Date()) {
     const fmt = new Intl.DateTimeFormat("en-GB", {
       timeZone: "Asia/Kolkata",
@@ -55,7 +54,7 @@ export class CDSLApi {
     });
 
     const parts = Object.fromEntries(
-      fmt.formatToParts(now).map(p => [p.type, p.value])
+      fmt.formatToParts(now).map((p) => [p.type, p.value])
     ) as Record<
       "day" | "month" | "year" | "hour" | "minute" | "second",
       string
@@ -76,11 +75,14 @@ export class CDSLApi {
     return { body14, headerEpochMs };
   }
 
-
   /** AES-256-CBC encryption with PKCS7 padding and zero IV (per CDSL spec) */
-  private encryptRequestData(requestData: object, iv = Buffer.alloc(16, 0x00)): string {
+  private encryptRequestData(
+    requestData: object,
+    iv = Buffer.alloc(16, 0x00)
+  ): string {
     const key = Buffer.from(this.AesKey, "utf8");
-    if (key.length !== 32) throw new Error("Invalid AES-256 key length (must be 32 bytes).");
+    if (key.length !== 32)
+      throw new Error("Invalid AES-256 key length (must be 32 bytes).");
 
     const plaintext = JSON.stringify(requestData);
     const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
@@ -95,7 +97,10 @@ export class CDSLApi {
     const key = Buffer.from(this.AesKey, "utf8");
     const data = Buffer.from(base64Cipher, "base64");
     const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-    const decrypted = Buffer.concat([decipher.update(data), decipher.final()]).toString("utf8");
+    const decrypted = Buffer.concat([
+      decipher.update(data),
+      decipher.final(),
+    ]).toString("utf8");
     try {
       return JSON.parse(decrypted);
     } catch {
@@ -104,7 +109,9 @@ export class CDSLApi {
   }
 
   /** Main API method — PAN Verify Request */
-  async panVerifyRequest(request: BoPanRequest): Promise<DemateVerifyResponse<BoPanResponse>> {
+  async panVerifyRequest(
+    request: BoPanRequest
+  ): Promise<DemateVerifyResponse<BoPanResponse>> {
     if (!request.boid || !request.pan1)
       throw new Error("Missing required fields: boid and pan1.");
 
@@ -122,7 +129,6 @@ export class CDSLApi {
 
     // Encrypt payload
     const encryptedBody = this.encryptRequestData(body);
-
 
     const headers = {
       "Content-Type": "application/json",
@@ -151,4 +157,3 @@ export class CDSLApi {
     };
   }
 }
-

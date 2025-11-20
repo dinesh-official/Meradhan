@@ -1,0 +1,12 @@
+model KraDataLogs {
+    id           Int      @id @default(autoincrement())
+    panId        Int
+    requestData  Json
+    responseData Json
+    status       String   @default("INITIALIZED")
+    /// Timestamps
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@map("kra_data_logs")
+}

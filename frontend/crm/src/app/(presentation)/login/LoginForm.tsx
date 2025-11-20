@@ -26,7 +26,7 @@ function LoginForm() {
           onChangeAction={state.otp.setOtp}
           value={state.otp.value}
           onSubmit={actions.handelOtpSubmit}
-          isLoading={otpVerificationMutation.isPending || !!otpVerificationMutation.data}
+          isLoading={otpVerificationMutation.isPending}
         />
       )}
     </div>

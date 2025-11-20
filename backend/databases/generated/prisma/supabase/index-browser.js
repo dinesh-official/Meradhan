@@ -210,6 +210,74 @@ exports.Prisma.LoginLogsCrmScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.SessionLogsMeradhanScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionToken: 'sessionToken',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  browserName: 'browserName',
+  deviceType: 'deviceType',
+  operatingSystem: 'operatingSystem',
+  endReason: 'endReason',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  duration: 'duration',
+  totalPages: 'totalPages',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PageViewLogsMeradhanScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  pagePath: 'pagePath',
+  pageTitle: 'pageTitle',
+  entryTime: 'entryTime',
+  exitTime: 'exitTime',
+  duration: 'duration',
+  scrollDepth: 'scrollDepth',
+  interactions: 'interactions',
+  referrer: 'referrer',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.LoginLogsMeradhanScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  email: 'email',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  browserName: 'browserName',
+  deviceType: 'deviceType',
+  operatingSystem: 'operatingSystem',
+  sessionType: 'sessionType',
+  success: 'success',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ActivityLogsMeradhanScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  email: 'email',
+  entityType: 'entityType',
+  action: 'action',
+  entityId: 'entityId',
+  ipAddress: 'ipAddress',
+  details: 'details',
+  userAgent: 'userAgent',
+  browserName: 'browserName',
+  deviceType: 'deviceType',
+  operatingSystem: 'operatingSystem',
+  url: 'url',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.BondsScalarFieldEnum = {
   id: 'id',
   isin: 'isin',
@@ -422,6 +490,16 @@ exports.Prisma.CustomersDematAccountModelScalarFieldEnum = {
   confirmTimeStamp: 'confirmTimeStamp',
   allowTerms: 'allowTerms',
   customerProfileDataModelId: 'customerProfileDataModelId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.KraDataLogsScalarFieldEnum = {
+  id: 'id',
+  panId: 'panId',
+  requestData: 'requestData',
+  responseData: 'responseData',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -927,6 +1005,10 @@ exports.Prisma.ModelName = {
   SessionLogsCRM: 'SessionLogsCRM',
   PageViewLogsCRM: 'PageViewLogsCRM',
   LoginLogsCrm: 'LoginLogsCrm',
+  SessionLogsMeradhan: 'SessionLogsMeradhan',
+  PageViewLogsMeradhan: 'PageViewLogsMeradhan',
+  LoginLogsMeradhan: 'LoginLogsMeradhan',
+  ActivityLogsMeradhan: 'ActivityLogsMeradhan',
   Bonds: 'Bonds',
   CRMUserDataModel: 'CRMUserDataModel',
   CustomersAuthDataModel: 'CustomersAuthDataModel',
@@ -938,6 +1020,7 @@ exports.Prisma.ModelName = {
   AddressModel: 'AddressModel',
   CustomersBankAccountModel: 'CustomersBankAccountModel',
   CustomersDematAccountModel: 'CustomersDematAccountModel',
+  KraDataLogs: 'KraDataLogs',
   KYC_FLOW: 'KYC_FLOW',
   LeadsModel: 'LeadsModel',
   LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',

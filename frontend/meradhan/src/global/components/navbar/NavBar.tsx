@@ -24,6 +24,7 @@ function NavBar({
     setSession(session);
 
     if (!session) {
+      // clear session data on logout or session expiry session expired but token cookie still exists
       if (cookies.token) {
         clearCookies();
         localStorage.clear();

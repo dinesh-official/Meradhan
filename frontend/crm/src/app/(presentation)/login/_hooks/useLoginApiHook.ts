@@ -1,5 +1,9 @@
 import { getSessionId } from "@/analytics/analytics";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
+import {
+  COOKIE_EXPIRY_TIME,
+  COOKIE_OPTIONS,
+} from "@/core/config/cookies.config";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useCurrentUserData } from "@/global/stores/useCurrentUserData.store";
 import useAppCookie from "@/hooks/useAppCookie.hook";
@@ -13,7 +17,6 @@ import z from "zod";
 
 export const useLoginApiHook = () => {
   const { trackActivity } = useUserTracking();
-  const { cookies, setCookie } = useAppCookie();
   const authApi = new apiGateway.auth.AuthApi(apiClientCaller);
   const [step, setStep] = useState<"EMAIL" | "OTP">("EMAIL");
   const usersStore = useCurrentUserData();
@@ -45,30 +48,32 @@ export const useLoginApiHook = () => {
     mutationFn: async (
       payload: z.infer<typeof appSchema.auth.verifyOtpSchema>
     ) => {
-      const response = await authApi.verifyOtp(payload);
-      return response.data;
+      const response = await fetch("/api/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      return response.json();
     },
     onSuccess(data) {
       toast.success("Login Successful");
 
       usersStore.setUserData({
-        name: data.responseData.name,
-        role: data.responseData.role,
-        email: data.responseData.email,
-        avatar: data.responseData.avatar,
-        id: data.responseData.id,
-        phoneNo: data.responseData.phoneNo,
+        name: data.name,
+        role: data.role,
+        email: data.email,
+        avatar: data.avatar,
+        id: data.id,
+        phoneNo: data.phoneNo,
       });
-
-      setCookie("token", data.responseData.token);
-      setCookie("userId", data.responseData.id.toString());
-      setCookie("role", data.responseData.role.toString());
 
       window.location.href = "/dashboard";
     },
     onError(error) {
+      console.log(error);
+
       if (error instanceof ApiError) {
-        toast.error(error.response?.data?.message);
+        toast.error(error?.message);
       } else {
         toast.error(error.message);
       }

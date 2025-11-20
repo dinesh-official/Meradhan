@@ -44,6 +44,26 @@ export type PageViewLogsCRM = $Result.DefaultSelection<Prisma.$PageViewLogsCRMPa
  */
 export type LoginLogsCrm = $Result.DefaultSelection<Prisma.$LoginLogsCrmPayload>
 /**
+ * Model SessionLogsMeradhan
+ * 
+ */
+export type SessionLogsMeradhan = $Result.DefaultSelection<Prisma.$SessionLogsMeradhanPayload>
+/**
+ * Model PageViewLogsMeradhan
+ * 
+ */
+export type PageViewLogsMeradhan = $Result.DefaultSelection<Prisma.$PageViewLogsMeradhanPayload>
+/**
+ * Model LoginLogsMeradhan
+ * 
+ */
+export type LoginLogsMeradhan = $Result.DefaultSelection<Prisma.$LoginLogsMeradhanPayload>
+/**
+ * Model ActivityLogsMeradhan
+ * 
+ */
+export type ActivityLogsMeradhan = $Result.DefaultSelection<Prisma.$ActivityLogsMeradhanPayload>
+/**
  * Model Bonds
  * 
  */
@@ -98,6 +118,11 @@ export type CustomersBankAccountModel = $Result.DefaultSelection<Prisma.$Custome
  * Demat / Broker account data (1-to-many)
  */
 export type CustomersDematAccountModel = $Result.DefaultSelection<Prisma.$CustomersDematAccountModelPayload>
+/**
+ * Model KraDataLogs
+ * 
+ */
+export type KraDataLogs = $Result.DefaultSelection<Prisma.$KraDataLogsPayload>
 /**
  * Model KYC_FLOW
  * 
@@ -718,6 +743,46 @@ export class PrismaClient<
   get loginLogsCrm(): Prisma.LoginLogsCrmDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.sessionLogsMeradhan`: Exposes CRUD operations for the **SessionLogsMeradhan** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SessionLogsMeradhans
+    * const sessionLogsMeradhans = await prisma.sessionLogsMeradhan.findMany()
+    * ```
+    */
+  get sessionLogsMeradhan(): Prisma.SessionLogsMeradhanDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.pageViewLogsMeradhan`: Exposes CRUD operations for the **PageViewLogsMeradhan** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PageViewLogsMeradhans
+    * const pageViewLogsMeradhans = await prisma.pageViewLogsMeradhan.findMany()
+    * ```
+    */
+  get pageViewLogsMeradhan(): Prisma.PageViewLogsMeradhanDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.loginLogsMeradhan`: Exposes CRUD operations for the **LoginLogsMeradhan** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoginLogsMeradhans
+    * const loginLogsMeradhans = await prisma.loginLogsMeradhan.findMany()
+    * ```
+    */
+  get loginLogsMeradhan(): Prisma.LoginLogsMeradhanDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.activityLogsMeradhan`: Exposes CRUD operations for the **ActivityLogsMeradhan** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ActivityLogsMeradhans
+    * const activityLogsMeradhans = await prisma.activityLogsMeradhan.findMany()
+    * ```
+    */
+  get activityLogsMeradhan(): Prisma.ActivityLogsMeradhanDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.bonds`: Exposes CRUD operations for the **Bonds** model.
     * Example usage:
     * ```ts
@@ -826,6 +891,16 @@ export class PrismaClient<
     * ```
     */
   get customersDematAccountModel(): Prisma.CustomersDematAccountModelDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.kraDataLogs`: Exposes CRUD operations for the **KraDataLogs** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KraDataLogs
+    * const kraDataLogs = await prisma.kraDataLogs.findMany()
+    * ```
+    */
+  get kraDataLogs(): Prisma.KraDataLogsDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.kYC_FLOW`: Exposes CRUD operations for the **KYC_FLOW** model.
@@ -1382,6 +1457,10 @@ export namespace Prisma {
     SessionLogsCRM: 'SessionLogsCRM',
     PageViewLogsCRM: 'PageViewLogsCRM',
     LoginLogsCrm: 'LoginLogsCrm',
+    SessionLogsMeradhan: 'SessionLogsMeradhan',
+    PageViewLogsMeradhan: 'PageViewLogsMeradhan',
+    LoginLogsMeradhan: 'LoginLogsMeradhan',
+    ActivityLogsMeradhan: 'ActivityLogsMeradhan',
     Bonds: 'Bonds',
     CRMUserDataModel: 'CRMUserDataModel',
     CustomersAuthDataModel: 'CustomersAuthDataModel',
@@ -1393,6 +1472,7 @@ export namespace Prisma {
     AddressModel: 'AddressModel',
     CustomersBankAccountModel: 'CustomersBankAccountModel',
     CustomersDematAccountModel: 'CustomersDematAccountModel',
+    KraDataLogs: 'KraDataLogs',
     KYC_FLOW: 'KYC_FLOW',
     LeadsModel: 'LeadsModel',
     LeadFollowUpNotesModel: 'LeadFollowUpNotesModel',
@@ -1422,7 +1502,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "crmAuditLogs" | "webAuditLogs" | "activityLogsCRM" | "sessionLogsCRM" | "pageViewLogsCRM" | "loginLogsCrm" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "settleOrderModel" | "rFQMasterISIN" | "rFQNegotiation"
+      modelProps: "crmAuditLogs" | "webAuditLogs" | "activityLogsCRM" | "sessionLogsCRM" | "pageViewLogsCRM" | "loginLogsCrm" | "sessionLogsMeradhan" | "pageViewLogsMeradhan" | "loginLogsMeradhan" | "activityLogsMeradhan" | "bonds" | "cRMUserDataModel" | "customersAuthDataModel" | "customerProfileDataModel" | "customerPersonalInfoModel" | "aADHAARCardModel" | "panCardModel" | "customersRiskProfileModel" | "addressModel" | "customersBankAccountModel" | "customersDematAccountModel" | "kraDataLogs" | "kYC_FLOW" | "leadsModel" | "leadFollowUpNotesModel" | "nseDataSet" | "nseCbricsParticipantModel" | "nSEBankAccount" | "nSEDpAccount" | "nseIsinSecurityReceipt" | "settleOrderModel" | "rFQMasterISIN" | "rFQNegotiation"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1867,6 +1947,302 @@ export namespace Prisma {
           count: {
             args: Prisma.LoginLogsCrmCountArgs<ExtArgs>
             result: $Utils.Optional<LoginLogsCrmCountAggregateOutputType> | number
+          }
+        }
+      }
+      SessionLogsMeradhan: {
+        payload: Prisma.$SessionLogsMeradhanPayload<ExtArgs>
+        fields: Prisma.SessionLogsMeradhanFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SessionLogsMeradhanFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SessionLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>
+          }
+          findFirst: {
+            args: Prisma.SessionLogsMeradhanFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SessionLogsMeradhanFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>
+          }
+          findMany: {
+            args: Prisma.SessionLogsMeradhanFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>[]
+          }
+          create: {
+            args: Prisma.SessionLogsMeradhanCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>
+          }
+          createMany: {
+            args: Prisma.SessionLogsMeradhanCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SessionLogsMeradhanCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>[]
+          }
+          delete: {
+            args: Prisma.SessionLogsMeradhanDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>
+          }
+          update: {
+            args: Prisma.SessionLogsMeradhanUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>
+          }
+          deleteMany: {
+            args: Prisma.SessionLogsMeradhanDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SessionLogsMeradhanUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SessionLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>[]
+          }
+          upsert: {
+            args: Prisma.SessionLogsMeradhanUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionLogsMeradhanPayload>
+          }
+          aggregate: {
+            args: Prisma.SessionLogsMeradhanAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSessionLogsMeradhan>
+          }
+          groupBy: {
+            args: Prisma.SessionLogsMeradhanGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SessionLogsMeradhanGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SessionLogsMeradhanCountArgs<ExtArgs>
+            result: $Utils.Optional<SessionLogsMeradhanCountAggregateOutputType> | number
+          }
+        }
+      }
+      PageViewLogsMeradhan: {
+        payload: Prisma.$PageViewLogsMeradhanPayload<ExtArgs>
+        fields: Prisma.PageViewLogsMeradhanFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PageViewLogsMeradhanFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PageViewLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>
+          }
+          findFirst: {
+            args: Prisma.PageViewLogsMeradhanFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PageViewLogsMeradhanFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>
+          }
+          findMany: {
+            args: Prisma.PageViewLogsMeradhanFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>[]
+          }
+          create: {
+            args: Prisma.PageViewLogsMeradhanCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>
+          }
+          createMany: {
+            args: Prisma.PageViewLogsMeradhanCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PageViewLogsMeradhanCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>[]
+          }
+          delete: {
+            args: Prisma.PageViewLogsMeradhanDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>
+          }
+          update: {
+            args: Prisma.PageViewLogsMeradhanUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>
+          }
+          deleteMany: {
+            args: Prisma.PageViewLogsMeradhanDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PageViewLogsMeradhanUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PageViewLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>[]
+          }
+          upsert: {
+            args: Prisma.PageViewLogsMeradhanUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PageViewLogsMeradhanPayload>
+          }
+          aggregate: {
+            args: Prisma.PageViewLogsMeradhanAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePageViewLogsMeradhan>
+          }
+          groupBy: {
+            args: Prisma.PageViewLogsMeradhanGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PageViewLogsMeradhanGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PageViewLogsMeradhanCountArgs<ExtArgs>
+            result: $Utils.Optional<PageViewLogsMeradhanCountAggregateOutputType> | number
+          }
+        }
+      }
+      LoginLogsMeradhan: {
+        payload: Prisma.$LoginLogsMeradhanPayload<ExtArgs>
+        fields: Prisma.LoginLogsMeradhanFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoginLogsMeradhanFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoginLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>
+          }
+          findFirst: {
+            args: Prisma.LoginLogsMeradhanFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoginLogsMeradhanFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>
+          }
+          findMany: {
+            args: Prisma.LoginLogsMeradhanFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>[]
+          }
+          create: {
+            args: Prisma.LoginLogsMeradhanCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>
+          }
+          createMany: {
+            args: Prisma.LoginLogsMeradhanCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoginLogsMeradhanCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>[]
+          }
+          delete: {
+            args: Prisma.LoginLogsMeradhanDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>
+          }
+          update: {
+            args: Prisma.LoginLogsMeradhanUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoginLogsMeradhanDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoginLogsMeradhanUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoginLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoginLogsMeradhanUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoginLogsMeradhanPayload>
+          }
+          aggregate: {
+            args: Prisma.LoginLogsMeradhanAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoginLogsMeradhan>
+          }
+          groupBy: {
+            args: Prisma.LoginLogsMeradhanGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoginLogsMeradhanGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoginLogsMeradhanCountArgs<ExtArgs>
+            result: $Utils.Optional<LoginLogsMeradhanCountAggregateOutputType> | number
+          }
+        }
+      }
+      ActivityLogsMeradhan: {
+        payload: Prisma.$ActivityLogsMeradhanPayload<ExtArgs>
+        fields: Prisma.ActivityLogsMeradhanFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ActivityLogsMeradhanFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ActivityLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>
+          }
+          findFirst: {
+            args: Prisma.ActivityLogsMeradhanFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ActivityLogsMeradhanFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>
+          }
+          findMany: {
+            args: Prisma.ActivityLogsMeradhanFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>[]
+          }
+          create: {
+            args: Prisma.ActivityLogsMeradhanCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>
+          }
+          createMany: {
+            args: Prisma.ActivityLogsMeradhanCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ActivityLogsMeradhanCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>[]
+          }
+          delete: {
+            args: Prisma.ActivityLogsMeradhanDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>
+          }
+          update: {
+            args: Prisma.ActivityLogsMeradhanUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>
+          }
+          deleteMany: {
+            args: Prisma.ActivityLogsMeradhanDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ActivityLogsMeradhanUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ActivityLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>[]
+          }
+          upsert: {
+            args: Prisma.ActivityLogsMeradhanUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogsMeradhanPayload>
+          }
+          aggregate: {
+            args: Prisma.ActivityLogsMeradhanAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateActivityLogsMeradhan>
+          }
+          groupBy: {
+            args: Prisma.ActivityLogsMeradhanGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogsMeradhanGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ActivityLogsMeradhanCountArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogsMeradhanCountAggregateOutputType> | number
           }
         }
       }
@@ -2681,6 +3057,80 @@ export namespace Prisma {
           count: {
             args: Prisma.CustomersDematAccountModelCountArgs<ExtArgs>
             result: $Utils.Optional<CustomersDematAccountModelCountAggregateOutputType> | number
+          }
+        }
+      }
+      KraDataLogs: {
+        payload: Prisma.$KraDataLogsPayload<ExtArgs>
+        fields: Prisma.KraDataLogsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KraDataLogsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KraDataLogsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>
+          }
+          findFirst: {
+            args: Prisma.KraDataLogsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KraDataLogsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>
+          }
+          findMany: {
+            args: Prisma.KraDataLogsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>[]
+          }
+          create: {
+            args: Prisma.KraDataLogsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>
+          }
+          createMany: {
+            args: Prisma.KraDataLogsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.KraDataLogsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>[]
+          }
+          delete: {
+            args: Prisma.KraDataLogsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>
+          }
+          update: {
+            args: Prisma.KraDataLogsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>
+          }
+          deleteMany: {
+            args: Prisma.KraDataLogsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KraDataLogsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.KraDataLogsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>[]
+          }
+          upsert: {
+            args: Prisma.KraDataLogsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KraDataLogsPayload>
+          }
+          aggregate: {
+            args: Prisma.KraDataLogsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKraDataLogs>
+          }
+          groupBy: {
+            args: Prisma.KraDataLogsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KraDataLogsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KraDataLogsCountArgs<ExtArgs>
+            result: $Utils.Optional<KraDataLogsCountAggregateOutputType> | number
           }
         }
       }
@@ -3600,6 +4050,10 @@ export namespace Prisma {
     sessionLogsCRM?: SessionLogsCRMOmit
     pageViewLogsCRM?: PageViewLogsCRMOmit
     loginLogsCrm?: LoginLogsCrmOmit
+    sessionLogsMeradhan?: SessionLogsMeradhanOmit
+    pageViewLogsMeradhan?: PageViewLogsMeradhanOmit
+    loginLogsMeradhan?: LoginLogsMeradhanOmit
+    activityLogsMeradhan?: ActivityLogsMeradhanOmit
     bonds?: BondsOmit
     cRMUserDataModel?: CRMUserDataModelOmit
     customersAuthDataModel?: CustomersAuthDataModelOmit
@@ -3611,6 +4065,7 @@ export namespace Prisma {
     addressModel?: AddressModelOmit
     customersBankAccountModel?: CustomersBankAccountModelOmit
     customersDematAccountModel?: CustomersDematAccountModelOmit
+    kraDataLogs?: KraDataLogsOmit
     kYC_FLOW?: KYC_FLOWOmit
     leadsModel?: LeadsModelOmit
     leadFollowUpNotesModel?: LeadFollowUpNotesModelOmit
@@ -10579,6 +11034,4622 @@ export namespace Prisma {
      * Omit specific fields from the LoginLogsCrm
      */
     omit?: LoginLogsCrmOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SessionLogsMeradhan
+   */
+
+  export type AggregateSessionLogsMeradhan = {
+    _count: SessionLogsMeradhanCountAggregateOutputType | null
+    _avg: SessionLogsMeradhanAvgAggregateOutputType | null
+    _sum: SessionLogsMeradhanSumAggregateOutputType | null
+    _min: SessionLogsMeradhanMinAggregateOutputType | null
+    _max: SessionLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  export type SessionLogsMeradhanAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    totalPages: number | null
+  }
+
+  export type SessionLogsMeradhanSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    totalPages: number | null
+  }
+
+  export type SessionLogsMeradhanMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    sessionToken: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    endReason: string | null
+    startTime: Date | null
+    endTime: Date | null
+    duration: number | null
+    totalPages: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionLogsMeradhanMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    sessionToken: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    endReason: string | null
+    startTime: Date | null
+    endTime: Date | null
+    duration: number | null
+    totalPages: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionLogsMeradhanCountAggregateOutputType = {
+    id: number
+    userId: number
+    sessionToken: number
+    ipAddress: number
+    userAgent: number
+    browserName: number
+    deviceType: number
+    operatingSystem: number
+    endReason: number
+    startTime: number
+    endTime: number
+    duration: number
+    totalPages: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SessionLogsMeradhanAvgAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    totalPages?: true
+  }
+
+  export type SessionLogsMeradhanSumAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    totalPages?: true
+  }
+
+  export type SessionLogsMeradhanMinAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionToken?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    endReason?: true
+    startTime?: true
+    endTime?: true
+    duration?: true
+    totalPages?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionLogsMeradhanMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionToken?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    endReason?: true
+    startTime?: true
+    endTime?: true
+    duration?: true
+    totalPages?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionLogsMeradhanCountAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionToken?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    endReason?: true
+    startTime?: true
+    endTime?: true
+    duration?: true
+    totalPages?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SessionLogsMeradhanAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SessionLogsMeradhan to aggregate.
+     */
+    where?: SessionLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsMeradhans to fetch.
+     */
+    orderBy?: SessionLogsMeradhanOrderByWithRelationInput | SessionLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SessionLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SessionLogsMeradhans
+    **/
+    _count?: true | SessionLogsMeradhanCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SessionLogsMeradhanAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SessionLogsMeradhanSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SessionLogsMeradhanMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SessionLogsMeradhanMaxAggregateInputType
+  }
+
+  export type GetSessionLogsMeradhanAggregateType<T extends SessionLogsMeradhanAggregateArgs> = {
+        [P in keyof T & keyof AggregateSessionLogsMeradhan]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSessionLogsMeradhan[P]>
+      : GetScalarType<T[P], AggregateSessionLogsMeradhan[P]>
+  }
+
+
+
+
+  export type SessionLogsMeradhanGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SessionLogsMeradhanWhereInput
+    orderBy?: SessionLogsMeradhanOrderByWithAggregationInput | SessionLogsMeradhanOrderByWithAggregationInput[]
+    by: SessionLogsMeradhanScalarFieldEnum[] | SessionLogsMeradhanScalarFieldEnum
+    having?: SessionLogsMeradhanScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SessionLogsMeradhanCountAggregateInputType | true
+    _avg?: SessionLogsMeradhanAvgAggregateInputType
+    _sum?: SessionLogsMeradhanSumAggregateInputType
+    _min?: SessionLogsMeradhanMinAggregateInputType
+    _max?: SessionLogsMeradhanMaxAggregateInputType
+  }
+
+  export type SessionLogsMeradhanGroupByOutputType = {
+    id: number
+    userId: number | null
+    sessionToken: string
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    endReason: string | null
+    startTime: Date
+    endTime: Date | null
+    duration: number
+    totalPages: number
+    createdAt: Date
+    updatedAt: Date
+    _count: SessionLogsMeradhanCountAggregateOutputType | null
+    _avg: SessionLogsMeradhanAvgAggregateOutputType | null
+    _sum: SessionLogsMeradhanSumAggregateOutputType | null
+    _min: SessionLogsMeradhanMinAggregateOutputType | null
+    _max: SessionLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  type GetSessionLogsMeradhanGroupByPayload<T extends SessionLogsMeradhanGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SessionLogsMeradhanGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SessionLogsMeradhanGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SessionLogsMeradhanGroupByOutputType[P]>
+            : GetScalarType<T[P], SessionLogsMeradhanGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SessionLogsMeradhanSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sessionLogsMeradhan"]>
+
+  export type SessionLogsMeradhanSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sessionLogsMeradhan"]>
+
+  export type SessionLogsMeradhanSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sessionLogsMeradhan"]>
+
+  export type SessionLogsMeradhanSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    sessionToken?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    endReason?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    duration?: boolean
+    totalPages?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SessionLogsMeradhanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "sessionToken" | "ipAddress" | "userAgent" | "browserName" | "deviceType" | "operatingSystem" | "endReason" | "startTime" | "endTime" | "duration" | "totalPages" | "createdAt" | "updatedAt", ExtArgs["result"]["sessionLogsMeradhan"]>
+
+  export type $SessionLogsMeradhanPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SessionLogsMeradhan"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number | null
+      sessionToken: string
+      ipAddress: string | null
+      userAgent: string | null
+      browserName: string | null
+      deviceType: string | null
+      operatingSystem: string | null
+      endReason: string | null
+      startTime: Date
+      endTime: Date | null
+      duration: number
+      totalPages: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["sessionLogsMeradhan"]>
+    composites: {}
+  }
+
+  type SessionLogsMeradhanGetPayload<S extends boolean | null | undefined | SessionLogsMeradhanDefaultArgs> = $Result.GetResult<Prisma.$SessionLogsMeradhanPayload, S>
+
+  type SessionLogsMeradhanCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SessionLogsMeradhanFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SessionLogsMeradhanCountAggregateInputType | true
+    }
+
+  export interface SessionLogsMeradhanDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SessionLogsMeradhan'], meta: { name: 'SessionLogsMeradhan' } }
+    /**
+     * Find zero or one SessionLogsMeradhan that matches the filter.
+     * @param {SessionLogsMeradhanFindUniqueArgs} args - Arguments to find a SessionLogsMeradhan
+     * @example
+     * // Get one SessionLogsMeradhan
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SessionLogsMeradhanFindUniqueArgs>(args: SelectSubset<T, SessionLogsMeradhanFindUniqueArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SessionLogsMeradhan that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SessionLogsMeradhanFindUniqueOrThrowArgs} args - Arguments to find a SessionLogsMeradhan
+     * @example
+     * // Get one SessionLogsMeradhan
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SessionLogsMeradhanFindUniqueOrThrowArgs>(args: SelectSubset<T, SessionLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SessionLogsMeradhan that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsMeradhanFindFirstArgs} args - Arguments to find a SessionLogsMeradhan
+     * @example
+     * // Get one SessionLogsMeradhan
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SessionLogsMeradhanFindFirstArgs>(args?: SelectSubset<T, SessionLogsMeradhanFindFirstArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SessionLogsMeradhan that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsMeradhanFindFirstOrThrowArgs} args - Arguments to find a SessionLogsMeradhan
+     * @example
+     * // Get one SessionLogsMeradhan
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SessionLogsMeradhanFindFirstOrThrowArgs>(args?: SelectSubset<T, SessionLogsMeradhanFindFirstOrThrowArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SessionLogsMeradhans that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsMeradhanFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SessionLogsMeradhans
+     * const sessionLogsMeradhans = await prisma.sessionLogsMeradhan.findMany()
+     * 
+     * // Get first 10 SessionLogsMeradhans
+     * const sessionLogsMeradhans = await prisma.sessionLogsMeradhan.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const sessionLogsMeradhanWithIdOnly = await prisma.sessionLogsMeradhan.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SessionLogsMeradhanFindManyArgs>(args?: SelectSubset<T, SessionLogsMeradhanFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SessionLogsMeradhan.
+     * @param {SessionLogsMeradhanCreateArgs} args - Arguments to create a SessionLogsMeradhan.
+     * @example
+     * // Create one SessionLogsMeradhan
+     * const SessionLogsMeradhan = await prisma.sessionLogsMeradhan.create({
+     *   data: {
+     *     // ... data to create a SessionLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    create<T extends SessionLogsMeradhanCreateArgs>(args: SelectSubset<T, SessionLogsMeradhanCreateArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SessionLogsMeradhans.
+     * @param {SessionLogsMeradhanCreateManyArgs} args - Arguments to create many SessionLogsMeradhans.
+     * @example
+     * // Create many SessionLogsMeradhans
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SessionLogsMeradhanCreateManyArgs>(args?: SelectSubset<T, SessionLogsMeradhanCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SessionLogsMeradhans and returns the data saved in the database.
+     * @param {SessionLogsMeradhanCreateManyAndReturnArgs} args - Arguments to create many SessionLogsMeradhans.
+     * @example
+     * // Create many SessionLogsMeradhans
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SessionLogsMeradhans and only return the `id`
+     * const sessionLogsMeradhanWithIdOnly = await prisma.sessionLogsMeradhan.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SessionLogsMeradhanCreateManyAndReturnArgs>(args?: SelectSubset<T, SessionLogsMeradhanCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SessionLogsMeradhan.
+     * @param {SessionLogsMeradhanDeleteArgs} args - Arguments to delete one SessionLogsMeradhan.
+     * @example
+     * // Delete one SessionLogsMeradhan
+     * const SessionLogsMeradhan = await prisma.sessionLogsMeradhan.delete({
+     *   where: {
+     *     // ... filter to delete one SessionLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SessionLogsMeradhanDeleteArgs>(args: SelectSubset<T, SessionLogsMeradhanDeleteArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SessionLogsMeradhan.
+     * @param {SessionLogsMeradhanUpdateArgs} args - Arguments to update one SessionLogsMeradhan.
+     * @example
+     * // Update one SessionLogsMeradhan
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SessionLogsMeradhanUpdateArgs>(args: SelectSubset<T, SessionLogsMeradhanUpdateArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SessionLogsMeradhans.
+     * @param {SessionLogsMeradhanDeleteManyArgs} args - Arguments to filter SessionLogsMeradhans to delete.
+     * @example
+     * // Delete a few SessionLogsMeradhans
+     * const { count } = await prisma.sessionLogsMeradhan.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SessionLogsMeradhanDeleteManyArgs>(args?: SelectSubset<T, SessionLogsMeradhanDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SessionLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsMeradhanUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SessionLogsMeradhans
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SessionLogsMeradhanUpdateManyArgs>(args: SelectSubset<T, SessionLogsMeradhanUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SessionLogsMeradhans and returns the data updated in the database.
+     * @param {SessionLogsMeradhanUpdateManyAndReturnArgs} args - Arguments to update many SessionLogsMeradhans.
+     * @example
+     * // Update many SessionLogsMeradhans
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SessionLogsMeradhans and only return the `id`
+     * const sessionLogsMeradhanWithIdOnly = await prisma.sessionLogsMeradhan.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SessionLogsMeradhanUpdateManyAndReturnArgs>(args: SelectSubset<T, SessionLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SessionLogsMeradhan.
+     * @param {SessionLogsMeradhanUpsertArgs} args - Arguments to update or create a SessionLogsMeradhan.
+     * @example
+     * // Update or create a SessionLogsMeradhan
+     * const sessionLogsMeradhan = await prisma.sessionLogsMeradhan.upsert({
+     *   create: {
+     *     // ... data to create a SessionLogsMeradhan
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SessionLogsMeradhan we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SessionLogsMeradhanUpsertArgs>(args: SelectSubset<T, SessionLogsMeradhanUpsertArgs<ExtArgs>>): Prisma__SessionLogsMeradhanClient<$Result.GetResult<Prisma.$SessionLogsMeradhanPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SessionLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsMeradhanCountArgs} args - Arguments to filter SessionLogsMeradhans to count.
+     * @example
+     * // Count the number of SessionLogsMeradhans
+     * const count = await prisma.sessionLogsMeradhan.count({
+     *   where: {
+     *     // ... the filter for the SessionLogsMeradhans we want to count
+     *   }
+     * })
+    **/
+    count<T extends SessionLogsMeradhanCountArgs>(
+      args?: Subset<T, SessionLogsMeradhanCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SessionLogsMeradhanCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SessionLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsMeradhanAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SessionLogsMeradhanAggregateArgs>(args: Subset<T, SessionLogsMeradhanAggregateArgs>): Prisma.PrismaPromise<GetSessionLogsMeradhanAggregateType<T>>
+
+    /**
+     * Group by SessionLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionLogsMeradhanGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SessionLogsMeradhanGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SessionLogsMeradhanGroupByArgs['orderBy'] }
+        : { orderBy?: SessionLogsMeradhanGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SessionLogsMeradhanGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSessionLogsMeradhanGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SessionLogsMeradhan model
+   */
+  readonly fields: SessionLogsMeradhanFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SessionLogsMeradhan.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SessionLogsMeradhanClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SessionLogsMeradhan model
+   */
+  interface SessionLogsMeradhanFieldRefs {
+    readonly id: FieldRef<"SessionLogsMeradhan", 'Int'>
+    readonly userId: FieldRef<"SessionLogsMeradhan", 'Int'>
+    readonly sessionToken: FieldRef<"SessionLogsMeradhan", 'String'>
+    readonly ipAddress: FieldRef<"SessionLogsMeradhan", 'String'>
+    readonly userAgent: FieldRef<"SessionLogsMeradhan", 'String'>
+    readonly browserName: FieldRef<"SessionLogsMeradhan", 'String'>
+    readonly deviceType: FieldRef<"SessionLogsMeradhan", 'String'>
+    readonly operatingSystem: FieldRef<"SessionLogsMeradhan", 'String'>
+    readonly endReason: FieldRef<"SessionLogsMeradhan", 'String'>
+    readonly startTime: FieldRef<"SessionLogsMeradhan", 'DateTime'>
+    readonly endTime: FieldRef<"SessionLogsMeradhan", 'DateTime'>
+    readonly duration: FieldRef<"SessionLogsMeradhan", 'Int'>
+    readonly totalPages: FieldRef<"SessionLogsMeradhan", 'Int'>
+    readonly createdAt: FieldRef<"SessionLogsMeradhan", 'DateTime'>
+    readonly updatedAt: FieldRef<"SessionLogsMeradhan", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SessionLogsMeradhan findUnique
+   */
+  export type SessionLogsMeradhanFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsMeradhan to fetch.
+     */
+    where: SessionLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsMeradhan findUniqueOrThrow
+   */
+  export type SessionLogsMeradhanFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsMeradhan to fetch.
+     */
+    where: SessionLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsMeradhan findFirst
+   */
+  export type SessionLogsMeradhanFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsMeradhan to fetch.
+     */
+    where?: SessionLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsMeradhans to fetch.
+     */
+    orderBy?: SessionLogsMeradhanOrderByWithRelationInput | SessionLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SessionLogsMeradhans.
+     */
+    cursor?: SessionLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SessionLogsMeradhans.
+     */
+    distinct?: SessionLogsMeradhanScalarFieldEnum | SessionLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * SessionLogsMeradhan findFirstOrThrow
+   */
+  export type SessionLogsMeradhanFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsMeradhan to fetch.
+     */
+    where?: SessionLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsMeradhans to fetch.
+     */
+    orderBy?: SessionLogsMeradhanOrderByWithRelationInput | SessionLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SessionLogsMeradhans.
+     */
+    cursor?: SessionLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SessionLogsMeradhans.
+     */
+    distinct?: SessionLogsMeradhanScalarFieldEnum | SessionLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * SessionLogsMeradhan findMany
+   */
+  export type SessionLogsMeradhanFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which SessionLogsMeradhans to fetch.
+     */
+    where?: SessionLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessionLogsMeradhans to fetch.
+     */
+    orderBy?: SessionLogsMeradhanOrderByWithRelationInput | SessionLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SessionLogsMeradhans.
+     */
+    cursor?: SessionLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessionLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessionLogsMeradhans.
+     */
+    skip?: number
+    distinct?: SessionLogsMeradhanScalarFieldEnum | SessionLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * SessionLogsMeradhan create
+   */
+  export type SessionLogsMeradhanCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SessionLogsMeradhan.
+     */
+    data: XOR<SessionLogsMeradhanCreateInput, SessionLogsMeradhanUncheckedCreateInput>
+  }
+
+  /**
+   * SessionLogsMeradhan createMany
+   */
+  export type SessionLogsMeradhanCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SessionLogsMeradhans.
+     */
+    data: SessionLogsMeradhanCreateManyInput | SessionLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SessionLogsMeradhan createManyAndReturn
+   */
+  export type SessionLogsMeradhanCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to create many SessionLogsMeradhans.
+     */
+    data: SessionLogsMeradhanCreateManyInput | SessionLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SessionLogsMeradhan update
+   */
+  export type SessionLogsMeradhanUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SessionLogsMeradhan.
+     */
+    data: XOR<SessionLogsMeradhanUpdateInput, SessionLogsMeradhanUncheckedUpdateInput>
+    /**
+     * Choose, which SessionLogsMeradhan to update.
+     */
+    where: SessionLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsMeradhan updateMany
+   */
+  export type SessionLogsMeradhanUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SessionLogsMeradhans.
+     */
+    data: XOR<SessionLogsMeradhanUpdateManyMutationInput, SessionLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which SessionLogsMeradhans to update
+     */
+    where?: SessionLogsMeradhanWhereInput
+    /**
+     * Limit how many SessionLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SessionLogsMeradhan updateManyAndReturn
+   */
+  export type SessionLogsMeradhanUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to update SessionLogsMeradhans.
+     */
+    data: XOR<SessionLogsMeradhanUpdateManyMutationInput, SessionLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which SessionLogsMeradhans to update
+     */
+    where?: SessionLogsMeradhanWhereInput
+    /**
+     * Limit how many SessionLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SessionLogsMeradhan upsert
+   */
+  export type SessionLogsMeradhanUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SessionLogsMeradhan to update in case it exists.
+     */
+    where: SessionLogsMeradhanWhereUniqueInput
+    /**
+     * In case the SessionLogsMeradhan found by the `where` argument doesn't exist, create a new SessionLogsMeradhan with this data.
+     */
+    create: XOR<SessionLogsMeradhanCreateInput, SessionLogsMeradhanUncheckedCreateInput>
+    /**
+     * In case the SessionLogsMeradhan was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SessionLogsMeradhanUpdateInput, SessionLogsMeradhanUncheckedUpdateInput>
+  }
+
+  /**
+   * SessionLogsMeradhan delete
+   */
+  export type SessionLogsMeradhanDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter which SessionLogsMeradhan to delete.
+     */
+    where: SessionLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * SessionLogsMeradhan deleteMany
+   */
+  export type SessionLogsMeradhanDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SessionLogsMeradhans to delete
+     */
+    where?: SessionLogsMeradhanWhereInput
+    /**
+     * Limit how many SessionLogsMeradhans to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SessionLogsMeradhan without action
+   */
+  export type SessionLogsMeradhanDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessionLogsMeradhan
+     */
+    select?: SessionLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SessionLogsMeradhan
+     */
+    omit?: SessionLogsMeradhanOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PageViewLogsMeradhan
+   */
+
+  export type AggregatePageViewLogsMeradhan = {
+    _count: PageViewLogsMeradhanCountAggregateOutputType | null
+    _avg: PageViewLogsMeradhanAvgAggregateOutputType | null
+    _sum: PageViewLogsMeradhanSumAggregateOutputType | null
+    _min: PageViewLogsMeradhanMinAggregateOutputType | null
+    _max: PageViewLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  export type PageViewLogsMeradhanAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+  }
+
+  export type PageViewLogsMeradhanSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+  }
+
+  export type PageViewLogsMeradhanMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    sessionId: string | null
+    pagePath: string | null
+    pageTitle: string | null
+    entryTime: Date | null
+    exitTime: Date | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+    referrer: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PageViewLogsMeradhanMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    sessionId: string | null
+    pagePath: string | null
+    pageTitle: string | null
+    entryTime: Date | null
+    exitTime: Date | null
+    duration: number | null
+    scrollDepth: number | null
+    interactions: number | null
+    referrer: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PageViewLogsMeradhanCountAggregateOutputType = {
+    id: number
+    userId: number
+    sessionId: number
+    pagePath: number
+    pageTitle: number
+    entryTime: number
+    exitTime: number
+    duration: number
+    scrollDepth: number
+    interactions: number
+    referrer: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PageViewLogsMeradhanAvgAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+  }
+
+  export type PageViewLogsMeradhanSumAggregateInputType = {
+    id?: true
+    userId?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+  }
+
+  export type PageViewLogsMeradhanMinAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionId?: true
+    pagePath?: true
+    pageTitle?: true
+    entryTime?: true
+    exitTime?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+    referrer?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PageViewLogsMeradhanMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionId?: true
+    pagePath?: true
+    pageTitle?: true
+    entryTime?: true
+    exitTime?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+    referrer?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PageViewLogsMeradhanCountAggregateInputType = {
+    id?: true
+    userId?: true
+    sessionId?: true
+    pagePath?: true
+    pageTitle?: true
+    entryTime?: true
+    exitTime?: true
+    duration?: true
+    scrollDepth?: true
+    interactions?: true
+    referrer?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PageViewLogsMeradhanAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PageViewLogsMeradhan to aggregate.
+     */
+    where?: PageViewLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsMeradhans to fetch.
+     */
+    orderBy?: PageViewLogsMeradhanOrderByWithRelationInput | PageViewLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PageViewLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PageViewLogsMeradhans
+    **/
+    _count?: true | PageViewLogsMeradhanCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PageViewLogsMeradhanAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PageViewLogsMeradhanSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PageViewLogsMeradhanMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PageViewLogsMeradhanMaxAggregateInputType
+  }
+
+  export type GetPageViewLogsMeradhanAggregateType<T extends PageViewLogsMeradhanAggregateArgs> = {
+        [P in keyof T & keyof AggregatePageViewLogsMeradhan]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePageViewLogsMeradhan[P]>
+      : GetScalarType<T[P], AggregatePageViewLogsMeradhan[P]>
+  }
+
+
+
+
+  export type PageViewLogsMeradhanGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PageViewLogsMeradhanWhereInput
+    orderBy?: PageViewLogsMeradhanOrderByWithAggregationInput | PageViewLogsMeradhanOrderByWithAggregationInput[]
+    by: PageViewLogsMeradhanScalarFieldEnum[] | PageViewLogsMeradhanScalarFieldEnum
+    having?: PageViewLogsMeradhanScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PageViewLogsMeradhanCountAggregateInputType | true
+    _avg?: PageViewLogsMeradhanAvgAggregateInputType
+    _sum?: PageViewLogsMeradhanSumAggregateInputType
+    _min?: PageViewLogsMeradhanMinAggregateInputType
+    _max?: PageViewLogsMeradhanMaxAggregateInputType
+  }
+
+  export type PageViewLogsMeradhanGroupByOutputType = {
+    id: number
+    userId: number | null
+    sessionId: string
+    pagePath: string
+    pageTitle: string | null
+    entryTime: Date
+    exitTime: Date | null
+    duration: number
+    scrollDepth: number
+    interactions: number
+    referrer: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PageViewLogsMeradhanCountAggregateOutputType | null
+    _avg: PageViewLogsMeradhanAvgAggregateOutputType | null
+    _sum: PageViewLogsMeradhanSumAggregateOutputType | null
+    _min: PageViewLogsMeradhanMinAggregateOutputType | null
+    _max: PageViewLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  type GetPageViewLogsMeradhanGroupByPayload<T extends PageViewLogsMeradhanGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PageViewLogsMeradhanGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PageViewLogsMeradhanGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PageViewLogsMeradhanGroupByOutputType[P]>
+            : GetScalarType<T[P], PageViewLogsMeradhanGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PageViewLogsMeradhanSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pageViewLogsMeradhan"]>
+
+  export type PageViewLogsMeradhanSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pageViewLogsMeradhan"]>
+
+  export type PageViewLogsMeradhanSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pageViewLogsMeradhan"]>
+
+  export type PageViewLogsMeradhanSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    pagePath?: boolean
+    pageTitle?: boolean
+    entryTime?: boolean
+    exitTime?: boolean
+    duration?: boolean
+    scrollDepth?: boolean
+    interactions?: boolean
+    referrer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PageViewLogsMeradhanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "sessionId" | "pagePath" | "pageTitle" | "entryTime" | "exitTime" | "duration" | "scrollDepth" | "interactions" | "referrer" | "createdAt" | "updatedAt", ExtArgs["result"]["pageViewLogsMeradhan"]>
+
+  export type $PageViewLogsMeradhanPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PageViewLogsMeradhan"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number | null
+      sessionId: string
+      pagePath: string
+      pageTitle: string | null
+      entryTime: Date
+      exitTime: Date | null
+      duration: number
+      scrollDepth: number
+      interactions: number
+      referrer: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["pageViewLogsMeradhan"]>
+    composites: {}
+  }
+
+  type PageViewLogsMeradhanGetPayload<S extends boolean | null | undefined | PageViewLogsMeradhanDefaultArgs> = $Result.GetResult<Prisma.$PageViewLogsMeradhanPayload, S>
+
+  type PageViewLogsMeradhanCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PageViewLogsMeradhanFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PageViewLogsMeradhanCountAggregateInputType | true
+    }
+
+  export interface PageViewLogsMeradhanDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PageViewLogsMeradhan'], meta: { name: 'PageViewLogsMeradhan' } }
+    /**
+     * Find zero or one PageViewLogsMeradhan that matches the filter.
+     * @param {PageViewLogsMeradhanFindUniqueArgs} args - Arguments to find a PageViewLogsMeradhan
+     * @example
+     * // Get one PageViewLogsMeradhan
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PageViewLogsMeradhanFindUniqueArgs>(args: SelectSubset<T, PageViewLogsMeradhanFindUniqueArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PageViewLogsMeradhan that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PageViewLogsMeradhanFindUniqueOrThrowArgs} args - Arguments to find a PageViewLogsMeradhan
+     * @example
+     * // Get one PageViewLogsMeradhan
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PageViewLogsMeradhanFindUniqueOrThrowArgs>(args: SelectSubset<T, PageViewLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PageViewLogsMeradhan that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsMeradhanFindFirstArgs} args - Arguments to find a PageViewLogsMeradhan
+     * @example
+     * // Get one PageViewLogsMeradhan
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PageViewLogsMeradhanFindFirstArgs>(args?: SelectSubset<T, PageViewLogsMeradhanFindFirstArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PageViewLogsMeradhan that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsMeradhanFindFirstOrThrowArgs} args - Arguments to find a PageViewLogsMeradhan
+     * @example
+     * // Get one PageViewLogsMeradhan
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PageViewLogsMeradhanFindFirstOrThrowArgs>(args?: SelectSubset<T, PageViewLogsMeradhanFindFirstOrThrowArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PageViewLogsMeradhans that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsMeradhanFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PageViewLogsMeradhans
+     * const pageViewLogsMeradhans = await prisma.pageViewLogsMeradhan.findMany()
+     * 
+     * // Get first 10 PageViewLogsMeradhans
+     * const pageViewLogsMeradhans = await prisma.pageViewLogsMeradhan.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const pageViewLogsMeradhanWithIdOnly = await prisma.pageViewLogsMeradhan.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PageViewLogsMeradhanFindManyArgs>(args?: SelectSubset<T, PageViewLogsMeradhanFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PageViewLogsMeradhan.
+     * @param {PageViewLogsMeradhanCreateArgs} args - Arguments to create a PageViewLogsMeradhan.
+     * @example
+     * // Create one PageViewLogsMeradhan
+     * const PageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.create({
+     *   data: {
+     *     // ... data to create a PageViewLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    create<T extends PageViewLogsMeradhanCreateArgs>(args: SelectSubset<T, PageViewLogsMeradhanCreateArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PageViewLogsMeradhans.
+     * @param {PageViewLogsMeradhanCreateManyArgs} args - Arguments to create many PageViewLogsMeradhans.
+     * @example
+     * // Create many PageViewLogsMeradhans
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PageViewLogsMeradhanCreateManyArgs>(args?: SelectSubset<T, PageViewLogsMeradhanCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PageViewLogsMeradhans and returns the data saved in the database.
+     * @param {PageViewLogsMeradhanCreateManyAndReturnArgs} args - Arguments to create many PageViewLogsMeradhans.
+     * @example
+     * // Create many PageViewLogsMeradhans
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PageViewLogsMeradhans and only return the `id`
+     * const pageViewLogsMeradhanWithIdOnly = await prisma.pageViewLogsMeradhan.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PageViewLogsMeradhanCreateManyAndReturnArgs>(args?: SelectSubset<T, PageViewLogsMeradhanCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PageViewLogsMeradhan.
+     * @param {PageViewLogsMeradhanDeleteArgs} args - Arguments to delete one PageViewLogsMeradhan.
+     * @example
+     * // Delete one PageViewLogsMeradhan
+     * const PageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.delete({
+     *   where: {
+     *     // ... filter to delete one PageViewLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PageViewLogsMeradhanDeleteArgs>(args: SelectSubset<T, PageViewLogsMeradhanDeleteArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PageViewLogsMeradhan.
+     * @param {PageViewLogsMeradhanUpdateArgs} args - Arguments to update one PageViewLogsMeradhan.
+     * @example
+     * // Update one PageViewLogsMeradhan
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PageViewLogsMeradhanUpdateArgs>(args: SelectSubset<T, PageViewLogsMeradhanUpdateArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PageViewLogsMeradhans.
+     * @param {PageViewLogsMeradhanDeleteManyArgs} args - Arguments to filter PageViewLogsMeradhans to delete.
+     * @example
+     * // Delete a few PageViewLogsMeradhans
+     * const { count } = await prisma.pageViewLogsMeradhan.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PageViewLogsMeradhanDeleteManyArgs>(args?: SelectSubset<T, PageViewLogsMeradhanDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PageViewLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsMeradhanUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PageViewLogsMeradhans
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PageViewLogsMeradhanUpdateManyArgs>(args: SelectSubset<T, PageViewLogsMeradhanUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PageViewLogsMeradhans and returns the data updated in the database.
+     * @param {PageViewLogsMeradhanUpdateManyAndReturnArgs} args - Arguments to update many PageViewLogsMeradhans.
+     * @example
+     * // Update many PageViewLogsMeradhans
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PageViewLogsMeradhans and only return the `id`
+     * const pageViewLogsMeradhanWithIdOnly = await prisma.pageViewLogsMeradhan.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PageViewLogsMeradhanUpdateManyAndReturnArgs>(args: SelectSubset<T, PageViewLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PageViewLogsMeradhan.
+     * @param {PageViewLogsMeradhanUpsertArgs} args - Arguments to update or create a PageViewLogsMeradhan.
+     * @example
+     * // Update or create a PageViewLogsMeradhan
+     * const pageViewLogsMeradhan = await prisma.pageViewLogsMeradhan.upsert({
+     *   create: {
+     *     // ... data to create a PageViewLogsMeradhan
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PageViewLogsMeradhan we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PageViewLogsMeradhanUpsertArgs>(args: SelectSubset<T, PageViewLogsMeradhanUpsertArgs<ExtArgs>>): Prisma__PageViewLogsMeradhanClient<$Result.GetResult<Prisma.$PageViewLogsMeradhanPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PageViewLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsMeradhanCountArgs} args - Arguments to filter PageViewLogsMeradhans to count.
+     * @example
+     * // Count the number of PageViewLogsMeradhans
+     * const count = await prisma.pageViewLogsMeradhan.count({
+     *   where: {
+     *     // ... the filter for the PageViewLogsMeradhans we want to count
+     *   }
+     * })
+    **/
+    count<T extends PageViewLogsMeradhanCountArgs>(
+      args?: Subset<T, PageViewLogsMeradhanCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PageViewLogsMeradhanCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PageViewLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsMeradhanAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PageViewLogsMeradhanAggregateArgs>(args: Subset<T, PageViewLogsMeradhanAggregateArgs>): Prisma.PrismaPromise<GetPageViewLogsMeradhanAggregateType<T>>
+
+    /**
+     * Group by PageViewLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PageViewLogsMeradhanGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PageViewLogsMeradhanGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PageViewLogsMeradhanGroupByArgs['orderBy'] }
+        : { orderBy?: PageViewLogsMeradhanGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PageViewLogsMeradhanGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPageViewLogsMeradhanGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PageViewLogsMeradhan model
+   */
+  readonly fields: PageViewLogsMeradhanFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PageViewLogsMeradhan.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PageViewLogsMeradhanClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PageViewLogsMeradhan model
+   */
+  interface PageViewLogsMeradhanFieldRefs {
+    readonly id: FieldRef<"PageViewLogsMeradhan", 'Int'>
+    readonly userId: FieldRef<"PageViewLogsMeradhan", 'Int'>
+    readonly sessionId: FieldRef<"PageViewLogsMeradhan", 'String'>
+    readonly pagePath: FieldRef<"PageViewLogsMeradhan", 'String'>
+    readonly pageTitle: FieldRef<"PageViewLogsMeradhan", 'String'>
+    readonly entryTime: FieldRef<"PageViewLogsMeradhan", 'DateTime'>
+    readonly exitTime: FieldRef<"PageViewLogsMeradhan", 'DateTime'>
+    readonly duration: FieldRef<"PageViewLogsMeradhan", 'Int'>
+    readonly scrollDepth: FieldRef<"PageViewLogsMeradhan", 'Int'>
+    readonly interactions: FieldRef<"PageViewLogsMeradhan", 'Int'>
+    readonly referrer: FieldRef<"PageViewLogsMeradhan", 'String'>
+    readonly createdAt: FieldRef<"PageViewLogsMeradhan", 'DateTime'>
+    readonly updatedAt: FieldRef<"PageViewLogsMeradhan", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PageViewLogsMeradhan findUnique
+   */
+  export type PageViewLogsMeradhanFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsMeradhan to fetch.
+     */
+    where: PageViewLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsMeradhan findUniqueOrThrow
+   */
+  export type PageViewLogsMeradhanFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsMeradhan to fetch.
+     */
+    where: PageViewLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsMeradhan findFirst
+   */
+  export type PageViewLogsMeradhanFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsMeradhan to fetch.
+     */
+    where?: PageViewLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsMeradhans to fetch.
+     */
+    orderBy?: PageViewLogsMeradhanOrderByWithRelationInput | PageViewLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PageViewLogsMeradhans.
+     */
+    cursor?: PageViewLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PageViewLogsMeradhans.
+     */
+    distinct?: PageViewLogsMeradhanScalarFieldEnum | PageViewLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * PageViewLogsMeradhan findFirstOrThrow
+   */
+  export type PageViewLogsMeradhanFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsMeradhan to fetch.
+     */
+    where?: PageViewLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsMeradhans to fetch.
+     */
+    orderBy?: PageViewLogsMeradhanOrderByWithRelationInput | PageViewLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PageViewLogsMeradhans.
+     */
+    cursor?: PageViewLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PageViewLogsMeradhans.
+     */
+    distinct?: PageViewLogsMeradhanScalarFieldEnum | PageViewLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * PageViewLogsMeradhan findMany
+   */
+  export type PageViewLogsMeradhanFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which PageViewLogsMeradhans to fetch.
+     */
+    where?: PageViewLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PageViewLogsMeradhans to fetch.
+     */
+    orderBy?: PageViewLogsMeradhanOrderByWithRelationInput | PageViewLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PageViewLogsMeradhans.
+     */
+    cursor?: PageViewLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PageViewLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PageViewLogsMeradhans.
+     */
+    skip?: number
+    distinct?: PageViewLogsMeradhanScalarFieldEnum | PageViewLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * PageViewLogsMeradhan create
+   */
+  export type PageViewLogsMeradhanCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PageViewLogsMeradhan.
+     */
+    data: XOR<PageViewLogsMeradhanCreateInput, PageViewLogsMeradhanUncheckedCreateInput>
+  }
+
+  /**
+   * PageViewLogsMeradhan createMany
+   */
+  export type PageViewLogsMeradhanCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PageViewLogsMeradhans.
+     */
+    data: PageViewLogsMeradhanCreateManyInput | PageViewLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PageViewLogsMeradhan createManyAndReturn
+   */
+  export type PageViewLogsMeradhanCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to create many PageViewLogsMeradhans.
+     */
+    data: PageViewLogsMeradhanCreateManyInput | PageViewLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PageViewLogsMeradhan update
+   */
+  export type PageViewLogsMeradhanUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PageViewLogsMeradhan.
+     */
+    data: XOR<PageViewLogsMeradhanUpdateInput, PageViewLogsMeradhanUncheckedUpdateInput>
+    /**
+     * Choose, which PageViewLogsMeradhan to update.
+     */
+    where: PageViewLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsMeradhan updateMany
+   */
+  export type PageViewLogsMeradhanUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PageViewLogsMeradhans.
+     */
+    data: XOR<PageViewLogsMeradhanUpdateManyMutationInput, PageViewLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which PageViewLogsMeradhans to update
+     */
+    where?: PageViewLogsMeradhanWhereInput
+    /**
+     * Limit how many PageViewLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PageViewLogsMeradhan updateManyAndReturn
+   */
+  export type PageViewLogsMeradhanUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to update PageViewLogsMeradhans.
+     */
+    data: XOR<PageViewLogsMeradhanUpdateManyMutationInput, PageViewLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which PageViewLogsMeradhans to update
+     */
+    where?: PageViewLogsMeradhanWhereInput
+    /**
+     * Limit how many PageViewLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PageViewLogsMeradhan upsert
+   */
+  export type PageViewLogsMeradhanUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PageViewLogsMeradhan to update in case it exists.
+     */
+    where: PageViewLogsMeradhanWhereUniqueInput
+    /**
+     * In case the PageViewLogsMeradhan found by the `where` argument doesn't exist, create a new PageViewLogsMeradhan with this data.
+     */
+    create: XOR<PageViewLogsMeradhanCreateInput, PageViewLogsMeradhanUncheckedCreateInput>
+    /**
+     * In case the PageViewLogsMeradhan was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PageViewLogsMeradhanUpdateInput, PageViewLogsMeradhanUncheckedUpdateInput>
+  }
+
+  /**
+   * PageViewLogsMeradhan delete
+   */
+  export type PageViewLogsMeradhanDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter which PageViewLogsMeradhan to delete.
+     */
+    where: PageViewLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * PageViewLogsMeradhan deleteMany
+   */
+  export type PageViewLogsMeradhanDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PageViewLogsMeradhans to delete
+     */
+    where?: PageViewLogsMeradhanWhereInput
+    /**
+     * Limit how many PageViewLogsMeradhans to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PageViewLogsMeradhan without action
+   */
+  export type PageViewLogsMeradhanDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PageViewLogsMeradhan
+     */
+    select?: PageViewLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PageViewLogsMeradhan
+     */
+    omit?: PageViewLogsMeradhanOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model LoginLogsMeradhan
+   */
+
+  export type AggregateLoginLogsMeradhan = {
+    _count: LoginLogsMeradhanCountAggregateOutputType | null
+    _avg: LoginLogsMeradhanAvgAggregateOutputType | null
+    _sum: LoginLogsMeradhanSumAggregateOutputType | null
+    _min: LoginLogsMeradhanMinAggregateOutputType | null
+    _max: LoginLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  export type LoginLogsMeradhanAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type LoginLogsMeradhanSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type LoginLogsMeradhanMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    sessionType: string | null
+    success: boolean | null
+    createdAt: Date | null
+  }
+
+  export type LoginLogsMeradhanMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    sessionType: string | null
+    success: boolean | null
+    createdAt: Date | null
+  }
+
+  export type LoginLogsMeradhanCountAggregateOutputType = {
+    id: number
+    userId: number
+    name: number
+    email: number
+    ipAddress: number
+    userAgent: number
+    browserName: number
+    deviceType: number
+    operatingSystem: number
+    sessionType: number
+    success: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type LoginLogsMeradhanAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type LoginLogsMeradhanSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type LoginLogsMeradhanMinAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    sessionType?: true
+    success?: true
+    createdAt?: true
+  }
+
+  export type LoginLogsMeradhanMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    sessionType?: true
+    success?: true
+    createdAt?: true
+  }
+
+  export type LoginLogsMeradhanCountAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    sessionType?: true
+    success?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type LoginLogsMeradhanAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoginLogsMeradhan to aggregate.
+     */
+    where?: LoginLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsMeradhans to fetch.
+     */
+    orderBy?: LoginLogsMeradhanOrderByWithRelationInput | LoginLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoginLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoginLogsMeradhans
+    **/
+    _count?: true | LoginLogsMeradhanCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LoginLogsMeradhanAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LoginLogsMeradhanSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoginLogsMeradhanMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoginLogsMeradhanMaxAggregateInputType
+  }
+
+  export type GetLoginLogsMeradhanAggregateType<T extends LoginLogsMeradhanAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoginLogsMeradhan]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoginLogsMeradhan[P]>
+      : GetScalarType<T[P], AggregateLoginLogsMeradhan[P]>
+  }
+
+
+
+
+  export type LoginLogsMeradhanGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoginLogsMeradhanWhereInput
+    orderBy?: LoginLogsMeradhanOrderByWithAggregationInput | LoginLogsMeradhanOrderByWithAggregationInput[]
+    by: LoginLogsMeradhanScalarFieldEnum[] | LoginLogsMeradhanScalarFieldEnum
+    having?: LoginLogsMeradhanScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoginLogsMeradhanCountAggregateInputType | true
+    _avg?: LoginLogsMeradhanAvgAggregateInputType
+    _sum?: LoginLogsMeradhanSumAggregateInputType
+    _min?: LoginLogsMeradhanMinAggregateInputType
+    _max?: LoginLogsMeradhanMaxAggregateInputType
+  }
+
+  export type LoginLogsMeradhanGroupByOutputType = {
+    id: number
+    userId: number | null
+    name: string | null
+    email: string
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    sessionType: string
+    success: boolean
+    createdAt: Date
+    _count: LoginLogsMeradhanCountAggregateOutputType | null
+    _avg: LoginLogsMeradhanAvgAggregateOutputType | null
+    _sum: LoginLogsMeradhanSumAggregateOutputType | null
+    _min: LoginLogsMeradhanMinAggregateOutputType | null
+    _max: LoginLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  type GetLoginLogsMeradhanGroupByPayload<T extends LoginLogsMeradhanGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoginLogsMeradhanGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoginLogsMeradhanGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoginLogsMeradhanGroupByOutputType[P]>
+            : GetScalarType<T[P], LoginLogsMeradhanGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoginLogsMeradhanSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["loginLogsMeradhan"]>
+
+  export type LoginLogsMeradhanSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["loginLogsMeradhan"]>
+
+  export type LoginLogsMeradhanSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["loginLogsMeradhan"]>
+
+  export type LoginLogsMeradhanSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    sessionType?: boolean
+    success?: boolean
+    createdAt?: boolean
+  }
+
+  export type LoginLogsMeradhanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "email" | "ipAddress" | "userAgent" | "browserName" | "deviceType" | "operatingSystem" | "sessionType" | "success" | "createdAt", ExtArgs["result"]["loginLogsMeradhan"]>
+
+  export type $LoginLogsMeradhanPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoginLogsMeradhan"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number | null
+      name: string | null
+      email: string
+      ipAddress: string | null
+      userAgent: string | null
+      browserName: string | null
+      deviceType: string | null
+      operatingSystem: string | null
+      sessionType: string
+      success: boolean
+      createdAt: Date
+    }, ExtArgs["result"]["loginLogsMeradhan"]>
+    composites: {}
+  }
+
+  type LoginLogsMeradhanGetPayload<S extends boolean | null | undefined | LoginLogsMeradhanDefaultArgs> = $Result.GetResult<Prisma.$LoginLogsMeradhanPayload, S>
+
+  type LoginLogsMeradhanCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoginLogsMeradhanFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoginLogsMeradhanCountAggregateInputType | true
+    }
+
+  export interface LoginLogsMeradhanDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoginLogsMeradhan'], meta: { name: 'LoginLogsMeradhan' } }
+    /**
+     * Find zero or one LoginLogsMeradhan that matches the filter.
+     * @param {LoginLogsMeradhanFindUniqueArgs} args - Arguments to find a LoginLogsMeradhan
+     * @example
+     * // Get one LoginLogsMeradhan
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoginLogsMeradhanFindUniqueArgs>(args: SelectSubset<T, LoginLogsMeradhanFindUniqueArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoginLogsMeradhan that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoginLogsMeradhanFindUniqueOrThrowArgs} args - Arguments to find a LoginLogsMeradhan
+     * @example
+     * // Get one LoginLogsMeradhan
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoginLogsMeradhanFindUniqueOrThrowArgs>(args: SelectSubset<T, LoginLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoginLogsMeradhan that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsMeradhanFindFirstArgs} args - Arguments to find a LoginLogsMeradhan
+     * @example
+     * // Get one LoginLogsMeradhan
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoginLogsMeradhanFindFirstArgs>(args?: SelectSubset<T, LoginLogsMeradhanFindFirstArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoginLogsMeradhan that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsMeradhanFindFirstOrThrowArgs} args - Arguments to find a LoginLogsMeradhan
+     * @example
+     * // Get one LoginLogsMeradhan
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoginLogsMeradhanFindFirstOrThrowArgs>(args?: SelectSubset<T, LoginLogsMeradhanFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoginLogsMeradhans that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsMeradhanFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoginLogsMeradhans
+     * const loginLogsMeradhans = await prisma.loginLogsMeradhan.findMany()
+     * 
+     * // Get first 10 LoginLogsMeradhans
+     * const loginLogsMeradhans = await prisma.loginLogsMeradhan.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loginLogsMeradhanWithIdOnly = await prisma.loginLogsMeradhan.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoginLogsMeradhanFindManyArgs>(args?: SelectSubset<T, LoginLogsMeradhanFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoginLogsMeradhan.
+     * @param {LoginLogsMeradhanCreateArgs} args - Arguments to create a LoginLogsMeradhan.
+     * @example
+     * // Create one LoginLogsMeradhan
+     * const LoginLogsMeradhan = await prisma.loginLogsMeradhan.create({
+     *   data: {
+     *     // ... data to create a LoginLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoginLogsMeradhanCreateArgs>(args: SelectSubset<T, LoginLogsMeradhanCreateArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoginLogsMeradhans.
+     * @param {LoginLogsMeradhanCreateManyArgs} args - Arguments to create many LoginLogsMeradhans.
+     * @example
+     * // Create many LoginLogsMeradhans
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoginLogsMeradhanCreateManyArgs>(args?: SelectSubset<T, LoginLogsMeradhanCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoginLogsMeradhans and returns the data saved in the database.
+     * @param {LoginLogsMeradhanCreateManyAndReturnArgs} args - Arguments to create many LoginLogsMeradhans.
+     * @example
+     * // Create many LoginLogsMeradhans
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoginLogsMeradhans and only return the `id`
+     * const loginLogsMeradhanWithIdOnly = await prisma.loginLogsMeradhan.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoginLogsMeradhanCreateManyAndReturnArgs>(args?: SelectSubset<T, LoginLogsMeradhanCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoginLogsMeradhan.
+     * @param {LoginLogsMeradhanDeleteArgs} args - Arguments to delete one LoginLogsMeradhan.
+     * @example
+     * // Delete one LoginLogsMeradhan
+     * const LoginLogsMeradhan = await prisma.loginLogsMeradhan.delete({
+     *   where: {
+     *     // ... filter to delete one LoginLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoginLogsMeradhanDeleteArgs>(args: SelectSubset<T, LoginLogsMeradhanDeleteArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoginLogsMeradhan.
+     * @param {LoginLogsMeradhanUpdateArgs} args - Arguments to update one LoginLogsMeradhan.
+     * @example
+     * // Update one LoginLogsMeradhan
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoginLogsMeradhanUpdateArgs>(args: SelectSubset<T, LoginLogsMeradhanUpdateArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoginLogsMeradhans.
+     * @param {LoginLogsMeradhanDeleteManyArgs} args - Arguments to filter LoginLogsMeradhans to delete.
+     * @example
+     * // Delete a few LoginLogsMeradhans
+     * const { count } = await prisma.loginLogsMeradhan.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoginLogsMeradhanDeleteManyArgs>(args?: SelectSubset<T, LoginLogsMeradhanDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoginLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsMeradhanUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoginLogsMeradhans
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoginLogsMeradhanUpdateManyArgs>(args: SelectSubset<T, LoginLogsMeradhanUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoginLogsMeradhans and returns the data updated in the database.
+     * @param {LoginLogsMeradhanUpdateManyAndReturnArgs} args - Arguments to update many LoginLogsMeradhans.
+     * @example
+     * // Update many LoginLogsMeradhans
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoginLogsMeradhans and only return the `id`
+     * const loginLogsMeradhanWithIdOnly = await prisma.loginLogsMeradhan.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoginLogsMeradhanUpdateManyAndReturnArgs>(args: SelectSubset<T, LoginLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoginLogsMeradhan.
+     * @param {LoginLogsMeradhanUpsertArgs} args - Arguments to update or create a LoginLogsMeradhan.
+     * @example
+     * // Update or create a LoginLogsMeradhan
+     * const loginLogsMeradhan = await prisma.loginLogsMeradhan.upsert({
+     *   create: {
+     *     // ... data to create a LoginLogsMeradhan
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoginLogsMeradhan we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoginLogsMeradhanUpsertArgs>(args: SelectSubset<T, LoginLogsMeradhanUpsertArgs<ExtArgs>>): Prisma__LoginLogsMeradhanClient<$Result.GetResult<Prisma.$LoginLogsMeradhanPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoginLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsMeradhanCountArgs} args - Arguments to filter LoginLogsMeradhans to count.
+     * @example
+     * // Count the number of LoginLogsMeradhans
+     * const count = await prisma.loginLogsMeradhan.count({
+     *   where: {
+     *     // ... the filter for the LoginLogsMeradhans we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoginLogsMeradhanCountArgs>(
+      args?: Subset<T, LoginLogsMeradhanCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoginLogsMeradhanCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoginLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsMeradhanAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoginLogsMeradhanAggregateArgs>(args: Subset<T, LoginLogsMeradhanAggregateArgs>): Prisma.PrismaPromise<GetLoginLogsMeradhanAggregateType<T>>
+
+    /**
+     * Group by LoginLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoginLogsMeradhanGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoginLogsMeradhanGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoginLogsMeradhanGroupByArgs['orderBy'] }
+        : { orderBy?: LoginLogsMeradhanGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoginLogsMeradhanGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoginLogsMeradhanGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoginLogsMeradhan model
+   */
+  readonly fields: LoginLogsMeradhanFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoginLogsMeradhan.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoginLogsMeradhanClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoginLogsMeradhan model
+   */
+  interface LoginLogsMeradhanFieldRefs {
+    readonly id: FieldRef<"LoginLogsMeradhan", 'Int'>
+    readonly userId: FieldRef<"LoginLogsMeradhan", 'Int'>
+    readonly name: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly email: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly ipAddress: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly userAgent: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly browserName: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly deviceType: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly operatingSystem: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly sessionType: FieldRef<"LoginLogsMeradhan", 'String'>
+    readonly success: FieldRef<"LoginLogsMeradhan", 'Boolean'>
+    readonly createdAt: FieldRef<"LoginLogsMeradhan", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoginLogsMeradhan findUnique
+   */
+  export type LoginLogsMeradhanFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsMeradhan to fetch.
+     */
+    where: LoginLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsMeradhan findUniqueOrThrow
+   */
+  export type LoginLogsMeradhanFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsMeradhan to fetch.
+     */
+    where: LoginLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsMeradhan findFirst
+   */
+  export type LoginLogsMeradhanFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsMeradhan to fetch.
+     */
+    where?: LoginLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsMeradhans to fetch.
+     */
+    orderBy?: LoginLogsMeradhanOrderByWithRelationInput | LoginLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoginLogsMeradhans.
+     */
+    cursor?: LoginLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoginLogsMeradhans.
+     */
+    distinct?: LoginLogsMeradhanScalarFieldEnum | LoginLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * LoginLogsMeradhan findFirstOrThrow
+   */
+  export type LoginLogsMeradhanFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsMeradhan to fetch.
+     */
+    where?: LoginLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsMeradhans to fetch.
+     */
+    orderBy?: LoginLogsMeradhanOrderByWithRelationInput | LoginLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoginLogsMeradhans.
+     */
+    cursor?: LoginLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoginLogsMeradhans.
+     */
+    distinct?: LoginLogsMeradhanScalarFieldEnum | LoginLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * LoginLogsMeradhan findMany
+   */
+  export type LoginLogsMeradhanFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which LoginLogsMeradhans to fetch.
+     */
+    where?: LoginLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoginLogsMeradhans to fetch.
+     */
+    orderBy?: LoginLogsMeradhanOrderByWithRelationInput | LoginLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoginLogsMeradhans.
+     */
+    cursor?: LoginLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoginLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoginLogsMeradhans.
+     */
+    skip?: number
+    distinct?: LoginLogsMeradhanScalarFieldEnum | LoginLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * LoginLogsMeradhan create
+   */
+  export type LoginLogsMeradhanCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to create a LoginLogsMeradhan.
+     */
+    data: XOR<LoginLogsMeradhanCreateInput, LoginLogsMeradhanUncheckedCreateInput>
+  }
+
+  /**
+   * LoginLogsMeradhan createMany
+   */
+  export type LoginLogsMeradhanCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoginLogsMeradhans.
+     */
+    data: LoginLogsMeradhanCreateManyInput | LoginLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoginLogsMeradhan createManyAndReturn
+   */
+  export type LoginLogsMeradhanCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoginLogsMeradhans.
+     */
+    data: LoginLogsMeradhanCreateManyInput | LoginLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoginLogsMeradhan update
+   */
+  export type LoginLogsMeradhanUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to update a LoginLogsMeradhan.
+     */
+    data: XOR<LoginLogsMeradhanUpdateInput, LoginLogsMeradhanUncheckedUpdateInput>
+    /**
+     * Choose, which LoginLogsMeradhan to update.
+     */
+    where: LoginLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsMeradhan updateMany
+   */
+  export type LoginLogsMeradhanUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoginLogsMeradhans.
+     */
+    data: XOR<LoginLogsMeradhanUpdateManyMutationInput, LoginLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which LoginLogsMeradhans to update
+     */
+    where?: LoginLogsMeradhanWhereInput
+    /**
+     * Limit how many LoginLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoginLogsMeradhan updateManyAndReturn
+   */
+  export type LoginLogsMeradhanUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to update LoginLogsMeradhans.
+     */
+    data: XOR<LoginLogsMeradhanUpdateManyMutationInput, LoginLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which LoginLogsMeradhans to update
+     */
+    where?: LoginLogsMeradhanWhereInput
+    /**
+     * Limit how many LoginLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoginLogsMeradhan upsert
+   */
+  export type LoginLogsMeradhanUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The filter to search for the LoginLogsMeradhan to update in case it exists.
+     */
+    where: LoginLogsMeradhanWhereUniqueInput
+    /**
+     * In case the LoginLogsMeradhan found by the `where` argument doesn't exist, create a new LoginLogsMeradhan with this data.
+     */
+    create: XOR<LoginLogsMeradhanCreateInput, LoginLogsMeradhanUncheckedCreateInput>
+    /**
+     * In case the LoginLogsMeradhan was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoginLogsMeradhanUpdateInput, LoginLogsMeradhanUncheckedUpdateInput>
+  }
+
+  /**
+   * LoginLogsMeradhan delete
+   */
+  export type LoginLogsMeradhanDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter which LoginLogsMeradhan to delete.
+     */
+    where: LoginLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * LoginLogsMeradhan deleteMany
+   */
+  export type LoginLogsMeradhanDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoginLogsMeradhans to delete
+     */
+    where?: LoginLogsMeradhanWhereInput
+    /**
+     * Limit how many LoginLogsMeradhans to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoginLogsMeradhan without action
+   */
+  export type LoginLogsMeradhanDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoginLogsMeradhan
+     */
+    select?: LoginLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoginLogsMeradhan
+     */
+    omit?: LoginLogsMeradhanOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ActivityLogsMeradhan
+   */
+
+  export type AggregateActivityLogsMeradhan = {
+    _count: ActivityLogsMeradhanCountAggregateOutputType | null
+    _avg: ActivityLogsMeradhanAvgAggregateOutputType | null
+    _sum: ActivityLogsMeradhanSumAggregateOutputType | null
+    _min: ActivityLogsMeradhanMinAggregateOutputType | null
+    _max: ActivityLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  export type ActivityLogsMeradhanAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type ActivityLogsMeradhanSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type ActivityLogsMeradhanMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    entityType: string | null
+    action: string | null
+    entityId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    url: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ActivityLogsMeradhanMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    name: string | null
+    email: string | null
+    entityType: string | null
+    action: string | null
+    entityId: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    url: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ActivityLogsMeradhanCountAggregateOutputType = {
+    id: number
+    userId: number
+    name: number
+    email: number
+    entityType: number
+    action: number
+    entityId: number
+    ipAddress: number
+    details: number
+    userAgent: number
+    browserName: number
+    deviceType: number
+    operatingSystem: number
+    url: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ActivityLogsMeradhanAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type ActivityLogsMeradhanSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type ActivityLogsMeradhanMinAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    entityType?: true
+    action?: true
+    entityId?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    url?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ActivityLogsMeradhanMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    entityType?: true
+    action?: true
+    entityId?: true
+    ipAddress?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    url?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ActivityLogsMeradhanCountAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    email?: true
+    entityType?: true
+    action?: true
+    entityId?: true
+    ipAddress?: true
+    details?: true
+    userAgent?: true
+    browserName?: true
+    deviceType?: true
+    operatingSystem?: true
+    url?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ActivityLogsMeradhanAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLogsMeradhan to aggregate.
+     */
+    where?: ActivityLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsMeradhans to fetch.
+     */
+    orderBy?: ActivityLogsMeradhanOrderByWithRelationInput | ActivityLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ActivityLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ActivityLogsMeradhans
+    **/
+    _count?: true | ActivityLogsMeradhanCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ActivityLogsMeradhanAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ActivityLogsMeradhanSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ActivityLogsMeradhanMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ActivityLogsMeradhanMaxAggregateInputType
+  }
+
+  export type GetActivityLogsMeradhanAggregateType<T extends ActivityLogsMeradhanAggregateArgs> = {
+        [P in keyof T & keyof AggregateActivityLogsMeradhan]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateActivityLogsMeradhan[P]>
+      : GetScalarType<T[P], AggregateActivityLogsMeradhan[P]>
+  }
+
+
+
+
+  export type ActivityLogsMeradhanGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ActivityLogsMeradhanWhereInput
+    orderBy?: ActivityLogsMeradhanOrderByWithAggregationInput | ActivityLogsMeradhanOrderByWithAggregationInput[]
+    by: ActivityLogsMeradhanScalarFieldEnum[] | ActivityLogsMeradhanScalarFieldEnum
+    having?: ActivityLogsMeradhanScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ActivityLogsMeradhanCountAggregateInputType | true
+    _avg?: ActivityLogsMeradhanAvgAggregateInputType
+    _sum?: ActivityLogsMeradhanSumAggregateInputType
+    _min?: ActivityLogsMeradhanMinAggregateInputType
+    _max?: ActivityLogsMeradhanMaxAggregateInputType
+  }
+
+  export type ActivityLogsMeradhanGroupByOutputType = {
+    id: number
+    userId: number
+    name: string | null
+    email: string | null
+    entityType: string
+    action: string | null
+    entityId: string | null
+    ipAddress: string | null
+    details: JsonValue
+    userAgent: string | null
+    browserName: string | null
+    deviceType: string | null
+    operatingSystem: string | null
+    url: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ActivityLogsMeradhanCountAggregateOutputType | null
+    _avg: ActivityLogsMeradhanAvgAggregateOutputType | null
+    _sum: ActivityLogsMeradhanSumAggregateOutputType | null
+    _min: ActivityLogsMeradhanMinAggregateOutputType | null
+    _max: ActivityLogsMeradhanMaxAggregateOutputType | null
+  }
+
+  type GetActivityLogsMeradhanGroupByPayload<T extends ActivityLogsMeradhanGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ActivityLogsMeradhanGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ActivityLogsMeradhanGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ActivityLogsMeradhanGroupByOutputType[P]>
+            : GetScalarType<T[P], ActivityLogsMeradhanGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ActivityLogsMeradhanSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["activityLogsMeradhan"]>
+
+  export type ActivityLogsMeradhanSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["activityLogsMeradhan"]>
+
+  export type ActivityLogsMeradhanSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["activityLogsMeradhan"]>
+
+  export type ActivityLogsMeradhanSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    email?: boolean
+    entityType?: boolean
+    action?: boolean
+    entityId?: boolean
+    ipAddress?: boolean
+    details?: boolean
+    userAgent?: boolean
+    browserName?: boolean
+    deviceType?: boolean
+    operatingSystem?: boolean
+    url?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ActivityLogsMeradhanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "email" | "entityType" | "action" | "entityId" | "ipAddress" | "details" | "userAgent" | "browserName" | "deviceType" | "operatingSystem" | "url" | "createdAt" | "updatedAt", ExtArgs["result"]["activityLogsMeradhan"]>
+
+  export type $ActivityLogsMeradhanPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ActivityLogsMeradhan"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number
+      name: string | null
+      email: string | null
+      entityType: string
+      action: string | null
+      entityId: string | null
+      ipAddress: string | null
+      details: Prisma.JsonValue
+      userAgent: string | null
+      browserName: string | null
+      deviceType: string | null
+      operatingSystem: string | null
+      url: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["activityLogsMeradhan"]>
+    composites: {}
+  }
+
+  type ActivityLogsMeradhanGetPayload<S extends boolean | null | undefined | ActivityLogsMeradhanDefaultArgs> = $Result.GetResult<Prisma.$ActivityLogsMeradhanPayload, S>
+
+  type ActivityLogsMeradhanCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ActivityLogsMeradhanFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ActivityLogsMeradhanCountAggregateInputType | true
+    }
+
+  export interface ActivityLogsMeradhanDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ActivityLogsMeradhan'], meta: { name: 'ActivityLogsMeradhan' } }
+    /**
+     * Find zero or one ActivityLogsMeradhan that matches the filter.
+     * @param {ActivityLogsMeradhanFindUniqueArgs} args - Arguments to find a ActivityLogsMeradhan
+     * @example
+     * // Get one ActivityLogsMeradhan
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ActivityLogsMeradhanFindUniqueArgs>(args: SelectSubset<T, ActivityLogsMeradhanFindUniqueArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ActivityLogsMeradhan that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ActivityLogsMeradhanFindUniqueOrThrowArgs} args - Arguments to find a ActivityLogsMeradhan
+     * @example
+     * // Get one ActivityLogsMeradhan
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ActivityLogsMeradhanFindUniqueOrThrowArgs>(args: SelectSubset<T, ActivityLogsMeradhanFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ActivityLogsMeradhan that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsMeradhanFindFirstArgs} args - Arguments to find a ActivityLogsMeradhan
+     * @example
+     * // Get one ActivityLogsMeradhan
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ActivityLogsMeradhanFindFirstArgs>(args?: SelectSubset<T, ActivityLogsMeradhanFindFirstArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ActivityLogsMeradhan that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsMeradhanFindFirstOrThrowArgs} args - Arguments to find a ActivityLogsMeradhan
+     * @example
+     * // Get one ActivityLogsMeradhan
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ActivityLogsMeradhanFindFirstOrThrowArgs>(args?: SelectSubset<T, ActivityLogsMeradhanFindFirstOrThrowArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ActivityLogsMeradhans that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsMeradhanFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ActivityLogsMeradhans
+     * const activityLogsMeradhans = await prisma.activityLogsMeradhan.findMany()
+     * 
+     * // Get first 10 ActivityLogsMeradhans
+     * const activityLogsMeradhans = await prisma.activityLogsMeradhan.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const activityLogsMeradhanWithIdOnly = await prisma.activityLogsMeradhan.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ActivityLogsMeradhanFindManyArgs>(args?: SelectSubset<T, ActivityLogsMeradhanFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ActivityLogsMeradhan.
+     * @param {ActivityLogsMeradhanCreateArgs} args - Arguments to create a ActivityLogsMeradhan.
+     * @example
+     * // Create one ActivityLogsMeradhan
+     * const ActivityLogsMeradhan = await prisma.activityLogsMeradhan.create({
+     *   data: {
+     *     // ... data to create a ActivityLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    create<T extends ActivityLogsMeradhanCreateArgs>(args: SelectSubset<T, ActivityLogsMeradhanCreateArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ActivityLogsMeradhans.
+     * @param {ActivityLogsMeradhanCreateManyArgs} args - Arguments to create many ActivityLogsMeradhans.
+     * @example
+     * // Create many ActivityLogsMeradhans
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ActivityLogsMeradhanCreateManyArgs>(args?: SelectSubset<T, ActivityLogsMeradhanCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ActivityLogsMeradhans and returns the data saved in the database.
+     * @param {ActivityLogsMeradhanCreateManyAndReturnArgs} args - Arguments to create many ActivityLogsMeradhans.
+     * @example
+     * // Create many ActivityLogsMeradhans
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ActivityLogsMeradhans and only return the `id`
+     * const activityLogsMeradhanWithIdOnly = await prisma.activityLogsMeradhan.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ActivityLogsMeradhanCreateManyAndReturnArgs>(args?: SelectSubset<T, ActivityLogsMeradhanCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ActivityLogsMeradhan.
+     * @param {ActivityLogsMeradhanDeleteArgs} args - Arguments to delete one ActivityLogsMeradhan.
+     * @example
+     * // Delete one ActivityLogsMeradhan
+     * const ActivityLogsMeradhan = await prisma.activityLogsMeradhan.delete({
+     *   where: {
+     *     // ... filter to delete one ActivityLogsMeradhan
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ActivityLogsMeradhanDeleteArgs>(args: SelectSubset<T, ActivityLogsMeradhanDeleteArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ActivityLogsMeradhan.
+     * @param {ActivityLogsMeradhanUpdateArgs} args - Arguments to update one ActivityLogsMeradhan.
+     * @example
+     * // Update one ActivityLogsMeradhan
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ActivityLogsMeradhanUpdateArgs>(args: SelectSubset<T, ActivityLogsMeradhanUpdateArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ActivityLogsMeradhans.
+     * @param {ActivityLogsMeradhanDeleteManyArgs} args - Arguments to filter ActivityLogsMeradhans to delete.
+     * @example
+     * // Delete a few ActivityLogsMeradhans
+     * const { count } = await prisma.activityLogsMeradhan.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ActivityLogsMeradhanDeleteManyArgs>(args?: SelectSubset<T, ActivityLogsMeradhanDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ActivityLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsMeradhanUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ActivityLogsMeradhans
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ActivityLogsMeradhanUpdateManyArgs>(args: SelectSubset<T, ActivityLogsMeradhanUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ActivityLogsMeradhans and returns the data updated in the database.
+     * @param {ActivityLogsMeradhanUpdateManyAndReturnArgs} args - Arguments to update many ActivityLogsMeradhans.
+     * @example
+     * // Update many ActivityLogsMeradhans
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ActivityLogsMeradhans and only return the `id`
+     * const activityLogsMeradhanWithIdOnly = await prisma.activityLogsMeradhan.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ActivityLogsMeradhanUpdateManyAndReturnArgs>(args: SelectSubset<T, ActivityLogsMeradhanUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ActivityLogsMeradhan.
+     * @param {ActivityLogsMeradhanUpsertArgs} args - Arguments to update or create a ActivityLogsMeradhan.
+     * @example
+     * // Update or create a ActivityLogsMeradhan
+     * const activityLogsMeradhan = await prisma.activityLogsMeradhan.upsert({
+     *   create: {
+     *     // ... data to create a ActivityLogsMeradhan
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ActivityLogsMeradhan we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ActivityLogsMeradhanUpsertArgs>(args: SelectSubset<T, ActivityLogsMeradhanUpsertArgs<ExtArgs>>): Prisma__ActivityLogsMeradhanClient<$Result.GetResult<Prisma.$ActivityLogsMeradhanPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ActivityLogsMeradhans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsMeradhanCountArgs} args - Arguments to filter ActivityLogsMeradhans to count.
+     * @example
+     * // Count the number of ActivityLogsMeradhans
+     * const count = await prisma.activityLogsMeradhan.count({
+     *   where: {
+     *     // ... the filter for the ActivityLogsMeradhans we want to count
+     *   }
+     * })
+    **/
+    count<T extends ActivityLogsMeradhanCountArgs>(
+      args?: Subset<T, ActivityLogsMeradhanCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ActivityLogsMeradhanCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ActivityLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsMeradhanAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ActivityLogsMeradhanAggregateArgs>(args: Subset<T, ActivityLogsMeradhanAggregateArgs>): Prisma.PrismaPromise<GetActivityLogsMeradhanAggregateType<T>>
+
+    /**
+     * Group by ActivityLogsMeradhan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogsMeradhanGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ActivityLogsMeradhanGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ActivityLogsMeradhanGroupByArgs['orderBy'] }
+        : { orderBy?: ActivityLogsMeradhanGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ActivityLogsMeradhanGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetActivityLogsMeradhanGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ActivityLogsMeradhan model
+   */
+  readonly fields: ActivityLogsMeradhanFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ActivityLogsMeradhan.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ActivityLogsMeradhanClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ActivityLogsMeradhan model
+   */
+  interface ActivityLogsMeradhanFieldRefs {
+    readonly id: FieldRef<"ActivityLogsMeradhan", 'Int'>
+    readonly userId: FieldRef<"ActivityLogsMeradhan", 'Int'>
+    readonly name: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly email: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly entityType: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly action: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly entityId: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly ipAddress: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly details: FieldRef<"ActivityLogsMeradhan", 'Json'>
+    readonly userAgent: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly browserName: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly deviceType: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly operatingSystem: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly url: FieldRef<"ActivityLogsMeradhan", 'String'>
+    readonly createdAt: FieldRef<"ActivityLogsMeradhan", 'DateTime'>
+    readonly updatedAt: FieldRef<"ActivityLogsMeradhan", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ActivityLogsMeradhan findUnique
+   */
+  export type ActivityLogsMeradhanFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsMeradhan to fetch.
+     */
+    where: ActivityLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsMeradhan findUniqueOrThrow
+   */
+  export type ActivityLogsMeradhanFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsMeradhan to fetch.
+     */
+    where: ActivityLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsMeradhan findFirst
+   */
+  export type ActivityLogsMeradhanFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsMeradhan to fetch.
+     */
+    where?: ActivityLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsMeradhans to fetch.
+     */
+    orderBy?: ActivityLogsMeradhanOrderByWithRelationInput | ActivityLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogsMeradhans.
+     */
+    cursor?: ActivityLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogsMeradhans.
+     */
+    distinct?: ActivityLogsMeradhanScalarFieldEnum | ActivityLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLogsMeradhan findFirstOrThrow
+   */
+  export type ActivityLogsMeradhanFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsMeradhan to fetch.
+     */
+    where?: ActivityLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsMeradhans to fetch.
+     */
+    orderBy?: ActivityLogsMeradhanOrderByWithRelationInput | ActivityLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogsMeradhans.
+     */
+    cursor?: ActivityLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsMeradhans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogsMeradhans.
+     */
+    distinct?: ActivityLogsMeradhanScalarFieldEnum | ActivityLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLogsMeradhan findMany
+   */
+  export type ActivityLogsMeradhanFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogsMeradhans to fetch.
+     */
+    where?: ActivityLogsMeradhanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogsMeradhans to fetch.
+     */
+    orderBy?: ActivityLogsMeradhanOrderByWithRelationInput | ActivityLogsMeradhanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ActivityLogsMeradhans.
+     */
+    cursor?: ActivityLogsMeradhanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogsMeradhans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogsMeradhans.
+     */
+    skip?: number
+    distinct?: ActivityLogsMeradhanScalarFieldEnum | ActivityLogsMeradhanScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLogsMeradhan create
+   */
+  export type ActivityLogsMeradhanCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ActivityLogsMeradhan.
+     */
+    data: XOR<ActivityLogsMeradhanCreateInput, ActivityLogsMeradhanUncheckedCreateInput>
+  }
+
+  /**
+   * ActivityLogsMeradhan createMany
+   */
+  export type ActivityLogsMeradhanCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ActivityLogsMeradhans.
+     */
+    data: ActivityLogsMeradhanCreateManyInput | ActivityLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLogsMeradhan createManyAndReturn
+   */
+  export type ActivityLogsMeradhanCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to create many ActivityLogsMeradhans.
+     */
+    data: ActivityLogsMeradhanCreateManyInput | ActivityLogsMeradhanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLogsMeradhan update
+   */
+  export type ActivityLogsMeradhanUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ActivityLogsMeradhan.
+     */
+    data: XOR<ActivityLogsMeradhanUpdateInput, ActivityLogsMeradhanUncheckedUpdateInput>
+    /**
+     * Choose, which ActivityLogsMeradhan to update.
+     */
+    where: ActivityLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsMeradhan updateMany
+   */
+  export type ActivityLogsMeradhanUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ActivityLogsMeradhans.
+     */
+    data: XOR<ActivityLogsMeradhanUpdateManyMutationInput, ActivityLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which ActivityLogsMeradhans to update
+     */
+    where?: ActivityLogsMeradhanWhereInput
+    /**
+     * Limit how many ActivityLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLogsMeradhan updateManyAndReturn
+   */
+  export type ActivityLogsMeradhanUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The data used to update ActivityLogsMeradhans.
+     */
+    data: XOR<ActivityLogsMeradhanUpdateManyMutationInput, ActivityLogsMeradhanUncheckedUpdateManyInput>
+    /**
+     * Filter which ActivityLogsMeradhans to update
+     */
+    where?: ActivityLogsMeradhanWhereInput
+    /**
+     * Limit how many ActivityLogsMeradhans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLogsMeradhan upsert
+   */
+  export type ActivityLogsMeradhanUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ActivityLogsMeradhan to update in case it exists.
+     */
+    where: ActivityLogsMeradhanWhereUniqueInput
+    /**
+     * In case the ActivityLogsMeradhan found by the `where` argument doesn't exist, create a new ActivityLogsMeradhan with this data.
+     */
+    create: XOR<ActivityLogsMeradhanCreateInput, ActivityLogsMeradhanUncheckedCreateInput>
+    /**
+     * In case the ActivityLogsMeradhan was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ActivityLogsMeradhanUpdateInput, ActivityLogsMeradhanUncheckedUpdateInput>
+  }
+
+  /**
+   * ActivityLogsMeradhan delete
+   */
+  export type ActivityLogsMeradhanDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
+    /**
+     * Filter which ActivityLogsMeradhan to delete.
+     */
+    where: ActivityLogsMeradhanWhereUniqueInput
+  }
+
+  /**
+   * ActivityLogsMeradhan deleteMany
+   */
+  export type ActivityLogsMeradhanDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLogsMeradhans to delete
+     */
+    where?: ActivityLogsMeradhanWhereInput
+    /**
+     * Limit how many ActivityLogsMeradhans to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLogsMeradhan without action
+   */
+  export type ActivityLogsMeradhanDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLogsMeradhan
+     */
+    select?: ActivityLogsMeradhanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLogsMeradhan
+     */
+    omit?: ActivityLogsMeradhanOmit<ExtArgs> | null
   }
 
 
@@ -24694,6 +29765,1060 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CustomersDematAccountModelInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model KraDataLogs
+   */
+
+  export type AggregateKraDataLogs = {
+    _count: KraDataLogsCountAggregateOutputType | null
+    _avg: KraDataLogsAvgAggregateOutputType | null
+    _sum: KraDataLogsSumAggregateOutputType | null
+    _min: KraDataLogsMinAggregateOutputType | null
+    _max: KraDataLogsMaxAggregateOutputType | null
+  }
+
+  export type KraDataLogsAvgAggregateOutputType = {
+    id: number | null
+    panId: number | null
+  }
+
+  export type KraDataLogsSumAggregateOutputType = {
+    id: number | null
+    panId: number | null
+  }
+
+  export type KraDataLogsMinAggregateOutputType = {
+    id: number | null
+    panId: number | null
+    status: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KraDataLogsMaxAggregateOutputType = {
+    id: number | null
+    panId: number | null
+    status: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KraDataLogsCountAggregateOutputType = {
+    id: number
+    panId: number
+    requestData: number
+    responseData: number
+    status: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type KraDataLogsAvgAggregateInputType = {
+    id?: true
+    panId?: true
+  }
+
+  export type KraDataLogsSumAggregateInputType = {
+    id?: true
+    panId?: true
+  }
+
+  export type KraDataLogsMinAggregateInputType = {
+    id?: true
+    panId?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KraDataLogsMaxAggregateInputType = {
+    id?: true
+    panId?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KraDataLogsCountAggregateInputType = {
+    id?: true
+    panId?: true
+    requestData?: true
+    responseData?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type KraDataLogsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KraDataLogs to aggregate.
+     */
+    where?: KraDataLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KraDataLogs to fetch.
+     */
+    orderBy?: KraDataLogsOrderByWithRelationInput | KraDataLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: KraDataLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KraDataLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KraDataLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned KraDataLogs
+    **/
+    _count?: true | KraDataLogsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: KraDataLogsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: KraDataLogsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: KraDataLogsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: KraDataLogsMaxAggregateInputType
+  }
+
+  export type GetKraDataLogsAggregateType<T extends KraDataLogsAggregateArgs> = {
+        [P in keyof T & keyof AggregateKraDataLogs]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKraDataLogs[P]>
+      : GetScalarType<T[P], AggregateKraDataLogs[P]>
+  }
+
+
+
+
+  export type KraDataLogsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KraDataLogsWhereInput
+    orderBy?: KraDataLogsOrderByWithAggregationInput | KraDataLogsOrderByWithAggregationInput[]
+    by: KraDataLogsScalarFieldEnum[] | KraDataLogsScalarFieldEnum
+    having?: KraDataLogsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KraDataLogsCountAggregateInputType | true
+    _avg?: KraDataLogsAvgAggregateInputType
+    _sum?: KraDataLogsSumAggregateInputType
+    _min?: KraDataLogsMinAggregateInputType
+    _max?: KraDataLogsMaxAggregateInputType
+  }
+
+  export type KraDataLogsGroupByOutputType = {
+    id: number
+    panId: number
+    requestData: JsonValue
+    responseData: JsonValue
+    status: string
+    createdAt: Date
+    updatedAt: Date
+    _count: KraDataLogsCountAggregateOutputType | null
+    _avg: KraDataLogsAvgAggregateOutputType | null
+    _sum: KraDataLogsSumAggregateOutputType | null
+    _min: KraDataLogsMinAggregateOutputType | null
+    _max: KraDataLogsMaxAggregateOutputType | null
+  }
+
+  type GetKraDataLogsGroupByPayload<T extends KraDataLogsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KraDataLogsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KraDataLogsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KraDataLogsGroupByOutputType[P]>
+            : GetScalarType<T[P], KraDataLogsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KraDataLogsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    panId?: boolean
+    requestData?: boolean
+    responseData?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kraDataLogs"]>
+
+  export type KraDataLogsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    panId?: boolean
+    requestData?: boolean
+    responseData?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kraDataLogs"]>
+
+  export type KraDataLogsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    panId?: boolean
+    requestData?: boolean
+    responseData?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kraDataLogs"]>
+
+  export type KraDataLogsSelectScalar = {
+    id?: boolean
+    panId?: boolean
+    requestData?: boolean
+    responseData?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type KraDataLogsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "panId" | "requestData" | "responseData" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["kraDataLogs"]>
+
+  export type $KraDataLogsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KraDataLogs"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      panId: number
+      requestData: Prisma.JsonValue
+      responseData: Prisma.JsonValue
+      status: string
+      /**
+       * Timestamps
+       */
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["kraDataLogs"]>
+    composites: {}
+  }
+
+  type KraDataLogsGetPayload<S extends boolean | null | undefined | KraDataLogsDefaultArgs> = $Result.GetResult<Prisma.$KraDataLogsPayload, S>
+
+  type KraDataLogsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KraDataLogsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KraDataLogsCountAggregateInputType | true
+    }
+
+  export interface KraDataLogsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KraDataLogs'], meta: { name: 'KraDataLogs' } }
+    /**
+     * Find zero or one KraDataLogs that matches the filter.
+     * @param {KraDataLogsFindUniqueArgs} args - Arguments to find a KraDataLogs
+     * @example
+     * // Get one KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KraDataLogsFindUniqueArgs>(args: SelectSubset<T, KraDataLogsFindUniqueArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KraDataLogs that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KraDataLogsFindUniqueOrThrowArgs} args - Arguments to find a KraDataLogs
+     * @example
+     * // Get one KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KraDataLogsFindUniqueOrThrowArgs>(args: SelectSubset<T, KraDataLogsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KraDataLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KraDataLogsFindFirstArgs} args - Arguments to find a KraDataLogs
+     * @example
+     * // Get one KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KraDataLogsFindFirstArgs>(args?: SelectSubset<T, KraDataLogsFindFirstArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KraDataLogs that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KraDataLogsFindFirstOrThrowArgs} args - Arguments to find a KraDataLogs
+     * @example
+     * // Get one KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KraDataLogsFindFirstOrThrowArgs>(args?: SelectSubset<T, KraDataLogsFindFirstOrThrowArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KraDataLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KraDataLogsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.findMany()
+     * 
+     * // Get first 10 KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const kraDataLogsWithIdOnly = await prisma.kraDataLogs.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends KraDataLogsFindManyArgs>(args?: SelectSubset<T, KraDataLogsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KraDataLogs.
+     * @param {KraDataLogsCreateArgs} args - Arguments to create a KraDataLogs.
+     * @example
+     * // Create one KraDataLogs
+     * const KraDataLogs = await prisma.kraDataLogs.create({
+     *   data: {
+     *     // ... data to create a KraDataLogs
+     *   }
+     * })
+     * 
+     */
+    create<T extends KraDataLogsCreateArgs>(args: SelectSubset<T, KraDataLogsCreateArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KraDataLogs.
+     * @param {KraDataLogsCreateManyArgs} args - Arguments to create many KraDataLogs.
+     * @example
+     * // Create many KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends KraDataLogsCreateManyArgs>(args?: SelectSubset<T, KraDataLogsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many KraDataLogs and returns the data saved in the database.
+     * @param {KraDataLogsCreateManyAndReturnArgs} args - Arguments to create many KraDataLogs.
+     * @example
+     * // Create many KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many KraDataLogs and only return the `id`
+     * const kraDataLogsWithIdOnly = await prisma.kraDataLogs.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends KraDataLogsCreateManyAndReturnArgs>(args?: SelectSubset<T, KraDataLogsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a KraDataLogs.
+     * @param {KraDataLogsDeleteArgs} args - Arguments to delete one KraDataLogs.
+     * @example
+     * // Delete one KraDataLogs
+     * const KraDataLogs = await prisma.kraDataLogs.delete({
+     *   where: {
+     *     // ... filter to delete one KraDataLogs
+     *   }
+     * })
+     * 
+     */
+    delete<T extends KraDataLogsDeleteArgs>(args: SelectSubset<T, KraDataLogsDeleteArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KraDataLogs.
+     * @param {KraDataLogsUpdateArgs} args - Arguments to update one KraDataLogs.
+     * @example
+     * // Update one KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends KraDataLogsUpdateArgs>(args: SelectSubset<T, KraDataLogsUpdateArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KraDataLogs.
+     * @param {KraDataLogsDeleteManyArgs} args - Arguments to filter KraDataLogs to delete.
+     * @example
+     * // Delete a few KraDataLogs
+     * const { count } = await prisma.kraDataLogs.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends KraDataLogsDeleteManyArgs>(args?: SelectSubset<T, KraDataLogsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KraDataLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KraDataLogsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends KraDataLogsUpdateManyArgs>(args: SelectSubset<T, KraDataLogsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KraDataLogs and returns the data updated in the database.
+     * @param {KraDataLogsUpdateManyAndReturnArgs} args - Arguments to update many KraDataLogs.
+     * @example
+     * // Update many KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more KraDataLogs and only return the `id`
+     * const kraDataLogsWithIdOnly = await prisma.kraDataLogs.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends KraDataLogsUpdateManyAndReturnArgs>(args: SelectSubset<T, KraDataLogsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one KraDataLogs.
+     * @param {KraDataLogsUpsertArgs} args - Arguments to update or create a KraDataLogs.
+     * @example
+     * // Update or create a KraDataLogs
+     * const kraDataLogs = await prisma.kraDataLogs.upsert({
+     *   create: {
+     *     // ... data to create a KraDataLogs
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KraDataLogs we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KraDataLogsUpsertArgs>(args: SelectSubset<T, KraDataLogsUpsertArgs<ExtArgs>>): Prisma__KraDataLogsClient<$Result.GetResult<Prisma.$KraDataLogsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KraDataLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KraDataLogsCountArgs} args - Arguments to filter KraDataLogs to count.
+     * @example
+     * // Count the number of KraDataLogs
+     * const count = await prisma.kraDataLogs.count({
+     *   where: {
+     *     // ... the filter for the KraDataLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends KraDataLogsCountArgs>(
+      args?: Subset<T, KraDataLogsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KraDataLogsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KraDataLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KraDataLogsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KraDataLogsAggregateArgs>(args: Subset<T, KraDataLogsAggregateArgs>): Prisma.PrismaPromise<GetKraDataLogsAggregateType<T>>
+
+    /**
+     * Group by KraDataLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KraDataLogsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends KraDataLogsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KraDataLogsGroupByArgs['orderBy'] }
+        : { orderBy?: KraDataLogsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KraDataLogsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKraDataLogsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KraDataLogs model
+   */
+  readonly fields: KraDataLogsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KraDataLogs.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KraDataLogsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KraDataLogs model
+   */
+  interface KraDataLogsFieldRefs {
+    readonly id: FieldRef<"KraDataLogs", 'Int'>
+    readonly panId: FieldRef<"KraDataLogs", 'Int'>
+    readonly requestData: FieldRef<"KraDataLogs", 'Json'>
+    readonly responseData: FieldRef<"KraDataLogs", 'Json'>
+    readonly status: FieldRef<"KraDataLogs", 'String'>
+    readonly createdAt: FieldRef<"KraDataLogs", 'DateTime'>
+    readonly updatedAt: FieldRef<"KraDataLogs", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * KraDataLogs findUnique
+   */
+  export type KraDataLogsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which KraDataLogs to fetch.
+     */
+    where: KraDataLogsWhereUniqueInput
+  }
+
+  /**
+   * KraDataLogs findUniqueOrThrow
+   */
+  export type KraDataLogsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which KraDataLogs to fetch.
+     */
+    where: KraDataLogsWhereUniqueInput
+  }
+
+  /**
+   * KraDataLogs findFirst
+   */
+  export type KraDataLogsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which KraDataLogs to fetch.
+     */
+    where?: KraDataLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KraDataLogs to fetch.
+     */
+    orderBy?: KraDataLogsOrderByWithRelationInput | KraDataLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KraDataLogs.
+     */
+    cursor?: KraDataLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KraDataLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KraDataLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KraDataLogs.
+     */
+    distinct?: KraDataLogsScalarFieldEnum | KraDataLogsScalarFieldEnum[]
+  }
+
+  /**
+   * KraDataLogs findFirstOrThrow
+   */
+  export type KraDataLogsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which KraDataLogs to fetch.
+     */
+    where?: KraDataLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KraDataLogs to fetch.
+     */
+    orderBy?: KraDataLogsOrderByWithRelationInput | KraDataLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KraDataLogs.
+     */
+    cursor?: KraDataLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KraDataLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KraDataLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KraDataLogs.
+     */
+    distinct?: KraDataLogsScalarFieldEnum | KraDataLogsScalarFieldEnum[]
+  }
+
+  /**
+   * KraDataLogs findMany
+   */
+  export type KraDataLogsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * Filter, which KraDataLogs to fetch.
+     */
+    where?: KraDataLogsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KraDataLogs to fetch.
+     */
+    orderBy?: KraDataLogsOrderByWithRelationInput | KraDataLogsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing KraDataLogs.
+     */
+    cursor?: KraDataLogsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KraDataLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KraDataLogs.
+     */
+    skip?: number
+    distinct?: KraDataLogsScalarFieldEnum | KraDataLogsScalarFieldEnum[]
+  }
+
+  /**
+   * KraDataLogs create
+   */
+  export type KraDataLogsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a KraDataLogs.
+     */
+    data: XOR<KraDataLogsCreateInput, KraDataLogsUncheckedCreateInput>
+  }
+
+  /**
+   * KraDataLogs createMany
+   */
+  export type KraDataLogsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KraDataLogs.
+     */
+    data: KraDataLogsCreateManyInput | KraDataLogsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KraDataLogs createManyAndReturn
+   */
+  export type KraDataLogsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * The data used to create many KraDataLogs.
+     */
+    data: KraDataLogsCreateManyInput | KraDataLogsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KraDataLogs update
+   */
+  export type KraDataLogsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a KraDataLogs.
+     */
+    data: XOR<KraDataLogsUpdateInput, KraDataLogsUncheckedUpdateInput>
+    /**
+     * Choose, which KraDataLogs to update.
+     */
+    where: KraDataLogsWhereUniqueInput
+  }
+
+  /**
+   * KraDataLogs updateMany
+   */
+  export type KraDataLogsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KraDataLogs.
+     */
+    data: XOR<KraDataLogsUpdateManyMutationInput, KraDataLogsUncheckedUpdateManyInput>
+    /**
+     * Filter which KraDataLogs to update
+     */
+    where?: KraDataLogsWhereInput
+    /**
+     * Limit how many KraDataLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KraDataLogs updateManyAndReturn
+   */
+  export type KraDataLogsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * The data used to update KraDataLogs.
+     */
+    data: XOR<KraDataLogsUpdateManyMutationInput, KraDataLogsUncheckedUpdateManyInput>
+    /**
+     * Filter which KraDataLogs to update
+     */
+    where?: KraDataLogsWhereInput
+    /**
+     * Limit how many KraDataLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KraDataLogs upsert
+   */
+  export type KraDataLogsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the KraDataLogs to update in case it exists.
+     */
+    where: KraDataLogsWhereUniqueInput
+    /**
+     * In case the KraDataLogs found by the `where` argument doesn't exist, create a new KraDataLogs with this data.
+     */
+    create: XOR<KraDataLogsCreateInput, KraDataLogsUncheckedCreateInput>
+    /**
+     * In case the KraDataLogs was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KraDataLogsUpdateInput, KraDataLogsUncheckedUpdateInput>
+  }
+
+  /**
+   * KraDataLogs delete
+   */
+  export type KraDataLogsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
+    /**
+     * Filter which KraDataLogs to delete.
+     */
+    where: KraDataLogsWhereUniqueInput
+  }
+
+  /**
+   * KraDataLogs deleteMany
+   */
+  export type KraDataLogsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KraDataLogs to delete
+     */
+    where?: KraDataLogsWhereInput
+    /**
+     * Limit how many KraDataLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KraDataLogs without action
+   */
+  export type KraDataLogsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KraDataLogs
+     */
+    select?: KraDataLogsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KraDataLogs
+     */
+    omit?: KraDataLogsOmit<ExtArgs> | null
   }
 
 
@@ -39367,6 +45492,86 @@ export namespace Prisma {
   export type LoginLogsCrmScalarFieldEnum = (typeof LoginLogsCrmScalarFieldEnum)[keyof typeof LoginLogsCrmScalarFieldEnum]
 
 
+  export const SessionLogsMeradhanScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    sessionToken: 'sessionToken',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    browserName: 'browserName',
+    deviceType: 'deviceType',
+    operatingSystem: 'operatingSystem',
+    endReason: 'endReason',
+    startTime: 'startTime',
+    endTime: 'endTime',
+    duration: 'duration',
+    totalPages: 'totalPages',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SessionLogsMeradhanScalarFieldEnum = (typeof SessionLogsMeradhanScalarFieldEnum)[keyof typeof SessionLogsMeradhanScalarFieldEnum]
+
+
+  export const PageViewLogsMeradhanScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    sessionId: 'sessionId',
+    pagePath: 'pagePath',
+    pageTitle: 'pageTitle',
+    entryTime: 'entryTime',
+    exitTime: 'exitTime',
+    duration: 'duration',
+    scrollDepth: 'scrollDepth',
+    interactions: 'interactions',
+    referrer: 'referrer',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PageViewLogsMeradhanScalarFieldEnum = (typeof PageViewLogsMeradhanScalarFieldEnum)[keyof typeof PageViewLogsMeradhanScalarFieldEnum]
+
+
+  export const LoginLogsMeradhanScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    email: 'email',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    browserName: 'browserName',
+    deviceType: 'deviceType',
+    operatingSystem: 'operatingSystem',
+    sessionType: 'sessionType',
+    success: 'success',
+    createdAt: 'createdAt'
+  };
+
+  export type LoginLogsMeradhanScalarFieldEnum = (typeof LoginLogsMeradhanScalarFieldEnum)[keyof typeof LoginLogsMeradhanScalarFieldEnum]
+
+
+  export const ActivityLogsMeradhanScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    email: 'email',
+    entityType: 'entityType',
+    action: 'action',
+    entityId: 'entityId',
+    ipAddress: 'ipAddress',
+    details: 'details',
+    userAgent: 'userAgent',
+    browserName: 'browserName',
+    deviceType: 'deviceType',
+    operatingSystem: 'operatingSystem',
+    url: 'url',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ActivityLogsMeradhanScalarFieldEnum = (typeof ActivityLogsMeradhanScalarFieldEnum)[keyof typeof ActivityLogsMeradhanScalarFieldEnum]
+
+
   export const BondsScalarFieldEnum: {
     id: 'id',
     isin: 'isin',
@@ -39614,6 +45819,19 @@ export namespace Prisma {
   };
 
   export type CustomersDematAccountModelScalarFieldEnum = (typeof CustomersDematAccountModelScalarFieldEnum)[keyof typeof CustomersDematAccountModelScalarFieldEnum]
+
+
+  export const KraDataLogsScalarFieldEnum: {
+    id: 'id',
+    panId: 'panId',
+    requestData: 'requestData',
+    responseData: 'responseData',
+    status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type KraDataLogsScalarFieldEnum = (typeof KraDataLogsScalarFieldEnum)[keyof typeof KraDataLogsScalarFieldEnum]
 
 
   export const KYC_FLOWScalarFieldEnum: {
@@ -41010,6 +47228,402 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"LoginLogsCrm"> | Date | string
   }
 
+  export type SessionLogsMeradhanWhereInput = {
+    AND?: SessionLogsMeradhanWhereInput | SessionLogsMeradhanWhereInput[]
+    OR?: SessionLogsMeradhanWhereInput[]
+    NOT?: SessionLogsMeradhanWhereInput | SessionLogsMeradhanWhereInput[]
+    id?: IntFilter<"SessionLogsMeradhan"> | number
+    userId?: IntNullableFilter<"SessionLogsMeradhan"> | number | null
+    sessionToken?: StringFilter<"SessionLogsMeradhan"> | string
+    ipAddress?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    userAgent?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    browserName?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    deviceType?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    endReason?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    startTime?: DateTimeFilter<"SessionLogsMeradhan"> | Date | string
+    endTime?: DateTimeNullableFilter<"SessionLogsMeradhan"> | Date | string | null
+    duration?: IntFilter<"SessionLogsMeradhan"> | number
+    totalPages?: IntFilter<"SessionLogsMeradhan"> | number
+    createdAt?: DateTimeFilter<"SessionLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeFilter<"SessionLogsMeradhan"> | Date | string
+  }
+
+  export type SessionLogsMeradhanOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    endReason?: SortOrderInput | SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsMeradhanWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: SessionLogsMeradhanWhereInput | SessionLogsMeradhanWhereInput[]
+    OR?: SessionLogsMeradhanWhereInput[]
+    NOT?: SessionLogsMeradhanWhereInput | SessionLogsMeradhanWhereInput[]
+    userId?: IntNullableFilter<"SessionLogsMeradhan"> | number | null
+    sessionToken?: StringFilter<"SessionLogsMeradhan"> | string
+    ipAddress?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    userAgent?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    browserName?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    deviceType?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    endReason?: StringNullableFilter<"SessionLogsMeradhan"> | string | null
+    startTime?: DateTimeFilter<"SessionLogsMeradhan"> | Date | string
+    endTime?: DateTimeNullableFilter<"SessionLogsMeradhan"> | Date | string | null
+    duration?: IntFilter<"SessionLogsMeradhan"> | number
+    totalPages?: IntFilter<"SessionLogsMeradhan"> | number
+    createdAt?: DateTimeFilter<"SessionLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeFilter<"SessionLogsMeradhan"> | Date | string
+  }, "id">
+
+  export type SessionLogsMeradhanOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    endReason?: SortOrderInput | SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SessionLogsMeradhanCountOrderByAggregateInput
+    _avg?: SessionLogsMeradhanAvgOrderByAggregateInput
+    _max?: SessionLogsMeradhanMaxOrderByAggregateInput
+    _min?: SessionLogsMeradhanMinOrderByAggregateInput
+    _sum?: SessionLogsMeradhanSumOrderByAggregateInput
+  }
+
+  export type SessionLogsMeradhanScalarWhereWithAggregatesInput = {
+    AND?: SessionLogsMeradhanScalarWhereWithAggregatesInput | SessionLogsMeradhanScalarWhereWithAggregatesInput[]
+    OR?: SessionLogsMeradhanScalarWhereWithAggregatesInput[]
+    NOT?: SessionLogsMeradhanScalarWhereWithAggregatesInput | SessionLogsMeradhanScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"SessionLogsMeradhan"> | number
+    userId?: IntNullableWithAggregatesFilter<"SessionLogsMeradhan"> | number | null
+    sessionToken?: StringWithAggregatesFilter<"SessionLogsMeradhan"> | string
+    ipAddress?: StringNullableWithAggregatesFilter<"SessionLogsMeradhan"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"SessionLogsMeradhan"> | string | null
+    browserName?: StringNullableWithAggregatesFilter<"SessionLogsMeradhan"> | string | null
+    deviceType?: StringNullableWithAggregatesFilter<"SessionLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableWithAggregatesFilter<"SessionLogsMeradhan"> | string | null
+    endReason?: StringNullableWithAggregatesFilter<"SessionLogsMeradhan"> | string | null
+    startTime?: DateTimeWithAggregatesFilter<"SessionLogsMeradhan"> | Date | string
+    endTime?: DateTimeNullableWithAggregatesFilter<"SessionLogsMeradhan"> | Date | string | null
+    duration?: IntWithAggregatesFilter<"SessionLogsMeradhan"> | number
+    totalPages?: IntWithAggregatesFilter<"SessionLogsMeradhan"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"SessionLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SessionLogsMeradhan"> | Date | string
+  }
+
+  export type PageViewLogsMeradhanWhereInput = {
+    AND?: PageViewLogsMeradhanWhereInput | PageViewLogsMeradhanWhereInput[]
+    OR?: PageViewLogsMeradhanWhereInput[]
+    NOT?: PageViewLogsMeradhanWhereInput | PageViewLogsMeradhanWhereInput[]
+    id?: IntFilter<"PageViewLogsMeradhan"> | number
+    userId?: IntNullableFilter<"PageViewLogsMeradhan"> | number | null
+    sessionId?: StringFilter<"PageViewLogsMeradhan"> | string
+    pagePath?: StringFilter<"PageViewLogsMeradhan"> | string
+    pageTitle?: StringNullableFilter<"PageViewLogsMeradhan"> | string | null
+    entryTime?: DateTimeFilter<"PageViewLogsMeradhan"> | Date | string
+    exitTime?: DateTimeNullableFilter<"PageViewLogsMeradhan"> | Date | string | null
+    duration?: IntFilter<"PageViewLogsMeradhan"> | number
+    scrollDepth?: IntFilter<"PageViewLogsMeradhan"> | number
+    interactions?: IntFilter<"PageViewLogsMeradhan"> | number
+    referrer?: StringNullableFilter<"PageViewLogsMeradhan"> | string | null
+    createdAt?: DateTimeFilter<"PageViewLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeFilter<"PageViewLogsMeradhan"> | Date | string
+  }
+
+  export type PageViewLogsMeradhanOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    sessionId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrderInput | SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsMeradhanWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PageViewLogsMeradhanWhereInput | PageViewLogsMeradhanWhereInput[]
+    OR?: PageViewLogsMeradhanWhereInput[]
+    NOT?: PageViewLogsMeradhanWhereInput | PageViewLogsMeradhanWhereInput[]
+    userId?: IntNullableFilter<"PageViewLogsMeradhan"> | number | null
+    sessionId?: StringFilter<"PageViewLogsMeradhan"> | string
+    pagePath?: StringFilter<"PageViewLogsMeradhan"> | string
+    pageTitle?: StringNullableFilter<"PageViewLogsMeradhan"> | string | null
+    entryTime?: DateTimeFilter<"PageViewLogsMeradhan"> | Date | string
+    exitTime?: DateTimeNullableFilter<"PageViewLogsMeradhan"> | Date | string | null
+    duration?: IntFilter<"PageViewLogsMeradhan"> | number
+    scrollDepth?: IntFilter<"PageViewLogsMeradhan"> | number
+    interactions?: IntFilter<"PageViewLogsMeradhan"> | number
+    referrer?: StringNullableFilter<"PageViewLogsMeradhan"> | string | null
+    createdAt?: DateTimeFilter<"PageViewLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeFilter<"PageViewLogsMeradhan"> | Date | string
+  }, "id">
+
+  export type PageViewLogsMeradhanOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    sessionId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrderInput | SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrderInput | SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PageViewLogsMeradhanCountOrderByAggregateInput
+    _avg?: PageViewLogsMeradhanAvgOrderByAggregateInput
+    _max?: PageViewLogsMeradhanMaxOrderByAggregateInput
+    _min?: PageViewLogsMeradhanMinOrderByAggregateInput
+    _sum?: PageViewLogsMeradhanSumOrderByAggregateInput
+  }
+
+  export type PageViewLogsMeradhanScalarWhereWithAggregatesInput = {
+    AND?: PageViewLogsMeradhanScalarWhereWithAggregatesInput | PageViewLogsMeradhanScalarWhereWithAggregatesInput[]
+    OR?: PageViewLogsMeradhanScalarWhereWithAggregatesInput[]
+    NOT?: PageViewLogsMeradhanScalarWhereWithAggregatesInput | PageViewLogsMeradhanScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PageViewLogsMeradhan"> | number
+    userId?: IntNullableWithAggregatesFilter<"PageViewLogsMeradhan"> | number | null
+    sessionId?: StringWithAggregatesFilter<"PageViewLogsMeradhan"> | string
+    pagePath?: StringWithAggregatesFilter<"PageViewLogsMeradhan"> | string
+    pageTitle?: StringNullableWithAggregatesFilter<"PageViewLogsMeradhan"> | string | null
+    entryTime?: DateTimeWithAggregatesFilter<"PageViewLogsMeradhan"> | Date | string
+    exitTime?: DateTimeNullableWithAggregatesFilter<"PageViewLogsMeradhan"> | Date | string | null
+    duration?: IntWithAggregatesFilter<"PageViewLogsMeradhan"> | number
+    scrollDepth?: IntWithAggregatesFilter<"PageViewLogsMeradhan"> | number
+    interactions?: IntWithAggregatesFilter<"PageViewLogsMeradhan"> | number
+    referrer?: StringNullableWithAggregatesFilter<"PageViewLogsMeradhan"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PageViewLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PageViewLogsMeradhan"> | Date | string
+  }
+
+  export type LoginLogsMeradhanWhereInput = {
+    AND?: LoginLogsMeradhanWhereInput | LoginLogsMeradhanWhereInput[]
+    OR?: LoginLogsMeradhanWhereInput[]
+    NOT?: LoginLogsMeradhanWhereInput | LoginLogsMeradhanWhereInput[]
+    id?: IntFilter<"LoginLogsMeradhan"> | number
+    userId?: IntNullableFilter<"LoginLogsMeradhan"> | number | null
+    name?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    email?: StringFilter<"LoginLogsMeradhan"> | string
+    ipAddress?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    userAgent?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    browserName?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    deviceType?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    sessionType?: StringFilter<"LoginLogsMeradhan"> | string
+    success?: BoolFilter<"LoginLogsMeradhan"> | boolean
+    createdAt?: DateTimeFilter<"LoginLogsMeradhan"> | Date | string
+  }
+
+  export type LoginLogsMeradhanOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsMeradhanWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: LoginLogsMeradhanWhereInput | LoginLogsMeradhanWhereInput[]
+    OR?: LoginLogsMeradhanWhereInput[]
+    NOT?: LoginLogsMeradhanWhereInput | LoginLogsMeradhanWhereInput[]
+    userId?: IntNullableFilter<"LoginLogsMeradhan"> | number | null
+    name?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    email?: StringFilter<"LoginLogsMeradhan"> | string
+    ipAddress?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    userAgent?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    browserName?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    deviceType?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableFilter<"LoginLogsMeradhan"> | string | null
+    sessionType?: StringFilter<"LoginLogsMeradhan"> | string
+    success?: BoolFilter<"LoginLogsMeradhan"> | boolean
+    createdAt?: DateTimeFilter<"LoginLogsMeradhan"> | Date | string
+  }, "id">
+
+  export type LoginLogsMeradhanOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+    _count?: LoginLogsMeradhanCountOrderByAggregateInput
+    _avg?: LoginLogsMeradhanAvgOrderByAggregateInput
+    _max?: LoginLogsMeradhanMaxOrderByAggregateInput
+    _min?: LoginLogsMeradhanMinOrderByAggregateInput
+    _sum?: LoginLogsMeradhanSumOrderByAggregateInput
+  }
+
+  export type LoginLogsMeradhanScalarWhereWithAggregatesInput = {
+    AND?: LoginLogsMeradhanScalarWhereWithAggregatesInput | LoginLogsMeradhanScalarWhereWithAggregatesInput[]
+    OR?: LoginLogsMeradhanScalarWhereWithAggregatesInput[]
+    NOT?: LoginLogsMeradhanScalarWhereWithAggregatesInput | LoginLogsMeradhanScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"LoginLogsMeradhan"> | number
+    userId?: IntNullableWithAggregatesFilter<"LoginLogsMeradhan"> | number | null
+    name?: StringNullableWithAggregatesFilter<"LoginLogsMeradhan"> | string | null
+    email?: StringWithAggregatesFilter<"LoginLogsMeradhan"> | string
+    ipAddress?: StringNullableWithAggregatesFilter<"LoginLogsMeradhan"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"LoginLogsMeradhan"> | string | null
+    browserName?: StringNullableWithAggregatesFilter<"LoginLogsMeradhan"> | string | null
+    deviceType?: StringNullableWithAggregatesFilter<"LoginLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableWithAggregatesFilter<"LoginLogsMeradhan"> | string | null
+    sessionType?: StringWithAggregatesFilter<"LoginLogsMeradhan"> | string
+    success?: BoolWithAggregatesFilter<"LoginLogsMeradhan"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"LoginLogsMeradhan"> | Date | string
+  }
+
+  export type ActivityLogsMeradhanWhereInput = {
+    AND?: ActivityLogsMeradhanWhereInput | ActivityLogsMeradhanWhereInput[]
+    OR?: ActivityLogsMeradhanWhereInput[]
+    NOT?: ActivityLogsMeradhanWhereInput | ActivityLogsMeradhanWhereInput[]
+    id?: IntFilter<"ActivityLogsMeradhan"> | number
+    userId?: IntFilter<"ActivityLogsMeradhan"> | number
+    name?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    email?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    entityType?: StringFilter<"ActivityLogsMeradhan"> | string
+    action?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    entityId?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    ipAddress?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    details?: JsonFilter<"ActivityLogsMeradhan">
+    userAgent?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    browserName?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    deviceType?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    url?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    createdAt?: DateTimeFilter<"ActivityLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeFilter<"ActivityLogsMeradhan"> | Date | string
+  }
+
+  export type ActivityLogsMeradhanOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    entityType?: SortOrder
+    action?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    details?: SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsMeradhanWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ActivityLogsMeradhanWhereInput | ActivityLogsMeradhanWhereInput[]
+    OR?: ActivityLogsMeradhanWhereInput[]
+    NOT?: ActivityLogsMeradhanWhereInput | ActivityLogsMeradhanWhereInput[]
+    userId?: IntFilter<"ActivityLogsMeradhan"> | number
+    name?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    email?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    entityType?: StringFilter<"ActivityLogsMeradhan"> | string
+    action?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    entityId?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    ipAddress?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    details?: JsonFilter<"ActivityLogsMeradhan">
+    userAgent?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    browserName?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    deviceType?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    url?: StringNullableFilter<"ActivityLogsMeradhan"> | string | null
+    createdAt?: DateTimeFilter<"ActivityLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeFilter<"ActivityLogsMeradhan"> | Date | string
+  }, "id">
+
+  export type ActivityLogsMeradhanOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    entityType?: SortOrder
+    action?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    details?: SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    browserName?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    operatingSystem?: SortOrderInput | SortOrder
+    url?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ActivityLogsMeradhanCountOrderByAggregateInput
+    _avg?: ActivityLogsMeradhanAvgOrderByAggregateInput
+    _max?: ActivityLogsMeradhanMaxOrderByAggregateInput
+    _min?: ActivityLogsMeradhanMinOrderByAggregateInput
+    _sum?: ActivityLogsMeradhanSumOrderByAggregateInput
+  }
+
+  export type ActivityLogsMeradhanScalarWhereWithAggregatesInput = {
+    AND?: ActivityLogsMeradhanScalarWhereWithAggregatesInput | ActivityLogsMeradhanScalarWhereWithAggregatesInput[]
+    OR?: ActivityLogsMeradhanScalarWhereWithAggregatesInput[]
+    NOT?: ActivityLogsMeradhanScalarWhereWithAggregatesInput | ActivityLogsMeradhanScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ActivityLogsMeradhan"> | number
+    userId?: IntWithAggregatesFilter<"ActivityLogsMeradhan"> | number
+    name?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    email?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    entityType?: StringWithAggregatesFilter<"ActivityLogsMeradhan"> | string
+    action?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    entityId?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    ipAddress?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    details?: JsonWithAggregatesFilter<"ActivityLogsMeradhan">
+    userAgent?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    browserName?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    deviceType?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    operatingSystem?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    url?: StringNullableWithAggregatesFilter<"ActivityLogsMeradhan"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ActivityLogsMeradhan"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ActivityLogsMeradhan"> | Date | string
+  }
+
   export type BondsWhereInput = {
     AND?: BondsWhereInput | BondsWhereInput[]
     OR?: BondsWhereInput[]
@@ -42308,6 +48922,70 @@ export namespace Prisma {
     customerProfileDataModelId?: IntNullableWithAggregatesFilter<"CustomersDematAccountModel"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CustomersDematAccountModel"> | Date | string
+  }
+
+  export type KraDataLogsWhereInput = {
+    AND?: KraDataLogsWhereInput | KraDataLogsWhereInput[]
+    OR?: KraDataLogsWhereInput[]
+    NOT?: KraDataLogsWhereInput | KraDataLogsWhereInput[]
+    id?: IntFilter<"KraDataLogs"> | number
+    panId?: IntFilter<"KraDataLogs"> | number
+    requestData?: JsonFilter<"KraDataLogs">
+    responseData?: JsonFilter<"KraDataLogs">
+    status?: StringFilter<"KraDataLogs"> | string
+    createdAt?: DateTimeFilter<"KraDataLogs"> | Date | string
+    updatedAt?: DateTimeFilter<"KraDataLogs"> | Date | string
+  }
+
+  export type KraDataLogsOrderByWithRelationInput = {
+    id?: SortOrder
+    panId?: SortOrder
+    requestData?: SortOrder
+    responseData?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KraDataLogsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: KraDataLogsWhereInput | KraDataLogsWhereInput[]
+    OR?: KraDataLogsWhereInput[]
+    NOT?: KraDataLogsWhereInput | KraDataLogsWhereInput[]
+    panId?: IntFilter<"KraDataLogs"> | number
+    requestData?: JsonFilter<"KraDataLogs">
+    responseData?: JsonFilter<"KraDataLogs">
+    status?: StringFilter<"KraDataLogs"> | string
+    createdAt?: DateTimeFilter<"KraDataLogs"> | Date | string
+    updatedAt?: DateTimeFilter<"KraDataLogs"> | Date | string
+  }, "id">
+
+  export type KraDataLogsOrderByWithAggregationInput = {
+    id?: SortOrder
+    panId?: SortOrder
+    requestData?: SortOrder
+    responseData?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: KraDataLogsCountOrderByAggregateInput
+    _avg?: KraDataLogsAvgOrderByAggregateInput
+    _max?: KraDataLogsMaxOrderByAggregateInput
+    _min?: KraDataLogsMinOrderByAggregateInput
+    _sum?: KraDataLogsSumOrderByAggregateInput
+  }
+
+  export type KraDataLogsScalarWhereWithAggregatesInput = {
+    AND?: KraDataLogsScalarWhereWithAggregatesInput | KraDataLogsScalarWhereWithAggregatesInput[]
+    OR?: KraDataLogsScalarWhereWithAggregatesInput[]
+    NOT?: KraDataLogsScalarWhereWithAggregatesInput | KraDataLogsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"KraDataLogs"> | number
+    panId?: IntWithAggregatesFilter<"KraDataLogs"> | number
+    requestData?: JsonWithAggregatesFilter<"KraDataLogs">
+    responseData?: JsonWithAggregatesFilter<"KraDataLogs">
+    status?: StringWithAggregatesFilter<"KraDataLogs"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"KraDataLogs"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"KraDataLogs"> | Date | string
   }
 
   export type KYC_FLOWWhereInput = {
@@ -44505,6 +51183,470 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SessionLogsMeradhanCreateInput = {
+    userId?: number | null
+    sessionToken: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    endReason?: string | null
+    startTime?: Date | string
+    endTime?: Date | string | null
+    duration?: number
+    totalPages?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionLogsMeradhanUncheckedCreateInput = {
+    id?: number
+    userId?: number | null
+    sessionToken: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    endReason?: string | null
+    startTime?: Date | string
+    endTime?: Date | string | null
+    duration?: number
+    totalPages?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionLogsMeradhanUpdateInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionLogsMeradhanUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionLogsMeradhanCreateManyInput = {
+    id?: number
+    userId?: number | null
+    sessionToken: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    endReason?: string | null
+    startTime?: Date | string
+    endTime?: Date | string | null
+    duration?: number
+    totalPages?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionLogsMeradhanUpdateManyMutationInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionLogsMeradhanUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionToken?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    endReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    totalPages?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsMeradhanCreateInput = {
+    userId?: number | null
+    sessionId: string
+    pagePath: string
+    pageTitle?: string | null
+    entryTime?: Date | string
+    exitTime?: Date | string | null
+    duration?: number
+    scrollDepth?: number
+    interactions?: number
+    referrer?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageViewLogsMeradhanUncheckedCreateInput = {
+    id?: number
+    userId?: number | null
+    sessionId: string
+    pagePath: string
+    pageTitle?: string | null
+    entryTime?: Date | string
+    exitTime?: Date | string | null
+    duration?: number
+    scrollDepth?: number
+    interactions?: number
+    referrer?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageViewLogsMeradhanUpdateInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsMeradhanUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsMeradhanCreateManyInput = {
+    id?: number
+    userId?: number | null
+    sessionId: string
+    pagePath: string
+    pageTitle?: string | null
+    entryTime?: Date | string
+    exitTime?: Date | string | null
+    duration?: number
+    scrollDepth?: number
+    interactions?: number
+    referrer?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PageViewLogsMeradhanUpdateManyMutationInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PageViewLogsMeradhanUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    pagePath?: StringFieldUpdateOperationsInput | string
+    pageTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    entryTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    exitTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    duration?: IntFieldUpdateOperationsInput | number
+    scrollDepth?: IntFieldUpdateOperationsInput | number
+    interactions?: IntFieldUpdateOperationsInput | number
+    referrer?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsMeradhanCreateInput = {
+    userId?: number | null
+    name?: string | null
+    email: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    sessionType?: string
+    success: boolean
+    createdAt?: Date | string
+  }
+
+  export type LoginLogsMeradhanUncheckedCreateInput = {
+    id?: number
+    userId?: number | null
+    name?: string | null
+    email: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    sessionType?: string
+    success: boolean
+    createdAt?: Date | string
+  }
+
+  export type LoginLogsMeradhanUpdateInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsMeradhanUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsMeradhanCreateManyInput = {
+    id?: number
+    userId?: number | null
+    name?: string | null
+    email: string
+    ipAddress?: string | null
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    sessionType?: string
+    success: boolean
+    createdAt?: Date | string
+  }
+
+  export type LoginLogsMeradhanUpdateManyMutationInput = {
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoginLogsMeradhanUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionType?: StringFieldUpdateOperationsInput | string
+    success?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsMeradhanCreateInput = {
+    userId: number
+    name?: string | null
+    email?: string | null
+    entityType: string
+    action?: string | null
+    entityId?: string | null
+    ipAddress?: string | null
+    details: JsonNullValueInput | InputJsonValue
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    url?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ActivityLogsMeradhanUncheckedCreateInput = {
+    id?: number
+    userId: number
+    name?: string | null
+    email?: string | null
+    entityType: string
+    action?: string | null
+    entityId?: string | null
+    ipAddress?: string | null
+    details: JsonNullValueInput | InputJsonValue
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    url?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ActivityLogsMeradhanUpdateInput = {
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsMeradhanUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsMeradhanCreateManyInput = {
+    id?: number
+    userId: number
+    name?: string | null
+    email?: string | null
+    entityType: string
+    action?: string | null
+    entityId?: string | null
+    ipAddress?: string | null
+    details: JsonNullValueInput | InputJsonValue
+    userAgent?: string | null
+    browserName?: string | null
+    deviceType?: string | null
+    operatingSystem?: string | null
+    url?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ActivityLogsMeradhanUpdateManyMutationInput = {
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogsMeradhanUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: StringFieldUpdateOperationsInput | string
+    action?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: JsonNullValueInput | InputJsonValue
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    browserName?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    operatingSystem?: NullableStringFieldUpdateOperationsInput | string | null
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BondsCreateInput = {
     isin: string
     bondName: string
@@ -46018,6 +53160,73 @@ export namespace Prisma {
     confirmTimeStamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allowTerms?: BoolFieldUpdateOperationsInput | boolean
     customerProfileDataModelId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KraDataLogsCreateInput = {
+    panId: number
+    requestData: JsonNullValueInput | InputJsonValue
+    responseData: JsonNullValueInput | InputJsonValue
+    status?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KraDataLogsUncheckedCreateInput = {
+    id?: number
+    panId: number
+    requestData: JsonNullValueInput | InputJsonValue
+    responseData: JsonNullValueInput | InputJsonValue
+    status?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KraDataLogsUpdateInput = {
+    panId?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    responseData?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KraDataLogsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    panId?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    responseData?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KraDataLogsCreateManyInput = {
+    id?: number
+    panId: number
+    requestData: JsonNullValueInput | InputJsonValue
+    responseData: JsonNullValueInput | InputJsonValue
+    status?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KraDataLogsUpdateManyMutationInput = {
+    panId?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    responseData?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KraDataLogsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    panId?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    responseData?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -48541,6 +55750,258 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type SessionLogsMeradhanCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    endReason?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsMeradhanAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+  }
+
+  export type SessionLogsMeradhanMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    endReason?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsMeradhanMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionToken?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    endReason?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionLogsMeradhanSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    totalPages?: SortOrder
+  }
+
+  export type PageViewLogsMeradhanCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsMeradhanAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+  }
+
+  export type PageViewLogsMeradhanMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsMeradhanMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    sessionId?: SortOrder
+    pagePath?: SortOrder
+    pageTitle?: SortOrder
+    entryTime?: SortOrder
+    exitTime?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+    referrer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PageViewLogsMeradhanSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    duration?: SortOrder
+    scrollDepth?: SortOrder
+    interactions?: SortOrder
+  }
+
+  export type LoginLogsMeradhanCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsMeradhanAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type LoginLogsMeradhanMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsMeradhanMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    sessionType?: SortOrder
+    success?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoginLogsMeradhanSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type ActivityLogsMeradhanCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    entityType?: SortOrder
+    action?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    details?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsMeradhanAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type ActivityLogsMeradhanMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    entityType?: SortOrder
+    action?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsMeradhanMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    entityType?: SortOrder
+    action?: SortOrder
+    entityId?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    browserName?: SortOrder
+    deviceType?: SortOrder
+    operatingSystem?: SortOrder
+    url?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ActivityLogsMeradhanSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
   export type FloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -49685,6 +57146,42 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDematAccountTypeFilter<$PrismaModel>
     _max?: NestedEnumDematAccountTypeFilter<$PrismaModel>
+  }
+
+  export type KraDataLogsCountOrderByAggregateInput = {
+    id?: SortOrder
+    panId?: SortOrder
+    requestData?: SortOrder
+    responseData?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KraDataLogsAvgOrderByAggregateInput = {
+    id?: SortOrder
+    panId?: SortOrder
+  }
+
+  export type KraDataLogsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    panId?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KraDataLogsMinOrderByAggregateInput = {
+    id?: SortOrder
+    panId?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KraDataLogsSumOrderByAggregateInput = {
+    id?: SortOrder
+    panId?: SortOrder
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<

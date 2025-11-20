@@ -1,5 +1,6 @@
 "use client";
 import { UserTrackingProvider } from "@/analytics";
+import { PageTrackingProvider } from "@/analytics/LogsTracking";
 import { queryClient } from "@/core/config/service-clients";
 import { gqlClient } from "@/core/connection/apollo-client";
 import { ApolloProvider } from "@apollo/client/react";
@@ -12,7 +13,7 @@ import { Toaster } from "react-hot-toast";
 function Client({ children }: { children: ReactNode }) {
   return (
     <CookiesProvider>
-      <UserTrackingProvider>
+      <PageTrackingProvider>
         <QueryClientProvider client={queryClient}>
           <ApolloProvider client={gqlClient}>
             {children}
@@ -24,7 +25,7 @@ function Client({ children }: { children: ReactNode }) {
             />
           </ApolloProvider>
         </QueryClientProvider>
-      </UserTrackingProvider>
+      </PageTrackingProvider>
     </CookiesProvider>
   );
 }

@@ -88,8 +88,7 @@ export const SideBarItems = ({
         onClick={toggleOpen}
         className={cn(
           "flex justify-between items-center gap-3 px-2 py-2 rounded-lg transition-all duration-200 cursor-pointer",
-          isActive ? "bg-primary/10 text-primary" : "hover:bg-gray-100",
-          `pl-${level * 5}`
+          isActive ? "bg-primary/10 text-primary" : "hover:bg-gray-100"
         )}
       >
         {/* render link or icons  menu */}

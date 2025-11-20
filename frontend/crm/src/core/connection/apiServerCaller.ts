@@ -1,13 +1,13 @@
-import { API_BACKEND_URL_IP } from '@/global/constants/domains';
-import { ApiError, IApiCaller } from '@root/apiGateway';
+import { API_BACKEND_URL_IP } from "@/global/constants/domains";
+import { ApiError, IApiCaller } from "@root/apiGateway";
 import axios, {
   AxiosInstance,
   AxiosRequestConfig,
   AxiosRequestHeaders,
-  AxiosResponse
-} from 'axios';
-import { headers } from 'next/headers';
-import 'server-only';
+  AxiosResponse,
+} from "axios";
+import { headers } from "next/headers";
+import "server-only";
 
 /**
  * Custom API Server Caller class extending AxiosInstance
@@ -22,13 +22,12 @@ class ApiServerCaller implements IApiCaller {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
-      timeout: 10000
+      timeout: 10000,
     });
 
     this.instance.interceptors.response.use(
       (response) => response,
       (error) => {
-        
         if (axios.isAxiosError(error)) {
           return Promise.reject(
             new ApiError(
@@ -43,13 +42,14 @@ class ApiServerCaller implements IApiCaller {
         return Promise.reject(error);
       }
     );
-
   }
 
   /**
    * Prepare and merge headers from Next.js server context
    */
-  private async prepareHeaders(configHeaders?: AxiosRequestHeaders | Record<string, string>) {
+  private async prepareHeaders(
+    configHeaders?: AxiosRequestHeaders | Record<string, string>
+  ) {
     const incomingHeaders = await headers();
     const headersObj: Record<string, string> = {};
 
@@ -59,8 +59,8 @@ class ApiServerCaller implements IApiCaller {
     });
 
     // Ensure cookies are preserved
-    const cookie = incomingHeaders.get('cookie') || '';
-    headersObj['cookie'] = cookie;
+    const cookie = incomingHeaders.get("cookie") || "";
+    headersObj["cookie"] = cookie;
 
     // Merge user-provided headers
     return {
@@ -72,8 +72,13 @@ class ApiServerCaller implements IApiCaller {
   /**
    * Base request handler — same as axios.request but injects server headers
    */
-  async request<T = unknown>(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse<T>> {
-    const mergedHeaders = await this.prepareHeaders(config.headers as Record<string, string>);
+  async request<T = unknown>(
+    url: string,
+    config: AxiosRequestConfig = {}
+  ): Promise<AxiosResponse<T>> {
+    const mergedHeaders = await this.prepareHeaders(
+      config.headers as Record<string, string>
+    );
 
     const finalConfig: AxiosRequestConfig = {
       url,
@@ -87,8 +92,11 @@ class ApiServerCaller implements IApiCaller {
   /**
    * GET request
    */
-  async get<T = unknown>(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse<T>> {
-    return this.request<T>(url, { ...config, method: 'GET' });
+  async get<T = unknown>(
+    url: string,
+    config: AxiosRequestConfig = {}
+  ): Promise<AxiosResponse<T>> {
+    return this.request<T>(url, { ...config, method: "GET" });
   }
 
   /**
@@ -99,7 +107,7 @@ class ApiServerCaller implements IApiCaller {
     data?: D,
     config: AxiosRequestConfig = {}
   ): Promise<AxiosResponse<T>> {
-    return this.request<T>(url, { ...config, method: 'POST', data });
+    return this.request<T>(url, { ...config, method: "POST", data });
   }
 
   /**
@@ -110,7 +118,7 @@ class ApiServerCaller implements IApiCaller {
     data?: D,
     config: AxiosRequestConfig = {}
   ): Promise<AxiosResponse<T>> {
-    return this.request<T>(url, { ...config, method: 'PUT', data });
+    return this.request<T>(url, { ...config, method: "PUT", data });
   }
 
   /**
@@ -121,14 +129,17 @@ class ApiServerCaller implements IApiCaller {
     data?: D,
     config: AxiosRequestConfig = {}
   ): Promise<AxiosResponse<T>> {
-    return this.request<T>(url, { ...config, method: 'PATCH', data });
+    return this.request<T>(url, { ...config, method: "PATCH", data });
   }
 
   /**
    * DELETE request
    */
-  async delete<T = unknown>(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse<T>> {
-    return this.request<T>(url, { ...config, method: 'DELETE' });
+  async delete<T = unknown>(
+    url: string,
+    config: AxiosRequestConfig = {}
+  ): Promise<AxiosResponse<T>> {
+    return this.request<T>(url, { ...config, method: "DELETE" });
   }
 }
 

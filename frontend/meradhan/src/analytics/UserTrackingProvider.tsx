@@ -1,5 +1,7 @@
 "use client";
 
+import { userSessionStore } from "@/core/auth/userSessionStore";
+import { makeFullname } from "@/global/utils/formate";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
@@ -11,17 +13,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import ActivityWindow from "./ActivityWindow";
 import { track } from "./analytics";
+import { useMaxScrollPercent } from "./hooks/useMaxScrollPercent";
 import {
   Activity,
   ActivityDetails,
   ActivityType,
   CustomDetails,
 } from "./types";
-import { useMaxScrollPercent } from "./hooks/useMaxScrollPercent";
-import { userSessionStore } from "@/core/auth/userSessionStore";
-import { makeFullname } from "@/global/utils/formate";
 
 type GeoData = {
   ip?: string;
@@ -108,9 +107,9 @@ export interface TrackingContextValue {
 }
 
 export const TrackingContext = createContext<TrackingContextValue>({
-  track: () => { },
+  track: () => {},
   activities: [],
-  trackActivity: () => { },
+  trackActivity: () => {},
 });
 
 interface UserTrackingProviderProps {
@@ -179,10 +178,10 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         user: {
           name: session
             ? makeFullname({
-              firstName: session.firstName,
-              lastName: session.lastName,
-              middleName: session.middleName,
-            })
+                firstName: session.firstName,
+                lastName: session.lastName,
+                middleName: session.middleName,
+              })
             : localStorage.getItem("name"),
           email: session?.emailAddress || localStorage.getItem("email"),
         },

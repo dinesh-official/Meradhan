@@ -32,7 +32,11 @@ export default function LogoutRedirect() {
       }
     };
 
-    logoutUser();
+    const timer = setTimeout(() => {
+      logoutUser();
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [removeCookie]);
 
   return (
