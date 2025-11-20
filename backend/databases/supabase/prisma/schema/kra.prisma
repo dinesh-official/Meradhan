@@ -1,9 +1,10 @@
 model KraDataLogs {
     id           Int      @id @default(autoincrement())
-    panId        Int
-    requestData  Json
-    responseData Json
-    status       String   @default("INITIALIZED")
+    userId       Int
+    kycId        Int
+    requestData  Json?
+    responseData Json?
+    stage        String   @default("ENQUIRY")
     /// Timestamps
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt

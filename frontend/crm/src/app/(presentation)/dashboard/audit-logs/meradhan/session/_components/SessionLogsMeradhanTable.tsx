@@ -148,7 +148,7 @@ const SessionRow = ({
     ? `${session.user.firstName} ${session.user.middleName || ""} ${
         session.user.lastName
       }`.trim()
-    : "Guest User";
+    : "Unknown";
 
   return (
     <Collapsible
@@ -179,7 +179,7 @@ const SessionRow = ({
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Session</span>
                     <span className="font-mono text-xs font-semibold text-gray-700">
-                      {hashSessionId(session.id)}
+                      {hashSessionId(session.id + 9)}
                     </span>
                   </div>
                 </div>
@@ -219,9 +219,7 @@ const SessionRow = ({
                         )}
                       </span>
                     ) : (
-                      <Badge className="bg-green-100 text-green-800 text-xs px-2 py-0.5">
-                        Active
-                      </Badge>
+                      <>N/A</>
                     )}
                   </div>
                 </div>
