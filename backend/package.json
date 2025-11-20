@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.919.0",
+    "@packages/config": "file:../packages/config",
     "@prisma/client": "^6.16.3",
     "@react-email/components": "^0.5.5",
     "@react-email/preview": "^0.0.13",

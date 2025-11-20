@@ -1,10 +1,10 @@
-import { config } from "@config/config";
 import { ExpressServer } from "@core/bootstrap/server";
 import { checkConnectToDatabases } from "@core/database/database";
 import {
   PrometheusMonitorProvider,
   PrometheusResponseTimeMonitor,
 } from "@modules/monitoring/prometheus";
+import { env } from "@packages/config/env";
 import bondRoute from "@resource/bonds/bond.routes";
 import commonApiRoutes from "@resource/common/routes";
 import auditLogsRouter from "@resource/crm/audit_logs/audit_logs_route";
@@ -24,14 +24,11 @@ import trashRoutes from "@resource/trash/trash.routes";
 import auditlogsRoutes from "@services/auditlogs/auditlog.routes";
 import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";
-import dotenv from "dotenv";
-
-dotenv.config({ debug: false });
 const monitoring = new PrometheusMonitorProvider();
 const response_time_monitor = new PrometheusResponseTimeMonitor();
 
 // Initialize server
-const server = new ExpressServer(config.port, {
+const server = new ExpressServer(Number(env.PORT), {
   serverMonitor: monitoring,
   responseTimeHandler(data) {
     response_time_monitor.recordResponseTime(

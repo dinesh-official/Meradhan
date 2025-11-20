@@ -1,30 +1,35 @@
-import { config } from '@config/config';
-import nodemailer from 'nodemailer';
+import { env } from "@packages/config/env";
+import nodemailer from "nodemailer";
 
 export class EmailCommunication {
+  private transporter: nodemailer.Transporter;
 
-    private transporter: nodemailer.Transporter;
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: Number(env.SMTP_PORT),
+      secure: false,
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+      },
+    });
+  }
 
-    constructor() {
-        this.transporter = nodemailer.createTransport({
-            host: config.smtp.host,
-            port: config.smtp.port,
-            secure: config.smtp.secure,
-            auth: {
-                user: config.smtp.user,
-                pass: config.smtp.pass,
-            },
-        });
-    }
-
-    async sendEmail(data: { to: string; subject: string; html?: string; text?: string; from?: string; }): Promise<string> {
-        const info = await this.transporter.sendMail({
-            from: data.from || `${config.smtp.sender}`,
-            to: data.to,
-            subject: data.subject,
-            text: data.text,
-            html: data.html,
-        });
-        return info.messageId;
-    }
+  async sendEmail(data: {
+    to: string;
+    subject: string;
+    html?: string;
+    text?: string;
+    from?: string;
+  }): Promise<string> {
+    const info = await this.transporter.sendMail({
+      from: data.from || env.SMTP_SENDER,
+      to: data.to,
+      subject: data.subject,
+      text: data.text,
+      html: data.html,
+    });
+    return info.messageId;
+  }
 }
