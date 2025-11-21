@@ -8,7 +8,7 @@ export const BASES = {
     ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
   },
   production: {
-    HOST: "https://crmtest.meradhan.co",
+    HOST: "https://crm.meradhan.co",
     API_SERVER: "https://testapi.meradhan.co",
     CMS: "https://spydertest.meradhan.co",
     API_BACKEND_URL_IP: "http://34.47.136.227:4000",
