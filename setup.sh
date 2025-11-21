@@ -107,6 +107,8 @@ main() {
     
     # Install API Gateway dependencies
     install_dependencies "packages/apiGateway" "API Client"
+    install_dependencies "packages/config" "Env Configuration"
+
     
     # Install backend dependencies
     install_dependencies "backend" "Backend"
