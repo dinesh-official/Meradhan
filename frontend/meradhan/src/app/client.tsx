@@ -1,5 +1,4 @@
 "use client";
-import { UserTrackingProvider } from "@/analytics";
 import { PageTrackingProvider } from "@/analytics/LogsTracking";
 import { queryClient } from "@/core/config/service-clients";
 import { gqlClient } from "@/core/connection/apollo-client";

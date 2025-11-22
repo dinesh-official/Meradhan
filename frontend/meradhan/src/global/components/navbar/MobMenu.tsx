@@ -19,7 +19,11 @@ interface MenuItemProps {
   level?: number;
 }
 
-function MobMenu({ session }: { session?: ISessionResponse["responseData"] | null }) {
+function MobMenu({
+  session,
+}: {
+  session?: ISessionResponse["responseData"] | null;
+}) {
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden block">
@@ -51,7 +55,7 @@ function MobMenu({ session }: { session?: ISessionResponse["responseData"] | nul
         </div>
 
         {/* Bottom Login / Signup Buttons */}
-        <div className="flex flex-col flex-shrink-0 gap-3 p-4 border-t border-t-gray-200">
+        {/* <div className="flex flex-col flex-shrink-0 gap-3 p-4 border-t border-t-gray-200">
           <Link
             href={session?.id ? "/dashboard" : "/login"}
             className="bg-primary hover:bg-primary/90 py-2 rounded-md w-full text-white text-center transition"
@@ -64,7 +68,7 @@ function MobMenu({ session }: { session?: ISessionResponse["responseData"] | nul
           >
             {session?.id ? "Logout" : "Sign Up"}
           </Link>
-        </div>
+        </div> */}
       </SheetContent>
     </Sheet>
   );

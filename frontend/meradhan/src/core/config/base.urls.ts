@@ -4,7 +4,7 @@ export const BASES = {
     HOST: "http://localhost:3000",
     API_SERVER: "http://localhost:4000",
     API_BACKEND_URL_IP: "http://localhost:4000",
-    CMS: process.env.STRAPI_HOST_URL,
+    CMS: process.env.STRAPI_HOST_URL || "",
     ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
   },
   production: {

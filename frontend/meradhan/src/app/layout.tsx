@@ -92,7 +92,7 @@ export default async function RootLayout({
           href="/favicon/favicon-16x16.png"
         />
         {/* canonical={pathname} */}
-        <link rel="canonical" href={`https://test.meradhan.co${pathname}`} />
+        <link rel="canonical" href={`${process.env.HOST_URL}${pathname}`} />
 
         <link rel="manifest" href="/manifest.json" />
         <meta name="msapplication-TileColor" content="#ffffff" />

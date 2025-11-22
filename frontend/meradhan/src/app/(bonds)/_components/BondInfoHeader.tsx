@@ -24,7 +24,7 @@ function BondInfoHeader({
               {bond.creditRatingInfo}
             </span>
           </div>
-          <BondAddToWatchList />
+          {/* <BondAddToWatchList /> */}
         </div>
       </div>
       <h2 className={cn("text-2xl md:text-3xl quicksand-medium")}>

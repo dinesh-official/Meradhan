@@ -1,4 +1,4 @@
-export const strApi = "https://spyder.meradhan.co";
+export const strApi = process.env.STRAPI_HOST_URL;
 
 import axios from "axios";
 import { pdf } from "pdf-to-img";
@@ -24,14 +24,24 @@ export function formatDate(
     throw new Error("Invalid date string");
   }
 
-  const day = String(date.getDate()).padStart(2, "0");        // DD
+  const day = String(date.getDate()).padStart(2, "0"); // DD
   const month = String(date.getMonth() + 1).padStart(2, "0"); // MM (1–12)
-  const year = date.getFullYear();                            // YYYY
-  const shortYear = String(year).slice(-2);                   // YY
+  const year = date.getFullYear(); // YYYY
+  const shortYear = String(year).slice(-2); // YY
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   switch (format) {
@@ -58,8 +68,14 @@ export function formatDate(
   }
 }
 
-export function splitAddress(address: string): { addressLine1: string; addressLine2: string } {
-  const parts = address.split(",").map((p) => p.trim()).filter(Boolean);
+export function splitAddress(address: string): {
+  addressLine1: string;
+  addressLine2: string;
+} {
+  const parts = address
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
 
   const mid = Math.ceil(parts.length / 2);
 
@@ -70,7 +86,10 @@ export function splitAddress(address: string): { addressLine1: string; addressLi
 }
 
 export function getVillageCity(address: string): string | null {
-  const parts = address.split(",").map((p) => p.trim()).filter(Boolean);
+  const parts = address
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
 
   // Remove S/O, D/O, W/O etc. if present in first part
   if (parts[0]?.match(/^(S\/O|D\/O|W\/O)/i)) {
@@ -85,10 +104,14 @@ export function getVillageCity(address: string): string | null {
   return null;
 }
 
-
-export async function pdfUrlToBase64(pdfUrl: string, pageNumber: number = 1): Promise<string> {
+export async function pdfUrlToBase64(
+  pdfUrl: string,
+  pageNumber: number = 1
+): Promise<string> {
   // 1. Download PDF as buffer
-  const response = await axios.get<ArrayBuffer>(pdfUrl, { responseType: "arraybuffer" });
+  const response = await axios.get<ArrayBuffer>(pdfUrl, {
+    responseType: "arraybuffer",
+  });
   const pdfBuffer = Buffer.from(response.data);
 
   // 2. Load PDF in pdf-to-img
