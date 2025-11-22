@@ -1,5 +1,4 @@
-import ViewPort from '@/global/components/wrapper/ViewPort'
-import React from 'react'
+import ReturnsCalculationSection from "@/app/(index)/_components/ReturnsCalculationSection";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,31 +7,53 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import FdHeader from './_conponents/FdHeader';
-import ReturnsCalculationSection from '@/app/(index)/_components/ReturnsCalculationSection';
-import FdCalculatorContent from './_conponents/FdCalculatorContent';
-const page = () => {
+import ViewPort from "@/global/components/wrapper/ViewPort";
+import {
+  getDynamicPageDataGql,
+  getDynamicPageMetaDataGql,
+} from "@/graphql/getDynamicPageDataGql";
+import FdCalculatorContent from "./_conponents/FdCalculatorContent";
+import FdHeader from "./_conponents/FdHeader";
+
+export const revalidate = 0;
+export const generateMetadata = async () => {
+  return await getDynamicPageMetaDataGql("fd-calculator");
+};
+
+const page = async () => {
+  const headerData = await getDynamicPageDataGql("fd-calculator");
   return (
-     <ViewPort>
-          <div className="mb-4 container">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>FD Calculator</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-            <FdHeader />
-            <ReturnsCalculationSection/>
-            <FdCalculatorContent/>
+    <ViewPort>
+      <div className="mb-4 container">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>FD Calculator</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+      <FdHeader
+        title={headerData?.Title || ""}
+        description={headerData?.Content?.Introduction || ""}
+        content={headerData?.Content?.Content_1 || ""}
+      />
+      <ReturnsCalculationSection />
+      {/* <FdCalculatorContent /> */}
+      <section>
+        <div
+          className="container "
+          dangerouslySetInnerHTML={{
+            __html: headerData?.Content.Content_2 || "",
+          }}
+        />
+      </section>
+    </ViewPort>
+  );
+};
 
-        </ViewPort>
-  )
-}
-
-export default page
+export default page;

@@ -45,40 +45,42 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Leads",
     icon: Users,
     allowOnly: ["create:leads", "edit:leads", "view:leads", "delete:leads"],
-    children: [
-      {
-        label: "All Leads",
-        path: "/dashboard/leads",
-        module: "leads",
-        allowOnly: ["view:leads"],
-      },
-      {
-        label: "New Lead",
-        path: "/dashboard/leads/create",
-        module: "leads",
-        allowOnly: ["create:leads", "edit:leads", "delete:leads"],
-      },
-    ],
+    path: "/dashboard/leads",
+    // children: [
+    //   {
+    //     label: "All Leads",
+    //     path: "/dashboard/leads",
+    //     module: "leads",
+    //     allowOnly: ["view:leads"],
+    //   },
+    //   {
+    //     label: "New Lead",
+    //     path: "/dashboard/leads/create",
+    //     module: "leads",
+    //     allowOnly: ["create:leads", "edit:leads", "delete:leads"],
+    //   },
+    // ],
   },
 
   {
     label: "Customers",
     icon: FileText,
     allowOnly: ["view:customer", "create:customer"],
-    children: [
-      {
-        label: "Customers List",
-        path: "/dashboard/customers",
-        module: "customer",
-        allowOnly: ["view:customer"],
-      },
-      {
-        label: "Create Customer",
-        path: "/dashboard/customers/create",
-        module: "customer",
-        allowOnly: ["create:customer"],
-      },
-    ],
+    path: "/dashboard/customers",
+    // children: [
+    //   {
+    //     label: "Customers List",
+    //     path: "/dashboard/customers",
+    //     module: "customer",
+    //     allowOnly: ["view:customer"],
+    //   },
+    //   {
+    //     label: "Create Customer",
+    //     path: "/dashboard/customers/create",
+    //     module: "customer",
+    //     allowOnly: ["create:customer"],
+    //   },
+    // ],
   },
 
   {
@@ -191,20 +193,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "User Management",
     icon: Briefcase,
     allowOnly: ["view:user", "create:user", "edit:user"],
-    children: [
-      {
-        label: "All Users",
-        path: "/dashboard/user-management",
-        module: "user",
-        allowOnly: ["view:user"],
-      },
-      {
-        label: "Suspended Users",
-        path: "/dashboard/user-management/suspended",
-        module: "user",
-        allowOnly: ["edit:user"],
-      },
-    ],
+    path: "/dashboard/user-management",
   },
 
   {

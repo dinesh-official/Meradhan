@@ -58,7 +58,7 @@ function XirrCalculator() {
     <>
       <div className="bg-muted">
         <div className="container">
-          <SectionWrapper className="gap-10 grid grid-cols-3">
+          <SectionWrapper className="gap-10 grid lg:grid-cols-3">
             <div className="gap-6 grid grid-cols-2">
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Face Value</Label>
@@ -187,7 +187,7 @@ function XirrCalculator() {
                 />
               </div>
             </div>
-            <div className="col-span-2 bg-white rounded-md">
+            <div className="lg:col-span-2 bg-white rounded-md">
               {validationErrors.length > 0 && (
                 <div className="bg-red-50 mb-4 p-4 border border-red-200 rounded-md">
                   <h4 className="mb-2 font-medium text-red-800 text-sm">

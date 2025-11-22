@@ -6,12 +6,21 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import FdCalculatorContent from "../fd-calculator/_conponents/FdCalculatorContent";
+import ViewPort from "@/global/components/wrapper/ViewPort";
+import {
+  getDynamicPageDataGql,
+  getDynamicPageMetaDataGql,
+} from "@/graphql/getDynamicPageDataGql";
 import FdHeader from "../fd-calculator/_conponents/FdHeader";
 import XirrCalculator from "./_components/XirrCalculator";
-import ViewPort from "@/global/components/wrapper/ViewPort";
 
-function YtmCalculator() {
+export const revalidate = 0;
+export const generateMetadata = async () => {
+  return await getDynamicPageMetaDataGql("ytm-calculator");
+};
+
+const page = async () => {
+  const headerData = await getDynamicPageDataGql("ytm-calculator");
   return (
     <ViewPort>
       <div className="mb-4 container">
@@ -27,13 +36,23 @@ function YtmCalculator() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-
-      <FdHeader />
+      <FdHeader
+        title={headerData?.Title || ""}
+        description={headerData?.Content?.Introduction || ""}
+        content={headerData?.Content?.Content_1 || ""}
+      />
       <XirrCalculator />
-      <FdCalculatorContent />
-    
+      {/* <FdCalculatorContent /> */}
+      <section>
+        <div
+          className="container "
+          dangerouslySetInnerHTML={{
+            __html: headerData?.Content.Content_2 || "",
+          }}
+        />
+      </section>
     </ViewPort>
   );
-}
+};
 
-export default YtmCalculator;
+export default page;

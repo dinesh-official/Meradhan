@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import { gqlClient } from "@/core/connection/apollo-client";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
@@ -14,15 +14,8 @@ export type T_PAGE_DATA = {
   Title: string;
   documentId: string;
 };
-type slugType =
-  | "about-us"
-  | "disclaimer"
-  | "terms-of-use"
-  | "privacy-policy"
-  | "cookie-policy"
-  | "contact-us"
 
-async function slugBasedPagesGQLData(slug: slugType) {
+async function slugBasedPagesGQLData(slug: string) {
   const GQLQuery = `query Pages($filters: PagesListFiltersInput) {
   pages(filters: $filters) {
     Content
@@ -66,7 +59,7 @@ type Page_MetaData = {
   updatedAt: string;
 };
 
-export async function slugBasedGQLMetaData(slug: slugType) {
+export async function slugBasedGQLMetaData(slug: string) {
   const MetaDataGQLQuery = `query Pages($filters: PagesListFiltersInput) {
   pages(filters: $filters) {
     MetaData {
@@ -97,9 +90,9 @@ export async function slugBasedGQLMetaData(slug: slugType) {
   const pageMetaData = data?.pages?.[0];
 
   return {
-    title: pageMetaData?.MetaData.Title,
-    description: pageMetaData?.MetaData.Description,
-    keywords: pageMetaData?.MetaData.KeyWords,
+    title: pageMetaData?.MetaData?.Title,
+    description: pageMetaData?.MetaData?.Description,
+    keywords: pageMetaData?.MetaData?.KeyWords,
   } as Metadata;
 }
 

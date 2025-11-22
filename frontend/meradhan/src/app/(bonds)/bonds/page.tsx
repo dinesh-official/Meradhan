@@ -40,6 +40,7 @@ async function BondPage({
         bondsData={responseData}
         options={{
           showBondsByCategory: true,
+          showUpcomingBonds: true,
           header: {
             title: (
               <>
@@ -64,7 +65,6 @@ async function BondPage({
           },
         }}
       />
-      
     </ViewPort>
   );
 }

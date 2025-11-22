@@ -3,15 +3,15 @@ export const BASES = {
   development: {
     HOST: "http://localhost:3000",
     API_SERVER: "http://localhost:4000",
-    CMS: "http://34.47.136.227:1337",
+    CMS: process.env.STRAPI_HOST_URL,
     API_BACKEND_URL_IP: "http://localhost:4000",
     ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
   },
   production: {
-    HOST: "https://crm.meradhan.co",
-    API_SERVER: "https://api.meradhan.co",
-    CMS: "https://spydertest.meradhan.co",
-    API_BACKEND_URL_IP: "http://34.131.27.101:4000",
+    HOST: process.env.CRM_HOST_URL,
+    API_SERVER: process.env.BACKEND_HOST_URL,
+    API_BACKEND_URL_IP: process.env.BACKEND_IP_URL,
+    CMS: process.env.STRAPI_HOST_URL,
     ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
   },
 };
