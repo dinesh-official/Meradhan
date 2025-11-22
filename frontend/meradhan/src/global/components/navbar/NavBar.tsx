@@ -51,7 +51,7 @@ function NavBar({
           {/* Menu Items */}
           <div className="hidden lg:flex justify-center items-center gap-7">
             <NavMenu />
-            <AuthActions session={session} />
+            {/* <AuthActions session={session} /> */}
           </div>
           <MobMenu session={session} />
         </div>
