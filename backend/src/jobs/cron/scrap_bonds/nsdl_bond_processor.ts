@@ -4,7 +4,7 @@ import { allCompanyNameOrTyes } from "./all_company_data";
 import { type BondDataSet } from "./nsdl_bond_service";
 
 export class NsdlBondProcessor {
-  constructor(private bond: BondDataSet) { }
+  constructor(private bond: BondDataSet) {}
 
   // Extract dates from text using multiple formats UTIL function
   private extractDatesFromText(text: string) {
@@ -132,7 +132,9 @@ export class NsdlBondProcessor {
 
   // Check if bond is perpetual
   private isPerpetualBond() {
-    return this.bond.NAME_OF_THE_INSTRUMENT?.toLocaleLowerCase().includes(" perpetual ");
+    return this.bond.NAME_OF_THE_INSTRUMENT?.toLocaleLowerCase().includes(
+      " perpetual "
+    );
   }
 
   // Check if bond is zero coupon
@@ -396,7 +398,8 @@ export class NsdlBondProcessor {
       "on matuirty",
     ];
 
-    const matchesAny = (terms: string[]) => terms.some((term) => lower.includes(term));
+    const matchesAny = (terms: string[]) =>
+      terms.some((term) => lower.includes(term));
 
     if (matchesAny(monthlyTerms)) return "MONTHLY";
     if (matchesAny(quarterlyTerms)) return "QUARTERLY";
@@ -427,11 +430,10 @@ export class NsdlBondProcessor {
     return releaseDate >= oneMonthAgo && releaseDate <= now;
   }
 
-
   isConvertible() {
     const instrumentName = this.bond.NAME_OF_THE_INSTRUMENT || "";
     if (instrumentName.toLocaleLowerCase().includes("non")) {
-      return false
+      return false;
     } else if (instrumentName.toLocaleLowerCase().includes("convertible")) {
       return true;
     }
@@ -440,9 +442,7 @@ export class NsdlBondProcessor {
 
   // Get bond categories based on various attributes
   private getBondCategories() {
-    const isector = this.getBondCorporateName(
-      this.bond.COMPANY
-    );
+    const isector = this.getBondCorporateName(this.bond.COMPANY);
     const taxFree = this.getTaxable() == "TAX_FREE";
     const perpetual = this.isPerpetualBond();
     const zeroCoupon = this.isZeroCouponBond();
@@ -452,30 +452,30 @@ export class NsdlBondProcessor {
     const category = [];
 
     if (isector) {
-      category.push(isector)
+      category.push(isector);
     }
 
     if (taxFree) {
-      category.push("tax-free")
+      category.push("tax-free");
     }
 
     if (perpetual) {
-      category.push("perpetual")
+      category.push("perpetual");
     }
 
     if (zeroCoupon) {
-      category.push("zero-coupon")
+      category.push("zero-coupon");
     }
 
     if (isConvertible) {
-      category.push("convertible")
+      category.push("convertible");
     }
 
     if (isNewRelease) {
-      category.push("latest-release")
+      category.push("latest-release");
     }
 
-    return category.map(c => c.toLowerCase());
+    return category.map((c) => c.toLowerCase());
   }
 
   // Main parse function to extract and structure bond data
@@ -493,17 +493,24 @@ export class NsdlBondProcessor {
       certificateNumbers: this.formatString(this.bond.CERTIFICATE_NOS),
       totalIssueSize: Number(this.bond.TOTAL_ISSUE_SIZE),
       registrarDetails: this.formatString(this.bond.REGISTRAR_WITH_BP_ID_NO),
-      physicalSecurityAddress: this.formatString(this.bond.ADDRESS_WHERE_PHYSICAL_SECURITIES_IS_TO_BE_SENT),
-      defaultedInRedemption: this.formatString(this.bond.DEFAULTED_IN_REDEMPTION),
+      physicalSecurityAddress: this.formatString(
+        this.bond.ADDRESS_WHERE_PHYSICAL_SECURITIES_IS_TO_BE_SENT
+      ),
+      defaultedInRedemption: this.formatString(
+        this.bond.DEFAULTED_IN_REDEMPTION
+      ),
       debentureTrustee: this.formatString(this.bond.DEFAULTED_IN_REDEMPTION),
-      creditRatingInfo: this.formatString(this.bond.CREDIT_RATING_CREDIT_RATING_AGENCY),
+      creditRatingInfo: this.formatString(
+        this.bond.CREDIT_RATING_CREDIT_RATING_AGENCY
+      ),
       remarks: this.formatString(this.bond.REMARKS),
       taxStatus: this.getTaxable(),
       redemptionDate: this.getRedemptionDate(),
       creditRating: this.getCreditRating(),
       interestPaymentMode: this.getInterestFrequency(),
       isListed: this.isListedBond(),
-      ratingAgencyName: this.extractRatingCompanyAndDate()?.companyName || "N/A",
+      ratingAgencyName:
+        this.extractRatingCompanyAndDate()?.companyName || "N/A",
       ratingDate: this.extractRatingCompanyAndDate()?.date,
       categories: this.getBondCategories(),
       sectorName: this.getBondCorporateName(this.bond.COMPANY),
@@ -511,5 +518,4 @@ export class NsdlBondProcessor {
       maturityDate: this.getRedemptionDate(),
     };
   }
-
 }

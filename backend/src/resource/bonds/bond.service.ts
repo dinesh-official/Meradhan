@@ -101,6 +101,22 @@ export class BondService {
     return data;
   }
 
+  async getLatestBondsTop3(limit: number = 3) {
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        redemptionDate: { lte: new Date() },
+        creditRating: { notIn: ["D", "C", "UnRated", ""] },
+      },
+      orderBy: {
+        dateOfAllotment: "desc",
+      },
+      take: limit,
+    });
+
+    return data;
+  }
+
   async getUpcomingBonds(limit: number = 6) {
     const data = await db.dataBase.bonds.findMany({
       where: {

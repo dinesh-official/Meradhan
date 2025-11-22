@@ -17,12 +17,11 @@ async function LatestRelease({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
   params: Promise<{ page?: string }>;
 }) {
-  const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
-
   const filters = await searchParams;
   const queryFilter = validateBondsFilters(filters);
   const pageParams = await params;
 
+  const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const { responseData } = await apiCaller.getListedBonds({
     filters: queryFilter,
     params: {
