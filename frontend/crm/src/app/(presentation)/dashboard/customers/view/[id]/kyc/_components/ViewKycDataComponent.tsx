@@ -75,7 +75,6 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
 
       {/* Personal Information */}
       <div className="scroll-mt-16" id="personal-info">
-        {data.avatar}
         <PersonalInformationCard
           photoUrl={genMediaUrl(data.avatar)}
           signatureUrl={genMediaUrl(data.personalInformation?.SignatureUrl)}
