@@ -6,7 +6,9 @@ const PrivacyPolicy = ({ Description, Title, Content }: T_PAGE_DATA) => {
     <>
       <TopTitleDesc title={Title} description={Description} />
       {/* <PrivacyPolicyContent /> */}
-      <div dangerouslySetInnerHTML={{ __html: Content }} />
+      <div className="container article ">
+        <div dangerouslySetInnerHTML={{ __html: Content }} className="py-20" />
+      </div>
     </>
   );
 };
