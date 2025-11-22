@@ -32,7 +32,7 @@ function DhanGpt() {
     <div className="container">
       <div className="flex flex-col justify-center items-center h-[calc(100vh-64px)] lg:h-[calc(100vh-72px)]">
         <div className="w-full min-h-[calc(100vh-320px)] overflow-auto scrollbar-hide">
-          <div className="mt-[15%]" />
+          <div className="mt-[8%]" />
           <TitleSection />
           <ChatMessages chat={chat} loading={loading} />
           <div ref={bottomRef} />
