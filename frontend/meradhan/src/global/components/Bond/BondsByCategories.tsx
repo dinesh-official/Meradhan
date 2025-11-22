@@ -58,7 +58,7 @@ function BondsByCategories() {
             Categories
           </>
         }
-        description="Discover upcoming bond issues before they open for investment."
+        description="Explore bonds by category to find investment options that match your goals, risk appetite, and financial preferences."
       />
 
       <CategorySlider category={bondCategories} />

@@ -9,13 +9,16 @@ const BASIC_AUTH_HEADER =
 
 const fetchUserSession = async (token: string) => {
   try {
-    const sessionResponse = fetch(API_SERVER_URL + "/customer/session", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }).then((res) => res.json());
+    const sessionResponse = fetch(
+      "http://localhost:4000/api/customer/session",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    ).then((res) => res.json());
     return sessionResponse as Promise<UserSessionDataResponse>;
   } catch (error) {
     console.error("Error fetching user session:", error);
@@ -30,23 +33,23 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
   // ✅ 1. Basic Auth protection for production
-  if (
-    process.env.NODE_ENV === "production" &&
-    !pathname.startsWith("/api") &&
-    !pathname.startsWith("/assets") &&
-    !pathname.startsWith("/_next")
-  ) {
-    const authHeader = request.headers.get("authorization");
+  // if (
+  //   process.env.NODE_ENV === "production" &&
+  //   !pathname.startsWith("/api") &&
+  //   !pathname.startsWith("/assets") &&
+  //   !pathname.startsWith("/_next")
+  // ) {
+  //   const authHeader = request.headers.get("authorization");
 
-    if (authHeader !== BASIC_AUTH_HEADER) {
-      return new Response("Unauthorized", {
-        status: 401,
-        headers: {
-          "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
-        },
-      });
-    }
-  }
+  //   if (authHeader !== BASIC_AUTH_HEADER) {
+  //     return new Response("Unauthorized", {
+  //       status: 401,
+  //       headers: {
+  //         "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
+  //       },
+  //     });
+  //   }
+  // }
 
   // ✅ 2. Protect /dashboard routes
   if (pathname.startsWith("/dashboard")) {

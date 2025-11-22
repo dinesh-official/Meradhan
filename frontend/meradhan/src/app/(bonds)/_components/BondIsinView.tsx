@@ -74,8 +74,12 @@ export default function BondIsinView({
                 ? "No"
                 : "Coming Soon"}
             </SortInfoBox>
-            <SortInfoBox title="Put">{"Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Call"> {"Coming Soon"} </SortInfoBox>
+            <SortInfoBox title="Put">
+              {bond.putCallOptionDetails?.split(" ")?.[0] || "N/A"}
+            </SortInfoBox>
+            <SortInfoBox title="Call">
+              {bond.putCallOptionDetails?.split(" ")?.[2] || "N/A"}
+            </SortInfoBox>
             <SortInfoBox title="Mode of issuance">Coming Soon</SortInfoBox>
             <SortInfoBox title="Security">{isSecured()}</SortInfoBox>
             <SortInfoBox title="Issue Size">
