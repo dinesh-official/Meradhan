@@ -11,4 +11,4 @@ export const CMS_URL = BASE.CMS;
 export const API_LOCAL_URL = `${BASE.HOST}/api/server`;
 export const API_SERVER_URL = `${BASE.API_SERVER}/api`;
 export const API_SERVER_URL_IP = `${BASE.API_BACKEND_URL_IP}/api`;
-export const ASSETS_URL = `${BASE.HOST}/assets/media/`;
+export const ASSETS_URL = `${BASE.HOST}/assets/media`;
