@@ -15,7 +15,7 @@ export const MENU_ITEMS: MenuItem[] = [
       { title: "Corporate Bonds", href: "/bonds/corporate" },
       { title: "PSU Bonds", href: "/bonds/psu" },
       { title: "NBFC Bonds", href: "/bonds/nbfc" },
-      { title: "Perpetual Bonds", href: "/bonds/perpetual" },
+      // { title: "Perpetual Bonds", href: "/bonds/perpetual" },
       { title: "Zero Coupon Bonds", href: "/bonds/zero-coupon" },
       // { title: "Tax Free Bonds", href: "/bonds/tax-free" },
       // { title: "Public Issues", href: "#" },

@@ -31,11 +31,11 @@ const bondCategories = [
     categoryName: "Tax Free",
     href: "/bonds/tax-free",
   },
-  {
-    imageUrl: "/images/icons/latest.svg",
-    categoryName: "Perpetual",
-    href: "/bonds/perpetual",
-  },
+  // {
+  //   imageUrl: "/images/icons/latest.svg",
+  //   categoryName: "Perpetual",
+  //   href: "/bonds/perpetual",
+  // },
   // {
   //   imageUrl: "/images/icons/latest.svg",
   //   categoryName: "Convertible",
