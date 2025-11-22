@@ -13,10 +13,7 @@ function HomeHeroSection() {
             </span>{" "}
             Fixed Income Investment Platform
           </h1>
-          <p>
-            Bonds confusing? Buy, sell, or just bond with knowledge—DhanGPT’s
-            got your back!
-          </p>
+          <p>Bonds sound confusing? DhanGPT’s got your back!</p>
           <DhanGptHeroInput />
           {/* <p className="mt-3">
             Or answer the following questions to let MeraDhan guide you!
