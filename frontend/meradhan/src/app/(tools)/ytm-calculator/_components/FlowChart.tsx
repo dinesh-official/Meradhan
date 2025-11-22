@@ -1,15 +1,9 @@
 "use client";
 
-
-import {
-  ChartConfig
-} from "@/components/ui/chart";
+import { ChartConfig } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import {
-  getXirr,
-  prepareXirrValues,
-  XirrResult
-} from "../_helpers/xirr";
+import { getXirr, prepareXirrValues, XirrResult } from "../_helpers/xirr";
+import { XirrLineChart } from "./XirrChart";
 
 export const description = "XIRR Cash Flow Chart";
 
@@ -69,11 +63,13 @@ export function FlowChart({ xirrData }: { xirrData: XirrResult }) {
         </h3>
       </div>
 
-      <div className="h-80">
-        <div className="flex justify-center items-center bg-gray-50 rounded-md h-full">
-          <p></p>
-        </div>
+      <div className="lg:h-80 relative">
+        <XirrLineChart cashflowData={xirrData["cashflow"]} />
       </div>
+      <p className="text-xs flex items-center justify-center gap-2 mt-2">
+        <span className="bg-[#4f81bd] min-w-[20px] min-h-[6px] rounded-full inline-block"></span>
+        Interest Amount
+      </p>
     </div>
   );
 }

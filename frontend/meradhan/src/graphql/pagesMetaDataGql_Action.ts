@@ -3,19 +3,6 @@ import { gqlClient } from "@/core/connection/apollo-client";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
-export type AppRoute =
-  | "index"
-  | "blog"
-  | "news"
-  | "bonds"
-  | "faqs"
-  | "login"
-  | "signup"
-  | "forgot-password"
-  | "reset-password"
-  | "contact-us"
-  | "dhangpt";
-
 const pageMetaDataGql = `
 query PagesMetaData($filters: PagesMetaDataListFiltersInput, $pagination: PaginationArg) {
   pagesMetaData(filters: $filters, pagination: $pagination) {
@@ -59,7 +46,7 @@ type PagesMetaDataResponse = {
 };
 
 export const generatePagesMetaData = async (
-  slug: AppRoute
+  slug: string
 ): Promise<Metadata> => {
   try {
     const { data } = await gqlClient.query<PagesMetaDataResponse>({

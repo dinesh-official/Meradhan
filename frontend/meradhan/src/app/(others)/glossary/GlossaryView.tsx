@@ -45,7 +45,7 @@ const GlossaryView = ({ pageData }: { pageData: DynamicPageData }) => {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Issuer Notes</BreadcrumbPage>
+            <BreadcrumbPage>Glossary</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

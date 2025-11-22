@@ -6,7 +6,9 @@ const Disclaimer = ({ Description, Title, Content }: T_PAGE_DATA) => {
     <div>
       <TopTitleDesc title={Title} description={Description} />
       {/* <DisclaimerContent /> */}
-      <div dangerouslySetInnerHTML={{ __html: Content }} />
+      <div className="container article ">
+        <div dangerouslySetInnerHTML={{ __html: Content }} className="py-20" />
+      </div>
     </div>
   );
 };

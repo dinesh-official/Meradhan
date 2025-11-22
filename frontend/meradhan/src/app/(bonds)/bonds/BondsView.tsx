@@ -22,6 +22,7 @@ import { useViewModeStore } from "../_hooks/useViewModeStore";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import CompareView from "../_components/CompareView";
+import UpcomingBonds from "../_components/UpcomingBonds";
 
 function BondsView({
   bondsData,
@@ -35,6 +36,8 @@ function BondsView({
   category: string;
   options: {
     showBondsByCategory?: boolean;
+    showUpcomingBonds?: boolean;
+
     header: {
       title: string | ReactNode;
       desc?: string | ReactNode;
@@ -64,6 +67,7 @@ function BondsView({
       />
       <SectionViewWrapper>
         {options.showBondsByCategory && <BondsByCategories />}
+        {options.showUpcomingBonds && <UpcomingBonds />}
         {bondFilterManager.applyFilterMutation.isPending ? (
           <div className="flex justify-center items-center h-96 container">
             <LoaderCircle

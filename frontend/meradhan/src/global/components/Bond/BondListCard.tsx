@@ -21,14 +21,20 @@ export function BondListCard({
   gridMode,
   onlyShare,
   data,
+  odd,
 }: {
   gridMode: boolean;
   onlyShare?: boolean;
   data: BondDetailsResponse;
+  odd?: boolean;
 }) {
   const { addItem, removeItem, selectedItems } = useCompareSelectStore();
   return (
-    <Card className={cn("even:bg-white odd:bg-muted even:border odd:border-0")}>
+    <Card
+      className={cn(
+        !odd && "even:bg-white odd:bg-muted even:border odd:border-0"
+      )}
+    >
       <CardContent>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">

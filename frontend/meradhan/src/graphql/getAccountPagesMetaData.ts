@@ -24,52 +24,54 @@ const accountPageKycGql = `query MetaData($pagination: PaginationArg, $filters: 
 }`;
 
 export type AccountPageMetaData = {
-    accountPagesMetadata: Array<{
-        MetaData: {
-            id: string
-            Title: string
-            Description: any
-            KeyWords: any
-            Og_Image: any
-            Priority: string
-        }
-        Slug: string
-        createdAt: string
-        updatedAt: string
-    }>
-}
-
-export const getAccountPagesMetaData = async (slug: string): Promise<Metadata> => {
-    const data = await gqlClient.query<AccountPageMetaData>({
-        query: gql(accountPageKycGql),
-        variables: {
-            filters: {
-                Slug: {
-                    eq: slug,
-                },
-            },
-            pagination: {
-                limit: 1,
-            },
-        },
-    });
-
-    const accountPageMetaData = data?.data?.accountPagesMetadata[0];
-
-    return {
-        title: accountPageMetaData?.MetaData?.Title,
-        description: accountPageMetaData?.MetaData?.Description,
-        keywords: accountPageMetaData?.MetaData?.KeyWords,
-        openGraph: {
-            title: accountPageMetaData?.MetaData?.Title,
-            description: accountPageMetaData?.MetaData?.Description,
-            images: accountPageMetaData?.MetaData?.Og_Image
-                ? [
-                    {
-                        url: accountPageMetaData.MetaData.Og_Image.url,
-                    },
-                ]
-                : [],
-        },
+  accountPagesMetadata: Array<{
+    MetaData: {
+      id: string;
+      Title: string;
+      Description: any;
+      KeyWords: any;
+      Og_Image: any;
+      Priority: string;
     };
-}
+    Slug: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export const getAccountPagesMetaData = async (
+  slug: string
+): Promise<Metadata> => {
+  const data = await gqlClient.query<AccountPageMetaData>({
+    query: gql(accountPageKycGql),
+    variables: {
+      filters: {
+        Slug: {
+          eq: slug,
+        },
+      },
+      pagination: {
+        limit: 1,
+      },
+    },
+  });
+
+  const accountPageMetaData = data?.data?.accountPagesMetadata?.[0];
+
+  return {
+    title: accountPageMetaData?.MetaData?.Title,
+    description: accountPageMetaData?.MetaData?.Description,
+    keywords: accountPageMetaData?.MetaData?.KeyWords,
+    openGraph: {
+      title: accountPageMetaData?.MetaData?.Title,
+      description: accountPageMetaData?.MetaData?.Description,
+      images: accountPageMetaData?.MetaData?.Og_Image
+        ? [
+            {
+              url: accountPageMetaData.MetaData.Og_Image.url,
+            },
+          ]
+        : [],
+    },
+  };
+};

@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactNode } from "react";
 import { CookiesProvider } from "react-cookie";
 import { Toaster } from "react-hot-toast";
+import DhanGptPopup from "./(tools)/dhangpt/_components/DhanGptPopup";
 
 function Client({ children }: { children: ReactNode }) {
   return (
@@ -17,6 +18,7 @@ function Client({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <ApolloProvider client={gqlClient}>
             {children}
+            <DhanGptPopup />
             <Toaster position="top-center" reverseOrder={false} />
             <ReactQueryDevtools
               initialIsOpen={false}

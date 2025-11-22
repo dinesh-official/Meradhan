@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "npx tsx start.ts",
-    "dev": "npx run --watch main.ts",
+    "dev": "bun run --watch main.ts",
     "worker": "bun run  ./src/jobs/start.ts",
     "email": "email dev",
     "lint": "eslint .",
