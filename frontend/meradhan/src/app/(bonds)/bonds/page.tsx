@@ -40,7 +40,7 @@ async function BondPage({
         bondsData={responseData}
         options={{
           showBondsByCategory: true,
-          showUpcomingBonds: true,
+          showUpcomingBonds: false,
           header: {
             title: (
               <>

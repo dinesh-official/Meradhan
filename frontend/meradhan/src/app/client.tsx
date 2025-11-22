@@ -1,5 +1,4 @@
 "use client";
-import { UserTrackingProvider } from "@/analytics";
 import { PageTrackingProvider } from "@/analytics/LogsTracking";
 import { queryClient } from "@/core/config/service-clients";
 import { gqlClient } from "@/core/connection/apollo-client";
@@ -9,7 +8,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactNode } from "react";
 import { CookiesProvider } from "react-cookie";
 import { Toaster } from "react-hot-toast";
-import DhanGptPopup from "./(tools)/dhangpt/_components/DhanGptPopup";
 
 function Client({ children }: { children: ReactNode }) {
   return (
@@ -18,7 +16,7 @@ function Client({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <ApolloProvider client={gqlClient}>
             {children}
-            <DhanGptPopup />
+            {/* <DhanGptPopup /> */}
             <Toaster position="top-center" reverseOrder={false} />
             <ReactQueryDevtools
               initialIsOpen={false}
