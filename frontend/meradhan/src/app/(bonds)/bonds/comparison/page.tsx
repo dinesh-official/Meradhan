@@ -15,8 +15,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 
 export const revalidate = 0;
+
+export const generateMetadata = async () => {
+  return await generatePagesMetaData("bonds/comparison");
+};
 
 async function page({
   searchParams,
@@ -153,7 +158,7 @@ async function page({
                 hasInfoIcon
                 values={bondsData.map((bond) => (
                   // <b>{parseFloat(bond?.coupon + '') + 1.37 /* example math */} %</b>
-                  <b key={bond.isin}>--</b>
+                  <p key={bond.isin}>Coming Soon</p>
                 ))}
               />
               {/* Price Offered */}
@@ -171,7 +176,7 @@ async function page({
               />
 
               {/* Buy Now Buttons */}
-              <BondRow
+              {/* <BondRow
                 label=""
                 noBorder
                 values={bondsData.map((_, i) => (
@@ -182,7 +187,7 @@ async function page({
                     Buy Now
                   </button>
                 ))}
-              />
+              /> */}
 
               {/* Coupon */}
               <BondRow
@@ -248,7 +253,7 @@ async function page({
                 values={bondsData.map((bond) => (
                   <span key={bond?.isin}>
                     {bond?.creditRating == "UnRated"
-                      ? "--"
+                      ? "Coming Soon"
                       : bond?.creditRating}
                   </span>
                 ))}
@@ -258,7 +263,11 @@ async function page({
               <BondRow
                 label="Taxation"
                 values={bondsData.map((bond) => (
-                  <span key={bond.isin}>{bond?.taxStatus}</span>
+                  <span key={bond.isin}>
+                    {bond?.taxStatus.toUpperCase() === "UNKNOWN"
+                      ? "Coming Soon"
+                      : bond?.taxStatus}
+                  </span>
                 ))}
               />
 
@@ -281,7 +290,7 @@ async function page({
                 label="Coupon Type"
                 values={bondsData.map(
                   (val: BondDetailResponse["responseData"], i) => (
-                    <span key={"couponType" + i}>--</span>
+                    <span key={"couponType" + i}>Coming Soon</span>
                   )
                 )}
               />
@@ -300,7 +309,7 @@ async function page({
               />
 
               {/* Buy Buttons Again */}
-              <BondRow
+              {/* <BondRow
                 label=""
                 noBorder
                 values={bondsData.map((_, i) => (
@@ -311,7 +320,7 @@ async function page({
                     Buy Now
                   </button>
                 ))}
-              />
+              /> */}
             </div>
           </div>
         </div>

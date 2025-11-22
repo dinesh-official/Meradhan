@@ -39,7 +39,7 @@ export const MENU_ITEMS: MenuItem[] = [
     children: [
       { title: "DhanGPT", href: "/dhangpt" },
       { title: "FD Calculator", href: "/fd-calculator" },
-      { title: "YTM Calculator", href: "/ytm-calculator" },
+      // { title: "YTM Calculator", href: "/ytm-calculator" },
     ],
   },
   // {

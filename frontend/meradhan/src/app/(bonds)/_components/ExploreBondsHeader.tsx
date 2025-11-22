@@ -85,8 +85,8 @@ function ExploreBondsHeader({
             </button>
           </div>
           <p className="mt-5">Or Search by Filter</p>
-          <div className="gap-3 grid grid-cols-2 lg:grid-cols-6">
-            <MultiSelect
+          <div className="gap-3 grid grid-cols-2 lg:grid-cols-5">
+            {/* <MultiSelect
               defaultValues={[]}
               onValuesChange={() => {
                 setDobunce((prev) => prev + 1);
@@ -104,7 +104,7 @@ function ExploreBondsHeader({
                   ))}
                 </MultiSelectGroup>
               </MultiSelectContent>
-            </MultiSelect>
+            </MultiSelect> */}
 
             <MultiSelect
               values={manager.filters?.maturity}

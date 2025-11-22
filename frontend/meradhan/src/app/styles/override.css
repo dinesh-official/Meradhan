@@ -36,7 +36,8 @@ input[type="range" i]::-webkit-slider-thumb {
   aspect-ratio: 1;
   border-radius: 10px;
   box-shadow: 0 0 0 var(--_b, var(--l)) inset var(--_c);
-  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 / calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
+  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 /
+    calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
   -webkit-appearance: none;
   appearance: none;
   transition: 0.3s;
@@ -51,7 +52,8 @@ input[type="range"]::-moz-range-thumb {
   background: none;
   border-radius: 10px;
   box-shadow: 0 0 0 var(--_b, var(--l)) inset var(--_c);
-  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 / calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
+  border-image: linear-gradient(90deg, var(--_c) 50%, #ffffff 0) 0 1 /
+    calc(50% - var(--l) / 2) 100vw/0 calc(100vw + var(--g));
   -moz-appearance: none;
   appearance: none;
   transition: 0.3s;
@@ -61,10 +63,12 @@ input[type="range"]::-moz-range-thumb {
 
 .react-multiple-carousel__arrow--left {
   left: 0 !important;
+  z-index: 3 !important;
 }
 
 .react-multiple-carousel__arrow--right {
   right: 0 !important;
+  z-index: 3 !important;
 }
 
 .react-multi-carousel-dot-list {

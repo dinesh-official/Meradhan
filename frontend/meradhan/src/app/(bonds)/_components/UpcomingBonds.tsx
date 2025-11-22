@@ -54,8 +54,7 @@ function UpcomingBonds() {
                 <span className="font-semibold text-secondary">Bonds</span>
               </>
             }
-            description="Explore bonds by category to find investment options that match your
-          goals, risk appetite, and financial preferences."
+            description="Discover upcoming bond issues before they open for investment."
           />
         </div>
         <Carousel

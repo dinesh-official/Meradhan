@@ -106,7 +106,7 @@ export function BondListCard({
                 </p>
               </BondInfoLabel>
               <BondInfoLabel title="Yield">
-                <p> --</p>
+                <p>Coming Soon</p>
               </BondInfoLabel>
               <BondInfoLabel title="Face Value">
                 <p className="flex items-center">

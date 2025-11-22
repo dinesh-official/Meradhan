@@ -59,7 +59,12 @@ export default function BondIsinView({
               {dateTimeUtils.formatDateTime(
                 bond.interestPaymentMode,
                 "DD MMM YYYY"
-              )}
+              ) == "Invalid Date"
+                ? "Coming Soon"
+                : dateTimeUtils.formatDateTime(
+                    bond.interestPaymentMode,
+                    "DD MMM YYYY"
+                  )}
             </SortInfoBox>
             <SortInfoBox title="Coupon Type">Coming Soon</SortInfoBox>
             <SortInfoBox title="Taxable">

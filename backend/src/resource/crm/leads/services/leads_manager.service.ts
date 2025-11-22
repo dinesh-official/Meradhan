@@ -157,7 +157,7 @@ export class LeadManagerService {
         },
       },
       orderBy: {
-        createdBy: "desc",
+        createdAt: "desc",
       },
     });
 

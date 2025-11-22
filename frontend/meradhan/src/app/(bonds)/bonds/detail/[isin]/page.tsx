@@ -12,8 +12,19 @@ import BondIsinView from "../../../_components/BondIsinView";
 import apiGateway from "@root/apiGateway";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import { redirect } from "next/navigation";
+import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 
 export const revalidate = 0;
+
+export const generateMetadata = async ({
+  params,
+}: {
+  params: Promise<{ isin: string }>;
+}) => {
+  const { isin } = await params;
+  return await generateBondInfoPageMetaData(isin);
+};
+
 async function page({ params }: { params: Promise<{ isin: string }> }) {
   const { isin } = await params;
 

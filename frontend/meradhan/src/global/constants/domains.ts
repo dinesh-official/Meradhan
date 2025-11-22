@@ -4,7 +4,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 // Pick environment-specific config
 const BASE = isDev ? BASES.development : BASES.production;
-console.log("Using BASE URLs:", BASE);
+
 // Export URLs consistently
 export const HOST_URL = BASE.HOST || "";
 export const CMS_URL = BASE.CMS || "";

@@ -9,7 +9,9 @@ const TermsOfUse = ({ Description, Title, Content }: T_PAGE_DATA) => {
       <TopTitleDesc title={Title} description={Description} />
 
       {/* <TermsContent /> */}
-      <div dangerouslySetInnerHTML={{ __html: Content }} />
+      <div className="container article">
+        <div dangerouslySetInnerHTML={{ __html: Content }} className="py-20" />
+      </div>
     </ViewPort>
   );
 };
