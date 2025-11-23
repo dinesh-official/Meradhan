@@ -1,13 +1,13 @@
 import { ASSETS_URL } from "../constants/domains";
 
-const hostPath = "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public"
+const hostPath =
+  "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public";
 
 export function genMediaUrl(mediaPath?: string | null): string {
   if (!mediaPath) return "/noimage.jpg";
 
   // Check if already a full URL (http, https) or URN (data:, urn:)
   const isFullUrl = /^(https?:\/\/|data:|urn:)/i.test(mediaPath);
-
 
   if (isFullUrl) {
     if (mediaPath.startsWith(hostPath)) {
@@ -23,14 +23,16 @@ export function genMediaUrl(mediaPath?: string | null): string {
   return `${ASSETS_URL}${normalizedPath}`;
 }
 
-
 // utils/generatePageUrl.ts
-export function generatePageUrl(
-  { basePath, page, currentQuery }: {
-    basePath: string,
-    page: number,
-    currentQuery?: Record<string, string | number | undefined>
-  }): string {
+export function generatePageUrl({
+  basePath,
+  page,
+  currentQuery,
+}: {
+  basePath: string;
+  page: number;
+  currentQuery?: Record<string, string | number | undefined>;
+}): string {
   // Copy current queries if provided
   const searchParams = new URLSearchParams();
   if (currentQuery) {
