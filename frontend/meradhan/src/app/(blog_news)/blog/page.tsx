@@ -11,9 +11,10 @@ import BlogView from "./BlogView";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 export const revalidate = 0; // Revalidate the page every hour
 
-export const generateMetadata = async () => {
+export async function generateMetadata() {
   return await generatePagesMetaData("blog");
-};
+}
+
 async function page({
   searchParams,
 }: {

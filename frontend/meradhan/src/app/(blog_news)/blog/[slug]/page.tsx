@@ -30,11 +30,10 @@ import { redirect } from "next/navigation";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 
 export const revalidate = 0; // Revalidate the page every hour
-export const generateMetadata = async (
-  page: Promise<{ params: { slug: string } }>
-) => {
-  const { params } = await page;
-  const slug = params.slug;
+export const generateMetadata = async (page: {
+  params: Promise<{ slug: string }>;
+}) => {
+  const { slug } = await page.params;
 
   return await fetchBlogPostMetaData(slug);
 };
