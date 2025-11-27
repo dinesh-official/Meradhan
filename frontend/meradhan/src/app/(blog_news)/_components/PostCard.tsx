@@ -15,6 +15,7 @@ interface PostCardProps {
   views: string;
   listMode: boolean;
   slug: string;
+  type?: "blog" | "news";
 }
 function PostCard({
   src,
@@ -26,6 +27,7 @@ function PostCard({
   profilePic,
   views,
   slug,
+  type,
 }: PostCardProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -58,8 +60,10 @@ function PostCard({
 
       <AuthorViewSharePostCard
         name={name}
+        share={slug}
         profilePic={profilePic}
         views={views}
+        type={type}
       />
     </div>
   );

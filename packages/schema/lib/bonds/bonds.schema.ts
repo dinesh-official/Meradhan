@@ -27,6 +27,7 @@ export const INTEREST_MODE_VALUES = [
 export const bondsFilterSchema = z
   .object({
     search: z.string().optional(),
+    q: z.string().optional(),
     maturity: z.array(z.enum(maturityYearEnums)).optional(),
     rating: z.array(z.string()).optional(),
     coupon: z.array(z.enum(couponPercentEnums)).optional(),

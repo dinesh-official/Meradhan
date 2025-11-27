@@ -1,8 +1,8 @@
+import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 import type { appSchema } from "@root/schema";
 import { NseRfqManager } from "@services/refq/nse/nseisin_manager.service";
 import type z from "zod";
 import { RfqMasterDbSyncManager } from "./rfq_master.manager";
-import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 
 export class RfqMasterService {
   private rfqManager = new NseRfqManager();

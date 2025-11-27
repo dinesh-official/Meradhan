@@ -85,6 +85,30 @@ export class BondService {
     };
   }
 
+  async autocompleteBondSearch(query: string) {
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        OR: [
+          {
+            bondName: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            isin: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+      take: 10,
+    });
+
+    return data;
+  }
+
   async getLatestBonds(limit: number = 3) {
     const data = await db.dataBase.bonds.findMany({
       where: {

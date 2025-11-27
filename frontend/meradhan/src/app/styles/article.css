@@ -23,7 +23,9 @@
 .article h4,
 .article h5,
 .article h6 {
-  font-family: "Quicksand", sans-serif; /* Headings font */
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: normal;
   line-height: 1.25;
   margin: 1.25rem 0 0.75rem;
 }

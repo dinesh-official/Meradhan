@@ -4,6 +4,7 @@ import { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
 import { makeFullname } from "@utils/generate/generate_username";
+import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 
 export class CustomerKycKycService {
   private kycProvider = new KycProvider();
@@ -257,6 +258,10 @@ export class CustomerKycKycService {
   async downloadEsignPdf(document_id: string, customerId: number) {
     const pdfData = await this.kycProvider.getEsignPdf(document_id);
     // set kyc status
+    const store = await db.dataBase.kYC_FLOW.findFirst({
+      where: { userID: customerId },
+    });
+
     await db.dataBase.customerProfileDataModel.updateMany({
       where: {
         id: Number(customerId),
@@ -265,7 +270,15 @@ export class CustomerKycKycService {
         kycStatus: "UNDER_REVIEW",
       },
     });
-
+    // Start KRa Process
+    await addKraWorkerJob({
+      customerId: customerId,
+      kycDataStoreId: store!.id,
+      stage: "ENQUIRY_KRA",
+      data: {
+        currentStepName: store?.currentStepName,
+      },
+    });
     return pdfData;
   }
 

@@ -11,14 +11,19 @@ import NewsView from "./NewsView";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 
 export const revalidate = 0; // Revalidate the page every hour
-
 export const generateMetadata = async () => {
   return await generatePagesMetaData("news");
 };
-function page() {
+async function page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const { page, sort } = await searchParams;
+
   return (
     <ViewPort>
-      <div className="mb-[4rem] md:w-[80%] container">
+      <div className="mb-16 md:w-[80%] container">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -31,7 +36,7 @@ function page() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <NewsView />
+        <NewsView page={page} sort={sort} />
       </div>
     </ViewPort>
   );

@@ -14,7 +14,13 @@ export const revalidate = 0; // Revalidate the page every hour
 export const generateMetadata = async () => {
   return await generatePagesMetaData("blog");
 };
-async function page() {
+async function page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const { page, sort } = await searchParams;
+
   return (
     <ViewPort>
       <div className="mb-16 container">
@@ -29,7 +35,7 @@ async function page() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <BlogView />
+        <BlogView page={page} sort={sort} />
       </div>
     </ViewPort>
   );

@@ -3,7 +3,7 @@
 // // // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 // // import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
+import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 
 // import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 
@@ -178,14 +178,14 @@ import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 // // const data = await manager.saveKycToCustomer(105);
 // // console.log(data);
 
-// const kraJob = async () => {
-//   await addKraWorkerJob({
-//     customerId: 112,
-//     kycDataStoreId: 175,
-//     stage: "ENQUIRY_KRA",
-//   });
-// };
+const kraJob = async () => {
+  await addKraWorkerJob({
+    customerId: 114,
+    kycDataStoreId: 191,
+    stage: "ENQUIRY_KRA",
+  });
+};
 
-// kraJob();
+kraJob();
 
-await revalidateBonds();
+// await revalidateBonds();

@@ -9,10 +9,28 @@ import {
 import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { IssuerNoteCard } from "./_components/IssuerNoteCard";
 import IssuerNotesSearchMode from "./_components/IssuerNotesSearchMode";
+import IssuerNotesView from "./_components/IssuerNotesView";
+import { fetchIssuerNotesGql } from "./_action/issuerNotesAction";
+import { getDynamicPageMetaDataGql } from "@/graphql/getDynamicPageDataGql";
+import Pagination from "./_components/Pagination";
 
-function page() {
+export const revalidate = 0; // Revalidate the page every hour
+export const generateMetadata = async () => {
+  return await getDynamicPageMetaDataGql("issuer-notes");
+};
+
+async function page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const { search, page } = await searchParams;
+  const data = await fetchIssuerNotesGql({
+    page: page ? parseInt(page) : 1,
+    isinSearch: search,
+  });
+
   return (
     <ViewPort>
       <div className="container">
@@ -40,16 +58,13 @@ function page() {
           />
 
           <IssuerNotesSearchMode />
-          <div className="flex flex-col gap-5 mt-5">
-            {/* <div className="gap-5 grid grid-cols-3 mt-5"> */}
-            <IssuerNoteCard gridMode={false}></IssuerNoteCard>
-            <IssuerNoteCard gridMode={false}></IssuerNoteCard>
-            <IssuerNoteCard gridMode={false}></IssuerNoteCard>
-            <IssuerNoteCard gridMode={false}></IssuerNoteCard>
-            <IssuerNoteCard gridMode={false}></IssuerNoteCard>
-            <IssuerNoteCard gridMode={false}></IssuerNoteCard>
-            <IssuerNoteCard gridMode={false}></IssuerNoteCard>
-          </div>
+          <IssuerNotesView data={data} />
+          <Pagination
+            pageInfo={{
+              pageCount: data?.pageInfo?.pageCount,
+              page: data?.pageInfo?.page,
+            }}
+          />
         </SectionWrapper>
       </div>
     </ViewPort>

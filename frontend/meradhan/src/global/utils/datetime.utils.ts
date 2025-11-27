@@ -122,3 +122,62 @@ export const dateTimeUtils = {
     return null;
   },
 };
+
+export function calculateReadTime(html: string) {
+  // 1. Remove all HTML tags
+  const text = html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // 2. Count words
+  const wordCount = text.split(/\s+/).length;
+
+  // 3. Calculate read time (assuming 200 words per minute)
+  const wordsPerMinute = 200;
+  const minutes = Math.ceil(wordCount / wordsPerMinute);
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  // 4. Format result
+  if (hours > 0 && remainingMinutes > 0) {
+    return `${hours} hour${hours > 1 ? "s" : ""} ${remainingMinutes} min read`;
+  } else if (hours > 0) {
+    return `${hours} hour${hours > 1 ? "s" : ""} read`;
+  } else {
+    return `${minutes} min read`;
+  }
+}
+
+export function convertUTCtoIST(utcStr: string, back = false): string {
+  const utcDate = new Date(utcStr);
+
+  // Calculate IST offset: 5 hours 30 minutes in milliseconds
+  // const istOffsetMs = (5 * 60 + 30) * 60 * 1000;
+
+  // Get IST date
+  const istDate = new Date(utcDate.getTime());
+
+  // Helper to pad numbers
+  const pad = (num: number): string => num.toString().padStart(2, "0");
+
+  const year = istDate.getFullYear();
+  const month = pad(istDate.getMonth() + 1);
+  const day = pad(istDate.getDate());
+  const hours = pad(istDate.getHours());
+  const minutes = pad(istDate.getMinutes());
+  const seconds = pad(istDate.getSeconds());
+
+  // Return formatted string with +05:30
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}+05:30`;
+}
+
+export function formatDateCustom(dateStr: string): string {
+  const date = new Date(dateStr);
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = date.toLocaleString("default", { month: "short" }); // e.g., "Aug"
+  const year = date.getFullYear();
+
+  return `${day} ${month} ${year}`;
+}

@@ -8,6 +8,10 @@ bondRoute.get("/api/bonds/latest", (req, res) =>
   bondController.getLatestListedBonds(req, res)
 );
 
+bondRoute.get("/api/bonds/search", (req, res) =>
+  bondController.autocompleteBondSearch(req, res)
+);
+
 bondRoute.get("/api/bonds/upcoming", (req, res) =>
   bondController.getUpcomingListedBonds(req, res)
 );

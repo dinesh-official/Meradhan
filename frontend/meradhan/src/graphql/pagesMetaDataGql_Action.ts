@@ -83,7 +83,7 @@ export const generatePagesMetaData = async (
       openGraph: {
         title: metadata?.Title,
         description: metadata?.Description,
-        // images: metadata?.Og_Image ? [metadata.Og_Image.url] : undefined,
+        images: metadata?.Og_Image ? [metadata.Og_Image.url] : undefined,
       },
     };
   } catch (e) {
@@ -139,6 +139,172 @@ export const generateBondInfoPageMetaData = async (
       openGraph: {
         title: fillTemplate(metadata?.Title || "", bondData),
         description: fillTemplate(metadata?.Description || "", bondData),
+        // images: metadata?.Og_Image ? [metadata.Og_Image.url] : undefined,
+      },
+    };
+  } catch (e) {
+    console.log(e);
+
+    return {};
+  }
+};
+
+const pageMetaDataGql_Category = `query Author($pagination: PaginationArg, $filters: BlogCategoryFiltersInput) {
+  blogCategories(pagination: $pagination, filters: $filters) {
+    Author {
+      Name
+      Profile_Image {
+        url
+      }
+    }
+    MetaData {
+      id
+      Title
+      Description
+      KeyWords
+      Og_Image {
+        url
+      }
+      Priority
+    }
+  }
+}`;
+
+export const getBlogCategoryMetaData = async (
+  categorySlug: string
+): Promise<Metadata> => {
+  try {
+    const { data } = await gqlClient.query<{
+      blogCategories: Array<{
+        Author: {
+          Name: string;
+          Profile_Image: {
+            url: string;
+          };
+        };
+        MetaData: {
+          id: string;
+          Title: string;
+          Description?: string;
+          KeyWords?: string;
+          Og_Image?: {
+            url: string;
+          };
+          Priority: string;
+        };
+      }>;
+    }>({
+      query: gql(pageMetaDataGql_Category),
+      variables: {
+        pagination: {
+          limit: 1,
+        },
+        filters: {
+          Slug: {
+            eq: categorySlug,
+          },
+        },
+      },
+    });
+
+    const metadata = data?.blogCategories?.[0]?.MetaData;
+    const author = data?.blogCategories?.[0]?.Author;
+
+    if (!data?.blogCategories?.[0]?.MetaData?.Title) {
+      return {};
+    }
+
+    return {
+      title: metadata?.Title,
+      description: metadata?.Description,
+      keywords: metadata?.KeyWords,
+      authors: author ? [{ name: author.Name }] : undefined,
+      openGraph: {
+        title: metadata?.Title,
+        description: metadata?.Description,
+        // images: metadata?.Og_Image ? [metadata.Og_Image.url] : undefined,
+      },
+    };
+  } catch (e) {
+    console.log(e);
+
+    return {};
+  }
+};
+
+const pageMetaDataGql_NewsCategory = `query Author($pagination: PaginationArg) {
+  newsCategories(pagination: $pagination) {
+    Author {
+      Name
+      Profile_Image {
+        url
+      }
+    }
+    MetaData {
+      id
+      Title
+      Description
+      KeyWords
+      Og_Image {
+        url
+      }
+      Priority
+    }
+  }
+}`;
+
+export const getNewsCategoryMetaData = async (
+  categorySlug: string
+): Promise<Metadata> => {
+  try {
+    const { data } = await gqlClient.query<{
+      newsCategories: Array<{
+        Author: {
+          Name: string;
+          Profile_Image: {
+            url: string;
+          };
+        };
+        MetaData: {
+          id: string;
+          Title: string;
+          Description?: string;
+          KeyWords?: string;
+          Og_Image?: {
+            url: string;
+          };
+          Priority: string;
+        };
+      }>;
+    }>({
+      query: gql(pageMetaDataGql_NewsCategory),
+      variables: {
+        pagination: {
+          limit: 1,
+        },
+        filters: {
+          Slug: {
+            eq: categorySlug,
+          },
+        },
+      },
+    });
+
+    const metadata = data?.newsCategories?.[0]?.MetaData;
+    const author = data?.newsCategories?.[0]?.Author;
+
+    if (!data?.newsCategories?.[0]?.MetaData?.Title) {
+      return {};
+    }
+
+    return {
+      title: metadata?.Title,
+      description: metadata?.Description,
+      keywords: metadata?.KeyWords,
+      authors: author ? [{ name: author.Name }] : undefined,
+      openGraph: {
+        title: metadata?.Title,
+        description: metadata?.Description,
         // images: metadata?.Og_Image ? [metadata.Og_Image.url] : undefined,
       },
     };

@@ -1,5 +1,5 @@
 import { db, type DataBaseSchema } from "@core/database/database";
-import type { $Enums } from "@databases/generated/prisma/supabase";
+import type { $Enums } from "@databases/generated/prisma/postgres";
 import type { CustomerProfileService } from "@resource/crm/customers/customer.service";
 import type { KycDataStorage } from "./kyc";
 

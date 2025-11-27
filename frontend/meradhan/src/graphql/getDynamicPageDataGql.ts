@@ -1,5 +1,6 @@
 "use server";
 import { gqlClient } from "@/core/connection/apollo-client";
+import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
@@ -91,7 +92,7 @@ export const getDynamicPageDataGql = async (slug: string) => {
     query: getDynamicPagesGql,
     ...getDynamicPagesVariables(slug),
   });
-  return data?.dynamicPages[0];
+  return data?.dynamicPages?.[0];
 };
 
 export type DynamicPageData = Awaited<ReturnType<typeof getDynamicPageDataGql>>;
@@ -108,5 +109,10 @@ export const getDynamicPageMetaDataGql = async (
     title: md?.Title,
     description: md?.Description,
     keywords: md?.KeyWords,
+    openGraph: {
+      title: md?.Title,
+      description: md?.Description,
+      images: md?.Og_Image ? [md.Og_Image.url] : undefined,
+    },
   };
 };

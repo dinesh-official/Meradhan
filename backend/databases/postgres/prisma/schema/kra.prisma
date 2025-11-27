@@ -1,0 +1,15 @@
+model KraDataLogs {
+    id           Int       @id @default(autoincrement())
+    userId       Int
+    kycId        Int
+    requestData  Json?
+    responseData Json?
+    stage        String    @default("ENQUIRY")
+    reqTime      DateTime  @default(now())
+    resTime      DateTime?
+    /// Timestamps
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+
+    @@map("kra_data_logs")
+}

@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Copy } from "lucide-react";
@@ -30,6 +30,7 @@ export function SharePopupTrigger({
   return (
     <div
       {...rest}
+      className="cursor-pointer "
       onClick={(e) => {
         rest.onClick?.(e);
         open({ title, url });
@@ -140,4 +141,3 @@ export function SharePopupViewProvider() {
     </Dialog>
   );
 }
-

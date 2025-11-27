@@ -12,7 +12,7 @@ interface ListNseDataProps {
   nseData: ListNseDataItem[];
 }
 
-const ListNseData = ({nseData}:ListNseDataProps) => {
+const ListNseData = ({ nseData }: ListNseDataProps) => {
   return (
     <div className="m-auto mt-[4rem] mb-[4rem]">
       <div className="gap-4 grid md:grid-cols-2 lg:grid-cols-3 mt-4">

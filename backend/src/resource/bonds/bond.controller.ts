@@ -24,6 +24,12 @@ export class BondController {
     });
   }
 
+  async autocompleteBondSearch(req: Request, res: Response) {
+    const query = req.query.q as string;
+    const data = await this.bondService.autocompleteBondSearch(query);
+    return res.send(data);
+  }
+
   async getLatestListedBonds(req: Request, res: Response) {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 3;
     const data = await this.bondService.getLatestBonds(limit);

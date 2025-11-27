@@ -1,72 +1,43 @@
-"use client";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import ViewPort from "@/global/components/wrapper/ViewPort";
- import { cn } from "@/lib/utils";
-import ListFilter from "./_components/ListFilter";
-import ListNseData from "./_components/ListNseData";
+import {
+  getDynamicPageDataGql,
+  getDynamicPageMetaDataGql,
+} from "@/graphql/getDynamicPageDataGql";
+import { cn } from "@/lib/utils";
+import RegulatoryCirculars from "./RegulatoryCirculars";
+import PageTitleDesc from "@/global/components/basic/page/PageTitleDesc";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
+import {
+  fetchRegulatoryCircularsByCategoryGql,
+  fetchRegulatoryCircularsCategoriesGql,
+} from "./_actions/reg-cir";
+import Pagination from "./_components/Pagination";
+export const revalidate = 0;
+export const generateMetadata = async () => {
+  return await getDynamicPageMetaDataGql("regulatory-circulars");
+};
 
-const nseData = [
-  {
-    date: "21 Jul 2025",
-    exchange: "NSE",
-    title: "Listing of Government Securities on capital market segment",
-  },
-  {
-    date: "21 Jul 2025",
-    exchange: "NSE",
-    title: "Listing of privately placed securities on capital market segment",
-  },
-  {
-    date: "21 Jul 2025",
-    exchange: "NSE",
-    title:
-      "Listing of privately placed securities on the debt market segment of the Exchange",
-  },
-  {
-    date: "21 Jul 2025",
-    exchange: "NSE",
-    title:
-      "List of securities further admitted to dealings on Debt Segment issued by Adani Enterprises Limited",
-  },
-  {
-    date: "18 Jul 2025",
-    exchange: "NSE",
-    title:
-      "Listing of privately placed securities on the debt market segment of the Exchange",
-  },
-  {
-    date: "17 Jul 2025",
-    exchange: "NSE",
-    title:
-      "Listing of privately placed securities on the debt market segment of the Exchange",
-  },
-  {
-    date: "17 Jul 2025",
-    exchange: "NSE",
-    title:
-      "Listing of privately placed securities on the debt market segment of the Exchange on the debt market segment of the Exchange",
-  },
-  {
-    date: "16 Jul 2025",
-    exchange: "NSE",
-    title:
-      "Listing of privately placed securities on the debt market segment of the Exchange",
-  },
-  {
-    date: "15 Jul 2025",
-    exchange: "NSE",
-    title:
-      "Listing of privately placed securities on the debt market segment of the Exchange",
-  },
-];
-
-const page = () => {
+const page = async ({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ category: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) => {
+  const pageData = await getDynamicPageDataGql("regulatory-circulars");
+  const categories = await fetchRegulatoryCircularsCategoriesGql();
+  const data = await fetchRegulatoryCircularsByCategoryGql({
+    slug: (await params).category,
+    page: (await searchParams).page ? parseInt((await searchParams).page!) : 1,
+  });
   return (
     <ViewPort>
       <div className="container">
@@ -77,32 +48,22 @@ const page = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/regulatory-circulars">
-                Regulatory Circulars
-              </BreadcrumbLink>
+              <BreadcrumbPage>Regulatory Circulars</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="py-16">
-          <h1
-            className={cn(
-              "font-medium text-4xl text-center",
-              "quicksand-medium"
-            )}
-          >
-            Regulatory
-            <span className="font-semibold text-secondary"> Circulars</span>
-          </h1>
-          <p className="mt-2 text-center">
-            Stay updated with the latest SEBI, NSE and BSE circulars impacting
-            the bond and fixed income markets—all in one place.
-          </p>
-        </div>
+        <SectionWrapper>
+          <div className={cn("mb-20 ")}>
+            <PageTitleDesc
+              title={pageData?.Title || "Glossary"}
+              description={pageData?.Content.Introduction || ""}
+            />
+          </div>
 
-        <ListFilter />
-
-        <ListNseData nseData={nseData} />
+          <RegulatoryCirculars categories={categories} data={data.data || []} />
+          <Pagination pageInfo={data.pageInfo} />
+        </SectionWrapper>
       </div>
     </ViewPort>
   );

@@ -128,3 +128,19 @@
     font-style: normal;
   }
 }
+
+.regularCircularBox {
+  height: 250px;
+  border-radius: 10px;
+  border-width: 1px;
+  border: 1px solid #e1e6e8;
+  padding: 1.8rem;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.regularCircularBox .shareBox {
+  padding: 18px;
+  border-top: 1px solid #e1e6e8;
+}

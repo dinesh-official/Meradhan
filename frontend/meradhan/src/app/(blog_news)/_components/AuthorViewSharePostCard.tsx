@@ -1,3 +1,5 @@
+import { HOST_URL } from "@/global/constants/domains";
+import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 import Image from "next/image";
 import React from "react";
 import { FaEye } from "react-icons/fa6";
@@ -7,12 +9,16 @@ interface AuthorViewSharePostCardProps {
   name: string;
   profilePic: string;
   views: string;
+  share: string;
+  type?: "blog" | "news";
 }
 
 function AuthorViewSharePostCard({
   name,
   profilePic,
   views,
+  share,
+  type = "blog",
 }: AuthorViewSharePostCardProps) {
   return (
     <div className="flex justify-between items-center text-[#666666]">
@@ -31,7 +37,12 @@ function AuthorViewSharePostCard({
           <FaEye size={22} /> {views}
         </div>
         <div>
-          <RiShareFill size={22} />
+          <SharePopupTrigger
+            title={`Share ${type === "blog" ? "Blog" : "News"}`}
+            url={`${HOST_URL}${share}`}
+          >
+            <RiShareFill size={22} className="cursor-pointer" />
+          </SharePopupTrigger>
         </div>
       </div>
     </div>

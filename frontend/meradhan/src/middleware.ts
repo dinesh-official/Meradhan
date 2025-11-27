@@ -1,7 +1,6 @@
 import { UserSessionDataResponse } from "@root/apiGateway";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
-import { API_SERVER_URL } from "./global/constants/domains";
 
 // Helper: Generate Basic Auth header
 const BASIC_AUTH_HEADER =

@@ -19,10 +19,6 @@ function SectionWrapper({
 
 export default SectionWrapper;
 
-
-
-
-
 export function SectionViewWrapper({
   children,
   className = "",
@@ -34,4 +30,3 @@ export function SectionViewWrapper({
     </section>
   );
 }
-
