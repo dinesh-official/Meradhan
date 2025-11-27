@@ -181,7 +181,9 @@ export const fetchNewsPostData = async (slug: string) => {
         Views: number;
         createdAt: string;
         documentId: string;
-        Tags: Array<string>;
+        Tags: Array<{
+          name: string;
+        }>;
         news_category: {
           Name: string;
           Slug: string;

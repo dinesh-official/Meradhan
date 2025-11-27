@@ -149,10 +149,10 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
                   <div className="flex flex-wrap gap-2">
                     {post?.Tags.map((tag) => (
                       <Badge
-                        key={tag}
+                        key={tag.name}
                         className="bg-secondary/10 text-secondary px-3 py-1 rounded-full"
                       >
-                        {tag}
+                        {tag.name}
                       </Badge>
                     ))}
                   </div>

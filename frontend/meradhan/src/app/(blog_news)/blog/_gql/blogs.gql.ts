@@ -176,7 +176,9 @@ export const fetchBlogPostData = async (slug: string) => {
       Views: number;
       createdAt: string;
       documentId: string;
-      Tags: Array<string>;
+      Tags: Array<{
+        name: string;
+      }>;
       Category: {
         Name: string;
         Slug: string;
@@ -289,13 +291,13 @@ export const fetchBlogPostMetaData = async (
   }
   return {
     title: metadata.Title,
-    description: metadata.Description,
-    keywords: metadata.KeyWords,
-    authors: post?.Author ? [{ name: post.Author.Name }] : undefined,
+    description: metadata?.Description,
+    keywords: metadata?.KeyWords,
+
     openGraph: {
-      title: metadata.Title,
-      description: metadata.Description,
-      images: metadata.Og_Image
+      title: metadata?.Title,
+      description: metadata?.Description,
+      images: metadata?.Og_Image
         ? [
             {
               url: metadata.Og_Image.url,

@@ -30,13 +30,13 @@ import { redirect } from "next/navigation";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 
 export const revalidate = 0; // Revalidate the page every hour
-export const generateMetadata = async (page: {
+export async function generateMetadata(page: {
   params: Promise<{ slug: string }>;
-}) => {
+}) {
   const { slug } = await page.params;
 
   return await fetchBlogPostMetaData(slug);
-};
+}
 
 async function page({ params }: { params: Promise<{ slug: string }> }) {
   const post = await fetchBlogPostData((await params).slug);
@@ -88,9 +88,9 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
                 <FaClock size={18} />{" "}
                 <p>
                   {calculateReadTime(
-                    post.Contents.Introduction +
-                      post.Contents.Content_1 +
-                      post.Contents.Content_2
+                    post?.Contents?.Introduction +
+                      post?.Contents?.Content_1 +
+                      post?.Contents?.Content_2
                   )}
                 </p>
               </div>
@@ -102,7 +102,7 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
               <div className="flex items-center gap-2 text-gray-500">
                 <SharePopupTrigger
                   title="Share Blog"
-                  url={`${HOST_URL}/blog/${post.Slug}`}
+                  url={`${HOST_URL}/blog/${post?.Slug}`}
                 >
                   <RiShareFill size={18} className="cursor-pointer" />
                 </SharePopupTrigger>
@@ -127,31 +127,31 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents.Introduction || "",
+                  __html: post?.Contents?.Introduction || "",
                 }}
               />
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents.Content_1 || "",
+                  __html: post?.Contents?.Content_1 || "",
                 }}
               />{" "}
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents.Content_2 || "",
+                  __html: post?.Contents?.Content_2 || "",
                 }}
               />
               {post?.Tags && post?.Tags.length > 0 && (
                 <div className="mt-10">
                   <h3 className="text-lg font-medium mb-3">Tags:</h3>
                   <div className="flex flex-wrap gap-2">
-                    {post?.Tags.map((tag) => (
+                    {post?.Tags?.map((tag) => (
                       <Badge
-                        key={tag}
+                        key={tag.name}
                         className="bg-secondary/10 text-secondary px-3 py-1 rounded-full"
                       >
-                        {tag}
+                        {tag.name}
                       </Badge>
                     ))}
                   </div>
