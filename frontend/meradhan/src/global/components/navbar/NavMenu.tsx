@@ -42,8 +42,8 @@ function NavMenuList({
             "absolute bg-white border border-gray-100   rounded-md w-52 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out transform group-hover:translate-y-1",
             // Position: open below if root, open right if nested
             isNested
-              ? "left-full top-0 -ml-1 right-0 -mt-1"
-              : "top-full left-0 mt-3"
+              ? "left-full top-0 -ml-1 right-0 -mt-1 "
+              : "top-full -left-14 mt-3 "
           )}
         >
           <ul className="">

@@ -1,14 +1,7 @@
 "use client";
 
 import { CalendarIcon } from "lucide-react";
-import {
-  Button,
-  DatePicker,
-  Dialog,
-  Group,
-  Label,
-  Popover,
-} from "react-aria-components";
+import { Button, DatePicker, Group, Popover } from "react-aria-components";
 
 import { Calendar } from "@/components/ui/calendar";
 import { DateInput } from "@/components/ui/datefield-rac";

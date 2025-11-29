@@ -1,4 +1,3 @@
-import BondAddToWatchList from "@/global/components/Bond/BondAddToWatchList";
 import { cn } from "@/lib/utils";
 import { BondDetailResponse } from "@root/apiGateway";
 import { FaStar } from "react-icons/fa6";

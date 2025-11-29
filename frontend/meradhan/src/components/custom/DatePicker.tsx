@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
-import { CalendarIcon } from "lucide-react";
 import { format, parse } from "date-fns";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";

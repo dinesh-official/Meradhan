@@ -1,10 +1,7 @@
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
-import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import apiGateway, { GetCustomerResponseById } from "@root/apiGateway";
-import { useMutation } from "@tanstack/react-query";
-import { Edit } from "lucide-react";
-import toast from "react-hot-toast";
-import { FaCheckSquare, FaEdit } from "react-icons/fa";
+import SignInOtpInput from "@/app/(auth)/login/_components/SignInOtpInput";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -14,13 +11,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ReactNode, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import { queryClient } from "@/core/config/service-clients";
-import SignInOtpInput from "@/app/(auth)/login/_components/SignInOtpInput";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import apiGateway, { GetCustomerResponseById } from "@root/apiGateway";
+import { useMutation } from "@tanstack/react-query";
+import { ReactNode, useState } from "react";
+import toast from "react-hot-toast";
+import { FaCheckSquare, FaEdit } from "react-icons/fa";
 function PersonalDetails({
   profile,
 }: {

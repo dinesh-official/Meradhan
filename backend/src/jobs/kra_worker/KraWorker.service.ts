@@ -98,7 +98,7 @@ class KraProcess {
       mobile: customer.phoneNo!.replaceAll("+", "")!,
       reqNo: this.generateReqNo(),
     };
-    const enquiry = await this.kraInstance.panInquiry(payload);
+    const enquiry = await this.kraInstance.panInquiryTwo(payload);
     const resTime = new Date().toISOString();
     await db.dataBase.kraDataLogs.create({
       data: {

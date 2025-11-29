@@ -1,5 +1,4 @@
 "use client";
-import React, { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -7,12 +6,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { AiOutlineMenu } from "react-icons/ai";
-import Image from "next/image";
-import { MENU_ITEMS } from "../../constants/menu.constants";
-import { IoMdArrowDropdown } from "react-icons/io";
-import Link from "next/link";
 import { ISessionResponse } from "@root/apiGateway";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { AiOutlineMenu } from "react-icons/ai";
+import { IoMdArrowDropdown } from "react-icons/io";
+import { MENU_ITEMS } from "../../constants/menu.constants";
 
 interface MenuItemProps {
   item: (typeof MENU_ITEMS)[number];

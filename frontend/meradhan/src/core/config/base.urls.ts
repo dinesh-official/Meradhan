@@ -1,5 +1,4 @@
 // Centralized base URLs for all environments
-
 export const BASES = {
   development: {
     HOST: "http://localhost:3000",
@@ -8,6 +7,7 @@ export const BASES = {
     CMS: "https://spydertest.meradhan.co",
     ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
   },
+
   production: {
     HOST: "https://test.meradhan.co",
     API_SERVER: "https://testapi.meradhan.co",

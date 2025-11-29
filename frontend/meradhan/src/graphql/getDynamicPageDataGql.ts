@@ -1,6 +1,5 @@
 "use server";
 import { gqlClient } from "@/core/connection/apollo-client";
-import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 

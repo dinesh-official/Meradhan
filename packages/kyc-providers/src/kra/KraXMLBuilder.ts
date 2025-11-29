@@ -22,26 +22,42 @@ export class KraXMLBuilder {
 </soapenv:Envelope>`;
   }
 
-  /** Build XML body for PAN inquiry (inner CDATA) */
-  private static buildPanInnerRequest(
-    pan: string,
-    dob: string,
-    mobile: string,
-    reqNo: string
-  ): string {
+  // Pan Inquiry Two XML Builders
+  public static buildPanInquiryXML({
+    dob,
+    encryptedPassword,
+    mobile,
+    pan,
+    reqNo,
+    passKey,
+    userName,
+  }: {
+    pan: string;
+    dob: string;
+    mobile: string;
+    reqNo: string;
+    encryptedPassword: string;
+    passKey: string;
+    userName: string;
+  }): string {
+    const innerXML = this.buildPanInnerRequest(pan, dob, mobile, reqNo);
+
     return `
-<APP_REQ_ROOT>
-    <APP_PAN_INQ>
-        <APP_PAN_NO>${pan}</APP_PAN_NO>
-        <APP_PAN_DOB>${dob}</APP_PAN_DOB>
-        <APP_MOBILE_NO>${mobile}</APP_MOBILE_NO>
-        <APP_REQ_NO>${reqNo}</APP_REQ_NO>
-    </APP_PAN_INQ>
-</APP_REQ_ROOT>`;
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ser:panInquiryDetails>
+          <arg0><![CDATA[${innerXML}]]></arg0>
+          <arg1>${userName}</arg1>
+          <arg2>${encryptedPassword}</arg2>
+          <arg3>${passKey}</arg3>
+      </ser:panInquiryDetails>
+   </soapenv:Body>
+</soapenv:Envelope>`;
   }
 
   /** Build full SOAP XML for PAN Inquiry */
-  public static buildPanInquiryXML({
+  public static buildPanInquiryTwoXML({
     dob,
     encryptedPassword,
     mobile,
@@ -72,6 +88,23 @@ export class KraXMLBuilder {
       </ser:panInquiryDetailsTwo>
    </soapenv:Body>
 </soapenv:Envelope>`;
+  }
+  /** Build XML body for PAN inquiry (inner CDATA) */
+  private static buildPanInnerRequest(
+    pan: string,
+    dob: string,
+    mobile: string,
+    reqNo: string
+  ): string {
+    return `
+<APP_REQ_ROOT>
+    <APP_PAN_INQ>
+        <APP_PAN_NO>${pan}</APP_PAN_NO>
+        <APP_PAN_DOB>${dob}</APP_PAN_DOB>
+        <APP_MOBILE_NO>${mobile}</APP_MOBILE_NO>
+        <APP_REQ_NO>${reqNo}</APP_REQ_NO>
+    </APP_PAN_INQ>
+</APP_REQ_ROOT>`;
   }
 
   /** Build XML body for PAN Download (inner CDATA) */

@@ -21,6 +21,7 @@ import RiskProfileQuestion, {
   RiskProfileAnsOption,
 } from "./cards/riskprofile/RiskProfileQuestion";
 import { riskProfileData } from "@/global/constants/riskProfileData";
+import KraLogsView from "./KraLogsView";
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
@@ -436,6 +437,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       </div>
       {/* Compliance */}
       <CheckedCompances data={kycStore.data} />
+      <KraLogsView id={data.id} />
     </div>
   );
 }

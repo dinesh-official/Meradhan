@@ -1,15 +1,14 @@
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import { IoMdTrash } from "react-icons/io";
 import { KycDataStorage } from "../../../_store/useKycDataStorage";
-import { cn } from "@/lib/utils";
 
 function DematAccountView({
   account,
   // name,
   setDefault,
   onDelete,
-  myPan,
 }: {
   account: KycDataStorage["step_4"][number];
   name: string;
@@ -24,11 +23,7 @@ function DematAccountView({
 
   return (
     <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
-      <div
-        className={cn(
-          "gap-5 grid sm:grid-cols-2 xl:grid-cols-4"
-        )}
-      >
+      <div className={cn("gap-5 grid sm:grid-cols-2 xl:grid-cols-4")}>
         {/* // not show dp id for cdsl */}
         {account.depositoryName != "CDSL" && (
           <DataInfoLabel
@@ -82,11 +77,13 @@ function DematAccountView({
         <DataInfoLabel
           className="xl:col-span-2"
           title="Depository Participant Name"
-        // status={account.isVerified ? "SUCCESS" : "ERROR"}
-        // statusLabel={account.isVerified ? "Verified" : "Invalid"}
-        // showStatus
+          // status={account.isVerified ? "SUCCESS" : "ERROR"}
+          // statusLabel={account.isVerified ? "Verified" : "Invalid"}
+          // showStatus
         >
-          <p className="font-medium">{account.depositoryParticipantName || "Coming Soon"}</p>
+          <p className="font-medium">
+            {account.depositoryParticipantName || "Coming Soon"}
+          </p>
         </DataInfoLabel>
       </div>
       <DataInfoLabel title="Is Default Demat Account?" status="SUCCESS">

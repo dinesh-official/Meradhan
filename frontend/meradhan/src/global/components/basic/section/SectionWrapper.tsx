@@ -25,7 +25,7 @@ export function SectionViewWrapper({
   ...props
 }: SectionWrapperProps) {
   return (
-    <section className={cn(`py-[70px]`, className)} {...props}>
+    <section className={cn(`py-[70px] `, className)} {...props}>
       {children}
     </section>
   );

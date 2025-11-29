@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { BiGridAlt, BiListUl } from "react-icons/bi";
 
 function TabView({
@@ -9,7 +9,7 @@ function TabView({
   viewMode,
   setViewMode,
   categories,
-  category,
+
   pageNo,
   search,
   from,

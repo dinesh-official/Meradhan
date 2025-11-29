@@ -17,6 +17,7 @@ export class BondController {
 
   async filterListedBonds(req: Request, res: Response) {
     const filters = appSchema.bonds.bondsFilterSchema.parse(req.body);
+
     const data = await this.bondService.filterBonds(filters, req.query);
     return res.sendResponse({
       statusCode: HttpStatus.OK,

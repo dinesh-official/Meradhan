@@ -1,17 +1,16 @@
 import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
 import { CMS_URL, HOST_URL } from "@/global/constants/domains";
+import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { cn } from "@/lib/utils";
 import { Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { BsStar } from "react-icons/bs";
+import { FaStar } from "react-icons/fa";
 import { IoMdArrowDropright } from "react-icons/io";
 import { IoShareSocialSharp } from "react-icons/io5";
 import { fetchIssuerNotesGql } from "../_action/issuerNotesAction";
-import { FaStar } from "react-icons/fa";
-import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 
 function InfoLabel({
   title,

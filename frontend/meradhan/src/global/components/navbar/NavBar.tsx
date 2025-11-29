@@ -1,15 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
+import { getSessionId } from "@/analytics/analytics";
+import { userSessionStore } from "@/core/auth/userSessionStore";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
-import AuthActions from "./AuthActions";
+import { useEffect } from "react";
 import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
-import { userSessionStore } from "@/core/auth/userSessionStore";
-import { useEffect } from "react";
-import useAppCookie from "@/hooks/useAppCookie.hook";
-import { getSessionId } from "@/analytics/analytics";
 
 function NavBar({
   session,

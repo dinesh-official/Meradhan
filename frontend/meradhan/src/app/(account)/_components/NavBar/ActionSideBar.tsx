@@ -1,9 +1,7 @@
 "use client";
 
 import { FC, memo, ReactNode, useEffect } from "react";
-import { FaChartPie, FaUser } from "react-icons/fa";
-import { FaSackDollar } from "react-icons/fa6";
-import { HiRectangleStack } from "react-icons/hi2";
+import { FaUser } from "react-icons/fa";
 import { MdSpaceDashboard } from "react-icons/md";
 
 import {
@@ -12,11 +10,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { Menu, X } from "lucide-react";
-import { create } from "zustand";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { create } from "zustand";
 
 // -------------------------
 // Zustand store

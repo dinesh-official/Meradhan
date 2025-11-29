@@ -207,3 +207,42 @@ input[type="range"]::-moz-range-thumb {
 .rpv-toolbar {
   font-size: 12px !important;
 }
+
+.rdrCalendarWrapper {
+  background-color: #f5f5f5 !important;
+  padding: 10px;
+  padding-top: 0 !important;
+  border-radius: 16px;
+}
+.rdrCalendarWrapper .rdrWeekDays .rdrWeekDay {
+  margin-bottom: 3px;
+  font-family: Poppins;
+  font-weight: 500;
+  font-size: 12px;
+  color: #1f1f1f !important;
+}
+.rdrCalendarWrapper .rdrDays {
+  padding: 0 !important;
+  gap: 5px;
+}
+.rdrCalendarWrapper .rdrNextPrevButton,
+.rdrCalendarWrapper .rdrNextButton {
+  background-color: #fff !important;
+  color: #002c59 !important;
+  border-radius: 6px !important;
+  box-shadow: 0px 1px 1px 0px #000e33 0d;
+}
+button.rdrDay {
+  color: #002c59 !important;
+  border-radius: 6px !important;
+  background-color: #fff !important;
+  width: calc(89% / 7) !important;
+  box-shadow: 0px 1px 1px 0px #000e33 0d;
+  font-size: 12px;
+}
+.rdrSelected,
+.rdrInRange,
+.rdrStartEdge,
+.rdrEndEdge {
+  background-color: #002c59 !important;
+}

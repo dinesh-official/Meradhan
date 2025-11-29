@@ -14,7 +14,6 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../../_store/useKycStepStore";
-import SignDoNotDO, { signDrawGuidelines } from "../_dialogs/SignDoNotDO";
 
 function IdentityValidationPreviewSign() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
@@ -49,7 +48,6 @@ function IdentityValidationPreviewSign() {
             >
               Remove and Add New Signature
             </p>
-
           </div>
         </div>
       </CardContent>

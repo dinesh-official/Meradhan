@@ -126,6 +126,43 @@ export class KraSDK {
     )) as T_APP_PAN_INQ;
   }
 
+  // 1.1. PAN Inquiry Two
+  public async panInquiryTwo({
+    dob,
+    mobile,
+    pan,
+    reqNo,
+  }: {
+    pan: string;
+    dob: string;
+    mobile: string;
+    reqNo: string;
+  }) {
+    const encrypted = await this.ensureEncryptedPassword();
+
+    const xml = KraXMLBuilder.buildPanInquiryTwoXML({
+      pan,
+      dob,
+      mobile,
+      reqNo,
+      encryptedPassword: encrypted,
+      passKey: this.passKey,
+      userName: this.userName,
+    });
+
+    const response = await axios.post(this.panServiceUrl, xml, {
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        SOAPAction: "panInquiryDetailsTwo",
+        Password: encrypted,
+      },
+    });
+
+    return (await KraXMLBuilder.parseSoapReturn(
+      response.data
+    )) as T_APP_PAN_INQ;
+  }
+
   // 2. download Kra XML
   public async panDownloadDetailsComplete({
     dob,

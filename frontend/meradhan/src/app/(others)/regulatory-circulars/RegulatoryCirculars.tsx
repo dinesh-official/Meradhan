@@ -1,10 +1,10 @@
 "use client";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { T_RegulatoryCirculars_GQL_RESPONSE } from "./_actions/reg-cir";
+import GridViewCard from "./_components/GridViewCard";
 import ListViewCard from "./_components/ListViewCard";
 import SearchDateFilter from "./_components/SearchDateFilter";
 import TabView from "./_components/TabView";
-import GridViewCard from "./_components/GridViewCard";
 
 function RegulatoryCirculars({
   categories,

@@ -14,6 +14,7 @@ type StarRatingProps = {
   showValue?: boolean;
   /** Accessible label for the rating (default: "Rating") */
   ariaLabel?: string;
+  onClick?: () => void;
 };
 
 /**
@@ -30,6 +31,7 @@ const StarRating: React.FC<StarRatingProps> = ({
   className = "",
   showValue = false,
   ariaLabel = "Rating",
+  onClick,
 }) => {
   // clamp value between 0 and max
   const safeValue = Math.max(0, Math.min(value, max));
@@ -46,8 +48,12 @@ const StarRating: React.FC<StarRatingProps> = ({
       className={`inline-flex items-center space-x-2 ${className}`}
       role="img"
       aria-label={`${ariaLabel}: ${safeValue} out of ${max}`}
+      onClick={onClick}
     >
-      <div className="flex items-center" aria-hidden={showValue ? "false" : "true"}>
+      <div
+        className="flex items-center"
+        aria-hidden={showValue ? "false" : "true"}
+      >
         {stars.map((s, idx) => (
           <div
             key={idx}
@@ -55,11 +61,7 @@ const StarRating: React.FC<StarRatingProps> = ({
             style={{ width: size, height: size, lineHeight: 0 }}
           >
             {/* empty star (base) */}
-            <Star
-              size={size}
-              className="text-gray-300"
-              aria-hidden="true"
-            />
+            <Star size={size} className="text-gray-300" aria-hidden="true" />
 
             {/* filled star clipped by width percentage */}
             <div

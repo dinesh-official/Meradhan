@@ -1,0 +1,127 @@
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import apiGateway from "@root/apiGateway";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import ReactJson from "react-json-view";
+import { FaChevronDown, FaChevronUp, FaSpinner } from "react-icons/fa";
+
+function KraLogsView({ id }: { id: number }) {
+  const profileApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
+    apiClientCaller
+  );
+  const { data, isLoading } = useQuery({
+    queryKey: ["KycKraLogsView", id],
+    queryFn: async () => {
+      const { responseData } = await profileApi.getKycKraDataById(id);
+      return responseData;
+    },
+  });
+
+  if (!isLoading && (!data || data.length === 0)) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <span className="text-gray-400 text-2xl mb-2">No KRA logs found</span>
+        <span className="text-gray-400">
+          Try refreshing or check back later.
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div className="sticky top-0 z-10  pb-2 mb-2  flex items-center justify-between">
+        <h3 className="text-2xl font-bold  tracking-tight">KRA Logs</h3>
+        {isLoading && <FaSpinner className="animate-spin  text-xl ml-2" />}
+      </div>
+      <div className="space-y-5">
+        {!isLoading &&
+          data?.map((log, index: number) => (
+            <div
+              key={index}
+              className="border border-gray-200 rounded-lg bg-white p-5"
+            >
+              <div className="flex items-center mb-2">
+                <span className="font-semibold text-gray-700">Stage:</span>
+                <span
+                  className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
+                    log.stage === "COMPLETED"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {log.stage}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                <div>
+                  <span className="font-semibold text-gray-700">
+                    Request Time:
+                  </span>
+                  <span className="ml-2 text-gray-600">
+                    {new Date(log.reqTime).toLocaleString()}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">
+                    Response Time:
+                  </span>
+                  <span className="ml-2 text-gray-600">
+                    {log.resTime
+                      ? new Date(log.resTime).toLocaleString()
+                      : "N/A"}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
+                <div>
+                  <span className="font-semibold text-gray-700">
+                    Request Data:
+                  </span>
+                  <ReactJson
+                    src={log.requestData || {}}
+                    theme="rjv-default"
+                    collapsed={2}
+                    enableClipboard={false}
+                    displayDataTypes={false}
+                  />
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-700">
+                    Response Data:
+                  </span>
+                  <ReactJson
+                    src={log.responseData || {}}
+                    theme="rjv-default"
+                    collapsed={2}
+                    enableClipboard={false}
+                    displayDataTypes={false}
+                  />
+                </div>
+              </div>
+              {log.error && (
+                <div className="mt-4">
+                  <span className="font-semibold text-red-700">Error:</span>
+                  <ReactJson
+                    src={log.error}
+                    theme="rjv-default"
+                    collapsed={2}
+                    enableClipboard={false}
+                    displayDataTypes={false}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center h-40">
+            <FaSpinner className="animate-spin text-blue-500 text-3xl mb-2" />
+            <span className="text-blue-500">Loading KRA logs...</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default KraLogsView;

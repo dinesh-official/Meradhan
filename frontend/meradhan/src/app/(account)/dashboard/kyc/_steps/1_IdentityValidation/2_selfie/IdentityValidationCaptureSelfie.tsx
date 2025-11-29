@@ -10,12 +10,9 @@ import {
 import Image from "next/image";
 import { MdOutlineCameraAlt } from "react-icons/md";
 import { useSelfieVerifyHook } from "./_hooks/useSelfieVerifyHook";
-import { useEffect } from "react";
 
 function IdentityValidationCaptureSelfie() {
   const { handelSelfieVerification, isPending } = useSelfieVerifyHook();
-
-
 
   return (
     <Card accountMode>

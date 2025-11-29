@@ -2,15 +2,15 @@
 
 import {
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
+  TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CMS_URL } from "@/global/constants/domains";
+import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
+import { formatDateCustom } from "@/global/utils/datetime.utils";
+import { getFileIcon } from "@/global/utils/icon";
 import { FaInfoCircle, FaShareAlt } from "react-icons/fa";
 import { T_RegulatoryCirculars_GQL_RESPONSE } from "../_actions/reg-cir";
-import { CMS_URL } from "@/global/constants/domains";
-import { formatDateCustom } from "@/global/utils/datetime.utils";
-import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
-import { getFileIcon } from "@/global/utils/icon";
 
 function ListViewCard({
   item,
