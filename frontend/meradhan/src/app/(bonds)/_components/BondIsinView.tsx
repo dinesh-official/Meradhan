@@ -6,6 +6,7 @@ import { PiCurrencyInrBold } from "react-icons/pi";
 import BondInfoHeader from "./BondInfoHeader";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import BondBuyNowCalc from "./BondBuyNowCalc";
 
 export default function BondIsinView({
   bond,
@@ -24,7 +25,7 @@ export default function BondIsinView({
   return (
     <div className="py-10">
       <BondInfoHeader bond={bond} />
-      <div className="gap-8 grid lg:grid-cols-3 py-10">
+      <div className="gap-8 grid lg:grid-cols-5 py-10">
         <div className="lg:col-span-3">
           <div className="gap-5 grid md:grid-cols-3">
             <SortInfoBox title="Issue Price">
@@ -90,9 +91,9 @@ export default function BondIsinView({
             </SortInfoBox>
           </div>
         </div>
-        {/* <div className="lg:col-span-2">
+        <div className="lg:col-span-2">
           <BondBuyNowCalc />
-        </div> */}
+        </div>
       </div>
 
       <div className="container">

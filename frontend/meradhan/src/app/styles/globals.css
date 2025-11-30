@@ -127,6 +127,12 @@
     font-weight: 400;
     font-style: normal;
   }
+  .title {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    @apply text-2xl md:text-[44px];
+  }
 }
 
 .regularCircularBox {

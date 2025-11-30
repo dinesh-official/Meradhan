@@ -13,14 +13,14 @@ export default function BondBuyNowCalc() {
         <div className="flex justify-center items-center ">
           <Button
             variant={"secondary"}
-            className="border-0 rounded-none rounded-l-md px-3"
+            className="border-none border-0 rounded-none rounded-l-md px-3 hover:bg-white hover:text-primary"
           >
             -
           </Button>
           <div className="bg-white px-6 py-1.5">1</div>
           <Button
             variant={"secondary"}
-            className="border-none border-0 rounded-none rounded-r-md px-3"
+            className="border-none border-0 rounded-none rounded-r-md px-3 hover:bg-white hover:text-primary"
           >
             +
           </Button>
@@ -77,7 +77,10 @@ export default function BondBuyNowCalc() {
         </div>
         <div className="text-white flex justify-between gap-2 items-center mt-8">
           <p>* Indicative Price</p>
-          <Button variant={`secondary`} className="px-6">
+          <Button
+            variant={`secondary`}
+            className="px-6 hover:border-white hover:border"
+          >
             Buy Now
           </Button>
         </div>

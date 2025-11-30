@@ -74,17 +74,17 @@ function CardPagination({
   const pages = getPageNumbers();
 
   return (
-    <div className="w-full">
+    <div className="w-full border border-gray-200 rounded-md bg-white overflow-hidden">
       <div className="flex justify-center items-center">
         {/* First */}
         <button
           disabled={page === 1}
           onClick={() => onClick && onClick(1)}
           className={clsx(
-            "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",
+            "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors ",
             page === 1
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-gray-100 hover:bg-blue-100 text-blue-900"
+              : "bg-white hover:bg-blue-100 text-blue-900"
           )}
         >
           «
