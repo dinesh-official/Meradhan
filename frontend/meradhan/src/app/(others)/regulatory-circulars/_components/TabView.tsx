@@ -46,22 +46,8 @@ function TabView({
   };
 
   const onSubmit = (tab: string) => {
-    const params = new URLSearchParams();
-
-    if (search.trim()) params.set("search", search.trim());
-    if (from) params.set("from", from);
-    if (to) params.set("to", to);
-
-    const queryString = params.toString();
-    const finalQuery = queryString ? `?${queryString}` : "";
-
     let slug: string = "/regulatory-circulars/";
-
     slug = tab === "all" ? "/regulatory-circulars" : slug + tab;
-
-    if (pageNo > 1) slug = slug + "/1";
-    if (finalQuery) slug = slug + finalQuery;
-
     window.location.href = slug;
   };
 

@@ -34,9 +34,14 @@ const page = async ({
 }) => {
   const pageData = await getDynamicPageDataGql("regulatory-circulars");
   const categories = await fetchRegulatoryCircularsCategoriesGql();
+  const from = (await searchParams)?.from;
+  const to = (await searchParams)?.to;
   const data = await fetchRegulatoryCircularsByCategoryGql({
     slug: (await params).category,
     page: (await searchParams).page ? parseInt((await searchParams).page!) : 1,
+    from: from,
+    to: to,
+    search: (await searchParams).search,
   });
   return (
     <ViewPort>
@@ -61,8 +66,11 @@ const page = async ({
             />
           </div>
 
-          <RegulatoryCirculars categories={categories} data={data.data || []} />
-          <Pagination pageInfo={data.pageInfo} />
+          <RegulatoryCirculars
+            category={(await params).category}
+            search={(await searchParams).search}
+            categories={categories}
+          />
         </SectionWrapper>
       </div>
     </ViewPort>

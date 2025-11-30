@@ -176,6 +176,15 @@ const generateFilter = ({
 }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filter: any = {};
+  console.log(search, category, from, to);
+
+  if (category.toLowerCase() != "all") {
+    filter["regulatory_circulars_category"] = {
+      Slug: {
+        eq: category,
+      },
+    };
+  }
 
   if (from) {
     filter["Circular_Date"] = {
@@ -194,14 +203,6 @@ const generateFilter = ({
   if (search) {
     filter["Name"] = {
       contains: search,
-    };
-  }
-
-  if (category.toLowerCase() != "all") {
-    filter["regulatory_circulars_category"] = {
-      Slug: {
-        eq: category,
-      },
     };
   }
 
@@ -227,6 +228,7 @@ export const fetchRegulatoryCircularsByCategoryGql = async ({
     to,
     search,
   });
+  console.log(filter);
 
   const { data } = await gqlClient.query<{
     regulatoryCirculars_connection: {
@@ -243,7 +245,7 @@ export const fetchRegulatoryCircularsByCategoryGql = async ({
     variables: {
       filters: filter,
       pagination: {
-        pageSize: 9,
+        pageSize: 3,
         page: page,
       },
     },

@@ -37,10 +37,7 @@ const page = async ({
 }) => {
   const pageData = await getDynamicPageDataGql("regulatory-circulars");
   const categories = await fetchRegulatoryCircularsCategoriesGql();
-  const data = await fetchRegulatoryCircularsByCategoryGql({
-    slug: (await params).category,
-    page: (await searchParams).page ? parseInt((await searchParams).page!) : 1,
-  });
+
   const { category } = await params;
   const search = await searchParams;
 
@@ -75,11 +72,7 @@ const page = async ({
           <RegulatoryCirculars
             categories={categories}
             category={category}
-            from={search.from || ""}
             search={search.search || ""}
-            to={search.to || ""}
-            page={search.page ? parseInt(search.page) : 1}
-            data={data.data || []}
           />
         </SectionWrapper>
       </div>

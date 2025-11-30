@@ -117,9 +117,10 @@ function SearchDateFilter({
             <DatePicker
               ref={fromDateRef}
               selected={fromDate ? new Date(fromDate) : null}
-              onChange={(date) =>
-                setFromDate(date ? new Date(date.setHours(12, 0, 0, 0)) : null)
-              }
+              onChange={(date) => {
+                setFromDate(date ? new Date(date.setHours(12, 0, 0, 0)) : null);
+                // search if fromDate is after toDate, reset
+              }}
               dateFormat="yyyy-MM-dd"
               placeholderText="From Date"
               className="form-input w-full rounded-md border border-gray-300 h-10 pr-10 "
