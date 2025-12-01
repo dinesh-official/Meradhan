@@ -1,5 +1,16 @@
 import { cookieOptions } from "@config/cookie";
 import { appSchema } from "@root/schema";
+import {
+  sendEmailOtpSchema,
+  sendMobileOtpSchema,
+  signUpWithCredentialsQuerySchema,
+  createNewCustomerSchema,
+  signInWithEmailPhoneRequestSchema,
+  sendSignInOtpSchema,
+  signInWithOtpSchema,
+  SocialLoginUserSchema,
+  signInWithCredentialsSchema,
+} from "@packages/schema/lib/customers/customers.schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 
@@ -22,9 +33,7 @@ export class CustomerAuthController {
 
   // ✅ Send Auth Email OTP
   async sendAuthEmailOtp(req: Request, res: Response) {
-    const { email, name } = appSchema.customer.sendEmailOtpSchema.parse(
-      req.body
-    );
+    const { email, name } = sendEmailOtpSchema.parse(req.body);
     await this.customerAuthService.throwEmailOrPhoneExists(email);
     const response = await this.optManager.generateOtp(
       "CUSTOMER_SIGNUP:" + email,
@@ -43,7 +52,7 @@ export class CustomerAuthController {
 
   // ✅ Send Auth Mobile OTP
   async sendAuthMobileOtp(req: Request, res: Response) {
-    const { mobile } = appSchema.customer.sendMobileOtpSchema.parse(req.body);
+    const { mobile } = sendMobileOtpSchema.parse(req.body);
     await this.customerAuthService.throwEmailOrPhoneExists(mobile);
     const response = await this.optManager.generateOtp(
       "CUSTOMER_SIGNUP:" + mobile,
@@ -58,8 +67,9 @@ export class CustomerAuthController {
 
   // ✅ Signup with Credentials
   async signUpWithCredentials(req: Request, res: Response) {
-    const { otp, token, verifyBy } =
-      appSchema.customer.signUpWithCredentialsQuerySchema.parse(req.query);
+    const { otp, token, verifyBy } = signUpWithCredentialsQuerySchema.parse(
+      req.query
+    );
     const isVerified = await this.optManager.verifyOtp(
       token || "",
       otp.toString()
@@ -67,7 +77,7 @@ export class CustomerAuthController {
     if (!isVerified) {
       throw new AppError("The OTP provided is invalid.");
     }
-    const data = appSchema.customer.createNewCustomerSchema.parse(req.body);
+    const data = createNewCustomerSchema.parse(req.body);
     const user = await this.customerAuthService.signUpWithCredentials({
       ...data,
       isEmailVerified: verifyBy === "email",
@@ -82,9 +92,7 @@ export class CustomerAuthController {
 
   // signin request with email or phone
   async signInRequest(req: Request, res: Response) {
-    const payload = appSchema.customer.signInWithEmailPhoneRequestSchema.parse(
-      req.body
-    );
+    const payload = signInWithEmailPhoneRequestSchema.parse(req.body);
     const response = await this.customerAuthService.signinRequest({
       identifier: payload.identity,
       value: payload.value,
@@ -104,8 +112,9 @@ export class CustomerAuthController {
 
   // signin with otp
   async signInWithPassword(req: Request, res: Response) {
-    const { identity, password, value } =
-      appSchema.customer.signInWithCredentialsSchema.parse(req.body);
+    const { identity, password, value } = signInWithCredentialsSchema.parse(
+      req.body
+    );
     const data = await this.customerAuthService.signInWithCredentials({
       identifier: identity,
       password,
@@ -130,9 +139,7 @@ export class CustomerAuthController {
   }
 
   async signInWithOtpSend(req: Request, res: Response) {
-    const { identity, value } = appSchema.customer.sendSignInOtpSchema.parse(
-      req.body
-    );
+    const { identity, value } = sendSignInOtpSchema.parse(req.body);
     const data = await this.customerAuthService.sendSigninWithOtp({
       identifier: identity,
       value,
@@ -144,8 +151,7 @@ export class CustomerAuthController {
   }
 
   async signInWithOtpVerify(req: Request, res: Response) {
-    const { identity, value, otp, token } =
-      appSchema.customer.signInWithOtpSchema.parse(req.body);
+    const { identity, value, otp, token } = signInWithOtpSchema.parse(req.body);
     const data = await this.customerAuthService.verifySigninWithOtp({
       identifier: identity,
       value,
@@ -159,9 +165,7 @@ export class CustomerAuthController {
   }
 
   async signInSocialMedia(req: Request, res: Response) {
-    const socialLogin = appSchema.customer.SocialLoginUserSchema.parse(
-      req.body
-    );
+    const socialLogin = SocialLoginUserSchema.parse(req.body);
     const data = await this.customerAuthService.socialLogin(socialLogin);
     res.sendResponse({
       statusCode: HttpStatus.OK,
