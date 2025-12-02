@@ -14,6 +14,7 @@ import followUpRouter from "@resource/crm/leads/followup/leads_follow_up.routes"
 import leadsRoutes from "@resource/crm/leads/leads.routes";
 import participantsRouter from "@resource/crm/refq/nse/cbrics/cbrics.routes";
 import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
+import local_data_rfq_routes from "@resource/crm/refq/nse/local/localdata_rfq.routes";
 import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
 import crmUsersRoutes from "@resource/crm/users/crmuser.route";
 import webAuditLogsRouter from "@resource/crm/web_audit_logs/audit_logs_route";
@@ -55,6 +56,7 @@ server.addRoutes([
   // rfq routes
   nseIsinRoute,
   rfqMasterRouter,
+  local_data_rfq_routes,
 
   // customer routes
   customerAuthRoutes,

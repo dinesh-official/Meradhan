@@ -15,7 +15,7 @@ function RfqOverviewView() {
         actions={
           <Link href={`/dashboard/leads/create`}>
             <Button>
-              <Plus /> Create New Rfq
+              <Plus /> Create New RFQ
             </Button>
           </Link>
         }

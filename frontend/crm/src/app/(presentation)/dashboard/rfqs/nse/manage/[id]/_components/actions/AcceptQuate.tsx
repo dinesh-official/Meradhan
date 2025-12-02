@@ -15,17 +15,22 @@ import { SelectField } from "@/global/elements/inputs/SelectField";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import apiGateway, { ApiError, CreateRfqResponseItem } from "@root/apiGateway";
 import { useMutation } from "@tanstack/react-query";
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  DealTypeBadge,
+  TradeTypeBadge,
+  YieldTypeBadge,
+} from "../../../../_components/bages/NseRfqBadges";
+import { SelectNseParticipant } from "@/global/elements/autocomplete/SelectNseParticipant";
 function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
   const rfqApi = new apiGateway.crm.rfq.RfqIsinApi(apiClientCaller);
   const router = useRouter();
+  const [openClientCOde, setOpenClientCOde] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [clientCode, setClientCode] = useState<undefined | any>(
-    data.clientCode
-  );
+  const [clientCode, setClientCode] = useState<undefined | any>();
   const [dealType, setDealType] = useState(data.dealType);
 
   const acceptQuoteMutation = useMutation({
@@ -37,7 +42,6 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
         acceptedValue: data.value,
         respDealType: dealType,
         respClientCode: clientCode || undefined,
-        
       });
     },
     onSuccess: (response) => {
@@ -86,13 +90,19 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
           <LabelView title="ISIN">{data.isin}</LabelView>
           <LabelView title="Participant Code">{data.participantCode}</LabelView>
           <LabelView title="Client Code">{data.clientCode}</LabelView>
-          <LabelView title="Deal Type">{data.dealType}</LabelView>
+          <LabelView title="Deal Type">
+            <DealTypeBadge type={`${data.dealType}`} />
+          </LabelView>
           <LabelView title="Settlement Date">{data.settlementDate}</LabelView>
           <LabelView title="Value">{data.value}</LabelView>
           <LabelView title="Yield">{data.yield}</LabelView>
-          <LabelView title="Yield Type">{data.yieldType}</LabelView>
+          <LabelView title="Yield Type">
+            <YieldTypeBadge type={`${data.yieldType}`} />
+          </LabelView>
           <LabelView title="Price">{data.price || "Null"}</LabelView>
-          <LabelView title="Buy/Sell">{data.buySell}</LabelView>
+          <LabelView title="Buy/Sell">
+            <TradeTypeBadge type={`${data.buySell}`} />
+          </LabelView>
           <LabelView title="End Time">{data.endTime}</LabelView>
           <div className="gap-5 grid grid-cols-2 col-span-3">
             <SelectField
@@ -113,22 +123,36 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChangeAction={(e) => setDealType(e as any)}
             />
-            <InputField
-              id="clientcode"
-              label="Client Code"
-              required
-              placeholder="Enter Client Code"
-              value={clientCode}
-              onChangeAction={(e) => {
-                if (e.length == 0) {
-                  setClientCode(undefined);
-                } else {
-                  setClientCode(e);
-                }
-              }}
-            />
+            <div className="relative">
+              <InputField
+                id="clientcode"
+                label="Client Code"
+                required
+                placeholder="Enter Client Code"
+                value={clientCode}
+                onChangeAction={(e) => {
+                  if (e.length == 0) {
+                    setClientCode(undefined);
+                  } else {
+                    setClientCode(e);
+                  }
+                }}
+              />
+              <Plus
+                className="absolute right-2 top-7.5 cursor-pointer"
+                size={18}
+                onClick={() => setOpenClientCOde(true)}
+              />
+            </div>
           </div>
         </div>
+        <SelectNseParticipant
+          open={openClientCOde}
+          setOpen={setOpenClientCOde}
+          onSelect={(e) => {
+            setClientCode(e?.loginId);
+          }}
+        />
         <DialogFooter>
           <DialogTrigger>
             <Button variant="secondary">Cancel</Button>

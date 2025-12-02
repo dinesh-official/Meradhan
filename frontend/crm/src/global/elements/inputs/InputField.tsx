@@ -20,7 +20,7 @@ interface InputFieldProps {
   /** Optional container class */
   className?: string;
   error?: string;
-  readonly?: boolean
+  readonly?: boolean;
 }
 
 export function InputField({
@@ -35,7 +35,7 @@ export function InputField({
   onChangeAction,
   className,
   error,
-  readonly
+  readonly,
 }: InputFieldProps) {
   const [internalValue, setInternalValue] = React.useState(defaultValue || "");
   const isControlled = value !== undefined;
@@ -63,7 +63,9 @@ export function InputField({
         className="disabled:bg-gray-200 disabled:opacity-100 mt-2 disabled:border-0 disabled:text-black"
       />
 
-      {error && <p className="mt-1 text-destructive text-xs text-left">{error}</p>}
+      {error && (
+        <p className="mt-1 text-destructive text-xs text-left">{error}</p>
+      )}
     </div>
   );
 }

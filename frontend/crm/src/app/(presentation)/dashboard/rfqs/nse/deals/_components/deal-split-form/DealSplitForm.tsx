@@ -10,9 +10,9 @@ import { useState } from "react";
 const DealSplitForm = ({
   data,
   onSubmitForm,
-  loading
+  loading,
 }: {
-    data: CreateNegotiationResponse;
+  data: CreateNegotiationResponse;
   loading?: boolean;
   onSubmitForm: (data: {
     calcMethod: string | undefined;
@@ -26,7 +26,7 @@ const DealSplitForm = ({
     remarks: string | undefined;
   }) => void;
 }) => {
-  const [calcMethod, setCalcMethod] = useState<string | undefined>(undefined);
+  const [calcMethod, setCalcMethod] = useState<string | undefined>("O");
   const [price, setPrice] = useState<number | undefined>(undefined);
   const [dealType, setDealType] = useState<string | undefined>(undefined);
   const [clientCode, setClientCode] = useState<string | undefined>(
@@ -155,6 +155,12 @@ const DealSplitForm = ({
             onChangeAction={(e) => {
               setAccruedInterest(Number(e));
               validateField("accruedInterest", e);
+              if (price) {
+                const faceValue = Number(data.initValue) * 10000000;
+                //  ((facevalue * price) / 100) + accured interest
+                const updatedPrice = (faceValue * price) / 100 + Number(e);
+                setConsideration(updatedPrice);
+              }
             }}
           />
           {errors.accruedInterest && (
@@ -256,11 +262,7 @@ const DealSplitForm = ({
 
       {/* Submit Button */}
       <div className="flex justify-end mt-4">
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
+        <Button type="button" onClick={handleSubmit} disabled={loading}>
           {loading ? "Submitting..." : "Submit"}
         </Button>
       </div>

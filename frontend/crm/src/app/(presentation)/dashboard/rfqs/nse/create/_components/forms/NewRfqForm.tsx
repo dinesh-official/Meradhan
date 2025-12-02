@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import NseIsinPicker from "@/global/elements/autocomplete/NseIsinPicker";
+import { SelectNseParticipant } from "@/global/elements/autocomplete/SelectNseParticipant";
+import { SelectRFqParti } from "@/global/elements/autocomplete/SelectRFqParti";
 import { FormCheckbox } from "@/global/elements/inputs/FormCheckbox";
 import { InputField } from "@/global/elements/inputs/InputField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
@@ -115,6 +117,11 @@ function NewRfqForm({
       participantCode: "BCISPL",
       clientCode: "BCISPL",
       access: "2",
+      calcMethodSell: "O",
+      quoteNegotiable: "Y",
+      valueNegotiable: "Y",
+      gtdFlag: "Y",
+      endTime: undefined,
     },
   });
 
@@ -139,6 +146,8 @@ function NewRfqForm({
     }
     return undefined;
   };
+  const [openParticipant, setOpenParticipant] = useState(false);
+  const [openClientCOde, setOpenClientCOde] = useState(false);
 
   return (
     <Form control={control} className="space-y-6">
@@ -326,23 +335,49 @@ function NewRfqForm({
               )}
 
               {watch("dealType") == "B" && (
-                <InputField
-                  id="clientcode"
-                  label="Client Code"
-                  required
-                  placeholder="Enter Client Code"
-                  value={watch("clientCode") || ""}
-                  onChangeAction={(e) => setValue("clientCode", e)}
-                  error={errors.clientCode?.message}
-                />
+                <div className="relative">
+                  <InputField
+                    id="clientcode"
+                    label="Client Code"
+                    required
+                    placeholder="Enter Client Code"
+                    value={watch("clientCode") || ""}
+                    onChangeAction={(e) => setValue("clientCode", e)}
+                    error={errors.clientCode?.message}
+                  />
+                  <Plus
+                    className="absolute right-2 top-7.5 cursor-pointer"
+                    size={18}
+                    onClick={() => setOpenClientCOde(true)}
+                  />
+                </div>
               )}
+              <SelectNseParticipant
+                open={openClientCOde}
+                setOpen={setOpenClientCOde}
+                onSelect={(e) => {
+                  const existing = watch("clientCode");
+                  if (e) {
+                    if (!existing.includes(e.loginId)) {
+                      const updated = e.loginId;
+                      setValue("clientCode", updated);
+                      clearErrors("clientCode");
+                    }
+                  }
+                }}
+              />
+              <Plus
+                className="absolute right-2 top-7.5 cursor-pointer"
+                size={18}
+                onClick={() => setOpenParticipant(true)}
+              />
             </div>
 
             <div className="gap-5 grid md:grid-cols-3 md:col-span-2">
               <InputField
                 id="value"
-                label="RFQ Size (Value in Crores)"
-                placeholder="RFQ Size (Value in Crores)"
+                label="RFQ Size (Value in Amount)"
+                placeholder="RFQ Size (Value in Amount)"
                 value={watch("value")?.toString()}
                 type="number"
                 required
@@ -390,8 +425,7 @@ function NewRfqForm({
                 label="Quantity (Auto Calculated)"
                 placeholder="Auto Calculated"
                 type="number"
-                // disabled
-
+                disabled
                 value={watch("quantity")?.toString()}
                 onChangeAction={(e) => setValue("quantity", Number(e))}
                 error={errors.quantity?.message}
@@ -660,22 +694,44 @@ function NewRfqForm({
               />
             )}
             {watch("access") == "2" && (
-              <InputField
-                id="participantlist"
-                label="Participant List"
-                placeholder="Enter Participant List"
-                type="text"
-                value={watch("participantList")?.join(", ") || ""}
-                onChangeAction={(e) => {
-                  setValue(
-                    "participantList",
-                    e ? e.split(",").map((s) => s.trim()) : undefined
-                  );
-                  clearErrors("participantList");
-                }}
-                error={errors.participantList?.message}
-              />
+              <div className="relative">
+                <Plus
+                  className="absolute right-2 top-7.5 cursor-pointer"
+                  size={18}
+                  onClick={() => setOpenParticipant(true)}
+                />
+
+                <InputField
+                  id="participantlist"
+                  label="Participant List"
+                  placeholder="Enter Participant List"
+                  type="text"
+                  value={watch("participantList")?.join(", ") || ""}
+                  onChangeAction={(e) => {
+                    setValue(
+                      "participantList",
+                      e ? e.split(",").map((s) => s.trim()) : undefined
+                    );
+                    clearErrors("participantList");
+                  }}
+                  error={errors.participantList?.message}
+                />
+              </div>
             )}
+            <SelectRFqParti
+              open={openParticipant}
+              setOpen={setOpenParticipant}
+              onSelect={(e) => {
+                const existing = watch("participantList") || [];
+                if (e) {
+                  if (!existing.includes(e.code)) {
+                    const updated = [...existing, e.code];
+                    setValue("participantList", updated);
+                    clearErrors("participantList");
+                  }
+                }
+              }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -687,7 +743,7 @@ function NewRfqForm({
         <CardContent>
           <div className="gap-4 grid md:grid-cols-2">
             <SelectField
-              label="Sector (Category)" 
+              label="Sector (Category)"
               placeholder="Select Sector"
               options={SECTORS.map((s) => ({
                 label: s.description,

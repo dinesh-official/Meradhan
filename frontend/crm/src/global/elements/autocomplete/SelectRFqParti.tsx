@@ -8,14 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
 interface ContactSelectProps {
-  onSelect?: (contact: ParticipantData | null) => void;
-  value?: ParticipantData;
+  onSelect?: (contact: { code: string; name: string } | null) => void;
+  value?: { code: string; name: string } | null;
   placeholder?: string;
   open?: boolean;
   setOpen?: (open: boolean) => void;
 }
 
-export function SelectNseParticipant({
+export function SelectRFqParti({
   onSelect,
   value,
   placeholder,
@@ -29,18 +29,15 @@ export function SelectNseParticipant({
   );
 
   const fetchUserQuery = useQuery({
-    queryKey: ["SelectNseParticipant", searchValue, open],
+    queryKey: ["SelectRFqParti", searchValue, open],
     queryFn: async () => {
-      const response = await userApi.getAllParticipants({
-        search: searchValue,
-        workflowStatus: "1",
-      });
+      const response = await userApi.getAllRfqParticipants();
       return response.data;
     },
     enabled: open, // only fetch when dropdown is open
   });
 
-  const handleSelect = (contact: ParticipantData) => {
+  const handleSelect = (contact: { code: string; name: string } | null) => {
     onSelect?.(contact);
   };
 
@@ -61,20 +58,26 @@ export function SelectNseParticipant({
             <Loader2 className="animate-spin text-gray-500" />
           </div>
         ) : null}
-        <div className="max-h-44 overflow-auto">
-          {data?.responseData.map((participant) => (
-            <div
-              key={participant.loginId}
-              className=" hover:bg-gray-100 cursor-pointer  p-1  border-b"
-              onClick={() => {
-                handleSelect(participant);
-                setOpen?.(false);
-              }}
-            >
-              <div className="font-medium text-sm">{participant.firstName}</div>
-              <div className="text-sm text-gray-500">{participant.loginId}</div>
-            </div>
-          ))}
+        <div className="max-h-64 overflow-auto">
+          {data?.responseData
+            .filter(
+              (e) =>
+                e.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                e.code?.toLowerCase().includes(searchValue.toLowerCase())
+            )
+            .map((participant) => (
+              <div
+                key={participant.code}
+                className=" hover:bg-gray-100 cursor-pointer  p-1  border-b"
+                onClick={() => {
+                  handleSelect(participant);
+                  setOpen?.(false);
+                }}
+              >
+                <div className="font-medium text-sm">{participant.name}</div>
+                <div className="text-sm text-gray-500">{participant.code}</div>
+              </div>
+            ))}
         </div>
       </DialogContent>
     </Dialog>

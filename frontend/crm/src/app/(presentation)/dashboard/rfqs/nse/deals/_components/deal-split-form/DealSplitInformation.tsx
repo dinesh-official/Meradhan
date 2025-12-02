@@ -2,6 +2,10 @@ import LabelView from "@/global/elements/wrapper/LabelView";
 import { formatNumberTS } from "@/global/utils/formate";
 import { cn } from "@/lib/utils";
 import { CreateNegotiationResponse } from "@root/apiGateway";
+import {
+  DealTypeBadge,
+  TradeTypeBadge,
+} from "../../../_components/bages/NseRfqBadges";
 
 const DealSplitInformation = ({
   data,
@@ -21,7 +25,7 @@ const DealSplitInformation = ({
       </LabelView>
 
       <LabelView title="Deal Type">
-        <p className="font-medium text-sm">{data.initDealType}</p>
+        <DealTypeBadge type={`${data.initDealType}`} />
       </LabelView>
 
       <LabelView title="RFQ Number">
@@ -39,7 +43,7 @@ const DealSplitInformation = ({
       </LabelView>
 
       <LabelView title="Buy/Sell">
-        <p className="font-medium text-sm">{data.buySell}</p>
+        <TradeTypeBadge type={`${data.buySell == "S" ? "B" : "S"}`} />
       </LabelView>
 
       <LabelView title="Quantity">
@@ -54,8 +58,10 @@ const DealSplitInformation = ({
 
       <LabelView title="Value Remaining">
         <p className="font-medium text-sm">
-          {formatNumberTS(Number(data.initValue) * 10000000 -
-            Number(data.initValue) * 10000000)}
+          {formatNumberTS(
+            Number(data.initValue) * 10000000 -
+              Number(data.initValue) * 10000000
+          )}
         </p>
       </LabelView>
     </div>
