@@ -69,7 +69,8 @@ export class OrderService {
         subTotal: preview.subTotal,
         stampDuty: preview.stampDuty,
         totalAmount: preview.totalAmount,
-        paymentStatus: "PENDING",
+        paymentStatus: PaymentStatus.PENDING,
+        status: "PENDING",
         paymentProvider: PaymentProviders.RAZORPAY,
         isin: preview.isin,
         bondName: preview.bondName,
@@ -126,7 +127,10 @@ export class OrderService {
       if (!isValid) {
         await db.dataBase.order.update({
           where: { id: order.id },
-          data: { paymentStatus: "FAILED" },
+          data: {
+            paymentStatus: "REJECTED" as PaymentStatus,
+            status: "REJECTED",
+          },
         });
         throw new AppError("Invalid payment signature", {
           code: "PAYMENT_VERIFICATION_FAILED",
@@ -139,6 +143,7 @@ export class OrderService {
         where: { id: order.id },
         data: {
           paymentStatus: PaymentStatus.COMPLETED,
+          status: "SETTLED",
           paymentId,
           paymentMetadata: {
             signature: signature || null,
@@ -167,19 +172,54 @@ export class OrderService {
   async getOrderHistory(
     customerId: number,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    status?: string,
+    bondType?: string
   ) {
     const skip = (page - 1) * limit;
 
+    const whereClause: Prisma.OrderWhereInput = {
+      customerProfileId: customerId,
+    };
+
+    const countWhereClause: Prisma.OrderWhereInput = {
+      customerProfileId: customerId,
+    };
+
+    if (status) {
+      // Status filter is for order status, not payment status
+      const validOrderStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
+      if (validOrderStatuses.includes(status)) {
+        whereClause.status = status;
+        countWhereClause.status = status;
+      }
+    }
+
+    if (bondType) {
+      // Filter by bond type stored in bondDetails JSON
+      const validBondTypes = ["PRIMARY", "SECONDARY"];
+      if (validBondTypes.includes(bondType.toUpperCase())) {
+        const isPrimary = bondType.toUpperCase() === "PRIMARY";
+        whereClause.bondDetails = {
+          path: ["isPrimary"],
+          equals: isPrimary,
+        };
+        countWhereClause.bondDetails = {
+          path: ["isPrimary"],
+          equals: isPrimary,
+        };
+      }
+    }
+
     const [orders, total] = await Promise.all([
       db.dataBase.order.findMany({
-        where: { customerProfileId: customerId },
+        where: whereClause,
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
       }),
       db.dataBase.order.count({
-        where: { customerProfileId: customerId },
+        where: countWhereClause,
       }),
     ]);
 

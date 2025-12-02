@@ -1,6 +1,8 @@
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { Button } from "./button";
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -12,7 +14,7 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
@@ -25,7 +27,7 @@ function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 const emptyMediaVariants = cva(
@@ -41,7 +43,7 @@ const emptyMediaVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
 function EmptyMedia({
   className,
@@ -55,7 +57,7 @@ function EmptyMedia({
       className={cn(emptyMediaVariants({ variant, className }))}
       {...props}
     />
-  )
+  );
 }
 
 function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
@@ -65,7 +67,7 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
       className={cn("text-lg font-medium tracking-tight", className)}
       {...props}
     />
-  )
+  );
 }
 
 function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
@@ -78,7 +80,7 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
@@ -91,7 +93,45 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
+  );
+}
+
+function OrdersEmptyState({
+  message = "No orders found",
+  ctaText,
+  onCtaClick,
+  imageSrc = "/static/sad-emoji.svg",
+  className = "",
+}: {
+  message?: string;
+  ctaText?: string;
+  onCtaClick?: () => void;
+  imageSrc?: string;
+  className?: string;
+}) {
+  return (
+    <Empty className={`py-10 ${className}`}>
+      <EmptyMedia>
+        <Image
+          src={imageSrc as string}
+          alt="Empty state illustration"
+          className="w-20 h-20 object-contain"
+          width={80}
+          height={80}
+        />
+      </EmptyMedia>
+      <EmptyContent>
+        <EmptyDescription className="text-gray-600 text-base">
+          {message}
+        </EmptyDescription>
+        {ctaText && (
+          <Button onClick={onCtaClick} variant="outline" aria-label={ctaText}>
+            {ctaText}
+          </Button>
+        )}
+      </EmptyContent>
+    </Empty>
+  );
 }
 
 export {
@@ -101,4 +141,5 @@ export {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
-}
+  OrdersEmptyState,
+};

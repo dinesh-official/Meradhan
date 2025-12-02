@@ -2,6 +2,7 @@
 
 import { FC, memo, ReactNode, useEffect } from "react";
 import { FaUser } from "react-icons/fa";
+import { HiShoppingCart } from "react-icons/hi";
 import { MdSpaceDashboard } from "react-icons/md";
 
 import {
@@ -49,11 +50,11 @@ export const accountMenuItems: MenuItem[] = [
   //   label: "Portfolio",
   //   href: "/dashboard/portfolio",
   // },
-  // {
-  //   icon: <HiRectangleStack size={18} />,
-  //   label: "My Orders",
-  //   href: "/dashboard/orders",
-  // },
+  {
+    icon: <HiShoppingCart size={18} />,
+    label: "My Orders",
+    href: "/dashboard/orders",
+  },
   // {
   //   icon: <FaSackDollar size={18} />,
   //   label: "Bond Requests",

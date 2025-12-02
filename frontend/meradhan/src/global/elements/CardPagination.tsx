@@ -8,6 +8,7 @@ interface CardPaginationProps {
   totalPages: number;
   onClick?: (page: number) => void; // optional
   getPageLink?: (page: number) => string; // optional link generator
+  disabled?: boolean;
 }
 
 function CardPagination({
@@ -15,6 +16,7 @@ function CardPagination({
   totalPages,
   onClick,
   getPageLink,
+  disabled,
 }: CardPaginationProps) {
   const getPageNumbers = () => {
     const pages: (number | "ellipsis")[] = [];
@@ -78,7 +80,7 @@ function CardPagination({
       <div className="flex justify-center items-center">
         {/* First */}
         <button
-          disabled={page === 1}
+          disabled={page === 1 || disabled}
           onClick={() => onClick && onClick(1)}
           className={clsx(
             "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors ",
@@ -92,7 +94,7 @@ function CardPagination({
 
         {/* Prev */}
         <button
-          disabled={page === 1}
+          disabled={page === 1 || disabled}
           onClick={() => onClick && onClick(page - 1)}
           className={clsx(
             "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",
@@ -109,7 +111,7 @@ function CardPagination({
 
         {/* Next */}
         <button
-          disabled={page === totalPages}
+          disabled={page === totalPages || disabled}
           onClick={() => onClick && onClick(page + 1)}
           className={clsx(
             "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",
@@ -123,7 +125,7 @@ function CardPagination({
 
         {/* Last */}
         <button
-          disabled={page === totalPages}
+          disabled={page === totalPages || disabled}
           onClick={() => onClick && onClick(totalPages)}
           className={clsx(
             "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",

@@ -34,10 +34,19 @@ export class OrderController {
     const customerId = req.customer?.id;
     if (!customerId) throw new AppError("Unauthorized");
 
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const query = appSchema.order.OrderQuerySchema.parse(req.query);
+    const page = query.page ? Number(query.page) : 1;
+    const limit = query.limit ? Number(query.limit) : 10;
+    const status = query.status;
+    const bondType = query.bondType;
 
-    const result = await this.orderService.getOrderHistory(customerId, page, limit);
+    const result = await this.orderService.getOrderHistory(
+      customerId,
+      page,
+      limit,
+      status,
+      bondType
+    );
     return res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: result,

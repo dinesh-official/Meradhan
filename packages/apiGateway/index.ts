@@ -16,6 +16,8 @@ import * as crmUser from "./src/core/api/crm/crmUsers.api";
 
 import * as crmFollowUpLeads from "./src/core/api/crm/crmFollowUp.api";
 import * as crmLeads from "./src/core/api/crm/crmLeads.api";
+import { CrmOrdersApi } from "./src/core/api/crm/orders.api";
+export type * from "./src/core/api/crm/orders.response";
 
 import * as auditlogs from "./src/core/api/crm/auditlogs/auditlogs.api";
 
@@ -34,6 +36,9 @@ export type * from "./src/core/api/meradhan/customerauth.response";
 import * as customerKycApi from "./src/core/api/meradhan/kyc/Kyc.api";
 export type * from "./src/core/api/meradhan/kyc/Kyc.response";
 
+import { CustomerOrderApi } from "./src/core/api/meradhan/order/order.api";
+export type * from "./src/core/api/meradhan/order/order.response";
+
 import * as trash from "./src/core/api/trash/trash.api";
 import * as commonApi from "./src/core/api/meradhan/common.api";
 
@@ -46,6 +51,7 @@ export default {
     customer: crmCustomer,
     crmLeads: crmLeads,
     crmFollowup: crmFollowUpLeads,
+    crmOrdersApi: CrmOrdersApi,
     auditlogs,
     rfq: {
       participants,
@@ -55,6 +61,7 @@ export default {
   meradhan: {
     customerAuthApi,
     customerKycApi,
+    customerOrderApi: CustomerOrderApi,
     commonApi,
   },
   bondsApi,

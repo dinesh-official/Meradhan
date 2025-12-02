@@ -33,6 +33,7 @@ export const OrderQuerySchema = z.object({
   page: z.string().optional(),
   limit: z.string().optional(),
   status: z.string().optional(),
+  bondType: z.string().optional(),
 });
 
 export const OrderAuditLogQuerySchema = z.object({
