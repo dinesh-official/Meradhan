@@ -95,6 +95,46 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+function OrdersEmptyState({
+  message = "No orders found",
+  ctaText,
+  onCtaClick,
+  imageSrc = "/static/sad-emoji.svg",
+  className = "",
+}: {
+  message?: string;
+  ctaText?: string;
+  onCtaClick?: () => void;
+  imageSrc?: string;
+  className?: string;
+}) {
+  return (
+    <Empty className={`py-10 ${className}`}>
+      <EmptyMedia>
+        <img
+          src={imageSrc}
+          alt="Empty state illustration"
+          className="w-20 h-20 object-contain"
+        />
+      </EmptyMedia>
+      <EmptyContent>
+        <EmptyDescription className="text-gray-600 text-base">
+          {message}
+        </EmptyDescription>
+        {ctaText && (
+          <button
+            onClick={onCtaClick}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+            aria-label={ctaText}
+          >
+            {ctaText}
+          </button>
+        )}
+      </EmptyContent>
+    </Empty>
+  );
+}
+
 export {
   Empty,
   EmptyHeader,
@@ -102,4 +142,5 @@ export {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
+  OrdersEmptyState,
 }

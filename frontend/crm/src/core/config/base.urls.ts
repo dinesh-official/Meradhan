@@ -1,7 +1,7 @@
 // Centralized base URLs for all environments
 export const BASES = {
   development: {
-    HOST: "http://localhost:3000",
+    HOST: "http://localhost:3001",
     API_SERVER: "http://localhost:4000",
     CMS: "https://spydertest.meradhan.co",
     API_BACKEND_URL_IP: "http://localhost:4000",
