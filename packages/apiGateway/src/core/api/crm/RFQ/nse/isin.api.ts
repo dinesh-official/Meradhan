@@ -163,4 +163,14 @@ export class RfqIsinApi {
     });
     return data;
   }
+
+  async getAllDealamend(
+    filter: z.infer<typeof appSchema.rfq.dealAmendFilterSchema>
+  ) {
+    const response = await this.apiClient.post(
+      "crm/rfq/nse/dealamend/all",
+      filter
+    );
+    return response.data;
+  }
 }

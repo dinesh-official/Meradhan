@@ -133,10 +133,17 @@ const DealSplitForm = ({
             label="Price *"
             placeholder="Enter Price"
             type="number"
+            max={100}
             value={price?.toString()}
             onChangeAction={(e) => {
               setPrice(Number(e));
               validateField("price", e);
+              if (accruedInterest) {
+                const faceValue = Number(data.initValue) * 10000000;
+                //  ((facevalue * price) / 100) + accured interest
+                const updatedPrice = (faceValue * Number(e)) / 100 + Number(e);
+                setConsideration(updatedPrice);
+              }
             }}
           />
           {errors.price && (

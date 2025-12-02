@@ -166,7 +166,7 @@ function NSEDealView({ id, date }: { id: string; date?: string }) {
             Refresh
           </Button>
           <AcceptQuate data={data} />
-          <RejectQuate data={data} />
+          {/* <RejectQuate data={data} /> */}
         </div>
       </div>
 

@@ -9,8 +9,8 @@ function DealsPage() {
       <PageInfoBar
         title="NSE Deals"
         description="Manage NSE deal submissions and confirmations"
-          />
-          <NSEDealsView/>
+      />
+      <NSEDealsView />
     </Workspace>
   );
 }

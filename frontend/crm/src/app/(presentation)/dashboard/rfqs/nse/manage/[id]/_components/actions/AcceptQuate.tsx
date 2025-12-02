@@ -25,13 +25,14 @@ import {
   YieldTypeBadge,
 } from "../../../../_components/bages/NseRfqBadges";
 import { SelectNseParticipant } from "@/global/elements/autocomplete/SelectNseParticipant";
+import { queryClient } from "@/core/config/reactQuery";
 function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
   const rfqApi = new apiGateway.crm.rfq.RfqIsinApi(apiClientCaller);
   const router = useRouter();
   const [openClientCOde, setOpenClientCOde] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [clientCode, setClientCode] = useState<undefined | any>();
-  const [dealType, setDealType] = useState(data.dealType);
+  const [dealType, setDealType] = useState<"B" | "D">("B");
 
   const acceptQuoteMutation = useMutation({
     mutationKey: ["acceptQuote", data.id],
@@ -48,6 +49,9 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
       // Handle success (e.g., show a success message, refresh data)
       toast.success("Quote accepted successfully");
       console.log(response);
+      queryClient.invalidateQueries({
+        queryKey: ["find-rfq"],
+      });
       router.back();
     },
     onError: (error) => {

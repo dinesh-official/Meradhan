@@ -29,7 +29,7 @@ function NscRfqView() {
           }}
           onRegTypeChange={(e) => setRegTypeValue(e)}
           rfqDateValue={filters.rfqDate}
-          onRfqDateChange={(e) => setRfqDate(e.target.value)}
+          onRfqDateChange={(e: string) => setRfqDate(e)}
           searchValue={filters.searchValue}
           onSearchChange={(e) => setSearchValue(e.target.value)}
         />

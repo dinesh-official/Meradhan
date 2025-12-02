@@ -104,6 +104,7 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: !!enableRowSelection,
     getRowId: getRowIdAction,
+
     initialState: {
       pagination: { pageIndex: 0, pageSize: initialPageSize },
     },
@@ -117,7 +118,7 @@ export function DataTable<TData, TValue>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}  className="bg-gray-50" >
+              <TableRow key={hg.id} className="bg-gray-50">
                 {hg.headers.map((header) => {
                   const stickyRight =
                     stickyRightColumnId &&

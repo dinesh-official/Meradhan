@@ -9,13 +9,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SelectOption } from "@/global/elements/inputs/SelectField";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface NseRFQSearchFilterBarProps {
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   rfqDateValue?: string;
-  onRfqDateChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRfqDateChange?: (e: string) => void;
 
   statusValue?: string;
   onStatusChange?: (value: string) => void;
@@ -63,13 +65,42 @@ const NseRFQSearchFilterBar: React.FC<NseRFQSearchFilterBarProps> = ({
           onChange={onSearchChange}
         />
 
-        <Input
-          className="peer bg-secondary border-0 w-48"
-          placeholder="RFQ Date"
-          type="date"
-          value={rfqDateValue}
-          onChange={onRfqDateChange}
-        />
+        <div className="flex items-center">
+          <Button
+            variant={`secondary`}
+            className="rounded-r-none"
+            onClick={() => {
+              const prevDate = new Date(rfqDateValue || new Date());
+              prevDate.setDate(prevDate.getDate() - 1);
+              const formatted = prevDate.toISOString().split("T")[0];
+              onRfqDateChange?.(formatted);
+            }}
+          >
+            <ArrowLeft />
+          </Button>
+          <Input
+            className=" rounded-none bg-secondary border-0 w-32 px-0 text-center"
+            placeholder="RFQ Date"
+            type="date"
+            value={rfqDateValue}
+            onChange={(e) => {
+              onRfqDateChange?.(e.target.value);
+            }}
+          />
+          <Button
+            variant={`secondary`}
+            className="rounded-l-none"
+            disabled={rfqDateValue === new Date().toISOString().split("T")[0]}
+            onClick={() => {
+              const prevDate = new Date(rfqDateValue || new Date());
+              prevDate.setDate(prevDate.getDate() + 1);
+              const formatted = prevDate.toISOString().split("T")[0];
+              onRfqDateChange?.(formatted);
+            }}
+          >
+            <ArrowRight />
+          </Button>
+        </div>
       </div>
 
       {/* Status and KYC Filters */}

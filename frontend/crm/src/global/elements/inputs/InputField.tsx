@@ -21,6 +21,7 @@ interface InputFieldProps {
   className?: string;
   error?: string;
   readonly?: boolean;
+  max?: number;
 }
 
 export function InputField({
@@ -36,6 +37,7 @@ export function InputField({
   className,
   error,
   readonly,
+  max,
 }: InputFieldProps) {
   const [internalValue, setInternalValue] = React.useState(defaultValue || "");
   const isControlled = value !== undefined;
@@ -54,6 +56,7 @@ export function InputField({
       <Input
         id={id}
         type={type}
+        max={max}
         placeholder={placeholder}
         required={required}
         disabled={disabled}

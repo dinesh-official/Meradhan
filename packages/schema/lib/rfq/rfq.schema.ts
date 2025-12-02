@@ -238,3 +238,12 @@ export const settleOrderFilterSchema = z.object({
   filtToModSettleDate: z.string(),
   filtCounterParty: z.string().max(30).optional(),
 });
+
+export const dealAmendFilterSchema = z.object({
+  id: z.number().optional(),
+  rfqNumber: z.string().max(15).optional(),
+  ngId: z.string().optional(),
+  requestType: z.enum(["M", "C"]).optional(),
+  filtFromDate: z.string().optional(),
+  filtToDate: z.string().max(30).optional(),
+});
