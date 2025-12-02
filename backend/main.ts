@@ -18,6 +18,9 @@ import local_data_rfq_routes from "@resource/crm/refq/nse/local/localdata_rfq.ro
 import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
 import crmUsersRoutes from "@resource/crm/users/crmuser.route";
 import webAuditLogsRouter from "@resource/crm/web_audit_logs/audit_logs_route";
+import orderRoutes from "@resource/customer/order/order.routes";
+import customerBondsRoutes from "@resource/customer/bonds/customer_bonds.routes";
+import paymentRoutes from "@resource/customer/payment/payment.routes";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.route";
 import kycRoutes from "@resource/customer/kyc/kyc.routes";
 import customerProfileRoutes from "@resource/customer/profile/c_profile.routes";
@@ -62,6 +65,9 @@ server.addRoutes([
   customerAuthRoutes,
   customerProfileRoutes,
   kycRoutes,
+  orderRoutes,
+  customerBondsRoutes,
+  paymentRoutes,
 
   // bond routes
   bondRoute,

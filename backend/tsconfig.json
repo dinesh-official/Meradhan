@@ -35,7 +35,8 @@
       "@store/*": ["./src/store/*"],
       "@services/*": ["./src/services/*"],
       "@root/*": ["./src/*"],
-      "@types/*": ["./types/*"]
+      "@types/*": ["./types/*"],
+      "@packages/*": ["../packages/*"]
     },
 
     // Some stricter flags (disabled by default)

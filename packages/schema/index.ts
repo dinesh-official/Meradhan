@@ -14,6 +14,7 @@ import * as bondsSchema from "./lib/bonds/bonds.schema";
 import * as rfqSchema from "./lib/rfq/rfq.schema";
 import * as contactSchema from "./lib/contact.schema";
 import * as auditlogsSchema from "./lib/auditlogs.schema";
+import * as orderSchema from "./lib/order/order.schema";
 
 export const appSchema = {
   auth: authSchema,
@@ -36,4 +37,5 @@ export const appSchema = {
 
   contact: contactSchema,
   auditlogsSchema,
+  order: orderSchema,
 };

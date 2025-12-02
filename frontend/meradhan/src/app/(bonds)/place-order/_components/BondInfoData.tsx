@@ -1,16 +1,29 @@
 import React from "react";
 import { BsArrowUpRightSquareFill } from "react-icons/bs";
 
-function BondInfoData() {
+interface BondInfoDataProps {
+  bondData?: {
+    bondName?: string;
+    isin?: string;
+    instrumentName?: string;
+  };
+}
+
+function BondInfoData({ bondData }: BondInfoDataProps) {
   return (
     <div>
-      <p className="text-sm">Issuer Name</p>
-      <h6 className="text-xl text-black">KRAZYBEE SERVICES LIMITED</h6>
+      <p className="text-sm">Bond Name</p>
+      <h6 className="text-xl text-black">
+        {bondData?.bondName || "Loading..."}
+      </h6>
       <p className="flex ">
         ISIN:{" "}
         <span className="text-primary flex items-center ml-1 gap-2">
-          INE02DT07019 <BsArrowUpRightSquareFill />
+          {bondData?.isin || "Loading..."} <BsArrowUpRightSquareFill />
         </span>
+      </p>
+      <p className="text-sm text-gray-600 mt-1">
+        {bondData?.instrumentName || "Loading..."}
       </p>
     </div>
   );

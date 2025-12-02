@@ -45,4 +45,14 @@ export const config = {
     host: getEnvVar("REDIS_HOST", "34.47.136.227"),
     port: parseInt(getEnvVar("REDIS_PORT", "6379")),
   },
+
+  razorpay: {
+    keyId: getEnvVar("RAZORPAY_KEY_ID","rzp_test_kEImBJ2nKkyGjS"),
+    keySecret: getEnvVar("RAZORPAY_KEY_SECRET","bLyRCn9Iqt2Ub8I53H1zJd02"),
+    webhookSecret: getEnvVar("RAZORPAY_WEBHOOK_SECRET","adsas@285$5a85$$5sjkbbdfjbdfa@#$%2334324sddfdsj"),
+  },
+
+  checkout: {
+    stampDutyRate: parseFloat(getEnvVar("STAMP_DUTY_RATE", "0.1")),
+  },
 };
