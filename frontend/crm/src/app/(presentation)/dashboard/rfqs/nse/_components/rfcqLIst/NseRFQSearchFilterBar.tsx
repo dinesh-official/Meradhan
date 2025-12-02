@@ -32,7 +32,7 @@ const filterKycStatus: SelectOption[] = [
   { label: "Institution – Unregulated", value: "U" },
 ];
 
-const filterStatusOptions: SelectOption[] = [
+export const filterStatusOptions: SelectOption[] = [
   { label: "All Status", value: "ALL" },
   { label: "Pending", value: "P" },
   { label: "Withdrawn", value: "W" },

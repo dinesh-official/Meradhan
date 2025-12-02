@@ -16,13 +16,35 @@ import DealProposerSection from "./_tabs/Deal_Proposer/DealProposerSection";
 
 function NSEDealsView() {
   const [tabs, setTabs] = useState("deal_proposer");
+  const [fromTimestamp, setFromTimestamp] = useState("");
+  const [toTimestamp, setToTimestamp] = useState("");
+  const [confirmStatus, setConfirmStatus] = useState("");
+  const [rfqNumber, setRfqNumber] = useState("");
+  const [buySell, setBuySell] = useState("");
 
   const rfqApi = new apiGateway.crm.rfq.RfqIsinApi(apiClientCaller);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["nseDealProposers"],
+    queryKey: [
+      "nseDealProposers",
+      fromTimestamp,
+      toTimestamp,
+      // lastActivityTimestamp removed
+      confirmStatus,
+      rfqNumber,
+      buySell,
+    ],
     queryFn: async () => {
-      const response = await rfqApi.getAllNegotiations({});
+      const response = await rfqApi.getAllNegotiations({
+        fromTimestamp,
+        toTimestamp,
+        confirmStatus:
+          confirmStatus === ""
+            ? undefined
+            : (confirmStatus as "PP" | "PC" | "PR" | "CA" | "CC" | "CR"),
+        rfqNumber,
+        buySell: buySell === "" ? undefined : (buySell as "B" | "S"),
+      });
       return response.responseData;
     },
     retry: 2,
@@ -51,6 +73,85 @@ function NSEDealsView() {
         />
       </div>
 
+      {/* Filters Section */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Filter Deals</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                From Timestamp
+              </label>
+              <input
+                type="date"
+                className="w-full border rounded px-2 py-1"
+                value={fromTimestamp}
+                onChange={(e) => setFromTimestamp(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                To Timestamp
+              </label>
+              <input
+                type="date"
+                className="w-full border rounded px-2 py-1"
+                value={toTimestamp}
+                onChange={(e) => setToTimestamp(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                RFQ Number
+              </label>
+              <input
+                type="text"
+                className="w-full border rounded px-2 py-1"
+                maxLength={15}
+                value={rfqNumber}
+                onChange={(e) => setRfqNumber(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Confirmation Status
+              </label>
+              <select
+                className="w-full border rounded px-2 py-1"
+                value={confirmStatus}
+                onChange={(e) => setConfirmStatus(e.target.value)}
+              >
+                <option value="">All</option>
+                <option value="PP">PP - Proposer Checker Pending*</option>
+                <option value="PC">PC - Submitted to Counter</option>
+                <option value="PR">PR - Proposer Checker Rejected*</option>
+                <option value="CA">CA - Counter Checker Pending*</option>
+                <option value="CC">CC - Confirmed</option>
+                <option value="CR">CR - Counter Rejected</option>
+              </select>
+              <div className="text-xs mt-1 text-gray-500">
+                * Relevant only if Maker checker is enabled in the deal
+                confirmation leg of proposer or counter
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Buy/Sell</label>
+              <select
+                className="w-full border rounded px-2 py-1"
+                value={buySell}
+                onChange={(e) => setBuySell(e.target.value)}
+              >
+                <option value="">All</option>
+                <option value="B">B - Buy</option>
+                <option value="S">S - Sell</option>
+              </select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Deals Management</CardTitle>
@@ -60,6 +161,7 @@ function NSEDealsView() {
           <div className="flex justify-between items-center gap-5 mt-2">
             <Tabs defaultValue="deal_proposer" onValueChange={setTabs}>
               <TabsList>
+                <TabsTrigger value="all">All Deals</TabsTrigger>
                 <TabsTrigger value="deal_proposer">Deal Proposer</TabsTrigger>
                 <TabsTrigger value="deal_counterparty">
                   Deal Counterparty
@@ -71,6 +173,9 @@ function NSEDealsView() {
         </CardHeader>
 
         <CardContent>
+          {tabs === "all" && (
+            <DealProposerSection data={data || []} loading={isLoading} />
+          )}
           {tabs === "deal_proposer" && (
             <DealProposerSection
               data={data?.filter((e) => !e.confirmStatus) || []}

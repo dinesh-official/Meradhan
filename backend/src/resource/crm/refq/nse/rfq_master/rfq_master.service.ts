@@ -125,8 +125,10 @@ export class RfqMasterService {
     filters: z.infer<typeof appSchema.rfq.rfqNegotiationFilterSchema>,
     activeUserId?: number
   ) {
+    console.log(filters);
+
     const data = await this.rfqManager.getAllNegotiations({
-      buySellType: filters.buySellType,
+      buySell: filters.buySell,
       rfqNumber: filters.rfqNumber,
       status: filters.status,
       date: filters.date,

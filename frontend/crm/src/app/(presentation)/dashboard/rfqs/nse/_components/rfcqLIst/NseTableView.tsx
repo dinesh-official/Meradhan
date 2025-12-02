@@ -25,7 +25,7 @@ function NseTableView({
   onClick?: (data: CreateRfqResponseItem) => void;
 }) {
   return (
-    <div >
+    <div>
       <UniversalTable<CreateRfqResponseItem>
         initialPageSize={10}
         isLoading={loading}

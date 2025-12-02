@@ -8,6 +8,7 @@ import { SelectField } from "@/global/elements/inputs/SelectField";
 import { UserAccountType } from "../../../../../../../../../../packages/schema/lib/customers/customers.schema";
 import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
+import { useState } from "react";
 
 function CustomerManagementForm({
   manager,
@@ -16,7 +17,6 @@ function CustomerManagementForm({
   manager: ICustomerDataFormHook;
   updateMode?: boolean;
 }) {
-
   return (
     <div className="flex flex-col  gap-4 relative">
       {/* First / Middle / Last Name */}
@@ -218,7 +218,7 @@ function CustomerManagementForm({
         <SelectRoleUser
           role="RELATIONSHIP_MANAGER"
           placeholder="Select relationship manager"
-          value={manager.relationManager.relationManager?? undefined} // shows selected name
+          value={manager.relationManager.relationManager ?? undefined} // shows selected name
           onSelect={(user) => {
             if (user) {
               manager.relationManager.setRelationManager(user);

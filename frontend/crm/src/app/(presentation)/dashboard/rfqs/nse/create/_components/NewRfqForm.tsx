@@ -17,12 +17,11 @@ function NewRfqFormView() {
         description="Create a new Request for Quote record"
         showBack
       />
-      
+
       <NewRfqForm
         onSubmit={handleFormSubmit}
         isLoading={newRfqMutation.isPending}
       />
-      
     </div>
   );
 }
