@@ -2,6 +2,7 @@ import axios, { type AxiosInstance } from "axios";
 import FormData from "form-data";
 import fs from "fs";
 import { v4 as uuid } from "uuid";
+import { env } from "@packages/config/env";
 import type {
   DigioSignatureResponse,
   TDigioWithTemplateResponse,
@@ -11,12 +12,10 @@ export class DigioSDK {
   private client: AxiosInstance;
   constructor() {
     this.client = axios.create({
-      baseURL: "https://ext.digio.in:444",
+      baseURL: "https://api.digio.in",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${btoa(
-          "ACK250805175803472WR3YWRCHU32425:6TZL379SV9DLOWHYF5QCF3ONQZ1UI7G7"
-        )}`, // Replace with real key
+        Authorization: `Basic ${btoa(env.DIGIO_USERNAME_PASS)}`, // Replace with real key
       },
     });
   }

@@ -11,7 +11,12 @@ export const UserAccountType = [
   "PARTNERSHIP_FIRM",
 ] as const;
 
-export const kycStatus = ["VERIFIED", "PENDING", "REJECTED"] as const;
+export const kycStatus = [
+  "VERIFIED",
+  "PENDING",
+  "REJECTED",
+  "UNDER_REVIEW",
+] as const;
 
 export const findManyCustomerSchema = z.object({
   page: z
@@ -23,7 +28,6 @@ export const findManyCustomerSchema = z.object({
   accountStatus: AccountStatusEnum.optional(),
   kycStatus: z.enum([...kycStatus]).optional(),
 });
-
 
 export const sendEmailOtpSchema = z.object({
   email: z.email("Invalid email format."),
@@ -42,7 +46,6 @@ export const signUpWithCredentialsQuerySchema = z.object({
   verifyBy: z.enum(["email", "mobile"]).optional(),
 });
 
-
 // Sign In Schemas
 export const signInWithEmailPhoneRequestSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),
@@ -54,7 +57,6 @@ export const signInWithCredentialsSchema = z.object({
   value: z.string().min(1, "Enter your valid email or phone number."),
   password: z.string().min(4, "Enter your valid password."),
 });
-
 
 export const sendSignInOtpSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),
@@ -68,14 +70,13 @@ export const signInWithOtpSchema = z.object({
   token: z.string().min(1, "Token is required."),
 });
 
-
 const ProviderEnum = z.enum(["GOOGLE", "MICROSOFT", "FACEBOOK"]);
 export const SocialLoginUserSchema = z.object({
   email: z.email(),
-  image: z.string(),         // must be a valid URL (change to .string() if not a URL)
-  name: z.string().min(1),         // non-empty string
-  id: z.string().min(1),           // non-empty string (could be UUID pattern if needed)
-  provider: ProviderEnum
+  image: z.string(), // must be a valid URL (change to .string() if not a URL)
+  name: z.string().min(1), // non-empty string
+  id: z.string().min(1), // non-empty string (could be UUID pattern if needed)
+  provider: ProviderEnum,
 });
 
 export const sendForgetPasswordSchema = z.object({
@@ -86,8 +87,6 @@ export const resetPasswordSchema = z.object({
   password: z.string().min(4, "Enter your valid password."),
   token: z.string().min(1, "Token is required."),
 });
-
-
 
 export const createNewCustomerSchema = z.object({
   firstName: z
@@ -100,10 +99,12 @@ export const createNewCustomerSchema = z.object({
   emailId: z.email({ message: "Please enter a valid email address" }),
   phoneNo: z
     .string({ error: "Phone number is required" })
-    .min(10, { message: "Phone number must be at least 10 digits long" }).max(14, { message: "Phone number must be at most 14 digits long" }),
+    .min(10, { message: "Phone number must be at least 10 digits long" })
+    .max(14, { message: "Phone number must be at most 14 digits long" }),
   whatsAppNo: z
     .string({ error: "WhatsApp number is required" })
-    .min(10, { message: "WhatsApp number must be at least 10 digits long" }).max(14, { message: "WhatsApp number must be at most 14 digits long" }),
+    .min(10, { message: "WhatsApp number must be at least 10 digits long" })
+    .max(14, { message: "WhatsApp number must be at most 14 digits long" }),
   userType: z.enum(UserAccountType, {
     error: "User account type is required",
   }),
@@ -113,12 +114,16 @@ export const createNewCustomerSchema = z.object({
   whatsAppNotificationAllow: z.boolean({
     error: "WhatsApp notification preference is required",
   }),
-  isEmailVerified: z.boolean({
-    error: "Email verification status is required",
-  }).optional(),
-  isPhoneVerified: z.boolean({
-    error: "Phone verification status is required",
-  }).optional(),
+  isEmailVerified: z
+    .boolean({
+      error: "Email verification status is required",
+    })
+    .optional(),
+  isPhoneVerified: z
+    .boolean({
+      error: "Phone verification status is required",
+    })
+    .optional(),
   kycStatus: z
     .enum(kycStatus, { error: "Invalid KYC status provided" })
     .optional(),
@@ -291,7 +296,6 @@ export const createPersonalInfoSchema = z.object({
 
 export const updatePersonalInfoSchema = createPersonalInfoSchema.partial();
 
-
 export const customerMobileUpdateRequestSchema = z.object({
   mobile: z
     .string({ error: "Mobile number is required" })
@@ -322,7 +326,6 @@ export const customerMobileVerifyRequestSchema = z.object({
   token: z.string({ error: "Token is required" }).min(1, {
     message: "Token must be at least 1 character long",
   }),
-
 });
 
 export const customerWhatsAppPreferenceSchema = z.object({

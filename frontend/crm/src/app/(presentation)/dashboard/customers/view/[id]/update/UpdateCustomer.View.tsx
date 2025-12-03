@@ -12,7 +12,7 @@ import { useCustomerFromDataHook } from "../../../_components/manageCustomer/for
 
 const UpdateCustomerView = ({ id }: { id: number }) => {
   const manager = useCustomerFromDataHook();
-  const { updateCustomerMutation } = useCustomerApiHook({backOnDone:true});
+  const { updateCustomerMutation } = useCustomerApiHook({ backOnDone: true });
 
   const fetchUser = async () => {
     const fetchUserApi = new apiGateway.crm.customer.CrmCustomerApi(
