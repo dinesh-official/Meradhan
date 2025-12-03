@@ -210,7 +210,7 @@ export class OrderService {
     orderId: number,
     settlementMetadata: Record<string, any>
   ): Promise<void> {
-    // Deprecated: Use addOrderTrackingStep instead for new flows
+    // Deprecated: Use addOrderLog instead for new flows
     const order = await db.dataBase.order.findUnique({
       where: { id: orderId },
       select: { metadata: true },
@@ -246,14 +246,14 @@ export class OrderService {
     })) as OrderWithNSEData | null;
   }
 
-  async addOrderTrackingStep(
+  async addOrderLog(
     orderId: number,
     step: string,
     status: "SUCCESS" | "FAILED" | "PENDING",
     outputData?: Record<string, any>,
     details?: Record<string, any>
   ): Promise<void> {
-    await db.dataBase.orderTracking.create({
+    await db.dataBase.orderLogs.create({
       data: {
         orderId,
         step,
@@ -264,8 +264,8 @@ export class OrderService {
     });
   }
 
-  async getOrderTracking(orderId: number) {
-    return await db.dataBase.orderTracking.findMany({
+  async getOrderLogs(orderId: number) {
+    return await db.dataBase.orderLogs.findMany({
       where: { orderId },
       orderBy: { createdAt: "desc" },
     });

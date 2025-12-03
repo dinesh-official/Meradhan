@@ -30,7 +30,7 @@ model Order {
 
     // Relations
     customerBonds CustomerBonds?
-    orderTracking OrderTracking[]
+    orderLogs     OrderLogs[]
 
     // General Metadata
     metadata Json?
@@ -73,7 +73,7 @@ model CustomerBonds {
     @@map("customer_bonds")
 }
 
-model OrderTracking {
+model OrderLogs {
     id Int @id @default(autoincrement())
 
     orderId Int
@@ -92,7 +92,7 @@ model OrderTracking {
     updatedAt DateTime @updatedAt
 
     @@index([orderId])
-    @@map("order_tracking")
+    @@map("order_logs")
 }
 
 enum PaymentStatus {

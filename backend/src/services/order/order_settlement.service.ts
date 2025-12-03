@@ -6,7 +6,7 @@ import logger from "@utils/logger/logger";
 import type {
   Order,
   NseCbricsParticipantModel,
-  OrderTracking,
+  OrderLogs,
 } from "@databases/generated/prisma/postgres";
 import type { CreateNegotiationResponse } from "@modules/RFQ/nse/rfq.types";
 
@@ -17,7 +17,7 @@ interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
       participant: NseCbricsParticipantModel;
     } | null;
   } | null;
-  orderTracking?: OrderTracking[];
+  orderLogs?: OrderLogs[];
 }
 
 interface NegotiationData extends CreateNegotiationResponse {
@@ -399,9 +399,9 @@ export class OrderSettlementService {
     const metadata = order.metadata as OrderMetadata;
     if (metadata?.rfqNumber) return metadata.rfqNumber;
 
-    // Fallback to tracking table
-    const tracking = await this.orderService.getOrderTracking(order.id);
-    const rfqStep = tracking.find(
+    // Fallback to logs table
+    const logs = await this.orderService.getOrderLogs(order.id);
+    const rfqStep = logs.find(
       (t) => t.step === "RFQ_CREATED" && t.status === "SUCCESS"
     );
     return (rfqStep?.outputData as { rfqNumber: string })?.rfqNumber;
@@ -413,8 +413,8 @@ export class OrderSettlementService {
     const metadata = order.metadata as OrderMetadata;
     if (metadata?.negotiationId) return metadata.negotiationId;
 
-    const tracking = await this.orderService.getOrderTracking(order.id);
-    const step = tracking.find(
+    const logs = await this.orderService.getOrderLogs(order.id);
+    const step = logs.find(
       (t) => t.step === "NEGOTIATION_ACCEPTED" && t.status === "SUCCESS"
     );
     return (step?.outputData as { negotiationId: string })?.negotiationId;
