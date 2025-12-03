@@ -15,11 +15,12 @@ import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
 function IdentityValidationAadharInfo() {
-  const { pushUserKycState, addAuditLog } = useKycDataProvider();
+  const { pushUserKycState, addAuditLog, pushAuditLog } = useKycDataProvider();
   const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
 
   const data = state.step_1.pan;
@@ -125,6 +126,17 @@ function IdentityValidationAadharInfo() {
               type: "KYC_PROCESS_CONTINUED",
               desc: "User chose to continue the KYC process : Aadhaar and Address Validation step.",
             });
+            addActivityLog({
+              action: "CONFIRMED_AADHAAR_DETAILS",
+              details: {
+                step: "PAN and Identity Validation step - Confirmed Aadhaar Details",
+                AadhaarNo: data.response?.details.aadhaar.id_number,
+                DateOfBirth: data.response?.details.aadhaar.dob,
+                Name: data.response?.details.aadhaar.name,
+                Address: data.response?.details.aadhaar.current_address,
+              },
+              entityType: "KYC",
+            });
             nextLocalStep();
             pushUserKycState();
           }}
@@ -150,6 +162,7 @@ function IdentityValidationAadharInfo() {
                 type: "KYC_PROCESS_EXITED",
                 desc: "User chose to save and exit the KYC process : Aadhaar and Address Validation step.",
               });
+
               pushUserKycState({ exit: true });
             }
           }}

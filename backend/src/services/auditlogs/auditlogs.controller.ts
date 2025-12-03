@@ -1,7 +1,10 @@
 import { appSchema } from "@root/schema";
 import { AuditLogsService } from "./auditlogs.service";
 import type { Request, Response } from "express";
-import { startMeradhanTrackingSession } from "./auditlog.repo";
+import {
+  crateMeradhanActivityLog,
+  startMeradhanTrackingSession,
+} from "./auditlog.repo";
 
 export class AuditLogsController {
   private auditLogsService = new AuditLogsService();
@@ -315,6 +318,23 @@ export class AuditLogsController {
       message: "Meradhan Session Logs Retrieved",
       success: true,
       responseData: logs,
+    });
+  }
+
+  async createActivityLogMeradhan(req: Request, res: Response): Promise<void> {
+    const activityLogId = await crateMeradhanActivityLog(req, {
+      userId: req.customer!.id,
+      action: req.body.action,
+      details: req.body.details,
+      entityType: req.body.entityType,
+      entityId: req.body.entityId,
+    });
+
+    res.sendResponse({
+      statusCode: 200,
+      message: "Meradhan Activity Log Created",
+      success: true,
+      responseData: { activityLogId },
     });
   }
 }

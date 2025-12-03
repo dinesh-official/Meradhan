@@ -224,4 +224,18 @@ export class AuditLogsApiV2 {
       config
     );
   }
+
+  async createActivityLogMeradhan(
+    data: {
+      action: string;
+      details: object;
+      entityType: string;
+      entityId?: number;
+    },
+    config?: AxiosRequestConfig
+  ) {
+    return await this.apiClient.post<
+      BaseResponseData<{ activityLogId: number }>
+    >("/auditlogs/meradhan/create/activity", data, config);
+  }
 }

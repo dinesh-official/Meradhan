@@ -21,6 +21,8 @@ import {
   ActivityType,
   CustomDetails,
 } from "./types";
+import apiGateway from "@root/apiGateway";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 
 type GeoData = {
   ip?: string;
@@ -104,12 +106,19 @@ export interface TrackingContextValue {
   track: (type: ActivityType, details: ActivityDetails) => void;
   activities: Activity[];
   trackActivity: (type: ActivityType, details?: CustomDetails) => void;
+  addActivity: (activity: {
+    action: string;
+    details: object;
+    entityType: string;
+    entityId?: number;
+  }) => void;
 }
 
 export const TrackingContext = createContext<TrackingContextValue>({
   track: () => {},
   activities: [],
   trackActivity: () => {},
+  addActivity: async () => {},
 });
 
 interface UserTrackingProviderProps {
@@ -286,8 +295,45 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const apiCate = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
+  const addActivity = async (data: {
+    action: string;
+    details: object;
+    entityType: string;
+    entityId?: number;
+  }) => {
+    return await apiCate.createActivityLogMeradhan({
+      action: data.action,
+      details: data.details,
+      entityType: data.entityType,
+      entityId: data.entityId,
+    });
+  };
+
   return (
-    <TrackingContext.Provider value={{ track, activities, trackActivity }}>
+    <TrackingContext.Provider
+      value={{
+        track,
+        activities,
+        trackActivity,
+        addActivity: (data: {
+          action: string;
+          details: object;
+          entityType: string;
+          entityId?: number;
+        }) => {
+          console.log("Adding activity:", data);
+
+          addActivity(data)
+            .then((e) => {
+              console.log(e);
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        },
+      }}
+    >
       {children}
       {/* <ActivityWindow activities={activities} /> */}
     </TrackingContext.Provider>
@@ -296,3 +342,18 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
 
 export const useUserTracking = (): TrackingContextValue =>
   useContext(TrackingContext);
+
+export const addActivityLog = async (data: {
+  action: string;
+  details: object;
+  entityType: string;
+  entityId?: number;
+}) => {
+  const apiCate = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
+  return await apiCate.createActivityLogMeradhan({
+    action: data.action,
+    details: data.details,
+    entityType: data.entityType,
+    entityId: data.entityId,
+  });
+};

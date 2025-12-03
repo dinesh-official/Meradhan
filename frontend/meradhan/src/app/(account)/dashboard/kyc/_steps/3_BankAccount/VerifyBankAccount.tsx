@@ -15,6 +15,7 @@ import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 import BankViewCard from "./_elements/BankViewCard";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function VerifyBankAccount() {
   const {
@@ -24,11 +25,11 @@ function VerifyBankAccount() {
     prevLocalStep,
     addBankAccount,
     setStepIndex,
-    updateBankAccount
+    updateBankAccount,
   } = useKycDataStorage();
   const data = state.step_3;
-  const { pushUserKycState, addAuditLog, } = useKycDataProvider();
-  const { nextStep, } = useKycStepStore();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
+  const { nextStep } = useKycStepStore();
 
   const isAllowToContinue = () => {
     const defaltSelcted = data.filter((item) => item.isDefault);
@@ -38,15 +39,24 @@ function VerifyBankAccount() {
   };
   const jumpNext = () => {
     addAuditLog({
-      type: "BANK_KYC_STEP_COMPLETED",
-      desc: "User completed the Bank Account Verification step during KYC process.",
+      type: "START_BANK_ACCOUNT_VERIFICATION",
+      desc: "User added a bank account during KYC process.",
+    });
+    addActivityLog({
+      action: "BANK_ACCOUNT_CONFIRMED",
+      details: {
+        step: "Bank Account step",
+        Added: data.length + " account",
+        Reason: "User confirmed the bank account details",
+      },
+      entityType: "KYC",
     });
     data.forEach((e, i) => {
       updateBankAccount(i, {
         ...e,
-        confirmBankTimestamp: new Date().toISOString()
-      })
-    })
+        confirmBankTimestamp: new Date().toISOString(),
+      });
+    });
     pushUserKycState();
     setStepIndex(0);
     nextStep();
@@ -98,7 +108,8 @@ function VerifyBankAccount() {
             disabled={!isAllowToContinue()}
             onClick={jumpNext}
           >
-            Confirm & Continue  <div className="flex justify-center items-center p-0 h-full">
+            Confirm & Continue{" "}
+            <div className="flex justify-center items-center p-0 h-full">
               <IoMdArrowDropright className="p-0 text-4xl" />
             </div>
           </Button>
@@ -133,7 +144,14 @@ function VerifyBankAccount() {
                 type: "ADD_BANK_ACCOUNT",
                 desc: "User chose to add a new bank account during KYC process.",
               });
-
+              addActivityLog({
+                action: "ADD_BANK_ACCOUNT",
+                details: {
+                  step: "Bank Account step",
+                  Reason: "User added a new bank account",
+                },
+                entityType: "KYC",
+              });
               addBankAccount();
               prevLocalStep();
             }}

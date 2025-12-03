@@ -17,6 +17,7 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -237,6 +238,13 @@ function IdentityValidationForm() {
             });
 
             if (result.isConfirmed) {
+              addActivityLog({
+                action: "KYC_PROCESS_EXITED",
+                details: {
+                  step: "PAN and Identity Validation step",
+                },
+                entityType: "KYC",
+              });
               addAuditLog({
                 type: "KYC_PROCESS_EXITED",
                 desc: "User chose to save and exit the KYC process : PAN and Identity Validation step.",

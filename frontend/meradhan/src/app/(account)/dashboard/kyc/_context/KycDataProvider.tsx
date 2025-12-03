@@ -15,6 +15,7 @@ import { useKycStepStore } from "../_store/useKycStepStore";
 import { BiLoaderCircle } from "react-icons/bi";
 import { useRouter } from "nextjs-toploader/app";
 import useAppCookie from "@/hooks/useAppCookie.hook";
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
 type TCallBack = {
   exit?: boolean;
@@ -28,6 +29,12 @@ interface KycContextType {
   isLoading: boolean;
   setCurrentStep: (currentStepName: string) => void;
   addAuditLog: (data: { desc: string; type: string }) => void;
+  pushAuditLog: (data: {
+    action: string;
+    details: object;
+    entityType: string;
+    entityId?: number;
+  }) => void;
 }
 
 const KycDataContext = createContext<KycContextType | undefined>(undefined);
@@ -39,10 +46,21 @@ function KycDataProvider({ children }: { children: ReactNode }) {
   const kycDataStorage = useKycDataStorage();
   const kycStep = useKycStepStore();
   const { cookies } = useAppCookie();
+  const { addActivity } = useUserTracking();
 
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
   );
+
+  // -- Push Activity Log on Pull KYC Progress
+  const pushActivityLogOnPullKyc = (data: {
+    action: string;
+    details: object;
+    entityType: string;
+    entityId?: number;
+  }) => {
+    return addActivity(data);
+  };
 
   // --- PULL USER KYC DATA (backend → local state)
   const pullUserKycProgressMutation = useMutation({
@@ -145,6 +163,7 @@ function KycDataProvider({ children }: { children: ReactNode }) {
         isLoading,
         setCurrentStep,
         addAuditLog,
+        pushAuditLog: pushActivityLogOnPullKyc,
       }}
     >
       {/* Loading Overlay */}

@@ -94,6 +94,7 @@ export class CustomerKycApi {
       "/customer/kyc/selfie/response/" + payload.kid,
       config
     );
+
     return data;
   }
 

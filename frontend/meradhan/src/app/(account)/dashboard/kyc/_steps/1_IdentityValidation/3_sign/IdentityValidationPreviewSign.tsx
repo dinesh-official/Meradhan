@@ -14,6 +14,7 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../../_store/useKycStepStore";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function IdentityValidationPreviewSign() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
@@ -63,6 +64,14 @@ function IdentityValidationPreviewSign() {
               type: "CONFIRM_SIGN",
               desc: "User confirmed the sign during KYC process.",
             });
+            addActivityLog({
+              action: "CONFIRM_SIGN",
+              details: {
+                step: "Sign Verification step",
+                Reason: "User Confirmed the Sign",
+              },
+              entityType: "KYC",
+            });
             nextStep();
             pushUserKycState();
           }}
@@ -87,6 +96,7 @@ function IdentityValidationPreviewSign() {
                 type: "KYC_PROCESS_EXITED",
                 desc: "User chose to save and exit the KYC process : Sign Verification step.",
               });
+
               pushUserKycState({ exit: true });
             }
           }}

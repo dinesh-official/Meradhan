@@ -15,6 +15,7 @@ import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 import DematAccountView from "./_elements/DematAccountView";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function VerifyDematAccount() {
   const {
@@ -24,7 +25,7 @@ function VerifyDematAccount() {
     addDepository,
     prevLocalStep,
     setStepIndex,
-    updateDepository
+    updateDepository,
   } = useKycDataStorage();
 
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
@@ -43,13 +44,20 @@ function VerifyDematAccount() {
       type: "DEMAT_KYC_STEP_COMPLETED",
       desc: "User completed the Demat Account Verification step during KYC process.",
     });
-
+    addActivityLog({
+      action: "ADD_DEMAT_ACCOUNT_CONFIRMED",
+      details: {
+        step: "Demat Account step",
+        Reason: "User confirmed the Demat account details",
+      },
+      entityType: "KYC",
+    });
     accounts.forEach((e, i) => {
       updateDepository(i, {
         ...e,
-        confirmDematTimestamp: new Date().toISOString()
-      })
-    })
+        confirmDematTimestamp: new Date().toISOString(),
+      });
+    });
 
     pushUserKycState();
     setStepIndex(0);
@@ -140,6 +148,14 @@ function VerifyDematAccount() {
               addAuditLog({
                 type: "ADD_DEMAT_ACCOUNT",
                 desc: "User added a new Demat account during KYC process.",
+              });
+              addActivityLog({
+                action: "ADD_DEMAT_ACCOUNT",
+                details: {
+                  step: "Demat Account step",
+                  Reason: "User added  a new Demat account button clicked",
+                },
+                entityType: "KYC",
               });
               addDepository();
               prevLocalStep();

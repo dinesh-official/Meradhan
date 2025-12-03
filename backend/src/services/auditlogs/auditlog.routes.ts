@@ -1,3 +1,4 @@
+import { customerAuthMiddleware } from "@middlewares/customer_middleware";
 import { Router } from "express";
 import { AuditLogsController } from "./auditlogs.controller";
 
@@ -65,6 +66,12 @@ auditlogsRoutes.get("/api/auditlogs/meradhan/login-logs", (req, res) =>
 
 auditlogsRoutes.get("/api/auditlogs/meradhan/session-logs", (req, res) =>
   auditLogsController.getSessionLogsMeradhan(req, res)
+);
+
+auditlogsRoutes.post(
+  "/api/auditlogs/meradhan/create/activity",
+  customerAuthMiddleware,
+  (req, res) => auditLogsController.createActivityLogMeradhan(req, res)
 );
 
 export default auditlogsRoutes;
