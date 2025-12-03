@@ -184,7 +184,7 @@ export class OrderService {
 
   async updateOrderMetadata(
     orderId: number,
-    metadata: Record<string, any>
+    metadata: Record<string, unknown>
   ): Promise<void> {
     await db.dataBase.order.update({
       where: { id: orderId },
@@ -204,29 +204,6 @@ export class OrderService {
         status: status,
       },
     });
-  }
-
-  async updateOrderSettlementMetadata(
-    orderId: number,
-    settlementMetadata: Record<string, any>
-  ): Promise<void> {
-    // Deprecated: Use addOrderLog instead for new flows
-    const order = await db.dataBase.order.findUnique({
-      where: { id: orderId },
-      select: { metadata: true },
-    });
-
-    if (!order) {
-      throw new AppError("Order not found", { code: "ORDER_NOT_FOUND" });
-    }
-
-    const currentMetadata = (order.metadata as Record<string, any>) || {};
-    const updatedMetadata = {
-      ...currentMetadata,
-      ...settlementMetadata,
-    };
-
-    await this.updateOrderMetadata(orderId, updatedMetadata);
   }
 
   async getOrderWithNSEData(orderId: number): Promise<OrderWithNSEData | null> {
@@ -250,8 +227,8 @@ export class OrderService {
     orderId: number,
     step: string,
     status: "SUCCESS" | "FAILED" | "PENDING",
-    outputData?: Record<string, any>,
-    details?: Record<string, any>
+    outputData?: Record<string, unknown>,
+    details?: Record<string, unknown>
   ): Promise<void> {
     await db.dataBase.orderLogs.create({
       data: {

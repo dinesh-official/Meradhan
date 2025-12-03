@@ -7,6 +7,7 @@ import type {
   Order,
   NseCbricsParticipantModel,
   OrderLogs,
+  OrderStatus,
 } from "@databases/generated/prisma/postgres";
 import type { CreateNegotiationResponse } from "@modules/RFQ/nse/rfq.types";
 
@@ -23,17 +24,6 @@ interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
 interface NegotiationData extends CreateNegotiationResponse {
   lastUpdated?: string;
   status?: string;
-}
-
-interface OrderMetadata {
-  rfqNumber?: string;
-  negotiationId?: string;
-  settlementStep?: string;
-  settlementError?: string;
-  settlementFailedAt?: string;
-  settledAt?: string;
-  settlementStatus?: string;
-  accruedInterest?: number;
 }
 
 export class OrderSettlementService {
@@ -98,12 +88,19 @@ export class OrderSettlementService {
       logger.logError(`Settlement process failed for order ${orderId}:`, error);
 
       // Update order status to failed settlement
-      await this.orderService.updateOrderStatus(orderId, "REJECTED");
-      await this.orderService.updateOrderSettlementMetadata(orderId, {
-        settlementError:
-          error instanceof Error ? error.message : "Unknown error",
-        settlementFailedAt: new Date().toISOString(),
-      });
+      await this.orderService.updateOrderStatus(orderId, OrderStatus.REJECTED);
+
+      // Log settlement failure
+      await this.orderService.addOrderLog(
+        orderId,
+        "SETTLEMENT_FAILED",
+        "FAILED",
+        { failedAt: new Date().toISOString() },
+        {
+          error: error instanceof Error ? error.message : "Unknown error",
+          errorStack: error instanceof Error ? error.stack : undefined,
+        }
+      );
 
       throw error;
     }
@@ -144,12 +141,15 @@ export class OrderSettlementService {
         anonymous: "N", // Not anonymous
       });
 
-      // Store RFQ details in order metadata (rfqResponse is an array)
+      // Store RFQ details in order logs (rfqResponse is an array)
       const rfqDetails = rfqResponse[0];
-      await this.orderService.updateOrderSettlementMetadata(order.id, {
-        rfqNumber: rfqDetails.number,
-        settlementStep: "RFQ_CREATED",
-      });
+      await this.orderService.addOrderLog(
+        order.id,
+        "RFQ_CREATED",
+        "SUCCESS",
+        { rfqNumber: rfqDetails.number },
+        { rfqResponse: rfqDetails }
+      );
 
       logger.logInfo(
         `RFQ created successfully for ISIN ${order.isin} with RFQ number: ${rfqDetails.number}`
@@ -172,11 +172,10 @@ export class OrderSettlementService {
     try {
       logger.logInfo(`Accepting negotiation for order ${order.id}`);
 
-      // Use stored RFQ number from metadata
-      const metadata = order.metadata as OrderMetadata;
-      const rfqNumber = metadata?.rfqNumber;
+      // Get RFQ number from logs
+      const rfqNumber = await this.getRfqNumber(order);
       if (!rfqNumber) {
-        throw new AppError("RFQ number not found in order metadata", {
+        throw new AppError("RFQ number not found in order logs", {
           code: "RFQ_NUMBER_MISSING",
         });
       }
@@ -222,11 +221,14 @@ export class OrderSettlementService {
         role: "I", // Initiator
       });
 
-      // Store negotiation ID in metadata
-      await this.orderService.updateOrderSettlementMetadata(order.id, {
-        negotiationId: activeNegotiation.id,
-        settlementStep: "NEGOTIATION_ACCEPTED",
-      });
+      // Store negotiation ID in logs
+      await this.orderService.addOrderLog(
+        order.id,
+        "NEGOTIATION_ACCEPTED",
+        "SUCCESS",
+        { negotiationId: activeNegotiation.id },
+        { negotiation: activeNegotiation }
+      );
 
       logger.logInfo(`Negotiation accepted successfully for order ${order.id}`);
     } catch (error) {
@@ -247,20 +249,19 @@ export class OrderSettlementService {
     try {
       logger.logInfo(`Proposing deal for order ${order.id}`);
 
-      // Use stored RFQ and negotiation IDs from metadata
+      // Use stored RFQ and negotiation IDs from logs
       const rfqNumber = await this.getRfqNumber(order);
       const negotiationId = await this.getNegotiationId(order);
 
       if (!rfqNumber || !negotiationId) {
         throw new AppError(
-          "RFQ number or negotiation ID not found in order metadata",
+          "RFQ number or negotiation ID not found in order logs",
           { code: "MISSING_METADATA" }
         );
       }
 
       // Calculate consideration: quantity * price / 100 + accrued interest
-      const metadata = order.metadata as OrderMetadata;
-      const accruedInterest = metadata?.accruedInterest || 0;
+      const accruedInterest = await this.getAccruedInterest(order);
       const consideration =
         (order.quantity * Number(order.unitPrice)) / 100 + accruedInterest;
 
@@ -277,10 +278,14 @@ export class OrderSettlementService {
         remarks: `Auto-proposed deal for order ${order.id}`,
       });
 
-      // Update metadata
-      await this.orderService.updateOrderSettlementMetadata(order.id, {
-        settlementStep: "DEAL_PROPOSED",
-      });
+      // Log deal proposal
+      await this.orderService.addOrderLog(
+        order.id,
+        "DEAL_PROPOSED",
+        "SUCCESS",
+        { rfqNumber, negotiationId, consideration, accruedInterest },
+        { dealDetails: { price: order.unitPrice, calcMethod: "M" } }
+      );
 
       logger.logInfo(`Deal proposed successfully for order ${order.id}`);
     } catch (error) {
@@ -306,20 +311,19 @@ export class OrderSettlementService {
 
       const participant = order.customerProfile.nseDataSet.participant;
 
-      // Use stored RFQ and negotiation IDs from metadata
+      // Use stored RFQ and negotiation IDs from logs
       const rfqNumber = await this.getRfqNumber(order);
       const negotiationId = await this.getNegotiationId(order);
 
       if (!rfqNumber || !negotiationId) {
         throw new AppError(
-          "RFQ number or negotiation ID not found in order metadata",
+          "RFQ number or negotiation ID not found in order logs",
           { code: "MISSING_METADATA" }
         );
       }
 
       // Calculate accepted values (should match proposed values)
-      const metadata = order.metadata as OrderMetadata;
-      const acceptedAccruedInterest = metadata?.accruedInterest || 0;
+      const acceptedAccruedInterest = await this.getAccruedInterest(order);
       const acceptedConsideration =
         (order.quantity * Number(order.unitPrice)) / 100 +
         acceptedAccruedInterest;
@@ -335,10 +339,19 @@ export class OrderSettlementService {
         respRole: "I", // Initiator
       });
 
-      // Update metadata
-      await this.orderService.updateOrderSettlementMetadata(order.id, {
-        settlementStep: "DEAL_ACCEPTED",
-      });
+      // Log deal acceptance
+      await this.orderService.addOrderLog(
+        order.id,
+        "DEAL_ACCEPTED",
+        "SUCCESS",
+        {
+          rfqNumber,
+          negotiationId,
+          acceptedConsideration,
+          acceptedAccruedInterest,
+        },
+        { dealAcceptance: { acceptedPrice: order.unitPrice } }
+      );
 
       logger.logInfo(`Deal accepted successfully for order ${order.id}`);
     } catch (error) {
@@ -354,11 +367,16 @@ export class OrderSettlementService {
    */
   private async updateOrderStatus(orderId: number): Promise<void> {
     try {
-      await this.orderService.updateOrderStatus(orderId, "SETTLED");
-      await this.orderService.updateOrderSettlementMetadata(orderId, {
-        settledAt: new Date().toISOString(),
-        settlementStatus: "COMPLETED",
-      });
+      await this.orderService.updateOrderStatus(orderId, OrderStatus.SETTLED);
+
+      // Log final settlement completion
+      await this.orderService.addOrderLog(
+        orderId,
+        "SETTLEMENT_COMPLETED",
+        "SUCCESS",
+        { settledAt: new Date().toISOString() },
+        { settlementStatus: "COMPLETED" }
+      );
 
       logger.logInfo(`Order ${orderId} status updated to SETTLED`);
     } catch (error) {
@@ -390,16 +408,11 @@ export class OrderSettlementService {
   }
 
   /**
-   * Helper to get RFQ Number from metadata or tracking history
+   * Helper to get RFQ Number from order logs
    */
   private async getRfqNumber(
     order: OrderWithNSEData
   ): Promise<string | undefined> {
-    // Try metadata first (legacy/fast access)
-    const metadata = order.metadata as OrderMetadata;
-    if (metadata?.rfqNumber) return metadata.rfqNumber;
-
-    // Fallback to logs table
     const logs = await this.orderService.getOrderLogs(order.id);
     const rfqStep = logs.find(
       (t) => t.step === "RFQ_CREATED" && t.status === "SUCCESS"
@@ -407,16 +420,30 @@ export class OrderSettlementService {
     return (rfqStep?.outputData as { rfqNumber: string })?.rfqNumber;
   }
 
+  /**
+   * Helper to get Negotiation ID from order logs
+   */
   private async getNegotiationId(
     order: OrderWithNSEData
   ): Promise<string | undefined> {
-    const metadata = order.metadata as OrderMetadata;
-    if (metadata?.negotiationId) return metadata.negotiationId;
-
     const logs = await this.orderService.getOrderLogs(order.id);
     const step = logs.find(
       (t) => t.step === "NEGOTIATION_ACCEPTED" && t.status === "SUCCESS"
     );
     return (step?.outputData as { negotiationId: string })?.negotiationId;
+  }
+
+  /**
+   * Helper to get Accrued Interest from order logs
+   */
+  private async getAccruedInterest(order: OrderWithNSEData): Promise<number> {
+    const logs = await this.orderService.getOrderLogs(order.id);
+    const dealStep = logs.find(
+      (t) => t.step === "DEAL_PROPOSED" && t.status === "SUCCESS"
+    );
+    return (
+      (dealStep?.outputData as { accruedInterest?: number })?.accruedInterest ||
+      0
+    );
   }
 }
