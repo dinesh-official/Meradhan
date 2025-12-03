@@ -10,6 +10,7 @@ import type {
 } from "@databases/generated/prisma/postgres";
 import { OrderStatus } from "@databases/generated/prisma/postgres";
 import type { CreateNegotiationResponse } from "@modules/RFQ/nse/rfq.types";
+import { RfqMasterDbSyncManager } from "@resource/crm/refq/nse/rfq_master/rfq_master.manager";
 
 // Type definitions for settlement service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -25,11 +26,12 @@ export class OrderSettlementService {
   private nseRfq: NseRfq;
   private nseCbrics: NseCBRICS;
   private orderService: OrderService;
-
+  private rfqMasterDbSyncManager: RfqMasterDbSyncManager;
   constructor() {
     this.nseRfq = new NseRfq();
     this.nseCbrics = new NseCBRICS();
     this.orderService = new OrderService();
+    this.rfqMasterDbSyncManager = new RfqMasterDbSyncManager();
   }
 
   /**
@@ -130,28 +132,26 @@ export class OrderSettlementService {
 
       // Calculate value in crores (face value * quantity / 100)
       const faceValueNum = Number(order.faceValue);
-      const unitPriceNum = Number(order.unitPrice);
       const valueInCrores = (faceValueNum * order.quantity) / 1000000000; // Convert to crores
 
       // Create RFQ for the ISIN
       const rfqResponse = await this.nseRfq.createRfq({
         isin: order.isin,
-        participantCode: participant.loginId,
-        dealType: "D", // Direct deal
-        clientCode: participant.loginId,
+        participantCode: 'MD123456',
+        dealType: "B", // Brokered deal
+        clientCode: 'BCISAPL',
         buySell: "B", // Buy
-        quoteType: "B", // Both price and yield
+        quoteType: "Y", // Only yield
         settlementType: 1, // T+1
         value: valueInCrores,
         quantity: order.quantity,
         yieldType: "YTM",
-        yield: 0, // Will be calculated by NSE
-        calcMethod: "M", // Money market
-        price: unitPriceNum,
+        yield: 10.0000, // Will be calculated by NSE
+        calcMethod: "O", // Other
+        price: null,
         gtdFlag: "Y", // Valid till day end
         quoteNegotiable: "Y", // Negotiable
-        anonymous: null, // Not anonymous (null means not anonymous)
-        access: 1, // OTM (One to many)
+        access: 2, // OTO (One to one)
       });
 
       // Store RFQ details in order logs (rfqResponse is an array)
@@ -161,6 +161,8 @@ export class OrderSettlementService {
           code: "RFQ_RESPONSE_EMPTY",
         });
       }
+
+      // await this.rfqMasterDbSyncManager.syncRfqMasterData(rfqDetails, order.id);
 
       await this.orderService.addOrderLog(
         order.id,
