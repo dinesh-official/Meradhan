@@ -1,8 +1,8 @@
-import type { AxiosRequestConfig } from "axios";
-import type { IApiCaller } from "../../../connection/apiCaller.interface";
-import type { GetCrmOrdersResponse } from "./orders.response";
 import { appSchema } from "@root/schema";
+import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
+import type { GetCrmOrdersResponse } from "./orders.response";
+import type { IApiCaller } from "../../connection/apiCaller.interface";
 
 export class CrmOrdersApi {
   private schema = appSchema.crm.orders;

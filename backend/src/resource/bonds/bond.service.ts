@@ -58,8 +58,9 @@ export class BondService {
       }
 
       if (options.category == "latest-release") {
-        orderBy = sortingOptions.byMaturity;
+        orderBy = sortingOptions.dateOfAllotment;
       }
+
       extendedQuery.categories = { has: options?.category || "" };
     }
 
@@ -113,7 +114,7 @@ export class BondService {
     const data = await db.dataBase.bonds.findMany({
       where: {
         isListed: { equals: "YES" },
-        redemptionDate: { lte: new Date() },
+        dateOfAllotment: { lte: new Date() },
         creditRating: { notIn: ["D", "C", "UnRated", ""] },
       },
       orderBy: {
@@ -129,7 +130,7 @@ export class BondService {
     const data = await db.dataBase.bonds.findMany({
       where: {
         isListed: { equals: "YES" },
-        redemptionDate: { lte: new Date() },
+        dateOfAllotment: { lte: new Date() },
         creditRating: { notIn: ["D", "C", "UnRated", ""] },
       },
       orderBy: {
@@ -149,7 +150,7 @@ export class BondService {
         creditRating: { notIn: ["D", "C", "UnRated", ""] },
       },
       orderBy: {
-        dateOfAllotment: "asc",
+        dateOfAllotment: "desc",
       },
       take: limit,
     });

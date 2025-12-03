@@ -62,7 +62,7 @@ function CardPagination({
         href={href}
         onClick={(e) => handleClick(p, e)}
         className={clsx(
-          "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",
+          "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
           isActive
             ? "bg-blue-900 text-white"
             : "bg-gray-100 hover:bg-blue-100 text-blue-900"
@@ -76,14 +76,14 @@ function CardPagination({
   const pages = getPageNumbers();
 
   return (
-    <div className="w-full border border-gray-200 rounded-md bg-white overflow-hidden">
+    <div className="w-full rounded-md bg-white overflow-hidden">
       <div className="flex justify-center items-center">
         {/* First */}
         <button
           disabled={page === 1 || disabled}
           onClick={() => onClick && onClick(1)}
           className={clsx(
-            "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors ",
+            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors ",
             page === 1
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-white hover:bg-blue-100 text-blue-900"
@@ -97,7 +97,7 @@ function CardPagination({
           disabled={page === 1 || disabled}
           onClick={() => onClick && onClick(page - 1)}
           className={clsx(
-            "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",
+            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
             page === 1
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-gray-100 hover:bg-blue-100 text-blue-900"
@@ -114,7 +114,7 @@ function CardPagination({
           disabled={page === totalPages || disabled}
           onClick={() => onClick && onClick(page + 1)}
           className={clsx(
-            "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",
+            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
             page === totalPages
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-gray-100 hover:bg-blue-100 text-blue-900"
@@ -128,7 +128,7 @@ function CardPagination({
           disabled={page === totalPages || disabled}
           onClick={() => onClick && onClick(totalPages)}
           className={clsx(
-            "px-2 py-2 min-w-[2rem] font-medium text-sm text-center transition-colors",
+            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
             page === totalPages
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-gray-100 hover:bg-blue-100 text-blue-900"

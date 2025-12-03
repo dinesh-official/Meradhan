@@ -19,6 +19,10 @@ import { memo, useEffect } from "react";
 import { userSessionStore } from "@/core/auth/userSessionStore";
 import { ISessionResponse } from "@root/apiGateway";
 import { IoIosArrowDown } from "react-icons/io";
+import { status } from "../../../../../../../packages/schema/lib/crm/leads.schema";
+import { IoWarning } from "react-icons/io5";
+import { Check } from "lucide-react";
+import { BiSolidFileFind } from "react-icons/bi";
 
 function AccountNavBar({
   session,
@@ -69,15 +73,28 @@ function AccountNavBar({
           {/* Action Buttons */}
           <div className="right-0 bottom-0 z-40 fixed sm:relative flex justify-between sm:justify-end items-center gap-8 sm:gap-5 bg-white sm:bg-transparent shadow sm:shadow-none px-4 sm:px-0 py-2 lg:py-0 border-gray-100 sm:border-0 border-t w-full sm:w-auto">
             {/* KYC Button */}
-            <Link href={`/dashboard/kyc`}>
-              <Button
-                variant="secondaryLight"
-                className="gap-3 w-24"
-                aria-label="KYC Verification"
-              >
-                <FaUser aria-hidden="true" /> KYC
-              </Button>
-            </Link>
+            {session?.kycStatus == "PENDING" && (
+              <Link href={`/dashboard/kyc`}>
+                <Button
+                  variant="secondaryLight"
+                  className="gap-3 w-24"
+                  aria-label="KYC Verification"
+                >
+                  <FaUser aria-hidden="true" /> KYC
+                </Button>
+              </Link>
+            )}
+
+            {session?.kycStatus == "UNDER_REVIEW" && (
+              <Link href={`/dashboard/kyc`}>
+                <Button
+                  variant="secondaryLight"
+                  className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 gap-2"
+                >
+                  <BiSolidFileFind /> KYC: In Review
+                </Button>
+              </Link>
+            )}
 
             {/* Icon Buttons */}
             <div className="flex items-center gap-8 sm:gap-5 lg:gap-10">
@@ -118,50 +135,61 @@ function AccountNavBar({
 }
 
 export default memo(AccountNavBar);
-export function ShowUserBadge(session: { id: number; avatar: string | null; userName: string; emailAddress: string; firstName: string; middleName: string; lastName: string; } | null) {
-  return <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <button
-        className="flex items-center gap-1 bg-white rounded-full focus:outline-none cursor-pointer"
-        aria-label="Open user menu"
+export function ShowUserBadge(
+  session: {
+    id: number;
+    avatar: string | null;
+    userName: string;
+    emailAddress: string;
+    firstName: string;
+    middleName: string;
+    lastName: string;
+  } | null
+) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="flex items-center gap-1 bg-white rounded-full focus:outline-none cursor-pointer"
+          aria-label="Open user menu"
+        >
+          <Avatar>
+            {/* Add avatar image here if needed */}
+            {/* <AvatarImage src="https://github.com/shadcn.png" alt="User profile picture" /> */}
+            <AvatarFallback aria-hidden="true">
+              {session?.firstName.charAt(0)}
+              {session?.lastName.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <IoIosArrowDown />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        side="bottom"
+        align="end"
+        className="shadow-none w-36"
+        aria-label="Profile Menu"
       >
-        <Avatar>
-          {/* Add avatar image here if needed */}
-          {/* <AvatarImage src="https://github.com/shadcn.png" alt="User profile picture" /> */}
-          <AvatarFallback aria-hidden="true">
-            {session?.firstName.charAt(0)}
-            {session?.lastName.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
-        <IoIosArrowDown />
-      </button>
-    </DropdownMenuTrigger>
+        <DropdownMenuItem asChild>
+          <Link
+            href="/dashboard/profile"
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <FaUser aria-hidden="true" /> Profile
+          </Link>
+        </DropdownMenuItem>
 
-    <DropdownMenuContent
-      side="bottom"
-      align="end"
-      className="shadow-none w-36"
-      aria-label="Profile Menu"
-    >
-      <DropdownMenuItem asChild>
-        <Link
-          href="/dashboard/profile"
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <FaUser aria-hidden="true" /> Profile
-        </Link>
-      </DropdownMenuItem>
-
-      <DropdownMenuItem asChild>
-        <Link
-          href="/logout"
-          className="flex items-center gap-2 w-full text-left cursor-pointer"
-          aria-label="Logout"
-        >
-          <MdLogout aria-hidden="true" /> Logout
-        </Link>
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>;
+        <DropdownMenuItem asChild>
+          <Link
+            href="/logout"
+            className="flex items-center gap-2 w-full text-left cursor-pointer"
+            aria-label="Logout"
+          >
+            <MdLogout aria-hidden="true" /> Logout
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
-

@@ -8,8 +8,8 @@ import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
 export const revalidate = 0;
 
 export const generateMetadata = async () => {
-  return  await getAccountPagesMetaData("dashboard/profile");
-}
+  return await getAccountPagesMetaData("dashboard/profile");
+};
 
 async function page() {
   const cookie = await cookies();
@@ -24,8 +24,8 @@ async function page() {
   return (
     <AccountViewPort
       title={
-        <div className="hidden md:flex">
-          My <span className="font-bold">Profile</span>
+        <div className="hidden md:flex gap-2">
+          My <span className="font-bold "> Profile</span>
         </div>
       }
     >

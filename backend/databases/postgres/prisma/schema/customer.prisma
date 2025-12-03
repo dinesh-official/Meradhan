@@ -52,9 +52,10 @@ model CustomerProfileDataModel {
     userType UserAccountType @default(INDIVIDUAL)
 
     /// KYC (Know Your Customer) related info
-    kycStatus  KYCStatus @default(PENDING)
-    VerifiedBy Int?
-    verifyDate DateTime?
+    kycStatus     KYCStatus @default(PENDING)
+    VerifiedBy    Int?
+    verifyDate    DateTime?
+    kycSubmitDate DateTime?
 
     // One-to-one relations
     riskProfile                 CustomersRiskProfileModel? @relation(fields: [customersRiskProfileModelId], references: [id], onDelete: Cascade)

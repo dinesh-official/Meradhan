@@ -5,9 +5,11 @@ import { AppError } from "@utils/error/AppError";
 import type z from "zod";
 import { makeFullname } from "@utils/generate/generate_username";
 import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
 export class CustomerKycKycService {
   private kycProvider = new KycProvider();
+  private cbricsManager = new ParticipantManager();
 
   // pan verify request
   async createPanVerifyRequest({
@@ -261,6 +263,9 @@ export class CustomerKycKycService {
     const store = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: customerId },
     });
+    // add NSE participant if not added
+    await this.cbricsManager.registerParticipant(customerId);
+    // -----------------------------------------------
 
     await db.dataBase.customerProfileDataModel.updateMany({
       where: {
@@ -268,8 +273,10 @@ export class CustomerKycKycService {
       },
       data: {
         kycStatus: "UNDER_REVIEW",
+        kycSubmitDate: new Date(),
       },
     });
+
     // Start KRa Process
     await addKraWorkerJob({
       customerId: customerId,
