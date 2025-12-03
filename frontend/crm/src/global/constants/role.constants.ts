@@ -14,7 +14,8 @@ export const MODULES = [
     'webauditlogs',
     'crmauditlogs',
     "webanalytics",
-    "bonds"
+    "bonds",
+    "orders"
 ] as const;
 export type ModuleName = typeof MODULES[number];
 

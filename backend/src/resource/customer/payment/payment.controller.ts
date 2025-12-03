@@ -5,6 +5,7 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import { db } from "@core/database/database";
 import logger from "@utils/logger/logger";
 import { PaymentService } from "./payment.service";
+import { orderSettlementQueue } from "@jobs/queue/worker_queues";
 
 export class PaymentController {
   private paymentService = new PaymentService(PaymentProviders.RAZORPAY);
@@ -51,10 +52,17 @@ export class PaymentController {
       const paymentId = paymentEntity.id;
 
       try {
-        await this.orderService.captureOrderPayment(paymentOrderId, paymentId);
-        logger.logInfo(
-          `Payment captured successfully for order: ${paymentOrderId}`
-        );
+        const orderResult = await this.orderService.captureOrderPayment(paymentOrderId, paymentId);
+
+        // Trigger settlement process as background job
+        if (orderResult.status === "success") {
+          await orderSettlementQueue.add("settle-order", {
+            orderId: orderResult.orderId
+          });
+          logger.logInfo(
+            `Payment captured and settlement job queued for order: ${paymentOrderId}`
+          );
+        }
       } catch (error) {
         logger.logError("Error capturing payment from webhook:", error);
       }

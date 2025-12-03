@@ -9,8 +9,7 @@ export class CrmOrdersService {
     status?: string,
     bondType?: string,
     search?: string,
-    startDate?: string,
-    endDate?: string
+    date?: string
   ) {
     const skip = (page - 1) * limit;
 
@@ -64,26 +63,35 @@ export class CrmOrdersService {
       countWhereClause.OR = whereClause.OR;
     }
 
-    if (startDate || endDate) {
-      whereClause.createdAt = {};
-      countWhereClause.createdAt = {};
+    if (date) {
+      const selectedDate = new Date(date);
+      const startOfDay = new Date(selectedDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(selectedDate);
+      endOfDay.setHours(23, 59, 59, 999);
 
-      if (startDate) {
-        whereClause.createdAt.gte = new Date(startDate);
-        countWhereClause.createdAt.gte = new Date(startDate);
-      }
-
-      if (endDate) {
-        whereClause.createdAt.lte = new Date(endDate);
-        countWhereClause.createdAt.lte = new Date(endDate);
-      }
+      whereClause.createdAt = {
+        gte: startOfDay,
+        lte: endOfDay,
+      };
+      countWhereClause.createdAt = {
+        gte: startOfDay,
+        lte: endOfDay,
+      };
     }
 
     const [orders, total] = await Promise.all([
       db.dataBase.order.findMany({
         where: whereClause,
         include: {
-          customerProfile: true,
+          customerProfile: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              emailAddress: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip,

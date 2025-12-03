@@ -289,7 +289,7 @@ function PlaceOrderPage() {
 
           // Redirect to order history - webhook will update status
           setTimeout(() => {
-            window.location.href = "/account/orders";
+            window.location.href = "/dashboard/orders";
           }, 2000);
         },
         modal: {

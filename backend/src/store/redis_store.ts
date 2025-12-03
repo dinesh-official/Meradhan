@@ -8,6 +8,7 @@ export enum QueueNames {
   forgotPasswordEmail = "forgotPasswordEmailMD",
   successResetPassword = "successResetPasswordMD",
   kraProcessWork = "kraProcessWorkMD",
+  orderSettlement = "orderSettlementMD",
 }
 
 // 🔹 Create a shared Redis connection using QueueStore (recommended)

@@ -5,7 +5,20 @@ import { PaymentProviders } from "@packages/config/constants";
 import { config } from "@config/config";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
-import type { Prisma } from "@databases/generated/prisma/postgres";
+import type {
+  Prisma,
+  Order,
+  NseCbricsParticipantModel,
+} from "@databases/generated/prisma/postgres";
+
+// Type definitions for order service
+interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
+  customerProfile: {
+    nseDataSet?: {
+      participant: NseCbricsParticipantModel;
+    } | null;
+  } | null;
+}
 
 type OrderPreviewItem = z.infer<typeof appSchema.order.OrderPreviewItemSchema>;
 
@@ -167,6 +180,72 @@ export class OrderService {
     });
 
     return { status: "success", orderId: order.id };
+  }
+
+  async updateOrderMetadata(
+    orderId: number,
+    metadata: Record<string, unknown>
+  ): Promise<void> {
+    await db.dataBase.order.update({
+      where: { id: orderId },
+      data: {
+        metadata: metadata,
+      },
+    });
+  }
+
+  async updateOrderStatus(
+    orderId: number,
+    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED"
+  ): Promise<void> {
+    await db.dataBase.order.update({
+      where: { id: orderId },
+      data: {
+        status: status,
+      },
+    });
+  }
+
+  async getOrderWithNSEData(orderId: number): Promise<OrderWithNSEData | null> {
+    return (await db.dataBase.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customerProfile: {
+          include: {
+            nseDataSet: {
+              include: {
+                participant: true,
+              },
+            },
+          },
+        },
+      },
+    })) as OrderWithNSEData | null;
+  }
+
+  async addOrderLog(
+    orderId: number,
+    step: string,
+    status: "SUCCESS" | "FAILED" | "PENDING",
+    outputData?: Record<string, unknown>,
+    details?: Record<string, unknown>
+  ): Promise<void> {
+    await db.dataBase.orderLogs.create({
+      data: {
+        orderId,
+        step,
+        status,
+        outputData,
+        details,
+      },
+    });
+  }
+
+  async getOrderLogs(orderId: number) {
+    return await db.dataBase.orderLogs.findMany({
+      where: { orderId },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
   async getOrderHistory(

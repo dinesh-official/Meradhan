@@ -41,3 +41,8 @@ export const kraWorkerQueue = new Bull(
   QueueNames.kraProcessWork,
   sharedRedisOpts
 );
+
+export const orderSettlementQueue = new Bull(
+  QueueNames.orderSettlement,
+  sharedRedisOpts
+);

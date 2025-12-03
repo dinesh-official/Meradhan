@@ -6,6 +6,5 @@ export const CrmOrdersQuerySchema = z.object({
   status: z.string().optional(),
   bondType: z.string().optional(),
   search: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  date: z.string().optional(),
 });

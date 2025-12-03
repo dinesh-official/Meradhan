@@ -13,8 +13,7 @@ export class CrmOrdersController {
     const status = query.status;
     const bondType = query.bondType;
     const search = query.search;
-    const startDate = query.startDate;
-    const endDate = query.endDate;
+    const date = query.date;
 
     const result = await this.ordersService.getAllOrders(
       page,
@@ -22,8 +21,7 @@ export class CrmOrdersController {
       status,
       bondType,
       search,
-      startDate,
-      endDate
+      date
     );
 
     return res.sendResponse({

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { PiCurrencyInrBold } from "react-icons/pi";
+import Link from "next/link";
 export function OngoingDealList() {
   return (
     <div className="flex flex-col gap-5 py-6 last:pb-2 border-gray-200 border-t w-ful">
@@ -13,7 +14,9 @@ export function OngoingDealList() {
           <Button variant={`outlineSecondary`} className="w-full lg:w-auto">
             View Details
           </Button>
-          <Button className="w-full lg:w-auto">Buy Now</Button>
+          <Button className="w-full lg:w-auto" asChild>
+            <Link href={`/place-order/INE909H08394`}>Buy Now</Link>
+          </Button>
         </div>
       </div>
       <div className="gap-5 grid grid-cols-2 lg:grid-cols-7">
