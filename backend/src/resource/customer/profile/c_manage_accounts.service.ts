@@ -291,7 +291,6 @@ export class CustomerManageAccountsService {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async saveRiskProfile(
     customerId: number,
     riskProfile: any[]
