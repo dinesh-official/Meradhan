@@ -135,12 +135,27 @@ export const NAV_ITEMS: NavItem[] = [
   },
 
   {
-    label: "Sales",
+    label: "Orders",
     icon: ShoppingCart,
-    path: "#",
-    module: "sales",
-    allowOnly: ["view:sales"],
+    module: "orders",
+    // allowOnly: ["view:orders", "edit:orders", "create:orders"],
+    children: [
+      {
+        label: "View Orders",
+        path: "/dashboard/orders",
+        module: "orders",
+        // allowOnly: ["view:orders"],
+      },
+    ],
   },
+
+  // {
+  //   label: "Sales",
+  //   icon: ShoppingCart,
+  //   path: "#",
+  //   module: "sales",
+  //   allowOnly: ["view:sales"],
+  // },
 
   {
     label: "Support Tickets",

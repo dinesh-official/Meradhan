@@ -30,6 +30,7 @@ model Order {
 
     // Relations
     customerBonds CustomerBonds?
+    orderTracking OrderTracking[]
 
     // General Metadata
     metadata Json?
@@ -70,6 +71,28 @@ model CustomerBonds {
     @@index([customerProfileId])
     @@index([isin])
     @@map("customer_bonds")
+}
+
+model OrderTracking {
+    id Int @id @default(autoincrement())
+
+    orderId Int
+    order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+    step   String // e.g. "RFQ_CREATED", "NEGOTIATION_ACCEPTED"
+    status String // "SUCCESS", "FAILED", "PENDING"
+
+    // To store specific IDs or results
+    outputData Json?
+
+    // To store what happened (errors, full API response for debugging)
+    details Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([orderId])
+    @@map("order_tracking")
 }
 
 enum PaymentStatus {

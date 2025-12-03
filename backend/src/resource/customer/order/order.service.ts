@@ -5,7 +5,20 @@ import { PaymentProviders } from "@packages/config/constants";
 import { config } from "@config/config";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
-import type { Prisma } from "@databases/generated/prisma/postgres";
+import type {
+  Prisma,
+  Order,
+  NseCbricsParticipantModel,
+} from "@databases/generated/prisma/postgres";
+
+// Type definitions for order service
+interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
+  customerProfile: {
+    nseDataSet?: {
+      participant: NseCbricsParticipantModel;
+    } | null;
+  } | null;
+}
 
 type OrderPreviewItem = z.infer<typeof appSchema.order.OrderPreviewItemSchema>;
 
@@ -167,6 +180,95 @@ export class OrderService {
     });
 
     return { status: "success", orderId: order.id };
+  }
+
+  async updateOrderMetadata(
+    orderId: number,
+    metadata: Record<string, any>
+  ): Promise<void> {
+    await db.dataBase.order.update({
+      where: { id: orderId },
+      data: {
+        metadata: metadata,
+      },
+    });
+  }
+
+  async updateOrderStatus(
+    orderId: number,
+    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED"
+  ): Promise<void> {
+    await db.dataBase.order.update({
+      where: { id: orderId },
+      data: {
+        status: status,
+      },
+    });
+  }
+
+  async updateOrderSettlementMetadata(
+    orderId: number,
+    settlementMetadata: Record<string, any>
+  ): Promise<void> {
+    // Deprecated: Use addOrderTrackingStep instead for new flows
+    const order = await db.dataBase.order.findUnique({
+      where: { id: orderId },
+      select: { metadata: true },
+    });
+
+    if (!order) {
+      throw new AppError("Order not found", { code: "ORDER_NOT_FOUND" });
+    }
+
+    const currentMetadata = (order.metadata as Record<string, any>) || {};
+    const updatedMetadata = {
+      ...currentMetadata,
+      ...settlementMetadata,
+    };
+
+    await this.updateOrderMetadata(orderId, updatedMetadata);
+  }
+
+  async getOrderWithNSEData(orderId: number): Promise<OrderWithNSEData | null> {
+    return (await db.dataBase.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customerProfile: {
+          include: {
+            nseDataSet: {
+              include: {
+                participant: true,
+              },
+            },
+          },
+        },
+      },
+    })) as OrderWithNSEData | null;
+  }
+
+  async addOrderTrackingStep(
+    orderId: number,
+    step: string,
+    status: "SUCCESS" | "FAILED" | "PENDING",
+    outputData?: Record<string, any>,
+    details?: Record<string, any>
+  ): Promise<void> {
+    await db.dataBase.orderTracking.create({
+      data: {
+        orderId,
+        step,
+        status,
+        outputData,
+        details,
+      },
+    });
+  }
+
+  async getOrderTracking(orderId: number) {
+    return await db.dataBase.orderTracking.findMany({
+      where: { orderId },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
   async getOrderHistory(
