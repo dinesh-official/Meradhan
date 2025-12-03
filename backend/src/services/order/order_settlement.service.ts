@@ -7,8 +7,8 @@ import type {
   Order,
   NseCbricsParticipantModel,
   OrderLogs,
-  OrderStatus,
 } from "@databases/generated/prisma/postgres";
+import { OrderStatus } from "@databases/generated/prisma/postgres";
 import type { CreateNegotiationResponse } from "@modules/RFQ/nse/rfq.types";
 
 // Type definitions for settlement service
@@ -19,11 +19,6 @@ interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
     } | null;
   } | null;
   orderLogs?: OrderLogs[];
-}
-
-interface NegotiationData extends CreateNegotiationResponse {
-  lastUpdated?: string;
-  status?: string;
 }
 
 export class OrderSettlementService {
@@ -66,14 +61,29 @@ export class OrderSettlementService {
       // Step 1: Add ISIN to settlement (addisin)
       await this.addIsinToSettlement(order, participant);
       order = await getOrderData(); // Refresh order data
+      if (!order) {
+        throw new AppError("Order not found after refresh", {
+          code: "ORDER_NOT_FOUND",
+        });
+      }
 
       // Step 2: Accept negotiation quote
       await this.acceptNegotiation(order, participant);
       order = await getOrderData(); // Refresh order data
+      if (!order) {
+        throw new AppError("Order not found after refresh", {
+          code: "ORDER_NOT_FOUND",
+        });
+      }
 
       // Step 3: Propose deal
       await this.proposeDeal(order, participant);
       order = await getOrderData(); // Refresh order data
+      if (!order) {
+        throw new AppError("Order not found after refresh", {
+          code: "ORDER_NOT_FOUND",
+        });
+      }
 
       // Step 4: Accept/Reject deal
       await this.acceptOrRejectDeal(order);
@@ -119,7 +129,9 @@ export class OrderSettlementService {
       );
 
       // Calculate value in crores (face value * quantity / 100)
-      const valueInCrores = (order.faceValue * order.quantity) / 1000000000; // Convert to crores
+      const faceValueNum = Number(order.faceValue);
+      const unitPriceNum = Number(order.unitPrice);
+      const valueInCrores = (faceValueNum * order.quantity) / 1000000000; // Convert to crores
 
       // Create RFQ for the ISIN
       const rfqResponse = await this.nseRfq.createRfq({
@@ -135,14 +147,21 @@ export class OrderSettlementService {
         yieldType: "YTM",
         yield: 0, // Will be calculated by NSE
         calcMethod: "M", // Money market
-        price: order.unitPrice,
+        price: unitPriceNum,
         gtdFlag: "Y", // Valid till day end
         quoteNegotiable: "Y", // Negotiable
-        anonymous: "N", // Not anonymous
+        anonymous: null, // Not anonymous (null means not anonymous)
+        access: 1, // OTM (One to many)
       });
 
       // Store RFQ details in order logs (rfqResponse is an array)
       const rfqDetails = rfqResponse[0];
+      if (!rfqDetails) {
+        throw new AppError("RFQ response is empty", {
+          code: "RFQ_RESPONSE_EMPTY",
+        });
+      }
+
       await this.orderService.addOrderLog(
         order.id,
         "RFQ_CREATED",
@@ -193,11 +212,11 @@ export class OrderSettlementService {
 
       // Find the most recent active negotiation
       const activeNegotiation = negotiations
-        .filter((neg: NegotiationData) => neg.status === "A") // 'A' for Active
+        .filter((neg: CreateNegotiationResponse) => neg.status === "A") // 'A' for Active
         .sort(
-          (a: NegotiationData, b: NegotiationData) =>
-            new Date(b.lastUpdated || 0).getTime() -
-            new Date(a.lastUpdated || 0).getTime()
+          (a: CreateNegotiationResponse, b: CreateNegotiationResponse) =>
+            new Date(b.lastActivityTimestamp || 0).getTime() -
+            new Date(a.lastActivityTimestamp || 0).getTime()
         )[0];
 
       if (!activeNegotiation) {
@@ -206,16 +225,33 @@ export class OrderSettlementService {
         });
       }
 
+      // Use initQuantity/initPrice/initYield or respQuantity/respPrice/respYield based on role
+      // Since we're the initiator, prefer init values, fallback to resp values
+      const quantity =
+        activeNegotiation.initQuantity ?? activeNegotiation.respQuantity ?? 0;
+      const price =
+        activeNegotiation.initPrice ?? activeNegotiation.respPrice ?? 0;
+      const yieldValue =
+        activeNegotiation.initYield ?? activeNegotiation.respYield ?? 0;
+
+      if (!quantity || !price) {
+        throw new AppError(
+          "Invalid negotiation data: missing quantity or price",
+          {
+            code: "INVALID_NEGOTIATION_DATA",
+          }
+        );
+      }
+
       // Accept the best quote from the negotiation
       await this.nseRfq.acceptNegotiationQuote({
         rfqNumber: rfqNumber,
-        acceptedValue:
-          (activeNegotiation.quantity * activeNegotiation.price) / 1000000000, // Convert to crores
+        acceptedValue: (quantity * price) / 1000000000, // Convert to crores
         id: activeNegotiation.id,
         acceptedSettlementDate: this.getNextSettlementDate(),
         acceptedYieldType: "YTM",
-        acceptedYield: activeNegotiation.yield,
-        acceptedPrice: activeNegotiation.price,
+        acceptedYield: yieldValue,
+        acceptedPrice: price,
         respDealType: "D", // Direct deal
         respClientCode: participant.loginId,
         role: "I", // Initiator
@@ -262,8 +298,9 @@ export class OrderSettlementService {
 
       // Calculate consideration: quantity * price / 100 + accrued interest
       const accruedInterest = await this.getAccruedInterest(order);
+      const unitPriceNum = Number(order.unitPrice);
       const consideration =
-        (order.quantity * Number(order.unitPrice)) / 100 + accruedInterest;
+        (order.quantity * unitPriceNum) / 100 + accruedInterest;
 
       await this.nseRfq.proposeDeal({
         ngRfqNumber: rfqNumber,
@@ -271,7 +308,7 @@ export class OrderSettlementService {
         participantCode: participant.loginId,
         dealType: "D", // Direct deal
         clientCode: participant.loginId,
-        price: order.unitPrice,
+        price: unitPriceNum,
         accruedInterest: accruedInterest,
         consideration: consideration,
         calcMethod: "M", // Money market
@@ -309,8 +346,6 @@ export class OrderSettlementService {
         });
       }
 
-      const participant = order.customerProfile.nseDataSet.participant;
-
       // Use stored RFQ and negotiation IDs from logs
       const rfqNumber = await this.getRfqNumber(order);
       const negotiationId = await this.getNegotiationId(order);
@@ -324,19 +359,17 @@ export class OrderSettlementService {
 
       // Calculate accepted values (should match proposed values)
       const acceptedAccruedInterest = await this.getAccruedInterest(order);
+      const unitPriceNum = Number(order.unitPrice);
       const acceptedConsideration =
-        (order.quantity * Number(order.unitPrice)) / 100 +
-        acceptedAccruedInterest;
+        (order.quantity * unitPriceNum) / 100 + acceptedAccruedInterest;
 
       await this.nseRfq.acceptOrRejectDeal({
         rfqNumber: rfqNumber,
         id: negotiationId,
-        acceptedPrice: order.unitPrice,
+        acceptedPrice: unitPriceNum,
         acceptedAccruedInterest: acceptedAccruedInterest,
         acceptedConsideration: acceptedConsideration,
         confirmStatus: "PC", // PC = Accept
-        respClientCode: participant.loginId,
-        respRole: "I", // Initiator
       });
 
       // Log deal acceptance
@@ -404,6 +437,11 @@ export class OrderSettlementService {
     }
 
     const dateStr = tomorrow.toISOString().split("T")[0];
+    if (!dateStr) {
+      throw new AppError("Failed to generate settlement date", {
+        code: "SETTLEMENT_DATE_GENERATION_FAILED",
+      });
+    }
     return dateStr;
   }
 
