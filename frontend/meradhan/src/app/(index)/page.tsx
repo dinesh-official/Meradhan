@@ -18,13 +18,7 @@ export const generateMetadata = async () => {
 export default async function HomePage() {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
 
-  const { responseData } = await apiCaller.getListedBonds({
-    params: {
-      page: 1,
-      category: "latest-release",
-      limit: 3,
-    },
-  });
+  const { responseData } = await apiCaller.getLatestBonds(3);
 
   return (
     <ViewPort>
@@ -36,7 +30,7 @@ export default async function HomePage() {
           <BondsByCategories />
         </SectionWrapper>
       </div>
-      <LatestBondReleases bonds={responseData.data || []} />
+      <LatestBondReleases bonds={responseData || []} />
       <ReturnsCalculationSection />
       {/* <CustomersTestimonials /> */}
       {/* <RecentBlogs /> */}

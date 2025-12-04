@@ -20,7 +20,7 @@ function RfqOverviewView() {
           </Link>
         }
       />
-      <div className="gap-5 grid grid-cols-4">
+      {/* <div className="gap-5 grid grid-cols-4">
         <StatusCountCard
           title="Total RFQs"
           value={100}
@@ -49,7 +49,7 @@ function RfqOverviewView() {
           changeText=""
           variant="indigoGradient"
         />
-      </div>
+      </div> */}
 
       <SettleOrdersView />
     </div>

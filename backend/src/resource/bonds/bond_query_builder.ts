@@ -170,6 +170,7 @@ export class BondQueryBuilder {
       byMaturity: { maturityDate: "asc" as const },
       byCoupon: { couponRate: "desc" as const },
       byIssuePrice: { issuePrice: "asc" as const },
+      dateOfAllotment: { dateOfAllotment: "desc" as const },
       byCreatedAt: { createdAt: "desc" as const },
       default: { sortedAt: "asc" as const },
     };

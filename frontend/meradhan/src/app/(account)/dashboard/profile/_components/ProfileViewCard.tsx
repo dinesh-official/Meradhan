@@ -4,9 +4,10 @@ import { makeFullname } from "@/global/utils/formate";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { cn } from "@/lib/utils";
 import { GetCustomerResponseById } from "@root/apiGateway";
-import { Download } from "lucide-react";
+import { Clock, Clock4, Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { BiSolidFileFind } from "react-icons/bi";
 import { FaCheckSquare } from "react-icons/fa";
 import { IoWarning } from "react-icons/io5";
 import { RiArrowRightSFill } from "react-icons/ri";
@@ -52,7 +53,11 @@ function ProfileViewCard({
             <p
               className={cn(
                 "flex items-center gap-2 font-medium text-secondary md:text-lg",
-                profile.kycStatus == "VERIFIED" ? "text-black" : "text-red-600"
+                profile.kycStatus == "VERIFIED"
+                  ? "text-black"
+                  : profile.kycStatus == "UNDER_REVIEW"
+                  ? "text-yellow-600"
+                  : "text-red-600"
               )}
             >
               {profile.kycStatus == "VERIFIED" ? (
@@ -60,6 +65,13 @@ function ProfileViewCard({
                   KYC: <span className="hidden sm:inline-block">Completed</span>
                   <span className="sm:hidden">Done</span>{" "}
                   <FaCheckSquare className="text-green-600" />
+                </>
+              ) : profile.kycStatus == "UNDER_REVIEW" ? (
+                <>
+                  <span className="text-black">KYC:</span>{" "}
+                  <span className="hidden sm:inline-block">Under Review</span>
+                  <span className="sm:hidden">Under Review</span>{" "}
+                  <BiSolidFileFind size={20} className="text-yellow-600" />
                 </>
               ) : (
                 <>
@@ -80,6 +92,19 @@ function ProfileViewCard({
                   dateTimeUtils.formatDateTime(profile.verifyDate, "hh:mm aa")}
               </p>
             )}
+            {profile.kycStatus == "UNDER_REVIEW" && profile?.kycSubmitDate && (
+              <p className="text-[#666666] text-xs">
+                {dateTimeUtils.formatDateTime(
+                  profile?.kycSubmitDate,
+                  "DD MMM YYYY"
+                ) +
+                  " | " +
+                  dateTimeUtils.formatDateTime(
+                    profile?.kycSubmitDate,
+                    "hh:mm aa"
+                  )}
+              </p>
+            )}
           </div>
 
           {profile.kycStatus == "VERIFIED" && (
@@ -92,7 +117,7 @@ function ProfileViewCard({
               </Button>
             </Link>
           )}
-          {profile.kycStatus !== "VERIFIED" && (
+          {profile.kycStatus == "PENDING" && (
             <Link href={`/dashboard/kyc`}>
               <Button variant={`secondary`}>
                 Complete <span className="hidden md:inline-block">Your</span>{" "}

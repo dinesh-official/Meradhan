@@ -12,11 +12,11 @@ import { useKycDataProvider } from "../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 import RiskProfilingSelector from "./RiskProfilingSelector";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function RiskProfilingCard() {
   const { state, setStepIndex } = useKycDataStorage();
   const riskProfiling = state.step_5;
-
 
   const isAllowToContinue = () => {
     const defaltSelcted = riskProfiling.filter((item) => !item.ans);
@@ -29,6 +29,14 @@ function RiskProfilingCard() {
     addAuditLog({
       type: "RISK_PROFILING_STEP_COMPLETED",
       desc: "User completed the Risk Profiling step during KYC process.",
+    });
+    addActivityLog({
+      action: "RISK_PROFILING_COMPLETED",
+      details: {
+        step: "Risk Profiling step",
+        Reason: "User completed the Risk Profiling step during KYC process.",
+      },
+      entityType: "KYC",
     });
     pushUserKycState();
     setStepIndex(0);
@@ -49,7 +57,8 @@ function RiskProfilingCard() {
           onClick={jumpNext}
           className="flex items-center gap-1 w-full sm:w-auto"
         >
-          Save & Continue  <div className="flex justify-center items-center p-0 h-full">
+          Save & Continue{" "}
+          <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
         </Button>

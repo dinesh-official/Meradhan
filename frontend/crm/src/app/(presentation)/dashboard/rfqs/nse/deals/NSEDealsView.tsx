@@ -8,16 +8,15 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import StatusCountCard from "@/global/elements/cards/StatusCountCard";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import DealProposerSection from "./_tabs/Deal_Proposer/DealProposerSection";
 
 function NSEDealsView() {
   const [tabs, setTabs] = useState("deal_proposer");
-  const [fromTimestamp, setFromTimestamp] = useState("");
-  const [toTimestamp, setToTimestamp] = useState("");
+  const [date, setdate] = useState(new Date().toISOString().split("T")[0]);
   const [confirmStatus, setConfirmStatus] = useState("");
   const [rfqNumber, setRfqNumber] = useState("");
   const [buySell, setBuySell] = useState("");
@@ -27,8 +26,7 @@ function NSEDealsView() {
   const { data, isLoading } = useQuery({
     queryKey: [
       "nseDealProposers",
-      fromTimestamp,
-      toTimestamp,
+      date,
       // lastActivityTimestamp removed
       confirmStatus,
       rfqNumber,
@@ -36,14 +34,13 @@ function NSEDealsView() {
     ],
     queryFn: async () => {
       const response = await rfqApi.getAllNegotiations({
-        fromTimestamp,
-        toTimestamp,
         confirmStatus:
           confirmStatus === ""
             ? undefined
             : (confirmStatus as "PP" | "PC" | "PR" | "CA" | "CC" | "CR"),
         rfqNumber,
         buySell: buySell === "" ? undefined : (buySell as "B" | "S"),
+        date: date,
       });
       return response.responseData;
     },
@@ -52,7 +49,7 @@ function NSEDealsView() {
 
   return (
     <div className="flex flex-col gap-5 mt-5">
-      <div className="gap-5 grid 2xl:grid-cols-4 xl:grid-cols-3">
+      {/* <div className="gap-5 grid 2xl:grid-cols-4 xl:grid-cols-3">
         <StatusCountCard
           title="Deal Submit (Proposer)"
           value={10}
@@ -71,7 +68,7 @@ function NSEDealsView() {
           changeText=""
           variant="greenGradient"
         />
-      </div>
+      </div> */}
 
       {/* Filters Section */}
       <Card className="mb-4">
@@ -79,29 +76,48 @@ function NSEDealsView() {
           <CardTitle>Filter Deals</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">
                 From Timestamp
               </label>
-              <input
-                type="date"
-                className="w-full border rounded px-2 py-1"
-                value={fromTimestamp}
-                onChange={(e) => setFromTimestamp(e.target.value)}
-              />
+              <div className="flex">
+                <div
+                  onClick={() => {
+                    const prevDate = new Date(date || new Date());
+                    prevDate.setDate(prevDate.getDate() - 1);
+                    const formatted = prevDate.toISOString().split("T")[0];
+                    setdate?.(formatted);
+                  }}
+                  className="w-12 border rounded-l px-2 py-1 flex justify-center items-center cursor-pointer"
+                >
+                  <ArrowLeft size={18} />
+                </div>
+                <input
+                  type="date"
+                  className="w-full border-t border-b  px-2 py-1"
+                  value={date}
+                  onChange={(e) => setdate(e.target.value)}
+                />
+                <div
+                  className="w-12 border rounded-r px-2 py-1 flex justify-center items-center cursor-pointer"
+                  onClick={() => {
+                    const disabled =
+                      date === new Date().toISOString().split("T")[0];
+                    if (disabled) {
+                      return;
+                    }
+                    const prevDate = new Date(date || new Date());
+                    prevDate.setDate(prevDate.getDate() + 1);
+                    const formatted = prevDate.toISOString().split("T")[0];
+                    setdate?.(formatted);
+                  }}
+                >
+                  <ArrowRight size={18} />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                To Timestamp
-              </label>
-              <input
-                type="date"
-                className="w-full border rounded px-2 py-1"
-                value={toTimestamp}
-                onChange={(e) => setToTimestamp(e.target.value)}
-              />
-            </div>
+
             <div>
               <label className="block text-sm font-medium mb-1">
                 RFQ Number

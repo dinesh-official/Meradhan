@@ -7,6 +7,12 @@ import BondInfoHeader from "./BondInfoHeader";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import BondBuyNowCalc from "./BondBuyNowCalc";
+import { FaInfoCircle } from "react-icons/fa";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function BondIsinView({
   bond,
@@ -21,11 +27,32 @@ export default function BondIsinView({
     }
     return "-";
   };
+  function pickWordsByMinLength(text: string, minLength: number): string {
+    const words = text.trim().split("");
+
+    if (words.length <= minLength) return text;
+
+    return words.slice(0, minLength).join("") + "...";
+  }
+
+  const formateCategory = (category: string) => {
+    if (bond.categories?.[0] == "n/a") {
+      return "Coming Soon";
+    }
+
+    const cat = ["nbfc", "psu"];
+
+    if (cat.includes(category.toLowerCase())) {
+      return category.toUpperCase();
+    }
+
+    return category;
+  };
 
   return (
     <div className="py-10">
       <BondInfoHeader bond={bond} />
-      <div className="gap-8 grid lg:grid-cols-5 py-10">
+      <div className="gap-8 grid lg:grid-cols-3 py-10">
         <div className="lg:col-span-3">
           <div className="gap-5 grid md:grid-cols-3">
             <SortInfoBox title="Issue Price">
@@ -48,24 +75,11 @@ export default function BondIsinView({
               {dateTimeUtils.formatDateTime(bond.maturityDate, "DD MMM YYYY")}
             </SortInfoBox>
             <SortInfoBox title="Bond Category">
-              {bond.categories?.[0] == "n/a" ? (
-                "Coming Soon"
-              ) : (
-                <span className="capitalize">
-                  {bond.categories?.[0] || "Coming Soon"}
-                </span>
-              )}
+              {formateCategory(bond.categories?.[0] || "")}
             </SortInfoBox>
+
             <SortInfoBox title="Interest Payment">
-              {dateTimeUtils.formatDateTime(
-                bond.interestPaymentMode,
-                "DD MMM YYYY"
-              ) == "Invalid Date"
-                ? "Coming Soon"
-                : dateTimeUtils.formatDateTime(
-                    bond.interestPaymentMode,
-                    "DD MMM YYYY"
-                  )}
+              {bond.interestPaymentMode?.replaceAll("_", " ") || "Coming Soon"}
             </SortInfoBox>
             <SortInfoBox title="Coupon Type">Coming Soon</SortInfoBox>
             <SortInfoBox title="Taxable">
@@ -75,25 +89,75 @@ export default function BondIsinView({
                 ? "No"
                 : "Coming Soon"}
             </SortInfoBox>
+
             <SortInfoBox title="Put">
-              {bond.putCallOptionDetails?.split(" ")?.[0] || "N/A"}
+              <p className="flex items-center gap-1">
+                {pickWordsByMinLength(
+                  bond.putCallOptionDetails
+                    ?.split("Call:")?.[0]
+                    .replace("Put:", "")
+                    .trim() || "N/A",
+                  15
+                )}
+
+                {(
+                  bond.putCallOptionDetails
+                    ?.split("Call:")?.[0]
+                    .replace("Put:", "")
+                    .trim() || ""
+                ).length > 15 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <FaInfoCircle className="cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-wrap max-w-48">
+                        {bond.putCallOptionDetails
+                          ?.split("Call:")?.[0]
+                          .replace("Put:", "")
+                          .trim()}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </p>
             </SortInfoBox>
             <SortInfoBox title="Call">
-              {bond.putCallOptionDetails?.split(" ")?.[2] || "N/A"}
+              <p className="flex items-center gap-1 line-clamp-1">
+                {pickWordsByMinLength(
+                  bond.putCallOptionDetails?.split("Call:")?.[1].trim() ||
+                    "N/A",
+                  15
+                )}
+
+                {(bond.putCallOptionDetails?.split("Call:")?.[1].trim() || "")
+                  .length > 15 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <FaInfoCircle className="cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-wrap max-w-48">
+                        {bond.putCallOptionDetails?.split("Call:")?.[1].trim()}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </p>
             </SortInfoBox>
             <SortInfoBox title="Mode of issuance">Coming Soon</SortInfoBox>
             <SortInfoBox title="Security">{isSecured()}</SortInfoBox>
             <SortInfoBox title="Issue Size">
-              <PiCurrencyInrBold /> {formatNumberTS(bond.issuePrice)}
+              <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize)}
             </SortInfoBox>
             <SortInfoBox title="Next Interest Payment Date">
               Coming Soon
             </SortInfoBox>
           </div>
         </div>
-        <div className="lg:col-span-2">
+        {/* <div className="lg:col-span-2">
           <BondBuyNowCalc />
-        </div>
+        </div> */}
       </div>
 
       <div className="container">

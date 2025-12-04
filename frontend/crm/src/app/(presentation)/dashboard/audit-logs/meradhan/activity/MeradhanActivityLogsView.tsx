@@ -28,7 +28,7 @@ function MeradhanActivityLogsView() {
 
   // Filter states
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(100);
   const [searchTerm, setSearchTerm] = useState("");
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | undefined>();

@@ -126,12 +126,25 @@ export class RfqMasterService {
     activeUserId?: number
   ) {
     console.log(filters);
+    const formatDate = (dateStr?: string) => {
+      if (!dateStr) return "";
+      const date = new Date(dateStr);
+
+      const day = String(date.getDate()).padStart(2, "0");
+
+      const monthShort = date.toLocaleString("en-US", { month: "short" });
+
+      const year = date.getFullYear();
+      console.log(year);
+
+      return `${day}-${monthShort}-${year}`;
+    };
 
     const data = await this.rfqManager.getAllNegotiations({
       buySell: filters.buySell,
       rfqNumber: filters.rfqNumber,
       status: filters.status,
-      date: filters.date,
+      date: formatDate(filters.date),
       fromTimestamp: filters.fromTimestamp,
       toTimestamp: filters.toTimestamp,
       confirmStatus: filters.confirmStatus,

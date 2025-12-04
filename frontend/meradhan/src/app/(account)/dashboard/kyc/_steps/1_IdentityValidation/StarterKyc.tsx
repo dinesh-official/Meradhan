@@ -14,6 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import { useKycStepStore } from "../../_store/useKycStepStore";
 import { IoMdArrowDropright } from "react-icons/io";
+import { useKycDataProvider } from "../../_context/KycDataProvider";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function StarterKyc() {
   const apiClient = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
@@ -58,6 +60,13 @@ function StarterKyc() {
       });
       return false;
     }
+    addActivityLog({
+      action: "KYC_PROCESS_STARTED",
+      details: {
+        step: "Starter KYC",
+      },
+      entityType: "KYC",
+    });
     nextStep();
   };
 
@@ -120,9 +129,12 @@ function StarterKyc() {
       </CardContent>
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 mt-4 pt-0">
-        <Button onClick={isAllowTOProcess} className="gap-1" >Start KYC Process  <div className="flex justify-center items-center p-0 h-full">
-          <IoMdArrowDropright className="p-0 text-4xl" />
-        </div></Button>
+        <Button onClick={isAllowTOProcess} className="gap-1">
+          Start KYC Process{" "}
+          <div className="flex justify-center items-center p-0 h-full">
+            <IoMdArrowDropright className="p-0 text-4xl" />
+          </div>
+        </Button>
       </CardFooter>
     </Card>
   );

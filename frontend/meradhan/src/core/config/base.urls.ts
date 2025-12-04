@@ -9,12 +9,13 @@ export const BASES = {
   },
 
   production: {
-    HOST: "https://test.meradhan.co",
-    API_SERVER: "https://testapi.meradhan.co",
+    HOST: "https://www.meradhan.co",
+    API_SERVER: "https://api.meradhan.co",
     API_BACKEND_URL_IP: "http://34.47.136.227:4000",
     CMS: "https://spydertest.meradhan.co",
     ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
   },
+  DIGIO: "production" as "sandbox" | "production", // Change to "production" for live environment
 };
 
 // production: {

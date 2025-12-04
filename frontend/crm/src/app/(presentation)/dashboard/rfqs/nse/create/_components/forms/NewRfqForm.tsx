@@ -376,8 +376,8 @@ function NewRfqForm({
             <div className="gap-5 grid md:grid-cols-3 md:col-span-2">
               <InputField
                 id="value"
-                label="RFQ Size (Value in Amount)"
-                placeholder="RFQ Size (Value in Amount)"
+                label="RFQ Size (Value in Cores)"
+                placeholder="RFQ Size (Value in Cores)"
                 value={watch("value")?.toString()}
                 type="number"
                 required

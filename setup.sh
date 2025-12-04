@@ -112,7 +112,7 @@ main() {
     
     # Install backend dependencies
     install_dependencies "backend" "Backend"
-    install_dependencies_prisma_backend "backend/databases/supabase" "Backend"
+    install_dependencies_prisma_backend "backend/databases/postgres" "Backend"
     
     # Install frontend dependencies
     install_dependencies "frontend/crm" "Frontend (Next.js)" "force"

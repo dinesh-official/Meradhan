@@ -1,16 +1,14 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
-import CardPagination from "@/global/elements/table/CardPagination";
+import ParticipantsTableFilter from "./_components/ParticipantsTablelFilter";
 import ParticipantsTableList from "./_components/ParticipantsTableList";
 import { useParticipantsApi } from "./hooks/useParticipantsApi";
-import ParticipantsTableFilter from "./_components/ParticipantsTablelFilter";
 
 function ParticipantsView() {
   const { fetchParticipantsQuery, state } = useParticipantsApi();
   const isShowPagination = () => {
     return (
-      (fetchParticipantsQuery.data?.data?.responseData.data.length || 0) > 0 &&
-      fetchParticipantsQuery.data?.data?.responseData.meta.totalPages != 1 &&
+      (fetchParticipantsQuery.data?.data?.responseData.length || 0) > 0 &&
       !fetchParticipantsQuery.isPending
     );
   };
@@ -25,22 +23,22 @@ function ParticipantsView() {
         />
         <CardContent>
           <ParticipantsTableList
-            data={fetchParticipantsQuery.data?.data.responseData.data || []}
+            data={fetchParticipantsQuery.data?.data.responseData || []}
             isLoading={fetchParticipantsQuery.isLoading}
           />
         </CardContent>
-        {isShowPagination() && (
+        {/* {isShowPagination() && (
           <CardPagination
             onClick={(p) => {
               state.setPage(p);
             }}
-            page={fetchParticipantsQuery.data?.data.responseData.meta.page || 1}
+            page={fetchParticipantsQuery.data?.data.responseData || 1}
             totalPages={
               fetchParticipantsQuery.data?.data.responseData.meta.totalPages ||
               1
             }
           />
-        )}
+        )} */}
       </Card>
     </div>
   );

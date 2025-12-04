@@ -14,13 +14,11 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { KycSelfieGuide } from "./IdentityValidationCaptureSelfie";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 function IdentityValidationSelfiePreview() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { state, nextLocalStep, prevLocalStep, setStep1SelfieFaceData } =
     useKycDataStorage();
-
-
-
 
   return (
     <Card accountMode>
@@ -43,6 +41,14 @@ function IdentityValidationSelfiePreview() {
                 addAuditLog({
                   type: "RECAPTURE_SELFIE",
                   desc: "User chose to recapture the selfie during KYC process.",
+                });
+                addActivityLog({
+                  action: "RECAPTURE_SELFIE",
+                  details: {
+                    step: "Selfie Verification step ",
+                    Reason: "User Recaptured the Selfie",
+                  },
+                  entityType: "KYC",
                 });
                 prevLocalStep();
               }}
@@ -72,11 +78,20 @@ function IdentityValidationSelfiePreview() {
               desc: "User confirmed the selfie during KYC process.",
             });
             setStep1SelfieFaceData("timestamp", new Date().toISOString());
+            addActivityLog({
+              action: "CONFIRM_SELFIE",
+              details: {
+                step: "Selfie Verification step ",
+                Reason: "User Confirmed the Selfie",
+              },
+              entityType: "KYC",
+            });
             nextLocalStep();
             pushUserKycState();
           }}
         >
-          Confirm & Continue<div className="flex justify-center items-center p-0 h-full">
+          Confirm & Continue
+          <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
         </Button>

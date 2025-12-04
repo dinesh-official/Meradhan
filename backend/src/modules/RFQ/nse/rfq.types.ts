@@ -1512,10 +1512,10 @@ export interface GetAllDealAmendmentsRequest {
   requestType?: "M" | "C"; // String(1), Optional
 
   /** From RFQ Date */
-  filtFromDate: string; // Date (DD-MMM-YYYY), Mandatory
+  filtFromDate?: string; // Date (DD-MMM-YYYY), Mandatory
 
   /** To RFQ Date */
-  filtToDate: string; // Date (DD-MMM-YYYY), Mandatory
+  filtToDate?: string; // Date (DD-MMM-YYYY), Mandatory
 }
 
 export type GetAllDealAmendmentsResponse = DealAmendModifyCancelResponse[];

@@ -169,12 +169,12 @@ export type CustomerByIdPayload = {
   riskProfile: {
     id: number;
     data: {
-      ans: string
-      opt: Array<string>
-      qus: string
-      index: number
-    }[]
-  }
+      ans: string;
+      opt: Array<string>;
+      qus: string;
+      index: number;
+    }[];
+  };
 
   userName: string;
   firstName: string;
@@ -186,7 +186,7 @@ export type CustomerByIdPayload = {
   gender: Gender;
   userType: CustomerUserType;
   kycStatus: KycStatus;
-  verifyDate: string | null,
+  verifyDate: string | null;
   avatar: string | null;
   VerifiedBy: number | null;
   createdBy: number | null;
@@ -194,8 +194,9 @@ export type CustomerByIdPayload = {
   id: number;
   updatedAt: string; // ISO
   isAFatcaCustomer: boolean;
-  allowSEBITerms: boolean,
-  isAPep: boolean,
+  allowSEBITerms: boolean;
+  kycSubmitDate: string | null;
+  isAPep: boolean;
   utility: DetailCustomerUtility;
 };
 
@@ -217,7 +218,6 @@ interface PersonalInfo {
   qualification?: string;
   politicallyExposedPerson?: string;
 }
-
 
 // GET /crm/customers/:id
 export type GetCustomerResponseById = BaseResponseData<CustomerByIdPayload>;
@@ -326,7 +326,7 @@ export type NewLeadPayload = {
   createdBy: number;
   createdAt: string;
   updatedAt: string;
-  assignTo?: CrmUsersProfile
+  assignTo?: CrmUsersProfile;
 };
 
 //POST /crm/lead

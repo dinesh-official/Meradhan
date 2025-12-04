@@ -212,6 +212,8 @@ export class CustomerAuthController {
         avatar: true,
         emailAddress: true,
         userName: true,
+        kycStatus: true,
+        gender: true,
       },
     });
 

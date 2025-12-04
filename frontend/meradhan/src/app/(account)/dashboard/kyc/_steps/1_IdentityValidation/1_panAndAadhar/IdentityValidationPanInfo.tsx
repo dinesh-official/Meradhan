@@ -16,6 +16,7 @@ import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
@@ -126,11 +127,27 @@ function IdentityValidationPanInfo() {
           className="flex items-center gap-1 w-full sm:w-auto"
           disabled={!isAllowToContinue}
           onClick={() => {
-            setStep1PanData("confirmPanTimestamp", new Date().toISOString());
             addAuditLog({
               type: "KYC_PROCESS_CONTINUED",
               desc: "User chose to continue the KYC process : PAN and Identity Validation step.",
             });
+            setStep1PanData("confirmPanTimestamp", new Date().toISOString());
+            addActivityLog({
+              action: "CONFIRMED_PAN_DETAILS",
+              details: {
+                step: "PAN and Identity Validation step - Confirmed PAN Details",
+                PanNo: state.step_1.pan.panCardNo,
+                DateOfBirth: state.step_1.pan.dateOfBirth,
+                FirstName: state.step_1.pan.firstName,
+                MiddleName: state.step_1.pan.middleName,
+                LastName: state.step_1.pan.lastName,
+                Gender:
+                  genders[data.response?.details.pan.gender as "M" | "F"] ||
+                  "Others",
+              },
+              entityType: "KYC",
+            });
+
             nextLocalStep();
             pushUserKycState();
           }}

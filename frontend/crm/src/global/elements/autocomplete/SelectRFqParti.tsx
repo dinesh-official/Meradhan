@@ -29,7 +29,7 @@ export function SelectRFqParti({
   );
 
   const fetchUserQuery = useQuery({
-    queryKey: ["SelectRFqParti", searchValue, open],
+    queryKey: ["SelectRFqParti", open],
     queryFn: async () => {
       const response = await userApi.getAllRfqParticipants();
       return response.data;

@@ -13,6 +13,7 @@ import {
 } from "../../../../_store/useKycDataStorage";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../../_context/KycDataProvider";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 export const usePanCardVerifyHook = () => {
   const [error, setError] =
     useState<
@@ -38,6 +39,22 @@ export const usePanCardVerifyHook = () => {
           "fetchedTimestamp",
           new Date(data?.responseData?.completed_at).toISOString()
         );
+        addActivityLog({
+          action: "DIGIO_PAN_VERIFICATION_COMPLETED",
+          details: {
+            step: "PAN and Identity Validation step",
+            PanNo: state.step_1.pan.panCardNo,
+            DateOfBirth: state.step_1.pan.dateOfBirth,
+            FirstName: state.step_1.pan.firstName,
+            MiddleName: state.step_1.pan.middleName,
+            LastName: state.step_1.pan.lastName,
+            "Not a Politically Exposed Person": "CHECKED",
+            "Not debarred from securities market": "CHECKED",
+            "Indian citizen and solely a tax resident of India": "CHECKED",
+            "Consent for KYC and KRA": "CHECKED",
+          },
+          entityType: "KYC",
+        });
         // its navigate to next step view pan info
         nextLocalStep();
         // update step
@@ -72,10 +89,45 @@ export const usePanCardVerifyHook = () => {
       await panKycApi.requestPanVerification(data),
     onSuccess: (data) => {
       if (data.responseData?.id) {
+        addActivityLog({
+          action: "START_DIGIO_KYC_PROCESS",
+          details: {
+            step: "PAN and Identity Validation step",
+            PanNo: state.step_1.pan.panCardNo,
+            DateOfBirth: state.step_1.pan.dateOfBirth,
+            FirstName: state.step_1.pan.firstName,
+            MiddleName: state.step_1.pan.middleName,
+            LastName: state.step_1.pan.lastName,
+            "Not a Politically Exposed Person": "CHECKED",
+            "Not debarred from securities market": "CHECKED",
+            "Indian citizen and solely a tax resident of India": "CHECKED",
+            "Consent for KYC and KRA": "CHECKED",
+          },
+          entityType: "KYC",
+        });
+
         const kycWindow = digio.createInstance({
           callback(response) {
             if (response.error_code) {
               toast.error(response.message || "Something went wrong");
+              addActivityLog({
+                action: "FAILED_DIGIO_KYC_PROCESS",
+                details: {
+                  step: "PAN and Identity Validation step",
+                  Reason: response.message || "Unknown Error",
+                  PanNo: state.step_1.pan.panCardNo,
+                  DateOfBirth: state.step_1.pan.dateOfBirth,
+                  FirstName: state.step_1.pan.firstName,
+                  MiddleName: state.step_1.pan.middleName,
+                  LastName: state.step_1.pan.lastName,
+                  "Not a Politically Exposed Person": "CHECKED",
+                  "Not debarred from securities market": "CHECKED",
+                  "Indian citizen and solely a tax resident of India":
+                    "CHECKED",
+                  "Consent for KYC and KRA": "CHECKED",
+                },
+                entityType: "KYC",
+              });
             } else if (response.digio_doc_id) {
               verifyPanCardInfoMutation.mutate(response.digio_doc_id);
             } else {
@@ -95,6 +147,7 @@ export const usePanCardVerifyHook = () => {
       if (error instanceof ApiError) {
         const errorMessage = error.response?.data?.message || error.message;
         toast.error(errorMessage);
+
         addAuditLog({
           type: "PAN_VERIFICATION_FAILED",
           desc: `PAN verification failed with error: ${errorMessage}`,

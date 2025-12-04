@@ -22,10 +22,10 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
               lightModded && "lg:px-0"
             )}
           >
-            Disclaimer : The content on this website is for informational and
-            educational purposes only. MeraDhan does not provide investment,
-            legal, or tax advice. Please consult a registered financial advisor
-            before making any investment decisions.
+            Disclaimer : Investments in debt securities/ municipal debt
+            securities/ securitised debt instruments are subject to risks
+            including delay and/ or default in payment. Read all the offer
+            related documents carefully.
           </p>
 
           <div

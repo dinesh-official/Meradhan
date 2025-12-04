@@ -306,6 +306,7 @@ export type T_PAN_MODIFY_RESPONSE = {
       APP_ENTRYDT: string;
       APP_MODDT: string;
       APP_POS_CODE: string;
+      ERROR?: string;
     };
     APP_SUMM_REC: {
       APP_REQ_DATE: string;
@@ -316,3 +317,27 @@ export type T_PAN_MODIFY_RESPONSE = {
     };
   };
 };
+
+export interface T_PAN_REGISTER_RESPONSE {
+  APP_RES_ROOT: {
+    APP_PAN_INQ: {
+      APP_ENTRYDT: string;
+      APP_IOP_FLG: string;
+      APP_PAN_DOB: string;
+      APP_PAN_NO: string;
+      APP_POS_CODE: string;
+      APP_REG_ACK: string;
+      APP_STATUS: string;
+      APP_STATUSDT: string;
+      APP_STATUS_DESC: string;
+      ERROR?: string;
+    };
+    APP_SUMM_REC: {
+      APP_OTHKRA_BATCH: string;
+      APP_OTHKRA_CODE: string;
+      APP_REQ_DATE: string;
+      APP_TOTAL_REC: string;
+      NO_OF_FATCA_ADDL_DTLS_RECORDS: string;
+    };
+  };
+}

@@ -5,15 +5,16 @@ export type DepositoryName = "NSDL" | "CDSL";
 export type DematAccountType = "SOLO" | "JOINT";
 export type AccountStatus = "ACTIVE" | "SUSPENDED";
 export type SigninWith = "CREDENTIALS" | "GOOGLE" | "GITHUB" | "APPLE";
-export type CustomerUserType = "INDIVIDUAL" |
-  "INDIVIDUAL_NRI_NRO" |
-  "TRUST" |
-  "CORPORATE" |
-  "HUF" |
-  "LLP" |
-  "PARTNERSHIP_FIRM";
+export type CustomerUserType =
+  | "INDIVIDUAL"
+  | "INDIVIDUAL_NRI_NRO"
+  | "TRUST"
+  | "CORPORATE"
+  | "HUF"
+  | "LLP"
+  | "PARTNERSHIP_FIRM";
 
-export type KycStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type KycStatus = "PENDING" | "VERIFIED" | "REJECTED" | "UNDER_REVIEW";
 
 export type AadhaarCard = {
   id: number;
@@ -28,7 +29,7 @@ export type AadhaarCard = {
   isVerified: boolean;
   verifyDate: string;
   confirmTimeStamp: string | null;
-  
+
   allowTerms: boolean;
   createdAt: string;
   updatedAt: string;
@@ -91,7 +92,6 @@ export type DematAccount = {
   createdAt: string;
   updatedAt: string;
   confirmTimeStamp: string | null;
-
 };
 
 // PAN Card

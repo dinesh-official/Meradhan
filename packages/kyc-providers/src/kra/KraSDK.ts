@@ -7,8 +7,9 @@ import type {
   T_APP_PAN_INQ_DOWNLOAD,
   T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
   T_PAN_MODIFY_RESPONSE,
+  T_PAN_REGISTER_RESPONSE,
 } from "./kra.types";
-import { KraXMLBuilder } from "./KraXMLBuilder";
+import { KraXMLBuilder, KraXMLParser } from "./KraXMLBuilder";
 export type KraEnvironment = "UAT" | "PROD";
 
 export interface KraConfig {
@@ -25,6 +26,7 @@ export class KraSDK {
   private passKey: string;
   private env: KraEnvironment;
   private encryptedPassword: string | null = null;
+  private okraCdOrMiId: string;
 
   private readonly okraServiceUrl: string;
   private readonly panServiceUrl: string;
@@ -34,6 +36,7 @@ export class KraSDK {
     this.passKey = config.passKey;
     this.env = (config.env || "UAT").toUpperCase() as KraEnvironment;
     this.userName = config.userName;
+    this.okraCdOrMiId = config.okraCdOrMiId;
 
     this.okraServiceUrl =
       this.env === "PROD"
@@ -213,11 +216,10 @@ export class KraSDK {
       APP_SUMM_REC,
       FATCA_ADDL_DTLS: FATCA_ADDL_DTLS || [],
       encryptedPassword: encrypted,
-      okraCdOrMiId: this.userName,
+      okraCdOrMiId: this.okraCdOrMiId,
       passKey: this.passKey,
       userName: this.userName,
     });
-    return resultXmlPayload;
     const response = await axios.post(this.okraServiceUrl, resultXmlPayload, {
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
@@ -226,7 +228,10 @@ export class KraSDK {
       },
     });
 
-    return (await KraXMLBuilder.parseSoapReturn(response.data)) as any;
+    // return (await KraXMLBuilder.parseSoapReturn(response.data)) as any;
+    return (await KraXMLParser.parseRegistrationResponse(
+      response.data
+    )) as T_PAN_REGISTER_RESPONSE;
   }
 
   // 4. Modify PAN Details
@@ -238,29 +243,27 @@ export class KraSDK {
       userName: this.userName,
       payload,
     });
-    const response = await axios.post(this.okraServiceUrl, xml, {
+    const response = await axios.post(this.panServiceUrl, xml, {
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
-        SOAPAction: "processModification",
-        Password: encrypted,
       },
     });
 
-    return (await KraXMLBuilder.decodeByteSoapResponse(
+    return (await KraXMLParser.parseModifyPdfResponse(
       response.data
-    )) as unknown as T_PAN_MODIFY_RESPONSE;
+    )) as T_PAN_MODIFY_RESPONSE;
   }
 }
 
-// const kra = new KraSDK({
-//   userName: "MERADHAN",
-//   password: "Ndml@123",
-//   passKey: "A1b2C3d4@XyZ!",
-//   okraCdOrMiId: "A1249",
-//   env: "UAT",
-// });
+const kra = new KraSDK({
+  userName: "MERADHAN",
+  password: "Ndml@123",
+  passKey: "A1b2C3d4@XyZ!",
+  okraCdOrMiId: "A1249",
+  env: "UAT",
+});
 
-// const provider = await kra.init();
+const provider = await kra.init();
 
 // const encrypted = await provider.ensureEncryptedPassword();
 // console.log("Encrypted Password:", encrypted);
@@ -282,79 +285,79 @@ export class KraSDK {
 
 // console.log(result2);
 
-// const result3 = await provider.panModifyKraXML({
-//   panInquiry: {
-//     APP_IOP_FLG: "IE",
-//     APP_POS_CODE: "A1249",
-//     APP_TYPE: "I",
-//     APP_NO: "",
-//     APP_DATE: "28-02-2023 00:00:00",
-//     APP_PAN_NO: "OWWPF2222C",
-//     APP_PANEX_NO: "",
-//     APP_PAN_COPY: "Y",
-//     APP_EXMT: "N",
-//     APP_EXMT_CAT: "",
-//     APP_KYC_MODE: "5",
-//     APP_EXMT_ID_PROOF: "02",
-//     APP_IPV_FLAG: "E",
-//     APP_IPV_DATE: "28-02-2023",
-//     APP_GEN: "F",
-//     APP_NAME: "CHETAN DHLIP GHARMALKAR",
-//     APP_F_NAME: "DILIP GHARMALKAR",
-//     APP_DOB_DT: "19-03-1999",
-//     APP_NATIONALITY: "01",
-//     APP_RES_STATUS: "N",
-//     APP_UID_NO: "631632583501",
-//     APP_COR_ADD1: "S/O Sanser Pal,A-326, Kusum Pur Pahari,Kusum Pur",
-//     APP_COR_ADD2: "South West Delhi,Delhi,110057 ",
-//     APP_COR_ADD3: "",
-//     APP_COR_CITY: "South West Delhi",
-//     APP_COR_PINCD: "110057",
-//     APP_COR_STATE: "099",
-//     APP_COR_CTRY: "103",
-//     APP_EMAIL: "SAMTEK109@GMAIL.COM",
-//     APP_COR_ADD_PROOF: "31",
-//     APP_COR_ADD_REF: "4322",
-//     APP_PER_ADD1: " S/O Sanser Pal,A-326, Kusum Pur Pahari,Kusum Pur",
-//     APP_PER_ADD2: "South West Delhi,Delhi,110057 ",
-//     APP_PER_ADD3: "",
-//     APP_PER_CITY: "South West Delhi",
-//     APP_PER_PINCD: "110057",
-//     APP_PER_STATE: "099",
-//     APP_PER_CTRY: "102",
-//     APP_INCOME: "",
-//     APP_OCC: "",
-//     APP_POL_CONN: "NA",
-//     APP_DOC_PROOF: "E",
-//     APP_FATCA_APPLICABLE_FLAG: "N",
-//     APP_FATCA_BIRTH_PLACE: "THANE",
-//     APP_FATCA_BIRTH_COUNTRY: "DE",
-//     APP_FATCA_COUNTRY_CITYZENSHIP: "IO",
-//     APP_FATCA_DATE_DECLARATION: "01-01-2024",
-//     APP_MOBILE_NO: "9299999999",
-//   },
-//   // FATCA_ADDL_DTLS: [
-//   //   {
-//   //     APP_FATCA_ENTITY_PAN: "OWWPF2222C",
-//   //     APP_FATCA_COUNTRY_RESIDENCY: "DE",
-//   //     APP_FATCA_TAX_IDENTIFICATION_NO: "8900984738893393",
-//   //     APP_FATCA_TAX_EXEMPT_FLAG: "N",
-//   //     APP_FATCA_TAX_EXEMPT_REASON: "",
-//   //   },
-//   // ],
+const result3 = await provider.panModifyKraXML({
+  panInquiry: {
+    APP_IOP_FLG: "IE",
+    APP_POS_CODE: "A1249",
+    APP_TYPE: "I",
+    APP_NO: "",
+    APP_DATE: "28-02-2023 00:00:00",
+    APP_PAN_NO: "OWWPF2222C",
+    APP_PANEX_NO: "",
+    APP_PAN_COPY: "Y",
+    APP_EXMT: "N",
+    APP_EXMT_CAT: "",
+    APP_KYC_MODE: "5",
+    APP_EXMT_ID_PROOF: "02",
+    APP_IPV_FLAG: "E",
+    APP_IPV_DATE: "28-02-2023",
+    APP_GEN: "F",
+    APP_NAME: "CHETAN DHLIP GHARMALKAR",
+    APP_F_NAME: "DILIP GHARMALKAR",
+    APP_DOB_DT: "19-03-1999",
+    APP_NATIONALITY: "01",
+    APP_RES_STATUS: "N",
+    APP_UID_NO: "631632583501",
+    APP_COR_ADD1: "S/O Sanser Pal,A-326, Kusum Pur Pahari,Kusum Pur",
+    APP_COR_ADD2: "South West Delhi,Delhi,110057 ",
+    APP_COR_ADD3: "",
+    APP_COR_CITY: "South West Delhi",
+    APP_COR_PINCD: "110057",
+    APP_COR_STATE: "099",
+    APP_COR_CTRY: "103",
+    APP_EMAIL: "SAMTEK109@GMAIL.COM",
+    APP_COR_ADD_PROOF: "31",
+    APP_COR_ADD_REF: "4322",
+    APP_PER_ADD1: " S/O Sanser Pal,A-326, Kusum Pur Pahari,Kusum Pur",
+    APP_PER_ADD2: "South West Delhi,Delhi,110057 ",
+    APP_PER_ADD3: "",
+    APP_PER_CITY: "South West Delhi",
+    APP_PER_PINCD: "110057",
+    APP_PER_STATE: "099",
+    APP_PER_CTRY: "102",
+    APP_INCOME: "",
+    APP_OCC: "",
+    APP_POL_CONN: "NA",
+    APP_DOC_PROOF: "E",
+    APP_FATCA_APPLICABLE_FLAG: "N",
+    APP_FATCA_BIRTH_PLACE: "THANE",
+    APP_FATCA_BIRTH_COUNTRY: "DE",
+    APP_FATCA_COUNTRY_CITYZENSHIP: "IO",
+    APP_FATCA_DATE_DECLARATION: "01-01-2024",
+    APP_MOBILE_NO: "9299999999",
+  },
+  // FATCA_ADDL_DTLS: [
+  //   {
+  //     APP_FATCA_ENTITY_PAN: "OWWPF2222C",
+  //     APP_FATCA_COUNTRY_RESIDENCY: "DE",
+  //     APP_FATCA_TAX_IDENTIFICATION_NO: "8900984738893393",
+  //     APP_FATCA_TAX_EXEMPT_FLAG: "N",
+  //     APP_FATCA_TAX_EXEMPT_REASON: "",
+  //   },
+  // ],
 
-//   fatcaAdditionalDetails: [
-//     {
-//       APP_FATCA_COUNTRY_RESIDENCY: "DE",
-//       APP_FATCA_ENTITY_PAN: "OWWPF2222C",
-//       APP_FATCA_TAX_EXEMPT_FLAG: "N",
-//       APP_FATCA_TAX_EXEMPT_REASON: "",
-//       APP_FATCA_TAX_IDENTIFICATION_NO: "8900984738893393",
-//     },
-//   ],
-// });
+  fatcaAdditionalDetails: [
+    {
+      APP_FATCA_COUNTRY_RESIDENCY: "DE",
+      APP_FATCA_ENTITY_PAN: "OWWPF2222C",
+      APP_FATCA_TAX_EXEMPT_FLAG: "N",
+      APP_FATCA_TAX_EXEMPT_REASON: "",
+      APP_FATCA_TAX_IDENTIFICATION_NO: "8900984738893393",
+    },
+  ],
+});
 
-// console.log({ result3 });
+console.log({ result3 });
 
 // const result4 = await provider.panRegisterUploadKraXML({
 //   APP_PAN_INQ: {

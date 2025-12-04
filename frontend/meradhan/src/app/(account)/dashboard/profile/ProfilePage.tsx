@@ -16,7 +16,7 @@ const tabs = [
   "Bank Accounts",
   "Demat Accounts",
   "Risk Profile",
-  "My Watch List",
+  "My Watchlist",
   // "Refer & Earn",
 ];
 function ProfilePage({

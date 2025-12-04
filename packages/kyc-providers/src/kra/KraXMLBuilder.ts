@@ -140,8 +140,7 @@ export class KraXMLBuilder {
     userName: string;
   }) {
     const innerXML = this.buildPanDownloadInnerXML(pan, dob, mobile);
-    return `
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
+    return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
    <soapenv:Header/>
    <soapenv:Body>
       <ser:panDownloadDetailsComplete>
@@ -190,7 +189,7 @@ export class KraXMLBuilder {
    <soapenv:Header/>
    <soapenv:Body>
       <com:registration>
-        <input>${byteArray.map((r) => `<byte>${r}</byte>`).join("")}</input>
+        ${byteArray.map((r) => `<input>${r}</input>`).join("")}
         <userId>${userName}</userId>
         <userPassword>${encryptedPassword}</userPassword>
         <passKey>${passKey}</passKey>
@@ -431,12 +430,11 @@ ${summaryXML}
     userName: string;
   }) {
     const innerXML = this.buildInnerPanModifyKraXML(payload);
-    return `
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
+    return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
   <soapenv:Header/>
   <soapenv:Body>
       <ser:processModification>
-          <arg0><![CDATA[${innerXML}]]></arg0>
+          <arg0><![CDATA[${innerXML.trim()}]]></arg0>
           <arg1>${userName}</arg1>
           <arg2>${encryptedPassword}</arg2>
           <arg3>${passKey}</arg3>
@@ -497,5 +495,69 @@ ${summaryXML}
     });
 
     return json; // final JSON result
+  }
+}
+
+export class KraXMLParser {
+  static async parseRegistrationResponse(xmlStr: string): Promise<object> {
+    function extractBytesFromXML(xml: string): number[] {
+      const regex = /<registrationReturn>(\d+)<\/registrationReturn>/g;
+      const bytes: number[] = [];
+      let match: RegExpExecArray | null;
+
+      while ((match = regex.exec(xml)) !== null) {
+        bytes.push(Number(match[1]));
+      }
+      return bytes;
+    }
+
+    function bytesToString(byteArray: number[]): string {
+      return byteArray.map((n: number) => String.fromCharCode(n)).join("");
+    }
+
+    const byteArray: number[] = extractBytesFromXML(xmlStr);
+    const decodedText: string = bytesToString(byteArray);
+    return await this.xmlToJson(decodedText);
+  }
+
+  static async parseModifyPdfResponse(xmlStr: string) {
+    // Step 1: Parse SOAP envelope
+    const soapJson = await parseStringPromise(xmlStr, {
+      explicitArray: false,
+      trim: true,
+      mergeAttrs: true,
+    });
+
+    // Navigate to inner escaped XML
+    const innerEscaped =
+      soapJson["soapenv:Envelope"]["soapenv:Body"][
+        "ns2:processModificationResponse"
+      ]["return"];
+
+    // Step 2: Unescape the inner XML string
+    const innerXml = innerEscaped
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+
+    // Step 3: Parse the inner XML
+    const innerJson = await parseStringPromise(innerXml, {
+      explicitArray: false,
+      trim: true,
+      mergeAttrs: true,
+    });
+
+    return innerJson;
+  }
+
+  static async xmlToJson<T>(xmlStr: string): Promise<T> {
+    const result = await parseStringPromise(xmlStr, {
+      explicitArray: false, // Do not wrap single nodes in arrays
+      explicitCharkey: false, // Clean text nodes
+      trim: true, // Trim whitespace
+      mergeAttrs: true, // Merge attributes into same object
+    });
+
+    return result;
   }
 }

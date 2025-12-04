@@ -560,6 +560,8 @@ export class NseRfq {
     payload: GetAllDealAmendmentsRequest
   ): Promise<GetAllDealAmendmentsResponse> {
     return this.withReLoginRetry(async (loginKey) => {
+      console.log(loginKey);
+
       const { data } = await this.client.post<GetAllDealAmendmentsResponse>(
         "/dealamend/all",
         payload,

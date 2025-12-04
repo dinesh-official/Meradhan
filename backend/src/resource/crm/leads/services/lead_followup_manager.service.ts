@@ -4,9 +4,7 @@ import { AppError } from "@utils/error/AppError";
 import type z from "zod";
 
 export class LeadsFollowUpManagerService {
-  async getFollowUpNotesByLeadId(
-    leadId: number
-  ) {
+  async getFollowUpNotesByLeadId(leadId: number) {
     const leadNotes = await db.dataBase.leadFollowUpNotesModel.findMany({
       where: { leadId },
       orderBy: { createdAt: "desc" }, // optional, adjust to your schema
@@ -21,9 +19,7 @@ export class LeadsFollowUpManagerService {
     return leadNotes;
   }
 
-  async deleteFollowUpNote(
-    followUpNoteId: number
-  ) {
+  async deleteFollowUpNote(followUpNoteId: number) {
     const existing = await db.dataBase.leadFollowUpNotesModel.findUnique({
       where: { id: followUpNoteId },
     });
@@ -34,11 +30,11 @@ export class LeadsFollowUpManagerService {
       });
     }
 
-    await db.dataBase.leadFollowUpNotesModel.delete({
+    const data = await db.dataBase.leadFollowUpNotesModel.delete({
       where: { id: followUpNoteId },
     });
 
-    return true;
+    return data;
   }
 
   async createNewFollowUpNote(

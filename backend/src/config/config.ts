@@ -10,7 +10,9 @@ function getEnvVar(key: string, devDefault?: string): string {
     return devDefault;
   throw new Error(`Missing required environment variable: ${key}`);
 }
-
+/**
+ * @deprecated Use `env.NAME` form "@packages/config/env" instead.
+ */
 export const config = {
   hostUrl: getEnvVar("BACKEND_HOST_URL", "http://localhost:4000"),
   clientUrl: getEnvVar("HOST_URL", "http://localhost:3000"),
@@ -47,9 +49,12 @@ export const config = {
   },
 
   razorpay: {
-    keyId: getEnvVar("RAZORPAY_KEY_ID","rzp_test_kEImBJ2nKkyGjS"),
-    keySecret: getEnvVar("RAZORPAY_KEY_SECRET","bLyRCn9Iqt2Ub8I53H1zJd02"),
-    webhookSecret: getEnvVar("RAZORPAY_WEBHOOK_SECRET","adsas@285$5a85$$5sjkbbdfjbdfa@#$%2334324sddfdsj"),
+    keyId: getEnvVar("RAZORPAY_KEY_ID", "rzp_test_kEImBJ2nKkyGjS"),
+    keySecret: getEnvVar("RAZORPAY_KEY_SECRET", "bLyRCn9Iqt2Ub8I53H1zJd02"),
+    webhookSecret: getEnvVar(
+      "RAZORPAY_WEBHOOK_SECRET",
+      "adsas@285$5a85$$5sjkbbdfjbdfa@#$%2334324sddfdsj"
+    ),
   },
 
   checkout: {
