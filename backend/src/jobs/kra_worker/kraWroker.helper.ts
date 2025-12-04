@@ -7,12 +7,15 @@ export interface KraWorkerJobData<T = Record<string, unknown>> {
   data?: T;
 }
 
-export const addKraWorkerJob = async <T>(data: KraWorkerJobData<T>) => {
+export const addKraWorkerJob = async <T>(
+  data: KraWorkerJobData<T>,
+  delay?: number
+) => {
   return await kraWorkerQueue.add(data, {
     attempts: 1,
-    // backoff: {
-    //   type: "exponential",
-    //   delay: 2000, // initial delay, grows: 2000, 4000, 8000, etc.
-    // },
+    backoff: {
+      type: "exponential",
+      delay: delay ?? 2 * 60 * 60 * 1000, // initial delay, 2 hr
+    },
   });
 };

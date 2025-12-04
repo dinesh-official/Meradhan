@@ -59,7 +59,7 @@ export class NseCBRICS {
   private credentials = {
     domain: env.CBRICS_DOMAIN,
     login: env.CBRICS_LOGIN,
-    password: env.CBRICS_PASSWORD, // dv(En91T$kgS6b1 for testing only
+    password: env.CBRICS_PASSWORD, // vcl)En91T$kgS6b1 for testing only
   };
 
   constructor() {

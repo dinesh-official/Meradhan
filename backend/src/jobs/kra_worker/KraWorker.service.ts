@@ -1,9 +1,15 @@
 import { db, type CustomerProfileDataModel } from "@core/database/database";
 import { env } from "@packages/config/env";
 import { KraSDK } from "kyc-providers";
-import type { T_APP_PAN_REGISTER_REQUEST_PAYLOAD } from "kyc-providers";
+import type {
+  T_APP_PAN_INQ,
+  T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
+} from "kyc-providers";
 import type { Root } from "../../../../packages/kyc-providers/pdf/dataMapper";
-import type { KraWorkerJobData } from "./kraWroker.helper";
+import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
+import { removeCountryCode } from "@utils/filters/convert";
+import { makeFullname } from "@utils/generate/generate_username";
+import { checkKraProcessCheckStatus } from "./CheckKraStatus";
 
 function stageFunctions(stage: KraWorkerJobData["stage"]) {
   switch (stage) {
@@ -46,18 +52,30 @@ export class KraWorkerService {
       const kyc = payload.data as Root;
       console.log("KYC payload:", kyc?.step_1?.pan?.panCardNo);
 
-      const handler = stageFunctions(data.stage);
-      if (!handler) {
-        throw new Error("No handler for stage");
-      }
-
-      const res = await handler({
+      const res = await stageFunctions("ENQUIRY_KRA")({
         kycdataId: kycDataStoreId,
         data: kyc,
         customer,
       });
 
-      console.log("KRA stage result:", res);
+      const status = checkKraProcessCheckStatus(res as T_APP_PAN_INQ);
+      // Reschedule the job next 2 hours later
+      if (status == "WAITING") {
+        await addKraWorkerJob(data);
+        return;
+      }
+
+      // If status is REGISTER then register the KRA again check status 2 hours later
+      if (status == "REGISTER") {
+        await stageFunctions("REGISTER_KRA")({
+          kycdataId: kycDataStoreId,
+          data: kyc,
+          customer,
+        });
+        await addKraWorkerJob(data);
+        return;
+      }
+
       return res;
     } catch (err) {
       console.error("KraWorkerService.processKra error:", err);
@@ -93,12 +111,12 @@ class KraProcess {
     // Implement the KRA processing logic here
     const reqTime = new Date().toISOString();
     const payload = {
-      dob: data.step_1.pan.dateOfBirth,
       pan: data.step_1.pan.panCardNo.split("-").reverse().join(""),
-      mobile: customer.phoneNo!.replaceAll("+", "")!,
+      dob: data.step_1.pan.dateOfBirth,
+      mobile: removeCountryCode(customer.phoneNo),
       reqNo: this.generateReqNo(),
     };
-    const enquiry = await this.kraInstance.panInquiryTwo(payload);
+    const enquiry = await this.kraInstance.panInquiry(payload);
     const resTime = new Date().toISOString();
     await db.dataBase.kraDataLogs.create({
       data: {
@@ -153,7 +171,7 @@ class KraProcess {
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
-        responseData: report,
+        responseData: report as object,
         userId: customer.id,
         kycId: kycdataId,
         stage: "REGISTER_KRA",
@@ -174,7 +192,7 @@ class KraProcess {
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
-        responseData: report,
+        responseData: report as object,
         userId: customer.id,
         kycId: kycdataId,
         stage: "MODIFY_KRA",
@@ -193,12 +211,14 @@ class KraProcess {
     const panNo = panRaw ? panRaw.split("-").reverse().join("") : "";
 
     const firstName = data.step_1?.pan?.firstName || "";
+    const middleName = data.step_1?.pan?.middleName || "";
     const lastName = data.step_1?.pan?.lastName || "";
+
     const dob = data.step_1?.pan?.dateOfBirth || "";
-    const mobile = customer.phoneNo?.replaceAll("+", "") || "";
+    const mobile = removeCountryCode(customer.phoneNo);
 
     const appPanInq = {
-      APP_IOP_FLG: "",
+      APP_IOP_FLG: "IE",
       APP_POS_CODE: env.KRA_OKRA_CD_MI_ID || "",
       APP_TYPE: "I",
       APP_NO: "",
@@ -206,17 +226,18 @@ class KraProcess {
       APP_PAN_NO: panNo,
       APP_PANEX_NO: "",
       APP_PAN_COPY: "Y",
-      APP_EXMT: "",
+      APP_EXMT: "N",
       APP_EXMT_CAT: "",
-      APP_KYC_MODE: "",
-      APP_EXMT_ID_PROOF: "",
-      APP_IPV_FLAG: "",
-      APP_IPV_DATE: "",
-      APP_GEN: "",
-      APP_NAME: `${firstName} ${lastName}`.trim(),
+      APP_KYC_MODE: "5",
+      APP_EXMT_ID_PROOF: "02",
+      APP_IPV_FLAG: "E",
+      APP_IPV_DATE: formatDate(new Date()),
+      APP_GEN: data.step_1.pan.response.details.pan.gender,
+      APP_NAME: makeFullname({ firstName, middleName, lastName }),
+
       APP_F_NAME: firstName,
       APP_REGNO: "",
-      APP_DOB_DT: dob,
+      APP_DOB_DT: formatDate(new Date(dob)),
       APP_DOI_DT: "",
       APP_COMMENCE_DT: "",
       APP_NATIONALITY: "",
@@ -229,8 +250,12 @@ class KraProcess {
       APP_COR_ADD1: "",
       APP_COR_ADD2: "",
       APP_COR_ADD3: "",
-      APP_COR_CITY: "",
-      APP_COR_PINCD: "",
+      APP_COR_CITY:
+        data.step_1.pan.response.details.aadhaar.permanent_address_details
+          .district_or_city,
+      APP_COR_PINCD:
+        data.step_1.pan.response.details.aadhaar.permanent_address_details
+          .pincode,
       APP_COR_STATE: "",
       APP_OTH_COR_STATE: "",
       APP_COR_CTRY: "",
@@ -306,3 +331,10 @@ class KraProcess {
     } as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"];
   }
 }
+
+const formatDate = (date: Date) => {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0"); // January is 0!
+  const yyyy = date.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+};
