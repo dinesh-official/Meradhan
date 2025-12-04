@@ -113,6 +113,7 @@ export default async function RootLayout({
         <Script
           type="text/javascript"
           src="https://ext-gateway.digio.in/sdk/v11/digio.js"
+          strategy="afterInteractive"
         />
       </body>
     </html>

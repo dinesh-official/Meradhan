@@ -15,6 +15,7 @@ export const BASES = {
     CMS: "https://spydertest.meradhan.co",
     ASSETS: "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public",
   },
+  DIGIO: "production" as "sandbox" | "production", // Change to "production" for live environment
 };
 
 // production: {
