@@ -8,6 +8,8 @@ const BASIC_AUTH_HEADER =
   "Basic " + Buffer.from("admin:admin").toString("base64");
 
 const fetchUserSession = async (token: string) => {
+  console.log(token);
+
   try {
     const sessionResponse = fetch(
       "http://localhost:4000/api/customer/session",
@@ -51,8 +53,30 @@ export async function middleware(request: NextRequest) {
   //   }
   // }
 
+  if (pathname.startsWith("/login")) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (token) {
+      try {
+        console.log({ token });
+        // Attempt session restore via API
+        await fetchUserSession(token);
+        const response = NextResponse.redirect(new URL("/dashboard", origin), {
+          headers: requestHeaders,
+        });
+        return response;
+      } catch (error) {
+        console.log(error);
+        return NextResponse.next({ headers: requestHeaders });
+      }
+    }
+  }
+
   // ✅ 2. Protect /dashboard routes
-  if (pathname.startsWith("/dashboard")) {
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/place-order")
+  ) {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
@@ -63,7 +87,8 @@ export async function middleware(request: NextRequest) {
         await fetchUserSession(token);
         return NextResponse.next({ headers: requestHeaders });
       } catch (error) {
-        const response = NextResponse.redirect(new URL("/logout", origin), {
+        console.log(error);
+        const response = NextResponse.redirect(new URL("/login", origin), {
           headers: requestHeaders,
         });
         const allCookies = cookieStore.getAll();
@@ -79,6 +104,11 @@ export async function middleware(request: NextRequest) {
         // Redirect to login if session is invalid
         return response;
       }
+    } else {
+      const response = NextResponse.redirect(new URL("/logout", origin), {
+        headers: requestHeaders,
+      });
+      return response;
     }
   }
 
