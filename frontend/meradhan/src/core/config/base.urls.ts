@@ -9,7 +9,7 @@ export const BASES = {
   },
 
   production: {
-    HOST: "https://crmtest.meradhan.co",
+    HOST: "https://test.meradhan.co",
     API_SERVER: "https://testapi.meradhan.co",
     API_BACKEND_URL_IP: "http://34.47.136.227:4000",
     CMS: "https://spydertest.meradhan.co",
