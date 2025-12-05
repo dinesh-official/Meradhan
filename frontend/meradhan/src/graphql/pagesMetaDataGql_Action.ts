@@ -100,7 +100,8 @@ function fillTemplate(template: string, data: any): string {
 }
 
 export const generateBondInfoPageMetaData = async (
-  isin: string
+  isin: string,
+  slug?: string
 ): Promise<Metadata> => {
   const gqlCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const bond = await gqlCaller.getBondDetailsByIsin(isin);
@@ -114,7 +115,7 @@ export const generateBondInfoPageMetaData = async (
         filters: {
           MetaData: {
             Slug: {
-              eq: "bonds/detail/[isin]",
+              eq: slug || "bonds/detail/[isin]",
             },
           },
         },

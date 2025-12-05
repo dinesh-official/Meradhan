@@ -4,7 +4,7 @@ import { makeFullname } from "@/global/utils/formate";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { cn } from "@/lib/utils";
 import { GetCustomerResponseById } from "@root/apiGateway";
-import { Clock, Clock4, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { BiSolidFileFind } from "react-icons/bi";

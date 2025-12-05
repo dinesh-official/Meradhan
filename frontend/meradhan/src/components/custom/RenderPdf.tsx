@@ -9,14 +9,21 @@ import "@react-pdf-viewer/zoom/lib/styles/index.css";
 
 import { toolbarPlugin } from "@react-pdf-viewer/toolbar";
 import "@react-pdf-viewer/toolbar/lib/styles/index.css";
+import { cn } from "@/lib/utils";
 
 interface RenderPdfProps {
   file: string; // URL or base64 string
   height?: number; // Optional height prop
   width?: number; // Optional width prop
+  className?: string; // Optional className prop
 }
 
-const RenderPdf: React.FC<RenderPdfProps> = ({ file, height, width }) => {
+const RenderPdf: React.FC<RenderPdfProps> = ({
+  file,
+  height,
+  width,
+  className,
+}) => {
   const zoomPluginInstance = zoomPlugin();
   const toolbarPluginInstance = toolbarPlugin();
 
@@ -24,7 +31,10 @@ const RenderPdf: React.FC<RenderPdfProps> = ({ file, height, width }) => {
 
   return (
     <div
-      className="d-flex flex-column align-items-center bg-light border border-gray-200 rounded-3 overflow-hidden"
+      className={cn(
+        `d-flex flex-column align-items-center bg-light border border-gray-200 rounded-3 overflow-hidden`,
+        className
+      )}
       style={{ width: width || "100%", height: height || "200px" }}
     >
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">

@@ -99,6 +99,7 @@ enum PaymentStatus {
     PENDING
     COMPLETED
     REFUNDED
+    CANCELLED
 }
 
 enum OrderStatus {

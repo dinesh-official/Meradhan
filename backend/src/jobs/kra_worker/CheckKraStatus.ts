@@ -4,6 +4,7 @@ import type {
   T_APP_PAN_INQ_DOWNLOAD,
 } from "@packages/kyc-providers";
 import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
+import { KraProcess } from "./KraWorker.service";
 
 export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
   const status =
@@ -57,11 +58,32 @@ export const checkIsKraMatched = (
   customer: CustomerProfileDataModel,
   kraData: T_APP_PAN_INQ_DOWNLOAD
 ) => {
+  const kraProcess = new KraProcess();
+  const genKra = kraProcess.buildRegisterPayload(data, customer);
+  const check = genKra.APP_PAN_INQ;
   const kra = kraData.APP_RES_ROOT.APP_PAN_INQ;
-
-  const isNameMatched =
-    kra.APP_PAN_NO?.toLowerCase().trim() ===
-    data.step_1.pan.panCardNo?.toLowerCase().trim();
-
-  return isNameMatched;
+  const checkKey: (keyof T_APP_PAN_INQ_DOWNLOAD["APP_RES_ROOT"]["APP_PAN_INQ"])[] =
+    [
+      "APP_POS_CODE",
+      "APP_PAN_NO",
+      "APP_GEN",
+      "APP_NAME",
+      "APP_F_NAME",
+      "APP_UID_NO",
+      "APP_COR_CITY",
+      "APP_COR_PINCD",
+      "APP_COR_STATE",
+      "APP_COR_CTRY",
+      "APP_EMAIL",
+      "APP_COR_ADD_REF",
+      "APP_PER_CITY",
+      "APP_PER_PINCD",
+      "APP_PER_STATE",
+      "APP_PER_CTRY",
+      "APP_PER_ADD_REF",
+      "APP_MAR_STATUS",
+    ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const matchers = checkKey.map((e) => (check as any)[e] == kra[e]);
+  return matchers.find((e) => e == false) || true;
 };

@@ -1,8 +1,5 @@
 import { ASSETS_URL } from "../constants/domains";
 
-const hostPath =
-  "https://jfhfryiyfqrytbtzsdtj.supabase.co/storage/v1/object/public";
-
 export function genMediaUrl(mediaPath?: string | null): string {
   if (!mediaPath || mediaPath === "/noimage.jpg") return "/noimage.jpg";
 
@@ -10,9 +7,6 @@ export function genMediaUrl(mediaPath?: string | null): string {
   const isFullUrl = /^(https?:\/\/|data:|urn:)/i.test(mediaPath);
 
   if (isFullUrl) {
-    if (mediaPath.startsWith(hostPath)) {
-      return mediaPath.replace(hostPath, ASSETS_URL);
-    }
     return mediaPath;
   }
 
@@ -20,5 +14,5 @@ export function genMediaUrl(mediaPath?: string | null): string {
   const normalizedPath = mediaPath.replace(/^\/+/, "");
 
   // Return the full URL
-  return `${normalizedPath}`;
+  return `${ASSETS_URL}/${normalizedPath}`;
 }

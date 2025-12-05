@@ -17,10 +17,27 @@ orderRoutes.post(
   orderController.createOrder
 );
 
+orderRoutes.post(
+  "/api/customer/order/cancel/:orderId",
+  customerAuthMiddleware,
+  orderController.cancelOrder
+);
+
+orderRoutes.post(
+  "/api/customer/order/status/:orderId",
+  customerAuthMiddleware,
+  orderController.setOrderStatus
+);
+
 orderRoutes.get(
   "/api/customer/order/history",
   customerAuthMiddleware,
   orderController.getOrderHistory
 );
 
+orderRoutes.all(
+  "/api/customer/order/pdf",
+  customerAuthMiddleware,
+  orderController.getOrderPdf
+);
 export default orderRoutes;

@@ -30,7 +30,7 @@ function KraLogsView({ id }: { id: number }) {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-10  pb-2 mb-2  flex items-center justify-between">
+      <div className=" pb-2 mb-2  flex items-center justify-between">
         <h3 className="text-2xl font-bold  tracking-tight">KRA Logs</h3>
         {isLoading && <FaSpinner className="animate-spin  text-xl ml-2" />}
       </div>
@@ -81,7 +81,7 @@ function KraLogsView({ id }: { id: number }) {
                   <ReactJson
                     src={log.requestData || {}}
                     theme="rjv-default"
-                    collapsed={2}
+                    collapsed={1}
                     enableClipboard={false}
                     displayDataTypes={false}
                   />

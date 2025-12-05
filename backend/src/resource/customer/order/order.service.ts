@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db, PaymentStatus } from "@core/database/database";
-import { AppError } from "@utils/error/AppError";
-import { PaymentService } from "@resource/customer/payment/payment.service";
-import { PaymentProviders } from "@packages/config/constants";
-import { config } from "@config/config";
-import type { appSchema } from "@root/schema";
-import type z from "zod";
 import type {
-  Prisma,
-  Order,
   NseCbricsParticipantModel,
+  Order,
+  Prisma,
 } from "@databases/generated/prisma/postgres";
+import { PaymentProviders } from "@packages/config/constants";
+import { env } from "@packages/config/src/env";
+import { PaymentService } from "@resource/customer/payment/payment.service";
+import type { appSchema } from "@root/schema";
+import { AppError } from "@utils/error/AppError";
+import type z from "zod";
 
 // Type definitions for order service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -48,14 +49,12 @@ export class OrderService {
   async previewOrder(item: OrderPreviewItem) {
     const bond = await this.getBondDetails(item.isin);
 
+    const stampDutyRate = 0.0001;
     const price = Number(bond.faceValue) || 1000;
     const totalPrice = price * item.quantity;
     const subTotal = totalPrice;
-
-    const stampDutyRate = Number(config.checkout.stampDutyRate) || 0.00015;
-    const stampDuty = subTotal * stampDutyRate;
-
-    const totalAmount = subTotal + stampDuty;
+    const stampDuty = price * item.quantity * stampDutyRate;
+    const totalAmount = price * item.quantity + stampDuty;
 
     return {
       subTotal,
@@ -70,11 +69,21 @@ export class OrderService {
     };
   }
 
-  async createOrder(customerId: number, item: OrderPreviewItem) {
+  async createOrder(
+    customerId: number,
+    item: OrderPreviewItem,
+    orderId?: string
+  ) {
     const preview = await this.previewOrder(item);
 
-    const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const orderNumber =
+      orderId || `MD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
+    const razorpayOrder = await this.payment.createOrder(
+      preview.totalAmount,
+      "INR",
+      orderNumber
+    );
     const order = await db.dataBase.order.create({
       data: {
         customerProfileId: customerId,
@@ -93,13 +102,6 @@ export class OrderService {
         bondDetails: preview.bondDetails as Prisma.InputJsonValue,
       },
     });
-
-    const razorpayOrder = await this.payment.createOrder(
-      preview.totalAmount,
-      "INR",
-      order.orderNumber
-    );
-
     await db.dataBase.order.update({
       where: { id: order.id },
       data: {
@@ -112,7 +114,7 @@ export class OrderService {
       paymentOrderId: razorpayOrder.id,
       amount: preview.totalAmount,
       currency: "INR",
-      key: config.razorpay.keyId,
+      key: env.RAZORPAY_KEY_ID,
     };
   }
 
@@ -182,9 +184,24 @@ export class OrderService {
     return { status: "success", orderId: order.id };
   }
 
+  async cancelOrder(orderId: string) {
+    await db.dataBase.order.update({
+      where: { orderNumber: orderId },
+      data: {
+        status: "REJECTED",
+        paymentStatus: PaymentStatus.CANCELLED,
+      },
+    });
+
+    return {
+      status: "success",
+      orderId: orderId,
+    };
+  }
+
   async updateOrderMetadata(
     orderId: number,
-    metadata: Record<string, unknown>
+    metadata: Record<string, any>
   ): Promise<void> {
     await db.dataBase.order.update({
       where: { id: orderId },
@@ -200,6 +217,18 @@ export class OrderService {
   ): Promise<void> {
     await db.dataBase.order.update({
       where: { id: orderId },
+      data: {
+        status: status,
+      },
+    });
+  }
+
+  async updateOrderStatusByOrderNo(
+    orderNumber: string,
+    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED"
+  ): Promise<void> {
+    await db.dataBase.order.update({
+      where: { orderNumber },
       data: {
         status: status,
       },
@@ -227,8 +256,8 @@ export class OrderService {
     orderId: number,
     step: string,
     status: "SUCCESS" | "FAILED" | "PENDING",
-    outputData?: Record<string, unknown>,
-    details?: Record<string, unknown>
+    outputData?: Record<string, any>,
+    details?: Record<string, any>
   ): Promise<void> {
     await db.dataBase.orderLogs.create({
       data: {
@@ -269,8 +298,16 @@ export class OrderService {
       // Status filter is for order status, not payment status
       const validOrderStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
       if (validOrderStatuses.includes(status)) {
-        whereClause.status = status;
-        countWhereClause.status = status;
+        whereClause.status = status as
+          | "PENDING"
+          | "SETTLED"
+          | "APPLIED"
+          | "REJECTED";
+        countWhereClause.status = status as
+          | "PENDING"
+          | "SETTLED"
+          | "APPLIED"
+          | "REJECTED";
       }
     }
 

@@ -1,9 +1,9 @@
-import Razorpay from "razorpay";
-import { config } from "@config/config";
 import { PaymentProviders } from "@packages/config/constants";
+import { env } from "@packages/config/src/env";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import crypto from "crypto";
+import Razorpay from "razorpay";
 
 // Type definitions for payment responses
 export interface PaymentOrderResponse {
@@ -212,13 +212,14 @@ export class PaymentService {
 
     try {
       const providerConfig: PaymentProviderConfig = {
-        keyId: config.razorpay.keyId,
-        keySecret: config.razorpay.keySecret,
-        webhookSecret: config.razorpay.webhookSecret,
+        keyId: env.RAZORPAY_KEY_ID,
+        keySecret: env.RAZORPAY_KEY_SECRET,
+        webhookSecret: env.RAZORPAY_WEBHOOK_SECRET,
       };
 
       this.provider = createPaymentProvider(provider, providerConfig);
       logger.logInfo(`PaymentService initialized with provider: ${provider}`);
+      logger.logInfo(`Using Razorpay Key ID: ${providerConfig.keyId}`);
     } catch (error) {
       logger.logError(
         `Failed to initialize PaymentService with provider ${provider}:`,

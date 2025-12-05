@@ -1,20 +1,20 @@
 import { db, type CustomerProfileDataModel } from "@core/database/database";
 import { env } from "@packages/config/env";
-import { KraSDK } from "kyc-providers";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
+import { makeFullname } from "@utils/generate/generate_username";
 import type {
   T_APP_PAN_INQ,
   T_APP_PAN_INQ_DOWNLOAD,
   T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
 } from "kyc-providers";
+import { KraSDK } from "kyc-providers";
 import type { Root } from "../../../../packages/kyc-providers/pdf/dataMapper";
-import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
-import { removeCountryCode } from "@utils/filters/convert";
-import { makeFullname } from "@utils/generate/generate_username";
 import {
   checkIsKraMatched,
   checkKraProcessCheckStatus,
 } from "./CheckKraStatus";
-import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
+import { getKraCountry, getKraState, kraMobNo } from "./constent";
+import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 
 const cbricsManager = new ParticipantManager();
 
@@ -24,8 +24,6 @@ export class KraWorkerService {
   async processKra(data: KraWorkerJobData) {
     const { customerId, kycDataStoreId } = data;
     try {
-      console.log("KRA Worker job:", data);
-
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
       });
@@ -34,8 +32,6 @@ export class KraWorkerService {
       const payload = await db.dataBase.kYC_FLOW.findFirst({
         where: { id: kycDataStoreId, userID: customerId },
       });
-
-      console.log(payload);
 
       if (!payload) {
         throw new Error("KYC payload not found or does not belong to user");
@@ -57,6 +53,7 @@ export class KraWorkerService {
 
       if (status == "WAITING") {
         await addKraWorkerJob(data);
+
         return;
       }
 
@@ -76,16 +73,45 @@ export class KraWorkerService {
           data: kyc,
           customer,
         })) as T_APP_PAN_INQ_DOWNLOAD;
-
         const isMatched = checkIsKraMatched(kyc, customer, downloadRes);
         if (isMatched) {
           await db.dataBase.customerProfileDataModel.update({
             where: { id: customerId },
             data: { kycStatus: "VERIFIED" },
           });
-
-          await cbricsManager.registerParticipant(customerId);
-
+          try {
+            const cbUser = await cbricsManager.registerParticipant(customerId);
+            await db.dataBase.kraDataLogs.create({
+              data: {
+                requestData: {
+                  customerId: customerId,
+                },
+                responseData: cbUser,
+                userId: customer.id,
+                kycId: kycDataStoreId,
+                stage: "FAILED_CBRICS_REGISTRATION",
+                reqTime: new Date().toISOString(),
+                resTime: new Date().toISOString(),
+              },
+            });
+          } catch (error) {
+            await db.dataBase.kraDataLogs.create({
+              data: {
+                requestData: {
+                  customerId: customerId,
+                },
+                responseData: {
+                  error: "CBRICS Registration Failed",
+                  message: error?.toString(),
+                },
+                userId: customer.id,
+                kycId: kycDataStoreId,
+                stage: "FAILED_CBRICS_REGISTRATION",
+                reqTime: new Date().toISOString(),
+                resTime: new Date().toISOString(),
+              },
+            });
+          }
           return;
         } else {
           await this.kraProcess.modify({
@@ -93,12 +119,10 @@ export class KraWorkerService {
             data: kyc,
             customer,
           });
-
           await addKraWorkerJob(data);
           return;
         }
       }
-
       return res;
     } catch (err) {
       console.error("KraWorkerService.processKra error:", err);
@@ -113,7 +137,7 @@ type processPayload = {
   customer: CustomerProfileDataModel;
 };
 
-class KraProcess {
+export class KraProcess {
   private kraInstance = new KraSDK({
     okraCdOrMiId: env.KRA_OKRA_CD_MI_ID,
     passKey: env.KRA_PASS_KEY,
@@ -127,7 +151,10 @@ class KraProcess {
   private generateReqNo() {
     const base = Date.now() % 10_000_000;
     this.counter = (this.counter + 1) % 1000;
-    return `${base}${this.counter.toString().padStart(3, "0")}`;
+    return `${base}${this.counter.toString().padStart(3, "0")}`.replaceAll(
+      "-",
+      ""
+    );
   }
 
   async enquiry({ customer, data, kycdataId }: processPayload) {
@@ -135,7 +162,7 @@ class KraProcess {
     const payload = {
       pan: data.step_1.pan.panCardNo,
       dob: data.step_1.pan.dateOfBirth,
-      mobile: removeCountryCode(customer.phoneNo),
+      mobile: kraMobNo,
       reqNo: this.generateReqNo(),
     };
 
@@ -161,9 +188,12 @@ class KraProcess {
     const reqTime = new Date().toISOString();
 
     const payload = {
-      dob: data.step_1.pan.dateOfBirth,
+      dob: formatDate(new Date(data.step_1.pan.dateOfBirth)).replaceAll(
+        "-",
+        ""
+      ),
       pan: data.step_1.pan.panCardNo.split("-").reverse().join(""),
-      mobile: customer.phoneNo!.replaceAll("+", "")!,
+      mobile: kraMobNo,
       reqNo: this.generateReqNo(),
     };
 
@@ -211,7 +241,63 @@ class KraProcess {
     const reqTime = new Date().toISOString();
     const payload = this.buildRegisterPayload(data, customer);
 
-    const report = await this.kraInstance.panRegisterUploadKraXML(payload);
+    const p = payload.APP_PAN_INQ;
+
+    const report = await this.kraInstance.panModifyKraXML({
+      panInquiry: {
+        APP_COR_ADD1: p.APP_COR_ADD1,
+        APP_COR_ADD2: p.APP_COR_ADD2,
+        APP_COR_ADD3: p.APP_COR_ADD3,
+        APP_COR_ADD_PROOF: p.APP_COR_ADD_PROOF,
+        APP_COR_ADD_REF: p.APP_COR_ADD_REF,
+        APP_COR_CITY: p.APP_COR_CITY,
+        APP_COR_CTRY: p.APP_COR_CTRY,
+        APP_COR_PINCD: p.APP_COR_PINCD,
+        APP_COR_STATE: p.APP_COR_STATE,
+        APP_DATE: p.APP_DATE,
+        APP_DOB_DT: p.APP_DOB_DT,
+        APP_DOC_PROOF: p.APP_DOC_PROOF,
+        APP_EMAIL: p.APP_EMAIL,
+        APP_EXMT: p.APP_EXMT,
+        APP_EXMT_CAT: p.APP_EXMT_CAT,
+        APP_EXMT_ID_PROOF: p.APP_EXMT_ID_PROOF,
+        APP_F_NAME: p.APP_F_NAME,
+        APP_FATCA_APPLICABLE_FLAG: p.APP_FATCA_APPLICABLE_FLAG as "Y" | "N",
+        APP_FATCA_BIRTH_COUNTRY: p.APP_FATCA_BIRTH_COUNTRY,
+        APP_FATCA_BIRTH_PLACE: p.APP_FATCA_BIRTH_PLACE,
+        APP_FATCA_COUNTRY_CITYZENSHIP: p.APP_FATCA_COUNTRY_CITYZENSHIP,
+        APP_FATCA_DATE_DECLARATION: p.APP_FATCA_DATE_DECLARATION,
+        APP_GEN: p.APP_GEN,
+        APP_INCOME: p.APP_INCOME,
+        APP_IOP_FLG: p.APP_IOP_FLG,
+        APP_IPV_DATE: p.APP_IPV_DATE,
+        APP_IPV_FLAG: p.APP_IPV_FLAG,
+        APP_KYC_MODE: p.APP_KYC_MODE,
+        APP_MOBILE_NO: p.APP_MOB_NO,
+        APP_NAME: p.APP_NAME,
+        APP_NATIONALITY: p.APP_NATIONALITY,
+        APP_NO: p.APP_NO,
+        APP_OCC: p.APP_OCC,
+        APP_PAN_COPY: p.APP_PAN_COPY,
+        APP_PAN_NO: p.APP_PAN_NO,
+        APP_PANEX_NO: p.APP_PANEX_NO,
+        APP_PER_ADD1: p.APP_PER_ADD1,
+        APP_PER_ADD2: p.APP_PER_ADD2,
+        APP_PER_ADD3: p.APP_PER_ADD3,
+        APP_PER_CITY: p.APP_PER_CITY,
+        APP_PER_CTRY: p.APP_PER_CTRY,
+        APP_PER_PINCD: p.APP_PER_PINCD,
+        APP_PER_STATE: p.APP_PER_STATE,
+        APP_POL_CONN: p.APP_POL_CONN,
+        APP_POS_CODE: p.APP_POS_CODE,
+        APP_RES_STATUS: p.APP_RES_STATUS,
+        APP_TYPE: p.APP_TYPE,
+        APP_UID_NO: p.APP_UID_NO,
+      },
+
+      fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
+    });
+
     const resTime = new Date().toISOString();
 
     await db.dataBase.kraDataLogs.create({
@@ -229,7 +315,7 @@ class KraProcess {
     return report;
   }
 
-  private buildRegisterPayload(
+  buildRegisterPayload(
     data: Root,
     customer: CustomerProfileDataModel
   ): T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"] {
@@ -240,77 +326,96 @@ class KraProcess {
     const middleName = data.step_1?.pan?.middleName || "";
     const lastName = data.step_1?.pan?.lastName || "";
     const dob = data.step_1?.pan?.dateOfBirth || "";
-    const mobile = removeCountryCode(customer.phoneNo);
+    const MAR_STATUS = data.step_2.maritalStatus == "MARRIED" ? "01" : "02";
+    const mobile = kraMobNo;
 
     const appPanInq = {
       APP_IOP_FLG: "IE",
       APP_POS_CODE: env.KRA_OKRA_CD_MI_ID || "",
       APP_TYPE: "I",
       APP_NO: "",
-      APP_DATE: new Date().toISOString(),
+      APP_DATE: formatDateTime(new Date()),
       APP_PAN_NO: panNo,
       APP_PANEX_NO: "",
       APP_PAN_COPY: "Y",
       APP_EXMT: "N",
       APP_EXMT_CAT: "",
       APP_KYC_MODE: "5",
-      APP_EXMT_ID_PROOF: "02",
+      APP_EXMT_ID_PROOF: "01",
       APP_IPV_FLAG: "E",
       APP_IPV_DATE: formatDate(new Date()),
       APP_GEN: data.step_1.pan.response.details.pan.gender,
       APP_NAME: makeFullname({ firstName, middleName, lastName }),
-
       APP_F_NAME: firstName,
       APP_REGNO: "",
       APP_DOB_DT: formatDate(new Date(dob)),
       APP_DOI_DT: "",
       APP_COMMENCE_DT: "",
-      APP_NATIONALITY: "",
+      APP_NATIONALITY: "01",
       APP_OTH_NATIONALITY: "",
       APP_COMP_STATUS: "",
       APP_OTH_COMP_STATUS: "",
-      APP_RES_STATUS: "",
+      APP_RES_STATUS: "R",
       APP_RES_STATUS_PROOF: "",
-      APP_UID_NO: data.step_1?.pan?.response?.details?.aadhaar?.id_number || "",
-      APP_COR_ADD1: "",
+      APP_UID_NO: data.step_1.pan.response.details.aadhaar.id_number.replaceAll(
+        "x",
+        "0"
+      ),
+      APP_COR_ADD1:
+        data.step_1.pan.response.details.aadhaar.current_address_details
+          .address,
       APP_COR_ADD2: "",
       APP_COR_ADD3: "",
       APP_COR_CITY:
-        data.step_1.pan.response.details.aadhaar.permanent_address_details
+        data.step_1.pan.response.details.aadhaar.current_address_details
           .district_or_city,
       APP_COR_PINCD:
-        data.step_1.pan.response.details.aadhaar.permanent_address_details
+        data.step_1.pan.response.details.aadhaar.current_address_details
           .pincode,
-      APP_COR_STATE: "",
-      APP_OTH_COR_STATE: "",
-      APP_COR_CTRY: "",
+      APP_COR_STATE: getKraState(
+        data.step_1.pan.response.details.aadhaar.current_address_details.state
+      )?.code,
+      APP_OTH_COR_STATE: getKraCountry("india")?.code,
+      APP_COR_CTRY: getKraState(
+        data.step_1.pan.response.details.aadhaar.current_address_details.state
+      )?.code,
       APP_OFF_NO: "",
       APP_RES_NO: "",
       APP_MOB_NO: mobile,
       APP_FAX_NO: "",
       APP_EMAIL: data.user?.emailAddress || customer.emailAddress || "",
-      APP_COR_ADD_PROOF: "",
-      APP_COR_ADD_REF: "",
+      APP_COR_ADD_PROOF: "31",
+      APP_COR_ADD_REF:
+        data.step_1.pan.response.details.aadhaar.id_number.replaceAll("x", ""),
       APP_COR_ADD_DT: "",
-      APP_PER_ADD1: "",
+      APP_PER_ADD1:
+        data.step_1.pan.response.details.aadhaar.permanent_address_details
+          .address,
       APP_PER_ADD2: "",
       APP_PER_ADD3: "",
-      APP_PER_CITY: "",
-      APP_PER_PINCD: "",
-      APP_PER_STATE: "",
+      APP_PER_CITY:
+        data.step_1.pan.response.details.aadhaar.permanent_address_details
+          .district_or_city,
+      APP_PER_PINCD:
+        data.step_1.pan.response.details.aadhaar.permanent_address_details
+          .pincode,
+      APP_PER_STATE: getKraState(
+        data.step_1.pan.response.details.aadhaar.permanent_address_details.state
+      )?.code,
       APP_OTH_PER_STATE: "",
-      APP_PER_CTRY: "",
-      APP_PER_ADD_PROOF: "",
-      APP_PER_ADD_REF: "",
+      APP_PER_CTRY: getKraCountry("india")?.code,
+      APP_PER_ADD_PROOF: "31",
+      APP_PER_ADD_REF:
+        data.step_1.pan.response.details.aadhaar.id_number.replaceAll("x", ""),
       APP_PER_ADD_DT: "",
-      APP_INCOME: data.step_2?.annualGrossIncome || "",
-      APP_OCC: data.step_2?.occupationType || "",
+      APP_INCOME: "",
+      APP_OCC: "",
       APP_OTH_OCC: "",
       APP_POL_CONN: "",
-      APP_DOC_PROOF: "",
+      APP_DOC_PROOF: "E",
       APP_INTERNAL_REF: "",
       APP_BRANCH_CODE: "",
-      APP_MAR_STATUS: data.step_2?.maritalStatus || "",
+      APP_MAR_STATUS: MAR_STATUS,
       APP_NETWRTH: "",
       APP_NETWORTH_DT: "",
       APP_INCORP_PLC: "",
@@ -320,26 +425,26 @@ class KraProcess {
       APP_FILLER3: "",
       APP_DUMP_TYPE: "",
       APP_KRA_INFO: "",
-      APP_SIGNATURE: data.step_4?.[0]?.response?.signature || "",
-      APP_FATCA_APPLICABLE_FLAG: data.step_1?.pan?.isFatca ? "Y" : "N",
+      APP_SIGNATURE: "",
+      APP_FATCA_APPLICABLE_FLAG: data.step_1?.pan?.isFatca ? "N" : "Y",
       APP_FATCA_BIRTH_PLACE: "",
       APP_FATCA_BIRTH_COUNTRY: "",
       APP_FATCA_COUNTRY_RES: "",
       APP_FATCA_COUNTRY_CITYZENSHIP: "",
-      APP_FATCA_DATE_DECLARATION: "",
+      APP_FATCA_DATE_DECLARATION: formatDate(new Date()),
     };
 
     const appSummRec = {
-      APP_REQ_DATE: new Date().toISOString(),
+      APP_REQ_DATE: formatDate(new Date()),
       APP_OTHKRA_BATCH: "",
       APP_OTHKRA_CODE: env.KRA_OKRA_CD_MI_ID || "",
       APP_TOTAL_REC: "1",
-      NO_OF_FATCA_ADDL_DTLS_RECORDS: data.step_1?.pan?.isFatca ? "1" : "0",
+      NO_OF_FATCA_ADDL_DTLS_RECORDS: data.step_1?.pan?.isFatca ? "0" : "1",
     };
 
     const fatca =
       [] as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"]["FATCA_ADDL_DTLS"];
-    if (data.step_1?.pan?.isFatca) {
+    if (!data.step_1?.pan?.isFatca) {
       fatca.push({
         APP_FATCA_ENTITY_PAN: panNo,
         APP_FATCA_COUNTRY_RESIDENCY: "",
@@ -357,9 +462,21 @@ class KraProcess {
   }
 }
 
-const formatDate = (date: Date) => {
+export const formatDate = (date: Date) => {
   const dd = String(date.getDate()).padStart(2, "0");
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const yyyy = date.getFullYear();
   return `${dd}-${mm}-${yyyy}`;
 };
+
+export function formatDateTime(date: Date): string {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+
+  const HH = String(date.getHours()).padStart(2, "0");
+  const MM = String(date.getMinutes()).padStart(2, "0");
+  const SS = String(date.getSeconds()).padStart(2, "0");
+
+  return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
+}

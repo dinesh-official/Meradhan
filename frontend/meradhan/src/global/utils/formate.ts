@@ -43,3 +43,15 @@ export function formatAmount(num: number | string) {
 
   return parts.join(".");
 }
+
+export function maskEmail(email: string) {
+  const [username, domain] = email.split("@");
+
+  if (!username || !domain) return email; // fallback
+
+  // Show first 4 chars, rest masked as xxxx
+  const visible = username.slice(0, 4);
+  const masked = "xxxx";
+
+  return `${visible}${masked}@${domain}`;
+}

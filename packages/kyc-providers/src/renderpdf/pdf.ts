@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import MdPdf from "../../pdf/MdPdf";
 import { mapAllPages } from "../../pdf/dataMapper";
+import { OrderPdf } from "../../pdf/OrderPdf";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generateKycPdf(userData: any) {
@@ -25,6 +26,28 @@ export async function generateKycPdf(userData: any) {
       }),
       filePath
     );
+
+    // Return file path
+    return filePath;
+  } catch (error) {
+    console.error("Error generating KYC PDF:", error);
+    throw error;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function generateTempOrderPdf() {
+  try {
+    const dirPath = path.join(process.cwd(), "tmp-orders-pdfs");
+    const filePath = path.join(dirPath, `order-${1}.pdf`);
+
+    // Ensure directory exists
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    // Generate PDF and save to file
+    await renderToFile(OrderPdf(), filePath);
 
     // Return file path
     return filePath;
