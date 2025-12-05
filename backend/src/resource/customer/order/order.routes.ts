@@ -37,7 +37,7 @@ orderRoutes.get(
 
 orderRoutes.all(
   "/api/customer/order/pdf",
-  customerAuthMiddleware,
+
   orderController.getOrderPdf
 );
 export default orderRoutes;

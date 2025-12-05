@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
-import React from "react";
 import { tw } from "../MdPdf";
 
 const Footer = () => {

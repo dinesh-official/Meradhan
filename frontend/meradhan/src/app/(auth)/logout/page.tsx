@@ -24,7 +24,7 @@ function Logout() {
     getSessionId(); // create new session id
 
     // Redirect to homepage
-    window.location.href = "/";
+    window.location.href = "/login";
   }, [removeCookie]);
 
   return (
