@@ -9,6 +9,7 @@ import Link from "next/link";
 import OrderStep from "../_components/OrderStep";
 import { generateOrderId } from "../_utils/calcAmount";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
+import { redirect } from "next/navigation";
 export const revalidate = 0;
 
 export const generateMetadata = async ({
@@ -30,6 +31,9 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
 
   const { responseData } = await apiCaller.getBondDetailsByIsin(isin);
   const session = await getSession();
+  if (!session?.id) {
+    redirect("/logout");
+  }
   const userData = await customerApi.customerInfoById(Number(session?.id));
 
   if (session?.kycStatus !== "VERIFIED") {
