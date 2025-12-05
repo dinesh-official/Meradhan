@@ -1,33 +1,50 @@
 import type { CustomerProfileDataModel } from "@core/database/database";
-import type { T_APP_PAN_INQ } from "@packages/kyc-providers";
+import type {
+  T_APP_PAN_INQ,
+  T_APP_PAN_INQ_DOWNLOAD,
+} from "@packages/kyc-providers";
 import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
 
 export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
   const status =
-    response.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS?.toLowerCase().trim();
+    response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS?.toLowerCase().trim();
 
-  if (!status) return "REGISTER";
+  if (!status) {
+    if (!response?.APP_RES_ROOT?.APP_PAN_INQ.ERROR?.trim()) {
+      return "REGISTER";
+    }
+  }
 
-  if (status.startsWith("not available") || status.includes("not available")) {
+  if (response?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR) {
+    return "ERROR";
+  }
+
+  if (
+    status?.startsWith("not available") ||
+    status?.includes("not available")
+  ) {
     return "REGISTER";
   }
 
   // SUCCESS -
-  if (status.startsWith("kyc registd") || status.startsWith("kyc validated")) {
+  if (
+    status?.startsWith("kyc registd") ||
+    status?.startsWith("kyc validated")
+  ) {
     return "PASS";
   }
 
   // PENDING -
   if (
-    status.includes("underprocess") ||
-    status.includes("onhold") ||
-    status.includes("incomplete")
+    status?.includes("underprocess") ||
+    status?.includes("onhold") ||
+    status?.includes("incomplete")
   ) {
     return "WAITING";
   }
 
   // FAILED (explicit) -
-  if (status.includes("rejted") || status.includes("rejected")) {
+  if (status?.includes("rejted") || status?.includes("rejected")) {
     return "PASS";
   }
 
@@ -37,17 +54,14 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
 
 export const checkIsKraMatched = (
   data: Root,
-  customer: CustomerProfileDataModel
+  customer: CustomerProfileDataModel,
+  kraData: T_APP_PAN_INQ_DOWNLOAD
 ) => {
-  const kraData = data.PAN_INQ_RESP.PERSONAL_INFO;
+  const kra = kraData.APP_RES_ROOT.APP_PAN_INQ;
 
   const isNameMatched =
-    kraData.NAME?.toLowerCase().trim() ===
-    customer.fullName.toLowerCase().trim();
+    kra.APP_PAN_NO?.toLowerCase().trim() ===
+    data.step_1.pan.panCardNo?.toLowerCase().trim();
 
-  const isDobMatched =
-    kraData.DOB?.toLowerCase().trim() ===
-    customer.dateOfBirth.toLowerCase().trim();
-
-  return isNameMatched && isDobMatched;
+  return isNameMatched;
 };

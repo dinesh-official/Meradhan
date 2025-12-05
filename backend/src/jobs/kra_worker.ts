@@ -6,7 +6,9 @@ import { KraWorkerService } from "./kra_worker/KraWorker.service";
 startQueueWorker(
   kraWorkerQueue,
   async (job: Job) => {
-    await KraWorkerService.processKra(job.data);
+    const kraWorkerService = new KraWorkerService();
+    await kraWorkerService.processKra(job.data);
+    console.log(job.data);
   },
   1,
   {

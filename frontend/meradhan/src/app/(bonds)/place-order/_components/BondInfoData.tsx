@@ -22,9 +22,6 @@ function BondInfoData({ bondData }: BondInfoDataProps) {
           {bondData?.isin || "Loading..."} <BsArrowUpRightSquareFill />
         </span>
       </p>
-      <p className="text-sm text-gray-600 mt-1">
-        {bondData?.instrumentName || "Loading..."}
-      </p>
     </div>
   );
 }

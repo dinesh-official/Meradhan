@@ -179,11 +179,14 @@ import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 // // console.log(data);
 
 const kraJob = async () => {
-  await addKraWorkerJob({
-    customerId: 114,
-    kycDataStoreId: 191,
-    stage: "ENQUIRY_KRA",
-  });
+  await addKraWorkerJob(
+    {
+      customerId: 112,
+      kycDataStoreId: 211,
+      stage: "ENQUIRY_KRA",
+    },
+    0
+  );
 };
 
 kraJob();

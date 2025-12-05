@@ -3,32 +3,25 @@ import { env } from "@packages/config/env";
 import { KraSDK } from "kyc-providers";
 import type {
   T_APP_PAN_INQ,
+  T_APP_PAN_INQ_DOWNLOAD,
   T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
 } from "kyc-providers";
 import type { Root } from "../../../../packages/kyc-providers/pdf/dataMapper";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 import { removeCountryCode } from "@utils/filters/convert";
 import { makeFullname } from "@utils/generate/generate_username";
-import { checkKraProcessCheckStatus } from "./CheckKraStatus";
+import {
+  checkIsKraMatched,
+  checkKraProcessCheckStatus,
+} from "./CheckKraStatus";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
-function stageFunctions(stage: KraWorkerJobData["stage"]) {
-  switch (stage) {
-    case "ENQUIRY_KRA":
-      return KraProcess.enquiry;
-    case "DOWNLOAD_KRA":
-      return KraProcess.downloadKraReport;
-    case "REGISTER_KRA":
-      return KraProcess.register;
-    case "MODIFY_KRA":
-      return KraProcess.modify;
-    default:
-      throw new Error("Invalid stage");
-  }
-}
+const cbricsManager = new ParticipantManager();
 
 export class KraWorkerService {
-  // kra worker methods here
-  static async processKra(data: KraWorkerJobData) {
+  private kraProcess = new KraProcess();
+
+  async processKra(data: KraWorkerJobData) {
     const { customerId, kycDataStoreId } = data;
     try {
       console.log("KRA Worker job:", data);
@@ -36,44 +29,74 @@ export class KraWorkerService {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
       });
-      if (!customer) {
-        throw new Error("Customer not found");
-      }
+      if (!customer) throw new Error("Customer not found");
 
-      // findFirst allows using both id and userID in the where clause
       const payload = await db.dataBase.kYC_FLOW.findFirst({
         where: { id: kycDataStoreId, userID: customerId },
       });
+
+      console.log(payload);
 
       if (!payload) {
         throw new Error("KYC payload not found or does not belong to user");
       }
 
       const kyc = payload.data as Root;
-      console.log("KYC payload:", kyc?.step_1?.pan?.panCardNo);
 
-      const res = await stageFunctions("ENQUIRY_KRA")({
+      const res = await this.kraProcess.enquiry({
         kycdataId: kycDataStoreId,
         data: kyc,
         customer,
       });
 
       const status = checkKraProcessCheckStatus(res as T_APP_PAN_INQ);
-      // Reschedule the job next 2 hours later
+
+      if (status == "ERROR") {
+        throw new Error("KRA Process encountered an error.");
+      }
+
       if (status == "WAITING") {
         await addKraWorkerJob(data);
         return;
       }
 
-      // If status is REGISTER then register the KRA again check status 2 hours later
       if (status == "REGISTER") {
-        await stageFunctions("REGISTER_KRA")({
+        await this.kraProcess.register({
           kycdataId: kycDataStoreId,
           data: kyc,
           customer,
         });
         await addKraWorkerJob(data);
         return;
+      }
+
+      if (status == "PASS") {
+        const downloadRes = (await this.kraProcess.downloadKraReport({
+          kycdataId: kycDataStoreId,
+          data: kyc,
+          customer,
+        })) as T_APP_PAN_INQ_DOWNLOAD;
+
+        const isMatched = checkIsKraMatched(kyc, customer, downloadRes);
+        if (isMatched) {
+          await db.dataBase.customerProfileDataModel.update({
+            where: { id: customerId },
+            data: { kycStatus: "VERIFIED" },
+          });
+
+          await cbricsManager.registerParticipant(customerId);
+
+          return;
+        } else {
+          await this.kraProcess.modify({
+            kycdataId: kycDataStoreId,
+            data: kyc,
+            customer,
+          });
+
+          await addKraWorkerJob(data);
+          return;
+        }
       }
 
       return res;
@@ -91,7 +114,7 @@ type processPayload = {
 };
 
 class KraProcess {
-  private static kraInstance = new KraSDK({
+  private kraInstance = new KraSDK({
     okraCdOrMiId: env.KRA_OKRA_CD_MI_ID,
     passKey: env.KRA_PASS_KEY,
     password: env.KRA_PASSWORD,
@@ -99,25 +122,26 @@ class KraProcess {
     env: env.KRA_ENV,
   });
 
-  private static counter = 0;
+  private counter = 0;
 
-  private static generateReqNo() {
+  private generateReqNo() {
     const base = Date.now() % 10_000_000;
     this.counter = (this.counter + 1) % 1000;
     return `${base}${this.counter.toString().padStart(3, "0")}`;
   }
 
-  static async enquiry({ customer, data, kycdataId }: processPayload) {
-    // Implement the KRA processing logic here
+  async enquiry({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
     const payload = {
-      pan: data.step_1.pan.panCardNo.split("-").reverse().join(""),
+      pan: data.step_1.pan.panCardNo,
       dob: data.step_1.pan.dateOfBirth,
       mobile: removeCountryCode(customer.phoneNo),
       reqNo: this.generateReqNo(),
     };
+
     const enquiry = await this.kraInstance.panInquiry(payload);
     const resTime = new Date().toISOString();
+
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
@@ -133,12 +157,9 @@ class KraProcess {
     return enquiry;
   }
 
-  static async downloadKraReport({
-    customer,
-    data,
-    kycdataId,
-  }: processPayload) {
+  async downloadKraReport({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
+
     const payload = {
       dob: data.step_1.pan.dateOfBirth,
       pan: data.step_1.pan.panCardNo.split("-").reverse().join(""),
@@ -148,6 +169,7 @@ class KraProcess {
 
     const report = await this.kraInstance.panDownloadDetailsComplete(payload);
     const resTime = new Date().toISOString();
+
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
@@ -159,15 +181,17 @@ class KraProcess {
         resTime,
       },
     });
+
     return report;
   }
 
-  static async register({ customer, data, kycdataId }: processPayload) {
+  async register({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
-    const payload = KraProcess.buildRegisterPayload(data, customer);
+    const payload = this.buildRegisterPayload(data, customer);
 
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
     const resTime = new Date().toISOString();
+
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
@@ -179,12 +203,13 @@ class KraProcess {
         resTime,
       },
     });
+
     return report;
   }
 
-  static async modify({ customer, data, kycdataId }: processPayload) {
+  async modify({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
-    const payload = KraProcess.buildRegisterPayload(data, customer);
+    const payload = this.buildRegisterPayload(data, customer);
 
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
     const resTime = new Date().toISOString();
@@ -200,10 +225,11 @@ class KraProcess {
         resTime,
       },
     });
+
     return report;
   }
 
-  private static buildRegisterPayload(
+  private buildRegisterPayload(
     data: Root,
     customer: CustomerProfileDataModel
   ): T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"] {
@@ -213,7 +239,6 @@ class KraProcess {
     const firstName = data.step_1?.pan?.firstName || "";
     const middleName = data.step_1?.pan?.middleName || "";
     const lastName = data.step_1?.pan?.lastName || "";
-
     const dob = data.step_1?.pan?.dateOfBirth || "";
     const mobile = removeCountryCode(customer.phoneNo);
 
@@ -334,7 +359,7 @@ class KraProcess {
 
 const formatDate = (date: Date) => {
   const dd = String(date.getDate()).padStart(2, "0");
-  const mm = String(date.getMonth() + 1).padStart(2, "0"); // January is 0!
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
   const yyyy = date.getFullYear();
   return `${dd}-${mm}-${yyyy}`;
 };

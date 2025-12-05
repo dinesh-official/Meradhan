@@ -13,9 +13,6 @@ export const addKraWorkerJob = async <T>(
 ) => {
   return await kraWorkerQueue.add(data, {
     attempts: 1,
-    backoff: {
-      type: "exponential",
-      delay: delay ?? 2 * 60 * 60 * 1000, // initial delay, 2 hr
-    },
+    delay: delay ?? 2 * 60 * 60 * 1000, // initial delay, 2 hr
   });
 };

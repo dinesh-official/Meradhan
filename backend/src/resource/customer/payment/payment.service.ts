@@ -45,7 +45,7 @@ class RazorpayProvider {
         key_id: providerConfig.keyId,
         key_secret: providerConfig.keySecret,
       });
-      logger.logInfo("Razorpay provider initialized successfully");
+      // logger.logInfo("Razorpay provider initialized successfully");
     } catch (error) {
       logger.logError("Failed to initialize Razorpay provider:", error);
       throw new AppError("Failed to initialize payment gateway", {
