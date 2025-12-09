@@ -8,7 +8,7 @@ export const strAssets = HOST_URL + "/assets/cms/media";
 // Load the API key from environment variables
 const API_KEY =
   process.env.GRAPHQL_KEY ||
-  "3bf77f973f4d6cc84c4a421dce7abc570452ba8514f93cd1dccc73271761b0996d9a63cc66e18363d4e667da302b16bb4842b6de13878aeba500800776e0a8e89dc90a5a43c1b77157d446a36db21a2d1bdb6087a2fd83606b70fc5027844151c774ef5431c611c09ca08e1fd1883615ebee381e389fe8dc2120ff0143ce3bac"; // Make sure to define this in .env.local
+  "9538e12d9a8ae051b257511fae5af06aad2a7b91e9d6bfac4d70eee547fafcfe91d5d9575b07e51c7d1b8c4227869a3bcc78e12cb1116441aa3bdd06d5fcd4ef3457dbc4ee6ea2a5f78eaaeb7663b42ff2ac334fa704abd3987bdab8ace815c2d3d37f64f83705838d7882e7c015421d08b779967ced6da398ef933aa6885c6d"; // Make sure to define this in .env.local
 
 export const strapiUrl = () => {
   // Determine the correct URL based on the environment

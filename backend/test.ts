@@ -3,6 +3,7 @@
 // // // import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 // // import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 
+import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 
 // import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
@@ -191,4 +192,4 @@ const kraJob = async () => {
 
 kraJob();
 
-// await revalidateBonds();
+await revalidateBonds();

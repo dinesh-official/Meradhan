@@ -7,6 +7,9 @@ const bondRoute = Router();
 bondRoute.get("/api/bonds/latest", (req, res) =>
   bondController.getLatestListedBonds(req, res)
 );
+bondRoute.get("/api/latest", (req, res) =>
+  bondController.getLatestListedBonds(req, res)
+);
 
 bondRoute.get("/api/bonds/search", (req, res) =>
   bondController.autocompleteBondSearch(req, res)
