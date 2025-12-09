@@ -1,4 +1,4 @@
-import { BASES } from "@/core/config/base.urls";
+import { BASES_URLS } from "@/core/config/base.urls";
 import { useEffect, useState } from "react";
 
 /* -------------------------------------------------------------
@@ -119,7 +119,7 @@ export function useDigioSDK() {
       );
     }
     return new window.Digio({
-      environment: BASES.DIGIO,
+      environment: BASES_URLS.DIGIO,
       logo: "https://www.meradhan.co/images/mera-dhan-logo.svg",
       theme: {
         primaryColor: "#002c59",

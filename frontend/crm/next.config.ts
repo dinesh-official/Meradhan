@@ -1,9 +1,5 @@
 import type { NextConfig } from "next";
-import { BASES } from "./src/core/config/base.urls";
-
-// Environment detection
-const isDev = process.env.NODE_ENV === "development";
-const BASE = isDev ? BASES.development : BASES.production;
+import { BASES_URLS } from "./src/core/config/base.urls";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -31,11 +27,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/server/:path*",
-        destination: `${BASE.API_SERVER}/api/:path*`,
+        destination: `${BASES_URLS.API_SERVER}/api/:path*`,
       },
       {
         source: "/assets/media/:path*", // what user visits
-        destination: `${BASE.ASSETS}/:path*`, // where it actually fetches
+        destination: `${BASES_URLS.ASSETS}/:path*`, // where it actually fetches
       },
     ];
   },

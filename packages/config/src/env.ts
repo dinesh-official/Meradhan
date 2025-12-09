@@ -15,7 +15,9 @@ dotenv.config({
 const EnvSchema = z.object(
   {
     // BASE
-    HOST_URL: z.string().url({ message: "HOST_URL must be a valid URL" }),
+    NEXT_PUBLIC_HOST_URL: z.url({
+      message: "NEXT_PUBLIC_HOST_URL must be a valid URL",
+    }),
     PORT: z.string().regex(/^\d+$/, { message: "PORT must be a number" }),
     JWT_SECRET: z.string().min(1, { message: "JWT_SECRET is required" }),
 

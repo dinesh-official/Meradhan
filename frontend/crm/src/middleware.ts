@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.NEXT_PUBLIC_DIGIO === "production";
 
 // ✅ Basic Auth Header
 const BASIC_AUTH_HEADER =
@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
 
   // ✅ 1. Basic Auth for production (only for non-static, non-api routes)
   if (
-    isProduction &&
+    !isProduction &&
     !pathname.startsWith("/api") &&
     !pathname.startsWith("/assets") &&
     !pathname.startsWith("/_next")

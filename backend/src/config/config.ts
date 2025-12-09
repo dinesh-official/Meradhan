@@ -14,9 +14,12 @@ function getEnvVar(key: string, devDefault?: string): string {
  * @deprecated Use `env.NAME` form "@packages/config/env" instead.
  */
 export const config = {
-  hostUrl: getEnvVar("BACKEND_HOST_URL", "http://localhost:4000"),
-  clientUrl: getEnvVar("HOST_URL", "http://localhost:3000"),
-  storageUrl: getEnvVar("STORAGE_URL", "http://localhost:3000"),
+  hostUrl: getEnvVar("NEXT_PUBLIC_BACKEND_HOST_URL", "http://localhost:4000"),
+  clientUrl: getEnvVar("NEXT_PUBLIC_HOST_URL", "http://localhost:3000"),
+  storageUrl: getEnvVar(
+    "NEXT_PUBLIC_BACKEND_HOST_URL",
+    "http://localhost:3000"
+  ),
   jwtSecret: getEnvVar("JWT_SECRET", "your_jwt_secret"),
   port: parseInt(getEnvVar("PORT", "4000")),
   mode: (process.env.MODE || "DEVELOPMENT") as "DEVELOPMENT" | "PRODUCTION",
@@ -43,8 +46,8 @@ export const config = {
   },
   redis: {
     username: getEnvVar("REDIS_USERNAME", "default"),
-    password: getEnvVar("REDIS_PASSWORD", "sourav"),
-    host: getEnvVar("REDIS_HOST", "34.47.136.227"),
+    password: getEnvVar("REDIS_PASSWORD", "meradhan"),
+    host: getEnvVar("REDIS_HOST", "localhost"),
     port: parseInt(getEnvVar("REDIS_PORT", "6379")),
   },
 };

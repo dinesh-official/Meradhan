@@ -1,4 +1,4 @@
-export const strApi = process.env.STRAPI_HOST_URL;
+export const strApi = process.env.NEXT_PUBLIC_STRAPI_HOST_URL;
 
 import axios from "axios";
 import { pdf } from "pdf-to-img";

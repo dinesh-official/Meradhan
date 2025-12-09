@@ -35,23 +35,23 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
   // ✅ 1. Basic Auth protection for production
-  // if (
-  //   process.env.NODE_ENV === "production" &&
-  //   !pathname.startsWith("/api") &&
-  //   !pathname.startsWith("/assets") &&
-  //   !pathname.startsWith("/_next")
-  // ) {
-  //   const authHeader = request.headers.get("authorization");
+  if (
+    process.env.NEXT_PUBLIC_DIGIO === "sandbox" &&
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/assets") &&
+    !pathname.startsWith("/_next")
+  ) {
+    const authHeader = request.headers.get("authorization");
 
-  //   if (authHeader !== BASIC_AUTH_HEADER) {
-  //     return new Response("Unauthorized", {
-  //       status: 401,
-  //       headers: {
-  //         "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
-  //       },
-  //     });
-  //   }
-  // }
+    if (authHeader !== BASIC_AUTH_HEADER) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": "Basic realm='MeraDhan Subdomain'",
+        },
+      });
+    }
+  }
 
   if (pathname.startsWith("/login")) {
     const cookieStore = await cookies();
