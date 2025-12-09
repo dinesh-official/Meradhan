@@ -1,10 +1,10 @@
-import { config } from "@config/config";
 import { db, type DataBaseSchema } from "@core/database/database";
 import {
   sendCustomerSigninOtpEmail,
   sendEmailVerificationLink,
 } from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
+import { env } from "@packages/config/src/env";
 import type { appSchema } from "@root/schema";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import { OtpVerificationService } from "@services/otp_verification.service";
@@ -387,13 +387,13 @@ export class CustomerAuthService {
     }
 
     const token = tokenUtils.generateToken({ customerId }, "15m");
-    console.log(`${config.clientUrl}/verify-email?token=${token}`);
+    console.log(`${env.NEXT_PUBLIC_HOST_URL}/verify-email?token=${token}`);
     // Send verification email with the token (implementation not shown)
     console.log(`Verification token: ${token}`);
     await sendEmailVerificationLink({
       email: customer.emailAddress,
       userName: customer.firstName + " " + customer.lastName,
-      link: `${config.clientUrl}/verify-email?token=${token}`,
+      link: `${env.NEXT_PUBLIC_HOST_URL}/verify-email?token=${token}`,
     });
     return true;
   }

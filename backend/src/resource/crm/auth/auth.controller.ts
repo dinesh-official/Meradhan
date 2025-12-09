@@ -1,4 +1,3 @@
-import { config } from "@config/config";
 import { appSchema } from "@root/schema";
 import {
   addCrmLoginBasedAuditLog,
@@ -93,7 +92,6 @@ export class AuthController {
       res.clearCookie(cookieName, {
         path: "/",
         httpOnly: true,
-        secure: config.mode == "PRODUCTION",
         sameSite: "lax",
       });
     }
