@@ -6,10 +6,12 @@ import { tw } from "../MdPdf";
 function TextList({
   children,
   count,
+  className = "text-xs",
 }: {
   children?: any;
   count?: string;
   fontSize?: number;
+  className?: string;
 }) {
   return (
     <View
@@ -22,7 +24,7 @@ function TextList({
         {count}
       </Text>
       {/* <Text style={{ fontSize: fontSize || 9, lineHeight: 1.4, width: "100%" }}> */}
-      <Text style={tw(`text-xs leading-[5px] w-full`)}>{children}</Text>
+      <Text style={[tw(` leading-[5px] w-full ${className}`)]}>{children}</Text>
     </View>
   );
 }

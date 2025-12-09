@@ -95,6 +95,15 @@ export class ExpressServer implements IServer, IExpressRoute {
     if (this.middlewares.length != 0) this.app.use(this.middlewares);
     if (this.routes.length != 0) this.app.use(this.routes);
 
+    this.app.post("/", (req, res) => {
+      console.log(req.body);
+
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message: "Server is healthy",
+      });
+    });
+
     // handel 404 routes -
     this.app.all(/.*/, (req, res) => {
       res.sendResponse({
