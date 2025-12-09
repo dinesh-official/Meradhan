@@ -12,6 +12,7 @@ print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
+
 print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
