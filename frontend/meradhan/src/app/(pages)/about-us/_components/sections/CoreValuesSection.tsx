@@ -1,6 +1,4 @@
-import { cn } from '@/lib/utils';
-import Image from 'next/image'
-import React from 'react'
+import { cn } from "@/lib/utils";
 
 const coreValues = [
   {
@@ -37,44 +35,37 @@ const coreValues = [
 
 const CoreValuesSection = () => {
   return (
-   <section className="justify-center items-center gap-4 space-y-6 mt-[4rem] px-5 text-gray-800 leading-relaxed container">
-          <h4
-            className={cn(
-              "font-medium text-black text-3xl md:text-4xl",
-              "quicksand-medium"
-            )}
-          >
-            Core <span className="font-semibold text-[#F25C4C]">Values</span>
-          </h4>
-  
-          <div className="space-y-10 mt-8">
-            {coreValues.map((item) => (
-              <div
-                key={item.id}
-                className="flex md:flex-row flex-col gap-6"
-              >
-                <div className="flex-shrink-0">
-                  <Image
-                    src={item.icon}
-                    alt={item.title}
-                    width={100}
-                    height={100}
-                    className="w-[90px] md:w-[110px] h-[90px] md:h-[110px]"
-                  />
-                </div>
-                <div className="flex flex-col gap-2 md:text-left">
-                  <h4 className="font-semibold text-lg md:text-xl">
-                    {item.title}
-                  </h4>
-                  <p className="text-sm md:text-base">
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-  )
-}
+    <section className="justify-center items-center gap-4 space-y-6 mt-[4rem] px-5 text-gray-800 leading-relaxed container">
+      <h4
+        className={cn(
+          "font-medium text-black text-3xl md:text-4xl",
+          "quicksand-medium"
+        )}
+      >
+        Core <span className="font-semibold text-[#F25C4C]">Values</span>
+      </h4>
 
-export default CoreValuesSection
+      <div className="space-y-10 mt-8">
+        {coreValues.map((item) => (
+          <div key={item.id} className="flex md:flex-row flex-col gap-6">
+            <div className="flex-shrink-0">
+              <img
+                src={item.icon}
+                alt={item.title}
+                width={100}
+                height={100}
+                className="w-[90px] md:w-[110px] h-[90px] md:h-[110px]"
+              />
+            </div>
+            <div className="flex flex-col gap-2 md:text-left">
+              <h4 className="font-semibold text-lg md:text-xl">{item.title}</h4>
+              <p className="text-sm md:text-base">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default CoreValuesSection;

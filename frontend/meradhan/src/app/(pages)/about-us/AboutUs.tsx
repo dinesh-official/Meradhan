@@ -1,13 +1,10 @@
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
 import { T_PAGE_DATA } from "@/graphql/pagesGQLAction";
 
-const AboutUs = ({Description, Title,Content}:T_PAGE_DATA) => {
+const AboutUs = ({ Description, Title, Content }: T_PAGE_DATA) => {
   return (
     <>
-      <TopTitleDesc
-        title={Title}
-        description={Description}
-      />
+      <TopTitleDesc title={Title} description={Description} />
 
       <div>
         {/* <AboutMeraDhanSection />
@@ -15,7 +12,7 @@ const AboutUs = ({Description, Title,Content}:T_PAGE_DATA) => {
         <CoreValuesSection />
         <OfferingsSection />
         <WhyChooseUsSection /> */}
-        <div dangerouslySetInnerHTML={{__html:Content}} />
+        <div dangerouslySetInnerHTML={{ __html: Content }} />
       </div>
     </>
   );
