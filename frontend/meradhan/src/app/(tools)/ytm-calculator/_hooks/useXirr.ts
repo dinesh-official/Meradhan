@@ -65,6 +65,7 @@ export const useXirr = () => {
     const errors: string[] = [];
 
     return errors;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     faceValue,
     cleanPrice,

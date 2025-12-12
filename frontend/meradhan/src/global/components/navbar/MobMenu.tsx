@@ -19,11 +19,7 @@ interface MenuItemProps {
   level?: number;
 }
 
-function MobMenu({
-  session,
-}: {
-  session?: ISessionResponse["responseData"] | null;
-}) {
+function MobMenu({}: { session?: ISessionResponse["responseData"] | null }) {
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden block">

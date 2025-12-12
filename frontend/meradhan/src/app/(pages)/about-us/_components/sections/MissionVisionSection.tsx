@@ -1,7 +1,5 @@
 import { cn } from "@/lib/utils";
 
-import React from "react";
-
 const MissionVisionSection = () => {
   return (
     <section className="bg-[#ebf6ff] mt-16">

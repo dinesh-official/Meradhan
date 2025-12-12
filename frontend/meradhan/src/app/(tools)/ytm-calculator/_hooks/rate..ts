@@ -133,8 +133,8 @@ export function yearfrac(
 
     // --- Basis 0: US 30/360 ---
     if (basis === 0) {
-      let d1adj = day1 === 31 ? 30 : day1;
-      let d2adj = day2 === 31 && day1 === 30 ? 30 : day2;
+      const d1adj = day1 === 31 ? 30 : day1;
+      const d2adj = day2 === 31 && day1 === 30 ? 30 : day2;
 
       const days = 360 * (y2 - y1) + 30 * (m2 - m1) + (d2adj - d1adj);
 

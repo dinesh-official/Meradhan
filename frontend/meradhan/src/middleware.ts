@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { UserSessionDataResponse } from "@root/apiGateway";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";

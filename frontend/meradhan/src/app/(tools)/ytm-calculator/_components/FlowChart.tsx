@@ -37,17 +37,6 @@ export function FlowChart({
   ytm: number;
   yieldVal: number;
 }) {
-  const listCashFlow = xirrData.cashflow;
-
-  // Prepare chart data from cash flow
-  const chartData = listCashFlow.map((item, index) => ({
-    index: index + 1,
-    date: formatDateSimple(item.paymentDate),
-    cashFlow: item.amount,
-    type: item.type,
-    fullDate: formatDateSimple(item.paymentDate),
-  }));
-
   const values = prepareXirrValues(xirrData.cashflow);
   const result = getXirr(values);
   // const formatted =

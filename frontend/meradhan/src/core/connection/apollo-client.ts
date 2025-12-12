@@ -30,7 +30,7 @@ const httpLink = new HttpLink({
   uri: strapiUrl(), // Replace with your GraphQL endpoint
 });
 
-const authLink = new SetContextLink((prevContext, operation) => {
+const authLink = new SetContextLink((prevContext) => {
   return {
     credentials: "include",
     next: { revalidate: 0 },
