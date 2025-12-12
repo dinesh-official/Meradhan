@@ -43,9 +43,10 @@ const page = async () => {
       />
       <XirrCalculator />
       {/* <FdCalculatorContent /> */}
-      <section>
+
+      <section className="mb-10">
         <div
-          className="container "
+          className="container article "
           dangerouslySetInnerHTML={{
             __html: headerData?.Content.Content_2 || "",
           }}

@@ -16,6 +16,7 @@ interface PostCardProps {
   listMode: boolean;
   slug: string;
   type?: "blog" | "news";
+  categorySlug?: string;
 }
 function PostCard({
   src,
@@ -28,6 +29,8 @@ function PostCard({
   views,
   slug,
   type,
+
+  categorySlug,
 }: PostCardProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -41,9 +44,11 @@ function PostCard({
         />
       </Link>
       <div className="flex justify-between items-center">
-        <Badge className="bg-[#7fabd2] px-4 py-1.5 rounded-lg font-normal text-[12px]">
-          {badge}
-        </Badge>
+        <Link href={`/${type}/${categorySlug}`}>
+          <Badge className="bg-[#7fabd2] px-4 py-1.5 rounded-lg font-normal text-[12px]">
+            {badge}
+          </Badge>
+        </Link>
         <p className="text-[14px]">{createAt}</p>
       </div>
 

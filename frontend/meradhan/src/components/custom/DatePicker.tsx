@@ -19,9 +19,15 @@ type DatePickerProps = Omit<
 > & {
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  toYear?: number;
 };
 
-export function DatePicker({ value, onChange, ...props }: DatePickerProps) {
+export function DatePicker({
+  value,
+  onChange,
+  toYear,
+  ...props
+}: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<Date | undefined>(
     value ? parse(value, "dd/MM/yyyy", new Date()) : undefined
@@ -105,7 +111,7 @@ export function DatePicker({ value, onChange, ...props }: DatePickerProps) {
             onSelect={handleSelect}
             captionLayout="dropdown"
             className="bg-white"
-            toYear={2050}
+            toYear={toYear}
             initialFocus
           />
         </PopoverContent>

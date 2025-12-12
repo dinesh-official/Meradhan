@@ -160,6 +160,7 @@ function XirrCalculator() {
               <div className="flex flex-col gap-2 col-span-2">
                 <Label className="font-normal">Maturity Date</Label>
                 <DatePicker
+                  toYear={2050}
                   className="bg-white py-5 border-none font-medium"
                   value={formatToDatePicker(maturityDate)}
                   onChange={(e) =>
@@ -206,7 +207,7 @@ function XirrCalculator() {
           </SectionWrapper>
         </div>
       </div>
-      <SectionWrapper>
+      <SectionWrapper className="pb-5">
         <FlowTable flowData={flowData} />
       </SectionWrapper>
     </>

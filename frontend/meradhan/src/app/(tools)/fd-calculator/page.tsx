@@ -12,7 +12,6 @@ import {
   getDynamicPageDataGql,
   getDynamicPageMetaDataGql,
 } from "@/graphql/getDynamicPageDataGql";
-import FdCalculatorContent from "./_conponents/FdCalculatorContent";
 import FdHeader from "./_conponents/FdHeader";
 
 export const revalidate = 0;
@@ -46,7 +45,7 @@ const page = async () => {
       {/* <FdCalculatorContent /> */}
       <section>
         <div
-          className="container "
+          className="container article"
           dangerouslySetInnerHTML={{
             __html: headerData?.Content.Content_2 || "",
           }}

@@ -61,67 +61,6 @@ export const tw = createTw({
     main: "#002C59",
   },
 });
-Font.register({
-  family: "Poppins",
-  fonts: [
-    {
-      src: "https://dev.meradhan.co/fonts/Poppins/Poppins-Regular.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Poppins/Poppins-Bold.ttf",
-      fontWeight: 700,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Poppins/Poppins-Italic.ttf",
-      fontStyle: "italic",
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Poppins/Poppins-Light.ttf",
-      fontWeight: 300,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Poppins/Poppins-Medium.ttf",
-      fontWeight: 500,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Poppins/Poppins-SemiBold.ttf",
-      fontWeight: 600,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Poppins/Poppins-Black.ttf",
-      fontWeight: 900,
-    },
-    // Add more variants as needed
-  ],
-});
-
-Font.register({
-  family: "Quicksand",
-  fonts: [
-    {
-      src: "https://dev.meradhan.co/fonts/Quicksand/Quicksand-Regular.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Quicksand/Quicksand-Bold.ttf",
-      fontWeight: 700,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Quicksand/Quicksand-Light.ttf",
-      fontWeight: 300,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Quicksand/Quicksand-Medium.ttf",
-      fontWeight: 500,
-    },
-    {
-      src: "https://dev.meradhan.co/fonts/Quicksand/Quicksand-SemiBold.ttf",
-      fontWeight: 600,
-    },
-    // Add more variants as needed
-  ],
-});
 
 // Map all page data once for easy access
 
@@ -130,6 +69,68 @@ const MdPdf = ({
 }: {
   pageData: Awaited<ReturnType<typeof mapAllPages>>;
 }) => {
+  Font.register({
+    family: "Poppins",
+    fonts: [
+      {
+        src: "https://www.meradhan.co/fonts/Poppins/Poppins-Regular.ttf",
+        fontWeight: 400,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Poppins/Poppins-Bold.ttf",
+        fontWeight: 700,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Poppins/Poppins-Italic.ttf",
+        fontStyle: "italic",
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Poppins/Poppins-Light.ttf",
+        fontWeight: 300,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Poppins/Poppins-Medium.ttf",
+        fontWeight: 500,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Poppins/Poppins-SemiBold.ttf",
+        fontWeight: 600,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Poppins/Poppins-Black.ttf",
+        fontWeight: 900,
+      },
+      // Add more variants as needed
+    ],
+  });
+
+  Font.register({
+    family: "Quicksand",
+    fonts: [
+      {
+        src: "https://www.meradhan.co/fonts/Quicksand/Quicksand-Regular.ttf",
+        fontWeight: 400,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Quicksand/Quicksand-Bold.ttf",
+        fontWeight: 700,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Quicksand/Quicksand-Light.ttf",
+        fontWeight: 300,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Quicksand/Quicksand-Medium.ttf",
+        fontWeight: 500,
+      },
+      {
+        src: "https://www.meradhan.co/fonts/Quicksand/Quicksand-SemiBold.ttf",
+        fontWeight: 600,
+      },
+      // Add more variants as needed
+    ],
+  });
+
   return (
     // <PDFViewer
     //   style={{ width: "100vw", height: "100vh", fontFamily: "Poppins" }}

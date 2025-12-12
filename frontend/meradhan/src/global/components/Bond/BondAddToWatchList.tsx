@@ -91,7 +91,7 @@ function BondAddToWatchList({ isin }: { isin: string }) {
             <button
               onClick={() => {
                 localStorage.setItem("bondsWatchList", isin);
-                window.location.href = "/logan";
+                window.location.href = `/login?watchlist=${isin}&type=bond`;
               }}
               className="px-4 py-2 rounded-md bg-secondary text-white text-sm cursor-pointer"
             >

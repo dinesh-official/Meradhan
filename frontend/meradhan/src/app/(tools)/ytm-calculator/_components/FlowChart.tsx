@@ -57,7 +57,7 @@ export function FlowChart({
     <div className="p-6">
       <div className="mb-5">
         <h3 className="text-2xl text-center">
-          XIRR:{" "}
+          YTM:{" "}
           <span
             className={cn("font-semibold", {
               "text-green-600": Number(result) > 0,
