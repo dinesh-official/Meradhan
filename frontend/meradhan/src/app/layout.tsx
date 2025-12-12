@@ -112,7 +112,7 @@ export default async function RootLayout({
         </NuqsAdapter>
         <Script
           type="text/javascript"
-          src="https://ext-gateway.digio.in/sdk/v11/digio.js"
+          src="https://app.digio.in/sdk/v11/digio.js"
           strategy="afterInteractive"
         />
       </body>

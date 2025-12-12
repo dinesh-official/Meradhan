@@ -77,7 +77,7 @@ export class KraWorkerService {
         if (isMatched) {
           await db.dataBase.customerProfileDataModel.update({
             where: { id: customerId },
-            data: { kycStatus: "VERIFIED" },
+            data: { kycStatus: "VERIFIED", kraStatus: "VERIFIED" },
           });
           try {
             const cbUser = await cbricsManager.registerParticipant(customerId);
@@ -168,7 +168,14 @@ export class KraProcess {
 
     const enquiry = await this.kraInstance.panInquiry(payload);
     const resTime = new Date().toISOString();
-
+    await db.dataBase.customerProfileDataModel.update({
+      where: {
+        id: customer.id,
+      },
+      data: {
+        kraStatus: "ENQUIRY_KRA",
+      },
+    });
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
@@ -199,7 +206,14 @@ export class KraProcess {
 
     const report = await this.kraInstance.panDownloadDetailsComplete(payload);
     const resTime = new Date().toISOString();
-
+    await db.dataBase.customerProfileDataModel.update({
+      where: {
+        id: customer.id,
+      },
+      data: {
+        kraStatus: "DOWNLOAD_KRA",
+      },
+    });
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
@@ -221,7 +235,14 @@ export class KraProcess {
 
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
     const resTime = new Date().toISOString();
-
+    await db.dataBase.customerProfileDataModel.update({
+      where: {
+        id: customer.id,
+      },
+      data: {
+        kraStatus: "REGISTER_KRA",
+      },
+    });
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
@@ -311,7 +332,14 @@ export class KraProcess {
         resTime,
       },
     });
-
+    await db.dataBase.customerProfileDataModel.update({
+      where: {
+        id: customer.id,
+      },
+      data: {
+        kraStatus: "MODIFY_KRA",
+      },
+    });
     return report;
   }
 

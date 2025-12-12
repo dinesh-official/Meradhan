@@ -186,6 +186,8 @@ export type CustomerByIdPayload = {
   gender: Gender;
   userType: CustomerUserType;
   kycStatus: KycStatus;
+  kraStatus: string;
+
   verifyDate: string | null;
   avatar: string | null;
   VerifiedBy: number | null;

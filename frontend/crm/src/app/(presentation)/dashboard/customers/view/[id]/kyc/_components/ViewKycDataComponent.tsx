@@ -48,8 +48,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
 
   return (
     <div className="relative flex flex-col gap-5 mt-5">
-      <div className="gap-5 grid xl:grid-cols-2">
+      <div className="gap-5  flex flex-col ">
         <CustomerOverViewCard
+          kraStatus={data.kraStatus}
           name={`${data.firstName} ${data.middleName} ${data.lastName}`}
           customerSince={dateTimeUtils.formatDateTime(
             data.createdAt,

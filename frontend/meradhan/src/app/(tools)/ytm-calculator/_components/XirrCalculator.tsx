@@ -21,7 +21,7 @@ import FlowTable from "./FlowTable";
 // Helper functions to convert between date formats
 const formatToDatePicker = (dateString: string): string => {
   if (!dateString) return "";
-  const date = new Date(dateString);
+  const date = new Date(dateString.toString().replaceAll("undefined-", ""));
   const day = date.getDate().toString().padStart(2, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const year = date.getFullYear();
@@ -30,7 +30,10 @@ const formatToDatePicker = (dateString: string): string => {
 
 const formatFromDatePicker = (dateString: string): string => {
   if (!dateString) return "";
-  const [day, month, year] = dateString.split("/");
+  const [day, month, year] = dateString
+    .replaceAll("undefined-", "")
+    .split("-")
+    .reverse();
   return `${year}-${month}-${day}`;
 };
 
@@ -43,6 +46,7 @@ function XirrCalculator() {
     flowData,
     lastCouponDate,
     maturityDate,
+    settlementDate,
     setCleanPrice,
     setCouponFrequency,
     setCouponRate,
@@ -50,11 +54,12 @@ function XirrCalculator() {
     setLastCouponDate,
     setMaturityDate,
     setSettlementDate,
-    settlementDate,
     validationErrors,
     ytm,
     yieldVal,
   } = useXirr();
+
+  console.log({ maturityDate, lastCouponDate, settlementDate });
 
   return (
     <>
@@ -69,9 +74,9 @@ function XirrCalculator() {
                     className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg     appearance-none ${
                       !faceValue ||
                       isNaN(parseFloat(faceValue)) ||
-                      parseFloat(faceValue) <= 0
+                      (parseFloat(faceValue) <= 0
                         ? "border-red-300 focus:border-red-500"
-                        : ""
+                        : "")
                     }`}
                     placeholder="Amount"
                     value={faceValue}
@@ -184,9 +189,9 @@ function XirrCalculator() {
                 <DatePicker
                   className="bg-white py-5 border-none font-medium"
                   value={formatToDatePicker(settlementDate)}
-                  onChange={(e) =>
-                    setSettlementDate(formatFromDatePicker(e.target.value))
-                  }
+                  onChange={(e) => {
+                    setSettlementDate(formatFromDatePicker(e.target.value));
+                  }}
                 />
               </div>
             </div>

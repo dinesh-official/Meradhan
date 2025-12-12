@@ -5,5 +5,5 @@ export const BASES_URLS = {
   API_BACKEND_URL_IP: process.env.NEXT_PUBLIC_BACKEND_IP_URL,
   CMS: process.env.NEXT_PUBLIC_STRAPI_HOST_URL,
   ASSETS: process.env.NEXT_PUBLIC_BACKEND_HOST_URL,
-  DIGIO: "sandbox" as "sandbox" | "production", // Change to "production" for live environment
+  DIGIO: process.env.NEXT_PUBLIC_DIGIO as "production" | "sandbox", // Change to "production" for live environment
 };

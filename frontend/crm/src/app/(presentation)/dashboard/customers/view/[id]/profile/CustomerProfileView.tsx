@@ -25,10 +25,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
     }
   };
 
-  const {
-    data: customer,
-    isLoading,
-  } = useQuery({
+  const { data: customer, isLoading } = useQuery({
     queryKey: ["fetchCustomer", profileId],
     queryFn: fetchCustomer,
     refetchOnWindowFocus: false,
@@ -43,7 +40,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col  gap-5">
       <PageInfoBar
         showBack
         title="Customer Profile"
@@ -164,7 +161,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
                     : "—"}
                 </p>
               </LabelView>
-           
+
               <LabelView title="Customer ID">
                 <p>{customer?.userName}</p>
               </LabelView>

@@ -52,7 +52,9 @@ model CustomerProfileDataModel {
     userType UserAccountType @default(INDIVIDUAL)
 
     /// KYC (Know Your Customer) related info
-    kycStatus     KYCStatus @default(PENDING)
+    kycStatus KYCStatus @default(PENDING)
+    kraStatus String    @default("PENDING")
+
     VerifiedBy    Int?
     verifyDate    DateTime?
     kycSubmitDate DateTime?

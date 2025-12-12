@@ -28,8 +28,7 @@ function PostCard({
   profilePic,
   views,
   slug,
-  type,
-
+  type = "blog",
   categorySlug,
 }: PostCardProps) {
   return (
