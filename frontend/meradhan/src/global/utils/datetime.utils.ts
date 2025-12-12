@@ -1,3 +1,5 @@
+import { addYears } from "date-fns";
+
 export type DateInput = Date | string | number;
 export type DateFormatToken =
   // Numeric dates
@@ -126,6 +128,10 @@ export const dateTimeUtils = {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
+  },
+
+  addYears(date: Date, years: number) {
+    return addYears(date, years);
   },
 };
 

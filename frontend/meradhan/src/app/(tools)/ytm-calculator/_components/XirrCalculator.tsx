@@ -62,7 +62,7 @@ function XirrCalculator() {
           <SectionWrapper className="gap-10 grid lg:grid-cols-3">
             <div className="gap-6 grid grid-cols-2">
               <div className="flex flex-col gap-2">
-                <Label className="font-normal">Face Value</Label>
+                <Label className="font-normal">Face (Par) Value</Label>
                 <div className="relative">
                   <Input
                     className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg     appearance-none ${
@@ -86,7 +86,7 @@ function XirrCalculator() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label className="font-normal">Clean Price</Label>
+                <Label className="font-normal">Clean (Current) Price</Label>
                 <div className="relative">
                   <Input
                     className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg appearance-none ${

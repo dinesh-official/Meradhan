@@ -105,6 +105,7 @@ export function DatePicker({ value, onChange, ...props }: DatePickerProps) {
             onSelect={handleSelect}
             captionLayout="dropdown"
             className="bg-white"
+            toYear={2050}
             initialFocus
           />
         </PopoverContent>

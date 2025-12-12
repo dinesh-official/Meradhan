@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   formatToMMDDYYYY,
   FrequencyType,
   getBondCashflowJson,
 } from "../_helpers/xirr";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 export const useXirr = () => {
   const [faceValue, setFaceValue] = useState("10000");
@@ -14,6 +15,22 @@ export const useXirr = () => {
   const [settlementDate, setSettlementDate] = useState("2025-12-10");
   const [maturityDate, setMaturityDate] = useState("2030-12-10");
   const [lastCouponDate, setLastCouponDate] = useState("2025-05-29");
+
+  useEffect(() => {
+    setLastCouponDate(dateTimeUtils.formatDateTime(new Date(), "YYYY-MM-DD"));
+    setMaturityDate(
+      dateTimeUtils.formatDateTime(
+        dateTimeUtils.addYears(new Date(), 2),
+        "YYYY-MM-DD"
+      )
+    );
+    setSettlementDate(
+      dateTimeUtils.formatDateTime(
+        dateTimeUtils.addDays(new Date(), -30),
+        "YYYY-MM-DD"
+      )
+    );
+  }, []);
 
   // Validation functions
   const isValidNumber = (value: string) => {
@@ -29,21 +46,6 @@ export const useXirr = () => {
   // Input validation
   const validationErrors = useMemo(() => {
     const errors: string[] = [];
-
-    // Date logic validation
-    if (isValidDate(settlementDate) && isValidDate(maturityDate)) {
-      if (new Date(settlementDate) >= new Date(maturityDate)) {
-        errors.push("Settlement date must be before maturity date");
-      }
-    }
-
-    if (isValidDate(lastCouponDate) && isValidDate(settlementDate)) {
-      if (new Date(lastCouponDate) > new Date(settlementDate)) {
-        errors.push(
-          "Last coupon date must be before or equal to settlement date"
-        );
-      }
-    }
 
     return errors;
   }, [
