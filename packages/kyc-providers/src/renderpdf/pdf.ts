@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderToFile } from "@react-pdf/renderer";
 import fs from "fs";
 import path from "path";
@@ -36,7 +37,18 @@ export async function generateKycPdf(userData: any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function generateTempOrderPdf() {
+export async function generateTempOrderPdf({
+  bond,
+  isReleased,
+  user,
+  orderId,
+}: {
+  user: any;
+  orderId: string;
+  isReleased: boolean;
+  bond: any;
+  qun: number;
+}) {
   try {
     const dirPath = path.join(process.cwd(), "tmp-orders-pdfs");
     const filePath = path.join(dirPath, `order-${1}.pdf`);
@@ -47,7 +59,16 @@ export async function generateTempOrderPdf() {
     }
 
     // Generate PDF and save to file
-    await renderToFile(OrderPdf(), filePath);
+    await renderToFile(
+      OrderPdf({
+        bond,
+        orderId,
+        qun: 1,
+        user,
+        releasedOrder: isReleased,
+      }),
+      filePath
+    );
 
     // Return file path
     return filePath;

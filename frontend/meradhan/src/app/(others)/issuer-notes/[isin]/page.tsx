@@ -104,7 +104,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                 </div>
               </div>
               <div className="flex justify-between lg:justify-end items-center gap-5 w-full lg:w-auto">
-                <IsshuerNotesAddToWatchList />
+                <IsshuerNotesAddToWatchList issuerId={data.data.documentId} />
                 <SharePopupTrigger
                   title={"Share Issuer Note"}
                   url={HOST_URL + "/issuer-notes/" + data?.data?.Slug}

@@ -11,9 +11,9 @@ export const useXirr = () => {
   const [couponRate, setCouponRate] = useState("8.25");
   const [couponFrequency, setCouponFrequency] =
     useState<FrequencyType>("quarterly");
-  const [maturityDate, setMaturityDate] = useState("2027-05-29");
+  const [settlementDate, setSettlementDate] = useState("2025-12-10");
+  const [maturityDate, setMaturityDate] = useState("2030-12-10");
   const [lastCouponDate, setLastCouponDate] = useState("2025-05-29");
-  const [settlementDate, setSettlementDate] = useState("2025-07-01");
 
   // Validation functions
   const isValidNumber = (value: string) => {
@@ -116,6 +116,9 @@ export const useXirr = () => {
     validationErrors.length,
   ]);
 
+  const ytmPercent = (Number(faceValue) * Number(couponRate)) / 100;
+  console.log(ytmPercent);
+
   return {
     faceValue,
     setFaceValue,
@@ -134,5 +137,6 @@ export const useXirr = () => {
     flowData,
     validationErrors,
     isValid: validationErrors.length === 0,
+    ytm: (Number(ytmPercent) / Number(cleanPrice)) * 100,
   };
 };

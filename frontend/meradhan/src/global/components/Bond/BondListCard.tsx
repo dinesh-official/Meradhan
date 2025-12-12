@@ -40,7 +40,7 @@ export function BondListCard({
           <div className="flex items-center gap-4">
             <p className="font-semibold text-primary text-sm">{data.isin}</p>
             <CreditRatingBadge creditRating={data.creditRating} />
-            {/* <BondAddToWatchList /> */}
+            <BondAddToWatchList isin={data.isin} />
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex justify-between">

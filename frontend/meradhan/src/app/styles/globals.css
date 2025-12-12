@@ -133,6 +133,9 @@
     font-style: normal;
     @apply text-2xl md:text-[44px];
   }
+  .title span {
+    @apply text-secondary;
+  }
 }
 
 .regularCircularBox {

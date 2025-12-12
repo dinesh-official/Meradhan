@@ -29,6 +29,7 @@ import trashRoutes from "@resource/trash/trash.routes";
 import auditlogsRoutes from "@services/auditlogs/auditlog.routes";
 import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";
+import watchListRoutes from "@resource/watchlist/watchlist.routes";
 const monitoring = new PrometheusMonitorProvider();
 const response_time_monitor = new PrometheusResponseTimeMonitor();
 
@@ -77,6 +78,8 @@ server.addRoutes([
   trashRoutes,
   webAuditLogsRouter,
   auditlogsRoutes,
+  // WatchList Routes
+  watchListRoutes,
 ]);
 
 // Connect to databases and start server

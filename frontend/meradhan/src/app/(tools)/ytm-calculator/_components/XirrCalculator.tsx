@@ -52,6 +52,7 @@ function XirrCalculator() {
     setSettlementDate,
     settlementDate,
     validationErrors,
+    ytm,
   } = useXirr();
 
   return (
@@ -200,7 +201,7 @@ function XirrCalculator() {
                   </ul>
                 </div>
               )}
-              <FlowChart xirrData={flowData} />
+              <FlowChart xirrData={flowData} ytm={ytm} />
             </div>
           </SectionWrapper>
         </div>

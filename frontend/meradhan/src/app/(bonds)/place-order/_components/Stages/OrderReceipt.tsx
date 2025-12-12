@@ -78,7 +78,13 @@ function OrderReceipt({
       </div>
 
       <RenderPdf
-        file={HOST_URL + `/api/server/customer/order/pdf?orderId=${orderId}`}
+        // orderId;
+        // qun;
+        // isin
+        file={
+          HOST_URL +
+          `/api/server/customer/order/pdf?orderId=${orderId}&isin=${bond.isin}&isReleased=false&qun=${quantity}`
+        }
         height={500}
         className="rounded-md overflow-hidden mt-8"
       />

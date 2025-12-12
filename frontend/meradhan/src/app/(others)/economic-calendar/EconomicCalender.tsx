@@ -246,8 +246,8 @@ function EconomicCalender({
 
   return (
     <SectionWrapper className="relative">
-      <h1 className="xl:text-[44px] lg:text-4xl text-2xl mb-2 quicksand-medium">
-        Economic <span className="font-semibold text-secondary">Calendar</span>
+      <h1 className="xl:text-[44px] lg:text-4xl text-2xl mb-2 quicksand-medium title">
+        Economic <span className="font-semibold">Calendar</span>
       </h1>
       <p className="text-sm">
         Stay updated with key global economic events, interest rate decisions,

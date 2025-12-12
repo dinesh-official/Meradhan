@@ -26,6 +26,7 @@
   "dependencies": {
     "@ag-media/react-pdf-table": "^2.0.3",
     "@packages/config": "file:../config",
+    "@root/apiGateway": "file:../apiGateway",
     "@react-pdf/renderer": "^4.3.0",
     "axios": "^1.13.1",
     "pdf-poppler": "^0.2.1",

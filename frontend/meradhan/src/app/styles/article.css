@@ -23,11 +23,20 @@
 .article h4,
 .article h5,
 .article h6 {
-  font-family: "Poppins", sans-serif;
+  font-family: "Quicksand", sans-serif;
   font-weight: 500;
   font-style: normal;
   line-height: 1.25;
   margin: 1.25rem 0 0.75rem;
+}
+
+.article h1 span,
+.article h2 span,
+.article h3 span,
+.article h4 span,
+.article h5 span,
+.article h6 span {
+  @apply text-secondary;
 }
 
 /* Mobile-first (add !important) */
@@ -61,6 +70,20 @@
 .article h2.is-accent,
 .article h3.is-accent {
   font-weight: 600 !important;
+}
+
+.article h1 .span,
+.article h2 .span,
+.article h3 .span {
+  @apply text-primary;
+}
+
+.article a {
+  @apply text-primary underline;
+}
+
+.article ul {
+  @apply list-disc;
 }
 
 /* Tablet ≥768px
@@ -99,6 +122,7 @@
 }
 
 /* Desktop ≥1024px
+
    --------------- */
 @media (min-width: 1024px) {
   .article h1 {

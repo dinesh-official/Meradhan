@@ -1,5 +1,9 @@
-import { Text, View, StyleSheet } from "@react-pdf/renderer";
-
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
+import type {
+  BondDetailsResponse,
+  CustomerByIdPayload,
+} from "@root/apiGateway";
+import { formatDate } from "../helper";
 const styles = StyleSheet.create({
   section: {
     marginBottom: 9,
@@ -23,7 +27,23 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function OrdersPage() {
+export default function OrdersPage({
+  bond,
+  user,
+  orderId,
+  qun,
+  releasedOrder,
+}: {
+  user: CustomerByIdPayload;
+  bond: BondDetailsResponse;
+  orderId: string;
+  qun: number;
+  releasedOrder?: boolean;
+}) {
+  const fullname =
+    user.firstName +
+    `${user.middleName ? `${user.middleName} ` : " "}` +
+    user.lastName;
   return (
     <View
       style={{
@@ -40,40 +60,53 @@ export default function OrdersPage() {
 
       <View style={styles.section}>
         <Text>To,</Text>
-        <Text style={styles.bold}>AJAY MOHANLAL MAHAJAN (PAN: AADPM2907K)</Text>
+        <Text style={styles.bold}>
+          {fullname} (PAN: {user?.panCard?.panCardNo})
+        </Text>
       </View>
 
       <View style={styles.section}>
         <Text>Dear Sir / Madam,</Text>
         <Text>
-          This Order Receipt has been automatically generated based on your
-          authorization to MeraDhan, a platform by BondNest Capital India
-          Securities Private Limited, to place a non-negotiable order
-          (One-to-One mode) on the RFQ platform of the Stock Exchanges.
+          This ${releasedOrder ? "" : "Draft"} Order Receipt has been
+          automatically generated based on your authorization to MeraDhan, a
+          platform by BondNest Capital India Securities Private Limited, to
+          place a non-negotiable order (One-to-One mode) on the RFQ platform of
+          the Stock Exchanges.
         </Text>
       </View>
 
       {[
-        ["MeraDhan Order ID", "MD-DIR-27112025-BUY-127703"],
+        ["MeraDhan Order ID", orderId],
         ["Order Date & Time", "XXXXXX"],
         ["Exchange RFQ Initiation ID", "XXXXXX"],
         ["MeraDhan Deal ID", "MD-AKCF1-01-DIR-27112025-BUY-131526"],
-        ["Transaction Type", "Your Buy (AJAY MOHANLAL MAHAJAN : AADPM2907K)"],
-        ["ISIN", "INE3427O7601"],
-        ["Security Name", "NAVI FINSERV LIMITED 10.75 NCD 19AG28 FVRS10000"],
-        ["Coupon Rate", "10.7500%"],
-        ["Face Value", "INR 10,000.00"],
-        ["Quantum", "INR 10,000.00 (No. of Bonds: 1)", "Price: INR 99.9750"],
+        [
+          "Transaction Type",
+          `Your Buy (${fullname} : ${user?.panCard?.panCardNo})`,
+        ],
+        ["ISIN", bond.isin],
+        ["Security Name", bond.bondName],
+        ["Coupon Rate", bond.couponRate + "%"],
+        ["Face Value", "INR " + bond.faceValue.toLocaleString("en-IN")],
+        [
+          "Quantum",
+          `INR ${bond.faceValue} (No. of Bonds: ${qun})`,
+          `Price: INR ${bond.faceValue * qun}`,
+        ],
         ["Date", "Deal Date: 27 Nov 2025", "Value Date: 28 Nov 2025"],
         ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
         ["Order Type", "One To One (OTO) on RFQ Platform of the Exchange"],
         [
           "Interest Payment Dates",
-          "Twelve Times a Year - 19-Dec, 19-Jan, 19-Feb, 19-Mar, 19-Apr, 19-May, 19-Jun, 19-Jul, 19-Aug, 19-Sep, 19-Oct, 19-Nov",
+          `Twelve Times a Year - ${new Date().getDay()}-Dec, ${new Date().getDay()}-Jan, ${new Date().getDay()}-Feb, ${new Date().getDay()}-Mar, ${new Date().getDay()}-Apr, ${new Date().getDay()}-May, ${new Date().getDay()}-Jun, ${new Date().getDay()}-Jul, ${new Date().getDay()}-Aug, ${new Date().getDay()}-Sep, ${new Date().getDay()}-Oct, ${new Date().getDay()}-Nov`,
         ],
         ["Last Interest Payment Date", "19 Nov 2025 (Wednesday)"],
-        ["Allotment Date", "19 Jun 2025"],
-        ["Maturity Date", "19 Aug 2028 : 100.0000%"],
+        ["Allotment Date", formatDate(bond.dateOfAllotment, "DD Month YYYY")],
+        [
+          "Maturity Date",
+          formatDate(bond.maturityDate, "DD Month YYYY") + " : 100.0000%",
+        ],
         ["Security Nature", "Senior Secured"],
         ["Put / Call Option", "N.A / N.A"],
         ["Principal Amount", "INR 9,997.50"],

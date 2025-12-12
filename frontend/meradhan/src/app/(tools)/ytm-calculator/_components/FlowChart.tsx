@@ -28,7 +28,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function FlowChart({ xirrData }: { xirrData: XirrResult }) {
+export function FlowChart({
+  xirrData,
+  ytm,
+}: {
+  xirrData: XirrResult;
+  ytm: number;
+}) {
   const listCashFlow = xirrData.cashflow;
 
   // Prepare chart data from cash flow
@@ -42,8 +48,8 @@ export function FlowChart({ xirrData }: { xirrData: XirrResult }) {
 
   const values = prepareXirrValues(xirrData.cashflow);
   const result = getXirr(values);
-  const formatted =
-    typeof result === "number" ? `${(result * 100).toFixed(2)}%` : result;
+  // const formatted =
+  //   typeof result === "number" ? `${(result * 100).toFixed(2)}%` : result;
 
   // Get min/max for Y-axis
 
@@ -58,7 +64,7 @@ export function FlowChart({ xirrData }: { xirrData: XirrResult }) {
               "text-red-600": Number(result) < 0,
             })}
           >
-            {formatted}
+            {ytm.toFixed(4)}%
           </span>
         </h3>
       </div>

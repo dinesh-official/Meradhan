@@ -14,7 +14,7 @@ const FdHeader = ({
       <div className="container">
         <div className="pb-16 space-y-4">
           <h1
-            className="text-[36px] quicksand-medium"
+            className="text-[36px] quicksand-medium title"
             dangerouslySetInnerHTML={{ __html: title || "" }}
           />
           <p

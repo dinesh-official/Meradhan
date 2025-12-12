@@ -1,8 +1,18 @@
 import { Text, View } from "@react-pdf/renderer";
+import type { CustomerByIdPayload } from "@root/apiGateway";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
 
-function OrdersPageTwo() {
+function OrdersPageTwo({
+  user,
+  releasedOrder,
+}: {
+  user: CustomerByIdPayload;
+  releasedOrder?: boolean;
+}) {
+  const bank = user.bankAccounts.find((e) => e.isPrimary);
+  const demat = user.dematAccounts.find((e) => e.isPrimary);
+
   return (
     <View
       style={{
@@ -55,21 +65,21 @@ Settlement No.: 2526161
           <Text>Client Settlement Details (Buyer)</Text>
         </View>
         <View style={tw(`text-[8px] flex w-[50%] flex-row gap-2`)}>
-          <Text>{`Bank Name: IDFC First Bank Ltd.
-IFSC Code: IDFB0040101
-Bank Account Number: 10000012080`}</Text>
+          <Text>{`Bank Name: ${bank?.bankName}
+IFSC Code: ${bank?.ifscCode}
+Bank Account Number: ${bank?.accountNumber}`}</Text>
         </View>
         <View style={tw(`text-[8px] flex w-[30%] flex-row gap-2`)}>
-          <Text>{`DP Name: HDFC Bank Limited
-DP ID: IN301549
-Client ID: 16626060`}</Text>
+          <Text>{`DP Name: ${demat?.depositoryName}
+DP ID: ${demat?.dpId}
+Client ID: ${demat?.clientId}`}</Text>
         </View>
       </View>
 
       {/* // Seller Client Settlement Details */}
       <Text style={tw(`text-[8px] mt-1`)}>
-        This Draft Order Receipt is a system generated document and does not
-        require any signatures.
+        This {releasedOrder ? "" : "Draft"} Order Receipt is a system generated
+        document and does not require any signatures.
       </Text>
       <Text style={tw(`text-[8px] mt-3 font-semibold`)}>
         Terms & Conditions

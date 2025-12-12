@@ -33,7 +33,7 @@ function PageTitleDesc({
       {title && (
         <h3
           className={cn(
-            "font-medium text-[28px] md:text-[36px] lg:text-[44px]",
+            "font-medium text-[28px] md:text-[36px] lg:text-[44px]  ",
             "quicksand-medium",
             titleClassName
           )}

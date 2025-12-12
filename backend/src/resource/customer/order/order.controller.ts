@@ -1,8 +1,10 @@
-import { type Request, type Response } from "express";
-import { OrderService } from "./order.service";
+import { generateTempOrderPdf } from "@packages/kyc-providers";
+import { BondService } from "@resource/bonds/bond.service";
+import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
-import { generateTempOrderPdf } from "@packages/kyc-providers";
+import { type Request, type Response } from "express";
+import { OrderService } from "./order.service";
 
 export class OrderController {
   private orderService = new OrderService();
@@ -86,7 +88,16 @@ export class OrderController {
   };
 
   getOrderPdf = async (req: Request, res: Response) => {
-    const pdfFile = await generateTempOrderPdf();
+    const repo = new CustomerProfileRepo();
+    const bond = new BondService();
+
+    const pdfFile = await generateTempOrderPdf({
+      orderId: req.query.orderId as string,
+      isReleased: req.query?.isReleased === "true",
+      bond: await bond.getBondDetails(req.query.isin as string),
+      qun: 1,
+      user: await repo.getFullCustomerProfile(req.customer!.id),
+    });
     // send the file as response
     res.sendFile(pdfFile, (err) => {
       if (err) {

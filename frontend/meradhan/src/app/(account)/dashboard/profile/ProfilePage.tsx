@@ -11,6 +11,7 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import BankAccounts from "./_components/Tabs/BankAccounts";
 import DematAccounts from "./_components/Tabs/DematAccounts";
 import RiskProfiling from "./_components/Tabs/RiskProfile";
+import WatchList from "./_components/Tabs/WatchList";
 const tabs = [
   "Personal Details",
   "Bank Accounts",
@@ -84,13 +85,7 @@ function ProfilePage({
                 desc={`to add risk profile!`}
               />
             ),
-            <NeedKyc
-              key={5}
-              title={`No watch list found!`}
-              href="/bonds"
-              buttonText="Explore List of Active Bonds"
-              desc={`to add watch list!`}
-            />,
+            <WatchList key={5} />,
           ][activeTab]
         }
       </CardContent>
