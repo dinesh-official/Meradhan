@@ -193,11 +193,11 @@ function SignUpForm() {
             >
               By continuing, I certify that I am 18 years of age or older, and
               agree to the{" "}
-              <Link href="#" className="text-primary underline">
+              <Link href="/terms-of-use" className="text-primary underline">
                 Terms & Conditions
               </Link>{" "}
               and{" "}
-              <Link href="#" className="text-primary underline">
+              <Link href="/privacy-policy" className="text-primary underline">
                 Privacy Policy
               </Link>
               .
