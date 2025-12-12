@@ -181,3 +181,52 @@
   margin: 1rem 0;
   word-break: break-all !important; /* optional: breaks anywhere if needed */
 }
+
+/* -------------------------------
+   Default Table Styling
+   ------------------------------- */
+
+.article table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto; /* Horizontal scroll on mobile */
+}
+
+/* Default table cells */
+.article th,
+.article td {
+  border: 1px solid #e5e7eb; /* Light gray border */
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+/* Header styling */
+.article th {
+  background-color: #f3f4f6; /* Light gray */
+  font-weight: 600;
+  font-family: "Quicksand", sans-serif;
+  color: #111827;
+}
+
+/* Zebra striping */
+.article tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Hover highlight (optional but nice) */
+.article tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Larger font for desktop */
+@media (min-width: 1024px) {
+  .article table {
+    font-size: 1rem;
+  }
+}
