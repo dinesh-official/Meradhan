@@ -1,35 +1,52 @@
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { RATE } from "@formulajs/formulajs";
 import { useEffect, useMemo, useState } from "react";
 import {
   formatToMMDDYYYY,
   FrequencyType,
   getBondCashflowJson,
 } from "../_helpers/xirr";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { yearfrac } from "./rate.";
 
 export const useXirr = () => {
-  const [faceValue, setFaceValue] = useState("10000");
-  const [cleanPrice, setCleanPrice] = useState("9990");
+  const [faceValue, setFaceValue] = useState("1000");
+  const [cleanPrice, setCleanPrice] = useState("990");
   const [couponRate, setCouponRate] = useState("8.25");
   const [couponFrequency, setCouponFrequency] =
     useState<FrequencyType>("quarterly");
-  const [settlementDate, setSettlementDate] = useState("2025-12-10");
-  const [maturityDate, setMaturityDate] = useState("2030-12-10");
-  const [lastCouponDate, setLastCouponDate] = useState("2025-05-29");
+  const [settlementDate, setSettlementDate] = useState(
+    dateTimeUtils.formatDateTime(
+      dateTimeUtils.addDays(new Date(), -30),
+      "YYYY-MM-DD"
+    )
+  );
+  const [maturityDate, setMaturityDate] = useState(
+    dateTimeUtils.formatDateTime(
+      dateTimeUtils.addDays(new Date(), -30),
+      "YYYY-MM-DD"
+    )
+  );
+  const [lastCouponDate, setLastCouponDate] = useState(
+    dateTimeUtils.formatDateTime(
+      dateTimeUtils.addDays(new Date(), -30),
+      "YYYY-MM-DD"
+    )
+  );
 
   useEffect(() => {
-    setLastCouponDate(dateTimeUtils.formatDateTime(new Date(), "YYYY-MM-DD"));
+    setLastCouponDate(
+      dateTimeUtils.formatDateTime(
+        dateTimeUtils.addDays(new Date(), -30),
+        "YYYY-MM-DD"
+      )
+    );
     setMaturityDate(
       dateTimeUtils.formatDateTime(
         dateTimeUtils.addYears(new Date(), 2),
         "YYYY-MM-DD"
       )
     );
-    setSettlementDate(
-      dateTimeUtils.formatDateTime(
-        dateTimeUtils.addDays(new Date(), -30),
-        "YYYY-MM-DD"
-      )
-    );
+    setSettlementDate(dateTimeUtils.formatDateTime(new Date(), "YYYY-MM-DD"));
   }, []);
 
   // Validation functions
@@ -119,7 +136,13 @@ export const useXirr = () => {
   ]);
 
   const ytmPercent = (Number(faceValue) * Number(couponRate)) / 100;
-  console.log(ytmPercent);
+
+  // YEARFRAC (Actual/Actual)
+  const yertoMac = yearfrac(
+    new Date(settlementDate),
+    new Date(maturityDate),
+    1
+  );
 
   return {
     faceValue,
@@ -139,6 +162,9 @@ export const useXirr = () => {
     flowData,
     validationErrors,
     isValid: validationErrors.length === 0,
-    ytm: (Number(ytmPercent) / Number(cleanPrice)) * 100,
+    yieldVal: (Number(ytmPercent) / Number(cleanPrice)) * 100,
+    ytm: Number(
+      RATE(yertoMac, ytmPercent, -Number(cleanPrice), Number(faceValue)) * 100
+    ),
   };
 };

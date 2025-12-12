@@ -20,6 +20,7 @@ export const blogsGql = `query Nodes($pagination: PaginationArg, $blogCategories
       Views
       Category {
         Name
+        Slug
       }
       documentId
       createdAt
@@ -60,6 +61,7 @@ export type T_BLOGS_GQL_RESPONSE = {
       Views: number;
       Category: {
         Name: string;
+        Slug: string;
       };
       documentId: string;
       createdAt: string;

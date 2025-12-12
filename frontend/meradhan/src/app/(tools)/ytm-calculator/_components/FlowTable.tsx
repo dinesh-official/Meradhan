@@ -1,10 +1,8 @@
 "use client";
 
-import React from "react";
-import { IndianRupee } from "lucide-react";
-import { useXirr } from "../_hooks/useXirr";
-import { CashFlowData } from "../_helpers/xirr";
 import { cn } from "@/lib/utils";
+import { IndianRupee } from "lucide-react";
+import { CashFlowData } from "../_helpers/xirr";
 
 // Simple date formatter as fallback
 const formatDateSimple = (dateStr: string): string => {
@@ -24,7 +22,7 @@ export default function FlowTable({ flowData }: { flowData: CashFlowData }) {
   return (
     <div className="container">
       <h2 className="mb-6 text-[32px] quicksand-semibold">
-        XIRR <span className="text-red-600"> Cash Flow</span>
+        Cash <span className="text-red-600"> Flow</span>
       </h2>
 
       <div className="w-full overflow-x-auto">
@@ -35,9 +33,7 @@ export default function FlowTable({ flowData }: { flowData: CashFlowData }) {
               <th className="p-4 font-medium text-sm text-left">
                 Payment Date
               </th>
-              <th className="p-4 font-medium text-sm text-left">
-                Cash Flow
-              </th>
+              <th className="p-4 font-medium text-sm text-left">Cash Flow</th>
               <th className="p-4 font-medium text-sm text-left">
                 Payment Type
               </th>
@@ -49,13 +45,19 @@ export default function FlowTable({ flowData }: { flowData: CashFlowData }) {
             {flowData.cashflow.map((flow, index) => {
               return (
                 // make last 2 rows bold
-                <tr key={index} className={cn("hover:bg-gray-50", { "font-bold": index >= flowData.cashflow.length - 2 })}>
+                <tr
+                  key={index}
+                  className={cn("hover:bg-gray-50", {
+                    "font-bold": index >= flowData.cashflow.length - 2,
+                  })}
+                >
                   <td className="p-4 text-left">{index + 1}</td>
                   <td className="p-4 text-left">
                     {formatDateSimple(flow.paymentDate)}
                   </td>
                   <td className="p-4 text-left">
                     <span className={`flex items-center `}>
+                      {flow.amount < -1 && "-"}
                       <IndianRupee size={14} className="mt-0.5" />
                       {Math.abs(flow.amount).toLocaleString("en-IN", {
                         minimumFractionDigits: 2,

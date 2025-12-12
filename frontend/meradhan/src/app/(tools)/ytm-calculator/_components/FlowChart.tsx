@@ -31,9 +31,11 @@ const chartConfig = {
 export function FlowChart({
   xirrData,
   ytm,
+  yieldVal,
 }: {
   xirrData: XirrResult;
   ytm: number;
+  yieldVal: number;
 }) {
   const listCashFlow = xirrData.cashflow;
 
@@ -55,7 +57,7 @@ export function FlowChart({
 
   return (
     <div className="p-6">
-      <div className="mb-5">
+      <div className="mb-5 flex items-center justify-center flex-col">
         <h3 className="text-2xl text-center">
           YTM:{" "}
           <span
@@ -64,9 +66,10 @@ export function FlowChart({
               "text-red-600": Number(result) < 0,
             })}
           >
-            {ytm.toFixed(4)}%
+            {ytm?.toFixed(4)}%
           </span>
         </h3>
+        <small> (Current Yield: {yieldVal?.toFixed(4)}% )</small>
       </div>
 
       <div className="lg:h-80 relative">

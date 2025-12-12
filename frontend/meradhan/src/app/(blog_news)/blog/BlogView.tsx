@@ -40,6 +40,7 @@ async function BlogView({
             profilePic={`${strAssets}${items[0]?.Author?.Profile_Image?.url}`}
             views={String(items[0]?.Views ?? 0)}
             slug={"/blog/" + items[0]?.Slug}
+            categorySlug={items[0]?.Category.Slug}
           />
           <div className="gap-5 gap-y-5 grid md:grid-cols-3">
             {items.slice(1).map((item) => (
@@ -55,6 +56,7 @@ async function BlogView({
                 name={item.Author?.Name || "Anonymous"}
                 profilePic={`${strAssets}${item.Author?.Profile_Image?.url}`}
                 views={String(item.Views ?? 0)}
+                categorySlug={item.Category.Slug}
               />
             ))}
           </div>
