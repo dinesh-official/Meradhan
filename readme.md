@@ -2,9 +2,7 @@
 
 A MeraDhan building scalable full-stack TypeScript projects with Bun, Node.js, Next.js, and Prisma.
 
-
-https://github.com/meradhan/md_test_tw
-
+https://github.com/meradhan/MeraDhan
 
 ---
 
