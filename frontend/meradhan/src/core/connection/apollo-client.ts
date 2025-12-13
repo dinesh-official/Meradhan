@@ -6,7 +6,7 @@ import axios from "axios";
 export const strApi = HOST_URL;
 export const strAssets = HOST_URL + "/assets/cms/media";
 // Load the API key from environment variables
-const API_KEY =
+export const API_KEY =
   process.env.GRAPHQL_KEY ||
   "9538e12d9a8ae051b257511fae5af06aad2a7b91e9d6bfac4d70eee547fafcfe91d5d9575b07e51c7d1b8c4227869a3bcc78e12cb1116441aa3bdd06d5fcd4ef3457dbc4ee6ea2a5f78eaaeb7663b42ff2ac334fa704abd3987bdab8ace815c2d3d37f64f83705838d7882e7c015421d08b779967ced6da398ef933aa6885c6d"; // Make sure to define this in .env.local
 
