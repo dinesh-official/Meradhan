@@ -127,35 +127,37 @@ const isserNotesGql = `query IssuerNotes($pagination: PaginationArg, $filters: I
   }
 }`;
 
-export const fetchIssuerNotesBySlugGql = async (slug: string) => {
-  const { data } = await gqlClient.query<{
-    issuerNotes: Array<{
-      createdAt: string;
-      Slug: string;
-      documentId: string;
-      Images: Array<{
-        url: string;
-      }>;
-      Content: {
-        id: string;
-        Introduction?: string;
-        Content_1?: string;
-        Content_2?: string;
-      };
-      Faqs: Array<{
-        id: string;
-        Question: string;
-        Answer: string;
-      }>;
-      ISIN: string;
-      Issuer_Name: string;
-      Views: number;
-      Logo: {
-        url: string;
-      };
-      updatedAt: string;
+export type T_ISSHUER = {
+  issuerNotes: Array<{
+    createdAt: string;
+    Slug: string;
+    documentId: string;
+    Images: Array<{
+      url: string;
     }>;
-  }>({
+    Content: {
+      id: string;
+      Introduction?: string;
+      Content_1?: string;
+      Content_2?: string;
+    };
+    Faqs: Array<{
+      id: string;
+      Question: string;
+      Answer: string;
+    }>;
+    ISIN: string;
+    Issuer_Name: string;
+    Views: number;
+    Logo: {
+      url: string;
+    };
+    updatedAt: string;
+  }>;
+};
+
+export const fetchIssuerNotesBySlugGql = async (slug: string) => {
+  const { data } = await gqlClient.query<T_ISSHUER>({
     query: gql(isserNotesGql),
     variables: {
       pagination: {

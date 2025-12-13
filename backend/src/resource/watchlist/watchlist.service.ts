@@ -73,6 +73,7 @@ export class WatchListService {
     if (!data) {
       return [];
     }
+    console.log(data.items);
 
     return data.items;
   }
@@ -83,6 +84,7 @@ export class WatchListService {
         userId,
       },
     });
+    console.log(data);
 
     if (!data) {
       await db.dataBase.issueNotesWatchList.create({
@@ -93,6 +95,7 @@ export class WatchListService {
       });
       return true;
     }
+    console.log(data?.items.includes(issuerId));
 
     if (data?.items.includes(issuerId)) {
       await db.dataBase.issueNotesWatchList.update({
@@ -100,9 +103,7 @@ export class WatchListService {
           id: data.id,
         },
         data: {
-          items: {
-            set: [...data.items.filter((e) => e != issuerId)],
-          },
+          items: [...data.items.filter((e) => e != issuerId)],
         },
       });
       return true;

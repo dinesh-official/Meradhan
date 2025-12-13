@@ -256,13 +256,13 @@ export class CustomerKycKycService {
 
   // download esign pdf
   async downloadEsignPdf(document_id: string, customerId: number) {
-    const pdfData = await this.kycProvider.getEsignPdf(document_id);
+    const pdfUrl = await this.kycProvider.getEsignPdf(document_id);
     // set kyc status
     const store = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: customerId },
     });
 
-    await db.dataBase.customerProfileDataModel.updateMany({
+    await db.dataBase.customerProfileDataModel.update({
       where: {
         id: Number(customerId),
       },
@@ -281,7 +281,7 @@ export class CustomerKycKycService {
         currentStepName: store?.currentStepName,
       },
     });
-    return pdfData;
+    return pdfUrl;
   }
 
   async getKycLevel(id: number) {

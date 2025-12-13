@@ -108,7 +108,9 @@ function ProfileViewCard({
           </div>
 
           {profile.kycStatus == "VERIFIED" && (
-            <Link href={`/dashboard/kyc`}>
+            <Link
+              href={genMediaUrl(profile.personalInformation?.signPdfUrl || "#")}
+            >
               <Button variant={`defaultLight`}>
                 KYC Copy
                 <div className="w-3 text-3xl">

@@ -206,6 +206,7 @@ interface PersonalInfo {
   /// Signature image URL
   SignatureUrl?: string;
   dateOfBirth?: string;
+  signPdfUrl?: string;
 
   /// Personal info
   maritalStatus?: string;

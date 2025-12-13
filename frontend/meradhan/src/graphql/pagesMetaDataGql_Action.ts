@@ -2,6 +2,7 @@
 "use server";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import { gqlClient } from "@/core/connection/apollo-client";
+import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 import { gql } from "@apollo/client";
 import apiGateway from "@root/apiGateway";
 import { Metadata } from "next";
@@ -23,6 +24,9 @@ query PagesMetaData($filters: PagesMetaDataListFiltersInput, $pagination: Pagina
         url
       }
     }
+    updatedAt
+    publishedAt
+    createdAt
   }
 }
 `;
@@ -45,6 +49,9 @@ type PagesMetaDataResponse = {
         url: string;
       };
     };
+    updatedAt: string;
+    publishedAt: string;
+    createdAt: string;
   }>;
 };
 
@@ -69,7 +76,7 @@ export const generatePagesMetaData = async (
     });
 
     const metadata = data?.pagesMetaData?.[0]?.MetaData;
-    console.log(metadata);
+    console.log(data);
 
     if (!data?.pagesMetaData?.[0]?.MetaData?.Title) {
       return {};
@@ -80,6 +87,14 @@ export const generatePagesMetaData = async (
       description: metadata?.Description,
       keywords: metadata?.Keywords?.map((k) => k.name).join(", "),
       authors: metadata?.Author ? [{ name: metadata.Author.Name }] : undefined,
+      other: {
+        "article:published_time":
+          convertUTCtoIST(data.pagesMetaData?.[0]?.["createdAt"]) || "",
+        "article:modified_time":
+          convertUTCtoIST(data.pagesMetaData?.[0]?.["updatedAt"]) || "",
+        "og:updated_time":
+          convertUTCtoIST(data.pagesMetaData?.[0]?.["updatedAt"]) || "",
+      },
       openGraph: {
         title: metadata?.Title,
         description: metadata?.Description,
@@ -137,6 +152,12 @@ export const generateBondInfoPageMetaData = async (
       description: fillTemplate(metadata?.Description || "", bondData),
       keywords: metadata?.Keywords?.map((k) => k.name).join(", "),
       authors: metadata?.Author ? [{ name: metadata.Author.Name }] : undefined,
+      other: {
+        "article:published_time":
+          convertUTCtoIST(bondData?.["createdAt"]) || "",
+        "article:modified_time": convertUTCtoIST(bondData?.["updatedAt"]) || "",
+        "og:updated_time": convertUTCtoIST(bondData?.["updatedAt"]) || "",
+      },
       openGraph: {
         title: fillTemplate(metadata?.Title || "", bondData),
         description: fillTemplate(metadata?.Description || "", bondData),
@@ -168,6 +189,9 @@ const pageMetaDataGql_Category = `query Author($pagination: PaginationArg, $filt
       }
       Priority
     }
+    publishedAt
+    createdAt
+    updatedAt
   }
 }`;
 
@@ -193,6 +217,9 @@ export const getBlogCategoryMetaData = async (
           };
           Priority: string;
         };
+        publishedAt: string;
+        createdAt: string;
+        updatedAt: string;
       }>;
     }>({
       query: gql(pageMetaDataGql_Category),
@@ -214,12 +241,18 @@ export const getBlogCategoryMetaData = async (
     if (!data?.blogCategories?.[0]?.MetaData?.Title) {
       return {};
     }
+    const meta = data?.blogCategories?.[0];
 
     return {
       title: metadata?.Title,
       description: metadata?.Description,
       keywords: metadata?.KeyWords,
       authors: author ? [{ name: author.Name }] : undefined,
+      other: {
+        "article:published_time": convertUTCtoIST(meta?.["createdAt"]) || "",
+        "article:modified_time": convertUTCtoIST(meta?.["updatedAt"]) || "",
+        "og:updated_time": convertUTCtoIST(meta?.["updatedAt"]) || "",
+      },
       openGraph: {
         title: metadata?.Title,
         description: metadata?.Description,
@@ -251,6 +284,9 @@ const pageMetaDataGql_NewsCategory = `query Author($pagination: PaginationArg) {
       }
       Priority
     }
+    publishedAt
+    createdAt
+    updatedAt
   }
 }`;
 
@@ -276,6 +312,9 @@ export const getNewsCategoryMetaData = async (
           };
           Priority: string;
         };
+        publishedAt: string;
+        createdAt: string;
+        updatedAt: string;
       }>;
     }>({
       query: gql(pageMetaDataGql_NewsCategory),
@@ -297,12 +336,18 @@ export const getNewsCategoryMetaData = async (
     if (!data?.newsCategories?.[0]?.MetaData?.Title) {
       return {};
     }
+    const meta = data.newsCategories?.[0];
 
     return {
       title: metadata?.Title,
       description: metadata?.Description,
       keywords: metadata?.KeyWords,
       authors: author ? [{ name: author.Name }] : undefined,
+      other: {
+        "article:published_time": convertUTCtoIST(meta?.["createdAt"]) || "",
+        "article:modified_time": convertUTCtoIST(meta?.["updatedAt"]) || "",
+        "og:updated_time": convertUTCtoIST(meta?.["updatedAt"]) || "",
+      },
       openGraph: {
         title: metadata?.Title,
         description: metadata?.Description,

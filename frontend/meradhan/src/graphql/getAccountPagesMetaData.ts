@@ -2,6 +2,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gqlClient } from "@/core/connection/apollo-client";
+import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
@@ -62,6 +63,14 @@ export const getAccountPagesMetaData = async (
     title: accountPageMetaData?.MetaData?.Title,
     description: accountPageMetaData?.MetaData?.Description,
     keywords: accountPageMetaData?.MetaData?.KeyWords,
+    other: {
+      "article:published_time":
+        convertUTCtoIST(accountPageMetaData?.["createdAt"]) || "",
+      "article:modified_time":
+        convertUTCtoIST(accountPageMetaData?.["updatedAt"]) || "",
+      "og:updated_time":
+        convertUTCtoIST(accountPageMetaData?.["updatedAt"]) || "",
+    },
     openGraph: {
       title: accountPageMetaData?.MetaData?.Title,
       description: accountPageMetaData?.MetaData?.Description,

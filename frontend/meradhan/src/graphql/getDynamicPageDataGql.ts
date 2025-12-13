@@ -1,5 +1,6 @@
 "use server";
 import { gqlClient } from "@/core/connection/apollo-client";
+import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
@@ -104,10 +105,17 @@ export const getDynamicPageMetaDataGql = async (
     ...getDynamicPagesVariables(slug),
   });
   const md = data?.dynamicPages?.[0]?.MetaData;
+  const meta = data?.dynamicPages?.[0];
+
   return {
     title: md?.Title,
     description: md?.Description,
     keywords: md?.KeyWords,
+    other: {
+      "article:published_time": convertUTCtoIST(meta?.["createdAt"]) || "",
+      "article:modified_time": convertUTCtoIST(meta?.["updatedAt"]) || "",
+      "og:updated_time": convertUTCtoIST(meta?.["updatedAt"]) || "",
+    },
     openGraph: {
       title: md?.Title,
       description: md?.Description,

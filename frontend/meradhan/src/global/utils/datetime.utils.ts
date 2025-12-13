@@ -161,7 +161,10 @@ export function calculateReadTime(html: string) {
   }
 }
 
-export function convertUTCtoIST(utcStr: string): string {
+export function convertUTCtoIST(utcStr?: string): string | undefined {
+  if (!utcStr) {
+    return undefined;
+  }
   const utcDate = new Date(utcStr);
 
   // Calculate IST offset: 5 hours 30 minutes in milliseconds

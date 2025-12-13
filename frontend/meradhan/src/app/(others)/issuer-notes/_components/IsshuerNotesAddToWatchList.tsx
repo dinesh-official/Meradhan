@@ -91,7 +91,7 @@ function IsshuerNotesAddToWatchList({ issuerId }: { issuerId: string }) {
             <button
               onClick={() => {
                 localStorage.setItem("issuesNotesWatchList", issuerId);
-                window.location.href = "/login";
+                window.location.href = `/login?taskId=${issuerId}&type=issuer-notes`;
               }}
               className="px-4 py-2 rounded-md bg-secondary text-white text-sm cursor-pointer"
             >

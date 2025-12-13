@@ -1,5 +1,6 @@
 "use server";
 import { gqlClient } from "@/core/connection/apollo-client";
+import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
@@ -93,6 +94,13 @@ export async function slugBasedGQLMetaData(slug: string) {
     title: pageMetaData?.MetaData?.Title,
     description: pageMetaData?.MetaData?.Description,
     keywords: pageMetaData?.MetaData?.KeyWords,
+    other: {
+      "article:published_time":
+        convertUTCtoIST(pageMetaData?.["createdAt"]) || "",
+      "article:modified_time":
+        convertUTCtoIST(pageMetaData?.["updatedAt"]) || "",
+      "og:updated_time": convertUTCtoIST(pageMetaData?.["updatedAt"]) || "",
+    },
   } as Metadata;
 }
 
