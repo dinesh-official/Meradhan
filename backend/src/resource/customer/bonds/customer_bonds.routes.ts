@@ -1,15 +1,14 @@
 import { Router } from "express";
 import { CustomerBondsController } from "./customer_bonds.controller";
-import { customerAuthMiddleware } from "@middlewares/customer_middleware";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const customerBondsRoutes = Router();
 const customerBondsController = new CustomerBondsController();
 
 customerBondsRoutes.get(
   "/api/customer/bonds",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   customerBondsController.getCustomerBonds
 );
 
 export default customerBondsRoutes;
-

@@ -1,20 +1,32 @@
 import { Router } from "express";
 import { TrashController } from "./trash.controller";
-import { withCrmAuthMiddleware } from "@middlewares/crm_middleware";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const trashRoutes = Router();
 const controller = new TrashController();
 
-trashRoutes.get("/api/trash/customers", withCrmAuthMiddleware, (req, res) => {
+trashRoutes.get(
+  "/api/trash/customers",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => {
     controller.getAllTrashCustomers(req, res);
-});
+  }
+);
 
-trashRoutes.post("/api/trash/customers/:customerId/restore", withCrmAuthMiddleware, (req, res) => {
+trashRoutes.post(
+  "/api/trash/customers/:customerId/restore",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => {
     controller.restoreCustomer(req, res);
-});
+  }
+);
 
-trashRoutes.delete("/api/trash/customers/:customerId", withCrmAuthMiddleware, (req, res) => {
+trashRoutes.delete(
+  "/api/trash/customers/:customerId",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => {
     controller.deleteCustomerPermanently(req, res);
-});
+  }
+);
 
 export default trashRoutes;

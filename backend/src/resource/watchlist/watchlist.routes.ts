@@ -1,31 +1,31 @@
-import { customerAuthMiddleware } from "@middlewares/customer_middleware";
 import { Router } from "express";
 import { WatchListController } from "./watchlist.controller";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const watchlistRoutes = Router();
 const controller = new WatchListController();
 
 watchlistRoutes.get(
   "/api/watchlist/bonds",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   controller.getUserBondsWatchList.bind(controller)
 );
 
 watchlistRoutes.get(
   "/api/watchlist/bonds/manage",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   controller.toggleBondsWatchList.bind(controller)
 );
 
 watchlistRoutes.get(
   "/api/watchlist/issuer",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   controller.getUserIssueNotesWatchList.bind(controller)
 );
 
 watchlistRoutes.get(
   "/api/watchlist/issuer/manage",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   controller.toggleIssueNotesWatchList.bind(controller)
 );
 

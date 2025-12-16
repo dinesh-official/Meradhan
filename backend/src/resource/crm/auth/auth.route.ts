@@ -1,6 +1,6 @@
-import { withCrmAuthMiddleware } from "@middlewares/crm_middleware";
 import { Router } from "express";
 import { AuthController } from "./auth.controller";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 const crmAuthRoutes = Router();
 const controller = new AuthController();
 
@@ -13,7 +13,7 @@ crmAuthRoutes.post("/api/auth/verify-otp", (req, res) =>
 crmAuthRoutes.all("/api/auth/logout", (req, res) =>
   controller.logout(req, res)
 );
-crmAuthRoutes.all("/api/session", withCrmAuthMiddleware, (req, res) =>
+crmAuthRoutes.all("/api/session", allowAccessMiddleware("ADMIN"), (req, res) =>
   controller.session(req, res)
 );
 

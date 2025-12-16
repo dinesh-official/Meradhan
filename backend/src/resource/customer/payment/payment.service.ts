@@ -1,9 +1,9 @@
-import { PaymentProviders } from "@packages/config/constants";
 import { env } from "@packages/config/src/env";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import crypto from "crypto";
 import Razorpay from "razorpay";
+import type { Orders } from "razorpay/dist/types/orders";
 
 // Type definitions for payment responses
 export interface PaymentOrderResponse {
@@ -15,24 +15,13 @@ export interface PaymentOrderResponse {
   created_at: number;
 }
 
-export interface PaymentProviderConfig {
-  keyId: string;
-  keySecret: string;
-  webhookSecret: string;
-}
+export class PaymentService {
+  private razorpay: Razorpay;
+  private keySecret: string;
+  private webhookSecret: string;
 
-export type PaymentProviderType =
-  (typeof PaymentProviders)[keyof typeof PaymentProviders];
-
-// Provider-specific implementations
-class RazorpayProvider {
-  private instance: Razorpay;
-  private config: PaymentProviderConfig;
-
-  constructor(providerConfig: PaymentProviderConfig) {
-    this.config = providerConfig;
-
-    if (!providerConfig.keyId || !providerConfig.keySecret) {
+  constructor() {
+    if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
       logger.logError("Razorpay credentials missing in configuration");
       throw new AppError("Payment gateway configuration incomplete", {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -40,14 +29,23 @@ class RazorpayProvider {
       });
     }
 
-    try {
-      this.instance = new Razorpay({
-        key_id: providerConfig.keyId,
-        key_secret: providerConfig.keySecret,
+    if (!env.RAZORPAY_WEBHOOK_SECRET) {
+      logger.logError("Razorpay webhook secret missing in configuration");
+      throw new AppError("Payment gateway webhook configuration incomplete", {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        code: "PAYMENT_WEBHOOK_CONFIG_ERROR",
       });
-      // logger.logInfo("Razorpay provider initialized successfully");
+    }
+
+    try {
+      this.razorpay = new Razorpay({
+        key_id: env.RAZORPAY_KEY_ID,
+        key_secret: env.RAZORPAY_KEY_SECRET,
+      });
+      this.keySecret = env.RAZORPAY_KEY_SECRET;
+      this.webhookSecret = env.RAZORPAY_WEBHOOK_SECRET;
     } catch (error) {
-      logger.logError("Failed to initialize Razorpay provider:", error);
+      logger.logError("Failed to initialize Razorpay:", error);
       throw new AppError("Failed to initialize payment gateway", {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         code: "PAYMENT_INIT_ERROR",
@@ -58,7 +56,8 @@ class RazorpayProvider {
   async createOrder(
     amount: number,
     currency: string = "INR",
-    receipt: string
+    receipt: string,
+    bank?: Orders.RazorpayOrderCreateRequestBody["bank_account"]
   ): Promise<PaymentOrderResponse> {
     if (amount <= 0) {
       throw new AppError("Invalid payment amount", {
@@ -74,22 +73,23 @@ class RazorpayProvider {
       });
     }
 
-    const options = {
+    const options: Orders.RazorpayOrderCreateRequestBody = {
       amount: Math.round(amount * 100), // amount in paisa
       currency,
       receipt,
+      // method: "netbanking",
+      bank_account: bank,
     };
 
     try {
       logger.logInfo(
         `Creating payment order: ${receipt}, Amount: ${amount} ${currency}`
       );
-      const order = await this.instance.orders.create(options);
+      const order = await this.razorpay.orders.create(options);
 
       logger.logInfo(`Payment order created successfully: ${order.id}`);
       return order as PaymentOrderResponse;
     } catch (error: unknown) {
-      console.log(error);
       logger.logError("Razorpay Create Order Error:", {
         error: (error as Error).message,
         receipt,
@@ -98,7 +98,6 @@ class RazorpayProvider {
         stack: (error as Error)?.stack,
       });
 
-      // Handle error
       throw error;
     }
   }
@@ -123,7 +122,7 @@ class RazorpayProvider {
     try {
       const body = `${orderId}|${paymentId}`;
       const expectedSignature = crypto
-        .createHmac("sha256", this.config.keySecret)
+        .createHmac("sha256", this.keySecret)
         .update(body)
         .digest("hex");
 
@@ -146,21 +145,33 @@ class RazorpayProvider {
   verifyWebhookSignature(body: string, signature: string): boolean {
     if (!body || !signature) {
       logger.logError(
-        "Missing required parameters for webhook signature verification"
+        "Missing required parameters for webhook signature verification",
+        {
+          hasBody: !!body,
+          hasSignature: !!signature,
+        }
       );
+      return false;
+    }
+
+    if (!this.webhookSecret) {
+      logger.logError("Webhook secret not configured");
       return false;
     }
 
     try {
       const expectedSignature = crypto
-        .createHmac("sha256", this.config.webhookSecret)
+        .createHmac("sha256", this.webhookSecret)
         .update(body)
         .digest("hex");
 
       const isValid = expectedSignature === signature;
 
       if (!isValid) {
-        logger.logError("Webhook signature verification failed");
+        logger.logError("Webhook signature verification failed", {
+          expectedLength: expectedSignature.length,
+          receivedLength: signature.length,
+        });
       }
 
       return isValid;
@@ -168,88 +179,5 @@ class RazorpayProvider {
       logger.logError("Error during webhook signature verification:", error);
       return false;
     }
-  }
-}
-
-// Generic Payment Service Interface
-export interface PaymentProvider {
-  createOrder(
-    amount: number,
-    currency: string,
-    receipt: string
-  ): Promise<PaymentOrderResponse>;
-  verifySignature(
-    orderId: string,
-    paymentId: string,
-    signature: string
-  ): boolean;
-  verifyWebhookSignature(body: string, signature: string): boolean;
-}
-
-// Factory function for creating payment providers
-function createPaymentProvider(
-  provider: PaymentProviderType,
-  providerConfig: PaymentProviderConfig
-): PaymentProvider {
-  switch (provider) {
-    case PaymentProviders.RAZORPAY:
-      return new RazorpayProvider(providerConfig);
-    default:
-      logger.logError(`Unsupported payment provider requested: ${provider}`);
-      throw new AppError(`Unsupported payment provider: ${provider}`, {
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        code: "UNSUPPORTED_PAYMENT_PROVIDER",
-      });
-  }
-}
-
-export class PaymentService {
-  private provider: PaymentProvider;
-  private providerType: PaymentProviderType;
-
-  constructor(provider: PaymentProviderType = PaymentProviders.RAZORPAY) {
-    this.providerType = provider;
-
-    try {
-      const providerConfig: PaymentProviderConfig = {
-        keyId: env.RAZORPAY_KEY_ID,
-        keySecret: env.RAZORPAY_KEY_SECRET,
-        webhookSecret: env.RAZORPAY_WEBHOOK_SECRET,
-      };
-
-      this.provider = createPaymentProvider(provider, providerConfig);
-      logger.logInfo(`PaymentService initialized with provider: ${provider}`);
-      logger.logInfo(`Using Razorpay Key ID: ${providerConfig.keyId}`);
-    } catch (error) {
-      logger.logError(
-        `Failed to initialize PaymentService with provider ${provider}:`,
-        error
-      );
-      throw error; // Re-throw AppError from factory
-    }
-  }
-
-  async createOrder(
-    amount: number,
-    currency: string = "INR",
-    receipt: string
-  ): Promise<PaymentOrderResponse> {
-    return this.provider.createOrder(amount, currency, receipt);
-  }
-
-  verifySignature(
-    orderId: string,
-    paymentId: string,
-    signature: string
-  ): boolean {
-    return this.provider.verifySignature(orderId, paymentId, signature);
-  }
-
-  verifyWebhookSignature(body: string, signature: string): boolean {
-    return this.provider.verifyWebhookSignature(body, signature);
-  }
-
-  getProviderType(): PaymentProviderType {
-    return this.providerType;
   }
 }

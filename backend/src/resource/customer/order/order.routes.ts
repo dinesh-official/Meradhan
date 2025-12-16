@@ -1,43 +1,43 @@
 import { Router } from "express";
 import { OrderController } from "./order.controller";
-import { customerAuthMiddleware } from "@middlewares/customer_middleware";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const orderRoutes = Router();
 const orderController = new OrderController();
 
 orderRoutes.post(
   "/api/customer/order/preview",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   orderController.previewOrder
 );
 
 orderRoutes.post(
   "/api/customer/order/pay",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   orderController.createOrder
 );
 
 orderRoutes.post(
   "/api/customer/order/cancel/:orderId",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   orderController.cancelOrder
 );
 
 orderRoutes.post(
   "/api/customer/order/status/:orderId",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   orderController.setOrderStatus
 );
 
 orderRoutes.get(
   "/api/customer/order/history",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   orderController.getOrderHistory
 );
 
 orderRoutes.all(
   "/api/customer/order/pdf",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   orderController.getOrderPdf
 );
 export default orderRoutes;

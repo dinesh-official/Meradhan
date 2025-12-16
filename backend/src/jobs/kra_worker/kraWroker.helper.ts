@@ -13,6 +13,6 @@ export const addKraWorkerJob = async <T>(
 ) => {
   return await kraWorkerQueue.add(data, {
     attempts: 1,
-    delay: delay ?? 2 * 60 * 60 * 1000, // initial delay, 2 hr
+    delay: delay ?? 1 * 60 * 60 * 1000, // initial delay, 1 hr
   });
 };

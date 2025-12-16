@@ -39,6 +39,7 @@ export class ForgetPasswordService {
     const token = tokenUtils.generateToken(
       {
         id: user.id,
+        role: "USER",
       },
       "30m"
     );

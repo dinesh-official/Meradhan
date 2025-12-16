@@ -29,6 +29,7 @@ export class CustomerAuthService {
       {
         email: user.emailAddress,
         id: user.id,
+        role: "USER",
       },
       "1d"
     );
@@ -126,6 +127,7 @@ export class CustomerAuthService {
         email: user.emailAddress,
         mobile: user.phoneNo,
         id: user.id,
+        role: "USER",
       },
       "1d"
     );
@@ -231,6 +233,7 @@ export class CustomerAuthService {
         email: user.emailAddress,
         mobile: user.phoneNo,
         id: user.id,
+        role: "USER",
       },
       "1d"
     );
@@ -265,6 +268,7 @@ export class CustomerAuthService {
           email: isExist.emailAddress,
           mobile: isExist.phoneNo,
           id: isExist.id,
+          role: "USER",
         },
         "1d"
       );
@@ -315,6 +319,7 @@ export class CustomerAuthService {
         email: response.emailAddress,
         mobile: response.phoneNo,
         id: response.id,
+        role: "USER",
       },
       "1d"
     );
@@ -386,7 +391,7 @@ export class CustomerAuthService {
       throw new AppError("Customer not found.");
     }
 
-    const token = tokenUtils.generateToken({ customerId }, "15m");
+    const token = tokenUtils.generateToken({ customerId, role: "USER" }, "15m");
     console.log(`${env.NEXT_PUBLIC_HOST_URL}/verify-email?token=${token}`);
     // Send verification email with the token (implementation not shown)
     console.log(`Verification token: ${token}`);

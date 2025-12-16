@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { CustomerKycKycController } from "./kyc_process/customer_kyc.controller";
 import { KycStoreController } from "./store/kyc_store.controller";
-import { customerAuthMiddleware } from "@middlewares/customer_middleware";
-import { withCrmAuthMiddleware } from "@middlewares/crm_middleware";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const kycRoutes = Router();
 const controller = new CustomerKycKycController();
@@ -10,36 +9,36 @@ const controller = new CustomerKycKycController();
 // pan
 kycRoutes.post(
   "/api/customer/kyc/pan/request",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.createPanVerifyRequest(req, res)
 );
 kycRoutes.get(
   "/api/customer/kyc/pan/response/:kid",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.verifyPanResponse(req, res)
 );
 
 // selfie
 kycRoutes.post(
   "/api/customer/kyc/selfie/request",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.createSelfieVerifyRequest(req, res)
 );
 kycRoutes.get(
   "/api/customer/kyc/selfie/response/:kid",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.verifySelfieResponse(req, res)
 );
 
 // sign
 kycRoutes.post(
   "/api/customer/kyc/sign/request",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.createSignVerifyRequest(req, res)
 );
 kycRoutes.get(
   "/api/customer/kyc/sign/response/:kid",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.verifySignResponse(req, res)
 );
 
@@ -49,24 +48,24 @@ kycRoutes.get("/api/bank/:ifsc", (req, res) =>
 );
 kycRoutes.post(
   "/api/customer/kyc/bank/verify",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.verifyBankAccount(req, res)
 );
 kycRoutes.post(
   "/api/customer/kyc/demat/submit",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.verifyDematAccount(req, res)
 );
 
 // esign
 kycRoutes.post(
   "/api/customer/kyc/esign/request",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.getEsignRequest(req, res)
 );
 kycRoutes.get(
   "/api/customer/kyc/esign/verify/:doc",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => controller.verifyEsignResponse(req, res)
 );
 
@@ -74,39 +73,43 @@ kycRoutes.get(
 const storeKyc = new KycStoreController();
 kycRoutes.get(
   "/api/customer/kyc/store/get",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => storeKyc.getKycData(req, res)
 );
 kycRoutes.post(
   "/api/customer/kyc/store/:step",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => storeKyc.setKycData(req, res)
 );
-kycRoutes.get("/api/customer/kyc/level/:customerId", (req, res) =>
-  storeKyc.setKycLevel(req, res)
+kycRoutes.get(
+  "/api/customer/kyc/level/:customerId",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => storeKyc.setKycLevel(req, res)
 );
 kycRoutes.post(
   "/api/customer/kyc/audit-log/:customerId",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => storeKyc.addAuditLog(req, res)
 );
 kycRoutes.post(
   "/api/customer/kyc/current-step/:customerId",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => storeKyc.setCurrentStep(req, res)
 );
-kycRoutes.get("/api/customer/kyc/download-pdf/:id", (req, res) =>
-  controller.downloadKycPdf(req, res)
+kycRoutes.get(
+  "/api/customer/kyc/download-pdf/:id",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.downloadKycPdf(req, res)
 );
 // for crm access
 kycRoutes.get(
   "/api/crm/kyc/store/get/:customerId",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => storeKyc.getKycDataById(req, res)
 );
 kycRoutes.get(
   "/api/crm/kyc/kra/get/:customerId",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => storeKyc.getKycKraDataById(req, res)
 );
 

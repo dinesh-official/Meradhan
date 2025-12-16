@@ -24,15 +24,52 @@ class DigioKycFileHelper {
     const zipBuffer = Buffer.from(bytes);
     const zip = new AdmZip(zipBuffer);
 
-    // Step 2: Create temp dir + extract
+    // Step 2: Create temp dir + extract with security validation
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "unzipped-"));
+    const tempDirResolved = path.resolve(tempDir);
+
+    // Security: Validate zip entries before extraction to prevent path traversal
+    const zipEntries = zip.getEntries();
+    const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
+
+    for (const entry of zipEntries) {
+      // Prevent path traversal attacks
+      const entryPath = path.resolve(tempDir, entry.entryName);
+      if (!entryPath.startsWith(tempDirResolved)) {
+        throw new AppError("Invalid zip entry: path traversal detected", {
+          code: "ZIP_SECURITY_ERROR",
+          statusCode: 400,
+        });
+      }
+
+      // Validate file extension
+      const ext = path.extname(entry.entryName).toLowerCase();
+      if (!allowedExtensions.includes(ext) && !entry.isDirectory) {
+        throw new AppError(`Invalid file type in zip: ${ext}`, {
+          code: "ZIP_INVALID_FILE_TYPE",
+          statusCode: 400,
+        });
+      }
+    }
+
+    // Safe extraction after validation
     zip.extractAllTo(tempDir, true);
 
     // Step 3: Collect extracted file paths
     const files = fs
       .readdirSync(tempDir)
       .sort((a, b) => a.localeCompare(b)) // A → Z
-      .map((file) => path.join(tempDir, file));
+      .map((file) => {
+        const filePath = path.join(tempDir, file);
+        // Double-check resolved path is still within temp directory
+        if (!path.resolve(filePath).startsWith(tempDirResolved)) {
+          throw new AppError("Invalid file path after extraction", {
+            code: "ZIP_EXTRACTION_ERROR",
+            statusCode: 500,
+          });
+        }
+        return filePath;
+      });
 
     const pathData = {
       pan: files?.[0],
@@ -106,13 +143,13 @@ export class KycProvider extends DigioKycFileHelper {
   }
 
   private nsdlApi = new NSDLApi(
-    "NR100013",
-    "0668afbe8257ebad91be8223b6f7fa6e5c5a",
-    false
-  ); // false = test mode
+    process.env.NDSL_REQUESTOR_ID || "",
+    process.env.NSDL_SECRET_KEY || "",
+    process.env.NODE_ENV === "production"
+  );
   private cdslApi = new CDSLApi({
-    AESKey: "P6KZN7PEHRASDX6M19Y3EF382F1F9NLQ",
-    isProd: false,
+    AESKey: process.env.CDSL_AES_KEY || "",
+    isProd: process.env.NODE_ENV === "production",
   });
 
   // KYC STEP 1: PAN Verification ---------------------------------------------

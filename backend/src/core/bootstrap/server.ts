@@ -53,11 +53,71 @@ export class ExpressServer implements IServer, IExpressRoute {
 
     // Pre Middlewares -
     // Trust proxy - required for rate limiting and proper IP detection behind proxies
+    this.app.set("trust proxy", 1);
 
-    this.app.use(cors());
+    // CORS configuration - restrict to specific origins
+    const isProduction = process.env.NODE_ENV === "production";
+    const isDevelopment = !isProduction; // Treat anything not production as development
+
+    const allowedOrigins = [
+      "https://meradhan.co",
+      "https://www.meradhan.co",
+      "https://crm.meradhan.co",
+      "https://api.meradhan.co", // Allow API subdomain
+      ...(isDevelopment
+        ? [
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:4000",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:3001",
+            "http://127.0.0.1:4000",
+          ]
+        : []),
+    ];
+
+    this.app.use(
+      cors({
+        origin: (origin, callback) => {
+          // Allow requests with no origin (same-origin requests, mobile apps, Postman, etc.)
+          if (!origin) {
+            // Allow same-origin requests (no origin header)
+            return callback(null, true);
+          }
+
+          // Check if origin is in allowed list
+          if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+          }
+
+          // In development, be more permissive - allow localhost with any port
+          if (
+            (isDevelopment && origin.startsWith("http://localhost:")) ||
+            origin.startsWith("http://127.0.0.1:")
+          ) {
+            return callback(null, true);
+          }
+
+          // Log blocked origin for security monitoring
+          logger.logError(`CORS blocked origin: ${origin}`);
+          callback(new Error("Not allowed by CORS"));
+        },
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: [
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With",
+          "x-razorpay-signature", // For webhook
+        ],
+        exposedHeaders: ["Content-Range", "X-Content-Range"],
+        maxAge: 86400, // 24 hours
+      })
+    );
     this.app.use(morgan("common"));
     this.app.use(helmet());
-    this.app.use("/uploads", express.static("uploads"));
+    // Remove public file serving - files should be served via signed URLs
+    // this.app.use("/uploads", express.static("uploads"));
 
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json(), express.text({ type: "*/*" }));

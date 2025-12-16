@@ -1,6 +1,6 @@
-import { withCrmAuthMiddleware } from "@middlewares/crm_middleware";
 import { Router } from "express";
 import { LocaldataRfqController } from "./localdata_rfq.controller";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 export const local_data_rfq_routes = Router();
 const controller = new LocaldataRfqController();
@@ -8,7 +8,7 @@ const controller = new LocaldataRfqController();
 // Example:
 local_data_rfq_routes.get(
   "/api/crm/rfq/nse/localdata",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   controller.getLocaldataRfq.bind(controller)
 );
 

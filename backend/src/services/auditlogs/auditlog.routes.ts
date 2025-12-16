@@ -1,6 +1,6 @@
-import { customerAuthMiddleware } from "@middlewares/customer_middleware";
 import { Router } from "express";
 import { AuditLogsController } from "./auditlogs.controller";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const auditlogsRoutes = Router();
 
@@ -70,7 +70,7 @@ auditlogsRoutes.get("/api/auditlogs/meradhan/session-logs", (req, res) =>
 
 auditlogsRoutes.post(
   "/api/auditlogs/meradhan/create/activity",
-  customerAuthMiddleware,
+  allowAccessMiddleware("USER"),
   (req, res) => auditLogsController.createActivityLogMeradhan(req, res)
 );
 

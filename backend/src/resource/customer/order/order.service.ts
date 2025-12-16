@@ -5,7 +5,6 @@ import type {
   Order,
   Prisma,
 } from "@databases/generated/prisma/postgres";
-import { PaymentProviders } from "@packages/config/constants";
 import { env } from "@packages/config/src/env";
 import { PaymentService } from "@resource/customer/payment/payment.service";
 import type { appSchema } from "@root/schema";
@@ -24,7 +23,7 @@ interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
 type OrderPreviewItem = z.infer<typeof appSchema.order.OrderPreviewItemSchema>;
 
 export class OrderService {
-  private payment = new PaymentService(PaymentProviders.RAZORPAY);
+  private payment = new PaymentService();
 
   private async getBondDetails(isin: string) {
     const bond = await db.dataBase.bonds.findFirst({
@@ -75,6 +74,16 @@ export class OrderService {
     orderId?: string
   ) {
     const preview = await this.previewOrder(item);
+    const customerBank = await db.dataBase.customersBankAccountModel.findFirst({
+      where: {
+        customerProfileDataModelId: customerId,
+        isPrimary: true,
+      },
+    });
+
+    if (!customerBank) {
+      throw new AppError("No Default Bank Account Found");
+    }
 
     const orderNumber =
       orderId || `MD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -82,7 +91,12 @@ export class OrderService {
     const razorpayOrder = await this.payment.createOrder(
       preview.totalAmount,
       "INR",
-      orderNumber
+      orderNumber,
+      {
+        account_number: customerBank.accountNumber,
+        ifsc: customerBank.ifscCode,
+        name: customerBank.accountHolderName,
+      }
     );
     const order = await db.dataBase.order.create({
       data: {
@@ -93,7 +107,7 @@ export class OrderService {
         totalAmount: preview.totalAmount,
         paymentStatus: PaymentStatus.PENDING,
         status: "PENDING",
-        paymentProvider: PaymentProviders.RAZORPAY,
+        paymentProvider: "RAZORPAY",
         isin: preview.isin,
         bondName: preview.bondName,
         faceValue: preview.faceValue,
@@ -162,7 +176,7 @@ export class OrderService {
           paymentId,
           paymentMetadata: {
             signature: signature || null,
-            provider: PaymentProviders.RAZORPAY,
+            provider: "RAZORPAY",
           },
         },
       });

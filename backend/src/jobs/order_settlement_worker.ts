@@ -1,4 +1,4 @@
-import type { Job } from "bullmq";
+import type { Job } from "bull";
 import { startQueueWorker } from "./helper/start_queue_worker_helper";
 import { orderSettlementQueue } from "./queue/worker_queues";
 import { OrderSettlementService } from "@services/order/order_settlement.service";

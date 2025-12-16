@@ -173,7 +173,16 @@ Client ID: ${demat?.clientId}`}</Text>
       <View>
         <Text style={tw(`text-[8px] mt-3 font-semibold`)}>Confirmation</Text>
         <Text style={tw(`text-[8px] mt-1 leading-6`)}>
-          {`[✔] I hereby confirm (Date: 27-Nov-2025 16:28:10 IST):
+          {`[✔] I hereby confirm (Date: ${new Date().toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+            timeZone: "Asia/Kolkata",
+          })} IST):
 a) I have read, understood, and accepted all terms & conditions provided on https://www.meradhan.com
 b) I have reviewed the details in the Order Receipt and wish to proceed with the payment.`}
         </Text>

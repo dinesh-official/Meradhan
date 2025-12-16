@@ -1,57 +1,61 @@
 import { Router } from "express";
 import { RfqMasterController } from "./rfq_master.controller";
-import { withCrmAuthMiddleware } from "@middlewares/crm_middleware";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 const rfqMasterRouter = Router();
 
 const controller = new RfqMasterController();
 rfqMasterRouter.get(
   "/api/crm/rfq/nse/find",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.getAllRfq(req, res)
 );
 rfqMasterRouter.get(
   "/api/crm/rfq/nse/find/:number",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.getRfqById(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/add-isin",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.addIsinToRfq(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/negotiate/accept",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.negotiateRfqAccept(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/negotiations",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.getAllNegotiations(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/deal/propose",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.proposeDeal(req, res)
 );
 
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/negotiate/terminate",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.negotiateRfqTerminate(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/deal/accept-reject",
-  withCrmAuthMiddleware,
+  allowAccessMiddleware("ADMIN"),
   (req, res) => controller.acceptRejectDeal(req, res)
 );
 
-rfqMasterRouter.post("/api/crm/rfq/nse/dealamend/all", (req, res) =>
-  controller.getAllDealamend(req, res)
+rfqMasterRouter.post(
+  "/api/crm/rfq/nse/dealamend/all",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.getAllDealamend(req, res)
 );
 
-rfqMasterRouter.post("/api/crm/rfq/nse/settle/orders", (req, res) =>
-  controller.getAllSettledOrders(req, res)
+rfqMasterRouter.post(
+  "/api/crm/rfq/nse/settle/orders",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.getAllSettledOrders(req, res)
 );
 
 export default rfqMasterRouter;

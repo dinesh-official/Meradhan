@@ -75,12 +75,12 @@ export class KraWorkerService {
         })) as T_APP_PAN_INQ_DOWNLOAD;
         const isMatched = checkIsKraMatched(kyc, customer, downloadRes);
         if (isMatched) {
-          await db.dataBase.customerProfileDataModel.update({
-            where: { id: customerId },
-            data: { kycStatus: "VERIFIED", kraStatus: "VERIFIED" },
-          });
           try {
             const cbUser = await cbricsManager.registerParticipant(customerId);
+            await db.dataBase.customerProfileDataModel.update({
+              where: { id: customerId },
+              data: { kycStatus: "VERIFIED", kraStatus: "VERIFIED" },
+            });
             await db.dataBase.kraDataLogs.create({
               data: {
                 requestData: {
@@ -89,7 +89,7 @@ export class KraWorkerService {
                 responseData: cbUser,
                 userId: customer.id,
                 kycId: kycDataStoreId,
-                stage: "FAILED_CBRICS_REGISTRATION",
+                stage: "REGISTER",
                 reqTime: new Date().toISOString(),
                 resTime: new Date().toISOString(),
               },
