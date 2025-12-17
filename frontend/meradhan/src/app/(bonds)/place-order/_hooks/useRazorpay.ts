@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderState } from "../store/useOrderState";
-import { fi } from "date-fns/locale";
+import { useOrderActivityTracking } from "./useOrderActivityTracking";
 
 /* -----------------------------------------------------
    Razorpay Type Definitions (kept inside single file)
@@ -85,6 +85,8 @@ export function useRazorpay() {
   const [orderReqData, setOrderReqData] = useState<PayApiResponse | undefined>(
     undefined
   );
+  const { trackPaymentSuccess, trackPaymentFailure, trackOrderCreation } =
+    useOrderActivityTracking();
 
   // load Razorpay SDK
   useEffect(() => {
@@ -119,9 +121,28 @@ export function useRazorpay() {
             }
           );
       setOrderReqData(response.data);
-      const { paymentOrderId, amount, currency, key } =
-        response.data.responseData;
-      console.log(key);
+      const {
+        paymentOrderId,
+        amount,
+        currency,
+        key,
+        orderId: responseOrderId,
+      } = response.data.responseData;
+
+      // Use orderId from parameter or response, ensuring it's always a string
+      const finalOrderId = orderId ?? String(responseOrderId);
+
+      // Track order creation
+      if (!orderReqData) {
+        trackOrderCreation(finalOrderId, {
+          isin,
+          quantity,
+          amount,
+          currency,
+          paymentOrderId,
+        });
+      }
+
       setIsLoading(false);
       // check Razorpay presence
       if (typeof window === "undefined" || !window.Razorpay) {
@@ -152,14 +173,34 @@ export function useRazorpay() {
         handler: async (response: RazorpayPaymentResponse) => {
           toast({ title: "Payment Successful" });
           setIsLoading(true);
-          await apiClientCaller.post(`/customer/order/status/${orderId}`, {
-            status: "APPLIED",
-          });
-          setIsLoading(false);
-          setStep(3);
+          try {
+            await apiClientCaller.post(
+              `/customer/order/status/${finalOrderId}`,
+              {
+                status: "APPLIED",
+              }
+            );
+            trackPaymentSuccess(finalOrderId, response.razorpay_payment_id, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            setIsLoading(false);
+            setStep(3);
+          } catch (error) {
+            trackPaymentFailure(
+              finalOrderId,
+              error instanceof Error ? error.message : "Unknown error",
+              {
+                razorpay_payment_id: response.razorpay_payment_id,
+              }
+            );
+            setIsLoading(false);
+            throw error;
+          }
         },
         modal: {
           ondismiss: () => {
+            trackPaymentFailure(finalOrderId, "User cancelled payment");
             toast({
               title: "Payment Cancelled",
               variant: "destructive",
@@ -177,6 +218,15 @@ export function useRazorpay() {
       const rzp = new window.Razorpay(options as any);
       rzp.open();
     } catch (error) {
+      // Use orderId from parameter or response if available
+      const orderIdForError =
+        orderId ??
+        (orderReqData ? String(orderReqData.responseData.orderId) : "unknown");
+      trackPaymentFailure(
+        orderIdForError,
+        error instanceof Error ? error.message : "Could not initiate payment",
+        { isin, quantity }
+      );
       toast({
         title: "Payment Failed",
         description: "Could not initiate payment",

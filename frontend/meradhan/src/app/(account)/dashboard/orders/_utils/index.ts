@@ -1,5 +1,37 @@
 import type { Order } from "@root/apiGateway";
 
+// Helper functions to safely extract values from Record<string, unknown>
+const getBondDetailString = (
+  bondDetails: Record<string, unknown>,
+  key: string
+): string | undefined => {
+  const value = bondDetails[key];
+  if (value === null || value === undefined) return undefined;
+  return String(value);
+};
+
+const getBondDetailBoolean = (
+  bondDetails: Record<string, unknown>,
+  key: string
+): boolean | undefined => {
+  const value = bondDetails[key];
+  if (value === null || value === undefined) return undefined;
+  if (typeof value === "boolean") return value;
+  return undefined;
+};
+
+const getBondDetailObject = (
+  bondDetails: Record<string, unknown>,
+  key: string
+): Record<string, unknown> | undefined => {
+  const value = bondDetails[key];
+  if (value === null || value === undefined) return undefined;
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return undefined;
+};
+
 export function getStatusDisplay(status: Order["status"]) {
   switch (status) {
     case "PENDING":
@@ -18,11 +50,16 @@ export function getStatusDisplay(status: Order["status"]) {
 export function getBondType(bondDetails: Order["bondDetails"]): string {
   // Try to extract bond type from bondDetails
   if (bondDetails && typeof bondDetails === "object") {
-    if (bondDetails.bondType) return bondDetails.bondType;
-    if (bondDetails.type) return bondDetails.type;
+    const bondType = getBondDetailString(bondDetails, "bondType");
+    if (bondType) return bondType;
+
+    const type = getBondDetailString(bondDetails, "type");
+    if (type) return type;
+
     // Check if it's a primary market bond (usually new issues)
-    if (bondDetails.isPrimary !== undefined) {
-      return bondDetails.isPrimary ? "Primary" : "Secondary";
+    const isPrimary = getBondDetailBoolean(bondDetails, "isPrimary");
+    if (isPrimary !== undefined) {
+      return isPrimary ? "Primary" : "Secondary";
     }
   }
   // Default to Secondary as most bonds are secondary market
@@ -31,9 +68,17 @@ export function getBondType(bondDetails: Order["bondDetails"]): string {
 
 export function getIssuerCode(bondDetails: Order["bondDetails"]): string {
   if (bondDetails && typeof bondDetails === "object") {
-    if (bondDetails.issuerCode) return bondDetails.issuerCode;
-    if (bondDetails.issuer?.code) return bondDetails.issuer.code;
-    if (bondDetails.issuer?.shortName) return bondDetails.issuer.shortName;
+    const issuerCode = getBondDetailString(bondDetails, "issuerCode");
+    if (issuerCode) return issuerCode;
+
+    const issuer = getBondDetailObject(bondDetails, "issuer");
+    if (issuer) {
+      const code = getBondDetailString(issuer, "code");
+      if (code) return code;
+
+      const shortName = getBondDetailString(issuer, "shortName");
+      if (shortName) return shortName;
+    }
   }
   return "";
 }

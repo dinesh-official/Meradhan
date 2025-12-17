@@ -34,6 +34,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PiCurrencyInrBold } from "react-icons/pi";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 export const revalidate = 0; // Revalidate the page every hour
 export const generateMetadata = async ({
@@ -178,25 +179,22 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
             <div
               className="article"
               dangerouslySetInnerHTML={{
-                __html: data?.data?.Content?.Introduction || "",
+                __html: sanitizeStrapiHTML(data?.data?.Content?.Introduction),
               }}
             ></div>
             <div
               className="article"
               dangerouslySetInnerHTML={{
-                __html: data?.data?.Content?.Content_1 || "",
+                __html: sanitizeStrapiHTML(data?.data?.Content?.Content_1),
               }}
             ></div>{" "}
             <ImageSlider
-              imaeges={data.data.Images.map((e) => {
-                console.log(e);
-                return CMS_URL + e.url;
-              })}
+              imaeges={data.data.Images.map((e) => CMS_URL + e.url)}
             />
             <div
               className="article"
               dangerouslySetInnerHTML={{
-                __html: data?.data?.Content?.Content_2 || "",
+                __html: sanitizeStrapiHTML(data?.data?.Content?.Content_2),
               }}
             ></div>
             <div>

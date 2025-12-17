@@ -27,7 +27,8 @@ import { calculateSettlementAmount } from "../../_utils/calcAmount";
 import { useOrderState } from "../../store/useOrderState";
 import BondInfoData from "../BondInfoData";
 import { RatingOrDelete } from "../RatingOrDelete";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
 function ReviewOrder({
   bond,
   customer,
@@ -48,6 +49,32 @@ function ReviewOrder({
     settlementDate,
     step,
   } = useOrderState();
+
+  const {
+    trackQuantityChange,
+    trackSettlementDateChange,
+    trackCheckboxInteraction,
+    trackButtonClick,
+  } = useOrderActivityTracking();
+
+  const previousQuantity = useRef(quantity);
+  const previousSettlementDate = useRef(settlementDate);
+
+  // Track quantity changes
+  useEffect(() => {
+    if (previousQuantity.current !== quantity) {
+      trackQuantityChange(orderId, previousQuantity.current, quantity);
+      previousQuantity.current = quantity;
+    }
+  }, [quantity, orderId, trackQuantityChange]);
+
+  // Track settlement date changes
+  useEffect(() => {
+    if (previousSettlementDate.current !== settlementDate) {
+      trackSettlementDateChange(orderId, settlementDate);
+      previousSettlementDate.current = settlementDate;
+    }
+  }, [settlementDate, orderId, trackSettlementDateChange]);
 
   const demateAccount = customer.dematAccounts.find(
     (account) => account.isPrimary
@@ -117,6 +144,7 @@ function ReviewOrder({
               value={settlementDate}
               onValueChange={(value) => {
                 setSettlementDate(value);
+                // Tracking is handled by useEffect
               }}
             >
               <SelectTrigger className="w-full">
@@ -133,7 +161,13 @@ function ReviewOrder({
             <div className="flex items-center w-full border border-[#E1E6E8] rounded-md ">
               <Button
                 className="bg-[#E1E6E8] text-black font-semibold  text-lg  rounded-r-none"
-                onClick={() => setQuantity(quantity - 1)}
+                onClick={() => {
+                  trackButtonClick(orderId, "QUANTITY_DECREASE", {
+                    previousQuantity: quantity,
+                    newQuantity: quantity - 1,
+                  });
+                  setQuantity(quantity - 1);
+                }}
               >
                 -
               </Button>
@@ -146,7 +180,13 @@ function ReviewOrder({
               />
               <Button
                 className="bg-[#E1E6E8] text-black  text-lg font-semibold rounded-l-none"
-                onClick={() => setQuantity(quantity + 1)}
+                onClick={() => {
+                  trackButtonClick(orderId, "QUANTITY_INCREASE", {
+                    previousQuantity: quantity,
+                    newQuantity: quantity + 1,
+                  });
+                  setQuantity(quantity + 1);
+                }}
               >
                 +
               </Button>
@@ -240,7 +280,11 @@ function ReviewOrder({
           <Checkbox
             className="mt-[2px]"
             checked={isChecked}
-            onClick={() => setIsChecked(!isChecked)}
+            onClick={() => {
+              const newValue = !isChecked;
+              setIsChecked(newValue);
+              trackCheckboxInteraction(orderId, "BROKER_PERMISSION", newValue);
+            }}
           />
           <p className="text-sm">
             I hereby give MeraDhan permission to act as my broker and to send or
@@ -252,7 +296,17 @@ function ReviewOrder({
         <div className="mt-8">
           <Dialog>
             <DialogTrigger disabled={!isChecked}>
-              <Button className="md:w-auto w-full" disabled={!isChecked}>
+              <Button
+                className="md:w-auto w-full"
+                disabled={!isChecked}
+                onClick={() => {
+                  if (isChecked) {
+                    trackButtonClick(orderId, "CONFIRM_CONTINUE_REVIEW", {
+                      step: 1,
+                    });
+                  }
+                }}
+              >
                 Confirm & Continue <IoMdArrowDropright />
               </Button>
             </DialogTrigger>
@@ -272,7 +326,11 @@ function ReviewOrder({
                 <Checkbox
                   className="mt-[2px]"
                   checked={isCheckedRisk}
-                  onClick={() => setIsCheckedRisk(!isCheckedRisk)}
+                  onClick={() => {
+                    const newValue = !isCheckedRisk;
+                    setIsCheckedRisk(newValue);
+                    trackCheckboxInteraction(orderId, "RISK_DECLARATION", newValue);
+                  }}
                 />
                 <p>
                   I confirm that I have read and understood all the documents
@@ -289,13 +347,26 @@ function ReviewOrder({
                 <Button
                   disabled={!isCheckedRisk}
                   onClick={() => {
+                    trackButtonClick(orderId, "CONFIRM_CONTINUE_DIALOG", {
+                      step: 1,
+                      nextStep: 2,
+                    });
                     setStep(step + 1);
                   }}
                 >
                   Confirm & Continue <IoMdArrowDropright />
                 </Button>
                 <DialogTrigger>
-                  <Button variant="outline">Cancel</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      trackButtonClick(orderId, "CANCEL_DIALOG", {
+                        step: 1,
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </DialogTrigger>
               </div>
             </DialogContent>

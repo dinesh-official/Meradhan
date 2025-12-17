@@ -6,4 +6,5 @@ export const BASES_URLS = {
   CMS: process.env.NEXT_PUBLIC_STRAPI_HOST_URL,
   ASSETS: process.env.NEXT_PUBLIC_BACKEND_HOST_URL,
   DIGIO: process.env.NEXT_PUBLIC_DIGIO as "production" | "sandbox", // Change to "production" for live environment
+  DHANGPT: process.env.NEXT_PUBLIC_DHANGPT_URL || "https://dhangpt.meradhan.co",
 };

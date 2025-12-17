@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useDhanGPT } from "../_hook/useDhanGPT";
 import { cn } from "@/lib/utils";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 function DhanGptPopup() {
   const [open, setOpen] = useState(false);
@@ -97,8 +98,10 @@ function DhanGptPopup() {
                     dangerouslySetInnerHTML={{
                       __html:
                         message.person === "BOT"
-                          ? marked.parse(message.response || "")
-                          : message.response,
+                          ? marked.parse(
+                              sanitizeStrapiHTML(message.response || "")
+                            )
+                          : sanitizeStrapiHTML(message.response),
                     }}
                   />
                 </div>

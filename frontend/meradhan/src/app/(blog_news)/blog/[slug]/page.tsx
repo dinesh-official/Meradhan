@@ -28,6 +28,7 @@ import {
 } from "@/global/utils/datetime.utils";
 import { redirect } from "next/navigation";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 export const revalidate = 0; // Revalidate the page every hour
 export async function generateMetadata(page: {
@@ -127,19 +128,19 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents?.Introduction || "",
+                  __html: sanitizeStrapiHTML(post?.Contents?.Introduction),
                 }}
               />
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents?.Content_1 || "",
+                  __html: sanitizeStrapiHTML(post?.Contents?.Content_1),
                 }}
               />{" "}
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents?.Content_2 || "",
+                  __html: sanitizeStrapiHTML(post?.Contents?.Content_2),
                 }}
               />
               {post?.Tags && post?.Tags.length > 0 && (

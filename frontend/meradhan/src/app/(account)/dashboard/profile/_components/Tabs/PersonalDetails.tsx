@@ -196,8 +196,6 @@ function MobileNoVerify({
       profile.phoneNo,
     ],
     mutationFn: async () => {
-      console.log(sendMobileOtpMutation.data);
-
       return await customerApi.verifyMobileOtp({
         mobile: profile.phoneNo || "",
         otp: otp, // OTP should be passed here

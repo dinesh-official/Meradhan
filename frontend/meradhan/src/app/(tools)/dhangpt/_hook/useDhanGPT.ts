@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
+import { BASES_URLS } from "@/core/config/base.urls";
 
 export const useDhanGPT = () => {
   const [chat, setChat] = useState<any[]>([]);
@@ -30,7 +31,8 @@ export const useDhanGPT = () => {
   ) => {
     setLoading(true);
     try {
-      const res = await fetch("https://dhangpt.meradhan.co/ask", {
+      const dhangptUrl = BASES_URLS.DHANGPT || "https://dhangpt.meradhan.co";
+      const res = await fetch(`${dhangptUrl}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: message, sessionId }),
@@ -71,8 +73,7 @@ export const useDhanGPT = () => {
         }
         return updated;
       });
-    } catch (error) {
-      console.error("Error streaming response:", error);
+    } catch {
       setChat((prev) => {
         const updated = [...prev];
         if (botIndex !== undefined && updated[botIndex]) {

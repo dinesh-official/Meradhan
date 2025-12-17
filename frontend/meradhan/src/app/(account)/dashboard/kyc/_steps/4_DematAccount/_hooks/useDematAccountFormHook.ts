@@ -13,6 +13,7 @@ import {
 } from "../../../_store/useKycDataStorage";
 import { findDpId } from "../../../_utils/nsdlDpid";
 import { addActivityLog } from "@/analytics/UserTrackingProvider";
+import { findCdslDpId } from "../../../_utils/cdslDpid";
 const statusCodes = {
   "00": "VALID Record",
   "01": "DP ID does not match",
@@ -134,7 +135,10 @@ export const useDematAccountFormHook = () => {
       setError(undefined);
       updateDepository(indexAccount, {
         ...data,
-        depositoryParticipantName: findDpId(data.dpId) || undefined,
+        depositoryParticipantName:
+          (data.depositoryName == "NSDL"
+            ? findDpId(data.dpId)
+            : findCdslDpId(data.dpId)) || undefined,
       });
 
       verifyDematAccount.mutate();

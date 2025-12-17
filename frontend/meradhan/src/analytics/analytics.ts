@@ -80,18 +80,33 @@ export function track(type: ActivityType, props: ActivityDetails = {}): void {
  * Send queued events to server
  */
 export async function flush(): Promise<void> {
-  console.log("send1");
-
   if (isSending || queue.length === 0) return;
-  console.log("send2");
 
   isSending = true;
   const payload = [...queue];
   queue = [];
 
   try {
-    console.log(payload);
-    console.log("send3");
+    if (localStorage.getItem("token")) {
+      await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      })
+        .then(() => {
+          const isNeedAutoLogout = payload.find(
+            (data) => data.type == "auto_logout"
+          );
+          if (isNeedAutoLogout) {
+            localStorage.clear();
+            window.location.replace("/logout");
+          }
+        })
+        .catch(() => {
+          // Analytics send failed - silently retry on next flush
+        });
+    }
 
     await fetch(ENDPOINT, {
       method: "POST",
@@ -108,12 +123,10 @@ export async function flush(): Promise<void> {
           window.location.replace("/logout");
         }
       })
-      .catch((error) => {
-        console.error("Analytics send error:", error);
+      .catch(() => {
+        // Analytics send failed - silently retry on next flush
       });
-    console.log("Analytics events sent:", payload.length);
-  } catch (error) {
-    console.error("Analytics flush failed:", error);
+  } catch {
     // Retry next time by putting events back in queue
     queue.unshift(...payload);
   } finally {
