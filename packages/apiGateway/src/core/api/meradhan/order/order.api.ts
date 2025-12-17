@@ -23,5 +23,29 @@ export class CustomerOrderApi {
     );
     return data;
   }
+
+  async addOrderLog(
+    orderId: string,
+    step: string,
+    status: "SUCCESS" | "FAILED" | "PENDING",
+    outputData?: Record<string, unknown>,
+    details?: Record<string, unknown>,
+    config?: AxiosRequestConfig
+  ): Promise<{ responseData: { success: boolean } }> {
+    const { data } = await this.apiClient.post<
+      { responseData: { success: boolean } }
+    >(
+      "/customer/order/log",
+      {
+        orderId,
+        step,
+        status,
+        outputData,
+        details,
+      },
+      config
+    );
+    return data;
+  }
 }
 

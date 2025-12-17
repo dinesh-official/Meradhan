@@ -17,7 +17,7 @@ interface ContactSelectProps {
 
 export function SelectNseParticipant({
   onSelect,
-  value,
+
   placeholder,
   open,
   setOpen,

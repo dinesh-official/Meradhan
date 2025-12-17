@@ -3,11 +3,11 @@ import {
   addCrmLoginBasedAuditLog,
   AuditLogRepository,
   endAuditLogSession,
-} from "@services/auditlogs/auditlog.repo";
+} from "@resource/crm/auditlogs/auditlog.repo";
 import {
   getClientIP,
   parseBrowserInfo,
-} from "@services/auditlogs/auditlogs.utility";
+} from "@resource/customer/auditlogs/auditlogs.utility";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { EmailAuthService } from "./email_auth.service";

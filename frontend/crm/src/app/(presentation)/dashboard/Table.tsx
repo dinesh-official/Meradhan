@@ -164,10 +164,10 @@ function Table() {
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={() => console.log("View", row.id)}>
+                <DropdownMenuItem onClick={() => {}}>
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => console.log("Edit", row.id)}>
+                <DropdownMenuItem onClick={() => {}}>
                   Edit Customer
                 </DropdownMenuItem>
               </DropdownMenuContent>

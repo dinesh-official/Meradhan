@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 
@@ -81,16 +80,6 @@ const UpdateRfqForm: React.FC<UpdateRfqFormProps> = ({
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const handleListChange = (
-    name: "groupList" | "participantList",
-    value: string
-  ) => {
-    setForm((prev) => ({
-      ...prev,
-      [name]: value.split(",").map((v) => v.trim()),
-    }));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

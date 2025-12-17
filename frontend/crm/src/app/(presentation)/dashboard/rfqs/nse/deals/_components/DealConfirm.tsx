@@ -50,7 +50,6 @@ const DealConfirmPopup = ({
     },
 
     onError: (error) => {
-      console.log(error);
       setOpen(false);
       // Properly type guard for ApiError
       if (error instanceof ApiError) {

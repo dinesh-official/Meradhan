@@ -1,16 +1,9 @@
-import { getSessionId } from "@/analytics/analytics";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
-import {
-  COOKIE_EXPIRY_TIME,
-  COOKIE_OPTIONS,
-} from "@/core/config/cookies.config";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useCurrentUserData } from "@/global/stores/useCurrentUserData.store";
-import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
@@ -70,8 +63,6 @@ export const useLoginApiHook = () => {
       window.location.href = "/dashboard";
     },
     onError(error) {
-      console.log(error);
-
       if (error instanceof ApiError) {
         toast.error(error?.message);
       } else {

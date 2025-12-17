@@ -2,6 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import React from "react";
+import Image from "next/image";
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -111,9 +112,11 @@ function OrdersEmptyState({
   return (
     <Empty className={`py-10 ${className}`}>
       <EmptyMedia>
-        <img
+        <Image
           src={imageSrc}
           alt="Empty state illustration"
+          width={80}
+          height={80}
           className="w-20 h-20 object-contain"
         />
       </EmptyMedia>

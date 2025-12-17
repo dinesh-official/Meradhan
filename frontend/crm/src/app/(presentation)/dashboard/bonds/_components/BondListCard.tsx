@@ -5,6 +5,7 @@ import { formatNumberTS } from "@/global/utils/formate";
 import { cn } from "@/lib/utils";
 import { BondDetailsResponse } from "@root/apiGateway";
 import { PiCurrencyInrBold } from "react-icons/pi";
+import { Edit } from "lucide-react";
 
 import Link from "next/link";
 import { BondInfoLabel } from "./BondInfoLabel";
@@ -28,9 +29,14 @@ export function BondListCard({
             <CreditRatingBadge creditRating={data.creditRating} />
           </div>
           <div className="flex flex-col gap-3">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <p className="text-xl line-clamp-1">{data.bondName}</p>
-              {/* // make sure 2 buttons on that code deferent places */}
+              <Link href={`/dashboard/bonds/update/${data.isin}`}>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Edit size={14} />
+                  Edit
+                </Button>
+              </Link>
             </div>
             <div
               className={cn(

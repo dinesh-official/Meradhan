@@ -160,7 +160,7 @@ const SessionRow = ({
       <Card className="overflow-hidden p-0">
         <CollapsibleTrigger asChild className="p-0">
           <div className="px-5 cursor-pointer hover:bg-gray-50 transition-colors py-4">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 overflow-x-auto">
               <Button
                 variant="ghost"
                 size="sm"
@@ -173,7 +173,7 @@ const SessionRow = ({
                 )}
               </Button>
 
-              <div className="flex items-center gap-5 flex-1 min-w-0">
+              <div className="flex items-center gap-5 flex-1 min-w-0 overflow-x-auto">
                 {/* Session ID */}
                 <div className="flex-shrink-0 min-w-[80px]">
                   <div className="flex flex-col gap-1">
@@ -185,7 +185,7 @@ const SessionRow = ({
                 </div>
 
                 {/* User Info */}
-                <div className="flex-shrink-0 min-w-[200px]">
+                <div className="flex-shrink-0 min-w-[180px] max-w-[200px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">User</span>
                     <span className="font-medium text-xs truncate">
@@ -195,10 +195,10 @@ const SessionRow = ({
                 </div>
 
                 {/* Login Time */}
-                <div className="flex-shrink-0 min-w-[140px]">
+                <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Start</span>
-                    <span className="text-xs font-medium">
+                    <span className="text-xs font-medium whitespace-nowrap">
                       {format(
                         new Date(session.startTime),
                         "MMM dd, yyyy hh:mm a"
@@ -208,18 +208,18 @@ const SessionRow = ({
                 </div>
 
                 {/* Logout Time */}
-                <div className="flex-shrink-0 min-w-[140px]">
+                <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">End</span>
                     {session.endTime ? (
-                      <span className="text-xs font-medium">
+                      <span className="text-xs font-medium whitespace-nowrap">
                         {format(
                           new Date(session.endTime),
                           "MMM dd, yyyy hh:mm a"
                         )}
                       </span>
                     ) : (
-                      <>N/A</>
+                      <span className="text-xs text-gray-400">N/A</span>
                     )}
                   </div>
                 </div>
@@ -236,60 +236,53 @@ const SessionRow = ({
                   </div>
                 </div>
 
-                {/* Browser */}
-                {session.browserName && (
-                  <div className="flex-shrink-0 min-w-[85px]">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-gray-500">Browser</span>
-                      <Badge
-                        className={`${getBrowserBadgeColor(
-                          session.browserName
-                        )} text-xs px-2 py-0.5`}
-                      >
-                        {session.browserName}
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-
-                {/* Device */}
-                {session.deviceType && (
-                  <div className="flex-shrink-0 min-w-[75px]">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-gray-500">Device</span>
-                      <Badge
-                        className={`${getDeviceBadgeColor(
-                          session.deviceType
-                        )} text-xs px-2 py-0.5`}
-                      >
-                        {session.deviceType}
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-
-                {/* OS */}
-                {session.operatingSystem && (
-                  <div className="flex-shrink-0 min-w-[75px]">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-gray-500">OS</span>
-                      <Badge
-                        className={`${getOSBadgeColor(
-                          session.operatingSystem
-                        )} text-xs px-2 py-0.5`}
-                      >
-                        {session.operatingSystem}
-                      </Badge>
+                {/* Environment Info - Browser, Device, OS combined */}
+                {(session.browserName || session.deviceType || session.operatingSystem) && (
+                  <div className="flex-shrink-0 min-w-[180px] max-w-[220px]">
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-xs text-gray-500">Environment</span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {session.browserName && (
+                          <Badge
+                            className={`${getBrowserBadgeColor(
+                              session.browserName
+                            )} text-xs px-2 py-0.5 whitespace-nowrap`}
+                            title={`Browser: ${session.browserName}`}
+                          >
+                            {session.browserName}
+                          </Badge>
+                        )}
+                        {session.deviceType && (
+                          <Badge
+                            className={`${getDeviceBadgeColor(
+                              session.deviceType
+                            )} text-xs px-2 py-0.5 whitespace-nowrap`}
+                            title={`Device: ${session.deviceType}`}
+                          >
+                            {session.deviceType}
+                          </Badge>
+                        )}
+                        {session.operatingSystem && (
+                          <Badge
+                            className={`${getOSBadgeColor(
+                              session.operatingSystem
+                            )} text-xs px-2 py-0.5 whitespace-nowrap`}
+                            title={`OS: ${session.operatingSystem}`}
+                          >
+                            {session.operatingSystem}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {/* IP Address */}
                 {session.ipAddress && (
-                  <div className="flex-shrink-0 min-w-[120px]">
+                  <div className="flex-shrink-0 min-w-[110px] max-w-[140px]">
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-gray-500">IP Address</span>
-                      <span className="font-mono text-xs text-gray-600">
+                      <span className="font-mono text-xs text-gray-600 truncate">
                         {session.ipAddress}
                       </span>
                     </div>
@@ -300,13 +293,13 @@ const SessionRow = ({
                 <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                   <Badge
                     variant="outline"
-                    className="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5"
+                    className="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 whitespace-nowrap"
                   >
                     {session.pageViews.length} pages
                   </Badge>
-                  <div className="flex items-center gap-1 text-gray-600">
+                  <div className="flex items-center gap-1 text-gray-600 flex-shrink-0">
                     <Clock className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="text-xs">
+                    <span className="text-xs whitespace-nowrap">
                       {formatDuration(session.duration)}
                     </span>
                   </div>
@@ -329,11 +322,11 @@ const SessionRow = ({
                 No page views recorded
               </div>
             ) : (
-              <div className="rounded-md border bg-white overflow-hidden">
+              <div className="rounded-md border bg-white overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold w-[300px]">
                         Page Path
                       </TableHead>
                       <TableHead className="text-xs font-semibold">
@@ -356,14 +349,20 @@ const SessionRow = ({
                   <TableBody>
                     {session.pageViews.map((pageView) => (
                       <TableRow key={pageView.id}>
-                        <TableCell className="text-xs text-gray-600">
-                          <div className="max-w-xs">
+                        <TableCell className="text-xs text-gray-600 w-[300px]">
+                          <div>
                             {pageView.pageTitle && (
-                              <div className="font-medium">
+                              <div 
+                                className="font-medium mb-1 truncate" 
+                                title={pageView.pageTitle}
+                              >
                                 {pageView.pageTitle}
                               </div>
                             )}
-                            <div className="text-gray-500">
+                            <div 
+                              className="text-gray-500 truncate" 
+                              title={pageView.pagePath}
+                            >
                               {pageView.pagePath}
                             </div>
                           </div>

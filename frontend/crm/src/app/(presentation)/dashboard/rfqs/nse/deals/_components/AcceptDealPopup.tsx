@@ -57,8 +57,6 @@ function AcceptDealPopup({
     },
 
     onError: (error) => {
-      console.log(error);
-
       // Properly type guard for ApiError
       if (error instanceof ApiError) {
         Swal.fire({

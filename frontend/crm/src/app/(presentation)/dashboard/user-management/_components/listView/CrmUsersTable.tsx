@@ -1,7 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ASSETS_URL } from "@/global/constants/domains";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import UserRoleBadge from "@/global/elements/wrapper/badges/UserRoleBadge";

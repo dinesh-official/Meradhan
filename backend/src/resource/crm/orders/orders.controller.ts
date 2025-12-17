@@ -2,6 +2,7 @@ import { type Request, type Response } from "express";
 import { CrmOrdersService } from "./orders.service";
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
+import { OrderStatus } from "@databases/generated/prisma/postgres";
 
 export class CrmOrdersController {
   private ordersService = new CrmOrdersService();
@@ -28,5 +29,81 @@ export class CrmOrdersController {
       statusCode: HttpStatus.OK,
       responseData: result,
     });
+  };
+
+  getOrderById = async (req: Request, res: Response) => {
+    try {
+      const orderId = Number(req.params.id);
+      if (!orderId || isNaN(orderId)) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: "Invalid order ID",
+        });
+      }
+
+      const order = await this.ordersService.getOrderById(orderId);
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: order,
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Order not found";
+      return res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message,
+      });
+    }
+  };
+
+  updateOrderStatus = async (req: Request, res: Response) => {
+    try {
+      const orderId = Number(req.params.id);
+      if (!orderId || isNaN(orderId)) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: "Invalid order ID",
+        });
+      }
+
+      const { status } = req.body;
+      if (!status) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: "Status is required",
+        });
+      }
+
+      const validStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
+      if (!validStatuses.includes(status)) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+        });
+      }
+
+      const updatedOrder = await this.ordersService.updateOrderStatus(
+        orderId,
+        status as OrderStatus
+      );
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message: "Order status updated successfully",
+        responseData: updatedOrder,
+      });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to update order status";
+      return res.sendResponse({
+        statusCode: errorMessage.includes("not found")
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.INTERNAL_SERVER_ERROR,
+        message: errorMessage,
+      });
+    }
   };
 }

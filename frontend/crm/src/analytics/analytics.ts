@@ -82,19 +82,13 @@ export function track(type: ActivityType, props: ActivityDetails = {}): void {
  * Send queued events to server
  */
 export async function flush(): Promise<void> {
-    console.log("send1");
-
     if (isSending || queue.length === 0) return;
-    console.log("send2");
 
     isSending = true;
     const payload = [...queue];
     queue = [];
 
     try {
-        console.log(payload);
-        console.log("send3");
-
         await fetch(ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -106,13 +100,10 @@ export async function flush(): Promise<void> {
                 localStorage.clear();
                 window.location.replace("/logout")
             }
-        }).catch((error) => {
-            console.error("Analytics send error:", error);
+        }).catch(() => {
+            // Silently fail - analytics should not interrupt user flow
         });
-        console.log("Analytics events sent:", payload.length);
-
-    } catch (error) {
-        console.error("Analytics flush failed:", error);
+    } catch {
         // Retry next time by putting events back in queue
         queue.unshift(...payload);
     } finally {

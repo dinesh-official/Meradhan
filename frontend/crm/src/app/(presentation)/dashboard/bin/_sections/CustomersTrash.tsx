@@ -181,9 +181,8 @@ export function CustomersTrash() {
       try {
         const response = await trashApi.getCustomersInTrash();
         return response.responseData || [];
-      } catch (error) {
+      } catch {
         // If the trash API doesn't exist or fails, return empty array
-        console.warn("TrashAPI might not be implemented:", error);
         return [];
       }
     },

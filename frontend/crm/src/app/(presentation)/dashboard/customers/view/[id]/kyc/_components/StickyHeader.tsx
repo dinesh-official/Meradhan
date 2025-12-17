@@ -16,6 +16,11 @@ export default function StickyHeader() {
   const [activeId, setActiveId] = useState("");
 
   useEffect(() => {
+    // Ensure we're on the client side
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
+    }
+
     const options = {
       root: null,
       rootMargin: "0px 0px -70% 0px",

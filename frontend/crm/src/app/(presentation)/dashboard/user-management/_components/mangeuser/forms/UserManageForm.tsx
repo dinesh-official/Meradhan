@@ -5,12 +5,9 @@ import {
   SelectField,
   SelectOption,
 } from "@/global/elements/inputs/SelectField";
-import HideForMe from "@/global/elements/permissions/HideForMe";
-import useAppCookie from "@/hooks/useAppCookie.hook";
 import { IUserDataFormHook, UserFormData } from "./hooks/userForm";
 
 const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
-  const { cookies } = useAppCookie();
   return (
     <div className="relative flex flex-col gap-4">
       <InputField

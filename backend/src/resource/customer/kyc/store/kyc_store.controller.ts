@@ -82,7 +82,7 @@ export class KycStoreController {
     });
   }
 
-  async setKycLevel(req: Request, res: Response) {
+  async getKycLevel(req: Request, res: Response) {
     const customerId = Number(req.params.customerId);
     const kyc = new CustomerKycKycService();
 
@@ -96,6 +96,17 @@ export class KycStoreController {
 
   async addAuditLog(req: Request, res: Response) {
     const customerId = Number(req.params.customerId);
+    const userId = req.customer?.id;
+    const isAdmin = req.session?.id; // Admin users have session
+
+    // Security: Enforce ownership check - users can only add audit logs for their own KYC
+    // Admins can add audit logs for any customer
+    if (!isAdmin && userId !== customerId) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. You can only add audit logs for your own KYC.",
+      });
+    }
 
     await db.dataBase.kYC_FLOW.updateMany({
       where: {

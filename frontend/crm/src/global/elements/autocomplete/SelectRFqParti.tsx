@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import apiGateway, { ParticipantData } from "@root/apiGateway";
+import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
@@ -17,7 +17,7 @@ interface ContactSelectProps {
 
 export function SelectRFqParti({
   onSelect,
-  value,
+
   placeholder,
   open,
   setOpen,

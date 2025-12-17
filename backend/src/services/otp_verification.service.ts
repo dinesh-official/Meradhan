@@ -1,4 +1,3 @@
-import { config } from "@config/config";
 import { QueueStore } from "@store/queue_store";
 import { AppError } from "@utils/error/AppError";
 import { hashingUtils } from "@utils/hash/hashing_utils";
@@ -25,7 +24,7 @@ export class OtpVerificationService implements IOtpVerificationService {
 
     async generateOtp(identifier: string, length: number = 6, expirySeconds: number = 300): ReturnType<IOtpVerificationService['generateOtp']> {
         const otp = Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
-        if (config.mode == "DEVELOPMENT") {
+        if (process.env.NODE_ENV !== "production") {
             console.log("====================");
             console.log("OTP SEND - ", otp);
             console.log("====================");

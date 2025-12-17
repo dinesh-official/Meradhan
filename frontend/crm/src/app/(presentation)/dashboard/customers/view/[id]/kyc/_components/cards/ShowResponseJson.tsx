@@ -1,6 +1,12 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ReactJson from 'react-json-view';
+"use client";
+import dynamic from "next/dynamic";
+
+// Dynamically import ReactJson to avoid SSR issues
+const ReactJson = dynamic(() => import("react-json-view"), {
+  ssr: false,
+});
 import { Root } from "./CheckedCompances";
 function ShowResponseJson({ data }: { data?: Root }) {
 

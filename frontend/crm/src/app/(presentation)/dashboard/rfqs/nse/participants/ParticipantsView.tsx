@@ -6,12 +6,6 @@ import { useParticipantsApi } from "./hooks/useParticipantsApi";
 
 function ParticipantsView() {
   const { fetchParticipantsQuery, state } = useParticipantsApi();
-  const isShowPagination = () => {
-    return (
-      (fetchParticipantsQuery.data?.data?.responseData.length || 0) > 0 &&
-      !fetchParticipantsQuery.isPending
-    );
-  };
   return (
     <div className="mt-5">
       <Card>

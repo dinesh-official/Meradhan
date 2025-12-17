@@ -157,4 +157,100 @@ export class BondService {
 
     return data;
   }
+
+  async createBond(
+    bondData: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>
+  ) {
+    const data = await db.dataBase.bonds.create({
+      data: {
+        isin: bondData.isin,
+        bondName: bondData.bondName,
+        instrumentName: bondData.instrumentName,
+        description: bondData.description,
+        issuePrice: bondData.issuePrice,
+        faceValue: bondData.faceValue,
+        stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
+        allowForPurchase: bondData.allowForPurchase ?? false,
+        couponRate: bondData.couponRate,
+        interestPaymentFrequency: bondData.interestPaymentFrequency,
+        putCallOptionDetails: bondData.putCallOptionDetails || null,
+        certificateNumbers: bondData.certificateNumbers || null,
+        totalIssueSize: bondData.totalIssueSize || 0,
+        registrarDetails: bondData.registrarDetails || null,
+        physicalSecurityAddress: bondData.physicalSecurityAddress || null,
+        defaultedInRedemption: bondData.defaultedInRedemption || null,
+        debentureTrustee: bondData.debentureTrustee || null,
+        creditRatingInfo: bondData.creditRatingInfo || null,
+        remarks: bondData.remarks || null,
+        taxStatus: bondData.taxStatus,
+        creditRating: bondData.creditRating || "UnRated",
+        interestPaymentMode: bondData.interestPaymentMode,
+        isListed: bondData.isListed,
+        ratingAgencyName: bondData.ratingAgencyName || null,
+        ratingDate: bondData.ratingDate || null,
+        categories: bondData.categories || [],
+        sectorName: bondData.sectorName || null,
+        dateOfAllotment: bondData.dateOfAllotment || null,
+        redemptionDate: bondData.redemptionDate || null,
+        maturityDate: bondData.maturityDate || null,
+        sortedAt: bondData.sortedAt || 0,
+        isConvertedDeal: bondData.isConvertedDeal || null,
+      },
+    });
+
+    return data;
+  }
+
+  async updateBond(
+    isin: string,
+    bondData: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>
+  ) {
+    // Check if bond exists
+    const existingBond = await db.dataBase.bonds.findUnique({
+      where: { isin },
+    });
+
+    if (!existingBond) {
+      throw new Error(`Bond with ISIN ${isin} not found`);
+    }
+
+    const data = await db.dataBase.bonds.update({
+      where: { isin },
+      data: {
+        bondName: bondData.bondName,
+        instrumentName: bondData.instrumentName,
+        description: bondData.description,
+        issuePrice: bondData.issuePrice,
+        faceValue: bondData.faceValue,
+        stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
+        allowForPurchase: bondData.allowForPurchase ?? false,
+        couponRate: bondData.couponRate,
+        interestPaymentFrequency: bondData.interestPaymentFrequency,
+        putCallOptionDetails: bondData.putCallOptionDetails || null,
+        certificateNumbers: bondData.certificateNumbers || null,
+        totalIssueSize: bondData.totalIssueSize || 0,
+        registrarDetails: bondData.registrarDetails || null,
+        physicalSecurityAddress: bondData.physicalSecurityAddress || null,
+        defaultedInRedemption: bondData.defaultedInRedemption || null,
+        debentureTrustee: bondData.debentureTrustee || null,
+        creditRatingInfo: bondData.creditRatingInfo || null,
+        remarks: bondData.remarks || null,
+        taxStatus: bondData.taxStatus,
+        creditRating: bondData.creditRating || "UnRated",
+        interestPaymentMode: bondData.interestPaymentMode,
+        isListed: bondData.isListed,
+        ratingAgencyName: bondData.ratingAgencyName || null,
+        ratingDate: bondData.ratingDate || null,
+        categories: bondData.categories || [],
+        sectorName: bondData.sectorName || null,
+        dateOfAllotment: bondData.dateOfAllotment || null,
+        redemptionDate: bondData.redemptionDate || null,
+        maturityDate: bondData.maturityDate || null,
+        sortedAt: bondData.sortedAt || 0,
+        isConvertedDeal: bondData.isConvertedDeal || null,
+      },
+    });
+
+    return data;
+  }
 }

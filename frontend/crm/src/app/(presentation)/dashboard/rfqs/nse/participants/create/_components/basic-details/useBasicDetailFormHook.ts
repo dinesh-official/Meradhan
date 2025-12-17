@@ -67,7 +67,6 @@ export const useBasicFormDataHook = (
 
   /** Validate the entire Basic Details form */
   const validateBasicData = (): boolean => {
-    console.log("Validating Basic Details data:", data);
     try {
       basicDetailsSchema.parse(data);
       setErrors({});

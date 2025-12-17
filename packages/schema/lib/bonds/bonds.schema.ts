@@ -36,3 +36,58 @@ export const bondsFilterSchema = z
     all: z.any().optional(),
   })
   .optional();
+
+// Bond Create/Update Schema
+export const TAX_TYPE_ENUM = z.enum([
+  "TAX_FREE",
+  "TAXABLE",
+  "TAX_SAVING",
+  "TAX_EXEMPTION",
+  "UNKNOWN",
+]);
+
+export const IS_LISTED_ENUM = z.enum(["YES", "NO", "UNKNOWN"]);
+
+export const INTEREST_MODE_ENUM = z.enum([
+  "MONTHLY",
+  "QUARTERLY",
+  "HALF_YEARLY",
+  "YEARLY",
+  "ON_MATURITY",
+  "UNKNOWN",
+]);
+
+export const bondCreateUpdateSchema = z.object({
+  isin: z.string().trim().min(1, "ISIN is required"),
+  bondName: z.string().trim().min(1, "Bond name is required"),
+  instrumentName: z.string().trim().min(1, "Instrument name is required"),
+  description: z.string().trim().min(1, "Description is required"),
+  issuePrice: z.number().nonnegative("Issue price must be non-negative"),
+  faceValue: z.number().positive("Face value must be positive"),
+  stampDutyPercentage: z.number().nonnegative("Stamp duty percentage must be non-negative").default(0).optional().nullable(),
+  allowForPurchase: z.boolean().default(false).optional().nullable(),
+  couponRate: z.number().nonnegative("Coupon rate must be non-negative"),
+  interestPaymentFrequency: z.string().trim().min(1, "Interest payment frequency is required"),
+  putCallOptionDetails: z.string().trim().optional().nullable(),
+  certificateNumbers: z.string().trim().optional().nullable(),
+  totalIssueSize: z.number().nonnegative().optional().nullable(),
+  registrarDetails: z.string().trim().optional().nullable(),
+  physicalSecurityAddress: z.string().trim().optional().nullable(),
+  defaultedInRedemption: z.string().trim().optional().nullable(),
+  debentureTrustee: z.string().trim().optional().nullable(),
+  creditRatingInfo: z.string().trim().optional().nullable(),
+  remarks: z.string().trim().optional().nullable(),
+  taxStatus: TAX_TYPE_ENUM,
+  creditRating: z.string().trim().default("UnRated"),
+  interestPaymentMode: INTEREST_MODE_ENUM.default("UNKNOWN"),
+  isListed: IS_LISTED_ENUM.default("UNKNOWN"),
+  ratingAgencyName: z.string().trim().optional().nullable(),
+  ratingDate: z.coerce.date().optional().nullable(),
+  categories: z.array(z.string().trim()).default([]),
+  sectorName: z.string().trim().optional().nullable(),
+  dateOfAllotment: z.coerce.date().optional().nullable(),
+  redemptionDate: z.coerce.date().optional().nullable(),
+  maturityDate: z.coerce.date().optional().nullable(),
+  sortedAt: z.number().int().default(0).optional(),
+  isConvertedDeal: z.boolean().optional().nullable(),
+});

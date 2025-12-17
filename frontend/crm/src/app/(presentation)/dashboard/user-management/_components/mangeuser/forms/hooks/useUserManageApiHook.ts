@@ -21,7 +21,6 @@ export const useUserManageApiHook = ({ onSuccess }: { onSuccess?: () => void }) 
   };
 
   const handleError = (error: unknown) => {
-    console.error(error);
     if (error instanceof ApiError) {
       toast.error(error.response?.data?.message);
     } else if (error instanceof Error) {

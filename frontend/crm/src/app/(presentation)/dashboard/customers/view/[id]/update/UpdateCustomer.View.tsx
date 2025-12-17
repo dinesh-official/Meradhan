@@ -44,8 +44,8 @@ const UpdateCustomerView = ({ id }: { id: number }) => {
           cs.utility.relationshipManager || undefined
         );
       }
-    } catch (error) {
-      console.error("Failed to fetch customer info:", error);
+    } catch {
+      // Silently handle error - will show error state in component
     }
   };
 

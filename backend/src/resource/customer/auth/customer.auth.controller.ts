@@ -14,7 +14,8 @@ import {
   addMeradhanLoginBasedAuditLog,
   endMeradhanSessionLog,
   revalidateMeradhanTrackingSession,
-} from "@services/auditlogs/auditlog.repo";
+} from "@resource/customer/auditlogs/auditlog.repo";
+import { trackRateLimitSuccess } from "./customer.auth.ratelimit";
 
 export class CustomerAuthController {
   private customerAuthService = new CustomerAuthService();
@@ -35,6 +36,8 @@ export class CustomerAuthController {
       userName: name,
       otp: response.otp,
     });
+    // Track successful OTP send for rate limiting
+    await trackRateLimitSuccess(req, "otp-send");
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: { token: response.token },
@@ -50,6 +53,8 @@ export class CustomerAuthController {
       4
     );
     await sendMobileOtp({ mobile, otp: response.otp, template: "signup" });
+    // Track successful OTP send for rate limiting
+    await trackRateLimitSuccess(req, "otp-send");
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: { token: response.token },
@@ -73,6 +78,8 @@ export class CustomerAuthController {
       isEmailVerified: verifyBy === "email",
       isPhoneVerified: verifyBy === "mobile",
     });
+    // Track successful OTP verification for rate limiting
+    await trackRateLimitSuccess(req, "otp-verify");
     res.cookie("token", user.token, cookieOptions);
     res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -137,6 +144,8 @@ export class CustomerAuthController {
       identifier: identity,
       value,
     });
+    // Track successful OTP send for rate limiting
+    await trackRateLimitSuccess(req, "otp-send");
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,
@@ -152,6 +161,8 @@ export class CustomerAuthController {
       otp,
       token,
     });
+    // Track successful OTP verification for rate limiting
+    await trackRateLimitSuccess(req, "otp-verify");
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,
@@ -229,6 +240,8 @@ export class CustomerAuthController {
     console.log(req.customer);
 
     await this.customerAuthService.sendEmailVerification(req.customer!.id);
+    // Track successful email verification send for rate limiting
+    await trackRateLimitSuccess(req, "email-verify");
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "Verification email sent successfully.",
@@ -237,6 +250,8 @@ export class CustomerAuthController {
   async verifyEmail(req: Request, res: Response): Promise<void> {
     const { token } = req.query;
     await this.customerAuthService.verifyEmailToken(token as string);
+    // Track successful email verification for rate limiting
+    await trackRateLimitSuccess(req, "email-verify");
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "Email verified successfully.",

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { BondController } from "./bond.controller";
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const bondController = new BondController();
 const bondRoute = Router();
@@ -25,6 +26,14 @@ bondRoute.post("/api/bonds/listed/filter", (req, res) =>
 
 bondRoute.get("/api/bonds/:isin", (req, res) =>
   bondController.getBondDetails(req, res)
+);
+
+bondRoute.post("/api/bonds", allowAccessMiddleware("ADMIN"), (req, res) =>
+  bondController.createBond(req, res)
+);
+
+bondRoute.put("/api/bonds/:isin", allowAccessMiddleware("ADMIN"), (req, res) =>
+  bondController.updateBond(req, res)
 );
 
 export default bondRoute;

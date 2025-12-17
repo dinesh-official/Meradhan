@@ -35,7 +35,6 @@ function NseIsinPicker({
     const timer = setTimeout(() => {
       searchIsinMutation.mutate();
     }, 500);
-    console.log("Filtering...");
 
     return () => clearTimeout(timer);
   }, [filters]);

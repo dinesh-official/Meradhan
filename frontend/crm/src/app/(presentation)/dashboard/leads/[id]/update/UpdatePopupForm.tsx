@@ -62,11 +62,10 @@ function UpdateLeadFormOnPopup({
         note: cs.note ?? "",
         assignTo: cs.assignTo?.id,
       });
-      console.log(cs);
 
       manager.relationManager.setRelationManager(cs.assignTo);
-    } catch (error) {
-      console.log("error", error);
+    } catch {
+      // Silently handle error
     }
   };
 

@@ -121,16 +121,20 @@ function NseTableView({
           },
           {
             key: "createdAt",
-            label: "Created",
+            label: "Created At",
             cell(row) {
-              return dateTimeUtils.formatDateTime(row?.createdAt, "DD/MM/YYYY");
+              return row?.createdAt
+                ? dateTimeUtils.formatDateTime(row.createdAt, "DD MMM YYYY hh:mm AA")
+                : "--";
             },
           },
           {
             key: "updatedAt",
-            label: "Updated",
+            label: "Updated At",
             cell(row) {
-              return dateTimeUtils.formatDateTime(row?.updatedAt, "DD/MM/YYYY");
+              return row?.updatedAt
+                ? dateTimeUtils.formatDateTime(row.updatedAt, "DD MMM YYYY hh:mm AA")
+                : "--";
             },
           },
         ]}

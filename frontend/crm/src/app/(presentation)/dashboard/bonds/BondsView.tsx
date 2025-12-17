@@ -11,7 +11,6 @@ import useBondsFilters from "./_hooks/useBondsFilters";
 function BondsView({
   bondsData,
   pathname,
-  category,
 }: {
   filter: z.infer<typeof appSchema.bonds.bondsFilterSchema>;
   bondsData: ListedBondsResponse["responseData"];

@@ -68,7 +68,6 @@ export const useManageUserDataHook = (initial: UserFormData = initUserData) => {
 
   /** ✅ Validate entire form (returns true if valid) */
   const validateAndCreateUserData = useCallback((): boolean => {
-    console.log("Validating user data:", data);
     try {
       userFormSchema.parse(data);
       setErrors({});
@@ -76,7 +75,6 @@ export const useManageUserDataHook = (initial: UserFormData = initUserData) => {
       createUserMutation.mutate(payload);
       return true;
     } catch (error) {
-      console.log("error hai in validateAndCreateUserData", error);
       const err = parseError<ZodError>(error);
       if (err.issues.length) {
         toast.error(err.issues[0].message);
@@ -90,7 +88,6 @@ export const useManageUserDataHook = (initial: UserFormData = initUserData) => {
   /** ✅ Validate entire form (returns true if valid) */
   const validateAndUpdateUserData = useCallback(
     (id: number): boolean => {
-      console.log("Validating user data:", data);
       try {
         userFormSchema.parse(data);
         setErrors({});
@@ -98,7 +95,6 @@ export const useManageUserDataHook = (initial: UserFormData = initUserData) => {
         updateUserMutation.mutate({ id, data: payload });
         return true;
       } catch (error) {
-        console.log("error hai in validateAndCreateUserData", error);
         const err = parseError<ZodError>(error);
         if (err.issues.length) {
           toast.error(err.issues[0].message);

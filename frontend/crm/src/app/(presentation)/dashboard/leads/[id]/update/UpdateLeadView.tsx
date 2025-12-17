@@ -13,7 +13,6 @@ import { appSchema } from "@root/schema";
 import { toast } from "sonner";
 
 const UpdateLeadView = ({ id }: { id: number }) => {
-  console.log("id", id);
   const manager = useLeadFormDataHook(undefined, { goBackOnSuccess: true });
   const { updateLeadMutation } = useLeadFollowUpApiHook({
     goBackOnSuccess: true,
@@ -38,11 +37,10 @@ const UpdateLeadView = ({ id }: { id: number }) => {
         note: cs.note ?? "",
         assignTo: cs.assignTo?.id,
       });
-      console.log(cs);
 
       manager.relationManager.setRelationManager(cs.assignTo);
-    } catch (error) {
-      console.log("error", error);
+    } catch {
+      // Silently handle error
     }
   };
 

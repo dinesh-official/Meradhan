@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@core/database/database";
+import { env } from "@packages/config/src/env";
 import { appSchema } from "@root/schema";
-import { HttpStatus } from "@utils/error/AppError";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import axios from "axios";
 import type { Request, Response } from "express";
 import FormData from "form-data";
@@ -32,10 +33,50 @@ export class CommonApiController {
   }
 
   async uploadStrapi(req: Request, res: Response) {
+    if (req.headers.authorization !== `Bearer ${env.STRAPI_API_TOKEN}`) {
+      throw new AppError("Unauthorized");
+    }
+    const maxSize = 50 * 1024 * 1024; // 50MB
     const { fileUrl, filename } = req.body;
     // Download file from URL
     async function downloadFile(url: string): Promise<Buffer> {
-      const response = await fetch(url);
+      let parsedUrl: URL;
+
+      try {
+        parsedUrl = new URL(url);
+      } catch {
+        throw new AppError("Invalid URL format");
+      }
+      const response = await fetch(parsedUrl.toString());
+      // ✅ Check content type - Block only TIFF files, allow all others
+      const contentType = response.headers.get("content-type") || "";
+      const contentTypeLower = contentType.toLowerCase();
+
+      // ✅ Block TIFF files explicitly
+      if (
+        contentTypeLower.includes("tiff") ||
+        contentTypeLower.includes("tif")
+      ) {
+        throw new AppError("TIFF files are not allowed", {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "TIFF_NOT_ALLOWED",
+        });
+      }
+
+      // ✅ Check content length header
+      const contentLength = response.headers.get("content-length");
+      if (contentLength) {
+        const size = parseInt(contentLength, 10);
+        if (isNaN(size) || size > maxSize) {
+          throw new AppError(
+            `File too large. Maximum size is ${maxSize / 1024 / 1024}MB`,
+            {
+              statusCode: HttpStatus.BAD_REQUEST,
+              code: "FILE_TOO_LARGE",
+            }
+          );
+        }
+      }
       if (!response.ok)
         throw new Error(`Failed to download file: ${response.statusText}`);
       const arrayBuffer = await response.arrayBuffer();
@@ -58,17 +99,13 @@ export class CommonApiController {
         })
       );
 
-      const response = await axios.post(
-        `https://spyder.meradhan.co/api/upload`,
-        form,
-        {
-          headers: {
-            ...form.getHeaders(),
-            Authorization: `Bearer 9538e12d9a8ae051b257511fae5af06aad2a7b91e9d6bfac4d70eee547fafcfe91d5d9575b07e51c7d1b8c4227869a3bcc78e12cb1116441aa3bdd06d5fcd4ef3457dbc4ee6ea2a5f78eaaeb7663b42ff2ac334fa704abd3987bdab8ace815c2d3d37f64f83705838d7882e7c015421d08b779967ced6da398ef933aa6885c6d`,
-          },
-          maxBodyLength: Infinity,
-        }
-      );
+      const response = await axios.post(`${env.STRAPI_API_URL}/upload`, form, {
+        headers: {
+          ...form.getHeaders(),
+          Authorization: `Bearer ${env.STRAPI_API_TOKEN}`, // ✅ Use env variable
+        },
+        maxBodyLength: Infinity,
+      });
 
       return response.data;
     }

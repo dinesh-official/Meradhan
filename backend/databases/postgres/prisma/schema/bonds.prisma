@@ -6,8 +6,10 @@ model Bonds {
     instrumentName String
     description    String
     issuePrice     Float
+    faceValue      Float
 
-    faceValue Float
+    stampDutyPercentage Float?   @default(0)
+    allowForPurchase    Boolean? @default(false)
 
     couponRate               Float
     interestPaymentFrequency String

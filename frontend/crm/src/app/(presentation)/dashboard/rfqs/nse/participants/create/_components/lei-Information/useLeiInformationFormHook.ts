@@ -61,7 +61,6 @@ export const useLEIInformationFormHook = (
 
   /** Validate the entire LEI form */
   const validateLEIData = (): boolean => {
-    console.log("Validating LEI Information data:", data);
     try {
       leiInformationSchema.parse(data);
       setErrors({});

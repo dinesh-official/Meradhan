@@ -10,7 +10,7 @@ import {
   MultiSelectValue,
 } from "@/components/ui/multi-select";
 import { cn } from "@/lib/utils";
-import { Search, Trash2Icon, X } from "lucide-react";
+import { Search, Trash2Icon, X, Plus } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import {
   couponOptions,
@@ -21,6 +21,8 @@ import {
 } from "../_hooks/bonds_filter_data";
 import { BondsFilterHook } from "../_hooks/useBondsFilters";
 import { useRouter } from "nextjs-toploader/app";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 function ExploreBondsHeader({
   manager,
@@ -52,17 +54,27 @@ function ExploreBondsHeader({
     <div className="flex flex-col justify-center items-center py-14 lg:py-0 w-full">
       <div className="h-full text-center container">
         <div className="flex flex-col justify-center gap-5 h-full">
-          {title && (
-            <h1
-              className={cn(
-                "font-medium lg:text-[40px] text-3xl",
-                "quicksand-medium"
+          <div className="flex justify-between items-center">
+            <div className="flex-1">
+              {title && (
+                <h1
+                  className={cn(
+                    "font-medium lg:text-[40px] text-3xl",
+                    "quicksand-medium"
+                  )}
+                >
+                  {title}
+                </h1>
               )}
-            >
-              {title}
-            </h1>
-          )}
-          {desc && <p>{desc}</p>}
+              {desc && <p>{desc}</p>}
+            </div>
+            <Link href="/dashboard/bonds/create">
+              <Button className="gap-2">
+                <Plus size={16} />
+                Create Bond
+              </Button>
+            </Link>
+          </div>
           <div className="relative">
             <Input
               className="bg-white px-5 py-5.5 text-gray-950"

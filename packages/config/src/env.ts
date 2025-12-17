@@ -116,6 +116,37 @@ const EnvSchema = z.object(
     // CDSL
     CDSL_AES_KEY: z.string().min(1, { message: "CDSL_AES_KEY is required" }),
     ENTITY_ID: z.string().min(1, { message: "ENTITY_ID is required" }),
+
+    // ✅ Add S3/Supabase credentials
+    S3_ACCESS_KEY_ID: z.string().min(1, {
+      message: "S3_ACCESS_KEY_ID is required",
+    }),
+    S3_SECRET_ACCESS_KEY: z.string().min(1, {
+      message: "S3_SECRET_ACCESS_KEY is required",
+    }),
+    S3_REGION: z.string().default("ap-south-1"),
+    S3_ENDPOINT: z.string().url({
+      message: "S3_ENDPOINT must be a valid URL",
+    }),
+    S3_BUCKET_NAME: z.string().default("documents"),
+
+    // ✅ Add Strapi token
+    STRAPI_API_TOKEN: z.string().min(1, {
+      message: "STRAPI_API_TOKEN is required",
+    }),
+    STRAPI_API_URL: z
+      .url({
+        message: "STRAPI_API_URL must be a valid URL",
+      })
+      .default("https://spyder.meradhan.co/api"),
+
+    // ✅ Password hashing pepper (optional, but recommended for production)
+    PASSWORD_PEPPER: z
+      .string()
+      .min(16, {
+        message: "PASSWORD_PEPPER must be at least 16 characters",
+      })
+      .optional(),
   },
   { error: "Need to set all required env variables" }
 );

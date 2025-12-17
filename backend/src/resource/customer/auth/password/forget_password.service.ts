@@ -7,7 +7,7 @@ import { env } from "@packages/config/src/env";
 import { AppError } from "@utils/error/AppError";
 import { hashingUtils } from "@utils/hash/hashing_utils";
 import { tokenUtils } from "@utils/token/JwtToken_utils";
-import { cacheStorage } from "../../../../store/redis_store";
+import { cacheStorage } from "@store/redis_store";
 
 export class ForgetPasswordService {
   async sendForgetPassword(data: { email: string }) {

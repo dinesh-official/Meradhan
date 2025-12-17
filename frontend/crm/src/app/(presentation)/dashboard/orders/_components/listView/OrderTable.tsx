@@ -6,6 +6,7 @@ import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { getBondType } from "../../utils/orderUtils";
 import { FaEye } from "react-icons/fa6";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import { useRouter } from "next/navigation";
 
 interface OrderTableProps {
   data: CrmOrder[];
@@ -14,6 +15,8 @@ interface OrderTableProps {
 }
 
 function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
+  const router = useRouter();
+
   return (
     <UniversalTable<CrmOrder>
       initialPageSize={pageSize}
@@ -74,7 +77,11 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
           stickyRight: true,
           sortable: false,
           cell: (row) => (
-            <div className="text-center flex justify-center items-center text-primary cursor-pointer">
+            <div
+              className="text-center flex justify-center items-center text-primary cursor-pointer hover:text-primary/80 transition-colors"
+              onClick={() => router.push(`/dashboard/orders/${row.id}`)}
+              title="View Order Details"
+            >
               <FaEye size={18} />
             </div>
           ),

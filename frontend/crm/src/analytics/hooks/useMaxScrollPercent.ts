@@ -20,7 +20,6 @@ export const useMaxScrollPercent = (elementId: string) => {
       if (scrollPercent > maxScrollRef.current) {
         maxScrollRef.current = scrollPercent;
         setMaxScroll(scrollPercent);
-        console.log(`📊 Max scroll reached: ${scrollPercent}%`);
       }
     };
 

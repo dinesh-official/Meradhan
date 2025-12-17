@@ -85,7 +85,6 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onCo
 
   /** Validate entire form; map errors for UI */
   const validateLeadData = useCallback((): boolean => {
-    console.log("Validating lead data:", data);
     try {
       leadFormDataSchema.parse(data);
       setErrors({});
@@ -93,7 +92,6 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onCo
       createLeadMutation.mutate(payload);
       return true;
     } catch (error) {
-      console.log("error hai in validateUserData", error);
       const err = parseError<ZodError>(error);
       if (err.issues.length) {
         toast.error(err.issues[0].message);

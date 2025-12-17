@@ -40,4 +40,11 @@ orderRoutes.all(
   allowAccessMiddleware("USER"),
   orderController.getOrderPdf
 );
+
+orderRoutes.post(
+  "/api/customer/order/log",
+  allowAccessMiddleware("USER"),
+  orderController.addOrderLog
+);
+
 export default orderRoutes;

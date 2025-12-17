@@ -66,7 +66,6 @@ export const useFollowUpNoteFormHook = (
 
   /** Validate the entire form */
   const validateFollowUpNoteData = useCallback((): boolean => {
-    console.log("validateFollowUpNoteData", data);
     try {
       const parsed = followUpNoteSchema.parse(data);
       setErrors({});
