@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Route } from "next";
 import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
+import { encodeId } from "@/global/utils/url.utils";
 
 export const useLeadTableActionHook = ({ leadId }: { leadId: number }) => {
   const customerApi = new apiGateway.crm.crmLeads.CrmLeadApi(
@@ -13,9 +14,7 @@ export const useLeadTableActionHook = ({ leadId }: { leadId: number }) => {
   const router = useRouter();
 
   const handleLeadUpdate = () => {
-    const href = `/dashboard/leads/${encodeURIComponent(
-      String(leadId)
-    )}/update` as Route;
+    const href = `/dashboard/leads/${encodeId(leadId)}/update` as Route;
 
     router.push(href);
   };

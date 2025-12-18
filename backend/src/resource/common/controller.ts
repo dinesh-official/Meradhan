@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@core/database/database";
 import { env } from "@packages/config/src/env";
 import { appSchema } from "@root/schema";

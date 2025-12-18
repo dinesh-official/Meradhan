@@ -7,6 +7,7 @@ import { getBondType } from "../../utils/orderUtils";
 import { FaEye } from "react-icons/fa6";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { useRouter } from "next/navigation";
+import { encodeId } from "@/global/utils/url.utils";
 
 interface OrderTableProps {
   data: CrmOrder[];
@@ -62,7 +63,10 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
           label: "Request Date",
           cell: (row) => (
             <div>
-              {dateTimeUtils.formatDateTime(row.createdAt, "DD MMM YYYY")}
+              {dateTimeUtils.formatDateTime(
+                row.createdAt,
+                "DD MMM YYYY hh:mm AA"
+              )}
             </div>
           ),
         },
@@ -79,7 +83,9 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
           cell: (row) => (
             <div
               className="text-center flex justify-center items-center text-primary cursor-pointer hover:text-primary/80 transition-colors"
-              onClick={() => router.push(`/dashboard/orders/${row.id}`)}
+              onClick={() =>
+                router.push(`/dashboard/orders/${encodeId(row.id)}`)
+              }
               title="View Order Details"
             >
               <FaEye size={18} />

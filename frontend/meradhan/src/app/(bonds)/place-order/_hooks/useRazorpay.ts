@@ -174,12 +174,7 @@ export function useRazorpay() {
           toast({ title: "Payment Successful" });
           setIsLoading(true);
           try {
-            await apiClientCaller.post(
-              `/customer/order/status/${finalOrderId}`,
-              {
-                status: "APPLIED",
-              }
-            );
+            // webhook will handle the rest of the logic
             trackPaymentSuccess(finalOrderId, response.razorpay_payment_id, {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,

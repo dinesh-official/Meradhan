@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
+import { decodeId } from "@/global/utils/url.utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -75,14 +76,14 @@ function OrderDetailsView() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const orderId = Number(params.id);
+  const orderId = decodeId(params.id as string);
 
   const apiCaller = new apiGateway.crm.crmOrdersApi(apiClientCaller);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["crm-order", orderId],
     queryFn: () => apiCaller.getOrderById(orderId),
-    enabled: !!orderId && !isNaN(orderId),
+    enabled: !!orderId && orderId > 0,
   });
 
   const updateStatusMutation = useMutation({

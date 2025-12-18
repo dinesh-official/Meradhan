@@ -12,6 +12,9 @@ export class PaymentController {
 
   handleWebhook = async (req: Request, res: Response) => {
     const signature = req.headers["x-razorpay-signature"] as string;
+    console.log("Signature", signature);
+    console.log("Body", req.body);
+
     const body = req.body;
     const rawBody = (req as Request & { rawBody?: string }).rawBody;
 
@@ -104,16 +107,43 @@ export class PaymentController {
           paymentId
         );
 
+        console.log("Order Result", orderResult);
+
         // Trigger settlement process as background job
         if (orderResult.status === "success") {
-          await orderSettlementQueue.add("settle-order", {
-            orderId: orderResult.orderId,
-          });
+          const order =
+            await this.orderService.getOrderByPaymentOrderId(paymentOrderId);
+          if (!order) {
+            logger.logError("Order not found for payment order ID", {
+              paymentOrderId,
+            });
+            return res.sendResponse({
+              statusCode: HttpStatus.OK,
+              responseData: { status: "ok", event: body.event },
+            });
+          }
+
+          await this.orderService.updateOrderStatus(order.id, "APPLIED");
+          await this.orderService.updateOrderMetadata(order.id, paymentEntity);
+          const job = await orderSettlementQueue.add(
+            `settle-order:${order.id}`,
+            {
+              id: order.id,
+              paymentOrderId,
+              paymentId,
+              paymentEntity,
+            }
+          );
           logger.logInfo(
-            `Payment captured and settlement job queued for order: ${paymentOrderId}`
+            `Payment captured and settlement job queued for order: ${paymentOrderId}`,
+            {
+              jobId: job.id,
+            }
           );
         }
       } catch (error) {
+        console.log(error);
+
         logger.logError("Error processing payment.captured webhook:", error);
         // Return success to Razorpay even if processing fails
         // This prevents Razorpay from retrying, and we can handle the error internally

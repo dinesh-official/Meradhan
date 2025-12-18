@@ -64,6 +64,8 @@ export class ExpressServer implements IServer, IExpressRoute {
       "https://www.meradhan.co",
       "https://crm.meradhan.co",
       "https://api.meradhan.co", // Allow API subdomain
+      "https://api.sourav.email", // Allow API subdomain
+      "https://client.sourav.email", // Allow API subdomain
       ...(isDevelopment
         ? [
             "http://localhost:3000",

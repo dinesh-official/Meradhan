@@ -144,7 +144,7 @@ export class OrderService {
     if (!order)
       throw new AppError("Order not found", { code: "ORDER_NOT_FOUND" });
     if (order.paymentStatus === PaymentStatus.COMPLETED) {
-      return { message: "Already captured", orderId: order.id };
+      return { message: "Already captured", id: order.id };
     }
 
     if (signature) {
@@ -213,6 +213,18 @@ export class OrderService {
     };
   }
 
+  async getOrderById(orderId: number) {
+    return await db.dataBase.order.findUnique({
+      where: { id: orderId },
+    });
+  }
+
+  async getOrderByPaymentOrderId(paymentOrderId: string) {
+    return await db.dataBase.order.findUnique({
+      where: { paymentOrderId },
+    });
+  }
+
   async updateOrderMetadata(
     orderId: number,
     metadata: Record<string, any>
@@ -240,13 +252,14 @@ export class OrderService {
   async updateOrderStatusByOrderNo(
     orderNumber: string,
     status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED"
-  ): Promise<void> {
-    await db.dataBase.order.update({
+  ): Promise<number> {
+    const { id } = await db.dataBase.order.update({
       where: { orderNumber },
       data: {
         status: status,
       },
     });
+    return id;
   }
 
   async getOrderWithNSEData(orderId: number): Promise<OrderWithNSEData | null> {

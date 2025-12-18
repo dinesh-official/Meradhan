@@ -50,15 +50,15 @@ export const useXirr = () => {
   }, []);
 
   // Validation functions
-  const isValidNumber = (value: string) => {
-    const num = parseFloat(value);
-    return !isNaN(num) && num > 0;
-  };
+  // const isValidNumber = (value: string) => {
+  //   const num = parseFloat(value);
+  //   return !isNaN(num) && num > 0;
+  // };
 
-  const isValidDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return !isNaN(date.getTime());
-  };
+  // const isValidDate = (dateStr: string) => {
+  //   const date = new Date(dateStr);
+  //   return !isNaN(date.getTime());
+  // };
 
   // Input validation
   const validationErrors = useMemo(() => {

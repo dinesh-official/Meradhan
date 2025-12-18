@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Route } from "next";
 import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
+import { encodeId } from "@/global/utils/url.utils";
 
 export const useCustomerTableActions = ({
   profileId,
@@ -17,24 +18,18 @@ export const useCustomerTableActions = ({
   );
 
   const handleViewKyc = () => {
-    const href = `/dashboard/customers/view/${encodeURIComponent(
-      String(profileId)
-    )}/kyc` as Route;
+    const href = `/dashboard/customers/view/${encodeId(profileId)}/kyc` as Route;
 
     router.push(href);
   };
   const handleProfileView = () => {
-    const href = `/dashboard/customers/view/${encodeURIComponent(
-      String(profileId)
-    )}/profile` as Route;
+    const href = `/dashboard/customers/view/${encodeId(profileId)}/profile` as Route;
 
     router.push(href);
   };
 
   const handleProfileUpdate = () => {
-    const href = `/dashboard/customers/view/${encodeURIComponent(
-      String(profileId)
-    )}/update` as Route;
+    const href = `/dashboard/customers/view/${encodeId(profileId)}/update` as Route;
 
     router.push(href);
   };
