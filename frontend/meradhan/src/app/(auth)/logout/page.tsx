@@ -6,11 +6,17 @@ import { userSessionStore } from "@/core/auth/userSessionStore";
 import { queryClient } from "@/core/config/service-clients";
 import { gqlClient } from "@/core/connection/apollo-client";
 import React from "react";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 
 function Logout() {
   const { clearCookies, removeCookie } = useAppCookie();
 
+  const logout = async () => {
+    await apiClientCaller.post("/api/server/auth/logout");
+  };
+
   React.useEffect(() => {
+    logout();
     // Clear Zustand session store
     userSessionStore.getState().setSession(null);
 
