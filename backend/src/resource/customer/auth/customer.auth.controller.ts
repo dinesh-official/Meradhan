@@ -125,7 +125,6 @@ export class CustomerAuthController {
       entityType: "Auth",
       email: data.email,
     });
-    res.cookie("token", data.token, cookieOptions);
     await revalidateMeradhanTrackingSession(req, {
       userId: data.id,
       sessionId: req.cookies["meradhan_tracking_session"],
