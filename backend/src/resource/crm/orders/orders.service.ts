@@ -114,4 +114,65 @@ export class CrmOrdersService {
       },
     };
   }
+
+  async getOrderById(orderId: number) {
+    const order = await db.dataBase.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customerProfile: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            emailAddress: true,
+            phoneNo: true,
+          },
+        },
+        orderLogs: {
+          orderBy: { createdAt: "desc" },
+        },
+        customerBonds: true,
+      },
+    });
+
+    if (!order) {
+      throw new Error(`Order with ID ${orderId} not found`);
+    }
+
+    return order;
+  }
+
+  async updateOrderStatus(orderId: number, status: OrderStatus) {
+    // Check if order exists
+    const existingOrder = await db.dataBase.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!existingOrder) {
+      throw new Error(`Order with ID ${orderId} not found`);
+    }
+
+    // Update order status
+    const updatedOrder = await db.dataBase.order.update({
+      where: { id: orderId },
+      data: { status },
+      include: {
+        customerProfile: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            emailAddress: true,
+            phoneNo: true,
+          },
+        },
+        orderLogs: {
+          orderBy: { createdAt: "desc" },
+        },
+        customerBonds: true,
+      },
+    });
+
+    return updatedOrder;
+  }
 }

@@ -11,4 +11,16 @@ router.get(
   crmOrdersController.getAllOrders
 );
 
+router.get(
+  "/api/crm/orders/:id",
+  allowAccessMiddleware("ADMIN"),
+  crmOrdersController.getOrderById
+);
+
+router.patch(
+  "/api/crm/orders/:id/status",
+  allowAccessMiddleware("ADMIN"),
+  crmOrdersController.updateOrderStatus
+);
+
 export default router;

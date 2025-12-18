@@ -13,6 +13,7 @@ import {
   getDynamicPageMetaDataGql,
 } from "@/graphql/getDynamicPageDataGql";
 import FdHeader from "./_conponents/FdHeader";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 export const revalidate = 0;
 export const generateMetadata = async () => {
@@ -47,7 +48,7 @@ const page = async () => {
         <div
           className="container article"
           dangerouslySetInnerHTML={{
-            __html: headerData?.Content.Content_2 || "",
+            __html: sanitizeStrapiHTML(headerData?.Content.Content_2),
           }}
         />
       </section>

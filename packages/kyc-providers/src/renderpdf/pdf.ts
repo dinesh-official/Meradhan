@@ -6,7 +6,6 @@ import MdPdf from "../../pdf/MdPdf";
 import { mapAllPages } from "../../pdf/dataMapper";
 import { OrderPdf } from "../../pdf/OrderPdf";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generateKycPdf(userData: any) {
   try {
     const data = await mapAllPages(userData);

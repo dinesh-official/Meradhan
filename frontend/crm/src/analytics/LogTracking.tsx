@@ -3,7 +3,7 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 
 type PageView = Partial<
@@ -14,19 +14,58 @@ export const PageTrackingProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { cookies } = useAppCookie();
-  console.log(cookies);
-
   const pathname = usePathname();
   const [currentPageView, setCurrentPageView] = useState<PageView | null>(null);
   const pageViewIdRef = useRef<number | null>(null);
   const maxScrollRef = useRef(0);
   const interactionsRef = useRef(0);
   const visibilityTimeRef = useRef<number>(Date.now());
-  const auditApi = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
+  const hasEndedRef = useRef<boolean>(false); // Track if current page view has been ended
+  const isEndingRef = useRef<boolean>(false); // Prevent concurrent end calls
+  const auditApi = useMemo(
+    () => new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller),
+    []
+  );
+
+  // End page view function
+  const endPageView = useCallback(async () => {
+    if (
+      !currentPageView ||
+      !pageViewIdRef.current ||
+      !cookies.userId ||
+      !cookies.token ||
+      hasEndedRef.current ||
+      isEndingRef.current
+    )
+      return;
+
+    isEndingRef.current = true;
+
+    const exitTime = new Date();
+    const duration = Math.floor(
+      (exitTime.getTime() - currentPageView!.entryTime!.getTime()) / 1000
+    );
+
+    try {
+      await auditApi.endPageTrackingCrm(pageViewIdRef.current, {
+        exitTime: exitTime,
+        duration,
+        scrollDepth: maxScrollRef.current,
+        interactions: interactionsRef.current,
+        sessionId: cookies.token,
+      });
+      hasEndedRef.current = true;
+    } catch {
+      // Silently fail - page tracking should not interrupt user flow
+    } finally {
+      isEndingRef.current = false;
+    }
+  }, [currentPageView, cookies.userId, cookies.token, auditApi]);
 
   // Start page view tracking
   useEffect(() => {
     const startPageView = async () => {
+      // End previous page view if exists
       await endPageView();
 
       if (!cookies.userId || !cookies.token) return;
@@ -34,6 +73,12 @@ export const PageTrackingProvider: React.FC<{
       if (pathname.startsWith("/logout")) {
         return;
       }
+
+      // Reset tracking state for new page view
+      hasEndedRef.current = false;
+      maxScrollRef.current = 0;
+      interactionsRef.current = 0;
+      visibilityTimeRef.current = Date.now();
 
       try {
         const pageData = {
@@ -57,92 +102,49 @@ export const PageTrackingProvider: React.FC<{
           userId: cookies.userId,
           sessionId: cookies.token,
         });
-      } catch (error) {
-        console.error("Failed to start page tracking:", error);
+      } catch {
+        // Silently fail - page tracking should not interrupt user flow
       }
     };
+    console.log("runing");
 
     startPageView();
-  }, [pathname]);
+  }, [pathname, cookies.userId, cookies.token]);
 
+  // Handle page unload (browser/tab close) - use sendBeacon for reliability
   useEffect(() => {
-    let isInternalNavigation = false;
-
-    // Detect internal navigation (e.g., clicking links inside the SPA)
-    const markInternalNavigation = () => {
-      isInternalNavigation = true;
-    };
-
-    // Listen to clicks inside the app
-    window.addEventListener("click", markInternalNavigation);
-
     const handleBeforeUnload = () => {
-      // Run only when the tab/browser is closed — not internal navigation
-      if (!isInternalNavigation) {
-        if (currentPageView && pageViewIdRef.current && cookies.userId) {
-          const exitTime = new Date();
-          const duration = Math.floor(
-            (exitTime.getTime() - currentPageView.entryTime.getTime()) / 1000
-          );
-          localStorage.clear();
-          sessionStorage.clear();
+      if (
+        currentPageView &&
+        pageViewIdRef.current &&
+        cookies.userId &&
+        !hasEndedRef.current
+      ) {
+        const exitTime = new Date();
+        const duration = Math.floor(
+          (exitTime.getTime() - currentPageView.entryTime!.getTime()) / 1000
+        );
 
-          // Clear all cookies
-          // document.cookie.split(";").forEach((cookie) => {
-          //   const name = cookie.split("=")[0].trim();
-          //   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-          // });
-          navigator.sendBeacon(
-            "/api/server/auditlogs/crm/page-tracking/end/" +
-              pageViewIdRef.current,
-            JSON.stringify({
-              pageViewId: pageViewIdRef.current,
-              exitTime,
-              duration,
-              scrollDepth: maxScrollRef.current,
-              interactions: interactionsRef.current,
-              sessionId: cookies.token,
-            })
-          );
-        }
+        // Use sendBeacon for reliable data sending on page unload
+        navigator.sendBeacon(
+          "/api/server/auditlogs/crm/page-tracking/end/" +
+            pageViewIdRef.current,
+          JSON.stringify({
+            pageViewId: pageViewIdRef.current,
+            exitTime,
+            duration,
+            scrollDepth: maxScrollRef.current,
+            interactions: interactionsRef.current,
+            sessionId: cookies.token,
+          })
+        );
+        hasEndedRef.current = true;
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("click", markInternalNavigation);
-    };
-  }, [currentPageView, cookies.userId, cookies.token, pathname]);
-
-  // End page view function
-  const endPageView = async () => {
-    if (
-      !currentPageView ||
-      !pageViewIdRef.current ||
-      !cookies.userId ||
-      !cookies.token
-    )
-      return;
-
-    const exitTime = new Date();
-    const duration = Math.floor(
-      (exitTime.getTime() - currentPageView!.entryTime!.getTime()) / 1000
-    );
-
-    try {
-      await auditApi.endPageTrackingCrm(pageViewIdRef.current, {
-        exitTime: exitTime,
-        duration,
-        scrollDepth: maxScrollRef.current,
-        interactions: interactionsRef.current,
-        sessionId: cookies.token,
-      });
-    } catch (error) {
-      console.error("Failed to end page tracking:", error);
-    }
-  };
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [currentPageView, cookies.userId, cookies.token]);
 
   // Track scroll depth
   useEffect(() => {
@@ -158,7 +160,6 @@ export const PageTrackingProvider: React.FC<{
 
       if (scrollPercent > maxScrollRef.current) {
         maxScrollRef.current = scrollPercent;
-        updateScrollDepth(scrollPercent);
       }
     };
 
@@ -192,12 +193,13 @@ export const PageTrackingProvider: React.FC<{
     };
   }, [pathname]);
 
-  // Handle page visibility changes
+  // Handle page visibility changes (only for backgrounding, not navigation)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
+      if (document.visibilityState === "hidden" && !hasEndedRef.current) {
+        // Only end if page is being backgrounded, not if already ended
         endPageView();
-      } else {
+      } else if (document.visibilityState === "visible") {
         visibilityTimeRef.current = Date.now();
       }
     };
@@ -205,42 +207,7 @@ export const PageTrackingProvider: React.FC<{
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
-
-  const updateScrollDepth = (depth: number) => {
-    if (depth > maxScrollRef.current) {
-      maxScrollRef.current = depth;
-    }
-  };
-
-  // Handle page unload
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (currentPageView && pageViewIdRef.current && cookies.userId) {
-        const exitTime = new Date();
-        const duration = Math.floor(
-          (exitTime.getTime() - currentPageView.entryTime!.getTime()) / 1000
-        );
-        endPageView();
-        // Use sendBeacon for reliable data sending on page unload
-        navigator.sendBeacon(
-          "/api/server/auditlogs/crm/page-tracking/end/" +
-            pageViewIdRef.current,
-          JSON.stringify({
-            pageViewId: pageViewIdRef.current,
-            exitTime: exitTime,
-            duration,
-            scrollDepth: maxScrollRef.current,
-            interactions: interactionsRef.current,
-            sessionId: cookies.token,
-          })
-        );
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [currentPageView, cookies.userId, cookies.token, pathname]);
+  }, [pathname]);
 
   const updateInteractions = () => {
     interactionsRef.current += 1;

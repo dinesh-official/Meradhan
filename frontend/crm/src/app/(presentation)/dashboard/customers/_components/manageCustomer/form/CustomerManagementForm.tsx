@@ -8,7 +8,6 @@ import { SelectField } from "@/global/elements/inputs/SelectField";
 import { UserAccountType } from "../../../../../../../../../../packages/schema/lib/customers/customers.schema";
 import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
-import { useState } from "react";
 
 function CustomerManagementForm({
   manager,

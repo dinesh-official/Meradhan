@@ -94,8 +94,7 @@ export async function getUserIpData(): Promise<GeoData | null> {
       country: geoJson.country,
       org: geoJson.org,
     };
-  } catch (err) {
-    console.error("getUserIpData error:", err);
+  } catch {
     return null;
   }
 }

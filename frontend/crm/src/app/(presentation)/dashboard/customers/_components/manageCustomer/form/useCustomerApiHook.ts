@@ -17,7 +17,6 @@ export const useCustomerApiHook = ({ backOnDone=true }: { backOnDone?: boolean }
     mutationFn: async (
       data: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>
     ) => {
-      console.log("data in useCustomerApiHook", data);
       const response = await customerApi.createCustomer(data);
       return response.data;
     },
@@ -28,7 +27,6 @@ export const useCustomerApiHook = ({ backOnDone=true }: { backOnDone?: boolean }
       }
     },
     onError(error) {
-      console.log("error", error);
       if (error instanceof ApiError) {
         toast.error(error.response?.data?.message);
       } else {

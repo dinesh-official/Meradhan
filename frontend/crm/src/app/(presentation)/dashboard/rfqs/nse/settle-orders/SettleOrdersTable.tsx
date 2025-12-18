@@ -447,6 +447,26 @@ function SettleOrdersTable({
               );
             },
           },
+          {
+            key: "createdAt",
+            label: "Created At",
+            sortable: true,
+            cell(row) {
+              return row.createdAt
+                ? dateTimeUtils.formatDateTime(row.createdAt, "DD MMM YYYY hh:mm AA")
+                : "--";
+            },
+          },
+          {
+            key: "updatedAt",
+            label: "Updated At",
+            sortable: true,
+            cell(row) {
+              return row.updatedAt
+                ? dateTimeUtils.formatDateTime(row.updatedAt, "DD MMM YYYY hh:mm AA")
+                : "--";
+            },
+          },
         ]}
       />
     </div>

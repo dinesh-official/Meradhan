@@ -98,8 +98,6 @@ const DealSplitForm = ({
         remarks,
       };
       onSubmitForm(data);
-    } else {
-      console.log("❌ Validation Failed");
     }
   };
 

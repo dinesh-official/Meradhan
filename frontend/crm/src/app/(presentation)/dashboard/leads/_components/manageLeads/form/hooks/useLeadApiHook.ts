@@ -18,8 +18,6 @@ export const useLeadFollowUpApiHook = ({ goBackOnSuccess, onComplete }: { onComp
     mutationFn: async (
       data: z.infer<(typeof appSchema.crm.leads)["createNewLeadSchema"]>
     ) => {
-      console.log("data in useLeadFollowUpApiHook", data);
-
       const response = await leadFollowUpApi.createNewLead(data);
       return response.data;
     },
@@ -32,7 +30,6 @@ export const useLeadFollowUpApiHook = ({ goBackOnSuccess, onComplete }: { onComp
       onComplete?.();
     },
     onError(error) {
-      console.log("error", error);
       if (error instanceof ApiError) {
         toast.error(error.response?.data?.message);
       } else {
@@ -63,7 +60,6 @@ export const useLeadFollowUpApiHook = ({ goBackOnSuccess, onComplete }: { onComp
       onComplete?.();
     },
     onError(error) {
-      console.log("error", error);
       if (error instanceof ApiError) {
         toast.error(error.response?.data?.message);
       } else {

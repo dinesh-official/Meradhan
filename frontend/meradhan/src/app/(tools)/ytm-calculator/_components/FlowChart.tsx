@@ -8,25 +8,25 @@ import { XirrLineChart } from "./XirrChart";
 export const description = "XIRR Cash Flow Chart";
 
 // Simple date formatter as fallback
-const formatDateSimple = (dateStr: string): string => {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    });
-  } catch {
-    return dateStr;
-  }
-};
+// const formatDateSimple = (dateStr: string): string => {
+//   try {
+//     const date = new Date(dateStr);
+//     return date.toLocaleDateString("en-GB", {
+//       day: "2-digit",
+//       month: "2-digit",
+//       year: "2-digit",
+//     });
+//   } catch {
+//     return dateStr;
+//   }
+// };
 
-const chartConfig = {
-  cashFlow: {
-    label: "Cash Flow",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
+// const chartConfig = {
+//   cashFlow: {
+//     label: "Cash Flow",
+//     color: "hsl(var(--primary))",
+//   },
+// } satisfies ChartConfig;
 
 export function FlowChart({
   xirrData,

@@ -20,8 +20,8 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
     try {
       const response = await fetchCustomerProfile.customerInfoById(profileId);
       return response.data.responseData;
-    } catch (error) {
-      console.error("Failed to fetch customer info:", error);
+    } catch {
+      // Silently handle error - will show error state in component
     }
   };
 

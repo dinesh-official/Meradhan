@@ -65,7 +65,6 @@ export const useAddressFormDataHook = (
 
   /** Validate the entire Address form */
   const validateAddressData = (): boolean => {
-    console.log("Validating Address Information data:", data);
     try {
       addressInformationSchema.parse(data);
       setErrors({});

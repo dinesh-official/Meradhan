@@ -7,7 +7,7 @@ export interface Order {
   paymentProvider?: string | null;
   paymentOrderId?: string | null;
   paymentId?: string | null;
-  paymentMetadata?: any;
+  paymentMetadata?: Record<string, unknown>;
   paymentStatus: "PENDING" | "COMPLETED";
   status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED";
   subTotal: string;
@@ -18,8 +18,8 @@ export interface Order {
   faceValue: string;
   quantity: number;
   unitPrice: string;
-  bondDetails: any;
-  metadata?: any;
+  bondDetails: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,4 +37,3 @@ export interface OrderHistoryResponse {
 }
 
 export type GetOrderHistoryResponse = BaseResponseData<OrderHistoryResponse>;
-

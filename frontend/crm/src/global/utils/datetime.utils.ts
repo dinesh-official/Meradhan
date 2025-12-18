@@ -47,7 +47,6 @@ export const dateTimeUtils = {
         if (!dateInput) return "";
 
         const date = dateInput instanceof Date ? dateInput : new Date(dateTimeUtils.parseDate(dateInput.toString()) || "");
-        console.log(date);
 
         if (isNaN(date.getTime())) return "Invalid Date";
 

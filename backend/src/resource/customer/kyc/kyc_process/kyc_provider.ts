@@ -1,5 +1,6 @@
 import { db } from "@core/database/database";
 import { saveFileOnCloud } from "@modules/file_upload/helpers/save_file_on_cloud";
+import { env } from "@packages/config/src/env";
 import { AppError } from "@utils/error/AppError";
 import AdmZip from "adm-zip";
 import { AxiosError } from "axios";
@@ -143,13 +144,13 @@ export class KycProvider extends DigioKycFileHelper {
   }
 
   private nsdlApi = new NSDLApi(
-    process.env.NDSL_REQUESTOR_ID || "",
-    process.env.NSDL_SECRET_KEY || "",
-    process.env.NODE_ENV === "production"
+    env.NDSL_REQUESTOR_ID || "",
+    env.NSDL_SECRET_KEY || "",
+    env.KRA_ENV === "PROD"
   );
   private cdslApi = new CDSLApi({
-    AESKey: process.env.CDSL_AES_KEY || "",
-    isProd: process.env.NODE_ENV === "production",
+    AESKey: env.CDSL_AES_KEY || "",
+    isProd: env.KRA_ENV === "PROD",
   });
 
   // KYC STEP 1: PAN Verification ---------------------------------------------

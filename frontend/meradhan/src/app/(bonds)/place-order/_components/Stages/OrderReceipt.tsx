@@ -12,6 +12,7 @@ import { RatingOrDelete } from "../RatingOrDelete";
 import dynamic from "next/dynamic";
 import { HOST_URL } from "@/global/constants/domains";
 import Image from "next/image";
+import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
@@ -28,6 +29,11 @@ function OrderReceipt({
   const { makePayment, cancelPayment, isLoading } = useRazorpay();
   const [checkTaC, setCheckTaC] = useState(false);
   const [checkOrderCerTaC, setCheckOrderCerTaC] = useState(false);
+  const {
+    trackCheckboxInteraction,
+    trackPaymentAttempt,
+    trackButtonClick,
+  } = useOrderActivityTracking();
 
   return (
     <div className="container">
@@ -56,7 +62,14 @@ function OrderReceipt({
 
       <div className="text-sm  mt-6">
         <label className="mt-3 block">
-          <Checkbox checked={checkTaC} onClick={() => setCheckTaC(!checkTaC)} />{" "}
+          <Checkbox
+            checked={checkTaC}
+            onClick={() => {
+              const newValue = !checkTaC;
+              setCheckTaC(newValue);
+              trackCheckboxInteraction(orderId, "TERMS_AND_CONDITIONS", newValue);
+            }}
+          />{" "}
           &nbsp; I have read, understood, and agree to all the{" "}
           <Link href="/terms-of-use" className="text-primary mx-1   ">
             Terms and Conditions
@@ -66,7 +79,11 @@ function OrderReceipt({
         <label className="mt-3 gap-2 block">
           <Checkbox
             checked={checkOrderCerTaC}
-            onClick={() => setCheckOrderCerTaC(!checkOrderCerTaC)}
+            onClick={() => {
+              const newValue = !checkOrderCerTaC;
+              setCheckOrderCerTaC(newValue);
+              trackCheckboxInteraction(orderId, "ORDER_CONFIRMATION", newValue);
+            }}
           />{" "}
           &nbsp; I confirm that I want to place the order as shown in the draft
           order receipt, and I have read the
@@ -94,6 +111,17 @@ function OrderReceipt({
           variant="default"
           disabled={!(checkTaC && checkOrderCerTaC)}
           onClick={() => {
+            trackButtonClick(orderId, "PROCEED_TO_PAY", {
+              step: 2,
+              isin: bond.isin,
+              quantity,
+              bondName: bond.bondName,
+            });
+            trackPaymentAttempt(orderId, {
+              isin: bond.isin,
+              quantity,
+              bondName: bond.bondName,
+            });
             makePayment({
               isin: bond.isin,
               bondData: {
@@ -117,6 +145,9 @@ function OrderReceipt({
           className="md:w-auto w-full"
           variant="outline"
           onClick={() => {
+            trackButtonClick(orderId, "CANCEL_ORDER", {
+              step: 2,
+            });
             cancelPayment(orderId);
           }}
         >

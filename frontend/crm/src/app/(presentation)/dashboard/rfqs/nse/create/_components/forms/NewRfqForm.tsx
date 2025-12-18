@@ -131,8 +131,6 @@ function NewRfqForm({
     }
   };
 
-  console.log("Errors:", errors);
-
   const [isin, setIsin] = useState<NSE_ISIN_DATA | undefined>(undefined);
 
   const calculateQuantity = (

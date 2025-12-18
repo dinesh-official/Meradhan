@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
-import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
 import { useDebounce } from "@/global/hooks/use-debounce";
-import { CrmUsersProfile, CustomerProfile } from "@root/apiGateway";
+import { CustomerProfile } from "@root/apiGateway";
 import { Filter, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 

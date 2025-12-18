@@ -24,8 +24,7 @@ export default function LogoutRedirect() {
         getSessionId();
         // Redirect to login after a brief delay
         setTimeout(() => window.location.replace("/login"), 1500);
-      } catch (error) {
-        console.error("Logout error:", error);
+      } catch {
         window.location.replace("/login");
       }
     };

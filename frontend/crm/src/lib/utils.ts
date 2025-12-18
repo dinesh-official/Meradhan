@@ -11,9 +11,8 @@ export const playSound = () => {
     "/bell.mp3"
   );
   pop.volume = 0.4; // softer sound
-  pop.play().catch((e) => {
-    console.log(e);
-
+  pop.play().catch(() => {
+    // Silently fail - audio playback is not critical
   });
 }
 

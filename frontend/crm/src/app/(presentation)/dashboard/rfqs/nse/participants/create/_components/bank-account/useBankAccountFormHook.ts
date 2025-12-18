@@ -115,12 +115,9 @@ export const useBankAccountFormHook = (
         bankAccountSchema.parse(data);
       } catch (error) {
         const fieldErrors = zodErrorToErrorMap<ZodError>(error);
-        console.log(fieldErrors);
-        
         errorsData.push(fieldErrors as IBankAccountFormHook['errors'][number])
       }
     })
-    console.log(errorsData);
     
     setErrors(errorsData)
     return false;

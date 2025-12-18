@@ -2,10 +2,12 @@ import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import React from "react";
 import UpdateCustomerView from "./UpdateCustomer.View";
+import { decodeId } from "@/global/utils/url.utils";
 
 export const revalidate = 0;
 async function page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id: encodedId } = await params;
+  const id = decodeId(encodedId);
   return (
     <Workspace>
       <PageInfoBar
@@ -13,7 +15,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
         description="Update Customer Latest Information"
         showBack
       />
-      <UpdateCustomerView id={Number(id)} />
+      <UpdateCustomerView id={id} />
     </Workspace>
   );
 }

@@ -81,7 +81,6 @@ export const useCustomerFromDataHook = (
   /** Validate entire form */
   const validateCustomerData = useCallback((): boolean => {
     try {
-      console.log("validateCustomerData", data);
       customerFormDataSchema.parse(data);
       setErrors({});
       const payload = appSchema.customer.createNewCustomerSchema.parse(data);
@@ -92,7 +91,6 @@ export const useCustomerFromDataHook = (
       });
       return true;
     } catch (error) {
-      console.log("error hai in validateUserData", error);
       const err = parseError<ZodError>(error);
       if (err.issues.length) {
         toast.error(err.issues[0].message);

@@ -5,9 +5,9 @@ import { OrderSettlementService } from "@services/order/order_settlement.service
 
 startQueueWorker(orderSettlementQueue, async (job: Job) => {
   const settlementService = new OrderSettlementService();
-  const { orderId } = job.data;
+  const { id } = job.data;
 
-  console.log(`Processing settlement for order: ${orderId}`);
+  console.log(`Processing settlement for order: ${id}`);
 
-  await settlementService.initiateOrderSettlement(orderId);
+  await settlementService.initiateOrderSettlement(id);
 });

@@ -1,9 +1,15 @@
+"use client";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import ReactJson from "react-json-view";
-import { FaChevronDown, FaChevronUp, FaSpinner } from "react-icons/fa";
+import dynamic from "next/dynamic";
+import { FaSpinner } from "react-icons/fa";
+
+// Dynamically import ReactJson to avoid SSR issues
+const ReactJson = dynamic(() => import("react-json-view"), {
+  ssr: false,
+});
 
 function KraLogsView({ id }: { id: number }) {
   const profileApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(

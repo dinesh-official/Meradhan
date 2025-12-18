@@ -16,7 +16,6 @@ export const API_KEY =
         "NEXT_PUBLIC_GRAPHQL_KEY environment variable is required in production"
       );
     }
-    console.warn("NEXT_PUBLIC_GRAPHQL_KEY not set. GraphQL requests may fail.");
     return "";
   })();
 

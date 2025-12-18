@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import StatusCountCard from "@/global/elements/cards/StatusCountCard";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
 import Link from "next/link";

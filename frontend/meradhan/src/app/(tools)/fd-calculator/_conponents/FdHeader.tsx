@@ -1,4 +1,5 @@
 import React from "react";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 const FdHeader = ({
   description,
@@ -15,18 +16,18 @@ const FdHeader = ({
         <div className="pb-16 space-y-4">
           <h1
             className="text-[36px] quicksand-medium title"
-            dangerouslySetInnerHTML={{ __html: title || "" }}
+            dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(title) }}
           />
           <p
             className="text-[24px]"
-            dangerouslySetInnerHTML={{ __html: description || "" }}
+            dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(description) }}
           />
 
           <p className="text-[16px] "></p>
           {content && (
             <p
               className="text-[16px]"
-              dangerouslySetInnerHTML={{ __html: content || "" }}
+              dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(content) }}
             />
           )}
         </div>

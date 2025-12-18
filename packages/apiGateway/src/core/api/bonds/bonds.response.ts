@@ -8,6 +8,8 @@ export interface BondDetailsResponse {
   description: string;
   issuePrice: number;
   faceValue: number;
+  stampDutyPercentage: number | null;
+  allowForPurchase: boolean | null;
   couponRate: number;
   interestPaymentFrequency: string;
   putCallOptionDetails: string;
@@ -33,6 +35,7 @@ export interface BondDetailsResponse {
   createdAt: string;
   updatedAt: string;
   sortedAt: number;
+  isConvertedDeal: boolean | null;
 }
 
 export type ListedBondsResponse = BaseResponseData<{

@@ -1,7 +1,6 @@
 import { createLogger, format } from 'winston';
 import LokiTransport from 'winston-loki';
 import type { LogsMonitorServiceInterface } from './monitoring';
-import { config } from '@config/config';
 
 
 export class LokiLogsProvider implements LogsMonitorServiceInterface {
@@ -14,8 +13,8 @@ export class LokiLogsProvider implements LogsMonitorServiceInterface {
             format: format.combine(format.timestamp(), format.json()),
             transports: [
                 new LokiTransport({
-                    host: config.monitoring.lokiUrl, // Replace with your Loki server URL
-                    labels: { job: config.monitoring.jobName },
+                    host: process.env.LOKI_URL || "http://34.47.136.227:3100", // Replace with your Loki server URL
+                    labels: { job: process.env.LOKI_JOB_NAME || "Backend" },
                     json: true,
                 })
             ]

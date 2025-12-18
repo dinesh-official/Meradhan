@@ -109,7 +109,6 @@ export const useDPAccountFormHook = (
 
   /** Validate all accounts (array-level rules, incl. single default) */
   const validateAllDPAccounts = (): boolean => {
-    console.log(state)
     try {
       dpAccountsSchema.parse(state);
       setErrors({});
@@ -117,8 +116,6 @@ export const useDPAccountFormHook = (
     } catch (err) {
       if (err instanceof ZodError) {
         // You can enhance to group by account.id if needed
-        // const fieldErrors = zodErrorToErrorMap(err);
-        // console.error("DP accounts validation failed:", fieldErrors);
       }
       return false;
     }

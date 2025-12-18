@@ -84,7 +84,7 @@ kycRoutes.post(
 kycRoutes.get(
   "/api/customer/kyc/level/:customerId",
   allowAccessMiddleware("ADMIN", "USER"),
-  (req, res) => storeKyc.setKycLevel(req, res)
+  (req, res) => storeKyc.getKycLevel(req, res)
 );
 kycRoutes.post(
   "/api/customer/kyc/audit-log/:customerId",

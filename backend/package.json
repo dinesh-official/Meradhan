@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun run start.ts",
+    "start": "bun run main.ts",
     "dev": "bun run --watch main.ts",
     "worker": "bun run  ./src/jobs/start.ts",
     "email": "email dev",

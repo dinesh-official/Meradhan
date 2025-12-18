@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import React from "react";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 interface PageTitleDescProps {
   title?: string | React.ReactNode;
@@ -18,7 +19,7 @@ function PageTitleDesc({
 }: PageTitleDescProps) {
   const renderContent = (content: string | React.ReactNode) => {
     if (typeof content === "string") {
-      return <span dangerouslySetInnerHTML={{ __html: content }} />;
+      return <span dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(content) }} />;
     }
     return content;
   };

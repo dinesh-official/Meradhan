@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import React from "react";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 function TopTitleDesc({
   children,
@@ -18,14 +19,14 @@ function TopTitleDesc({
             className={cn(
               "text-[28px] md:text-[36px] lg:text-[44px] quicksand-medium"
             )}
-            dangerouslySetInnerHTML={{ __html: title || "" }}
+            dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(title) }}
           />
         )}
 
         {description && (
           <p
             className="md:max-w-[60%]"
-            dangerouslySetInnerHTML={{ __html: description }}
+            dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(description) }}
           />
         )}
       </div>

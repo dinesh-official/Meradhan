@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { marked } from "marked";
 import { cn } from "@/lib/utils";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 interface ChatMessagesProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +55,9 @@ export default function ChatMessages({
                     : "bg-gray-100 text-gray-900 article"
                 )}
                 dangerouslySetInnerHTML={{
-                  __html: marked.parse(message.response || ""),
+                  __html: marked.parse(
+                    sanitizeStrapiHTML(message.response || "")
+                  ),
                 }}
               />
             )}

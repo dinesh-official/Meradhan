@@ -56,4 +56,29 @@ export class BondsApi {
     );
     return response.data;
   }
+
+  public async createBond(
+    payload: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const response = await this.apiClient.post<BondDetailResponse>(
+      `/bonds`,
+      payload,
+      config
+    );
+    return response.data;
+  }
+
+  public async updateBond(
+    isin: string,
+    payload: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const response = await this.apiClient.put<BondDetailResponse>(
+      `/bonds/${isin}`,
+      payload,
+      config
+    );
+    return response.data;
+  }
 }

@@ -28,7 +28,6 @@ export const useCreateRfqHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        console.log(error.response?.data);
         if (error.response?.data?.responseData) {
           Swal.fire({
             icon: "info",

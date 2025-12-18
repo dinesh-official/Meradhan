@@ -30,7 +30,6 @@ export const useFollowUpApiHook = () => {
 
     },
     onError(error) {
-      console.log("error", error);
       if (error instanceof ApiError) {
         toast.error(error.response?.data?.message);
       } else {
@@ -50,7 +49,6 @@ export const useFollowUpApiHook = () => {
       queryClient.invalidateQueries({ queryKey: ["followUpsNotes"] });
     },
     onError(error) {
-      console.log("error", error);
       if (error instanceof ApiError) {
         toast.error(error.response?.data?.message);
       } else {

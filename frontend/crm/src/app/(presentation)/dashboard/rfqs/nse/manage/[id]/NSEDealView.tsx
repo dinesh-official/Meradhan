@@ -6,14 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Check, RefreshCw, X } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import NseAdditionalInformation from "./_components/NseAdditionalInformation";
 import NseRecordInformation from "./_components/NseRecordInformation";
 import NseRfqInformation from "./_components/NseRfqInformation";
 import NseTradingOptions from "./_components/NseTradingOptions";
 import { mapRfqToComponents } from "./_utils/mapRfqData";
 import AcceptQuate from "./_components/actions/AcceptQuate";
-import RejectQuate from "./_components/actions/RejectQuate";
 
 function LoadingSkeleton() {
   return (

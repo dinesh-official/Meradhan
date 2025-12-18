@@ -3,7 +3,7 @@ import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { CustomerProfileRepo } from "./customer.repo";
 import { CustomerProfileService } from "./customer.service";
-import { createCrmActivityLog } from "@services/auditlogs/auditlog.repo";
+import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;

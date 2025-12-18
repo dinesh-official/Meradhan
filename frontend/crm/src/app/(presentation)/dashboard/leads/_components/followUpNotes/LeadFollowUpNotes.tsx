@@ -48,8 +48,6 @@ const LeadFollowUpNotes = ({
     refetchOnWindowFocus: false,
   });
 
-  // ✅ Extract actual array
-  console.log("foolowUps", followUps);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent  className="lg:min-w-[800px]" >

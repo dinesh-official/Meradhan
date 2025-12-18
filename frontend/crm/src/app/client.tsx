@@ -1,5 +1,4 @@
 "use client";
-import { UserTrackingProvider } from "@/analytics";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { queryClient } from "@/core/config/reactQuery";
 import { QueryClientProvider } from "@tanstack/react-query";

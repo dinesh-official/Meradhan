@@ -61,6 +61,11 @@ const nextConfig: NextConfig = {
         source: "/assets/media/:path*",
         destination: `${BASES_URLS.ASSETS}/:path*`,
       },
+      // Rewrite sitemap XML files to route handlers
+      {
+        source: "/sitemap-main.xml",
+        destination: "/sitemap-main",
+      },
     ];
   },
 };

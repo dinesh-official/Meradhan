@@ -72,7 +72,6 @@ export class DigioSDK {
     const response = await this.client.post<TVerifyBankAccountResponse>(
       `/v4/client/verify/bank_account`,
       {
-        amount: 1,
         beneficiary_account_no: data.beneficiary_account_no,
         beneficiary_ifsc: data.beneficiary_ifsc,
         beneficiary_name: data.beneficiary_name,

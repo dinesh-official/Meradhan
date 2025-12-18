@@ -30,15 +30,13 @@ function RejectQuate({ data }: { data: CreateRfqResponseItem }) {
       //     role: role,
       //   });
     },
-    onSuccess: (response) => {
+    onSuccess: () => {
       // Handle success (e.g., show a success message, refresh data)
       toast.success("Quote accepted successfully");
-      console.log(response);
       router.back();
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        console.log(error.response?.data);
         if (error.response?.data?.responseData) {
           toast.error(error.response.data.responseData.join("<br/>"));
         } else {

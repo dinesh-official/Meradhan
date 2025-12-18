@@ -7,6 +7,7 @@ import { useOrderState } from "../../store/useOrderState";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { maskEmail } from "@/global/utils/formate";
 import Link from "next/link";
+import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
 
 function Payment({
   bond,
@@ -18,6 +19,7 @@ function Payment({
   orderId: string;
 }) {
   const { settlementDate } = useOrderState();
+  const { trackButtonClick } = useOrderActivityTracking();
   return (
     <div className="container">
       <h1 className="title text-center">Payment Completed</h1>
@@ -53,12 +55,28 @@ function Payment({
 
       <div className="flex justify-center items-center gap-4 mt-10">
         <Link href="/bonds">
-          <Button className="md:w-auto w-full" variant="default">
+          <Button
+            className="md:w-auto w-full"
+            variant="default"
+            onClick={() => {
+              trackButtonClick(orderId, "EXPLORE_BONDS", {
+                step: 3,
+              });
+            }}
+          >
             Explore Bonds <IoMdArrowDropright />
           </Button>
         </Link>
         <Link href="/dashboard/orders">
-          <Button className="md:w-auto w-full" variant="outline">
+          <Button
+            className="md:w-auto w-full"
+            variant="outline"
+            onClick={() => {
+              trackButtonClick(orderId, "VIEW_ORDERS", {
+                step: 3,
+              });
+            }}
+          >
             View Orders <IoMdArrowDropright />
           </Button>
         </Link>

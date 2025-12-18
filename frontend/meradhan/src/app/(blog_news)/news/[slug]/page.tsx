@@ -22,6 +22,7 @@ import { FaClock, FaEye } from "react-icons/fa6";
 import { RiShareFill } from "react-icons/ri";
 import AvatarDetailCard from "../../_components/AvatarDatialCard";
 import PostCard from "../../_components/PostCard";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 import {
   addNewsViews,
   fetchNewsPostData,
@@ -128,19 +129,19 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents.Introduction || "",
+                  __html: sanitizeStrapiHTML(post?.Contents.Introduction),
                 }}
               />
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents.Content_1 || "",
+                  __html: sanitizeStrapiHTML(post?.Contents.Content_1),
                 }}
               />{" "}
               <div
                 className="prose prose-lg max-w-none article"
                 dangerouslySetInnerHTML={{
-                  __html: post?.Contents.Content_2 || "",
+                  __html: sanitizeStrapiHTML(post?.Contents.Content_2),
                 }}
               />
               {post?.Tags && post?.Tags.length > 0 && (

@@ -5,6 +5,7 @@ import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { type Request, type Response } from "express";
 import { OrderService } from "./order.service";
+import { db } from "@core/database/database";
 
 export class OrderController {
   private orderService = new OrderService();
@@ -104,6 +105,52 @@ export class OrderController {
         console.error("Error sending file:", err);
         res.status(500).send("Error generating PDF");
       }
+    });
+  };
+
+  addOrderLog = async (req: Request, res: Response) => {
+    const customerId = req.customer?.id;
+    if (!customerId) throw new AppError("Unauthorized");
+
+    const { orderId, step, status, outputData, details } = req.body;
+
+    if (!orderId || !step || !status) {
+      throw new AppError("Order ID, step, and status are required");
+    }
+
+    // Get order by orderNumber to find the order ID
+    const order = await db.dataBase.order.findUnique({
+      where: { orderNumber: orderId },
+      select: { id: true, customerProfileId: true },
+    });
+
+    // If order doesn't exist yet (e.g., user is still on place-order page),
+    // silently return success - we'll track activities once order is created
+    if (!order) {
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message: "Order log queued (order not yet created)",
+        responseData: { success: true, queued: true },
+      });
+    }
+
+    // Verify the order belongs to the customer
+    if (order.customerProfileId !== customerId) {
+      throw new AppError("Unauthorized");
+    }
+
+    await this.orderService.addOrderLog(
+      order.id,
+      step,
+      status,
+      outputData,
+      details
+    );
+
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "Order log added successfully",
+      responseData: { success: true },
     });
   };
 }

@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import { LeadsFollowUpManagerService } from "../services/lead_followup_manager.service";
-import { createCrmActivityLog } from "@services/auditlogs/auditlog.repo";
+import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 
 export class LeadsFollowUpController {
   private followUpManager: LeadsFollowUpManagerService;
