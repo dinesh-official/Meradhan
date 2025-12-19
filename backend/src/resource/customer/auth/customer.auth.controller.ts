@@ -125,7 +125,6 @@ export class CustomerAuthController {
       entityType: "Auth",
       email: data.email,
     });
-    res.cookie("token", data.token, cookieOptions);
     await revalidateMeradhanTrackingSession(req, {
       userId: data.id,
       sessionId: req.cookies["meradhan_tracking_session"],
@@ -182,9 +181,10 @@ export class CustomerAuthController {
 
   async logout(req: Request, res: Response): Promise<void> {
     // Clear all cookies
-    for (const cookieName in req.cookies) {
-      res.clearCookie(cookieName);
-    }
+    res.cookie("token", "", {
+      ...cookieOptions,
+      expires: new Date(0),
+    });
     await endMeradhanSessionLog(req, {
       userId: req.customer!.id,
       endReason: "User initiated logout",

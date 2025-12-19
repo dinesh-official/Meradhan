@@ -11,6 +11,7 @@ import {
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { EmailAuthService } from "./email_auth.service";
+import { cookieOptions } from "@config/cookie";
 
 export class AuthController {
   private auditLogsRepo = new AuditLogRepository();
@@ -88,13 +89,10 @@ export class AuthController {
 
   async logout(req: Request, res: Response): Promise<void> {
     // Clear all cookies
-    for (const cookieName in req.cookies) {
-      res.clearCookie(cookieName, {
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-      });
-    }
+    res.cookie("token", "", {
+      ...cookieOptions,
+      expires: new Date(0),
+    });
     await addCrmLoginBasedAuditLog(req, {
       sessionType: "logout",
       userId: Number(req.cookies.userId),

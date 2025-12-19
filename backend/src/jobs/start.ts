@@ -5,10 +5,10 @@ import "./cron/nseIsin_cron";
 import "./sms_worker";
 import "./email_worker";
 
-// Order Settlement Worker
+// Order Settlement Worker - not used
 import "./order_settlement_worker";
 
-// KRA Worker
+// KRA Worker - not used
 import "./kra_worker";
 
 console.log("✅ All workers initialized successfully");
