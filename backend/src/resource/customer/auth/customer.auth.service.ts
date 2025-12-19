@@ -25,10 +25,33 @@ export class CustomerAuthService {
     data: z.infer<typeof appSchema.customer.createNewCustomerSchema>
   ) {
     const user = await this.customerProfileService.createCustomerProfile(data);
+
+    return {
+      id: user.id,
+      email: user.emailAddress,
+      avatar: user.avatar,
+    };
+  }
+
+  async verifyOtpForSignup(userId: number, verifyBy: "email" | "mobile") {
+    const user = await db.dataBase.customerProfileDataModel.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        utility: {
+          update: {
+            isEmailVerified: verifyBy === "email",
+            isPhoneVerified: verifyBy === "mobile",
+          },
+        },
+      },
+    });
     const authToken = tokenUtils.generateToken(
       {
         email: user.emailAddress,
-        id: user.id,
+        mobile: user.phoneNo,
+        id: userId,
         role: "USER",
       },
       "1d"
@@ -364,6 +387,12 @@ export class CustomerAuthService {
       );
     }
     if (identifier == "email" && !user.utility.isEmailVerified) {
+      if (!user.utility.isPhoneVerified && !user.utility.isEmailVerified) {
+        throw new AppError(
+          "Your account is not verified. <span class='text-primary cursor-pointer underline' id='resend-email-verification' >Click here</span> to resend the verification link to your email.",
+          { code: "EMAIL_NOT_VERIFIED" }
+        );
+      }
       throw new AppError(
         "This email is not verified. Please login using your email ID and verify your email from the My Profile section.",
         { code: "EMAIL_NOT_VERIFIED" }
@@ -391,10 +420,8 @@ export class CustomerAuthService {
       throw new AppError("Customer not found.");
     }
 
-    const token = tokenUtils.generateToken({ customerId, role: "USER" }, "15m");
-    console.log(`${env.NEXT_PUBLIC_HOST_URL}/verify-email?token=${token}`);
-    // Send verification email with the token (implementation not shown)
-    console.log(`Verification token: ${token}`);
+    const token = tokenUtils.generateToken({ customerId, role: "USER" }, "30m");
+
     await sendEmailVerificationLink({
       email: customer.emailAddress,
       userName: customer.firstName + " " + customer.lastName,
@@ -421,7 +448,7 @@ export class CustomerAuthService {
         },
       });
 
-      console.log(`Email verified for customer ${customerId}`);
+      // REMOVED: console.log(`Email verified for customer ${customerId}`);
       return true;
     } catch (error) {
       console.error("Email verification failed:", error);
@@ -432,16 +459,81 @@ export class CustomerAuthService {
   async throwEmailOrPhoneExists(emailOrMob: string) {
     const user =
       await this.customerProfileService.getCustomerProfileByEmail(emailOrMob);
-    if (user) {
+    if (user?.emailAddress && user.emailAddress === emailOrMob) {
       throw new Error("Email already exists");
     }
+
     const userByPhone =
       await this.customerProfileService.getCustomerProfileByPhone(
         "+91" + removeCountryCode(emailOrMob)
       );
-    if (userByPhone) {
+
+    if (
+      userByPhone?.phoneNo &&
+      (userByPhone.phoneNo == emailOrMob ||
+        userByPhone.phoneNo == "+91" + removeCountryCode(emailOrMob))
+    ) {
       throw new Error("Phone number already exists");
     }
     return user;
+  }
+
+  async resendEmailVerificationForUnverifiedUser(data: {
+    identifier: I_IDENTIFIED;
+    value: string;
+  }): Promise<boolean> {
+    const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
+      data.identifier == "email"
+        ? {
+            emailAddress: data.value,
+          }
+        : {
+            phoneNo: "+91" + removeCountryCode(data.value),
+          };
+
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: {
+        ...query,
+        isDeleted: false,
+      },
+      include: {
+        utility: true,
+      },
+    });
+
+    if (!user) {
+      throw new AppError("Invalid email or mobile number", {
+        code: "USER_NOT_FOUND",
+      });
+    }
+
+    // Only allow resend if both email and phone are not verified
+    if (user.utility.isEmailVerified || user.utility.isPhoneVerified) {
+      throw new AppError(
+        "Your account is already verified. Please login with your credentials.",
+        { code: "ALREADY_VERIFIED" }
+      );
+    }
+
+    // Check if account is suspended
+    if (user.utility.accountStatus == "SUSPENDED") {
+      throw new AppError("Your account is suspended", {
+        code: "ACCOUNT_SUSPENDED",
+      });
+    }
+
+    // Send email verification
+    const token = tokenUtils.generateToken(
+      { customerId: user.id, role: "USER" },
+      "30m"
+    );
+
+    await sendEmailVerificationLink({
+      email: user.emailAddress,
+      userName: user.firstName + " " + user.lastName,
+      link: `${env.NEXT_PUBLIC_HOST_URL}/verify-email?token=${token}`,
+    });
+
+    return true;
   }
 }

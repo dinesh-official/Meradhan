@@ -130,6 +130,7 @@ function VerifyOtpPopUp({
                   userType: formData.userType as any,
                   whatsAppNo: "+91" + formData.mobile,
                   whatsAppNotificationAllow: formData.isAcceptedWhatsapp,
+                  id: formData.id!,
                 })
               }
             >
@@ -143,6 +144,7 @@ function VerifyOtpPopUp({
                 flowManager.sendVerifyOtp({
                   emailId: formData.email,
                   mobile: formData.mobile,
+                  id: formData.id!,
                   name: makeFullname({
                     firstName: formData.firstName,
                     lastName: formData.lastName,

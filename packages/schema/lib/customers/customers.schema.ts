@@ -44,6 +44,7 @@ export const signUpWithCredentialsQuerySchema = z.object({
   otp: z.string().min(1, "OTP is required."),
   token: z.string().min(1, "Token is required.").optional(),
   verifyBy: z.enum(["email", "mobile"]).optional(),
+  id: z.string(),
 });
 
 // Sign In Schemas

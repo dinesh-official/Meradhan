@@ -7,6 +7,7 @@ export enum QueueNames {
   mobileOtpSend = "mobileOTPSendMD",
   forgotPasswordEmail = "forgotPasswordEmailMD",
   successResetPassword = "successResetPasswordMD",
+  emailVerification = "emailVerificationMD",
   kraProcessWork = "kraProcessWorkMD",
   orderSettlement = "orderSettlementMD",
 }

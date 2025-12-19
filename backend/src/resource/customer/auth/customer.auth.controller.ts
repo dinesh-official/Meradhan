@@ -6,8 +6,6 @@ import type { Request, Response } from "express";
 import { CustomerAuthService } from "./customer.auth.service";
 
 import { db } from "@core/database/database";
-import { OtpVerificationService } from "@services/otp_verification.service";
-import { cacheStorage } from "@store/redis_store";
 import { sendCustomerSignupOtpEmail } from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
 import {
@@ -15,6 +13,8 @@ import {
   endMeradhanSessionLog,
   revalidateMeradhanTrackingSession,
 } from "@resource/customer/auditlogs/auditlog.repo";
+import { OtpVerificationService } from "@services/otp_verification.service";
+import { cacheStorage } from "@store/redis_store";
 import { trackRateLimitSuccess } from "./customer.auth.ratelimit";
 
 export class CustomerAuthController {
@@ -26,7 +26,6 @@ export class CustomerAuthController {
     const { email, name } = appSchema.customer.sendEmailOtpSchema.parse(
       req.body
     );
-    await this.customerAuthService.throwEmailOrPhoneExists(email);
     const response = await this.optManager.generateOtp(
       "CUSTOMER_SIGNUP:" + email,
       4
@@ -47,7 +46,6 @@ export class CustomerAuthController {
   // ✅ Send Auth Mobile OTP
   async sendAuthMobileOtp(req: Request, res: Response) {
     const { mobile } = appSchema.customer.sendMobileOtpSchema.parse(req.body);
-    await this.customerAuthService.throwEmailOrPhoneExists(mobile);
     const response = await this.optManager.generateOtp(
       "CUSTOMER_SIGNUP:" + mobile,
       4
@@ -63,7 +61,21 @@ export class CustomerAuthController {
 
   // ✅ Signup with Credentials
   async signUpWithCredentials(req: Request, res: Response) {
-    const { otp, token, verifyBy } =
+    const data = appSchema.customer.createNewCustomerSchema.parse(req.body);
+    await this.customerAuthService.throwEmailOrPhoneExists(data.emailId);
+    await this.customerAuthService.throwEmailOrPhoneExists(data.phoneNo);
+    const user = await this.customerAuthService.signUpWithCredentials({
+      ...data,
+    });
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: user,
+    });
+  }
+
+  // ✅ Signup with Credentials
+  async verifyOtpForSignup(req: Request, res: Response) {
+    const { otp, token, verifyBy, id } =
       appSchema.customer.signUpWithCredentialsQuerySchema.parse(req.query);
     const isVerified = await this.optManager.verifyOtp(
       token || "",
@@ -72,15 +84,10 @@ export class CustomerAuthController {
     if (!isVerified) {
       throw new AppError("The OTP provided is invalid.");
     }
-    const data = appSchema.customer.createNewCustomerSchema.parse(req.body);
-    const user = await this.customerAuthService.signUpWithCredentials({
-      ...data,
-      isEmailVerified: verifyBy === "email",
-      isPhoneVerified: verifyBy === "mobile",
-    });
-    // Track successful OTP verification for rate limiting
-    await trackRateLimitSuccess(req, "otp-verify");
-    res.cookie("token", user.token, cookieOptions);
+    const user = await this.customerAuthService.verifyOtpForSignup(
+      Number(id!),
+      verifyBy as "email" | "mobile"
+    );
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: user,
@@ -255,6 +262,25 @@ export class CustomerAuthController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "Email verified successfully.",
+    });
+  }
+
+  async resendEmailVerificationForUnverifiedUser(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    const payload = appSchema.customer.signInWithEmailPhoneRequestSchema.parse(
+      req.body
+    );
+    await this.customerAuthService.resendEmailVerificationForUnverifiedUser({
+      identifier: payload.identity,
+      value: payload.value,
+    });
+    // Track successful email verification send for rate limiting
+    await trackRateLimitSuccess(req, "email-verify");
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "Verification email sent successfully.",
     });
   }
 }

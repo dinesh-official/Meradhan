@@ -15,6 +15,8 @@ import SignInOtpInput from "./_components/SignInOtpInput";
 import { useLoginDataStore } from "./_hooks/useLoginDataStore";
 import { ILoginFormHook, useLoginFormHook } from "./_hooks/useLoginFormHook";
 import { signIn } from "next-auth/react";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
+import { useEffect } from "react";
 
 /* ---------------------------------------------------------
  * 🔹 Helper Component: Social Login Buttons
@@ -115,6 +117,7 @@ const VerifyModeSection = ({
     formManager.handleSendOtp();
   };
 
+
   return (
     <>
       {/* Password Field */}
@@ -192,6 +195,27 @@ function LoginForm() {
 
   // Handle "Continue" button click
   const handleContinue = () => handleSignInRequest();
+
+  // Handle resend email verification click using event delegation
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Check if the clicked element is the resend link or a child of it
+      const resendElement = target.closest("#resend-email-verification");
+      if (resendElement) {
+        e.preventDefault();
+        e.stopPropagation();
+        formManager.handleResendEmailVerification();
+      }
+    };
+
+    // Use event delegation on document to catch clicks on dynamically added elements
+    document.addEventListener("click", handleClick, true);
+
+    return () => {
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [formManager]);
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -274,10 +298,20 @@ function LoginForm() {
            * Status Messages
            * --------------------------------------------------- */}
           {state.errorMessage && (
-            <p className="text-red-600 text-sm">{state.errorMessage}</p>
+            <p
+              className="text-red-600 text-sm"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeStrapiHTML(state.errorMessage),
+              }}
+            />
           )}
           {state.successMessage && (
-            <p className="text-green-600 text-sm">{state.successMessage}</p>
+            <p
+              className="text-green-600 text-sm"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeStrapiHTML(state.successMessage),
+              }}
+            />
           )}
         </>
       ) : (

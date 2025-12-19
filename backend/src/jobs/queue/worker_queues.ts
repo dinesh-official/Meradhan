@@ -36,6 +36,10 @@ export const successResetPasswordQueue = new Bull(
   QueueNames.successResetPassword,
   sharedRedisOpts
 );
+export const emailVerificationQueue = new Bull(
+  QueueNames.emailVerification,
+  sharedRedisOpts
+);
 
 export const kraWorkerQueue = new Bull(
   QueueNames.kraProcessWork,
