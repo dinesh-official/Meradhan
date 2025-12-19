@@ -262,7 +262,11 @@ function SignUpForm() {
         </section>
 
         {/* --- Actions --- */}
-        <Button type="submit" className="mt-3" disabled={isPending}>
+        <Button
+          type="submit"
+          className="mt-3"
+          disabled={isPending || createCustomerMutation.isPending}
+        >
           Sign Up
         </Button>
 

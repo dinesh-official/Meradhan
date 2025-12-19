@@ -102,7 +102,8 @@ const VerifyModeSection = ({
 }: {
   formManager: ILoginFormHook;
 }) => {
-  const { state, setOtp, setPassword, setType } = useLoginDataStore();
+  const { state, setOtp, setPassword, setType, setRememberMe } =
+    useLoginDataStore();
 
   // Switch between password and OTP modes
   const handleSwitchToOtp = () => {
@@ -116,7 +117,6 @@ const VerifyModeSection = ({
     formManager.timer.pause();
     formManager.handleSendOtp();
   };
-
 
   return (
     <>
@@ -144,7 +144,11 @@ const VerifyModeSection = ({
       {/* Extra Options */}
       <div className="flex justify-between items-center">
         <label className="flex items-center gap-2 cursor-pointer select-none">
-          <Checkbox /> Remember Me
+          <Checkbox
+            checked={state.rememberMe}
+            onCheckedChange={(checked) => setRememberMe(checked === true)}
+          />
+          Remember Me
         </label>
 
         {state.type === "password" ? (

@@ -242,6 +242,8 @@ export const useLoginFormHook = () => {
         value: state.emailOrPhoneNo,
       }),
     onSuccess: () => {
+      // Clear error message and set success message
+      dataStore.setErrorMessage("");
       dataStore.setSuccessMessage(
         "Verification email sent successfully. Please check your inbox."
       );
@@ -321,8 +323,16 @@ export const useLoginFormHook = () => {
     token: string;
     id: string;
   }) => {
-    setCookie("token", token, COOKIE_OPTIONS);
-    setCookie("userId", id, COOKIE_OPTIONS);
+    // Use longer expiry (30 days) if remember me is checked, otherwise use default (1 day)
+    const cookieOptions = state.rememberMe
+      ? {
+          ...COOKIE_OPTIONS,
+          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        }
+      : COOKIE_OPTIONS;
+
+    setCookie("token", token, cookieOptions);
+    setCookie("userId", id, cookieOptions);
 
     // redirect to dashboard
     if (localStorage.getItem("redirect")) {
