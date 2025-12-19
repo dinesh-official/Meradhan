@@ -21,17 +21,20 @@ customerAuthRoutes.all(
 // signup
 customerAuthRoutes.post(
   "/api/auth/customer/send-signup-mobile-verify",
-  otpSendRateLimiter,
+
   (req, res) => controller.sendAuthMobileOtp(req, res)
 );
 customerAuthRoutes.post(
   "/api/auth/customer/send-signup-email-verify",
-  otpSendRateLimiter,
   (req, res) => controller.sendAuthEmailOtp(req, res)
 );
+
+customerAuthRoutes.post("/api/auth/customer/verify-signup-otp", (req, res) =>
+  controller.verifyOtpForSignup(req, res)
+);
+
 customerAuthRoutes.post(
   "/api/auth/customer/signup-with-credentials",
-  otpVerifyRateLimiter,
   (req, res) => controller.signUpWithCredentials(req, res)
 );
 
@@ -81,6 +84,12 @@ customerAuthRoutes.get(
   "/api/auth/customer/verify-email",
   emailVerifyRateLimiter,
   (req, res) => controller.verifyEmail(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/resend-email-verification",
+  emailVerifyRateLimiter,
+  (req, res) => controller.resendEmailVerificationForUnverifiedUser(req, res)
 );
 
 export default customerAuthRoutes;

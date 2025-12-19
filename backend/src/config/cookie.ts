@@ -8,5 +8,7 @@ export const cookieOptions: CookieOptions = {
   secure: process.env.NODE_ENV === "production", // HTTPS only in production
   sameSite: "lax", // CSRF protection
   path: "/", // Cookie available site-wide
-  domain: process.env.NODE_ENV === "production" ? ".meradhan.co" : undefined, // Allow subdomain sharing in production
+  // Removed domain attribute - use host-only cookies for better security
+  // Cookies set by api.meradhan.co will only be accessible to api.meradhan.co
+  // Frontend apps can still send these cookies via CORS with credentials: true
 };

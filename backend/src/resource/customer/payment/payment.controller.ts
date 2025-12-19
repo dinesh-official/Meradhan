@@ -12,11 +12,6 @@ export class PaymentController {
 
   handleWebhook = async (req: Request, res: Response) => {
     const signature = req.headers["x-razorpay-signature"] as string;
-    console.log("Signature", signature);
-    console.log("Body", req.body);
-
-    const body = req.body;
-    const rawBody = (req as Request & { rawBody?: string }).rawBody;
 
     // Validate signature header
     if (!signature) {
@@ -24,6 +19,28 @@ export class PaymentController {
       throw new AppError("Missing webhook signature", {
         statusCode: HttpStatus.BAD_REQUEST,
         code: "WEBHOOK_SIGNATURE_MISSING",
+      });
+    }
+
+    // With express.text(), req.body is the raw string - use it directly for verification
+    const rawBody =
+      typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+
+    // Verify signature using raw body string
+    const isValid = this.paymentService.verifyWebhookSignature(
+      rawBody,
+      signature
+    );
+
+    // Parse JSON separately for processing
+    let body;
+    try {
+      body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    } catch (parseError) {
+      logger.logError("Failed to parse webhook body as JSON", parseError);
+      throw new AppError("Invalid webhook body format", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "WEBHOOK_INVALID_BODY",
       });
     }
 
@@ -35,13 +52,6 @@ export class PaymentController {
         code: "WEBHOOK_INVALID_BODY",
       });
     }
-
-    // Use raw body for signature verification if available, otherwise fallback to stringified
-    const bodyForVerification = rawBody || JSON.stringify(body);
-    const isValid = this.paymentService.verifyWebhookSignature(
-      bodyForVerification,
-      signature
-    );
 
     // Log webhook attempt
     try {
@@ -62,7 +72,6 @@ export class PaymentController {
     if (!isValid) {
       logger.logError("Invalid webhook signature received", {
         event: body.event,
-        hasRawBody: !!rawBody,
       });
       throw new AppError("Invalid webhook signature", {
         statusCode: HttpStatus.BAD_REQUEST,
@@ -107,8 +116,6 @@ export class PaymentController {
           paymentId
         );
 
-        console.log("Order Result", orderResult);
-
         // Trigger settlement process as background job
         if (orderResult.status === "success") {
           const order =
@@ -142,8 +149,6 @@ export class PaymentController {
           );
         }
       } catch (error) {
-        console.log(error);
-
         logger.logError("Error processing payment.captured webhook:", error);
         // Return success to Razorpay even if processing fails
         // This prevents Razorpay from retrying, and we can handle the error internally

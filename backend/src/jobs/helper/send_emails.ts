@@ -34,6 +34,7 @@ const getFormattedTimestamp = (): string => {
 
 import {
   emailOtpSenderQueue,
+  emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
@@ -149,7 +150,7 @@ export const sendEmailVerificationLink = async (data: {
   userName: string;
   link: string;
 }) => {
-  await forgotPasswordLinkSenderQueue.add(
+  await emailVerificationQueue.add(
     {
       ...data,
       subject: `Verify Your Email – MeraDhan ${getFormattedTimestamp()}`,

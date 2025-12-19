@@ -32,7 +32,12 @@ const formSchemaZod = z
 export type SignUPFormSchemaType = z.infer<typeof formSchemaZod>;
 
 export const useSignUpFormDataState = () => {
-  const [signUpFormData, setSignUpFormData] = useState<SignUPFormSchemaType>({
+  const [signUpFormData, setSignUpFormData] = useState<
+    SignUPFormSchemaType & {
+      id: number | null;
+    }
+  >({
+    id: null,
     firstName: "",
     lastName: "",
     email: "",
@@ -59,7 +64,7 @@ export const useSignUpFormDataState = () => {
   });
 
   const handleSignUpFormChange = (
-    key: keyof SignUPFormSchemaType,
+    key: keyof SignUPFormSchemaType | "id",
     value: string | boolean | number
   ) => {
     setSignUpFormData((prev) => ({ ...prev, [key]: value }));
@@ -77,6 +82,7 @@ export const useSignUpFormDataState = () => {
       userType: "INDIVIDUAL",
       isAcceptedTerms: false,
       isAcceptedWhatsapp: false,
+      id: null,
     });
     setSignUpFormError({
       firstName: "",

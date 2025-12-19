@@ -1,3 +1,4 @@
+import MeraDhanEmailVerificationEmail from "@emails/email_verification";
 import MeraDhanForgotPasswordEmail from "@emails/forgot_password";
 import MeraDhanPasswordResetSuccessEmail from "@emails/reset_password_sucess";
 import MeraDhanWelcomeEmail from "@emails/welcome";
@@ -6,6 +7,7 @@ import type { Job } from "bull";
 import { EmailCommunication } from "../communication/email_communication";
 import { startQueueWorker } from "./helper/start_queue_worker_helper";
 import {
+  emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
@@ -56,6 +58,28 @@ startQueueWorker(successResetPasswordQueue, async (job: Job) => {
   const emailHtml = await render(
     MeraDhanPasswordResetSuccessEmail({
       userName,
+    })
+  );
+  await emailSend.sendEmail({
+    to: email,
+    subject: subject,
+    html: emailHtml,
+  });
+});
+
+startQueueWorker(emailVerificationQueue, async (job: Job) => {
+  const emailSend = new EmailCommunication();
+  const { userName, link, email, subject } = job.data as {
+    email: string;
+    userName: string;
+    link: string;
+    subject: string;
+  };
+  console.log("Sending Email Verification - " + email);
+  const emailHtml = await render(
+    MeraDhanEmailVerificationEmail({
+      userName,
+      verificationLink: link,
     })
   );
   await emailSend.sendEmail({

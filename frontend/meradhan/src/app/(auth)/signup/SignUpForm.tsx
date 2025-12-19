@@ -19,6 +19,12 @@ import VerifyOtpPopUp from "./_components/VerifyOtpPopUp";
 import { cn } from "@/lib/utils";
 import { useSignUpAuthFlow } from "./_hooks/useSignUpAuthFlow";
 import { useSignUpFormDataState } from "./_hooks/useSignUpFormDataState";
+import { useMutation } from "@tanstack/react-query";
+import z from "zod";
+import { appSchema } from "@root/schema";
+import apiGateway, { ApiError } from "@root/apiGateway";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import toast from "react-hot-toast";
 
 // ✅ Reusable field wrapper with error display
 const Field: React.FC<{
@@ -41,8 +47,35 @@ function SignUpForm() {
     validateForm,
   } = form;
 
+  const signupApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
+    apiClientCaller
+  );
+
   const signUpFlow = useSignUpAuthFlow();
   const { sendVerifyOtp, isPending } = signUpFlow;
+
+  const createCustomerMutation = useMutation({
+    mutationKey: ["signUpWithCredentials"],
+    mutationFn: (
+      payload: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>
+    ) => signupApi.singUpWithCredentials(payload),
+    onSuccess(data) {
+      form.handleSignUpFormChange("id", data.responseData!.id);
+      sendVerifyOtp({
+        emailId: signUpFormData.email,
+        mobile: signUpFormData.mobile,
+        name: `${signUpFormData.firstName} ${signUpFormData.lastName}`,
+        id: data.responseData!.id,
+      });
+    },
+    onError(error) {
+      if (error instanceof ApiError) {
+        toast.error(error.response?.data.message || error.message);
+      } else {
+        toast.error(error.message);
+      }
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,12 +85,20 @@ function SignUpForm() {
       return;
     }
 
-    console.log("Form submitted ✅", signUpFormData);
-    sendVerifyOtp({
+    createCustomerMutation.mutate({
+      firstName: signUpFormData.firstName,
+      lastName: signUpFormData.lastName,
       emailId: signUpFormData.email,
-      mobile: signUpFormData.mobile,
-      name: `${signUpFormData.firstName} ${signUpFormData.lastName}`,
+      password: signUpFormData.password,
+      phoneNo: signUpFormData.mobile,
+      termsAccepted: signUpFormData.isAcceptedTerms,
+      whatsAppNo: signUpFormData.mobile,
+      whatsAppNotificationAllow: signUpFormData.isAcceptedWhatsapp,
+      userType:
+        signUpFormData.userType as (typeof appSchema.customer.UserAccountType)[number],
     });
+
+    console.log("Form submitted ✅", signUpFormData);
   };
 
   return (
@@ -221,7 +262,11 @@ function SignUpForm() {
         </section>
 
         {/* --- Actions --- */}
-        <Button type="submit" className="mt-3" disabled={isPending}>
+        <Button
+          type="submit"
+          className="mt-3"
+          disabled={isPending || createCustomerMutation.isPending}
+        >
           Sign Up
         </Button>
 

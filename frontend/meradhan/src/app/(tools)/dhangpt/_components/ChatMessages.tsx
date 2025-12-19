@@ -55,9 +55,13 @@ export default function ChatMessages({
                     : "bg-gray-100 text-gray-900 article"
                 )}
                 dangerouslySetInnerHTML={{
-                  __html: marked.parse(
-                    sanitizeStrapiHTML(message.response || "")
-                  ),
+                  __html: (() => {
+                    const markdown = message.response || "";
+                    const html = marked.parse(markdown);
+                    // Ensure html is a string (not a Promise)
+                    const htmlString = typeof html === "string" ? html : "";
+                    return sanitizeStrapiHTML(htmlString);
+                  })(),
                 }}
               />
             )}

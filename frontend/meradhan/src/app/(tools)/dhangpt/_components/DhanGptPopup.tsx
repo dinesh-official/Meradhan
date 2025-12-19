@@ -98,9 +98,14 @@ function DhanGptPopup() {
                     dangerouslySetInnerHTML={{
                       __html:
                         message.person === "BOT"
-                          ? marked.parse(
-                              sanitizeStrapiHTML(message.response || "")
-                            )
+                          ? (() => {
+                              const markdown = message.response || "";
+                              const html = marked.parse(markdown);
+                              // Ensure html is a string (not a Promise)
+                              const htmlString =
+                                typeof html === "string" ? html : "";
+                              return sanitizeStrapiHTML(htmlString);
+                            })()
                           : sanitizeStrapiHTML(message.response),
                     }}
                   />
