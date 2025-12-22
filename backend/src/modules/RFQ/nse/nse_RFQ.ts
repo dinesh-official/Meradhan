@@ -560,7 +560,9 @@ export class NseRfq {
     payload: GetAllDealAmendmentsRequest
   ): Promise<GetAllDealAmendmentsResponse> {
     return this.withReLoginRetry(async (loginKey) => {
-      console.log(loginKey);
+      if (process.env.NODE_ENV != "production") {
+        console.log(loginKey);
+      }
 
       const { data } = await this.client.post<GetAllDealAmendmentsResponse>(
         "/dealamend/all",
@@ -645,9 +647,3 @@ export class NseRfq {
     });
   }
 }
-
-// const cb = new NseRfq();
-// const data = await cb.getLoginKey();
-// console.log(data);
-// const l = await cb.logout();
-// console.log(l);

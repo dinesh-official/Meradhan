@@ -21,8 +21,6 @@ export class AuthController {
   }
 
   async loginWithOtp(req: Request, res: Response): Promise<void> {
-    console.log(req.body);
-
     const data = appSchema.auth.loginWithOtpSchema.parse(req.body);
     const payload = await this.emailAuthService.sendAuthEmailOtp(data.email);
 
