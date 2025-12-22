@@ -61,7 +61,9 @@ export class CustomerProfileService {
   }): Promise<string> {
     const otp = await this.optManager.generateOtp(newMobile);
     // Send OTP to new mobile number (implementation not shown)
-    console.log(`OTP sent to ${newMobile}: ${otp}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`OTP sent to ${newMobile}: ${otp}`);
+    }
 
     await sendMobileOtp({
       mobile: newMobile,
@@ -131,4 +133,3 @@ export class CustomerProfileService {
     return true;
   }
 }
-

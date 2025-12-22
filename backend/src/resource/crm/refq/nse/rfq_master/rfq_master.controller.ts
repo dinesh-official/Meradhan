@@ -44,7 +44,7 @@ export class RfqMasterController {
       const userId = req.session!.id;
 
       const data = appSchema.rfq.acceptNegotiationQuoteSchema.parse(req.body);
-      console.log(req.body);
+
       const result = await this.rfqMasterService.negotiateRfqAccept(
         data,
         userId

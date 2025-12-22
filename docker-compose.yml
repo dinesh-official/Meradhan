@@ -34,7 +34,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: redis
-    command: ["redis-server", "--requirepass", "sourav"]
+    command: ["redis-server", "--requirepass", "enter-your-password"]
     ports:
       - "6379:6379"
     volumes:
