@@ -27,10 +27,12 @@ const EnvSchema = z.object(
     // REDIS
     REDIS_USERNAME: z
       .string()
-      .min(1, { message: "REDIS_USERNAME is required" }),
+      .min(1, { message: "REDIS_USERNAME is required" })
+      .optional(),
     REDIS_PASSWORD: z
       .string()
-      .min(1, { message: "REDIS_PASSWORD is required" }),
+      .min(1, { message: "REDIS_PASSWORD is required" })
+      .optional(),
     REDIS_HOST: z.string().min(1, { message: "REDIS_HOST is required" }),
     REDIS_PORT: z
       .string()
