@@ -17,6 +17,7 @@ import participantsRouter from "@resource/crm/refq/nse/cbrics/cbrics.routes";
 import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
 import localDataRfqRoutes from "@resource/crm/refq/nse/local/localdata_rfq.routes";
 import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
+import nseWebhookRoutes from "@modules/RFQ/nse/webhook_notification.routes";
 import crmUsersRoutes from "@resource/crm/users/crmusers.routes";
 import auditlogsRoutes from "@resource/customer/auditlogs/auditlogs.routes";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.routes";
@@ -60,6 +61,8 @@ server.addRoutes([
   nseIsinRoute,
   rfqMasterRouter,
   localDataRfqRoutes,
+  // nse webhook routes
+  nseWebhookRoutes,
 
   // customer routes
   customerAuthRoutes,
