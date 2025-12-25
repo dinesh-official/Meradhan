@@ -20,7 +20,6 @@ import { useMutation } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 import { FaCheckSquare, FaEdit } from "react-icons/fa";
-import { EmailVerification } from "./_preoceess/EmailVerificationProcess";
 function PersonalDetails({
   profile,
 }: {
@@ -109,6 +108,51 @@ function PersonalDetails({
 }
 
 export default PersonalDetails;
+
+function EmailVerification({
+  profile,
+}: {
+  profile: GetCustomerResponseById["responseData"];
+}) {
+  const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
+    apiClientCaller
+  );
+  const verifyEmailMutation = useMutation({
+    mutationKey: ["profile-email-verify", profile.id],
+    mutationFn: async () => {
+      return await customerApi.sendEmailVerifyLink();
+    },
+    onSuccess: () => {
+      toast.success("Email Send Successfully");
+    },
+    onError: () => {
+      toast.error("Verification Email Send Failed");
+    },
+  });
+  return (
+    <DataInfoLabel
+      title="Email"
+      status={profile.utility.isEmailVerified ? "SUCCESS" : undefined}
+      showStatus={true}
+      statusLabel={
+        !profile.utility.isEmailVerified ? (
+          <span
+            className="text-secondary underline cursor-pointer"
+            onClick={() => verifyEmailMutation.mutate()}
+          >
+            {verifyEmailMutation.isPending ? "Sending.." : "Verify"}
+          </span>
+        ) : (
+          ""
+        )
+      }
+    >
+      <p className="flex items-center gap-2 font-medium text-sm">
+        {profile.emailAddress || "--"}
+      </p>
+    </DataInfoLabel>
+  );
+}
 
 function MobileNoVerify({
   profile,

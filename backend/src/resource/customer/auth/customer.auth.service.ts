@@ -389,12 +389,12 @@ export class CustomerAuthService {
     if (identifier == "email" && !user.utility.isEmailVerified) {
       if (!user.utility.isPhoneVerified && !user.utility.isEmailVerified) {
         throw new AppError(
-          "This account hasn’t been verified yet. <a class='underline text-primary' role='button' id='resend-email-verification'  >Click here</a> to send a verification link to your email to activate your account.",
+          "This account hasn’t been verified yet. <a class='underline text-primary cursor-pointer' role='button' id='resend-email-verification'  >Click here</a> to send a verification link to your email to activate your account.",
           { code: "EMAIL_NOT_VERIFIED" }
         );
       }
       throw new AppError(
-        `Your email is not verified. Please login using your verified phone number. Or, <a class='underline text-primary' role='button' id='resend-email-verification'   >Click here</a> to send the email verification link. Once verified, you can login using your email ID as well.`,
+        `Your email is not verified. Please login using your verified phone number. Or, <a class='underline text-primary cursor-pointer' role='button' id='resend-email-verification'   >Click here</a> to send the email verification link. Once verified, you can login using your email ID as well.`,
         { code: "EMAIL_NOT_VERIFIED" }
       );
     }
@@ -408,7 +408,6 @@ export class CustomerAuthService {
 
   async sendEmailVerification(customerId: number): Promise<boolean> {
     // Logic to send email verification (implementation not shown)
-    console.log(`Email verification sent for customer ${customerId}`);
 
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: {
@@ -448,7 +447,6 @@ export class CustomerAuthService {
         },
       });
 
-      // REMOVED: console.log(`Email verified for customer ${customerId}`);
       return true;
     } catch (error) {
       console.error("Email verification failed:", error);
@@ -457,8 +455,6 @@ export class CustomerAuthService {
   }
 
   async throwEmailOrPhoneExists(emailOrMob: string) {
-    console.log(emailOrMob);
-
     const user =
       await this.customerProfileService.getCustomerProfileByEmail(emailOrMob);
     if (user?.emailAddress && user.emailAddress === emailOrMob) {
@@ -469,7 +465,6 @@ export class CustomerAuthService {
       await this.customerProfileService.getCustomerProfileByPhone(
         "+91" + removeCountryCode(emailOrMob)
       );
-    console.log(userByPhone);
 
     if (
       userByPhone?.phoneNo &&

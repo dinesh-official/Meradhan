@@ -244,6 +244,7 @@ export const useLoginFormHook = () => {
     onSuccess: () => {
       // Clear error message and set success message
       dataStore.setErrorMessage("");
+      dataStore.setSuccessMessage("");
       dataStore.setSuccessMessage(
         "Verification email sent successfully. Please check your inbox."
       );
@@ -255,9 +256,12 @@ export const useLoginFormHook = () => {
           error.response?.data?.message ||
           error.message ||
           "Something went wrong";
+        dataStore.setSuccessMessage("");
         dataStore.setErrorMessage(errorMessage);
         toast.error(errorMessage);
       } else {
+        dataStore.setSuccessMessage("");
+        dataStore.setErrorMessage("Something went wrong");
         toast.error(error.message);
       }
     },
@@ -273,6 +277,8 @@ export const useLoginFormHook = () => {
   const handleSignInRequest = () => {
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
     requestLoginMutation.mutate();
   };
 
@@ -282,7 +288,8 @@ export const useLoginFormHook = () => {
   const handleSendOtp = () => {
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
-
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
     sendOtpMutation.mutate();
   };
 
@@ -292,7 +299,8 @@ export const useLoginFormHook = () => {
   const handleVerifyOtp = () => {
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
-
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
     if (state.otp.length !== 4) {
       dataStore.setErrorMessage("Please enter valid OTP");
       return;
@@ -307,7 +315,8 @@ export const useLoginFormHook = () => {
   const handleSignInWithPassword = () => {
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
-
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
     if (state.otp.length !== 0) {
       dataStore.setErrorMessage("Please enter valid OTP");
       return;
@@ -349,6 +358,8 @@ export const useLoginFormHook = () => {
   const handleResendEmailVerification = () => {
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
     resendEmailVerificationMutation.mutate();
   };
 

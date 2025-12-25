@@ -256,10 +256,9 @@ export class CustomerAuthController {
   }
 
   async sendVerifyEmail(req: Request, res: Response): Promise<void> {
-    console.log(req.customer);
-
+    // send email verification to the user c
     await this.customerAuthService.sendEmailVerification(req.customer!.id);
-    // Track successful email verification send for rate limiting
+    // Track successful email verification d
     await trackRateLimitSuccess(req, "email-verify");
     res.sendResponse({
       statusCode: HttpStatus.OK,
