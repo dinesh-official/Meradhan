@@ -112,10 +112,14 @@ const EnvSchema = z.object(
     NSDL_SECRET_KEY: z
       .string()
       .min(1, { message: "NSDL_SECRET_KEY is required" }),
+    NSDL_MODE: z
+      .string()
+      .min(1, { message: "NSDL_MODE  SECRET_KEY is required" }),
 
     // CDSL
     CDSL_AES_KEY: z.string().min(1, { message: "CDSL_AES_KEY is required" }),
     ENTITY_ID: z.string().min(1, { message: "ENTITY_ID is required" }),
+    CDSL_MODE: z.string().min(1, { message: "CDSL_MODE is required" }),
 
     // ✅ Add S3/Supabase credentials
     S3_ACCESS_KEY_ID: z.string().min(1, {

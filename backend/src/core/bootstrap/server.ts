@@ -122,6 +122,7 @@ export class ExpressServer implements IServer, IExpressRoute {
     this.app.use(express.json(), express.text({ type: "*/*" }));
     this.app.use(cookieParser());
     this.app.use(responseHandler);
+    this.app.use(express.static("public"));
 
     // add response time monitor -
     if (this.monitoring?.responseTimeHandler) {

@@ -146,11 +146,11 @@ export class KycProvider extends DigioKycFileHelper {
   private nsdlApi = new NSDLApi(
     env.NDSL_REQUESTOR_ID || "",
     env.NSDL_SECRET_KEY || "",
-    env.KRA_ENV === "PROD"
+    env.NSDL_MODE === "PROD"
   );
   private cdslApi = new CDSLApi({
     AESKey: env.CDSL_AES_KEY || "",
-    isProd: env.KRA_ENV === "PROD",
+    isProd: env.CDSL_MODE === "PROD",
   });
 
   // KYC STEP 1: PAN Verification ---------------------------------------------

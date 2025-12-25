@@ -58,7 +58,7 @@ export function FlowChart({
             {ytm?.toFixed(4)}%
           </span>
         </h3>
-        <small> (Current Yield: {yieldVal?.toFixed(4)}% )</small>
+        {/* <small> (Current Yield: {yieldVal?.toFixed(4)}% )</small> */}
       </div>
 
       <div className="lg:h-80 relative">

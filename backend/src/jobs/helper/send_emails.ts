@@ -100,7 +100,7 @@ export const sendCustomerWelcomeEmail = async (data: {
   await welcomeEmailSenderQueue.add(
     {
       ...data,
-      subject: `Welcome to MeraDhan – Your Journey to Secure Investments Begins!`,
+      subject: `Welcome to MeraDhan – Your Journey to Secure Investments Begins! ${getFormattedTimestamp()}`,
     },
     {
       removeOnComplete: true,

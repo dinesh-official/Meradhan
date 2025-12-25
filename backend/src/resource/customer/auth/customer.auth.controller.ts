@@ -6,7 +6,10 @@ import type { Request, Response } from "express";
 import { CustomerAuthService } from "./customer.auth.service";
 
 import { db } from "@core/database/database";
-import { sendCustomerSignupOtpEmail } from "@jobs/helper/send_emails";
+import {
+  sendCustomerSignupOtpEmail,
+  sendCustomerWelcomeEmail,
+} from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
 import {
   addMeradhanLoginBasedAuditLog,
@@ -88,6 +91,15 @@ export class CustomerAuthController {
       Number(id!),
       verifyBy as "email" | "mobile"
     );
+    // send welcome email
+    const userData = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: user.id },
+      select: { firstName: true, lastName: true },
+    });
+    await sendCustomerWelcomeEmail({
+      email: user.email,
+      userName: userData?.firstName + " " + userData?.lastName,
+    });
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: user,

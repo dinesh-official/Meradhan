@@ -389,12 +389,12 @@ export class CustomerAuthService {
     if (identifier == "email" && !user.utility.isEmailVerified) {
       if (!user.utility.isPhoneVerified && !user.utility.isEmailVerified) {
         throw new AppError(
-          "Your account is not verified. <span class='text-primary cursor-pointer underline' id='resend-email-verification' >Click here</span> to resend the verification link to your email.",
+          "This account hasn’t been verified yet. <a class='underline text-primary' role='button' id='resend-email-verification'  >Click here</a> to send a verification link to your email to activate your account.",
           { code: "EMAIL_NOT_VERIFIED" }
         );
       }
       throw new AppError(
-        "This email is not verified. Please login using your email ID and verify your email from the My Profile section.",
+        `Your email is not verified. Please login using your verified phone number. Or, <a class='underline text-primary' role='button' id='resend-email-verification'   >Click here</a> to send the email verification link. Once verified, you can login using your email ID as well.`,
         { code: "EMAIL_NOT_VERIFIED" }
       );
     }
@@ -457,6 +457,8 @@ export class CustomerAuthService {
   }
 
   async throwEmailOrPhoneExists(emailOrMob: string) {
+    console.log(emailOrMob);
+
     const user =
       await this.customerProfileService.getCustomerProfileByEmail(emailOrMob);
     if (user?.emailAddress && user.emailAddress === emailOrMob) {
@@ -467,6 +469,7 @@ export class CustomerAuthService {
       await this.customerProfileService.getCustomerProfileByPhone(
         "+91" + removeCountryCode(emailOrMob)
       );
+    console.log(userByPhone);
 
     if (
       userByPhone?.phoneNo &&
@@ -475,6 +478,7 @@ export class CustomerAuthService {
     ) {
       throw new Error("Phone number already exists");
     }
+
     return user;
   }
 

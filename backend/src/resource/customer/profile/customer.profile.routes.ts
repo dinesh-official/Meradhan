@@ -16,6 +16,7 @@ customerProfileRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.sendMobileOtpVerification(req, res)
 );
+
 customerProfileRoutes.post(
   "/api/auth/customer/profile/mobile/verify",
   allowAccessMiddleware("USER"),

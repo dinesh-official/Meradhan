@@ -1,8 +1,7 @@
-import MeraDhanEmailVerificationEmail from "@emails/email_verification";
-import MeraDhanForgotPasswordEmail from "@emails/forgot_password";
-import MeraDhanPasswordResetSuccessEmail from "@emails/reset_password_sucess";
-import MeraDhanWelcomeEmail from "@emails/welcome";
-import { render } from "@react-email/render";
+import { meraDhanEmailVerificationEmailText } from "@emails/text/meraDhanEmailVerificationEmailText";
+import { meraDhanForgotPasswordEmailText } from "@emails/text/meraDhanForgotPasswordEmailText";
+import { meraDhanPasswordResetSuccessEmailText } from "@emails/text/meraDhanPasswordResetSuccessEmailText";
+import { meraDhanWelcomeEmailText } from "@emails/text/meraDhanWelcomeEmailText";
 import type { Job } from "bull";
 import { EmailCommunication } from "../communication/email_communication";
 import { startQueueWorker } from "./helper/start_queue_worker_helper";
@@ -16,16 +15,16 @@ import {
 startQueueWorker(welcomeEmailSenderQueue, async (job: Job) => {
   const emailSend = new EmailCommunication();
   const { email, userName, subject } = job.data;
-  console.log("Sending Email - " + email);
-  const emailHtml = await render(
-    MeraDhanWelcomeEmail({
-      userName,
-    })
-  );
+  // const emailHtml = await render(
+  //   MeraDhanWelcomeEmail({
+  //     userName,
+  //   })
+  // );
   await emailSend.sendEmail({
     to: email,
     subject: subject,
-    html: emailHtml,
+    // html: emailHtml,
+    html: meraDhanWelcomeEmailText({ userName }),
   });
 });
 
@@ -37,33 +36,33 @@ startQueueWorker(forgotPasswordLinkSenderQueue, async (job: Job) => {
     link: string;
     subject: string;
   };
-  console.log("Sending Email - " + email);
-  const emailHtml = await render(
-    MeraDhanForgotPasswordEmail({
-      userName,
-      resetLink: link,
-    })
-  );
+
+  // const emailHtml = await render(
+  //   MeraDhanForgotPasswordEmail({
+  //     userName,
+  //     resetLink: link,
+  //   })
+  // );
   await emailSend.sendEmail({
     to: email,
     subject: subject,
-    html: emailHtml,
+    html: meraDhanForgotPasswordEmailText({ userName, resetLink: link }),
   });
 });
 
 startQueueWorker(successResetPasswordQueue, async (job: Job) => {
   const emailSend = new EmailCommunication();
   const { email, userName, subject } = job.data;
-  console.log("Sending Email - " + email);
-  const emailHtml = await render(
-    MeraDhanPasswordResetSuccessEmail({
-      userName,
-    })
-  );
+
+  // const emailHtml = await render(
+  //   MeraDhanPasswordResetSuccessEmail({
+  //     userName,
+  //   })
+  // );
   await emailSend.sendEmail({
     to: email,
     subject: subject,
-    html: emailHtml,
+    html: meraDhanPasswordResetSuccessEmailText({ userName }),
   });
 });
 
@@ -75,16 +74,18 @@ startQueueWorker(emailVerificationQueue, async (job: Job) => {
     link: string;
     subject: string;
   };
-  console.log("Sending Email Verification - " + email);
-  const emailHtml = await render(
-    MeraDhanEmailVerificationEmail({
-      userName,
-      verificationLink: link,
-    })
-  );
+  // const emailHtml = await render(
+  //   MeraDhanEmailVerificationEmail({
+  //     userName,
+  //     verificationLink: link,
+  //   })
+  // );
   await emailSend.sendEmail({
     to: email,
     subject: subject,
-    html: emailHtml,
+    html: meraDhanEmailVerificationEmailText({
+      userName,
+      verificationLink: link,
+    }),
   });
 });
