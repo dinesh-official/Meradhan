@@ -117,11 +117,12 @@ export class ExpressServer implements IServer, IExpressRoute {
     this.app.use(morgan("common"));
     this.app.use(helmet());
     // Files should be served via signed URLs only - static serving removed for security
-
+    this.app.use("/uploads", express.static("uploads"));
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json(), express.text({ type: "*/*" }));
     this.app.use(cookieParser());
     this.app.use(responseHandler);
+    this.app.use(express.static("public"));
 
     // add response time monitor -
     if (this.monitoring?.responseTimeHandler) {
@@ -141,7 +142,7 @@ export class ExpressServer implements IServer, IExpressRoute {
     if (this.middlewares.length != 0) this.app.use(this.middlewares);
     if (this.routes.length != 0) this.app.use(this.routes);
 
-    this.app.get("/health", (req, res) => {
+    this.app.all("/health", (req, res) => {
       res.sendResponse({
         statusCode: HttpStatus.OK,
         message: "Server is healthy",

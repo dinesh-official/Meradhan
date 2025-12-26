@@ -51,7 +51,6 @@ function BondsWatchList() {
       <NeedKyc
         key={4}
         title={`No Bonds In WatchList`}
-        desc={`to add risk profile!`}
         buttonText="Explore Bonds"
       />
     );

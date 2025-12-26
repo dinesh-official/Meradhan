@@ -99,7 +99,8 @@ export const useDematAccountFormHook = () => {
     },
     onError(error) {
       if (error instanceof ApiError) {
-        const errorMessage = error.response?.data?.message || error.message;
+        const errorMessage =
+          error.response?.data?.message || "Failed To Verify Demat Account";
         Swal.fire({
           imageUrl: "/images/icons/sad-emoji.svg",
           title: "Demat verification Failed!",

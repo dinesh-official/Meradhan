@@ -81109,6 +81109,6 @@ const cdslDp = [
 ];
 
 export const findCdslDpId = (id: string) => {
-  const data = cdslDp.find((e) => e["DP ID"].includes(id));
+  const data = cdslDp.find((e) => id.includes(e["DP Name"]));
   return data?.["DP Name"];
 };

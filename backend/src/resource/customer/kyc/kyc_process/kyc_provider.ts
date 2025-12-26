@@ -21,7 +21,7 @@ class DigioKycFileHelper {
   constructor(private digioSdk: DigioSDK) {}
 
   // get pan aadhar document files from digio rid
-  async getPanAadharDocumentFiles(bytes: string) {
+  async getPanAadharDocumentFiles(bytes: string, userName?: string) {
     const zipBuffer = Buffer.from(bytes);
     const zip = new AdmZip(zipBuffer);
 
@@ -79,11 +79,11 @@ class DigioKycFileHelper {
 
     const aadharUrl = await saveFileOnCloud({
       filePath: pathData.aadhar!,
-      directory: "kyc/aadhar/document",
+      directory: `${userName ? userName + "/" : ""}kyc`,
     });
     const panUrl = await saveFileOnCloud({
       filePath: pathData.pan!,
-      directory: "kyc/pan/document",
+      directory: `${userName ? userName + "/" : ""}kyc`,
     });
     return {
       aadhar: aadharUrl,
@@ -146,11 +146,11 @@ export class KycProvider extends DigioKycFileHelper {
   private nsdlApi = new NSDLApi(
     env.NDSL_REQUESTOR_ID || "",
     env.NSDL_SECRET_KEY || "",
-    env.KRA_ENV === "PROD"
+    env.NSDL_MODE === "PROD"
   );
   private cdslApi = new CDSLApi({
     AESKey: env.CDSL_AES_KEY || "",
-    isProd: env.KRA_ENV === "PROD",
+    isProd: env.CDSL_MODE === "PROD",
   });
 
   // KYC STEP 1: PAN Verification ---------------------------------------------
@@ -289,6 +289,8 @@ export class KycProvider extends DigioKycFileHelper {
             ?.response?.data?.ErrorDescription ||
             (error as AxiosError<{ error: string; message?: string }>)?.response
               ?.data?.error ||
+            (error as AxiosError<{ error: string; message?: string }>)?.response
+              ?.data?.message ||
             error.toString(),
           { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 }
         );
@@ -324,11 +326,11 @@ export class KycProvider extends DigioKycFileHelper {
   }
 
   // get esign pdf from digio document id
-  async getEsignPdf(document_id: string) {
+  async getEsignPdf(document_id: string, userName?: string) {
     const pdfData = await this.digio.getSignatureEsignPdf(document_id);
     const url = this.getFileBytesPath(pdfData, {
       name: "esign.pdf",
-      path: "kyc/esign",
+      path: `${userName ? userName + "/" : ""}kyc/esign`,
     });
     return url;
   }

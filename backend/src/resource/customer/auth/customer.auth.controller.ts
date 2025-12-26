@@ -6,7 +6,10 @@ import type { Request, Response } from "express";
 import { CustomerAuthService } from "./customer.auth.service";
 
 import { db } from "@core/database/database";
-import { sendCustomerSignupOtpEmail } from "@jobs/helper/send_emails";
+import {
+  sendCustomerSignupOtpEmail,
+  sendCustomerWelcomeEmail,
+} from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
 import {
   addMeradhanLoginBasedAuditLog,
@@ -88,6 +91,15 @@ export class CustomerAuthController {
       Number(id!),
       verifyBy as "email" | "mobile"
     );
+    // send welcome email
+    const userData = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: user.id },
+      select: { firstName: true, lastName: true },
+    });
+    await sendCustomerWelcomeEmail({
+      email: user.email,
+      userName: userData?.firstName + " " + userData?.lastName,
+    });
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: user,
@@ -244,10 +256,9 @@ export class CustomerAuthController {
   }
 
   async sendVerifyEmail(req: Request, res: Response): Promise<void> {
-    console.log(req.customer);
-
+    // send email verification to the user c
     await this.customerAuthService.sendEmailVerification(req.customer!.id);
-    // Track successful email verification send for rate limiting
+    // Track successful email verification d
     await trackRateLimitSuccess(req, "email-verify");
     res.sendResponse({
       statusCode: HttpStatus.OK,

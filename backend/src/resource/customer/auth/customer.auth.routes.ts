@@ -2,12 +2,11 @@ import { Router } from "express";
 
 import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 import { CustomerAuthController } from "./customer.auth.controller";
-import { ForgetPasswordController } from "./password/forget_password.controller";
 import {
   otpSendRateLimiter,
   otpVerifyRateLimiter,
-  emailVerifyRateLimiter,
 } from "./customer.auth.ratelimit";
+import { ForgetPasswordController } from "./password/forget_password.controller";
 
 const customerAuthRoutes = Router();
 const controller = new CustomerAuthController();
@@ -18,12 +17,12 @@ customerAuthRoutes.all(
   (req, res) => controller.session(req, res)
 );
 
-// signup
+// signup email and mobile verification
 customerAuthRoutes.post(
   "/api/auth/customer/send-signup-mobile-verify",
-
   (req, res) => controller.sendAuthMobileOtp(req, res)
 );
+// signup email verification
 customerAuthRoutes.post(
   "/api/auth/customer/send-signup-email-verify",
   (req, res) => controller.sendAuthEmailOtp(req, res)
@@ -50,10 +49,8 @@ customerAuthRoutes.post(
   otpSendRateLimiter,
   (req, res) => controller.signInWithOtpSend(req, res)
 );
-customerAuthRoutes.post(
-  "/api/auth/customer/signin/with-otp",
-  otpVerifyRateLimiter,
-  (req, res) => controller.signInWithOtpVerify(req, res)
+customerAuthRoutes.post("/api/auth/customer/signin/with-otp", (req, res) =>
+  controller.signInWithOtpVerify(req, res)
 );
 
 // logout
@@ -77,18 +74,14 @@ customerAuthRoutes.post(
 customerAuthRoutes.get(
   "/api/auth/customer/send-verify-email",
   allowAccessMiddleware("USER"),
-  emailVerifyRateLimiter,
   (req, res) => controller.sendVerifyEmail(req, res)
 );
-customerAuthRoutes.get(
-  "/api/auth/customer/verify-email",
-  emailVerifyRateLimiter,
-  (req, res) => controller.verifyEmail(req, res)
+customerAuthRoutes.get("/api/auth/customer/verify-email", (req, res) =>
+  controller.verifyEmail(req, res)
 );
 
 customerAuthRoutes.post(
   "/api/auth/customer/resend-email-verification",
-  emailVerifyRateLimiter,
   (req, res) => controller.resendEmailVerificationForUnverifiedUser(req, res)
 );
 

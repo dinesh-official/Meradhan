@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
+import { env } from "@packages/config/env";
 import { pdfUrlToBase64 } from "./helper";
 import { getStateSortCode } from "./states/getStateSortCode";
 
@@ -445,7 +446,8 @@ const getAddress = (data: Root) => {
   };
 };
 
-const getSignatureUrl = (data: Root): string => data.step_1?.sign?.url || "";
+const getSignatureUrl = (data: Root): string =>
+  env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.sign?.url || "";
 
 const getInvestmentExperience = (data: Root): string => {
   const experienceQuestion = data.step_5?.find((q) =>
@@ -511,8 +513,8 @@ export const mapDataForPage1 = (data: Root): Page1Props => ({
   residentialStatus: data.step_2?.residentialStatus || "",
   occupationType: data.step_2?.occupationType || "",
   verifyWith: "AADHAAR",
-  profilePic: data.step_1?.face?.url || "",
-  signature: data.step_1?.sign?.url || "",
+  profilePic: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.face?.url || "",
+  signature: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.sign?.url || "",
 });
 
 export const mapDataForPage2 = (data: Root): Page2Props => {
@@ -592,7 +594,8 @@ export const mapDataForPage5 = (data: Root): Page5Props => ({
 export const mapDataForPage6 = async (data: Root): Promise<Page6Props> => ({
   eAaDhar: data.step_1?.pan?.response?.details?.aadhaar?.file_url
     ? await pdfUrlToBase64(
-        data.step_1?.pan?.response?.details?.aadhaar?.file_url || ""
+        env.NEXT_PUBLIC_BACKEND_HOST_URL +
+          data.step_1?.pan?.response?.details?.aadhaar?.file_url || ""
       )
     : "",
 });
@@ -600,17 +603,18 @@ export const mapDataForPage6 = async (data: Root): Promise<Page6Props> => ({
 export const mapDataForPage7 = async (data: Root): Promise<Page7Props> => ({
   ePan: data.step_1?.pan?.response?.details?.pan?.file_url
     ? await pdfUrlToBase64(
-        data.step_1?.pan?.response?.details?.pan?.file_url || ""
+        env.NEXT_PUBLIC_BACKEND_HOST_URL +
+          data.step_1?.pan?.response?.details?.pan?.file_url || ""
       )
     : "",
 });
 
 export const mapDataForPage8 = (data: Root): Page8Props => ({
-  face: data.step_1?.face?.url || "",
+  face: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.face?.url || "",
 });
 
 export const mapDataForPage9 = (data: Root): Page9Props => ({
-  sign: data.step_1?.sign?.url || "",
+  sign: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.sign?.url || "",
 });
 
 export const mapDataForPage10 = (data: Root): Page10Props => ({});
