@@ -18,6 +18,7 @@ const EnvSchema = z.object(
     NEXT_PUBLIC_HOST_URL: z.url({
       message: "NEXT_PUBLIC_HOST_URL must be a valid URL",
     }),
+    NEXT_PUBLIC_BACKEND_HOST_URL: z.url().optional(),
     PORT: z.string().regex(/^\d+$/, { message: "PORT must be a number" }),
     JWT_SECRET: z.string().min(1, { message: "JWT_SECRET is required" }),
 
@@ -101,6 +102,7 @@ const EnvSchema = z.object(
       .default("0.1"),
 
     // DIGIO
+    NEXT_PUBLIC_DIGIO: z.string().optional(),
     DIGIO_USERNAME_PASS: z
       .string()
       .min(1, { message: "DIGIO_USERNAME_PASS is required" }),

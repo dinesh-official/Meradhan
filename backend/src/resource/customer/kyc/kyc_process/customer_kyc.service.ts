@@ -45,17 +45,20 @@ export class CustomerKycKycService {
   }
 
   // get pan aadhar document files
-  async getPanAadharDocumentFiles(kid: string) {
+  async getPanAadharDocumentFiles(kid: string, userName?: string) {
     const bytes = await this.kycProvider.getMediaFileDataBytes(kid);
-    const files = await this.kycProvider.getPanAadharDocumentFiles(bytes);
+    const files = await this.kycProvider.getPanAadharDocumentFiles(
+      bytes,
+      userName
+    );
     return files;
   }
 
   // aadhar profile image
-  async getAadharProfileImage(imageString: string) {
+  async getAadharProfileImage(imageString: string, userName?: string) {
     const files = await this.kycProvider.getBash64File(imageString, {
       name: "profile.png",
-      path: "kyc/aadhar/profile",
+      path: `${userName ? userName + "/" : ""}kyc`,
     });
     return files;
   }
@@ -90,7 +93,13 @@ export class CustomerKycKycService {
   }
 
   // selfie verify response
-  async verifySelfieResponse({ kid }: { kid: string }) {
+  async verifySelfieResponse({
+    kid,
+    userName,
+  }: {
+    kid: string;
+    userName?: string;
+  }) {
     const selfieDetails = await this.kycProvider.verifySelfie({ kid: kid });
     if (!selfieDetails.actions[0]?.file_id) {
       throw new AppError("User profile Not Found", {
@@ -103,7 +112,7 @@ export class CustomerKycKycService {
     );
     const image = await this.kycProvider.getBash64File(bytes, {
       name: "selfie.jpeg",
-      path: "kyc/selfie",
+      path: `${userName ? userName + "/" : ""}kyc`,
     });
     selfieDetails.file_url = image;
 
@@ -140,7 +149,13 @@ export class CustomerKycKycService {
   }
 
   // sign verify response
-  async verifySignResponse({ kid }: { kid: string }) {
+  async verifySignResponse({
+    kid,
+    userName,
+  }: {
+    kid: string;
+    userName?: string;
+  }) {
     const selfieDetails = await this.kycProvider.verifySign({ kid: kid });
     if (!selfieDetails.actions[0]?.file_id) {
       throw new AppError("User profile Not Found", {
@@ -153,7 +168,7 @@ export class CustomerKycKycService {
     );
     const image = await this.kycProvider.getBash64File(bytes, {
       name: "sign.jpeg",
-      path: "kyc/sign",
+      path: `${userName ? userName + "/" : ""}kyc/sign`,
     });
     selfieDetails.file_url = image;
 
@@ -255,8 +270,12 @@ export class CustomerKycKycService {
   }
 
   // download esign pdf
-  async downloadEsignPdf(document_id: string, customerId: number) {
-    const pdfUrl = await this.kycProvider.getEsignPdf(document_id);
+  async downloadEsignPdf(
+    document_id: string,
+    customerId: number,
+    userName?: string
+  ) {
+    const pdfUrl = await this.kycProvider.getEsignPdf(document_id, userName);
     // set kyc status
     const store = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: customerId },

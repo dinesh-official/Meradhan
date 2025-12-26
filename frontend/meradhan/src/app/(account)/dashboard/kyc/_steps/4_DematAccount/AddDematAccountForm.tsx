@@ -27,6 +27,8 @@ import {
 } from "../../_store/useKycDataStorage";
 import ManageDematPanInputs from "./_elements/ManageDematPanInputs";
 import { useDematAccountFormHook } from "./_hooks/useDematAccountFormHook";
+import { findDpId } from "../../_utils/nsdlDpid";
+import { findCdslDpId } from "../../_utils/cdslDpid";
 
 function AddDematAccountForm() {
   const { updateDepository, state, removeDepository, nextLocalStep } =
@@ -75,10 +77,7 @@ function AddDematAccountForm() {
         <div className="flex flex-col gap-3 md:gap-5">
           {/* 3 for CDSL  */}
           <div
-            className={cn(
-              "gap-3 md:gap-5 grid md:grid-cols-2 lg:grid-cols-4",
-
-            )}
+            className={cn("gap-3 md:gap-5 grid md:grid-cols-2 lg:grid-cols-4")}
           >
             <LabelInput
               label="Depository Name"
@@ -88,6 +87,7 @@ function AddDematAccountForm() {
               <Select
                 value={data?.depositoryName}
                 onValueChange={(e) => {
+                  updateData("depositoryParticipantName", "");
                   updateData("depositoryName", e);
                   // Clear DP ID if changing from NSDL to CDSL
                   if (e === "CDSL") {
@@ -105,15 +105,21 @@ function AddDematAccountForm() {
               </Select>
             </LabelInput>
 
-
-
-
             {/* // Only for NSDL */}
             {data.depositoryName == "NSDL" && (
               <LabelInput label="DP ID" required error={error?.dpId?.[0]}>
                 <Input
                   value={data?.dpId}
-                  onChange={(e) => updateData("dpId", e.target.value)}
+                  onChange={(e) => {
+                    updateData("dpId", e.target.value);
+                    if (data.depositoryName == "NSDL") {
+                      const name = findDpId(e.target.value);
+                      updateData("depositoryParticipantName", name || "");
+                    } else if (data.depositoryName == "CDSL") {
+                      const name = findCdslDpId(e.target.value);
+                      updateData("depositoryParticipantName", name || "");
+                    }
+                  }}
                 />
               </LabelInput>
             )}
@@ -127,9 +133,13 @@ function AddDematAccountForm() {
             >
               <Input
                 value={data.beneficiaryClientId}
-                onChange={(e) =>
-                  updateData("beneficiaryClientId", e.target.value)
-                }
+                onChange={(e) => {
+                  updateData("beneficiaryClientId", e.target.value);
+                  if (data.depositoryName == "CDSL") {
+                    const name = findCdslDpId(e.target.value);
+                    updateData("depositoryParticipantName", name || "");
+                  }
+                }}
               />
             </LabelInput>
 
@@ -174,18 +184,20 @@ function AddDematAccountForm() {
           )}
 
           <div className="gap-3 md:gap-5 grid md:grid-cols-3">
-            {/* <LabelInput
+            <LabelInput
               label="Depository Participant Name"
               required
               error={error?.depositoryParticipantName?.[0]}
             >
               <Input
+                disabled
+                adminMode
                 value={data?.depositoryParticipantName}
                 onChange={(e) =>
                   updateData("depositoryParticipantName", e.target.value)
                 }
               />
-            </LabelInput> */}
+            </LabelInput>
 
             {/* //  Primary Account Holder Details (PAN & Name) - Auto filled from Step 1 */}
             <LabelInput
@@ -201,8 +213,8 @@ function AddDematAccountForm() {
                     ...data.panNumber?.slice(1),
                   ])
                 }
-              // disabled
-              // adminMode
+                // disabled
+                // adminMode
               />
             </LabelInput>
 
@@ -258,7 +270,8 @@ function AddDematAccountForm() {
           onClick={handelSubmit}
           disabled={isPending}
         >
-          Continue to Verify  <div className="flex justify-center items-center p-0 h-full">
+          Continue to Verify{" "}
+          <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
         </Button>

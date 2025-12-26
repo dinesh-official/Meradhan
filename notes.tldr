@@ -702,7 +702,7 @@
 							"content": [
 								{
 									"type": "text",
-									"text": "Day Count -  "
+									"text": "Day Count - "
 								}
 							]
 						},
@@ -1108,9 +1108,9 @@
 			"typeName": "shape"
 		},
 		{
-			"x": -4043.236320622498,
-			"y": -15478.722423828638,
-			"z": 0.8724701134443212,
+			"x": -4101.451713236941,
+			"y": -15291.411054083896,
+			"z": 0.9219004408007487,
 			"meta": {},
 			"id": "camera:page:page",
 			"typeName": "camera"
@@ -2105,10 +2105,12 @@
 			"typeName": "shape"
 		},
 		{
-			"editingShapeId": null,
+			"editingShapeId": "shape:Bc_Uzl0hdCNPmk-krRrQ9",
 			"croppingShapeId": null,
-			"selectedShapeIds": [],
-			"hoveredShapeId": null,
+			"selectedShapeIds": [
+				"shape:Bc_Uzl0hdCNPmk-krRrQ9"
+			],
+			"hoveredShapeId": "shape:Bc_Uzl0hdCNPmk-krRrQ9",
 			"erasingShapeIds": [],
 			"hintingShapeIds": [],
 			"focusedGroupId": null,
@@ -4281,9 +4283,7 @@
 		{
 			"followingUserId": null,
 			"opacityForNextShape": 1,
-			"stylesForNextShape": {
-				"tldraw:color": "black"
-			},
+			"stylesForNextShape": {},
 			"brush": null,
 			"scribbles": [],
 			"cursor": {
@@ -4298,7 +4298,7 @@
 				"x": 0,
 				"y": 0,
 				"w": 1272,
-				"h": 868
+				"h": 609
 			},
 			"insets": [
 				false,

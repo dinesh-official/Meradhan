@@ -117,7 +117,7 @@ export class ExpressServer implements IServer, IExpressRoute {
     this.app.use(morgan("common"));
     this.app.use(helmet());
     // Files should be served via signed URLs only - static serving removed for security
-
+    this.app.use("/uploads", express.static("uploads"));
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json(), express.text({ type: "*/*" }));
     this.app.use(cookieParser());

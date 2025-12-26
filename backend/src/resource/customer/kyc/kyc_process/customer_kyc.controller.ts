@@ -4,6 +4,7 @@ import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import fs from "fs";
 import path from "path";
+import { db } from "@core/database/database";
 
 export class CustomerKycKycController {
   private panKycService = new CustomerKycKycService();
@@ -25,6 +26,12 @@ export class CustomerKycKycController {
   // pan verify response
   async verifyPanResponse(req: Request, res: Response) {
     const kid = req.params.kid!;
+    const id = req.customer?.id;
+    const user = await db.dataBase.customerProfileDataModel.findFirst({
+      where: {
+        id,
+      },
+    });
     // verify pan response from digio
     const response = await this.panKycService.verifyPanResponse({ kid });
     console.log(response.status);
@@ -53,10 +60,12 @@ export class CustomerKycKycController {
     // fetch aadhar and pan document files
     const kycdata = response.actions?.[0];
     const aadharData = await this.panKycService.getPanAadharDocumentFiles(
-      kycdata.execution_request_id
+      kycdata.execution_request_id,
+      user?.userName
     );
     const aadharImage = await this.panKycService.getAadharProfileImage(
-      kycdata.details.aadhaar.image
+      kycdata.details.aadhaar.image,
+      user?.userName
     );
 
     // append file urls to kyc data response
@@ -87,7 +96,16 @@ export class CustomerKycKycController {
   // selfie verify response
   async verifySelfieResponse(req: Request, res: Response) {
     const kid = req.params.kid!;
-    const response = await this.panKycService.verifySelfieResponse({ kid });
+    const id = req.customer?.id;
+    const user = await db.dataBase.customerProfileDataModel.findFirst({
+      where: {
+        id,
+      },
+    });
+    const response = await this.panKycService.verifySelfieResponse({
+      kid,
+      userName: user?.userName,
+    });
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,
@@ -111,7 +129,16 @@ export class CustomerKycKycController {
   // sign verify response
   async verifySignResponse(req: Request, res: Response) {
     const kid = req.params.kid!;
-    const response = await this.panKycService.verifySignResponse({ kid });
+    const id = req.customer?.id;
+    const user = await db.dataBase.customerProfileDataModel.findFirst({
+      where: {
+        id,
+      },
+    });
+    const response = await this.panKycService.verifySignResponse({
+      kid,
+      userName: user?.userName,
+    });
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,
@@ -151,6 +178,7 @@ export class CustomerKycKycController {
   // e-sign request
   async getEsignRequest(req: Request, res: Response) {
     const id = req.customer!.id;
+
     const data = await this.panKycService.reqEsignPdf(id);
     res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -162,7 +190,17 @@ export class CustomerKycKycController {
   async verifyEsignResponse(req: Request, res: Response) {
     const doc = req.params.doc!;
     const userId = req.customer!.id;
-    const data = await this.panKycService.downloadEsignPdf(doc, userId);
+
+    const user = await db.dataBase.customerProfileDataModel.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+    const data = await this.panKycService.downloadEsignPdf(
+      doc,
+      userId,
+      user?.userName
+    );
 
     res.sendResponse({
       statusCode: HttpStatus.OK,
