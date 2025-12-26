@@ -34,7 +34,7 @@ export const useSignUpAuthFlow = () => {
   const { trackActivity } = useUserTracking();
 
   const timer = useTimer({
-    duration: 10,
+    duration: 180,
     isCountdown: true,
 
     onFinish: () => {
