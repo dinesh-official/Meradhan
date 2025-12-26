@@ -626,6 +626,106 @@
 			"typeName": "shape"
 		},
 		{
+			"x": 4139.878301420895,
+			"y": 15571.433047248018,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:Bc_Uzl0hdCNPmk-krRrQ9",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "m",
+				"w": 1249,
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1,
+				"richText": {
+					"type": "doc",
+					"attrs": {
+						"dir": "auto"
+					},
+					"content": [
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "issue date - No upper Then Maturity date"
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "Maturity Date - No lower Then Maturity date"
+								},
+								{
+									"type": "hardBreak",
+									"attrs": {
+										"dir": "auto"
+									}
+								},
+								{
+									"type": "text",
+									"text": "Coupon Date - No lower Then Maturity date"
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "Last coupon Date -  Make based coupon frequency date over flow max 3 - 5 days mot allow todaye "
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "Day Count -  "
+								}
+							]
+						},
+						{
+							"type": "paragraph",
+							"attrs": {
+								"dir": "auto"
+							},
+							"content": [
+								{
+									"type": "text",
+									"text": "Purchase/ Settlement Date -  allow yesterday or today next 3 days"
+								}
+							]
+						}
+					]
+				}
+			},
+			"parentId": "page:page",
+			"index": "b0bORFUwG",
+			"typeName": "shape"
+		},
+		{
 			"x": 0,
 			"y": 0,
 			"rotation": 0,
@@ -1008,9 +1108,9 @@
 			"typeName": "shape"
 		},
 		{
-			"x": 366.2695026908468,
-			"y": 2777.7780722110365,
-			"z": 0.05,
+			"x": -4043.236320622498,
+			"y": -15478.722423828638,
+			"z": 0.8724701134443212,
 			"meta": {},
 			"id": "camera:page:page",
 			"typeName": "camera"
@@ -4181,7 +4281,9 @@
 		{
 			"followingUserId": null,
 			"opacityForNextShape": 1,
-			"stylesForNextShape": {},
+			"stylesForNextShape": {
+				"tldraw:color": "black"
+			},
 			"brush": null,
 			"scribbles": [],
 			"cursor": {
@@ -4195,8 +4297,8 @@
 			"screenBounds": {
 				"x": 0,
 				"y": 0,
-				"w": 1009,
-				"h": 708
+				"w": 1272,
+				"h": 868
 			},
 			"insets": [
 				false,
@@ -4213,7 +4315,7 @@
 			"isFocused": true,
 			"devicePixelRatio": 1,
 			"isCoarsePointer": false,
-			"isHoveringCanvas": null,
+			"isHoveringCanvas": true,
 			"openMenus": [],
 			"isChangingStyle": false,
 			"isReadonly": false,
