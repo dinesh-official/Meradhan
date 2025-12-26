@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { API_SERVER_URL } from "@/global/constants/domains";
+import { API_LOCAL_URL, API_SERVER_URL } from "@/global/constants/domains";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import Link from "next/link";
 import { FaDownload } from "react-icons/fa";
@@ -22,21 +22,25 @@ function KycESign() {
   const { handleEsignKyc, isPending } = useHandelEsignKyc();
   const { state, setStep6Data } = useKycDataStorage();
   const { cookies } = useAppCookie();
-  const [clicks, setClicks] = useState(0)
+  const [clicks, setClicks] = useState(0);
 
   return (
-    <Card accountMode className="gap-0 text-black" >
-      <CardHeader accountMode className="gap-0 p-0" >
+    <Card accountMode className="gap-0 text-black">
+      <CardHeader accountMode className="gap-0 p-0">
         <CardTitle className="font-normal">Kyc Form Generation</CardTitle>
         <CardDescription className="mt-6 p-0">
           KYC form generated successfully. Download the form and review it
           before you proceed to e-sign.
         </CardDescription>
       </CardHeader>
-      <CardContent accountMode className="pt-0" >
+      <CardContent accountMode className="pt-0">
         <div className="flex flex-col">
           <Link
-            href={clicks <= 3 ? `${API_SERVER_URL}/customer/kyc/download-pdf/${cookies?.userId}` : "#"}
+            href={
+              clicks <= 3
+                ? `${API_LOCAL_URL}/customer/kyc/download-pdf/${cookies?.userId}`
+                : "#"
+            }
             target="_blank"
             onClick={() => setClicks(clicks + 1)}
             download
