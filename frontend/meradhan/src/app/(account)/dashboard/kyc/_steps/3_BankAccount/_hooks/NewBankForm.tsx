@@ -95,7 +95,7 @@ function NewBankForm({
             <LabelInput label="IFSC Code" required error={error?.ifscCode?.[0]}>
               <Input
                 onChange={(e) => {
-                  updateData("ifscCode", e.target.value);
+                  updateData("ifscCode", e.target.value.toUpperCase());
                   if (e.target.value.length >= 11) {
                     fetchBankIfsc?.();
                   }
@@ -163,7 +163,8 @@ function NewBankForm({
           className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handleBankAccountSubmit}
         >
-          Continue to Verify  <div className="flex justify-center items-center p-0 h-full">
+          Continue to Verify{" "}
+          <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
         </Button>
