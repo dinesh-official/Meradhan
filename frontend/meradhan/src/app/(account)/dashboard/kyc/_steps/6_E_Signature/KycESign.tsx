@@ -35,26 +35,27 @@ function KycESign() {
       </CardHeader>
       <CardContent accountMode className="pt-0">
         <div className="flex flex-col">
-          <Link
-            href={
-              clicks <= 3
-                ? `${API_LOCAL_URL}/customer/kyc/download-pdf/${cookies?.userId}`
-                : "#"
-            }
-            target="_blank"
-            onClick={() => setClicks(clicks + 1)}
-            download
-            className="my-6"
-          >
-            <Button
-              size={`lg`}
-              variant={`defaultLight`}
-              className="gap-5 w-56 font-medium"
-              disabled={clicks >= 3}
+          <div className="my-6">
+            <Link
+              href={
+                clicks <= 3
+                  ? `${API_LOCAL_URL}/customer/kyc/download-pdf/${cookies?.userId}`
+                  : "#"
+              }
+              target="_blank"
+              onClick={() => setClicks(clicks + 1)}
+              download
             >
-              Download KYC Form <FaDownload />{" "}
-            </Button>
-          </Link>
+              <Button
+                size={`lg`}
+                variant={`defaultLight`}
+                className="gap-5 w-56 font-medium"
+                disabled={clicks >= 3}
+              >
+                Download KYC Form <FaDownload />{" "}
+              </Button>
+            </Link>
+          </div>
           <p className="font-medium text-lg">Final Step - Proceed to e-Sign</p>
           <div className="flex flex-col gap-4 mt-4 text-sm">
             <p>

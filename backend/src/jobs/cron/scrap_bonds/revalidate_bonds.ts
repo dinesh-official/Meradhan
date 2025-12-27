@@ -1,6 +1,6 @@
 import { EmailCommunication } from "@communication/email_communication";
 import { db } from "@core/database/database";
-import { env } from "@packages/config/src/env";
+import { formatDateTime } from "@jobs/kra_worker/KraWorker.service";
 import { NsdlBondProcessor } from "./nsdl_bond_processor";
 import { NsdlBondService } from "./nsdl_bond_service";
 
@@ -135,8 +135,9 @@ export const revalidateBonds = async () => {
   try {
     const emailer = new EmailCommunication();
     await emailer.sendEmail({
-      to: env.SMTP_SENDER,
-      subject: "NSDL Bond Revalidation Summary",
+      // to: env.SMTP_SENDER,
+      to: "sandeep.dhingra@meradhan.co,vikas.kukreja@meradhan.co,adarsh@meradhan.co",
+      subject: "NSDL Bond Revalidation Summary " + formatDateTime(new Date()),
       text: emailContent,
     });
     console.log("Update email sent successfully.");

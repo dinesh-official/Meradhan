@@ -103,7 +103,8 @@ function Page10() {
           return (
             <View
               style={tw(
-                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs  ${i == 0 && "border-t"
+                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs  ${
+                  i == 0 && "border-t"
                 }`
               )}
             >
@@ -126,7 +127,8 @@ function Page10() {
           return (
             <View
               style={tw(
-                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs ${i == 0 && "border-t"
+                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs ${
+                  i == 0 && "border-t"
                 }`
               )}
             >
@@ -168,7 +170,8 @@ function Page10() {
         <View style={tw(`flex gap-3 flex-row`)}>
           <Text style={tw(`font-[600]`)}>Registered Office:</Text>
           <Text>
-            2703, Ashok Tower 'D', Dr. SSR Marg, Parel, Mumbai- 400012, Maharashtra
+            2703, Ashok Tower 'D', Dr. SSR Marg, Parel, Mumbai- 400012,
+            Maharashtra
           </Text>
         </View>
         <View style={tw(`flex gap-3 flex-row w-full`)}>
@@ -182,7 +185,7 @@ function Page10() {
         <View style={tw(`flex gap-3 flex-row`)}>
           <Text style={tw(`font-[600]`)}>Compliance Officer:</Text>
           <Text style={{ lineHeight: 0.8 }}>
-            Mr. Sandeep Kumar Gupta, Mobile: +91 9831311515, Email ID:
+            Ms. Deepa Shah, Mobile: +91 9845432677, Email ID:
             compliance@meradhan.co
           </Text>
         </View>

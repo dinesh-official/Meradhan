@@ -292,14 +292,17 @@ export class CustomerKycKycService {
     });
 
     // Start KRa Process
-    await addKraWorkerJob({
-      customerId: customerId,
-      kycDataStoreId: store!.id,
-      stage: "ENQUIRY_KRA",
-      data: {
-        currentStepName: store?.currentStepName,
+    await addKraWorkerJob(
+      {
+        customerId: customerId,
+        kycDataStoreId: store!.id,
+        stage: "ENQUIRY_KRA",
+        data: {
+          currentStepName: store?.currentStepName,
+        },
       },
-    });
+      10
+    );
     return pdfUrl;
   }
 

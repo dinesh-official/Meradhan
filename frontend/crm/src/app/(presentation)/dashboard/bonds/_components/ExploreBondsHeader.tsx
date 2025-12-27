@@ -382,7 +382,7 @@ function ExploreBondsHeader({
                   // manager.setTaxation([]);
                   // manager.setCoupon([]);
                   // manager.setInterest([]);
-                  router.replace(rootUrl);
+                  router.replace("/dashboard/bonds");
                   // setDobunce((prev) => prev + 1);
                 }}
               >

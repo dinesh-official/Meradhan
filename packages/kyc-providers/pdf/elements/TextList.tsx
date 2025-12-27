@@ -7,6 +7,7 @@ function TextList({
   children,
   count,
   className = "text-xs",
+  fontSize,
 }: {
   children?: any;
   count?: string;
@@ -24,7 +25,14 @@ function TextList({
         {count}
       </Text>
       {/* <Text style={{ fontSize: fontSize || 9, lineHeight: 1.4, width: "100%" }}> */}
-      <Text style={[tw(` leading-[5px] w-full ${className}`)]}>{children}</Text>
+      <Text
+        style={[
+          tw(` leading-[5px] w-full ${className}`),
+          { lineHeight: 1.4, width: "100%" },
+        ]}
+      >
+        {children}
+      </Text>
     </View>
   );
 }
