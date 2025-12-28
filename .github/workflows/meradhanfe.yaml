@@ -1,5 +1,5 @@
 
-name: Build, Push & Deploy
+name: meradhan FE deploy
 
 on:
   push:
@@ -98,6 +98,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Show .env
+        run: cat .env
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -111,10 +114,18 @@ jobs:
           docker build -f frontendDockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+      - name: Download Task Definition
+        id: task-def
+        run: |
+          aws ecs describe-task-definition \
+          --task-definition meradhan-ui-prod\
+          --query taskDefinition \
+          > task-definition.json
+
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: arn:aws:ecs:ap-south-1:450321244603:task-definition/meradhan-ui-prod:1
+          task-definition: task-definition.json
           cluster: prod-cluster
           service: meradhan-ui-prod
           force-new-deployment: true
