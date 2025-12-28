@@ -2,9 +2,7 @@
 name: meradhan FE deploy
 
 on:
-  push:
-    branches:
-      - lokesh/pipeline
+  workflow_dispatch:
 
 jobs:
   deploy:
