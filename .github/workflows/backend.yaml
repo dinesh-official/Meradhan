@@ -1,5 +1,5 @@
 
-name: Build, Push & Deploy
+name: backend deploy
 
 on:
   workflow_dispatch:
