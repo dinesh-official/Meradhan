@@ -17,13 +17,13 @@ jobs:
         shell: bash
         run: |
           {
-            echo NEXT_PUBLIC_HOST_URL="https://aws.meradhan.co"
-            echo NEXT_PUBLIC_CRM_HOST_URL="https://awscrm.meradhan.co"
-            echo NEXT_PUBLIC_BACKEND_HOST_URL="https://awsapi.meradhan.co"
-            echo NEXT_PUBLIC_BACKEND_IP_URL="http://prod-meradhan-be.prod-namespace:4000"
-            echo NEXT_PUBLIC_STRAPI_HOST_URL="https://spyder.meradhan.co"
-            echo NEXT_PUBLIC_DIGIO=production
-            echo STRAPI_API_URL=https://spyder.meradhan.co/api
+            echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co"
+            echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co"
+            echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co"
+            echo "NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000"
+            echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co"
+            echo "NEXT_PUBLIC_DIGIO=production"
+            echo "STRAPI_API_URL=https://spyder.meradhan.co/api"
 
             echo "NEXT_PUBLIC_GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
             echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}"
@@ -104,11 +104,10 @@ jobs:
       - name: Build, Tag & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          REPOSITORY: prod-crm-ui
+          REPOSITORY: prod-crm-ui # 👈 Update if needed
           IMAGE_TAG: latest
         run: |
-          docker build -t -f crmdockerfile $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f crmdockerfile .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to Amazon ECS
