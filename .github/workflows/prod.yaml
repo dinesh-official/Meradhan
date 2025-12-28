@@ -57,13 +57,13 @@ jobs:
 
             echo "CBRICS_DOMAIN=${{ secrets.CBRICS_DOMAIN }}"
             echo "CBRICS_LOGIN=${{ secrets.CBRICS_LOGIN }}"
-            echo 'CBRICS_PASSWORD=${{ secrets.CBRICS_PASSWORD }}'
+            echo "CBRICS_PASSWORD=${{ secrets.CBRICS_PASSWORD }}"
 
             echo "RFQ_CBRICS_DOMAIN=${{ secrets.RFQ_CBRICS_DOMAIN }}"
             echo "RFQ_CBRICS_LOGIN=${{ secrets.RFQ_CBRICS_LOGIN }}"
-            echo 'RFQ_CBRICS_PASSWORD=${{ secrets.RFQ_CBRICS_PASSWORD }}'
+            echo "RFQ_CBRICS_PASSWORD=${{ secrets.RFQ_CBRICS_PASSWORD }}"
 
-            echo 'DIGIO_USERNAME_PASS=${{ secrets.DIGIO_USERNAME_PASS }}'
+            echo "DIGIO_USERNAME_PASS=${{ secrets.DIGIO_USERNAME_PASS }}"
 
             echo "NDSL_REQUESTOR_ID=${{ secrets.NDSL_REQUESTOR_ID }}"
             echo "NSDL_SECRET_KEY=${{ secrets.NSDL_SECRET_KEY }}"
@@ -71,7 +71,7 @@ jobs:
             echo "CDSL_AES_KEY=${{ secrets.CDSL_AES_KEY }}"
             echo "ENTITY_ID=${{ secrets.ENTITY_ID }}"
 
-            echo 'AUTH_SECRET=${{ secrets.AUTH_SECRET }}'
+            echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}"
             echo "AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }}"
             echo "AUTH_GOOGLE_SECRET=${{ secrets.AUTH_GOOGLE_SECRET }}"
             echo "AUTH_FACEBOOK_ID=${{ secrets.AUTH_FACEBOOK_ID }}"
@@ -108,8 +108,7 @@ jobs:
           REPOSITORY: prod-crm-ui
           IMAGE_TAG: latest
         run: |
-          docker build -t -f crmdockerfile $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker build -f crmdockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to Amazon ECS
