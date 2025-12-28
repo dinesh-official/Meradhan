@@ -1,4 +1,4 @@
-im getting syntax error over passing .env
+
 name: Build, Push & Deploy
 
 on:
