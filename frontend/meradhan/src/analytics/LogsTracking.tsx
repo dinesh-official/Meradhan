@@ -29,6 +29,30 @@ export const PageTrackingProvider: React.FC<{
     []
   );
 
+  const clearAllClientStorage = useCallback(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+
+      const hostname = window.location.hostname;
+      const domainVariants = ["", hostname, `.${hostname}`];
+
+      document.cookie.split(";").forEach((cookie) => {
+        const eqPos = cookie.indexOf("=");
+        const name =
+          eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+        if (name) {
+          domainVariants.forEach((domain) => {
+            const domainPart = domain ? `;domain=${domain}` : "";
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/${domainPart}`;
+          });
+        }
+      });
+    } catch (error) {
+      console.error("Failed to clear client storage:", error);
+    }
+  }, []);
+
   useEffect(() => {
     // Initialize tracking session on mount
     const initTracking = async () => {
@@ -133,53 +157,40 @@ export const PageTrackingProvider: React.FC<{
   }, [pathname, auditApi, cookies.userId]);
 
   useEffect(() => {
-    let isInternalNavigation = false;
+    const handlePageHide = () => {
+      // Always clear client storage when leaving or closing the page
+      clearAllClientStorage();
 
-    // Detect internal navigation (e.g., clicking links inside the SPA)
-    const markInternalNavigation = () => {
-      isInternalNavigation = true;
-    };
+      if (currentPageView && pageViewIdRef.current && trackingId.current) {
+        const exitTime = new Date();
+        const duration = Math.floor(
+          (exitTime.getTime() - currentPageView.entryTime.getTime()) / 1000
+        );
 
-    // Listen to clicks inside the app
-    window.addEventListener("click", markInternalNavigation);
-
-    const handleBeforeUnload = () => {
-      // Run only when the tab/browser is closed — not internal navigation
-      if (!isInternalNavigation) {
-        if (currentPageView && pageViewIdRef.current && trackingId.current) {
-          const exitTime = new Date();
-          const duration = Math.floor(
-            (exitTime.getTime() - currentPageView.entryTime.getTime()) / 1000
-          );
-          localStorage.clear();
-          sessionStorage.clear();
-
-          // Clear all cookies
-
-          navigator.sendBeacon(
-            "/api/server/auditlogs/meradhan/page-tracking/end/" +
-              pageViewIdRef.current,
-            JSON.stringify({
-              pageViewId: pageViewIdRef.current,
-              exitTime,
-              duration,
-              scrollDepth: maxScrollRef.current,
-              interactions: interactionsRef.current,
-              sessionId: trackingId.current,
-              userId: cookies.userId || undefined,
-            })
-          );
-        }
+        navigator.sendBeacon(
+          "/api/server/auditlogs/meradhan/page-tracking/end/" +
+            pageViewIdRef.current,
+          JSON.stringify({
+            pageViewId: pageViewIdRef.current,
+            exitTime,
+            duration,
+            scrollDepth: maxScrollRef.current,
+            interactions: interactionsRef.current,
+            sessionId: trackingId.current,
+            userId: cookies.userId || undefined,
+          })
+        );
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handlePageHide);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("click", markInternalNavigation);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handlePageHide);
     };
-  }, [currentPageView, cookies.userId, pathname]);
+  }, [clearAllClientStorage, currentPageView, cookies.userId]);
 
   // Track scroll depth
   useEffect(() => {

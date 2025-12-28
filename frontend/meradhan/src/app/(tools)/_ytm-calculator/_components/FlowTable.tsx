@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { IndianRupee } from "lucide-react";
-import { YtmResult } from "../_helpers/ytm";
 import { CashFlowData } from "../_helpers/xirr";
 
 // Simple date formatter as fallback
@@ -19,7 +18,7 @@ const formatDateSimple = (dateStr: string): string => {
   }
 };
 
-export default function FlowTable({ flowData }: { flowData: YtmResult | CashFlowData }) {
+export default function FlowTable({ flowData }: { flowData: CashFlowData }) {
   return (
     <div className="container">
       <h2 className="mb-6 text-[32px] quicksand-semibold">

@@ -4,6 +4,7 @@ import Client from "./client";
 
 import { SharePopupViewProvider } from "@/global/module/share/SharePopupView";
 import { headers } from "next/headers";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import Script from "next/script";
 import "./styles/globals.css";
 import "./styles/override.css";
@@ -107,12 +108,14 @@ export default async function RootLayout({
       </head>
       <body className={`antialiased`}>
         <NextTopLoader color="#002c59" />
-        <NuqsAdapter>
-          <Client>
-            {children}
-            <SharePopupViewProvider />
-          </Client>
-        </NuqsAdapter>
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          <NuqsAdapter>
+            <Client>
+              {children}
+              <SharePopupViewProvider />
+            </Client>
+          </NuqsAdapter>
+        </AppRouterCacheProvider>
         <Script
           type="text/javascript"
           src="https://app.digio.in/sdk/v11/digio.js"

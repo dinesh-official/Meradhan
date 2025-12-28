@@ -15,9 +15,22 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Cashflow } from "../_helpers/ytm";
+import { CashFlowData } from "../_helpers/xirr";
 
 export const description = "A line chart with a label";
+
+// const chartData = [
+//   { date: "2025-01-01", desktop: 186 },
+//   { date: "2025-02-01", desktop: 305 },
+//   { date: "2025-03-01", desktop: 237 },
+//   { date: "2025-04-01", desktop: 73 },
+//   { date: "2025-05-01", desktop: 209 },
+//   { date: "2025-06-01", desktop: 214 },
+//   { date: "2065-05-01", desktop: 214 },
+//   { date: "2055-05-01", desktop: 214 },
+//   { date: "2075-06-01", desktop: 214 },
+//   { date: "2085-06-01", desktop: 214 },
+// ];
 
 const chartConfig = {
   desktop: {
@@ -29,7 +42,7 @@ const chartConfig = {
 export function XirrLineChart({
   cashflowData,
 }: {
-  cashflowData?: Cashflow[];
+  cashflowData?: CashFlowData["cashflow"];
 }) {
   const chartData = cashflowData
     ? cashflowData.map((item, index) => ({
