@@ -114,6 +114,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
+          task-definition: arn:aws:ecs:ap-south-1:450321244603:task-definition/prod-crm-ui:1
           cluster: prod-cluster
           service: prod-crm-ui
           force-new-deployment: true
