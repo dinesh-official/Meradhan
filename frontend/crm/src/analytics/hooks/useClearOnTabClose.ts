@@ -22,7 +22,12 @@ export function useClearOnTabClose(enabled = true) {
     const navigationType = navEntries[0]?.type;
 
     // Skip reloads
-    if (navigationType === "navigation") return;
+    if (
+      navigationType === "reload" ||
+      navigationType === "back_forward" ||
+      navigationType === "navigate"
+    )
+      return;
 
     const handleBeforeUnload = () => {
       try {
