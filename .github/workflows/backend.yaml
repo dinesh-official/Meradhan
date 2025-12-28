@@ -2,7 +2,9 @@
 name: backend deploy
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - lokesh/pipeline
 
 jobs:
   deploy:
