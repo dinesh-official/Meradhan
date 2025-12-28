@@ -7,7 +7,7 @@ function TextList({
   children,
   count,
   className = "text-xs",
-  fontSize,
+
 }: {
   children?: any;
   count?: string;
