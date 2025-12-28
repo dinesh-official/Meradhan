@@ -81109,6 +81109,9 @@ const cdslDp = [
 ];
 
 export const findCdslDpId = (id: string) => {
-  const data = cdslDp.find((e) => id.includes(e["DP Name"]));
-  return data?.["DP Name"];
+  if (!id || id.length < 8) return undefined;
+  // First 8 digits (CDSL BO format: DP_ID + Client_ID)
+  const firstBatch = id.slice(0, 8);
+  const dp = cdslDp.find((e) => firstBatch.includes(e["DP ID"]));
+  return dp?.["DP Name"];
 };

@@ -80,9 +80,8 @@ export const useBondsFilters = ({
       return await apiCaller.getListedBonds({
         filters: {
           ...queryFilter,
-          all: "YES",
         },
-        params: { page: 1, category },
+        params: { page: 1, category, all: "YES" },
       });
     },
   });

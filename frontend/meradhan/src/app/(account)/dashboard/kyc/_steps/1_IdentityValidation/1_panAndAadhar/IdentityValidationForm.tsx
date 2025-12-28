@@ -1,4 +1,5 @@
 "use client";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import LabelInput from "@/app/(account)/_components/wrapper/LableInput";
 import { DatePicker } from "@/components/custom/DatePicker";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,6 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
-import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -56,13 +56,14 @@ function IdentityValidationForm() {
             >
               {/* <DatePickerWithEdit/> */}
               {/* // fix date formatting issue */}
+              {/* <MuiDatePicker /> */}
               <DatePicker
                 value={
                   data.dateOfBirth
                     ? dateTimeUtils.formatDateTime(
-                        data.dateOfBirth,
-                        "DD/MM/YYYY"
-                      )
+                      data.dateOfBirth,
+                      "DD/MM/YYYY"
+                    )
                     : ""
                 }
                 onChange={(e) => {

@@ -61,6 +61,6 @@ export const useLoginHook = () => {
       handelOtpSubmit,
     },
     loginWithOtpMutation,
-    otpVerificationMutation
+    otpVerificationMutation,
   };
 };

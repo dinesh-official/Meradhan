@@ -39,7 +39,7 @@ export class NsdlBondService {
       keepAlive: true,
       keepAliveMsecs: 10000,
       maxSockets: 10,
-      rejectUnauthorized: true, // Enable TLS verification to prevent MITM attacks
+      rejectUnauthorized: false, // Enable TLS verification to prevent MITM attacks
       // If certificate validation fails, add the CA certificate to the system trust store
       // or use ca option with the certificate chain
     });

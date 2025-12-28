@@ -1,8 +1,6 @@
 # Node/Bun dependencies
 node_modules
 bun_modules
-frontend/
-api/
 *.lock
 
 # Logs

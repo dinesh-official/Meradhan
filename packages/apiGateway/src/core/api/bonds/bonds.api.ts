@@ -18,6 +18,7 @@ export class BondsApi {
         page?: number | string;
         limit?: number | string;
         category?: string;
+        all?: string;
       };
     },
     config?: AxiosRequestConfig

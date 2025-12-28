@@ -5,6 +5,7 @@ const useAppCookie = () => {
     "token",
     "userId",
     "role",
+    "SESSION",
   ]);
   return { cookies, setCookie, removeCookie };
 };
