@@ -12,7 +12,10 @@ export class DigioSDK {
   private client: AxiosInstance;
   constructor() {
     this.client = axios.create({
-      baseURL: "https://api.digio.in",
+      baseURL:
+        env.NEXT_PUBLIC_DIGIO == "sandbox"
+          ? "https://ext.digio.in:444"
+          : "https://api.digio.in",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Basic ${btoa(env.DIGIO_USERNAME_PASS)}`, // Replace with real key

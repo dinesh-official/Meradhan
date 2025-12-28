@@ -106,14 +106,7 @@ function IdentityValidationPanInfo() {
           </DataInfoLabel>
 
           <div className="gap-5 grid lg:grid-cols-3 md:col-span-2 lg:col-span-3">
-            <Image
-              src={genMediaUrl(data.response?.details.aadhaar.image)}
-              alt="PAN Card"
-              width={840}
-              height={397}
-              className="bg-gray-50 rounded-2xl w-48 object-cover aspect-3/4"
-            />
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <RenderPdf
                 file={genMediaUrl(data.response?.details.pan.file_url)}
                 height={280}

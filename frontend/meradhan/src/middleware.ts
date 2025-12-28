@@ -58,6 +58,8 @@ export async function middleware(request: NextRequest) {
         await fetchUserSession(token);
         return NextResponse.next({ headers: requestHeaders });
       } catch (error) {
+        console.log(error);
+
         const response = NextResponse.redirect(new URL("/login", origin), {
           headers: requestHeaders,
         });

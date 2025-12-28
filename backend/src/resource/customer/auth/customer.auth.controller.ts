@@ -6,7 +6,10 @@ import type { Request, Response } from "express";
 import { CustomerAuthService } from "./customer.auth.service";
 
 import { db } from "@core/database/database";
-import { sendCustomerSignupOtpEmail } from "@jobs/helper/send_emails";
+import {
+  sendCustomerSignupOtpEmail,
+  sendCustomerWelcomeEmail,
+} from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
 import {
   addMeradhanLoginBasedAuditLog,
@@ -14,7 +17,6 @@ import {
   revalidateMeradhanTrackingSession,
 } from "@resource/customer/auditlogs/auditlog.repo";
 import { OtpVerificationService } from "@services/otp_verification.service";
-import { cacheStorage } from "@store/redis_store";
 import { trackRateLimitSuccess } from "./customer.auth.ratelimit";
 
 export class CustomerAuthController {
@@ -88,6 +90,15 @@ export class CustomerAuthController {
       Number(id!),
       verifyBy as "email" | "mobile"
     );
+    // send welcome email
+    const userData = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: user.id },
+      select: { firstName: true, lastName: true },
+    });
+    await sendCustomerWelcomeEmail({
+      email: user.email,
+      userName: userData?.firstName + " " + userData?.lastName,
+    });
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: user,
@@ -205,19 +216,10 @@ export class CustomerAuthController {
 
   async session(req: Request, res: Response): Promise<void> {
     const id = req.customer?.id;
+    console.log(req.customer);
 
     if (!id) {
       throw new AppError("Session not found");
-    }
-
-    const cashedUser = await cacheStorage.get(`USER_SESSION:${id}`);
-    if (cashedUser) {
-      res.sendResponse({
-        statusCode: HttpStatus.OK,
-        message: "session",
-        responseData: cashedUser,
-      });
-      return;
     }
 
     const session = await db.dataBase.customerProfileDataModel.findUnique({
@@ -235,7 +237,6 @@ export class CustomerAuthController {
       },
     });
 
-    await cacheStorage.set(`USER_SESSION:${id}`, session, 60);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "session",
@@ -244,10 +245,9 @@ export class CustomerAuthController {
   }
 
   async sendVerifyEmail(req: Request, res: Response): Promise<void> {
-    console.log(req.customer);
-
+    // send email verification to the user c
     await this.customerAuthService.sendEmailVerification(req.customer!.id);
-    // Track successful email verification send for rate limiting
+    // Track successful email verification d
     await trackRateLimitSuccess(req, "email-verify");
     res.sendResponse({
       statusCode: HttpStatus.OK,

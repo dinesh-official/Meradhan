@@ -33,7 +33,6 @@ export const bondsFilterSchema = z
     coupon: z.array(z.enum(couponPercentEnums)).optional(),
     taxation: z.array(z.enum(taxationEnums)).optional(),
     interest: z.array(z.enum(INTEREST_MODE_VALUES)).optional(),
-    all: z.any().optional(),
   })
   .optional();
 
@@ -64,10 +63,18 @@ export const bondCreateUpdateSchema = z.object({
   description: z.string().trim().min(1, "Description is required"),
   issuePrice: z.number().nonnegative("Issue price must be non-negative"),
   faceValue: z.number().positive("Face value must be positive"),
-  stampDutyPercentage: z.number().nonnegative("Stamp duty percentage must be non-negative").default(0).optional().nullable(),
+  stampDutyPercentage: z
+    .number()
+    .nonnegative("Stamp duty percentage must be non-negative")
+    .default(0)
+    .optional()
+    .nullable(),
   allowForPurchase: z.boolean().default(false).optional().nullable(),
   couponRate: z.number().nonnegative("Coupon rate must be non-negative"),
-  interestPaymentFrequency: z.string().trim().min(1, "Interest payment frequency is required"),
+  interestPaymentFrequency: z
+    .string()
+    .trim()
+    .min(1, "Interest payment frequency is required"),
   putCallOptionDetails: z.string().trim().optional().nullable(),
   certificateNumbers: z.string().trim().optional().nullable(),
   totalIssueSize: z.number().nonnegative().optional().nullable(),

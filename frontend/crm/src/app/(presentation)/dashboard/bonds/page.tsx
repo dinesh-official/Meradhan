@@ -5,9 +5,7 @@ import apiGateway from "@root/apiGateway";
 import { validateBondsFilters } from "./_utils/filter";
 import BondsView from "./BondsView";
 
-
 export const revalidate = 0; // Revalidate the page every hour
-
 
 async function BondPage({
   searchParams,
@@ -26,6 +24,7 @@ async function BondPage({
     params: {
       page: pageParams.page ? parseInt(pageParams?.page as string, 10) : 1,
       category: "all",
+      all: "YES",
     },
   });
 
@@ -36,7 +35,6 @@ async function BondPage({
         category="all"
         filter={queryFilter}
         bondsData={responseData}
-       
       />
     </Workspace>
   );

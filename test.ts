@@ -53,13 +53,18 @@ function bondYtmExcelEquivalent({
   // Annualise (same as Excel)
   return rate * frequency;
 }
+const yearsToMaturity =
+  (new Date("2027-12-25").getTime() - new Date("2025-12-25").getTime()) /
+  (1000 * 60 * 60 * 24 * 365);
+
+console.log(yearsToMaturity); // 2
 
 const result = bondYtmExcelEquivalent({
-  price: 95,
-  faceValue: 100,
-  couponRate: 0.06,
-  yearsToMaturity: 5,
-  frequency: 2,
+  price: 1990,
+  faceValue: 5000,
+  couponRate: 0.08,
+  yearsToMaturity, // 2
+  frequency: 1,
 });
 
 console.log((result * 100).toFixed(4) + "%");

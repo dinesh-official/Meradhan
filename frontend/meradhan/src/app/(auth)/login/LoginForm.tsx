@@ -203,6 +203,8 @@ function LoginForm() {
   // Handle resend email verification click using event delegation
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      console.log("handleClick");
+
       const target = e.target as HTMLElement;
       // Check if the clicked element is the resend link or a child of it
       const resendElement = target.closest("#resend-email-verification");

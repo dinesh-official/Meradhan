@@ -1,72 +1,125 @@
 "use client";
 
-import { ChartConfig } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import { getXirr, prepareXirrValues, XirrResult } from "../_helpers/xirr";
+import { CashFlowData } from "../_helpers/xirr";
+import { YtmResult } from "../_helpers/ytm";
 import { XirrLineChart } from "./XirrChart";
 
-export const description = "XIRR Cash Flow Chart";
-
-// Simple date formatter as fallback
-// const formatDateSimple = (dateStr: string): string => {
-//   try {
-//     const date = new Date(dateStr);
-//     return date.toLocaleDateString("en-GB", {
-//       day: "2-digit",
-//       month: "2-digit",
-//       year: "2-digit",
-//     });
-//   } catch {
-//     return dateStr;
-//   }
-// };
-
-// const chartConfig = {
-//   cashFlow: {
-//     label: "Cash Flow",
-//     color: "hsl(var(--primary))",
-//   },
-// } satisfies ChartConfig;
+export const description = "YTM Cash Flow Chart";
 
 export function FlowChart({
+  ytmData,
   xirrData,
-  ytm,
-  yieldVal,
+  xirrRate,
 }: {
-  xirrData: XirrResult;
-  ytm: number;
-  yieldVal: number;
+  ytmData?: YtmResult | undefined;
+  xirrData?: CashFlowData | undefined;
+  xirrRate?: number;
 }) {
-  const values = prepareXirrValues(xirrData.cashflow);
-  const result = getXirr(values);
-  // const formatted =
-  //   typeof result === "number" ? `${(result * 100).toFixed(2)}%` : result;
+  // Handle XIRR data
+  if (xirrData !== undefined) {
+    const hasValidData = xirrData && xirrData.cashflow && xirrData.cashflow.length > 0;
+    const xirrRatePercent = xirrRate ?? 0;
 
-  // Get min/max for Y-axis
+    if (!hasValidData) {
+      return (
+        <div className="p-6">
+          <div className="mb-5 flex items-center justify-center flex-col gap-4">
+            <div className="flex items-center justify-center flex-col">
+              <h3 className="text-2xl text-center">
+                Extended Internal Rate of Return (XIRR): <span className="font-semibold">--</span>
+              </h3>
+              <small className="text-muted-foreground text-xs mt-1">
+                (Please enter valid inputs)
+              </small>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-6">
+        <div className="mb-5 flex items-center justify-center flex-col gap-4">
+          <div className="flex items-center justify-center flex-col">
+            <h3 className="text-2xl text-center">
+              Extended Internal Rate of Return (XIRR):{" "}
+              <span
+                className={cn("font-semibold", {
+                  "text-green-600": xirrRatePercent > 0,
+                  "text-red-600": xirrRatePercent < 0,
+                })}
+              >
+                {xirrRatePercent.toFixed(7)}%
+              </span>
+            </h3>
+            <small className="text-muted-foreground text-xs mt-1">
+              (Effective Annual Yield using XIRR)
+            </small>
+          </div>
+
+
+        </div>
+
+        <div className="lg:h-80 relative">
+          <XirrLineChart cashflowData={xirrData.cashflow} />
+        </div>
+        <p className="text-xs flex items-center justify-center gap-2 mt-2">
+          <span className="bg-[#4f81bd] min-w-[20px] min-h-[6px] rounded-full inline-block"></span>
+          Cash Flow Amount
+        </p>
+      </div>
+    );
+  }
+
+  // Handle YTM data (original logic)
+  if (!ytmData) {
+    return (
+      <div className="p-6">
+        <div className="mb-5 flex items-center justify-center flex-col gap-4">
+          <div className="flex items-center justify-center flex-col">
+            <h3 className="text-2xl text-center">
+              Yield to Maturity (YTM): <span className="font-semibold">--</span>
+            </h3>
+            <small className="text-muted-foreground text-xs mt-1">
+              (Please enter valid inputs)
+            </small>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const effectiveAnnualYtmPercent = (ytmData.effectiveAnnualYtm || 0) * 100;
 
   return (
     <div className="p-6">
-      <div className="mb-5 flex items-center justify-center flex-col">
-        <h3 className="text-2xl text-center">
-          YTM:{" "}
-          <span
-            className={cn("font-semibold", {
-              "text-green-600": Number(result) > 0,
-              "text-red-600": Number(result) < 0,
-            })}
-          >
-            {ytm?.toFixed(4)}%
-          </span>
-        </h3>
-        <small> (Current Yield: {yieldVal?.toFixed(4)}% )</small>
+      <div className="mb-5 flex items-center justify-center flex-col gap-4">
+        <div className="flex items-center justify-center flex-col">
+          <h3 className="text-2xl text-center">
+            YTM:{" "}
+            <span
+              className={cn("font-semibold", {
+                "text-green-600": effectiveAnnualYtmPercent > 0,
+                "text-red-600": effectiveAnnualYtmPercent < 0,
+              })}
+            >
+              {effectiveAnnualYtmPercent?.toFixed(7)}%
+            </span>
+          </h3>
+          <small className="text-muted-foreground text-xs mt-1">
+            (Yield to Maturity - Effective Annual Yield)
+          </small>
+        </div>
+
       </div>
 
       <div className="lg:h-80 relative">
-        <XirrLineChart cashflowData={xirrData["cashflow"]} />
+        <XirrLineChart cashflowData={ytmData.cashflow} />
       </div>
       <p className="text-xs flex items-center justify-center gap-2 mt-2">
         <span className="bg-[#4f81bd] min-w-[20px] min-h-[6px] rounded-full inline-block"></span>
-        Interest Amount
+        Cash Flow Amount
       </p>
     </div>
   );

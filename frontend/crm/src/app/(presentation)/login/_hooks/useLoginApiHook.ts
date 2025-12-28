@@ -1,6 +1,7 @@
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useCurrentUserData } from "@/global/stores/useCurrentUserData.store";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ export const useLoginApiHook = () => {
   const authApi = new apiGateway.auth.AuthApi(apiClientCaller);
   const [step, setStep] = useState<"EMAIL" | "OTP">("EMAIL");
   const usersStore = useCurrentUserData();
+  const { setCookie } = useAppCookie();
   const loginWithOtpMutation = useMutation({
     mutationKey: ["loginWithOtpMutate"],
     mutationFn: async (payload: { email: string }) => {
@@ -59,7 +61,9 @@ export const useLoginApiHook = () => {
         id: data.id,
         phoneNo: data.phoneNo,
       });
-
+      const sessionId = "ID:" + new Date().getTime();
+      sessionStorage.setItem("SESSION", sessionId);
+      setCookie("SESSION", sessionId);
       window.location.href = "/dashboard";
     },
     onError(error) {

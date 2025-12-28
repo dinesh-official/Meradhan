@@ -10,7 +10,6 @@ customerProfileRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.requestMobileUpdate(req, res)
 );
-// Send mobile OTP verification
 customerProfileRoutes.post(
   "/api/auth/customer/profile/mobile/send-otp",
   allowAccessMiddleware("USER"),
@@ -21,14 +20,11 @@ customerProfileRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.verifyAndUpdateMobile(req, res)
 );
-
 customerProfileRoutes.post(
   "/api/auth/customer/profile/whatsapp",
   allowAccessMiddleware("USER"),
   (req, res) => controller.toggleWhatsAppPreference(req, res)
 );
-
-// Bank account routes
 customerProfileRoutes.post(
   "/api/auth/customer/profile/bank-account",
   allowAccessMiddleware("USER"),
@@ -44,8 +40,6 @@ customerProfileRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.setPrimaryBankAccount(req, res)
 );
-
-// Demat account routes
 customerProfileRoutes.post(
   "/api/auth/customer/profile/demat-account",
   allowAccessMiddleware("USER"),
@@ -66,4 +60,5 @@ customerProfileRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.saveRiskProfileAnswers(req, res)
 );
+
 export default customerProfileRoutes;

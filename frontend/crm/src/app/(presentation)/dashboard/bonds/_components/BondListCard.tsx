@@ -1,13 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatNumberTS } from "@/global/utils/formate";
 import { cn } from "@/lib/utils";
-import { BondDetailsResponse } from "@root/apiGateway";
-import { PiCurrencyInrBold } from "react-icons/pi";
+import apiGateway, { BondDetailsResponse } from "@root/apiGateway";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Edit } from "lucide-react";
-
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { PiCurrencyInrBold } from "react-icons/pi";
+
 import { BondInfoLabel } from "./BondInfoLabel";
 import CreditRatingBadge from "./CreaditRatingBadge";
 
@@ -20,6 +30,47 @@ export function BondListCard({
   onlyShare?: boolean;
   data: BondDetailsResponse;
 }) {
+  const [allowForPurchase, setAllowForPurchase] = useState(
+    data.allowForPurchase ?? false
+  );
+  const queryClient = useQueryClient();
+  const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+
+  // keep local state in sync if parent data changes
+  useEffect(() => {
+    setAllowForPurchase(data.allowForPurchase ?? false);
+  }, [data.allowForPurchase]);
+
+  const updateAllowForPurchase = useMutation({
+    mutationFn: async (newValue: boolean) => {
+      // fetch latest bond to avoid missing fields
+      const current = await bondsApi.getBondDetailsByIsin(data.isin);
+      return bondsApi.updateBond(data.isin, {
+        ...current.responseData,
+        allowForPurchase: newValue,
+      } as any);
+    },
+    onSuccess: (_, newValue) => {
+      setAllowForPurchase(newValue);
+      queryClient.invalidateQueries({ queryKey: ["bonds"] });
+      queryClient.invalidateQueries({ queryKey: ["bond", data.isin] });
+      toast.success("Updated allow for purchase");
+    },
+    onError: (error: AxiosError) => {
+      toast.error(
+        (error?.response?.data as { message?: string })?.message ||
+          error?.message ||
+          "Failed to update"
+      );
+      setAllowForPurchase(data.allowForPurchase ?? false);
+    },
+  });
+
+  const handleAllowForPurchaseChange = (checked: boolean) => {
+    setAllowForPurchase(checked); // optimistic
+    updateAllowForPurchase.mutate(checked);
+  };
+
   return (
     <Card className={cn("even:bg-white odd:bg-muted even:border odd:border-0")}>
       <CardContent>
@@ -37,6 +88,20 @@ export function BondListCard({
                   Edit
                 </Button>
               </Link>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`allow-for-purchase-${data.isin}`}
+                checked={allowForPurchase}
+                disabled={updateAllowForPurchase.isPending}
+                onCheckedChange={handleAllowForPurchaseChange}
+              />
+              <Label
+                htmlFor={`allow-for-purchase-${data.isin}`}
+                className="text-sm font-medium cursor-pointer"
+              >
+                Allow for Purchase
+              </Label>
             </div>
             <div
               className={cn(

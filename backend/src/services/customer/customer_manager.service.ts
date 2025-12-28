@@ -1,5 +1,4 @@
 import { db, KYCStatus } from "@core/database/database";
-import { sendCustomerWelcomeEmail } from "@jobs/helper/send_emails";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import { removeCountryCode } from "@utils/filters/convert";
@@ -49,11 +48,7 @@ export class CustomerProfileManager {
           },
         },
       });
-    // send welcome email
-    await sendCustomerWelcomeEmail({
-      email: data.emailId,
-      userName: data.firstName,
-    });
+
     return createdCustomerResponse;
   }
 

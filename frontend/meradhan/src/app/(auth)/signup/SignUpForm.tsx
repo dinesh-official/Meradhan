@@ -60,6 +60,7 @@ function SignUpForm() {
       payload: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>
     ) => signupApi.singUpWithCredentials(payload),
     onSuccess(data) {
+      // get the id from the response data to use.
       form.handleSignUpFormChange("id", data.responseData!.id);
       sendVerifyOtp({
         emailId: signUpFormData.email,
@@ -278,8 +279,13 @@ function SignUpForm() {
         </p>
       </form>
 
-      {/* --- OTP Verification Modal --- */}
+      {/*
+       * ------------------------------
+       * 🔹 Main Component : SignUpForm
+       * -------------------------------
+       *  */}
       <VerifyOtpPopUp formData={signUpFormData} signUpFlowKyc={signUpFlow} />
+      {/* ------------------------------- */}
     </>
   );
 }

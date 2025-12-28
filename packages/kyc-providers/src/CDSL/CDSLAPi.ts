@@ -2,6 +2,7 @@ import axios, { type AxiosInstance } from "axios";
 import * as crypto from "crypto";
 import type { BoPanRequest, BoPanResponse } from "./CDSLApi.response";
 import type { DemateVerifyResponse } from "../response.types";
+import { env } from "@packages/config/env";
 
 const StatusCodeMessages: Record<string, string> = {
   "01": "Valid BO-PAN",
@@ -28,7 +29,7 @@ export class CDSLApi {
       throw new Error("AESKey must be exactly 32 bytes for AES-256.");
 
     this.baseUrl = data.isProd
-      ? "https://app.cdslindia.com/EasiEasiestApi/BOPAN"
+      ? "https://apigt.cdsl.co.in/EasiEasiestApi/BOPAN"
       : "https://mockapigt.cdsl.co.in/EasiEasiestApi/BOPAN";
 
     this.axiosInstance = axios.create({
@@ -133,9 +134,16 @@ export class CDSLApi {
     const headers = {
       "Content-Type": "application/json",
       Version: "1.0",
-      EntityID: "bond8534",
+      EntityID: env.ENTITY_ID,
       Reqdatetime: body14,
     };
+    console.log(headers);
+    console.log(
+      env.CDSL_AES_KEY || "",
+      env.CDSL_MODE === "PROD",
+      env.ENTITY_ID,
+      this.axiosInstance.getUri().toString()
+    );
 
     const response = await this.axiosInstance.post<BoPanResponse>(
       "/PANVerifyRequest",
@@ -144,6 +152,8 @@ export class CDSLApi {
     );
 
     const data = response.data;
+
+    console.log(data);
 
     return {
       idNo: data.ReqSeqNo,

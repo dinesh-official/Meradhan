@@ -38,12 +38,10 @@ export class CustomerProfileController {
       otpToken: token,
     });
     if (isUpdated) {
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Mobile number updated successfully.",
-        });
+      res.status(200).json({
+        success: true,
+        message: "Mobile number updated successfully.",
+      });
     } else {
       res
         .status(400)
@@ -58,12 +56,10 @@ export class CustomerProfileController {
       req.customer!.id,
       enableWhatsApp
     );
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "WhatsApp preference updated successfully.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "WhatsApp preference updated successfully.",
+    });
   }
 
   async addBankAccount(req: Request, res: Response) {
@@ -94,12 +90,10 @@ export class CustomerProfileController {
       req.customer!.id,
       bankAccountId
     );
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Primary bank account set successfully.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Primary bank account set successfully.",
+    });
   }
 
   async addNewDematAccount(req: Request, res: Response) {
@@ -132,12 +126,10 @@ export class CustomerProfileController {
       req.customer!.id,
       dematAccountId
     );
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Primary demat account set successfully.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Primary demat account set successfully.",
+    });
   }
 
   async saveRiskProfileAnswers(req: Request, res: Response) {
@@ -145,11 +137,9 @@ export class CustomerProfileController {
       req.customer!.id,
       req.body
     );
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Risk profile answers saved successfully.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Risk profile answers saved successfully.",
+    });
   }
 }

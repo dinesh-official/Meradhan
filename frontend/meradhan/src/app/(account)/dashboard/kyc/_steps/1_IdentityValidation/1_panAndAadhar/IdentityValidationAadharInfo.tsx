@@ -16,6 +16,7 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { addActivityLog } from "@/analytics/UserTrackingProvider";
+import Image from "next/image";
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
@@ -42,8 +43,8 @@ function IdentityValidationAadharInfo() {
         </CardTitle>
       </CardHeader>
       <CardContent accountMode>
-        <div className="gap-10 grid lg:grid-cols-5">
-          <div className="flex flex-col gap-5 col-span-2">
+        <div className="gap-10 grid ">
+          <div className="flex flex-col gap-5 ">
             <DataInfoLabel
               title="Aadhaar Number (last 4-digits)"
               status="SUCCESS"
@@ -85,11 +86,24 @@ function IdentityValidationAadharInfo() {
               </p>
             </DataInfoLabel>
           </div>
-          <div className="col-span-3">
-            <RenderPdf
-              file={genMediaUrl(data.response?.details.aadhaar.file_url || "")}
-              height={320}
-            />
+          <div className="md:col-span-3 grid md:grid-cols-4 gap-5">
+            <div className="flex justify-center items-center">
+              <Image
+                src={genMediaUrl(data.response?.details.aadhaar.image)}
+                alt="PAN Card"
+                width={840}
+                height={397}
+                className="bg-gray-50 rounded-2xl w-48 object-cover aspect-3/4"
+              />
+            </div>
+            <div className="col-span-3">
+              <RenderPdf
+                file={genMediaUrl(
+                  data.response?.details.aadhaar.file_url || ""
+                )}
+                height={320}
+              />
+            </div>
           </div>
         </div>
         <div className="gap-5 grid md:grid-cols-3 md:mt-10 py-5 border-gray-200 md:border-t md:border-b">

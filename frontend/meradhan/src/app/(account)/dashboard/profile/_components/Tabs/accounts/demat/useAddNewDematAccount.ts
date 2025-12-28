@@ -20,7 +20,11 @@ const statusCodes = {
   "91": "Timeout",
 };
 
-export const useAddNewDematAccountFormHook = ({ onComplete }: { onComplete?: () => void }) => {
+export const useAddNewDematAccountFormHook = ({
+  onComplete,
+}: {
+  onComplete?: () => void;
+}) => {
   const [error, setError] =
     useState<
       Partial<Record<keyof KycDataStorage["step_4"][number], string[]>>
@@ -79,7 +83,7 @@ export const useAddNewDematAccountFormHook = ({ onComplete }: { onComplete?: () 
         console.log(error);
         toast.error("Something went wrong");
       }
-    }
+    },
   });
 
   const verifyDematAccount = useMutation({
@@ -91,13 +95,14 @@ export const useAddNewDematAccountFormHook = ({ onComplete }: { onComplete?: () 
       } else {
         toast.error(
           statusCodes?.[data.responseData.status as keyof typeof statusCodes] ||
-          "Something went wrong"
+            "Something went wrong"
         );
       }
     },
     onError(error) {
       if (error instanceof ApiError) {
-        const errorMessage = error.response?.data?.message || error.message;
+        const errorMessage =
+          error.response?.data?.message || "Failed To Verify Demat Account";
         Swal.fire({
           icon: "error",
           title: "Demat verification Failed!",

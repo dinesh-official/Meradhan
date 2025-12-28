@@ -1,3 +1,4 @@
+"use client";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway from "@root/apiGateway";
@@ -27,6 +28,18 @@ export const PageTrackingProvider: React.FC<{
     []
   );
 
+  const checkSessionExists = () => {
+    return cookies.SESSION && cookies.token;
+  };
+
+  useEffect(() => {
+    if (pathname.startsWith("/dashboard")) {
+      if (!checkSessionExists()) {
+        window.location.href = "/logout";
+      }
+    }
+  }, [pathname]);
+
   // End page view function
   const endPageView = useCallback(async () => {
     if (
@@ -36,8 +49,7 @@ export const PageTrackingProvider: React.FC<{
       !cookies.token ||
       hasEndedRef.current ||
       isEndingRef.current
-    )
-      return;
+    ) return;
 
     isEndingRef.current = true;
 
@@ -82,7 +94,7 @@ export const PageTrackingProvider: React.FC<{
 
       try {
         const pageData = {
-          userId: cookies.userId,
+          userId: Number(cookies.userId),
           pagePath: pathname,
           entryTime: new Date(),
           sessionId: cookies.token,
@@ -99,14 +111,13 @@ export const PageTrackingProvider: React.FC<{
         pageViewIdRef.current = pageViewData.pageViewId;
         setCurrentPageView({
           ...pageData,
-          userId: cookies.userId,
+          userId: Number(cookies.userId),
           sessionId: cookies.token,
         });
       } catch {
         // Silently fail - page tracking should not interrupt user flow
       }
     };
-    console.log("runing");
 
     startPageView();
   }, [pathname, cookies.userId, cookies.token]);
@@ -124,11 +135,12 @@ export const PageTrackingProvider: React.FC<{
         const duration = Math.floor(
           (exitTime.getTime() - currentPageView.entryTime!.getTime()) / 1000
         );
-
+        sessionStorage.clear();
+        localStorage.clear();
         // Use sendBeacon for reliable data sending on page unload
         navigator.sendBeacon(
           "/api/server/auditlogs/crm/page-tracking/end/" +
-            pageViewIdRef.current,
+          pageViewIdRef.current,
           JSON.stringify({
             pageViewId: pageViewIdRef.current,
             exitTime,

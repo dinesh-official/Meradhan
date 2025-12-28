@@ -82,7 +82,7 @@ function DematAccountView({
           // showStatus
         >
           <p className="font-medium">
-            {account.depositoryParticipantName || "Coming Soon"}
+            {account.depositoryParticipantName || "Not Found"}
           </p>
         </DataInfoLabel>
       </div>

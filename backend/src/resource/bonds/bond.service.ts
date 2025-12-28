@@ -2,6 +2,7 @@ import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
 import { BondQueryBuilder } from "./bond_query_builder";
+import { isISIN } from "@utils/filters/convert";
 
 export class BondService {
   async getBondDetails(isin: string) {
@@ -48,6 +49,13 @@ export class BondService {
       extendedQuery.isListed = { equals: "YES" };
       extendedQuery.redemptionDate = { gte: new Date() };
       extendedQuery.creditRating = { notIn: ["D", "C"] };
+      console.log(isISIN(filters?.search || ""), filters?.search);
+
+      if (isISIN(filters?.search || "")) {
+        console.log("ISIN Search");
+      } else {
+        extendedQuery.allowForPurchase = { equals: true };
+      }
     }
 
     if (options?.category && options.category != "all") {
