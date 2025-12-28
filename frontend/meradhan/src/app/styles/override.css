@@ -246,3 +246,11 @@ button.rdrDay {
 .rdrEndEdge {
   background-color: #002c59 !important;
 }
+
+.MuiFormControl-root {
+  padding: 1px !important;
+  border: 1px solid #dfdfdf !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+  padding-left: 12px !important;
+}
