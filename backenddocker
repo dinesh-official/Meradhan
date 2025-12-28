@@ -13,8 +13,6 @@ WORKDIR /app/packages/kyc-providers
 RUN bun install
 WORKDIR /app/packages/schema
 RUN bun install
-WORKDIR /app/backend/databases/postgres
-RUN bunx prisma generate
 WORKDIR /app/backend
 
 RUN bun install
