@@ -17,7 +17,6 @@ import {
   revalidateMeradhanTrackingSession,
 } from "@resource/customer/auditlogs/auditlog.repo";
 import { OtpVerificationService } from "@services/otp_verification.service";
-import { cacheStorage } from "@store/redis_store";
 import { trackRateLimitSuccess } from "./customer.auth.ratelimit";
 
 export class CustomerAuthController {
@@ -217,19 +216,10 @@ export class CustomerAuthController {
 
   async session(req: Request, res: Response): Promise<void> {
     const id = req.customer?.id;
+    console.log(req.customer);
 
     if (!id) {
       throw new AppError("Session not found");
-    }
-
-    const cashedUser = await cacheStorage.get(`USER_SESSION:${id}`);
-    if (cashedUser) {
-      res.sendResponse({
-        statusCode: HttpStatus.OK,
-        message: "session",
-        responseData: cashedUser,
-      });
-      return;
     }
 
     const session = await db.dataBase.customerProfileDataModel.findUnique({
@@ -247,7 +237,6 @@ export class CustomerAuthController {
       },
     });
 
-    await cacheStorage.set(`USER_SESSION:${id}`, session, 60);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "session",

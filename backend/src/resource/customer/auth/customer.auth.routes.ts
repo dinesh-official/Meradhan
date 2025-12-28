@@ -44,10 +44,8 @@ customerAuthRoutes.post("/api/auth/customer/signin/request", (req, res) =>
 customerAuthRoutes.post("/api/auth/customer/signin/with-password", (req, res) =>
   controller.signInWithPassword(req, res)
 );
-customerAuthRoutes.post(
-  "/api/auth/customer/signin/send-otp",
-  otpSendRateLimiter,
-  (req, res) => controller.signInWithOtpSend(req, res)
+customerAuthRoutes.post("/api/auth/customer/signin/send-otp", (req, res) =>
+  controller.signInWithOtpSend(req, res)
 );
 customerAuthRoutes.post("/api/auth/customer/signin/with-otp", (req, res) =>
   controller.signInWithOtpVerify(req, res)

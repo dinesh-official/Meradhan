@@ -159,7 +159,7 @@ export const PageTrackingProvider: React.FC<{
   useEffect(() => {
     const handlePageHide = () => {
       // Always clear client storage when leaving or closing the page
-      clearAllClientStorage();
+      // clearAllClientStorage();
 
       if (currentPageView && pageViewIdRef.current && trackingId.current) {
         const exitTime = new Date();
@@ -169,7 +169,7 @@ export const PageTrackingProvider: React.FC<{
 
         navigator.sendBeacon(
           "/api/server/auditlogs/meradhan/page-tracking/end/" +
-            pageViewIdRef.current,
+          pageViewIdRef.current,
           JSON.stringify({
             pageViewId: pageViewIdRef.current,
             exitTime,
