@@ -114,18 +114,11 @@ jobs:
           docker build -f frontendDockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: Download Task Definition
-        id: task-def
-        run: |
-          aws ecs describe-task-definition \
-          --task-definition meradhan-ui-prod\
-          --query taskDefinition \
-          > task-definition.json
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: task-definition.json
+          task-definition: meradhan-fe-task.json
           cluster: prod-cluster
           service: meradhan-ui-prod
           force-new-deployment: true
