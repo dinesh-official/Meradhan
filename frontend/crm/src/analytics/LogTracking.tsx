@@ -6,6 +6,7 @@ import { appSchema } from "@root/schema";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
+import { useClearOnTabClose } from "./hooks/useClearOnTabClose";
 
 type PageView = Partial<
   z.infer<typeof appSchema.auditlogsSchema.PageViewSchema>
@@ -31,6 +32,8 @@ export const PageTrackingProvider: React.FC<{
   const checkSessionExists = () => {
     return cookies.SESSION && cookies.token;
   };
+
+  useClearOnTabClose(pathname.startsWith("/dashboard"));
 
   useEffect(() => {
     if (pathname.startsWith("/dashboard")) {

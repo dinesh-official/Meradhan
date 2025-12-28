@@ -1,262 +1,211 @@
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  calculateNextCouponDate,
-  calculateYtm,
-  CouponFrequency,
-  DayCountConvention,
-  YtmResult,
-} from "../_helpers/ytm";
+  calculateCompoundReturn,
+  calculateDate,
+  calculateFraction,
+  calculateRate,
+  calculateValueNPER,
+  calculateYearFraction,
+  validateInputs,
+} from "./formula";
+export const cFrequencyMap = {
+  Annual: 1,
+  "Semi-Annual": 2,
+  Quarterly: 4,
+  Monthly: 12,
+} as const;
+
+export const dayCountMap = {
+  "Actual/Actual": 1,
+  "30/360 (US)": 0,
+  "Actual/360": 2,
+  "Actual/365 (Fixed)": 3,
+  "30E/360 (EU)": 4,
+} as const;
+
+export type T_CF = keyof typeof cFrequencyMap;
+export type T_DC = keyof typeof dayCountMap;
 
 export const useYtm = () => {
-  // Input states
-  const [faceValue, setFaceValue] = useState("1000");
-  const [cleanPrice, setCleanPrice] = useState("990");
-  const [couponRate, setCouponRate] = useState("8.25");
-  const [couponFrequency, setCouponFrequency] =
-    useState<CouponFrequency>("QUARTERLY");
-  const [dayCountConvention, setDayCountConvention] =
-    useState<DayCountConvention>("ACT_365F");
-
-  // Date states
-  const initialSettlementDate = dateTimeUtils.formatDateTime(
-    new Date(),
-    "YYYY-MM-DD"
+  const [faceValue, setFaceValue] = useState<number>(10000);
+  const [cleanPrice, setCleanPrice] = useState<number>(9990);
+  const [annualCouponRate, setAnnualCouponRate] = useState(8.25);
+  const [couponFrequency, setCouponFrequency] = useState<T_CF>("Quarterly");
+  const [dayCount, setDayCount] = useState<T_DC>("Actual/Actual");
+  const [issueDate, setIssueDate] = useState<Date>(new Date("2024-12-10"));
+  const [settlementDate, setSettlementDate] = useState<Date>(
+    new Date("2025-12-28")
   );
-  const initialMaturityDate = dateTimeUtils.formatDateTime(
-    dateTimeUtils.addYears(new Date(), 2),
-    "YYYY-MM-DD"
+  const [maturityDate, setMaturityDate] = useState<Date>(
+    new Date("2027-12-10")
   );
-  const initialIssueDate = dateTimeUtils.formatDateTime(
-    dateTimeUtils.addYears(new Date(), -1),
-    "YYYY-MM-DD"
+  const [lastCouponDate, setLastCouponDateState] = useState<Date>(
+    new Date("2025-12-10")
   );
-
-  const [settlementDate, setSettlementDate] = useState(initialSettlementDate);
-  const [maturityDate, setMaturityDate] = useState(initialMaturityDate);
-  const [issueDate, setIssueDate] = useState(initialIssueDate);
-  const [lastCouponDate, setLastCouponDate] = useState<string>("");
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Last Coupon Date is now user-entered only, no auto-calculation
-  // Removed auto-calculation - user must enter Last Coupon Date manually
-
-  // Mark as initialized after first render
-  useEffect(() => {
-    setIsInitialized(true);
+  const setLastCouponDate = useCallback((date: Date) => {
+    setLastCouponDateState(date);
   }, []);
 
-  // Calculate Next Coupon Date
-  const nextCouponDate = useMemo(() => {
-    if (!lastCouponDate || couponFrequency === "AT_MATURITY") {
-      return "";
-    }
-    return calculateNextCouponDate(lastCouponDate, couponFrequency);
-  }, [lastCouponDate, couponFrequency]);
+  useEffect(() => {
+    const paymentsPerYear = cFrequencyMap[couponFrequency];
+    if (!paymentsPerYear) return;
+    const monthsPerPeriod = 12 / paymentsPerYear;
 
-  // Validation
-  const validationErrors = useMemo(() => {
-    const errors: string[] = [];
+    let current = new Date(issueDate);
+    let last = new Date(issueDate);
+    let guard = 0;
 
-    if (!isInitialized) {
-      return errors;
-    }
-
-    // Validate numeric inputs
-    const faceValueNum = parseFloat(faceValue);
-    const cleanPriceNum = parseFloat(cleanPrice);
-    const couponRateNum = parseFloat(couponRate);
-
-    if (isNaN(faceValueNum) || faceValueNum <= 0) {
-      errors.push("Face Value must be greater than 0");
+    while (guard < 500) {
+      const next = new Date(current);
+      next.setMonth(next.getMonth() + monthsPerPeriod);
+      if (next > settlementDate) break;
+      last = next;
+      current = next;
+      guard += 1;
     }
 
-    if (isNaN(cleanPriceNum) || cleanPriceNum <= 0) {
-      errors.push("Clean Price must be greater than 0");
-    }
+    setLastCouponDateState(last);
+  }, [couponFrequency, issueDate, settlementDate]);
 
-    if (isNaN(couponRateNum) || couponRateNum < 0) {
-      errors.push("Coupon Rate must be greater than or equal to 0");
-    }
+  // RESULT
+  const [result, setResult] = useState({
+    answer: 0,
+    status: true,
+  });
 
-    // Validate dates
-    if (issueDate && settlementDate && maturityDate) {
-      const issue = new Date(issueDate);
-      const settlement = new Date(settlementDate);
-      const maturity = new Date(maturityDate);
+  const calculate = useCallback(() => {
+    const paymentsPerYear = cFrequencyMap[couponFrequency];
+    const YEARFRAC_Basis = dayCountMap[dayCount];
 
-      issue.setHours(0, 0, 0, 0);
-      settlement.setHours(0, 0, 0, 0);
-      maturity.setHours(0, 0, 0, 0);
+    const monthsPerPeriod = 12 / paymentsPerYear;
+    const nextCouponDate = calculateDate(
+      lastCouponDate,
+      monthsPerPeriod,
+      settlementDate
+    );
 
-      if (settlement < issue) {
-        errors.push("Settlement Date must be on or after Issue Date");
-      }
+    const yearsToMaturity = calculateYearFraction(
+      settlementDate,
+      maturityDate,
+      YEARFRAC_Basis
+    );
 
-      if (maturity <= settlement) {
-        errors.push("Maturity Date must be after Settlement Date");
-      }
+    const NPER = calculateValueNPER(
+      nextCouponDate,
+      maturityDate,
+      YEARFRAC_Basis,
+      paymentsPerYear
+    );
+    const PMT = (faceValue * annualCouponRate) / paymentsPerYear;
+    const annualCouponAmount = faceValue * YEARFRAC_Basis;
+    const accruedFraction = calculateFraction(
+      lastCouponDate,
+      settlementDate,
+      nextCouponDate,
+      YEARFRAC_Basis
+    );
+    const accruedInterest = (PMT * accruedFraction) / 100;
+    const dirtyPrice = cleanPrice + accruedInterest;
 
-      if (maturity <= issue) {
-        errors.push("Maturity Date must be after Issue Date");
-      }
+    const check = validateInputs({
+      C10: settlementDate,
+      C11: maturityDate,
+      C12: lastCouponDate,
+      C15: paymentsPerYear,
+      C16: monthsPerPeriod,
+      C17: YEARFRAC_Basis,
+      C18: nextCouponDate,
+      C4: faceValue,
+      C5: cleanPrice,
+      C6: annualCouponRate,
+      C9: issueDate,
+    });
 
-      // Validate Last Coupon Date
-      if (lastCouponDate && couponFrequency !== "AT_MATURITY") {
-        const lastCoupon = new Date(lastCouponDate);
-        lastCoupon.setHours(0, 0, 0, 0);
+    const Periodic_R_RATE = calculateRate({
+      C26: check,
+      C25: Number(dirtyPrice),
+      C21: Number(PMT / 100),
+      C20: Number(NPER),
+      C4: faceValue,
+    });
 
-        if (lastCoupon > settlement) {
-          errors.push(
-            "Last Coupon Date must be on or before Settlement Date"
-          );
-        }
+    const data = calculateCompoundReturn({
+      C15: paymentsPerYear,
+      C26: check,
+      I9: Periodic_R_RATE,
+    });
 
-        if (lastCoupon > maturity) {
-          errors.push("Last Coupon Date must be on or before Maturity Date");
-        }
-
-        if (lastCoupon < issue) {
-          errors.push("Last Coupon Date must be on or after Issue Date");
-        }
-      }
-    }
-
-    return errors;
+    return {
+      result: data * 100,
+      check: check,
+      drived: {
+        Periodic_R_RATE,
+        paymentsPerYear,
+        YEARFRAC_Basis,
+        monthsPerPeriod,
+        nextCouponDate,
+        yearsToMaturity,
+        NPER,
+        PMT,
+        annualCouponAmount,
+        accruedFraction,
+        accruedInterest,
+        dirtyPrice,
+      },
+    };
   }, [
-    faceValue,
+    annualCouponRate,
     cleanPrice,
-    couponRate,
-    issueDate,
-    settlementDate,
-    maturityDate,
-    lastCouponDate,
     couponFrequency,
-    isInitialized,
+    dayCount,
+    faceValue,
+    issueDate,
+    lastCouponDate,
+    maturityDate,
+    settlementDate,
   ]);
 
-  // Calculate YTM
-  const ytmResult = useMemo(() => {
-    if (validationErrors.length > 0) {
-      return {
-        dayDiff: 0,
-        accruedInterest: 0,
-        dirtyPrice: 0,
-        cashflow: [
-          {
-            paymentDate: settlementDate,
-            days: 0,
-            amount: 0,
-            mc: false,
-            type: "Investment",
-            extra: false,
-            interest: 0,
-          },
-        ],
-        periodicYield: 0,
-        nominalAnnualYtm: 0,
-        effectiveAnnualYtm: 0,
-        lastCouponDate: "",
-        nextCouponDate: "",
-      };
-    }
-
+  useEffect(() => {
     try {
-      return calculateYtm({
-        faceValue: parseFloat(faceValue),
-        cleanPrice: parseFloat(cleanPrice),
-        couponRate: parseFloat(couponRate),
-        issueDate,
-        settlementDate,
-        maturityDate,
-        couponFrequency,
-        dayCountConvention,
-        lastCouponDate: lastCouponDate || undefined,
+      const res = calculate();
+      console.log(res);
+
+      setResult({
+        answer: res.result,
+        status: res.check == "OK",
       });
     } catch (error) {
-      console.error("Error calculating YTM:", error);
-      return {
-        dayDiff: 0,
-        accruedInterest: 0,
-        dirtyPrice: 0,
-        cashflow: [
-          {
-            paymentDate: settlementDate,
-            days: 0,
-            amount: 0,
-            mc: false,
-            type: "Investment",
-            extra: false,
-            interest: 0,
-          },
-        ],
-        periodicYield: 0,
-        nominalAnnualYtm: 0,
-        effectiveAnnualYtm: 0,
-        lastCouponDate: "",
-        nextCouponDate: "",
-      };
+      console.error(error);
+      setResult({
+        answer: NaN,
+        status: false,
+      });
     }
-  }, [
-    faceValue,
-    cleanPrice,
-    couponRate,
-    issueDate,
-    settlementDate,
-    maturityDate,
-    couponFrequency,
-    dayCountConvention,
-    lastCouponDate,
-    validationErrors.length,
-  ]);
-
-  // Ensure ytmResult is always defined - create default if needed
-  const safeYtmResult: YtmResult = ytmResult || {
-    dayDiff: 0,
-    accruedInterest: 0,
-    dirtyPrice: 0,
-    cashflow: [
-      {
-        paymentDate: settlementDate || new Date().toISOString().split("T")[0],
-        days: 0,
-        amount: 0,
-        mc: false,
-        type: "Investment",
-        extra: false,
-        interest: 0,
-      },
-    ],
-    periodicYield: 0,
-    annualYtm: 0,
-    lastCouponDate: "",
-    nextCouponDate: "",
-  };
+  }, [calculate]);
 
   return {
-    // Inputs
-    faceValue,
-    setFaceValue,
-    cleanPrice,
-    setCleanPrice,
-    couponRate,
-    setCouponRate,
-    couponFrequency,
-    setCouponFrequency,
-    dayCountConvention,
-    setDayCountConvention,
-    issueDate,
-    setIssueDate,
-    settlementDate,
-    setSettlementDate,
-    maturityDate,
-    setMaturityDate,
-    lastCouponDate,
-    setLastCouponDate,
-    nextCouponDate,
-    // Results
-    ytmResult: safeYtmResult,
-    validationErrors,
-    isValid: validationErrors.length === 0,
+    result,
+    manager: {
+      // state
+      faceValue,
+      cleanPrice,
+      annualCouponRate,
+      couponFrequency,
+      dayCount,
+      issueDate,
+      settlementDate,
+      lastCouponDate,
+      maturityDate,
+      // updates
+      setAnnualCouponRate,
+      setCleanPrice,
+      setCouponFrequency,
+      setDayCount,
+      setFaceValue,
+      setIssueDate,
+      setLastCouponDate,
+      setMaturityDate,
+      setSettlementDate,
+    },
   };
 };
-
