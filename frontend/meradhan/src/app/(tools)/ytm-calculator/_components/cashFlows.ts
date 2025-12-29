@@ -1,4 +1,3 @@
-
 type CashFlow = {
   paymentDate: string;
   amount: number;
@@ -8,8 +7,6 @@ type CashFlow = {
   extra: boolean;
   interest: number;
 }[];
-
-
 
 export const cashFlows: CashFlow = [
   {

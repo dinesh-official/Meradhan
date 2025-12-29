@@ -56,6 +56,9 @@ export const PageTrackingProvider: React.FC<{
   useEffect(() => {
     // Initialize tracking session on mount
     const initTracking = async () => {
+      if (!cookies.token) {
+        return;
+      }
       try {
         const newTrackingID =
           new Date().getTime().toString() +
@@ -80,6 +83,9 @@ export const PageTrackingProvider: React.FC<{
 
   // End page view function
   const endPageView = useCallback(async () => {
+    if (!cookies.token) {
+      return;
+    }
     if (!currentPageView || !pageViewIdRef.current || !trackingId.current)
       return;
 
@@ -128,7 +134,7 @@ export const PageTrackingProvider: React.FC<{
         interactionsRef.current = 0;
 
         const pageData = {
-          userId: cookies.userId || undefined, // Optional userId
+          userId: cookies.userId || undefined, // Optional
           pagePath: pathname,
           entryTime: new Date(),
           sessionId: trackingId.current,
@@ -152,7 +158,9 @@ export const PageTrackingProvider: React.FC<{
         console.error("Failed to start page tracking:", error);
       }
     };
-
+    if (!cookies.token) {
+      return;
+    }
     startPageView();
   }, [pathname, auditApi, cookies.userId]);
 
@@ -169,7 +177,7 @@ export const PageTrackingProvider: React.FC<{
 
         navigator.sendBeacon(
           "/api/server/auditlogs/meradhan/page-tracking/end/" +
-          pageViewIdRef.current,
+            pageViewIdRef.current,
           JSON.stringify({
             pageViewId: pageViewIdRef.current,
             exitTime,

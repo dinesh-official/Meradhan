@@ -18,11 +18,16 @@ import { BsArrowUpRightSquareFill } from "react-icons/bs";
 import { FaEye, FaTrash } from "react-icons/fa";
 import NeedKyc from "../NeedKyc";
 import { Loader } from "lucide-react";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 
 function BondsWatchList() {
+  const { cookies } = useAppCookie();
   const bondsWatchList = useQuery({
     queryKey: ["bondsWatchList"],
     queryFn: async () => {
+      if (!cookies.token) {
+        return { data: [] };
+      }
       return await apiClientCaller.get<BondDetailsResponse[]>(
         "/watchlist/bonds"
       );

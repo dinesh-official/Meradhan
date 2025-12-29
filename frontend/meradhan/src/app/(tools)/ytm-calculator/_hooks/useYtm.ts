@@ -19,7 +19,7 @@ export const dayCountMap = {
   "Actual/Actual": 1,
   "30/360 (US)": 0,
   "Actual/360": 2,
-  "Actual/365 (Fixed)": 3,
+  "Actual/365": 3,
   "30E/360 (EU)": 4,
 } as const;
 
