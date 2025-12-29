@@ -157,6 +157,12 @@ jobs:
           RAZORPAY_WEBHOOK_SECRET="${{ secrets.RAZORPAY_WEBHOOK_SECRET }}"
           echo "RAZORPAY_WEBHOOK_SECRET=$RAZORPAY_WEBHOOK_SECRET" >> .env
 
+          CDSL_MODE="${{ secrets.CDSL_MODE }}"
+          echo "CDSL_MODE=$CDSL_MODE" >> .env
+
+          NSDL_MODE="${{ secrets.NSDL_MODE }}"
+          echo "NSDL_MODE=$NSDL_MODE" >> .env
+
           S3_ACCESS_KEY_ID="${{ secrets.S3_ACCESS_KEY_ID }}"
           echo "S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID" >> .env
 
