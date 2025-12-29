@@ -24,7 +24,6 @@ export default function FlowTable({ flowData }: { flowData: CashFlowData }) {
       <h2 className="mb-6 text-[32px] quicksand-semibold">
         Cash <span className="text-red-600"> Flow</span>
       </h2>
-
       <div className="w-full overflow-x-auto">
         <table className="divide-y first:divide-white w-full table-fixed">
           <thead className="rounded overflow-hidden">
@@ -42,33 +41,35 @@ export default function FlowTable({ flowData }: { flowData: CashFlowData }) {
 
           {/* Table Body */}
           <tbody className="bg-white divide-y divide-gray-200">
-            {flowData.cashflow.map((flow, index) => {
-              return (
-                // make last 2 rows bold
-                <tr
-                  key={index}
-                  className={cn("hover:bg-gray-50", {
-                    "font-bold": index >= flowData.cashflow.length - 2,
-                  })}
-                >
-                  <td className="p-4 text-left">{index + 1}</td>
-                  <td className="p-4 text-left">
-                    {formatDateSimple(flow.paymentDate)}
-                  </td>
-                  <td className="p-4 text-left">
-                    <span className={`flex items-center `}>
-                      {flow.amount < -1 && "-"}
-                      <IndianRupee size={14} className="mt-0.5" />
-                      {Math.abs(flow.amount).toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </span>
-                  </td>
-                  <td className="p-4 text-left">{flow.type}</td>
-                </tr>
-              );
-            })}
+            {flowData.cashflow
+              .filter((flow) => flow.amount !== 0)
+              .map((flow, index) => {
+                return (
+                  // make last 2 rows bold if the type is Principal
+                  <tr
+                    key={index}
+                    className={cn("hover:bg-gray-50", {
+                      "font-bold": index >= flowData.cashflow.length - 2,
+                    })}
+                  >
+                    <td className="p-4 text-left">{index + 1}</td>
+                    <td className="p-4 text-left">
+                      {formatDateSimple(flow.paymentDate)}
+                    </td>
+                    <td className="p-4 text-left">
+                      <span className={`flex items-center `}>
+                        {flow.amount < -1 && "-"}
+                        <IndianRupee size={14} className="mt-0.5" />
+                        {Math.abs(flow.amount).toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </td>
+                    <td className="p-4 text-left">{flow.type}</td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>

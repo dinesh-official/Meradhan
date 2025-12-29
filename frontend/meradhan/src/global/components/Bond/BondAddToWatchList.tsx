@@ -19,14 +19,20 @@ function BondAddToWatchList({ isin }: { isin: string }) {
   const [open, setOpen] = useState(false);
   const { cookies } = useAppCookie();
 
-  // Fetch Watchlist
+  // Fetch WatchList
   const bondsWatchList = useQuery({
     queryKey: ["bondsWatchList"],
-    queryFn: async () =>
-      await apiClientCaller.get<BondDetailsResponse[]>("/watchlist/bonds"),
+    queryFn: async () => {
+      if (!cookies.token) {
+        return { data: [] };
+      }
+      return await apiClientCaller.get<BondDetailsResponse[]>(
+        "/watchlist/bonds"
+      );
+    },
   });
 
-  // Add To Watchlist Mutation
+  // Add To WatchList Mutation
   const addToWatchList = useMutation({
     mutationKey: ["addBondsWatchList", isin],
     mutationFn: async () =>
@@ -35,15 +41,15 @@ function BondAddToWatchList({ isin }: { isin: string }) {
       }),
     onSuccess: () => {
       bondsWatchList.refetch();
-      toast.success("Added To Watchlist");
+      toast.success("Added To WatchList");
     },
     onError: () => {
       bondsWatchList.refetch();
-      toast.error("Failed To Add Watchlist");
+      toast.error("Failed To Add WatchList");
     },
   });
 
-  // Check if ISIN exists in watchlist
+  // Check if ISIN exists in watchList
   const exists = bondsWatchList.data?.data?.some((b) => b.isin === isin);
 
   // If exists, show watched UI
@@ -74,7 +80,7 @@ function BondAddToWatchList({ isin }: { isin: string }) {
         <div className="bg-secondary rounded-sm p-0.5">
           <Plus size={15} className="text-white" />
         </div>
-        <p className="font-medium text-gray-500 text-sm">Watchlist</p>
+        <p className="font-medium text-gray-500 text-sm">WatchList</p>
       </div>
 
       {/* LOGIN REQUIRED DIALOG */}
@@ -83,7 +89,7 @@ function BondAddToWatchList({ isin }: { isin: string }) {
           <DialogHeader>
             <DialogTitle>Login Required</DialogTitle>
             <DialogDescription>
-              You must be logged in to add bonds to your watchlist.
+              You must be logged in to add bonds to your watchList.
             </DialogDescription>
           </DialogHeader>
 

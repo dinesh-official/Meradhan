@@ -1,4 +1,6 @@
 "use client";
+import { fetchIssuerNotesWatchList } from "@/app/(others)/issuer-notes/_action/isshueNotesClient";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -7,9 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { queryClient } from "@/core/config/service-clients";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
 import { formatDateCustom } from "@/global/utils/datetime.utils";
-import { formatNumberTS } from "@/global/utils/formate";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
@@ -18,16 +21,19 @@ import toast from "react-hot-toast";
 import { BsArrowUpRightSquareFill } from "react-icons/bs";
 import { FaEye, FaTrash } from "react-icons/fa";
 import NeedKyc from "../NeedKyc";
-import { fetchIssuerNotesWatchList } from "@/app/(others)/issuer-notes/_action/isshueNotesClient";
-import { Badge } from "@/components/ui/badge";
-import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
-import { queryClient } from "@/core/config/service-clients";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 
 function IssuerWatchList() {
+  const { cookies } = useAppCookie();
   const issuerWatchList = useQuery({
     queryKey: ["issuerWatchList"],
     queryFn: async () => {
+      if (!cookies.token) {
+        return [];
+      }
+
       const ids = await apiClientCaller.get<string[]>("/watchlist/issuer");
+
       if (ids.data.length == 0) {
         return [];
       }
