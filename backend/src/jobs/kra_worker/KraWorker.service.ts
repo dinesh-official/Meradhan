@@ -161,12 +161,13 @@ export class KraProcess {
     const reqTime = new Date().toISOString();
     const payload = {
       pan: data.step_1.pan.panCardNo,
-      dob: data.step_1.pan.dateOfBirth,
+      dob: data.step_1.pan.dateOfBirth.split("T")[0]?.toString() || "",
       mobile: kraMobNo,
       reqNo: this.generateReqNo(),
     };
 
     const enquiry = await this.kraInstance.panInquiry(payload);
+
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
       where: {
@@ -353,7 +354,7 @@ export class KraProcess {
     const firstName = data.step_1?.pan?.firstName || "";
     const middleName = data.step_1?.pan?.middleName || "";
     const lastName = data.step_1?.pan?.lastName || "";
-    const dob = data.step_1?.pan?.dateOfBirth || "";
+    const dob = data.step_1?.pan?.dateOfBirth.split("T")[0]?.toString() || "";
     const MAR_STATUS = data.step_2.maritalStatus == "MARRIED" ? "01" : "02";
     const mobile = kraMobNo;
 

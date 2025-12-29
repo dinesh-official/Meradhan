@@ -1,4 +1,5 @@
 "use client";
+import { PrimeReactProvider } from "primereact/api";
 import { PageTrackingProvider } from "@/analytics/LogsTracking";
 import { queryClient } from "@/core/config/service-clients";
 import { gqlClient } from "@/core/connection/apollo-client";
@@ -15,22 +16,24 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 function Client({ children }: { children: ReactNode }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <CookiesProvider>
-        <PageTrackingProvider>
-          <QueryClientProvider client={queryClient}>
-            <ApolloProvider client={gqlClient}>
-              {children}
-              <DhanGptPopup />
-              <Toaster position="top-center" reverseOrder={false} />
-              <ReactQueryDevtools
-                initialIsOpen={false}
-                buttonPosition="bottom-right"
-                position="right"
-              />
-            </ApolloProvider>
-          </QueryClientProvider>
-        </PageTrackingProvider>
-      </CookiesProvider>
+      <PrimeReactProvider>
+        <CookiesProvider>
+          <PageTrackingProvider>
+            <QueryClientProvider client={queryClient}>
+              <ApolloProvider client={gqlClient}>
+                {children}
+                <DhanGptPopup />
+                <Toaster position="top-center" reverseOrder={false} />
+                <ReactQueryDevtools
+                  initialIsOpen={false}
+                  buttonPosition="bottom-right"
+                  position="right"
+                />
+              </ApolloProvider>
+            </QueryClientProvider>
+          </PageTrackingProvider>
+        </CookiesProvider>
+      </PrimeReactProvider>
     </LocalizationProvider>
   );
 }

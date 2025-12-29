@@ -1,5 +1,4 @@
 "use client";
-
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 
@@ -23,7 +22,6 @@ function MuiDatePicker({
           },
           sx: {
             padding: 0,
-
             "& input": {
               padding: 0,
             },

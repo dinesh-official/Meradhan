@@ -85,7 +85,6 @@ export function DatePicker({
                 onChange?.(e);
               }}
               onClick={handleInputClick}
-              readOnly
               className="[&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:absolute bg-background [&::-webkit-calendar-picker-indicator]:opacity-0 pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               {...props}
             />
