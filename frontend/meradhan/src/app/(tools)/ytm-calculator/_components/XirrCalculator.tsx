@@ -252,20 +252,21 @@ function XirrCalculator() {
 
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Issue Date</Label>
-                <DatePickerV2
+                {/*
+                 <DatePickerV2
                   value={issueDate ? formatToDatePicker(issueDate) : undefined}
                   onChange={(date) => {
-                    setIssueDate(date ? parseFromDatePicker(date) : new Date());
+                    setIssueDate(date ? new Date(date) : new Date());
                   }}
-                />
+                /> */}
 
-                {/* <DatePicker
+                <DatePicker
                   className="bg-white py-5 border-none font-medium"
                   value={formatToDatePicker(issueDate)}
                   onChange={(e) => {
                     setIssueDate(parseFromDatePicker(e.target.value));
                   }}
-                /> */}
+                />
               </div>
 
               <div className="flex flex-col gap-2 col-span-2">
