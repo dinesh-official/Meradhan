@@ -18,7 +18,6 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
-import MuiDatePicker from "@/components/custom/MuiDatePicker";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
