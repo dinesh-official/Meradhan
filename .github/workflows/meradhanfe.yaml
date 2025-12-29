@@ -4,7 +4,7 @@ name: meradhan FE deploy
 on:
   push:
     branches:
-      - lokesh/pipeline
+      - master
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -122,6 +122,12 @@ jobs:
 
           ENTITY_ID="${{ secrets.ENTITY_ID }}"
           echo "ENTITY_ID=$ENTITY_ID" >> .env
+
+          CDSL_MODE="${{ secrets.CDSL_MODE }}"
+          echo "CDSL_MODE=$CDSL_MODE" >> .env
+
+          NSDL_MODE="${{ secrets.NSDL_MODE }}"
+          echo "NSDL_MODE=$NSDL_MODE" >> .env
 
           AUTH_SECRET="${{ secrets.AUTH_SECRET }}"
           echo "AUTH_SECRET=$AUTH_SECRET" >> .env
