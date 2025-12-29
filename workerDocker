@@ -19,4 +19,4 @@ WORKDIR /app/backend/databases/postgres
 RUN bunx prisma generate
 WORKDIR /app/backend
 EXPOSE 4000
-CMD ["bun", "start"]
+CMD ["bun", "run", "worker"]
