@@ -57,14 +57,14 @@ function IdentityValidationForm() {
             >
               {/* <DatePickerWithEdit/> */}
               {/* // fix date formatting issue */}
-              <MuiDatePicker
+              {/* <MuiDatePicker
                 value={data.dateOfBirth}
                 onChange={(date) => {
                   console.log(date.split("T")[0]);
                   setStep1PanData("dateOfBirth", date);
                 }}
-              />
-              {/* <DatePicker
+              /> */}
+              <DatePicker
                 value={
                   data.dateOfBirth
                     ? dateTimeUtils.formatDateTime(
@@ -77,7 +77,7 @@ function IdentityValidationForm() {
                   setStep1PanData("dateOfBirth", e.target.value);
                   console.log(e.target.value);
                 }}
-              /> */}
+              />
             </LabelInput>
           </div>
 
