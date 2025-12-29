@@ -1,6 +1,6 @@
 import TopTitleDesc from "@/global/components/basic/TopTitleDesc";
-import { T_PAGE_DATA } from "@/graphql/pagesGQLAction";
 import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
+import { T_PAGE_DATA } from "@/graphql/pagesGQLAction";
 
 const AboutUs = ({ Description, Title, Content }: T_PAGE_DATA) => {
   return (
@@ -12,8 +12,11 @@ const AboutUs = ({ Description, Title, Content }: T_PAGE_DATA) => {
         <MissionVisionSection />
         <CoreValuesSection />
         <OfferingsSection />
+        <OurExports />
         <WhyChooseUsSection /> */}
-        <div dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(Content) }} />
+        <div
+          dangerouslySetInnerHTML={{ __html: sanitizeStrapiHTML(Content) }}
+        />
       </div>
     </>
   );

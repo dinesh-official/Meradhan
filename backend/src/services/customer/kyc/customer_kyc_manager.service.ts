@@ -141,7 +141,8 @@ export class CustomerKycManager {
                 firstName,
                 lastName,
                 middleName,
-                dateOfBirth: step1.pan.dateOfBirth,
+                dateOfBirth:
+                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
                 gender,
                 image: aadhaarData.image,
                 fileUrl: panData.file_url,
@@ -155,7 +156,8 @@ export class CustomerKycManager {
                 firstName,
                 lastName,
                 middleName,
-                dateOfBirth: step1.pan.dateOfBirth,
+                dateOfBirth:
+                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
                 gender,
                 image: aadhaarData.image,
                 fileUrl: panData.file_url,
@@ -180,7 +182,8 @@ export class CustomerKycManager {
                 nationality: step2.nationality,
                 residentialStatus: step2.residentialStatus,
                 qualification: step2.qualification,
-                dateOfBirth: step1.pan.dateOfBirth,
+                dateOfBirth:
+                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
                 SignatureUrl: step1.sign.url,
                 signPdfUrl: step6.response.fileUrl,
                 maidenName: null,
@@ -197,7 +200,8 @@ export class CustomerKycManager {
                 nationality: step2.nationality,
                 residentialStatus: step2.residentialStatus,
                 qualification: step2.qualification,
-                dateOfBirth: step1.pan.dateOfBirth,
+                dateOfBirth:
+                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
                 SignatureUrl: step1.sign.url,
                 signPdfUrl: step6.response.fileUrl,
                 maidenName: null,

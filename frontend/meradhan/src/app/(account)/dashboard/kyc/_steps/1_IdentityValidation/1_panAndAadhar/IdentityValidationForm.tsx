@@ -60,6 +60,7 @@ function IdentityValidationForm() {
               <MuiDatePicker
                 value={data.dateOfBirth}
                 onChange={(date) => {
+                  console.log(date.split("T")[0]);
                   setStep1PanData("dateOfBirth", date);
                 }}
               />

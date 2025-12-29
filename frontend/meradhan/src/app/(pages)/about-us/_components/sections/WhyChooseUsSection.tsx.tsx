@@ -14,7 +14,7 @@ const WhyChooseUsSection = () => {
   return (
     <>
       <section className="container">
-        <div className="space-y-8 px-5 leading-relaxed">
+        <div className="space-y-8 px-5 mt-12 leading-relaxed">
           {/* Heading */}
           <h4
             className={cn(

@@ -22,6 +22,8 @@ import {
 import { cFrequencyMap, dayCountMap, useYtm } from "../_hooks/useYtm";
 import { FlowChart } from "./FlowChart";
 import FlowTable from "./FlowTable";
+import { Calendar } from "primereact/calendar";
+import { DatePickerV2 } from "@/components/custom/DatePickerV2";
 
 // Helper functions to convert between date formats
 const formatToDatePicker = (value?: Date): string => {
@@ -250,13 +252,20 @@ function XirrCalculator() {
 
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Issue Date</Label>
-                <DatePicker
+                <DatePickerV2
+                  value={issueDate ? formatToDatePicker(issueDate) : undefined}
+                  onChange={(date) => {
+                    setIssueDate(date ? parseFromDatePicker(date) : new Date());
+                  }}
+                />
+
+                {/* <DatePicker
                   className="bg-white py-5 border-none font-medium"
                   value={formatToDatePicker(issueDate)}
                   onChange={(e) => {
                     setIssueDate(parseFromDatePicker(e.target.value));
                   }}
-                />
+                /> */}
               </div>
 
               <div className="flex flex-col gap-2 col-span-2">
