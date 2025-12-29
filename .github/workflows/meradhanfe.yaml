@@ -4,7 +4,7 @@ name: meradhan FE deploy
 on:
   push:
     branches:
-      - lokesh/pipeline
+      - master
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000" >> .env
-          echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
           echo "NEXT_PUBLIC_DIGIO=production" >> .env
           echo "STRAPI_API_URL=https://spyder.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
@@ -122,6 +122,12 @@ jobs:
 
           ENTITY_ID="${{ secrets.ENTITY_ID }}"
           echo "ENTITY_ID=$ENTITY_ID" >> .env
+
+          CDSL_MODE="${{ secrets.CDSL_MODE }}"
+          echo "CDSL_MODE=$CDSL_MODE" >> .env
+
+          NSDL_MODE="${{ secrets.NSDL_MODE }}"
+          echo "NSDL_MODE=$NSDL_MODE" >> .env
 
           AUTH_SECRET="${{ secrets.AUTH_SECRET }}"
           echo "AUTH_SECRET=$AUTH_SECRET" >> .env
