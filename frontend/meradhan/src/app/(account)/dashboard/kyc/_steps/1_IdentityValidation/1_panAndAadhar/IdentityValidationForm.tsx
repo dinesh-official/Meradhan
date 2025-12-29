@@ -18,7 +18,6 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
-import MuiDatePicker from "@/components/custom/MuiDatePicker";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -57,14 +56,14 @@ function IdentityValidationForm() {
             >
               {/* <DatePickerWithEdit/> */}
               {/* // fix date formatting issue */}
-              <MuiDatePicker
+              {/* <MuiDatePicker
                 value={data.dateOfBirth}
                 onChange={(date) => {
                   console.log(date.split("T")[0]);
                   setStep1PanData("dateOfBirth", date);
                 }}
-              />
-              {/* <DatePicker
+              /> */}
+              <DatePicker
                 value={
                   data.dateOfBirth
                     ? dateTimeUtils.formatDateTime(
@@ -77,7 +76,7 @@ function IdentityValidationForm() {
                   setStep1PanData("dateOfBirth", e.target.value);
                   console.log(e.target.value);
                 }}
-              /> */}
+              />
             </LabelInput>
           </div>
 
