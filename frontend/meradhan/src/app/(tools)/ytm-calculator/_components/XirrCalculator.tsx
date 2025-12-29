@@ -1,5 +1,5 @@
 "use client";
-import { DatePicker } from "@/components/custom/DatePicker";
+import DatePicker from "@/components/picker/DatePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FaPercent } from "react-icons/fa";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import {
@@ -22,23 +22,6 @@ import {
 import { cFrequencyMap, dayCountMap, useYtm } from "../_hooks/useYtm";
 import { FlowChart } from "./FlowChart";
 import FlowTable from "./FlowTable";
-import { Calendar } from "primereact/calendar";
-import { DatePickerV2 } from "@/components/custom/DatePickerV2";
-
-// Helper functions to convert between date formats
-const formatToDatePicker = (value?: Date): string => {
-  if (!value) return "";
-  const day = value.getDate().toString().padStart(2, "0");
-  const month = (value.getMonth() + 1).toString().padStart(2, "0");
-  const year = value.getFullYear();
-  return `${day}/${month}/${year}`;
-};
-
-const parseFromDatePicker = (value: string): Date => {
-  const [year, month, day] = value.split("-");
-  return new Date(Number(year), Number(month) - 1, Number(day));
-};
-
 const couponFrequencyMap: Record<keyof typeof cFrequencyMap, FrequencyType> = {
   Annual: "annual",
   "Semi-Annual": "semi-annual",
@@ -62,6 +45,22 @@ const fallbackFlow = {
     },
   ],
 };
+
+const formatOffsetLabel = (offset: number) => {
+  const base = new Date();
+  base.setDate(base.getDate() + offset);
+  return base.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const settlementOptions = () => [
+  { label: "T+0 (Today)", value: 0 },
+  { label: "T+1 (Tomorrow)", value: 1 },
+  { label: `T+2 (${formatOffsetLabel(2)})`, value: 2 },
+  { label: `T+3 (${formatOffsetLabel(3)})`, value: 3 },
+];
 
 function XirrCalculator() {
   const {
@@ -121,12 +120,22 @@ function XirrCalculator() {
     return (Number(faceValue) * Number(annualCouponRate)) / Number(cleanPrice);
   }, [annualCouponRate, cleanPrice, faceValue]);
 
+  const today = useMemo(() => new Date(), []);
+  const settlementChoices = useMemo(() => settlementOptions(), []);
+  const [settlementTerm, setSettlementTerm] = useState<number>(0);
+
+  const updateSettlementByOffset = (offset: number) => {
+    const next = new Date(today);
+    next.setDate(next.getDate() + offset);
+    setSettlementDate(next);
+  };
+
   return (
     <>
       <div className="bg-muted">
         <div className="container">
           <SectionWrapper className="gap-10 grid lg:grid-cols-3">
-            <div className="gap-6 grid grid-cols-2">
+            <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Face (Par) Value</Label>
                 <div className="relative">
@@ -226,7 +235,7 @@ function XirrCalculator() {
                 </Select>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 col-span-1 md:col-span-2">
                 <Label className="font-normal">Day Count Convention</Label>
 
                 <Select
@@ -252,53 +261,65 @@ function XirrCalculator() {
 
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Issue Date</Label>
-                {/*
-                 <DatePickerV2
-                  value={issueDate ? formatToDatePicker(issueDate) : undefined}
-                  onChange={(date) => {
-                    setIssueDate(date ? new Date(date) : new Date());
-                  }}
-                /> */}
-
                 <DatePicker
-                  className="bg-white py-5 border-none font-medium"
-                  value={formatToDatePicker(issueDate)}
-                  onChange={(e) => {
-                    setIssueDate(parseFromDatePicker(e.target.value));
+                  className="w-full"
+                  value={issueDate}
+                  maxDate={today}
+                  onChange={(date) => {
+                    if (date) setIssueDate(date);
                   }}
                 />
               </div>
 
-              <div className="flex flex-col gap-2 col-span-2">
+              <div className="flex flex-col gap-2">
                 <Label className="font-normal">Maturity Date</Label>
                 <DatePicker
-                  toYear={2050}
-                  className="bg-white py-5 border-none font-medium"
-                  value={formatToDatePicker(maturityDate)}
-                  onChange={(e) =>
-                    setMaturityDate(parseFromDatePicker(e.target.value))
-                  }
-                />
-              </div>
-              <div className="flex flex-col gap-2 col-span-2">
-                <Label className="font-normal">Last Coupon Date</Label>
-                <DatePicker
-                  className="bg-white py-5 border-none font-medium"
-                  value={formatToDatePicker(lastCouponDate)}
-                  onChange={(e) =>
-                    setLastCouponDate(parseFromDatePicker(e.target.value))
-                  }
-                />
-              </div>
-              <div className="flex flex-col gap-2 col-span-2">
-                <Label className="font-normal">Purchase/Settlement Date</Label>
-                <DatePicker
-                  className="bg-white py-5 border-none font-medium"
-                  value={formatToDatePicker(settlementDate)}
-                  onChange={(e) => {
-                    setSettlementDate(parseFromDatePicker(e.target.value));
+                  className="w-full"
+                  value={maturityDate}
+                  minDate={issueDate}
+                  maxDate={new Date(2050, 11, 31)}
+                  onChange={(date) => {
+                    if (date) setMaturityDate(date);
                   }}
                 />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="font-normal">Last Coupon Date</Label>
+                <DatePicker
+                  className="w-full"
+                  value={lastCouponDate}
+                  maxDate={today}
+                  onChange={(date) => {
+                    if (date) setLastCouponDate(date);
+                  }}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="font-normal">Purchase/Settlement Date</Label>
+                <Select
+                  value={String(settlementTerm)}
+                  onValueChange={(value) => {
+                    const offset = Number(value);
+                    setSettlementTerm(offset);
+                    updateSettlementByOffset(offset);
+                  }}
+                >
+                  <SelectTrigger className="bg-white py-5 border-0 w-full font-medium">
+                    <SelectValue placeholder="Select settlement term" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {settlementChoices.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={String(option.value)}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="lg:col-span-2 bg-white rounded-md">

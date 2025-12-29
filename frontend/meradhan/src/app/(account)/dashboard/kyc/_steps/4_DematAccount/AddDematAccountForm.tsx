@@ -115,7 +115,7 @@ function AddDematAccountForm() {
                     if (data.depositoryName == "NSDL") {
                       const name = findDpId(e.target.value);
                       updateData("depositoryParticipantName", name || "");
-                    } else if (data.depositoryName == "CDSL") {
+                    } else {
                       const name = findCdslDpId(e.target.value);
                       updateData("depositoryParticipantName", name || "");
                     }
@@ -135,7 +135,7 @@ function AddDematAccountForm() {
                 value={data.beneficiaryClientId}
                 onChange={(e) => {
                   updateData("beneficiaryClientId", e.target.value);
-                  if (data.depositoryName == "CDSL") {
+                  if (data.depositoryName != "NSDL") {
                     const name = findCdslDpId(e.target.value);
                     updateData("depositoryParticipantName", name || "");
                   }

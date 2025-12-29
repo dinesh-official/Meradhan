@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { renderToFile } from "@react-pdf/renderer";
+import { renderToBuffer, renderToFile } from "@react-pdf/renderer";
 import fs from "fs";
 import path from "path";
 import MdPdf from "../../pdf/MdPdf";
@@ -20,12 +20,13 @@ export async function generateKycPdf(userData: any) {
     }
 
     // Generate PDF and save to file
-    await renderToFile(
+    const buffer = await renderToBuffer(
       MdPdf({
         pageData: data,
-      }),
-      filePath
+      })
     );
+
+    fs.writeFileSync(filePath, buffer);
 
     // Return file path
     return filePath;

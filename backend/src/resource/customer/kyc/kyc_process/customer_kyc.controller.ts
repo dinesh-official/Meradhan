@@ -230,7 +230,7 @@ export class CustomerKycKycController {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="kyc-${id}.pdf"`
+        `attachment; filename="MeraDhan-KYC-${new Date().getTime()}-UnsignedForm.pdf"`
       );
 
       // Stream the file to the client

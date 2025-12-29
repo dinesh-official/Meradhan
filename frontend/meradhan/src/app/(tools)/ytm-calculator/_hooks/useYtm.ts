@@ -26,22 +26,58 @@ export const dayCountMap = {
 export type T_CF = keyof typeof cFrequencyMap;
 export type T_DC = keyof typeof dayCountMap;
 
+const defaultDates = () => {
+  const today = new Date();
+
+  const settlement = new Date(today);
+
+  const issue = new Date(today);
+  issue.setFullYear(issue.getFullYear() - 1);
+
+  const maturity = new Date(today);
+  maturity.setFullYear(maturity.getFullYear() + 2);
+
+  const monthsBackMap: Record<T_CF, number> = {
+    Annual: 12,
+    "Semi-Annual": 6,
+    Quarterly: 3,
+    Monthly: 1,
+  };
+
+  const defaultFrequency: T_CF = "Quarterly";
+  const lastCoupon = new Date(today);
+  lastCoupon.setMonth(
+    lastCoupon.getMonth() - monthsBackMap[defaultFrequency],
+    lastCoupon.getDate()
+  );
+
+  return {
+    issue,
+    settlement,
+    maturity,
+    lastCoupon,
+    defaultFrequency,
+  };
+};
+
 export const useYtm = () => {
+  const {
+    issue,
+    settlement,
+    maturity,
+    lastCoupon,
+    defaultFrequency,
+  } = defaultDates();
   const [faceValue, setFaceValue] = useState<number>(10000);
   const [cleanPrice, setCleanPrice] = useState<number>(9990);
   const [annualCouponRate, setAnnualCouponRate] = useState(8.25);
-  const [couponFrequency, setCouponFrequency] = useState<T_CF>("Quarterly");
+  const [couponFrequency, setCouponFrequency] =
+    useState<T_CF>(defaultFrequency);
   const [dayCount, setDayCount] = useState<T_DC>("Actual/Actual");
-  const [issueDate, setIssueDate] = useState<Date>(new Date("2024-12-10"));
-  const [settlementDate, setSettlementDate] = useState<Date>(
-    new Date("2025-12-28")
-  );
-  const [maturityDate, setMaturityDate] = useState<Date>(
-    new Date("2027-12-10")
-  );
-  const [lastCouponDate, setLastCouponDateState] = useState<Date>(
-    new Date("2025-12-10")
-  );
+  const [issueDate, setIssueDate] = useState<Date>(issue);
+  const [settlementDate, setSettlementDate] = useState<Date>(settlement);
+  const [maturityDate, setMaturityDate] = useState<Date>(maturity);
+  const [lastCouponDate, setLastCouponDateState] = useState<Date>(lastCoupon);
   const setLastCouponDate = useCallback((date: Date) => {
     setLastCouponDateState(date);
   }, []);
