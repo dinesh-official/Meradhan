@@ -1,7 +1,7 @@
 import type { CustomerProfileDataModel } from "@core/database/database";
-import type {
-  T_APP_PAN_INQ,
-  T_APP_PAN_INQ_DOWNLOAD,
+import {
+  type T_APP_PAN_INQ,
+  type T_APP_PAN_INQ_DOWNLOAD,
 } from "@packages/kyc-providers";
 import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
 import { KraProcess } from "./KraWorker.service";
@@ -62,6 +62,7 @@ export const checkIsKraMatched = (
   const genKra = kraProcess.buildRegisterPayload(data, customer);
   const check = genKra.APP_PAN_INQ;
   const kra = kraData.APP_RES_ROOT.APP_PAN_INQ;
+
   const checkKey: (keyof T_APP_PAN_INQ_DOWNLOAD["APP_RES_ROOT"]["APP_PAN_INQ"])[] =
     [
       "APP_POS_CODE",
@@ -82,6 +83,12 @@ export const checkIsKraMatched = (
       "APP_PER_CTRY",
       "APP_PER_ADD_REF",
       "APP_MAR_STATUS",
+      "APP_COR_ADD1",
+      "APP_COR_ADD2",
+      "APP_COR_ADD3",
+      "APP_PER_ADD1",
+      "APP_PER_ADD2",
+      "APP_PER_ADD3",
     ];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const matchers = checkKey.map((e) => (check as any)[e] == kra[e]);

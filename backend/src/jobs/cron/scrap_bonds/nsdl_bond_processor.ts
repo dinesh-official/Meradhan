@@ -2,6 +2,7 @@ import { type $Enums, type DataBaseSchema } from "@core/database/database";
 import dayjs from "dayjs";
 import { allCompanyNameOrTyes } from "./all_company_data";
 import { type BondDataSet } from "./nsdl_bond_service";
+import fs from "fs";
 
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) {}
@@ -305,6 +306,10 @@ export class NsdlBondProcessor {
   private getRedemptionDate() {
     const dateField = this.bond.REDEMPTION;
     const redemptionDate = this.getStructuredDate(dateField);
+    console.log(dateField, redemptionDate);
+    const line = `ISIN:${this.bond.ISIN} | DATE:${redemptionDate} | ${dateField}\n`;
+    fs.appendFileSync("redemptions.txt", line);
+
     return redemptionDate;
   }
 

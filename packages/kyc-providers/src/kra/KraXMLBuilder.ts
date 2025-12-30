@@ -117,7 +117,7 @@ export class KraXMLBuilder {
 <APP_REQ_ROOT>
     <APP_PAN_DOWN>
         <APP_PAN_NO>${pan}</APP_PAN_NO>
-        <APP_PAN_DOB>${new Date(dob).toISOString().split("T")[0]}</APP_PAN_DOB>
+        <APP_PAN_DOB>${dob}</APP_PAN_DOB>
         <APP_MOBILE_NO>${mobile}</APP_MOBILE_NO>
     </APP_PAN_DOWN>
 </APP_REQ_ROOT>`;

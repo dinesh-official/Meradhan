@@ -21,15 +21,16 @@ function Page1(data: {
   residentialStatus?: string;
   occupationType?: string;
   verifyWith?:
-    | "AADHAAR"
-    | "DL"
-    | "VID"
-    | "PASSPORT"
-    | "NREGA"
-    | "NPR"
-    | "OTHERS";
+  | "AADHAAR"
+  | "DL"
+  | "VID"
+  | "PASSPORT"
+  | "NREGA"
+  | "NPR"
+  | "OTHERS";
   profilePic?: string;
   signature?: string;
+  kycNo: string
 }) {
   return (
     <View style={tw("px-4")}>
@@ -58,7 +59,7 @@ function Page1(data: {
         {/* // section 2  */}
         <View style={tw(" mx-auto mt-4 flex flex-row")}>
           <View style={tw("w-[26%] ")}>
-            <Text style={tw("text-xs")}>KYC Number: 123456</Text>
+            <Text style={tw("text-xs")}>KYC Number: {data.kycNo}</Text>
           </View>
 
           <View style={tw("w-[17%]")}>

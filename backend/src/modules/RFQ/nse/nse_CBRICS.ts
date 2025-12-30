@@ -158,6 +158,25 @@ export class NseCBRICS {
         return this.withReLoginRetry(apiCall, attempt + 1);
       }
 
+      if (error instanceof AxiosError) {
+        if (error.response?.data.message) {
+          throw new Error(
+            error.response?.data.message?.toString() ||
+              "CBRICS Request Failed - " + error.toString()
+          );
+        } else if (error.response?.data.error) {
+          throw new Error(
+            error.response?.data.error?.toString() ||
+              "CBRICS Request Failed - " + error.toString()
+          );
+        } else if (error.response?.data.messages) {
+          throw new Error(
+            error.response?.data.messages?.[0].toString() ||
+              "CBRICS Request Failed - " + error.toString()
+          );
+        }
+      }
+
       // Log final error for debugging
       console.error("API call failed after max retries:");
       throw error;

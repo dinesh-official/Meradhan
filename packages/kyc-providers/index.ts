@@ -8,3 +8,4 @@ export * from "./src/renderpdf/pdf";
 export * from "./src/NSDL/NSDLApi";
 export * from "./src/CDSL/CDSLAPi";
 export * from "./src/kra/index";
+export * from "./src/utils/address";
