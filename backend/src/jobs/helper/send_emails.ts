@@ -33,6 +33,7 @@ const getFormattedTimestamp = (): string => {
 };
 
 import {
+  emailAdminOtpSenderQueue,
   emailOtpSenderQueue,
   emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
@@ -45,6 +46,24 @@ export const sendLoginOtpEmail = async (data: {
   otp: string;
 }) => {
   await emailOtpSenderQueue.add(
+    {
+      ...data,
+      subject: `MeraDhan CRM - Login OTP ${getFormattedTimestamp()}`,
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    }
+  );
+};
+
+export const sendAdminLoginOtpEmail = async (data: {
+  email: string;
+  userName: string;
+  otp: string;
+}) => {
+  await emailAdminOtpSenderQueue.add(
     {
       ...data,
       subject: `MeraDhan CRM - Login OTP ${getFormattedTimestamp()}`,

@@ -3,6 +3,7 @@ import { QueueStore } from "./queue_store";
 
 export enum QueueNames {
   emailOtpSend = "emailOTPSendMD",
+  emailAdminOtpSend = "emailOTPSendMDAdmin",
   welComeEmail = "welcomeEmailMD",
   mobileOtpSend = "mobileOTPSendMD",
   forgotPasswordEmail = "forgotPasswordEmailMD",

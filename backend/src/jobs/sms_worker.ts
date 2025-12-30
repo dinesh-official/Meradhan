@@ -4,9 +4,12 @@ import { EmailCommunication } from "../communication/email_communication";
 import { SMSCommunication } from "../communication/sms_communication";
 import { startQueueWorker } from "./helper/start_queue_worker_helper";
 import {
+  emailAdminOtpSenderQueue,
   emailOtpSenderQueue,
   mobileOtpSenderQueue,
 } from "./queue/worker_queues";
+import { render } from "@react-email/components";
+import MeraDhanOtpEmail from "@emails/crm_login_otp_email";
 
 startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
   const emailSend = new EmailCommunication();
@@ -23,6 +26,24 @@ startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
     to: email,
     subject: subject,
     text: meraDhanOtpEmailText({ userName, otpCode: otp }),
+  });
+});
+
+startQueueWorker(emailAdminOtpSenderQueue, async (job: Job) => {
+  const emailSend = new EmailCommunication();
+  const { email, userName, subject, otp } = job.data;
+  console.log("Sending Email - " + email);
+  const emailHtml = await render(
+    MeraDhanOtpEmail({
+      otpCode: otp,
+      userName,
+    })
+  );
+
+  await emailSend.sendEmail({
+    to: email,
+    subject: subject,
+    text: emailHtml,
   });
 });
 
