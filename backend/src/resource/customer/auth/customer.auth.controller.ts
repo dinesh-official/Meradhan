@@ -216,7 +216,6 @@ export class CustomerAuthController {
 
   async session(req: Request, res: Response): Promise<void> {
     const id = req.customer?.id;
-    console.log(req.customer);
 
     if (!id) {
       throw new AppError("Session not found");

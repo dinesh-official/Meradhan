@@ -30,7 +30,7 @@ export function meraDhanForgotPasswordEmailText({
   
       <p>
         For help or questions, contact us at
-        <a href="mailto:support@meradhan.com">support@meradhan.com</a>.
+        <a href="mailto:support@meradhan.co">support@meradhan.co</a>.
       </p>
   
       <p>

@@ -40,6 +40,7 @@ import {
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
 } from "@jobs/queue/worker_queues";
+
 export const sendLoginOtpEmail = async (data: {
   email: string;
   userName: string;

@@ -61,7 +61,7 @@ export default function MeraDhanOtpEmail({
               <Text className="text-gray-400 text-xs">
                 Need help?{" "}
                 <a
-                  href="mailto:support@meradhan.com"
+                  href="mailto:support@meradhan.co"
                   className="text-[#002c59]"
                 >
                   Contact Support
