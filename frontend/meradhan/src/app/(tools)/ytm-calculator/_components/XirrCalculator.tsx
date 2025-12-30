@@ -1,5 +1,5 @@
 "use client";
-import DatePicker from "@/components/picker/DatePicker";
+import { DatePicker } from "@/components/custom/DatePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -260,10 +260,10 @@ function XirrCalculator() {
                 <Label className="font-normal">Issue Date</Label>
                 <DatePicker
                   className="w-full"
-                  value={issueDate}
-                  maxDate={today}
+                  value={issueDate.toISOString().split("T")[0]}
+
                   onChange={(date) => {
-                    if (date) setIssueDate(date);
+                    if (date) setIssueDate(new Date(date.target.value));
                   }}
                 />
               </div>
@@ -272,11 +272,11 @@ function XirrCalculator() {
                 <Label className="font-normal">Maturity Date</Label>
                 <DatePicker
                   className="w-full"
-                  value={maturityDate}
-                  minDate={issueDate}
-                  maxDate={new Date(2050, 11, 31)}
+                  value={(maturityDate).toISOString().split("T")[0]}
+
+
                   onChange={(date) => {
-                    if (date) setMaturityDate(date);
+                    if (date) setMaturityDate(new Date(date.target.value));
                   }}
                 />
               </div>
@@ -284,10 +284,10 @@ function XirrCalculator() {
                 <Label className="font-normal">Last Coupon Date</Label>
                 <DatePicker
                   className="w-full"
-                  value={lastCouponDate}
-                  maxDate={today}
+                  value={lastCouponDate.toISOString().split("T")[0]}
+
                   onChange={(date) => {
-                    if (date) setLastCouponDate(date);
+                    if (date) setLastCouponDate(new Date(date.target.value));
                   }}
                 />
               </div>
