@@ -7,12 +7,14 @@ const AboutUs = ({ Description, Title, Content }: T_PAGE_DATA) => {
       <TopTitleDesc title={Title} description={Description} />
 
       <div>
-        {/* <AboutMeraDhanSection />
+        {/*
+        <AboutMeraDhanSection />
         <MissionVisionSection />
         <CoreValuesSection />
         <OfferingsSection />
         <OurExports />
-        <WhyChooseUsSection /> */}
+        <WhyChooseUsSection />
+        */}
         <div dangerouslySetInnerHTML={{ __html: Content }} />
       </div>
     </>

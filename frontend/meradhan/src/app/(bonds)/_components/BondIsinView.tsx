@@ -75,7 +75,7 @@ export default function BondIsinView({
               {dateTimeUtils.formatDateTime(bond.maturityDate, "DD MMM YYYY")}
             </SortInfoBox>
             <SortInfoBox title="Bond Category">
-              {formateCategory(bond.categories?.[0] || "")}
+              <span className="capitalize" >{formateCategory(bond.categories?.[0] || "")}</span>
             </SortInfoBox>
 
             <SortInfoBox title="Interest Payment">
@@ -86,8 +86,8 @@ export default function BondIsinView({
               {bond.taxStatus == "TAXABLE"
                 ? "Yes"
                 : bond.taxStatus == "TAX_FREE"
-                ? "No"
-                : "Coming Soon"}
+                  ? "No"
+                  : "Coming Soon"}
             </SortInfoBox>
 
             <SortInfoBox title="Put">
@@ -106,43 +106,43 @@ export default function BondIsinView({
                     .replace("Put:", "")
                     .trim() || ""
                 ).length > 15 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <FaInfoCircle className="cursor-pointer" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-wrap max-w-48">
-                        {bond.putCallOptionDetails
-                          ?.split("Call:")?.[0]
-                          .replace("Put:", "")
-                          .trim()}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <FaInfoCircle className="cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-wrap max-w-48">
+                          {bond.putCallOptionDetails
+                            ?.split("Call:")?.[0]
+                            .replace("Put:", "")
+                            .trim()}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
               </p>
             </SortInfoBox>
             <SortInfoBox title="Call">
               <p className="flex items-center gap-1 line-clamp-1">
                 {pickWordsByMinLength(
                   bond.putCallOptionDetails?.split("Call:")?.[1].trim() ||
-                    "N/A",
+                  "N/A",
                   15
                 )}
 
                 {(bond.putCallOptionDetails?.split("Call:")?.[1].trim() || "")
                   .length > 15 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <FaInfoCircle className="cursor-pointer" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-wrap max-w-48">
-                        {bond.putCallOptionDetails?.split("Call:")?.[1].trim()}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <FaInfoCircle className="cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-wrap max-w-48">
+                          {bond.putCallOptionDetails?.split("Call:")?.[1].trim()}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
               </p>
             </SortInfoBox>
             <SortInfoBox title="Mode of issuance">Coming Soon</SortInfoBox>

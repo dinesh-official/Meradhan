@@ -1,5 +1,5 @@
 import { db, type DataBaseSchema } from "@core/database/database";
-import type { $Enums } from "@databases/generated/prisma/postgres";
+import type { $Enums, KYCStatus } from "@databases/generated/prisma/postgres";
 import type { CustomerProfileService } from "@resource/crm/customers/customer.service";
 import type { KycDataStorage } from "./kyc";
 
@@ -53,7 +53,11 @@ export class CustomerKycManager {
   /**
    * Main method to save KYC data to customer profile
    */
-  async saveKycToCustomer(customerId: number): Promise<void> {
+
+  async saveKycToCustomer(
+    customerId: number,
+    kycStatus?: KYCStatus
+  ): Promise<void> {
     const kycData = await this.getKycData(customerId);
 
     // Extract data from KYC steps
@@ -91,7 +95,7 @@ export class CustomerKycManager {
           lastName,
           middleName,
           gender,
-          kycStatus: "VERIFIED",
+          kycStatus,
           verifyDate: new Date(),
           avatar: step1.face.url || null,
 
@@ -331,7 +335,8 @@ export class CustomerKycManager {
             dpId: demat.dpId,
             clientId: demat.beneficiaryClientId,
             accountType: this.mapAccountType(demat.accountType),
-            depositoryParticipantName: demat.depositoryParticipantName,
+            depositoryParticipantName:
+              demat.depositoryParticipantName || "Not Found",
             primaryPanNumber: demat.panNumber[0] || "",
             sndPanNumber: demat.panNumber[1] || null,
             trdPanNumber: demat.panNumber[2] || null,

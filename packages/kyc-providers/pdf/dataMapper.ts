@@ -176,6 +176,7 @@ export type Page1Props = {
     | "OTHERS";
   profilePic?: string;
   signature?: string;
+  kycNo: string;
 };
 
 export type AddressType = {
@@ -515,6 +516,7 @@ export const mapDataForPage1 = (data: Root): Page1Props => ({
   verifyWith: "AADHAAR",
   profilePic: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.face?.url || "",
   signature: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.sign?.url || "",
+  kycNo: "MD" + (10 + (data?.user?.id || 0)).toString() + data.user.id + 1,
 });
 
 export const mapDataForPage2 = (data: Root): Page2Props => {

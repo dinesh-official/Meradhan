@@ -254,12 +254,12 @@ function XirrCalculator() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+
               </div>
 
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Issue Date</Label>
                 <DatePicker
-                  disabled
                   className="w-full"
                   value={issueDate}
                   maxDate={today}
@@ -272,7 +272,6 @@ function XirrCalculator() {
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Maturity Date</Label>
                 <DatePicker
-                  disabled
                   className="w-full"
                   value={maturityDate}
                   minDate={issueDate}
@@ -285,7 +284,6 @@ function XirrCalculator() {
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Last Coupon Date</Label>
                 <DatePicker
-                  disabled
                   className="w-full"
                   value={lastCouponDate}
                   maxDate={today}

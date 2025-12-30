@@ -7,8 +7,12 @@ import type {
   T_APP_PAN_INQ_DOWNLOAD,
   T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
 } from "kyc-providers";
-import { KraSDK } from "kyc-providers";
-import type { Root } from "../../../../packages/kyc-providers/pdf/dataMapper";
+import {
+  KraSDK,
+  removeLastCommaChunks,
+  splitAddressInto3BalancedLines,
+} from "kyc-providers";
+import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
 import {
   checkIsKraMatched,
   checkKraProcessCheckStatus,
@@ -358,6 +362,22 @@ export class KraProcess {
     const MAR_STATUS = data.step_2.maritalStatus == "MARRIED" ? "01" : "02";
     const mobile = kraMobNo;
 
+    const corAddress = splitAddressInto3BalancedLines(
+      removeLastCommaChunks(
+        data.step_1.pan.response.details.aadhaar.current_address_details
+          .address,
+        3
+      )
+    );
+
+    const porAddress = splitAddressInto3BalancedLines(
+      removeLastCommaChunks(
+        data.step_1.pan.response.details.aadhaar.permanent_address_details
+          .address,
+        3
+      )
+    );
+
     const appPanInq = {
       APP_IOP_FLG: "IE",
       APP_POS_CODE: env.KRA_OKRA_CD_MI_ID || "",
@@ -375,7 +395,7 @@ export class KraProcess {
       APP_IPV_DATE: formatDate(new Date()),
       APP_GEN: data.step_1.pan.response.details.pan.gender,
       APP_NAME: makeFullname({ firstName, middleName, lastName }),
-      APP_F_NAME: firstName,
+      APP_F_NAME: data.step_2.fatSpuName,
       APP_REGNO: "",
       APP_DOB_DT: formatDate(new Date(dob)),
       APP_DOI_DT: "",
@@ -390,11 +410,9 @@ export class KraProcess {
         "x",
         "0"
       ),
-      APP_COR_ADD1:
-        data.step_1.pan.response.details.aadhaar.current_address_details
-          .address,
-      APP_COR_ADD2: "",
-      APP_COR_ADD3: "",
+      APP_COR_ADD1: corAddress.line1,
+      APP_COR_ADD2: corAddress.line2,
+      APP_COR_ADD3: corAddress.line3,
       APP_COR_CITY:
         data.step_1.pan.response.details.aadhaar.current_address_details
           .district_or_city,
@@ -404,10 +422,10 @@ export class KraProcess {
       APP_COR_STATE: getKraState(
         data.step_1.pan.response.details.aadhaar.current_address_details.state
       )?.code,
-      APP_OTH_COR_STATE: getKraCountry("india")?.code,
-      APP_COR_CTRY: getKraState(
+      APP_OTH_COR_STATE: getKraCountry(
         data.step_1.pan.response.details.aadhaar.current_address_details.state
       )?.code,
+      APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OFF_NO: "",
       APP_RES_NO: "",
       APP_MOB_NO: mobile,
@@ -417,11 +435,9 @@ export class KraProcess {
       APP_COR_ADD_REF:
         data.step_1.pan.response.details.aadhaar.id_number.replaceAll("x", ""),
       APP_COR_ADD_DT: "",
-      APP_PER_ADD1:
-        data.step_1.pan.response.details.aadhaar.permanent_address_details
-          .address,
-      APP_PER_ADD2: "",
-      APP_PER_ADD3: "",
+      APP_PER_ADD1: porAddress.line1,
+      APP_PER_ADD2: porAddress.line2,
+      APP_PER_ADD3: porAddress.line3,
       APP_PER_CITY:
         data.step_1.pan.response.details.aadhaar.permanent_address_details
           .district_or_city,
