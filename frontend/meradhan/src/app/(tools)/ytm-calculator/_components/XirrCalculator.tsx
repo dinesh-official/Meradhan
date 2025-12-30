@@ -1,5 +1,5 @@
 "use client";
-import { DatePicker } from "@/components/custom/DatePicker";
+import DatePicker from "@/components/picker/DatePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -259,11 +259,12 @@ function XirrCalculator() {
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Issue Date</Label>
                 <DatePicker
+                  disabled
                   className="w-full"
-                  value={issueDate.toISOString().split("T")[0]}
-
+                  value={issueDate}
+                  maxDate={today}
                   onChange={(date) => {
-                    if (date) setIssueDate(new Date(date.target.value));
+                    if (date) setIssueDate(date);
                   }}
                 />
               </div>
@@ -271,23 +272,25 @@ function XirrCalculator() {
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Maturity Date</Label>
                 <DatePicker
+                  disabled
                   className="w-full"
-                  value={(maturityDate).toISOString().split("T")[0]}
-
-
+                  value={maturityDate}
+                  minDate={issueDate}
+                  maxDate={new Date(2050, 11, 31)}
                   onChange={(date) => {
-                    if (date) setMaturityDate(new Date(date.target.value));
+                    if (date) setMaturityDate(date);
                   }}
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Last Coupon Date</Label>
                 <DatePicker
+                  disabled
                   className="w-full"
-                  value={lastCouponDate.toISOString().split("T")[0]}
-
+                  value={lastCouponDate}
+                  maxDate={today}
                   onChange={(date) => {
-                    if (date) setLastCouponDate(new Date(date.target.value));
+                    if (date) setLastCouponDate(date);
                   }}
                 />
               </div>
