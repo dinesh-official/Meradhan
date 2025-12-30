@@ -4,6 +4,10 @@
 import { env } from "@packages/config/env";
 import { pdfUrlToBase64 } from "./helper";
 import { getStateSortCode } from "./states/getStateSortCode";
+import {
+  removeLastCommaChunks,
+  splitAddressInto3BalancedLines,
+} from "../src/utils/address";
 
 export type Root = {
   step_1: {
@@ -520,56 +524,59 @@ export const mapDataForPage1 = (data: Root): Page1Props => ({
 });
 
 export const mapDataForPage2 = (data: Root): Page2Props => {
-  let address =
+  const current_address =
     data.step_1?.pan?.response?.details?.aadhaar?.current_address_details;
 
-  const cars = ["c/o", "d/o", "s/o", "w/o", "h/o"];
+  const permanent_address =
+    data.step_1?.pan?.response?.details?.aadhaar?.permanent_address_details;
 
-  cars.forEach((car) => {
-    if (address?.address.toLowerCase().includes(car)) {
-      address = {
-        ...address,
-        // remove first ,
-        address: address.address.split(",").slice(1).join(",").trim(),
-      };
-    }
-  });
+  const perAddress = splitAddressInto3BalancedLines(
+    removeLastCommaChunks(permanent_address.address, 3)
+  );
 
-  const addresBrake = address.address?.split(",") || [];
-  const cityName = addresBrake?.[addresBrake.length - 5];
+  const perAddresBrake = permanent_address.address?.split(",") || [];
+  const perCityName = perAddresBrake?.[perAddresBrake.length - 5];
 
-  // only first 2 ,  before city name
-  const line1 = (address.address.split("," + cityName)[0] || "")
-    .split(",")
-    .slice(0, 2)
-    .join(",")
-    .trim();
-  // next line 2 is rest of address before city name
-  const line2 = (address.address.split("," + cityName)[0] || "")
-    .split(",")
-    .slice(2)
-    .join(",")
-    .trim();
+  const isSameAddresss = current_address.address == permanent_address.address;
 
   const permanentAddress: AddressType = {
     addressType: "RESIDENTIAL",
-    addressLine1: line1,
-    addressLine2: line2,
-    addressLine3: address.locality_or_post_office,
-    city: cityName || "",
-    state: address?.state || "",
-    district: address?.district_or_city || "",
-    pincode: address?.pincode || "",
+    addressLine1: perAddress.line1 || "",
+    addressLine2: perAddress.line2 || "",
+    addressLine3: perAddress.line3 || "",
+    city: perCityName || "",
+    state: permanent_address?.state || "",
+    district: permanent_address?.district_or_city || "",
+    pincode: permanent_address?.pincode || "",
     country: "India",
-    postOffice: address?.locality_or_post_office || "",
-    stateUTCode: getStateSortCode(address.state) || "N/A",
+    postOffice: permanent_address?.locality_or_post_office || "",
+    stateUTCode: getStateSortCode(permanent_address.state) || "N/A",
+  };
+
+  const curAddress = splitAddressInto3BalancedLines(
+    removeLastCommaChunks(current_address.address, 3)
+  );
+  const curAddresBrake = current_address.address?.split(",") || [];
+  const curCityName = curAddresBrake?.[curAddresBrake.length - 5];
+  const currentAddress: AddressType = {
+    addressType: "RESIDENTIAL",
+    addressLine1: curAddress.line1 || "",
+    addressLine2: curAddress.line2 || "",
+    addressLine3: curAddress.line3 || "",
+    city: curCityName || "",
+    state: current_address?.state || "",
+    district: current_address?.district_or_city || "",
+    pincode: current_address?.pincode || "",
+    country: "India",
+    postOffice: current_address?.locality_or_post_office || "",
+    stateUTCode: getStateSortCode(current_address.state) || "N/A",
   };
 
   return {
     permanentAddress,
     currentAddress: {
-      sameAsPermanentAddress: true,
-      data: permanentAddress,
+      sameAsPermanentAddress: isSameAddresss,
+      data: isSameAddresss ? permanentAddress : currentAddress,
     },
     proofWith: "AADHAAR",
   };
