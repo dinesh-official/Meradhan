@@ -71,7 +71,7 @@ export class KraWorkerService {
       }
 
       // Download Allow -
-      if (status == "PASS") {
+      if (status == "AVAILABLE") {
         const downloadRes = (await this.kraProcess.downloadKraReport({
           kycdataId: kycDataStoreId,
           data: kyc,
@@ -183,6 +183,7 @@ export class KraProcess {
         kraStatus: "ENQUIRY_KRA",
       },
     });
+
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
