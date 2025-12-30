@@ -57,7 +57,6 @@ export class KraWorkerService {
 
       if (status == "WAITING") {
         await addKraWorkerJob(data);
-
         return;
       }
 
@@ -71,6 +70,7 @@ export class KraWorkerService {
         return;
       }
 
+      // Download Allow -
       if (status == "PASS") {
         const downloadRes = (await this.kraProcess.downloadKraReport({
           kycdataId: kycDataStoreId,
@@ -79,6 +79,7 @@ export class KraWorkerService {
         })) as T_APP_PAN_INQ_DOWNLOAD;
 
         const isMatched = checkIsKraMatched(kyc, customer, downloadRes);
+
         if (isMatched) {
           try {
             const cbUser = await cbricsManager.registerParticipant(customerId);
@@ -266,7 +267,7 @@ export class KraProcess {
 
   async modify({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
-    const payload = this.buildRegisterPayload(data, customer);
+    const payload = this.buildRegisterPayload(data, customer, true);
 
     const p = payload.APP_PAN_INQ;
 
@@ -322,6 +323,9 @@ export class KraProcess {
         APP_TYPE: p.APP_TYPE,
         APP_UID_NO: p.APP_UID_NO,
         APP_PER_ADD_PROOF: p.APP_PER_ADD_PROOF,
+        APP_PER_ADD_DT: p.APP_PER_ADD_DT,
+        APP_PER_ADD_REF: p.APP_PER_ADD_REF,
+        APP_MAR_STATUS: p.APP_MAR_STATUS,
       },
 
       fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
