@@ -69,7 +69,7 @@ export default function MeraDhanPasswordResetSuccessEmail({
               <Text className="mt-6 mb-4 text-gray-600">
                 If you didn’t perform this action, please{" "}
                 <a
-                  href="mailto:support@meradhan.com"
+                  href="mailto:support@meradhan.co"
                   className="font-semibold text-[#002c59]"
                 >
                   contact our support team
@@ -91,7 +91,7 @@ export default function MeraDhanPasswordResetSuccessEmail({
               <Text className="text-gray-400 text-xs">
                 Need help?{" "}
                 <a
-                  href="mailto:support@meradhan.com"
+                  href="mailto:support@meradhan.co"
                   className="text-[#002c59]"
                 >
                   Contact Support

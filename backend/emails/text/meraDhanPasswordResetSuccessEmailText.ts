@@ -22,7 +22,7 @@ export function meraDhanPasswordResetSuccessEmailText({
   
       <p>
         If you did not perform this action, please
-        <a href="mailto:support@meradhan.com">contact our support team</a>
+        <a href="mailto:support@meradhan.co">contact our support team</a>
         immediately to secure your account.
       </p>
   

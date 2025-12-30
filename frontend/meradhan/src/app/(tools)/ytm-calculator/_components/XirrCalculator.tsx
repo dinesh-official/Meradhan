@@ -1,5 +1,5 @@
 "use client";
-import DatePicker from "@/components/picker/DatePicker";
+import { DatePicker } from "@/components/custom/DatePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -140,13 +140,12 @@ function XirrCalculator() {
                 <Label className="font-normal">Face (Par) Value</Label>
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg     appearance-none ${
-                      !faceValue ||
+                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg     appearance-none ${!faceValue ||
                       isNaN(Number(faceValue)) ||
                       (Number(faceValue) <= 0
                         ? "border-red-300 focus:border-red-500"
                         : "")
-                    }`}
+                      }`}
                     placeholder="Amount"
                     value={faceValue}
                     onChange={(e) => setFaceValue(Number(e.target.value))}
@@ -164,13 +163,12 @@ function XirrCalculator() {
                 <Label className="font-normal">Clean (Current) Price</Label>
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg appearance-none ${
-                      !cleanPrice ||
+                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg appearance-none ${!cleanPrice ||
                       isNaN(Number(cleanPrice)) ||
                       Number(cleanPrice) <= 0
-                        ? "border-red-300 focus:border-red-500"
-                        : ""
-                    }`}
+                      ? "border-red-300 focus:border-red-500"
+                      : ""
+                      }`}
                     placeholder="Amount"
                     value={cleanPrice}
                     onChange={(e) => setCleanPrice(Number(e.target.value))}
@@ -189,13 +187,12 @@ function XirrCalculator() {
 
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 pe-12 border-0 font-medium     appearance-none ${
-                      !annualCouponRate ||
+                    className={`peer bg-white py-5 pe-12 border-0 font-medium     appearance-none ${!annualCouponRate ||
                       isNaN(Number(annualCouponRate)) ||
                       Number(annualCouponRate) <= 0
-                        ? "border-red-300 focus:border-red-500"
-                        : ""
-                    }`}
+                      ? "border-red-300 focus:border-red-500"
+                      : ""
+                      }`}
                     placeholder="Rate"
                     value={annualCouponRate}
                     onChange={(e) =>
@@ -263,10 +260,10 @@ function XirrCalculator() {
                 <Label className="font-normal">Issue Date</Label>
                 <DatePicker
                   className="w-full"
-                  value={issueDate}
-                  maxDate={today}
+                  value={issueDate.toISOString().split("T")[0]}
+
                   onChange={(date) => {
-                    if (date) setIssueDate(date);
+                    if (date) setIssueDate(new Date(date.target.value));
                   }}
                 />
               </div>
@@ -275,11 +272,11 @@ function XirrCalculator() {
                 <Label className="font-normal">Maturity Date</Label>
                 <DatePicker
                   className="w-full"
-                  value={maturityDate}
-                  minDate={issueDate}
-                  maxDate={new Date(2050, 11, 31)}
+                  value={(maturityDate).toISOString().split("T")[0]}
+
+
                   onChange={(date) => {
-                    if (date) setMaturityDate(date);
+                    if (date) setMaturityDate(new Date(date.target.value));
                   }}
                 />
               </div>
@@ -287,10 +284,10 @@ function XirrCalculator() {
                 <Label className="font-normal">Last Coupon Date</Label>
                 <DatePicker
                   className="w-full"
-                  value={lastCouponDate}
-                  maxDate={today}
+                  value={lastCouponDate.toISOString().split("T")[0]}
+
                   onChange={(date) => {
-                    if (date) setLastCouponDate(date);
+                    if (date) setLastCouponDate(new Date(date.target.value));
                   }}
                 />
               </div>

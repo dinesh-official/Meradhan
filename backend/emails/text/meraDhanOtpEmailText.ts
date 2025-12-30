@@ -5,8 +5,7 @@ export function meraDhanOtpEmailText({
   const year = new Date().getFullYear();
 
   return `
-  Email Verification Code
-  
+
   Hello ${userName},
   
   Use the following One-Time Password (OTP) to verify your email address for MeraDhan:
@@ -22,6 +21,6 @@ export function meraDhanOtpEmailText({
   MeraDhan Team
   
   © ${year} MeraDhan. All rights reserved.
-  Need help? Contact us at support@meradhan.com
+  Need help? Contact us at support@meradhan.co
   `.trim();
 }

@@ -139,7 +139,7 @@ Client ID: ${demat?.clientId}`}</Text>
         </TextList>
         <TextList className="text-[8px]" count="8.">
           MeraDhan is not responsible for any errors or missing information. For
-          any queries or discrepancies, please write to: support@meradhan.com
+          any queries or discrepancies, please write to: support@meradhan.co
         </TextList>
         <TextList className="text-[8px]" count="9.">
           The Buyer confirms—irrevocably and unconditionally—that he/she has
