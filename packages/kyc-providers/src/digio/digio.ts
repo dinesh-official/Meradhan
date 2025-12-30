@@ -127,7 +127,7 @@ export class DigioSDK {
 
       // Attach the PDF as binary
       // Attach the PDF file as binary stream
-      form.append("file", fs.createReadStream(filePath), {
+      form.append("file", fs.readFileSync(filePath), {
         filename: "document" + time + ".pdf",
         contentType: "application/pdf",
       });

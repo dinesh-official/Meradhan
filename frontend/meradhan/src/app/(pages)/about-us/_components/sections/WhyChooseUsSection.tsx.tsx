@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { CheckCircle, Globe, Mail, Phone } from "lucide-react";
-import React from "react";
+import { Globe, Mail, Phone } from "lucide-react";
+import { FaCircleCheck } from "react-icons/fa6";
 
 const whyChooseUs = [
   "One-Stop Platform – Learn, invest, and manage bonds effortlessly",
@@ -13,38 +13,40 @@ const whyChooseUs = [
 const WhyChooseUsSection = () => {
   return (
     <>
-      <section className="container">
-        <div className="space-y-8 px-5 mt-12 leading-relaxed">
-          {/* Heading */}
-          <h4
-            className={cn(
-              "font-medium text-3xl md:text-4xl",
-              "quicksand-medium"
-            )}
-          >
-            Why <span className="font-semibold text-[#F25C4C]">Choose Us?</span>
-          </h4>
+      <div className="bg-[#ebf6ff] py-10 mt-18">
+        <section className="container">
+          <div className="space-y-8 px-5 leading-relaxed">
+            {/* Heading */}
+            <h4
+              className={cn(
+                "font-medium text-3xl md:text-4xl",
+                "quicksand-medium"
+              )}
+            >
+              Why{" "}
+              <span className="font-semibold text-[#F25C4C]">Choose Us?</span>
+            </h4>
 
-          {/* List */}
-          <ul className="space-y-5">
-            {whyChooseUs.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-3">
-                <CheckCircle
-                  size={20}
-                  className="text-[#6496C8]"
-                  strokeWidth={2}
-                  fill="#ebf6ff"
-                />
-                <p className="text-[16px] text-slate-800 md:text-[17px]">
-                  {item}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+            {/* List */}
+            <ul className="space-y-5">
+              {whyChooseUs.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <FaCircleCheck
+                    size={20}
+                    className="text-[#7FABD2]"
+                    strokeWidth={2}
+                  />
+                  <p className="text-[16px] text-slate-800 md:text-[17px]">
+                    {item}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </div>
 
-      <section className="bg-[#ebf6ff] mt-16">
+      <section className=" mt-5">
         <div className="container">
           <div className="flex flex-col gap-6 px-4 py-12 md:py-16">
             <h5
