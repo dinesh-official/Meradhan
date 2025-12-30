@@ -1,4 +1,4 @@
-import { sendLoginOtpEmail } from "@jobs/helper/send_emails";
+import { sendAdminLoginOtpEmail } from "@jobs/helper/send_emails";
 import {
   OtpVerificationService,
   type IOtpVerificationService,
@@ -20,7 +20,7 @@ export class EmailAuthService {
     const { token, otp } = await this.optManager.generateOtp(
       user.id.toString()
     );
-    await sendLoginOtpEmail({
+    await sendAdminLoginOtpEmail({
       email: user.email,
       userName: user.name,
       otp,
