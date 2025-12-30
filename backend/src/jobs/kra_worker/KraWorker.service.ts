@@ -530,13 +530,19 @@ export const formatDate = (date: Date) => {
 };
 
 export function formatDateTime(date: Date): string {
-  const dd = String(date.getDate()).padStart(2, "0");
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const yyyy = date.getFullYear();
+  // Convert to UTC first
+  const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
 
-  const HH = String(date.getHours()).padStart(2, "0");
-  const MM = String(date.getMinutes()).padStart(2, "0");
-  const SS = String(date.getSeconds()).padStart(2, "0");
+  // Add IST offset (5 hours 30 minutes)
+  const istTime = new Date(utcTime + 5.5 * 60 * 60 * 1000);
+
+  const dd = String(istTime.getDate()).padStart(2, "0");
+  const mm = String(istTime.getMonth() + 1).padStart(2, "0");
+  const yyyy = istTime.getFullYear();
+
+  const HH = String(istTime.getHours()).padStart(2, "0");
+  const MM = String(istTime.getMinutes()).padStart(2, "0");
+  const SS = String(istTime.getSeconds()).padStart(2, "0");
 
   return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
 }
