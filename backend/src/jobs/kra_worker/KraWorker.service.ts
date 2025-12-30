@@ -77,6 +77,7 @@ export class KraWorkerService {
           data: kyc,
           customer,
         })) as T_APP_PAN_INQ_DOWNLOAD;
+
         const isMatched = checkIsKraMatched(kyc, customer, downloadRes);
         if (isMatched) {
           try {
@@ -306,6 +307,7 @@ export class KraProcess {
         APP_OCC: p.APP_OCC,
         APP_PAN_COPY: p.APP_PAN_COPY,
         APP_PAN_NO: p.APP_PAN_NO,
+        APP_COR_ADD_DT: p.APP_COR_ADD_DT,
         APP_PANEX_NO: p.APP_PANEX_NO,
         APP_PER_ADD1: p.APP_PER_ADD1,
         APP_PER_ADD2: p.APP_PER_ADD2,
@@ -319,6 +321,7 @@ export class KraProcess {
         APP_RES_STATUS: p.APP_RES_STATUS,
         APP_TYPE: p.APP_TYPE,
         APP_UID_NO: p.APP_UID_NO,
+        APP_PER_ADD_PROOF: p.APP_PER_ADD_PROOF,
       },
 
       fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
@@ -350,7 +353,8 @@ export class KraProcess {
 
   buildRegisterPayload(
     data: Root,
-    customer: CustomerProfileDataModel
+    customer: CustomerProfileDataModel,
+    isModify: boolean = false
   ): T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"] {
     const panRaw = data.step_1?.pan?.panCardNo || "";
     const panNo = panRaw ? panRaw.split("-").reverse().join("") : "";
@@ -379,8 +383,9 @@ export class KraProcess {
     );
 
     const appPanInq = {
-      APP_IOP_FLG: "IE",
+      APP_IOP_FLG: isModify ? "II" : "IE",
       APP_POS_CODE: env.KRA_OKRA_CD_MI_ID || "",
+
       APP_TYPE: "I",
       APP_NO: "",
       APP_DATE: formatDateTime(new Date()),
@@ -391,7 +396,7 @@ export class KraProcess {
       APP_EXMT_CAT: "",
       APP_KYC_MODE: "5",
       APP_EXMT_ID_PROOF: "01",
-      APP_IPV_FLAG: "E",
+      APP_IPV_FLAG: "N",
       APP_IPV_DATE: formatDate(new Date()),
       APP_GEN: data.step_1.pan.response.details.pan.gender,
       APP_NAME: makeFullname({ firstName, middleName, lastName }),
@@ -422,10 +427,14 @@ export class KraProcess {
       APP_COR_STATE: getKraState(
         data.step_1.pan.response.details.aadhaar.current_address_details.state
       )?.code,
-      APP_OTH_COR_STATE: getKraCountry(
-        data.step_1.pan.response.details.aadhaar.current_address_details.state
-      )?.code,
+
       APP_COR_CTRY: getKraCountry("india")?.code,
+      APP_OTH_COR_STATE: isModify
+        ? getKraCountry(
+            data.step_1.pan.response.details.aadhaar.current_address_details
+              .state
+          )?.code
+        : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
       APP_MOB_NO: mobile,
@@ -456,7 +465,7 @@ export class KraProcess {
       APP_INCOME: "",
       APP_OCC: "",
       APP_OTH_OCC: "",
-      APP_POL_CONN: "",
+      APP_POL_CONN: "NA",
       APP_DOC_PROOF: "E",
       APP_INTERNAL_REF: "",
       APP_BRANCH_CODE: "",
@@ -469,6 +478,7 @@ export class KraProcess {
       APP_FILLER2: "",
       APP_FILLER3: "",
       APP_DUMP_TYPE: "",
+
       APP_KRA_INFO: "",
       APP_SIGNATURE: "",
       APP_FATCA_APPLICABLE_FLAG: data.step_1?.pan?.isFatca ? "N" : "Y",
@@ -483,6 +493,7 @@ export class KraProcess {
       APP_REQ_DATE: formatDate(new Date()),
       APP_OTHKRA_BATCH: "",
       APP_OTHKRA_CODE: env.KRA_OKRA_CD_MI_ID || "",
+
       APP_TOTAL_REC: "1",
       NO_OF_FATCA_ADDL_DTLS_RECORDS: data.step_1?.pan?.isFatca ? "0" : "1",
     };
@@ -501,7 +512,7 @@ export class KraProcess {
 
     return {
       APP_PAN_INQ: appPanInq,
-      FATCA_ADDL_DTLS: fatca,
+      // FATCA_ADDL_DTLS: fatca,
       APP_SUMM_REC: appSummRec,
     } as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"];
   }
