@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 
@@ -15,6 +16,7 @@ type DatePickerProps = {
   popoverClassName?: string;
   headerClassName?: string;
   allowedDates?: Date[];
+  inputClassName?: string;
 };
 
 type CalendarCell = {
@@ -138,6 +140,7 @@ export default function DatePicker({
   popoverClassName,
   headerClassName,
   allowedDates,
+  inputClassName,
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(formatDate(value));
@@ -305,7 +308,7 @@ export default function DatePicker({
       <div className="date-picker__control">
         <input
           aria-label={label ?? "Date"}
-          className="date-picker__input"
+          className={cn("date-picker__input", inputClassName)}
           inputMode="numeric"
           placeholder={placeholder}
           value={displayValue}

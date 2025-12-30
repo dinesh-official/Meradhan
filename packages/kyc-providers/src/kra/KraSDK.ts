@@ -234,7 +234,7 @@ export class KraSDK {
     )) as T_PAN_REGISTER_RESPONSE;
   }
 
-  // 4. Modify PAN Details
+  // 4. Modify PAN Details (KRA XML Upload)
   public async panModifyKraXML(payload: PanModifyKraPayload) {
     const encrypted = await this.ensureEncryptedPassword();
     const xml = KraXMLBuilder.buildPanModifyKraXML({
@@ -243,6 +243,7 @@ export class KraSDK {
       userName: this.userName,
       payload,
     });
+
     const response = await axios.post(this.panServiceUrl, xml, {
       headers: {
         "Content-Type": "text/xml; charset=utf-8",

@@ -263,6 +263,7 @@ interface PanInquiry {
   APP_EMAIL: string;
   APP_COR_ADD_PROOF: string;
   APP_COR_ADD_REF: string;
+  APP_COR_ADD_DT: string;
 
   APP_PER_ADD1: string;
   APP_PER_ADD2: string;
@@ -276,6 +277,7 @@ interface PanInquiry {
   APP_OCC: string;
   APP_POL_CONN: string;
   APP_DOC_PROOF: string;
+  APP_PER_ADD_PROOF: string;
 
   APP_FATCA_APPLICABLE_FLAG: "Y" | "N"; // drives the FATCA block
   APP_FATCA_BIRTH_PLACE: string;

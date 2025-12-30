@@ -140,12 +140,13 @@ function XirrCalculator() {
                 <Label className="font-normal">Face (Par) Value</Label>
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg     appearance-none ${!faceValue ||
+                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg     appearance-none ${
+                      !faceValue ||
                       isNaN(Number(faceValue)) ||
                       (Number(faceValue) <= 0
                         ? "border-red-300 focus:border-red-500"
                         : "")
-                      }`}
+                    }`}
                     placeholder="Amount"
                     value={faceValue}
                     onChange={(e) => setFaceValue(Number(e.target.value))}
@@ -163,12 +164,13 @@ function XirrCalculator() {
                 <Label className="font-normal">Clean (Current) Price</Label>
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg appearance-none ${!cleanPrice ||
+                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg appearance-none ${
+                      !cleanPrice ||
                       isNaN(Number(cleanPrice)) ||
                       Number(cleanPrice) <= 0
-                      ? "border-red-300 focus:border-red-500"
-                      : ""
-                      }`}
+                        ? "border-red-300 focus:border-red-500"
+                        : ""
+                    }`}
                     placeholder="Amount"
                     value={cleanPrice}
                     onChange={(e) => setCleanPrice(Number(e.target.value))}
@@ -187,12 +189,13 @@ function XirrCalculator() {
 
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 pe-12 border-0 font-medium     appearance-none ${!annualCouponRate ||
+                    className={`peer bg-white py-5 pe-12 border-0 font-medium     appearance-none ${
+                      !annualCouponRate ||
                       isNaN(Number(annualCouponRate)) ||
                       Number(annualCouponRate) <= 0
-                      ? "border-red-300 focus:border-red-500"
-                      : ""
-                      }`}
+                        ? "border-red-300 focus:border-red-500"
+                        : ""
+                    }`}
                     placeholder="Rate"
                     value={annualCouponRate}
                     onChange={(e) =>
@@ -254,7 +257,6 @@ function XirrCalculator() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-
               </div>
 
               <div className="flex flex-col gap-2">
@@ -293,7 +295,7 @@ function XirrCalculator() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label className="font-normal">Purchase/Settlement Date</Label>
+                <Label className="font-normal">Settlement Date</Label>
                 <Select
                   value={String(settlementTerm)}
                   onValueChange={(value) => {
