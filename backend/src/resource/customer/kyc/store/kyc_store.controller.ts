@@ -2,9 +2,11 @@ import { db } from "@core/database/database";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { CustomerKycKycService } from "../kyc_process/customer_kyc.service";
+import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 
 // KYC store controller class to get and set kyc data in kyc_flow table to track kyc progress for customer to resume later
 export class KycStoreController {
+  private kycManager = new CustomerKycManager();
   async getKycData(req: Request, res: Response) {
     const id = req.customer!.id;
 
@@ -73,6 +75,10 @@ export class KycStoreController {
         complete,
       },
     });
+
+    if (complete) {
+      await this.kycManager.saveKycToCustomer(Number(id));
+    }
 
     res.sendResponse({
       statusCode: HttpStatus.OK,

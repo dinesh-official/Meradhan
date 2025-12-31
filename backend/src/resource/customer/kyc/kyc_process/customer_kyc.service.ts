@@ -5,11 +5,9 @@ import { AppError } from "@utils/error/AppError";
 import { makeFullname } from "@utils/generate/generate_username";
 import type z from "zod";
 import { KycProvider } from "./kyc_provider";
-import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 
 export class CustomerKycKycService {
   private kycProvider = new KycProvider();
-  private kycManager = new CustomerKycManager();
 
   // pan verify request
   async createPanVerifyRequest({
@@ -293,7 +291,6 @@ export class CustomerKycKycService {
       },
     });
 
-    await this.kycManager.saveKycToCustomer(Number(customerId));
     // Start KRa Process
     await addKraWorkerJob(
       {
@@ -304,7 +301,7 @@ export class CustomerKycKycService {
           currentStepName: store?.currentStepName,
         },
       },
-      10
+      30
     );
     return pdfUrl;
   }
