@@ -453,7 +453,7 @@ export class KraProcess {
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
-      APP_MOB_NO: removeCountryCode(data.user.phoneNo || customer.phoneNo),
+      APP_MOB_NO: removeCountryCode(data?.user?.phoneNo || customer?.phoneNo),
       APP_FAX_NO: "",
       APP_EMAIL: data.user?.emailAddress || customer.emailAddress || "",
       APP_COR_ADD_PROOF: "31",
