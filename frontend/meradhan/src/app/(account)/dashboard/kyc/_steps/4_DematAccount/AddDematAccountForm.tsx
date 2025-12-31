@@ -213,8 +213,8 @@ function AddDematAccountForm() {
                     ...data.panNumber?.slice(1),
                   ])
                 }
-                // disabled
-                // adminMode
+              // disabled
+              // adminMode
               />
             </LabelInput>
 

@@ -132,14 +132,11 @@ export const useDematAccountFormHook = () => {
         });
         return;
       }
-
+      //  const name = findCdslDpId(e.target.value);
+      //  updateData("depositoryParticipantName", name || "");
       setError(undefined);
       updateDepository(indexAccount, {
         ...data,
-        depositoryParticipantName:
-          (data.depositoryName == "NSDL"
-            ? findDpId(data.dpId)
-            : findCdslDpId(data.dpId)) || undefined,
       });
 
       verifyDematAccount.mutate();

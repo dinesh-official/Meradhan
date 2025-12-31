@@ -69,12 +69,13 @@ export function DatePicker({
             <Input
               id={props.id ?? "date"}
               placeholder="DD/MM/YYYY"
+              readOnly
               value={
                 selected
                   ? format(selected, "dd/MM/yyyy")
                   : typeof value === "string"
-                  ? value
-                  : ""
+                    ? value
+                    : ""
               }
               onChange={(e) => {
                 const inputValue = e.target.value;
