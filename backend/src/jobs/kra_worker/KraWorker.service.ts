@@ -19,6 +19,7 @@ import {
 } from "./CheckKraStatus";
 import { getKraCountry, getKraState, kraMobNo } from "./constent";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
+import { cacheStorage } from "@store/redis_store";
 
 const cbricsManager = new ParticipantManager();
 
@@ -26,6 +27,10 @@ export class KraWorkerService {
   private kraProcess = new KraProcess();
 
   async processKra(data: KraWorkerJobData) {
+    const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
+    const TTL_28_HOURS = 28 * 60 * 60; // seconds = 100,800
+
+    const lastTask = await cacheStorage.get(cachedKey);
     const { customerId, kycDataStoreId } = data;
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
@@ -67,18 +72,23 @@ export class KraWorkerService {
           customer,
         });
         await addKraWorkerJob(data);
+        await cacheStorage.set(cachedKey, "REGISTER", TTL_28_HOURS); // 28 Hr
         return;
       }
 
       // Download Allow -
       if (status == "AVAILABLE") {
-        const downloadRes = (await this.kraProcess.downloadKraReport({
-          kycdataId: kycDataStoreId,
-          data: kyc,
-          customer,
-        })) as T_APP_PAN_INQ_DOWNLOAD;
-
-        const isMatched = checkIsKraMatched(kyc, customer, downloadRes);
+        let isMatched = false;
+        if (!lastTask) {
+          const downloadRes = (await this.kraProcess.downloadKraReport({
+            kycdataId: kycDataStoreId,
+            data: kyc,
+            customer,
+          })) as T_APP_PAN_INQ_DOWNLOAD;
+          isMatched = checkIsKraMatched(kyc, customer, downloadRes);
+        } else {
+          isMatched = true;
+        }
 
         if (isMatched) {
           try {
@@ -126,6 +136,7 @@ export class KraWorkerService {
             customer,
           });
           await addKraWorkerJob(data);
+          await cacheStorage.set(cachedKey, "MODIFY", TTL_28_HOURS);
           return;
         }
       }
