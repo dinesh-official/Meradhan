@@ -448,8 +448,10 @@ export class CustomerKycManager {
       userName: user?.userName || "------",
       userType: user?.userType || "INDIVIDUAL",
       kycStatus: user?.kycStatus || "VERIFIED",
+      kraStatus: user?.kraStatus,
       verifyDate: user?.verifyDate,
       VerifiedBy: user?.VerifiedBy || null,
+
       avatar: step1?.face?.url || user?.avatar || "------",
       isAFatcaCustomer: step1?.pan?.isFatca || user?.isAFatcaCustomer || false,
       allowSEBITerms: step1?.pan?.checkTerms2 || user?.allowSEBITerms || false,

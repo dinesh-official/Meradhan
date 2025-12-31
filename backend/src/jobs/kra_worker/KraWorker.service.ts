@@ -20,6 +20,7 @@ import {
 import { getKraCountry, getKraState, kraMobNo } from "./constent";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 import { cacheStorage } from "@store/redis_store";
+import { removeCountryCode } from "@utils/filters/convert";
 
 const cbricsManager = new ParticipantManager();
 
@@ -380,7 +381,6 @@ export class KraProcess {
     const lastName = data.step_1?.pan?.lastName || "";
     const dob = data.step_1?.pan?.dateOfBirth.split("T")[0]?.toString() || "";
     const MAR_STATUS = data.step_2.maritalStatus == "MARRIED" ? "01" : "02";
-    const mobile = kraMobNo;
 
     const corAddress = splitAddressInto3BalancedLines(
       removeLastCommaChunks(
@@ -453,7 +453,7 @@ export class KraProcess {
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
-      APP_MOB_NO: mobile,
+      APP_MOB_NO: removeCountryCode(data.user.phoneNo || customer.phoneNo),
       APP_FAX_NO: "",
       APP_EMAIL: data.user?.emailAddress || customer.emailAddress || "",
       APP_COR_ADD_PROOF: "31",

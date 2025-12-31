@@ -1,4 +1,6 @@
-export const kraMobNo = "9299999999";
+import { env } from "@packages/config/src/env";
+
+export const kraMobNo = env.KRA_MOB_NO;
 const kraState = [
   {
     id: 1,
