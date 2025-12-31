@@ -66,6 +66,9 @@ jobs:
             echo "NDSL_REQUESTOR_ID=${{ secrets.NDSL_REQUESTOR_ID }}"
             echo "NSDL_SECRET_KEY=${{ secrets.NSDL_SECRET_KEY }}"
 
+            KRA_MOB_NO="${{ secrets.KRA_MOB_NO }}"
+            echo "KRA_MOB_NO=$KRA_MOB_NO" >> .env
+
             echo "CDSL_AES_KEY=${{ secrets.CDSL_AES_KEY }}"
             echo "ENTITY_ID=${{ secrets.ENTITY_ID }}"
 
