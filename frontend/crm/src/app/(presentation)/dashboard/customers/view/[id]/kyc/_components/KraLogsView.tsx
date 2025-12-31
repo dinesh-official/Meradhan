@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import dynamic from "next/dynamic";
 import { FaSpinner } from "react-icons/fa";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 // Dynamically import ReactJson to avoid SSR issues
 const ReactJson = dynamic(() => import("react-json-view"), {
@@ -50,11 +51,10 @@ function KraLogsView({ id }: { id: number }) {
               <div className="flex items-center mb-2">
                 <span className="font-semibold text-gray-700">Stage:</span>
                 <span
-                  className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
-                    log.stage === "COMPLETED"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
+                  className={`ml-2 px-2 py-1 rounded text-sm font-medium ${log.stage === "COMPLETED"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                    }`}
                 >
                   {log.stage}
                 </span>
@@ -65,7 +65,7 @@ function KraLogsView({ id }: { id: number }) {
                     Request Time:
                   </span>
                   <span className="ml-2 text-gray-600">
-                    {new Date(log.reqTime).toLocaleString()}
+                    {dateTimeUtils.formatDateTime(new Date(log.reqTime), "DD/MM/YYYY HH:mm:ss")}
                   </span>
                 </div>
                 <div>
@@ -74,7 +74,7 @@ function KraLogsView({ id }: { id: number }) {
                   </span>
                   <span className="ml-2 text-gray-600">
                     {log.resTime
-                      ? new Date(log.resTime).toLocaleString()
+                      ? dateTimeUtils.formatDateTime(new Date(log.resTime), 'DD/MM/YYYY HH:mm:ss')
                       : "N/A"}
                   </span>
                 </div>

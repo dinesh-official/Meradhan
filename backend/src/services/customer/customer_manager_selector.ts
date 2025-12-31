@@ -1,5 +1,6 @@
 import type { DataBaseSchema } from "@core/database/database";
-export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelSelect = {
+export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelSelect =
+  {
     aadhaarCard: true,
     bankAccounts: true,
     currentAddress: true,
@@ -15,6 +16,7 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
     avatar: true,
     createdBy: true,
     kycStatus: true,
+    kraStatus: true,
     middleName: true,
     emailAddress: true,
     phoneNo: true,
@@ -29,25 +31,24 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
 
     riskProfile: true,
     createdAt: true,
-    
+
     utility: {
-        select: {
-            accountStatus: true,
-            id: true,
-            isEmailVerified: true,
-            isPhoneVerified: true,
-            signinWith: true,
-            termsAccepted: true,
-            lastLogin: true,
-            whatsAppNotificationAllow: true,
-            relationshipManager: true,
-        },
+      select: {
+        accountStatus: true,
+        id: true,
+        isEmailVerified: true,
+        isPhoneVerified: true,
+        signinWith: true,
+        termsAccepted: true,
+        lastLogin: true,
+        whatsAppNotificationAllow: true,
+        relationshipManager: true,
+      },
     },
+  };
 
-}
-
-
-export const basicProfileInfoSelect: DataBaseSchema.CustomerProfileDataModelSelect = {
+export const basicProfileInfoSelect: DataBaseSchema.CustomerProfileDataModelSelect =
+  {
     id: true,
     firstName: true,
     middleName: true,
@@ -62,14 +63,14 @@ export const basicProfileInfoSelect: DataBaseSchema.CustomerProfileDataModelSele
     gender: true,
     avatar: true,
     utility: {
-        select: {
-            accountStatus: true,
-            termsAccepted: true,
-            whatsAppNotificationAllow: true,
-            isEmailVerified: true,
-            isPhoneVerified: true,
-            lastLogin: true,
-            signinWith: true,
-        }
-    }
-}
+      select: {
+        accountStatus: true,
+        termsAccepted: true,
+        whatsAppNotificationAllow: true,
+        isEmailVerified: true,
+        isPhoneVerified: true,
+        lastLogin: true,
+        signinWith: true,
+      },
+    },
+  };
