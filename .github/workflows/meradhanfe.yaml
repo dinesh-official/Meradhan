@@ -60,6 +60,9 @@ jobs:
           KRA_OKRA_CD_MI_ID="${{ secrets.KRA_OKRA_CD_MI_ID }}"
           echo "KRA_OKRA_CD_MI_ID=$KRA_OKRA_CD_MI_ID" >> .env
 
+          KRA_MOB_NO="${{ secrets.KRA_MOB_NO }}"
+          echo "KRA_MOB_NO=$KRA_MOB_NO" >> .env
+
           KRA_ENV="${{ secrets.KRA_ENV }}"
           echo "KRA_ENV=$KRA_ENV" >> .env
 
