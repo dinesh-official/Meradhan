@@ -16,10 +16,6 @@ export class CustomerKycManager {
       throw new Error("KYC Data not found");
     }
 
-    if (!data.complete) {
-      throw new Error("KYC Data is not complete");
-    }
-
     return data.data as KycDataStorage;
   }
 
