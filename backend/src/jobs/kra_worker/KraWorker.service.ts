@@ -176,6 +176,9 @@ export class KraProcess {
   }
 
   async enquiry({ customer, data, kycdataId }: processPayload) {
+    const cachedKey = `KRA:${customer.id}-${kycdataId}`;
+    const lastTask = await cacheStorage.get(cachedKey);
+
     const reqTime = new Date().toISOString();
     const payload = {
       pan: data.step_1.pan.panCardNo,
@@ -192,7 +195,11 @@ export class KraProcess {
         id: customer.id,
       },
       data: {
-        kraStatus: "ENQUIRY_KRA",
+        kraStatus:
+          (lastTask || "ENQUIRY") +
+          "_" +
+          (enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_UPDT_STATUS ||
+            enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS),
       },
     });
 
@@ -202,7 +209,10 @@ export class KraProcess {
         responseData: enquiry,
         userId: customer.id,
         kycId: kycdataId,
-        stage: "ENQUIRY_KRA",
+        stage:
+          (lastTask || "ENQUIRY") +
+          "_" +
+          enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
         reqTime,
         resTime,
       },
@@ -231,7 +241,7 @@ export class KraProcess {
         id: customer.id,
       },
       data: {
-        kraStatus: "DOWNLOAD_KRA",
+        kraStatus: "DOWNLOAD_KRA_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
       },
     });
     await db.dataBase.kraDataLogs.create({
@@ -240,7 +250,7 @@ export class KraProcess {
         responseData: report,
         userId: customer.id,
         kycId: kycdataId,
-        stage: "DOWNLOAD_KRA",
+        stage: "DOWNLOAD_KRA_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
         reqTime,
         resTime,
       },
@@ -260,7 +270,7 @@ export class KraProcess {
         id: customer.id,
       },
       data: {
-        kraStatus: "REGISTER_KRA",
+        kraStatus: "REGISTER_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
       },
     });
     await db.dataBase.kraDataLogs.create({
@@ -269,7 +279,7 @@ export class KraProcess {
         responseData: report as object,
         userId: customer.id,
         kycId: kycdataId,
-        stage: "REGISTER_KRA",
+        stage: "REGISTER_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
         reqTime,
         resTime,
       },
@@ -352,7 +362,10 @@ export class KraProcess {
         responseData: report as object,
         userId: customer.id,
         kycId: kycdataId,
-        stage: "MODIFY_KRA",
+        stage:
+          "MODIFY_" +
+          (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUSDT ||
+            report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS),
         reqTime,
         resTime,
       },
@@ -362,7 +375,10 @@ export class KraProcess {
         id: customer.id,
       },
       data: {
-        kraStatus: "MODIFY_KRA",
+        kraStatus:
+          "MODIFY_" +
+          (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUSDT ||
+            report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS),
       },
     });
     return report;

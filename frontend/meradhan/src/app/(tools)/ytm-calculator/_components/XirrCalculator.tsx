@@ -49,18 +49,19 @@ const fallbackFlow = {
 const formatOffsetLabel = (offset: number) => {
   const base = new Date();
   base.setDate(base.getDate() + offset);
-  return base.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
+  // dd/mm/yyyy
+  return base.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 };
 
-const settlementOptions = () => [
-  { label: "T+0 (Today)", value: 0 },
-  { label: "T+1 (Tomorrow)", value: 1 },
-  { label: `T+2 (${formatOffsetLabel(2)})`, value: 2 },
-  { label: `T+3 (${formatOffsetLabel(3)})`, value: 3 },
-];
+const settlementOptions = () =>
+  [0, 1, 2, 3].map((offset) => ({
+    label: `${formatOffsetLabel(offset)} (T+${offset})`,
+    value: offset,
+  }));
 
 function XirrCalculator() {
   const {
@@ -264,6 +265,7 @@ function XirrCalculator() {
                 <DatePicker
                   className="w-full"
                   value={issueDate}
+                  inputClassName="font-medium"
                   maxDate={today}
                   onChange={(date) => {
                     if (date) setIssueDate(date);
@@ -274,8 +276,9 @@ function XirrCalculator() {
               <div className="flex flex-col gap-2">
                 <Label className="font-normal">Maturity Date</Label>
                 <DatePicker
-                  className="w-full"
+                  className="w-full "
                   value={maturityDate}
+                  inputClassName="font-medium"
                   minDate={issueDate}
                   maxDate={new Date(2050, 11, 31)}
                   onChange={(date) => {
@@ -287,6 +290,7 @@ function XirrCalculator() {
                 <Label className="font-normal">Last Coupon Date</Label>
                 <DatePicker
                   className="w-full"
+                  inputClassName="font-medium"
                   value={lastCouponDate}
                   maxDate={today}
                   onChange={(date) => {
@@ -304,7 +308,7 @@ function XirrCalculator() {
                     updateSettlementByOffset(offset);
                   }}
                 >
-                  <SelectTrigger className="bg-white py-5 border-0 w-full font-medium">
+                  <SelectTrigger className="bg-white py-4 border-0 w-full font-medium">
                     <SelectValue placeholder="Select settlement term" />
                   </SelectTrigger>
                   <SelectContent>
