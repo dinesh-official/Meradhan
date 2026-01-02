@@ -7,6 +7,7 @@ export type Address3Lines = {
 };
 
 // Remove the last `count` comma-separated chunks from an address string.
+
 function removeLastCommaChunks(input: string, count = 3): string {
   const parts = input.split(",");
   if (parts.length <= count) return "";
@@ -16,15 +17,6 @@ function removeLastCommaChunks(input: string, count = 3): string {
 
 /**
  * Splits an address into 3 balanced lines (<= maxLen each),
- * WITHOUT breaking any comma-separated chunk.
- *
- * - Uses commas as atomic boundaries: "between commas" is never split.
- * - Also treats newlines as separators (converted to commas).
- * - Chooses the most "equal-looking" split by minimizing line-length spread,
- *   then minimizing total distance from ideal (total/3).
- *
- * If it's impossible to fit within maxLen (e.g., a single token > maxLen),
- * it falls back to greedy packing into 3 lines (still not breaking tokens).
  */
 export function splitAddressInto3BalancedLines(
   input: string,

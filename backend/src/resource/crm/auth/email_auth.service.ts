@@ -8,6 +8,7 @@ import { tokenUtils } from "@utils/token/JwtToken_utils";
 import { AuthRepo } from "./auth.repo";
 
 export class EmailAuthService {
+  // OTP verification service
   private optManager: IOtpVerificationService;
   private authRepo: AuthRepo;
   constructor() {
