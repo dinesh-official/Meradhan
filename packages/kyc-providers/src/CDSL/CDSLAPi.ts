@@ -137,13 +137,6 @@ export class CDSLApi {
       EntityID: env.ENTITY_ID,
       Reqdatetime: body14,
     };
-    console.log(headers);
-    console.log(
-      env.CDSL_AES_KEY || "",
-      env.CDSL_MODE === "PROD",
-      env.ENTITY_ID,
-      this.axiosInstance.getUri().toString()
-    );
 
     const response = await this.axiosInstance.post<BoPanResponse>(
       "/PANVerifyRequest",
@@ -152,8 +145,6 @@ export class CDSLApi {
     );
 
     const data = response.data;
-
-    console.log(data);
 
     return {
       idNo: data.ReqSeqNo,
