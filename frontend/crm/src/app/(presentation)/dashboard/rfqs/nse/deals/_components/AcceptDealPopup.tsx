@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -84,6 +85,10 @@ function AcceptDealPopup({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Confirmation</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to {status === "PC" ? "accept" : "reject"}{" "}
+            this deal?
+          </DialogDescription>
         </DialogHeader>
         <DealSplitInformation data={data} className="md:grid-cols-3" />
         <DialogFooter>

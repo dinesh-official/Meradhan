@@ -24,10 +24,10 @@ export class AuthController {
     const data = appSchema.auth.loginWithOtpSchema.parse(req.body);
     const payload = await this.emailAuthService.sendAuthEmailOtp(data.email);
 
-    // Audit log for login attempt
+    // Audit log for login attempt with otp
     await addCrmLoginBasedAuditLog(req, {
       sessionType: "otp_request",
-      userId: payload.id, // Replace with actual userId if available
+      userId: payload.id,
       success: true,
     });
 

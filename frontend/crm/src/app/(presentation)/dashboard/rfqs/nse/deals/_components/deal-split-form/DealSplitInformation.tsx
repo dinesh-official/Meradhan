@@ -16,53 +16,28 @@ const DealSplitInformation = ({
 }) => {
   return (
     <div className={cn("gap-5 gap-y-6 grid md:grid-cols-5 my-3", className)}>
-      <LabelView title="Participant Code ">
-        <p className="font-medium text-sm">{data.initAeCode}</p>
-      </LabelView>
-
-      <LabelView title="Client Code">
-        <p className="font-medium text-sm">{data.initClientCode}</p>
-      </LabelView>
-
-      <LabelView title="Deal Type">
-        <DealTypeBadge type={`${data.initDealType}`} />
-      </LabelView>
-
-      <LabelView title="RFQ Number">
-        <p className="font-medium text-sm">{data.rfqNumber}</p>
+      <LabelView title="Trade NO">
+        <p className="font-medium text-sm">{data.tradeNumber}</p>
       </LabelView>
 
       <LabelView title="ISIN">
         <p className="font-medium text-sm">{data.isin}</p>
       </LabelView>
 
-      <LabelView title="Face Value">
-        <p className="font-medium text-sm">
-          {formatNumberTS(Number(data.initValue) * 10000000)}
-        </p>
+      <LabelView title="Price">
+        <p className="font-medium text-sm">{data.acceptedPrice}</p>
       </LabelView>
 
-      <LabelView title="Buy/Sell">
-        <TradeTypeBadge type={`${data.buySell == "S" ? "B" : "S"}`} />
+      <LabelView title="Accrued Interest">
+        <p className="font-medium text-sm">{data.acceptedAccruedInterest}</p>
       </LabelView>
-
-      <LabelView title="Quantity">
-        <p className="font-medium text-sm">{data.initQuantity}</p>
-      </LabelView>
-
-      <LabelView title="value (Crores)">
-        <p className="font-medium text-sm">
-          {formatNumberTS(Number(data.initValue) * 10000000)}
-        </p>
-      </LabelView>
-
-      <LabelView title="Value Remaining">
-        <p className="font-medium text-sm">
-          {formatNumberTS(
-            Number(data.initValue) * 10000000 -
-              Number(data.initValue) * 10000000
-          )}
-        </p>
+      <div className="col-span-2">
+        <LabelView title="Consideration without stamp duty">
+          <p className="font-medium text-sm">{data.acceptedConsideration}</p>
+        </LabelView>
+      </div>
+      <LabelView title="Settlement Date">
+        <p className="font-medium text-sm">{data.acceptedSettlementDate}</p>
       </LabelView>
     </div>
   );

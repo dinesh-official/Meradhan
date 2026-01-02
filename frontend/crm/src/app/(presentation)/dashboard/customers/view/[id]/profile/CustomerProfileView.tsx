@@ -155,7 +155,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
                 <p>
                   {customer?.createdAt
                     ? dateTimeUtils.formatDateTime(
-                        customer.updatedAt,
+                        customer.createdAt,
                         "DD MMMM YYYY hh:mm AA"
                       )
                     : "—"}
