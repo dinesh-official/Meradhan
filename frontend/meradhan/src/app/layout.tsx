@@ -107,6 +107,8 @@ export default async function RootLayout({
           content="/favicon/ms-icon-144x144.png"
         />
         <meta name="theme-color" content="#ffffff" />
+
+        <script></script>
       </head>
       <body className={`antialiased`}>
         <NextTopLoader color="#002c59" />

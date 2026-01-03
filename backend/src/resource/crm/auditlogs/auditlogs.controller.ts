@@ -9,6 +9,7 @@ import {
 } from "./tracking.service";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
+import { endAuditLogSession } from "./auditlog.repo";
 
 export class AuditLogsController {
   private auditLogsService = new AuditLogsService();
@@ -151,6 +152,19 @@ export class AuditLogsController {
     const payload = req.body as RevalidatePayload;
     await this.crmTrackingService.revalidateTracking(payload);
     res.send("OK");
+  }
+
+  async clearCrmTrackingSession(req: Request, res: Response): Promise<void> {
+    await endAuditLogSession(req, {
+      userId: Number(req.params.userId),
+      endReason: "User closed session",
+      success: true,
+    });
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "CRM Tracking Session Cleared",
+      success: true,
+    });
   }
 
   async getCrmTrackingList(req: Request, res: Response): Promise<void> {

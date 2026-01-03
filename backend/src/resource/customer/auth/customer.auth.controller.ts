@@ -69,6 +69,13 @@ export class CustomerAuthController {
     const user = await this.customerAuthService.signUpWithCredentials({
       ...data,
     });
+    await addMeradhanLoginBasedAuditLog(req, {
+      userId: user.id,
+      sessionType: "SIGNUP_CREDENTIALS",
+      success: true,
+      entityType: "Auth",
+      email: user.email,
+    });
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: user,
@@ -99,6 +106,14 @@ export class CustomerAuthController {
       email: user.email,
       userName: userData?.firstName + " " + userData?.lastName,
     });
+    await addMeradhanLoginBasedAuditLog(req, {
+      userId: user.id,
+      sessionType: "SIGNUP_VERIFIED",
+      success: true,
+      entityType: "Auth",
+      email: user.email,
+    });
+    // Server Sent Events (SSE)
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: user,

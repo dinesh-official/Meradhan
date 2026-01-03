@@ -70,6 +70,11 @@ auditlogsRoutes.all(
 );
 
 auditlogsRoutes.all(
+  "/api/auditlogs/crm/close-session/:userId",
+  async (req, res) => auditLogsController.clearCrmTrackingSession(req, res)
+);
+
+auditlogsRoutes.all(
   "/api/crm/tracking/revalidate",
   crmAuditLogLimiter,
   trackingPayloadLimit,
