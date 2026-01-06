@@ -358,7 +358,7 @@ export class KraXMLBuilder {
   <APP_KYC_MODE>${panInquiry.APP_KYC_MODE}</APP_KYC_MODE>
   <APP_EXMT_ID_PROOF>${panInquiry.APP_EXMT_ID_PROOF}</APP_EXMT_ID_PROOF>
   <APP_IPV_FLAG>${panInquiry.APP_IPV_FLAG}</APP_IPV_FLAG>
-  <APP_IPV_DATE>${panInquiry.APP_IPV_DATE} 00:00:00</APP_IPV_DATE>
+  <APP_IPV_DATE>${panInquiry.APP_IPV_DATE}</APP_IPV_DATE>
   <APP_GEN>${panInquiry.APP_GEN}</APP_GEN>
   <APP_NAME>${panInquiry.APP_NAME}</APP_NAME>
   <APP_F_NAME>${panInquiry.APP_F_NAME}</APP_F_NAME>
