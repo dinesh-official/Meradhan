@@ -3,7 +3,18 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
-
+function formatWithTimeZone(date: Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
+}
 type DatePickerProps = {
   value: Date | null;
   onChange: (date: Date | null) => void;
@@ -23,6 +34,8 @@ type CalendarCell = {
   date: Date;
   inCurrentMonth: boolean;
 };
+
+type ViewMode = "day" | "month" | "year";
 
 const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTH_LABELS = [
@@ -146,6 +159,7 @@ export default function DatePicker({
   const [inputValue, setInputValue] = useState(formatDate(value));
   const [isDirty, setIsDirty] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(value ?? new Date());
+  const [viewMode, setViewMode] = useState<ViewMode>("day");
   const containerRef = useRef<HTMLDivElement>(null);
   const today = useMemo(() => new Date(), []);
 
@@ -191,12 +205,11 @@ export default function DatePicker({
     });
     return set;
   }, [allowedDates]);
-  const yearOptions = useMemo(() => {
-    const currentYear = today.getFullYear();
-    const start = currentYear - 50;
-    const end = currentYear + 20;
-    return Array.from({ length: end - start + 1 }, (_, idx) => start + idx);
-  }, [today]);
+  const yearGridStart = useMemo(() => viewDate.getFullYear() - 6, [viewDate]);
+  const yearGrid = useMemo(
+    () => Array.from({ length: 12 }, (_, idx) => yearGridStart + idx),
+    [yearGridStart]
+  );
 
   const displayValue = isDirty ? inputValue : formatDate(value);
   const isAllowed = (timestamp: number) => {
@@ -268,6 +281,7 @@ export default function DatePicker({
     if (disabled) return;
     if (!isOpen) {
       setViewDate(value ?? new Date());
+      setViewMode("day");
     }
     setIsOpen((current) => !current);
   };
@@ -280,20 +294,44 @@ export default function DatePicker({
     });
   };
 
-  const changeMonthDirect = (nextMonth: number) => {
+  const changeYear = (step: number) => {
     setViewDate((current) => {
       const next = new Date(current);
-      next.setMonth(nextMonth, 1);
+      next.setFullYear(current.getFullYear() + step, current.getMonth(), 1);
       return next;
     });
   };
 
-  const changeYearDirect = (nextYear: number) => {
+  const changeYearRange = (step: number) => {
     setViewDate((current) => {
       const next = new Date(current);
-      next.setFullYear(nextYear, current.getMonth(), 1);
+      next.setFullYear(
+        current.getFullYear() + step * 12,
+        current.getMonth(),
+        1
+      );
       return next;
     });
+  };
+
+  const handlePrevNavigation = () => {
+    if (viewMode === "day") {
+      changeMonth(-1);
+    } else if (viewMode === "month") {
+      changeYear(-1);
+    } else {
+      changeYearRange(-1);
+    }
+  };
+
+  const handleNextNavigation = () => {
+    if (viewMode === "day") {
+      changeMonth(1);
+    } else if (viewMode === "month") {
+      changeYear(1);
+    } else {
+      changeYearRange(1);
+    }
   };
 
   return (
@@ -343,84 +381,129 @@ export default function DatePicker({
               type="button"
               className="date-picker__nav"
               aria-label="Previous month"
-              onClick={() => changeMonth(-1)}
+              onClick={handlePrevNavigation}
             >
               ‹
             </button>
 
             <div className="date-picker__selectors">
-              <select
-                aria-label="Select month"
-                className="date-picker__select"
-                value={viewDate.getMonth()}
-                onChange={(event) =>
-                  changeMonthDirect(Number(event.target.value))
-                }
+              <button
+                type="button"
+                className="date-picker__select-trigger"
+                aria-label="Switch to month selection"
+                onClick={() => setViewMode("month")}
               >
-                {MONTH_LABELS.map((label, idx) => (
-                  <option key={label} value={idx}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                aria-label="Select year"
-                className="date-picker__select"
-                value={viewDate.getFullYear()}
-                onChange={(event) =>
-                  changeYearDirect(Number(event.target.value))
-                }
+                {MONTH_LABELS[viewDate.getMonth()]}
+              </button>
+              <button
+                type="button"
+                className="date-picker__select-trigger"
+                aria-label="Switch to year selection"
+                onClick={() => setViewMode("year")}
               >
-                {yearOptions.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
+                {viewDate.getFullYear()}
+              </button>
             </div>
 
             <button
               type="button"
               className="date-picker__nav"
               aria-label="Next month"
-              onClick={() => changeMonth(1)}
+              onClick={handleNextNavigation}
             >
               ›
             </button>
           </div>
 
-          <div className="date-picker__weekdays">
-            {WEEKDAY_LABELS.map((day) => (
-              <span key={day}>{day}</span>
-            ))}
-          </div>
+          {viewMode === "day" ? (
+            <>
+              <div className="date-picker__weekdays">
+                {WEEKDAY_LABELS.map((day) => (
+                  <span key={day}>{day}</span>
+                ))}
+              </div>
 
-          <div className="date-picker__grid">
-            {days.map(({ date, inCurrentMonth }) => {
-              const ts = normalizeToMidnight(date);
-              const classNames = ["date-picker__day"];
-              if (!inCurrentMonth) classNames.push("date-picker__day--muted");
-              if (isSameDay(date, today))
-                classNames.push("date-picker__day--today");
-              if (isSameDay(date, value))
-                classNames.push("date-picker__day--selected");
-              const selectable = isWithinRange(ts) && isAllowed(ts);
-              if (!selectable) classNames.push("date-picker__day--disabled");
+              <div className="date-picker__grid">
+                {days.map(({ date, inCurrentMonth }) => {
+                  const ts = normalizeToMidnight(date);
+                  const classNames = ["date-picker__day"];
+                  if (!inCurrentMonth)
+                    classNames.push("date-picker__day--muted");
+                  if (isSameDay(date, today))
+                    classNames.push("date-picker__day--today");
+                  if (isSameDay(date, value))
+                    classNames.push("date-picker__day--selected");
+                  const selectable = isWithinRange(ts) && isAllowed(ts);
+                  if (!selectable)
+                    classNames.push("date-picker__day--disabled");
 
-              return (
-                <button
-                  key={date.toISOString()}
-                  type="button"
-                  className={classNames.join(" ")}
-                  disabled={!selectable}
-                  onClick={() => selectDate(date)}
-                >
-                  {date.getDate()}
-                </button>
-              );
-            })}
-          </div>
+                  return (
+                    <button
+                      key={date.toISOString()}
+                      type="button"
+                      className={classNames.join(" ")}
+                      disabled={!selectable}
+                      onClick={() => selectDate(date)}
+                    >
+                      {date.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
+
+          {viewMode === "month" ? (
+            <div className="date-picker__month-grid">
+              {MONTH_LABELS.map((label, idx) => {
+                const classNames = ["date-picker__month"];
+                if (idx === viewDate.getMonth()) {
+                  classNames.push("date-picker__month--selected");
+                }
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    className={classNames.join(" ")}
+                    onClick={() => {
+                      setViewDate(
+                        new Date(viewDate.getFullYear(), idx, 1, 0, 0, 0, 0)
+                      );
+                      setViewMode("day");
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {viewMode === "year" ? (
+            <div className="date-picker__year-grid">
+              {yearGrid.map((year) => {
+                const classNames = ["date-picker__year"];
+                if (year === viewDate.getFullYear()) {
+                  classNames.push("date-picker__year--selected");
+                }
+                return (
+                  <button
+                    key={year}
+                    type="button"
+                    className={classNames.join(" ")}
+                    onClick={() => {
+                      setViewDate(
+                        new Date(year, viewDate.getMonth(), 1, 0, 0, 0, 0)
+                      );
+                      setViewMode("month");
+                    }}
+                  >
+                    {year}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

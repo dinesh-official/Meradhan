@@ -9,6 +9,7 @@ import ReturnsCalculationSection from "./_components/ReturnsCalculationSection";
 import ToolsOfferedByMeraDhan from "./_components/ToolsOfferedbyMeraDhan";
 import WhyMeraDhanSection from "./_components/WhyMeraDhanSection";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
+import XirrCalculator from "../(tools)/ytm-calculator/_components/XirrCalculator";
 
 export const revalidate = 0; // Revalidate the page every hour
 export const generateMetadata = async () => {
@@ -31,7 +32,12 @@ export default async function HomePage() {
         </SectionWrapper>
       </div>
       <LatestBondReleases bonds={responseData || []} />
-      <ReturnsCalculationSection />
+      {/* <ReturnsCalculationSection /> */}
+      <XirrCalculator
+        showTitle={true}
+        showFlowChart={false}
+        showChart={false}
+      />
       {/* <CustomersTestimonials /> */}
       {/* <RecentBlogs /> */}
     </ViewPort>

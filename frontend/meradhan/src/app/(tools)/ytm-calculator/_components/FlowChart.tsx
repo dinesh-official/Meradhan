@@ -62,6 +62,7 @@ export function FlowChart({
             </span>
           )}
         </h3>
+
         {/* <small> (Current Yield: {yieldVal?.toFixed(4)}% )</small> */}
       </div>
 

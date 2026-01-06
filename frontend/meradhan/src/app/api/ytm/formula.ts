@@ -105,7 +105,7 @@ export function validateInputs(params: {
 
       C10.getTime() >= C9.getTime(),
       C10.getTime() >= today.getTime(),
-      C10.getTime() <= new Date(today.getTime() + 3 * 86400000).getTime(),
+      C10.getTime() <= new Date(today.getTime() + 4 * 86400000).getTime(),
 
       C11.getTime() > C10.getTime(),
       C11.getTime() > C9.getTime(),

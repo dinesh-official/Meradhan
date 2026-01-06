@@ -164,7 +164,7 @@ function DhanGptPopup() {
         width={100}
         height={100}
         id="dhanGpt-popup-trigger"
-        className="w-20 fixed bottom-8 right-8 cursor-pointer z-40 "
+        className="w-20 fixed md:bottom-8 bottom-4 md:right-8 right-3 cursor-pointer z-40 "
       />
     </>
   );

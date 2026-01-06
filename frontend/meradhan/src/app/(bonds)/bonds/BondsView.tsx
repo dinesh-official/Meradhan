@@ -162,9 +162,8 @@ function RenderBondView({
       )}
 
       <div
-        className={`gap-5 grid grid-cols-1 mt-2 py-5 ${
-          viewMode === "grid" ? "lg:grid-cols-3" : "grid-cols-1"
-        }`}
+        className={`gap-5 grid grid-cols-1 mt-2 py-5 ${viewMode === "grid" ? "lg:grid-cols-3" : "grid-cols-1"
+          }`}
       >
         {bondsListData.data.map((bond) => (
           <BondListCard
@@ -181,6 +180,7 @@ function RenderBondView({
           activePage={bondsListData.meta.page}
           totalPages={bondsListData.meta.totalPages}
         />
+
       </div>
     </div>
   );
