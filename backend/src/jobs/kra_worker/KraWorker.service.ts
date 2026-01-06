@@ -196,7 +196,7 @@ export class KraProcess {
       },
       data: {
         kraStatus:
-          (lastTask || "ENQUIRY") +
+          "ENQUIRY" +
           "_" +
           (enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_UPDT_STATUS ||
             enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS),

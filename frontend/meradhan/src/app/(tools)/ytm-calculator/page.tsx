@@ -42,10 +42,10 @@ const page = async () => {
         description={headerData?.Content?.Introduction || ""}
         content={headerData?.Content?.Content_1 || ""}
       />
-      <XirrCalculator />
+      <XirrCalculator showFlowChart={false} showChart={false} />
       {/* <FdCalculatorContent /> */}
 
-      <section className="mb-10">
+      <section className="mb-10 mt-10">
         <div
           className="container article "
           dangerouslySetInnerHTML={{

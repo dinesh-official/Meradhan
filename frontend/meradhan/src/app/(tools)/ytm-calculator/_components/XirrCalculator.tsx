@@ -18,10 +18,13 @@ import {
   formatToMMDDYYYY,
   FrequencyType,
   getBondCashflowJson,
+  getXirr,
+  prepareXirrValues,
 } from "../_helpers/xirr";
 import { cFrequencyMap, dayCountMap, useYtm } from "../_hooks/useYtm";
 import { FlowChart } from "./FlowChart";
 import FlowTable from "./FlowTable";
+import { cn } from "@/lib/utils";
 const couponFrequencyMap: Record<keyof typeof cFrequencyMap, FrequencyType> = {
   Annual: "annual",
   "Semi-Annual": "semi-annual",
@@ -46,24 +49,46 @@ const fallbackFlow = {
   ],
 };
 
-const formatOffsetLabel = (offset: number) => {
-  const base = new Date();
-  base.setDate(base.getDate() + offset);
-  // dd/mm/yyyy
-  return base.toLocaleDateString("en-GB", {
+const formatDateLabel = (date: Date) =>
+  date.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
+
+const settlementOptions = (base: Date) => {
+  const options: { label: string; value: number; date: Date }[] = [];
+  let businessOffset = 0;
+
+  for (
+    let cursor = new Date(base);
+    options.length < 4;
+    cursor.setDate(cursor.getDate() + 1)
+  ) {
+    const day = cursor.getDay();
+    const isWeekend = day === 0 || day === 6;
+    if (!isWeekend) {
+      options.push({
+        label: `${formatDateLabel(cursor)} (T+${businessOffset})`,
+        value: businessOffset,
+        date: new Date(cursor),
+      });
+      businessOffset += 1;
+    }
+  }
+
+  return options;
 };
 
-const settlementOptions = () =>
-  [0, 1, 2, 3].map((offset) => ({
-    label: `${formatOffsetLabel(offset)} (T+${offset})`,
-    value: offset,
-  }));
-
-function XirrCalculator() {
+function XirrCalculator({
+  showFlowChart = false,
+  showTitle = false,
+  showChart = false,
+}: {
+  showFlowChart?: boolean;
+  showTitle?: boolean;
+  showChart?: boolean;
+}) {
   const {
     result,
     manager: {
@@ -122,32 +147,45 @@ function XirrCalculator() {
   }, [annualCouponRate, cleanPrice, faceValue]);
 
   const today = useMemo(() => new Date(), []);
-  const settlementChoices = useMemo(() => settlementOptions(), []);
-  const [settlementTerm, setSettlementTerm] = useState<number>(0);
+  const settlementChoices = useMemo(() => settlementOptions(today), [today]);
+  const [settlementTerm, setSettlementTerm] = useState<number>(
+    settlementChoices[0]?.value ?? 0
+  );
 
   const updateSettlementByOffset = (offset: number) => {
-    const next = new Date(today);
-    next.setDate(next.getDate() + offset);
-    setSettlementDate(next);
+    const choice = settlementChoices.find((option) => option.value === offset);
+    if (choice) {
+      setSettlementDate(choice.date);
+    }
   };
 
   return (
     <>
       <div className="bg-muted">
         <div className="container">
-          <SectionWrapper className="gap-10 grid lg:grid-cols-3">
-            <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
-              <div className="flex flex-col gap-2">
+          {showTitle && (
+            <h2 className="text-4xl font-bold pt-10 text-center quicksand-medium">
+              <span className="text-secondary">YTM</span> Calculator
+            </h2>
+          )}
+
+          <SectionWrapper className="md:gap-10 gap-5 grid lg:grid-cols-3">
+            <div
+              className={cn(
+                "gap-6 grid grid-cols-2",
+                showChart ? "lg:col-span-1" : "lg:col-span-2"
+              )}
+            >
+              <div className="flex flex-col gap-2 ">
                 <Label className="font-normal">Face (Par) Value</Label>
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg     appearance-none ${
-                      !faceValue ||
+                    className={` bg-white py-5 ps-9 border-0 font-medium  text-[1rem]  appearance-none ${!faceValue ||
                       isNaN(Number(faceValue)) ||
                       (Number(faceValue) <= 0
                         ? "border-red-300 focus:border-red-500"
                         : "")
-                    }`}
+                      }`}
                     placeholder="Amount"
                     value={faceValue}
                     onChange={(e) => setFaceValue(Number(e.target.value))}
@@ -161,17 +199,16 @@ function XirrCalculator() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 ">
                 <Label className="font-normal">Clean (Current) Price</Label>
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 ps-9 border-0 font-medium text-lg appearance-none ${
-                      !cleanPrice ||
-                      isNaN(Number(cleanPrice)) ||
-                      Number(cleanPrice) <= 0
+                    className={` bg-white py-5 ps-9 border-0 font-medium text-[1rem] appearance-none ${!cleanPrice ||
+                        isNaN(Number(cleanPrice)) ||
+                        Number(cleanPrice) <= 0
                         ? "border-red-300 focus:border-red-500"
                         : ""
-                    }`}
+                      }`}
                     placeholder="Amount"
                     value={cleanPrice}
                     onChange={(e) => setCleanPrice(Number(e.target.value))}
@@ -185,18 +222,17 @@ function XirrCalculator() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 ">
                 <Label className="font-normal">Coupon Rate (%)</Label>
 
                 <div className="relative">
                   <Input
-                    className={`peer bg-white py-5 pe-12 border-0 font-medium     appearance-none ${
-                      !annualCouponRate ||
-                      isNaN(Number(annualCouponRate)) ||
-                      Number(annualCouponRate) <= 0
+                    className={` bg-white py-5 pe-12 border-0 font-medium text-[1rem]  appearance-none ${!annualCouponRate ||
+                        isNaN(Number(annualCouponRate)) ||
+                        Number(annualCouponRate) <= 0
                         ? "border-red-300 focus:border-red-500"
                         : ""
-                    }`}
+                      }`}
                     placeholder="Rate"
                     value={annualCouponRate}
                     onChange={(e) =>
@@ -222,7 +258,7 @@ function XirrCalculator() {
                     setCouponFrequency(e as keyof typeof cFrequencyMap)
                   }
                 >
-                  <SelectTrigger className="bg-white py-5 border-0 w-full font-medium">
+                  <SelectTrigger className="bg-white py-5 border-0 w-full font-medium text-[1rem]">
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent>
@@ -236,7 +272,7 @@ function XirrCalculator() {
                 </Select>
               </div>
 
-              <div className="flex flex-col gap-2 col-span-1 md:col-span-2">
+              <div className="flex flex-col gap-2 col-span-2">
                 <Label className="font-normal">Day Count Convention</Label>
 
                 <Select
@@ -245,7 +281,7 @@ function XirrCalculator() {
                     setDayCount(e as keyof typeof dayCountMap)
                   }
                 >
-                  <SelectTrigger className="bg-white py-5 border-0 w-full font-medium">
+                  <SelectTrigger className="bg-white py-5 border-0 w-full font-medium text-[1rem]">
                     <SelectValue placeholder="Select day count" />
                   </SelectTrigger>
                   <SelectContent>
@@ -266,7 +302,14 @@ function XirrCalculator() {
                   className="w-full"
                   value={issueDate}
                   inputClassName="font-medium"
-                  maxDate={today}
+                  maxDate={today} // today
+                  minDate={
+                    new Date(
+                      today.getFullYear() - 15,
+                      today.getMonth(),
+                      today.getDate()
+                    )
+                  } // last 15 years
                   onChange={(date) => {
                     if (date) setIssueDate(date);
                   }}
@@ -308,7 +351,7 @@ function XirrCalculator() {
                     updateSettlementByOffset(offset);
                   }}
                 >
-                  <SelectTrigger className="bg-white py-4 border-0 w-full font-medium">
+                  <SelectTrigger className="bg-white py-5 border-0 w-full font-medium text-[1rem]">
                     <SelectValue placeholder="Select settlement term" />
                   </SelectTrigger>
                   <SelectContent>
@@ -326,19 +369,44 @@ function XirrCalculator() {
                 </Select>
               </div>
             </div>
-            <div className="lg:col-span-2 bg-white rounded-md">
-              <FlowChart
-                xirrData={flowData}
-                ytm={result.answer}
-                yieldVal={yieldVal}
-              />
-            </div>
+            {showChart ? (
+              <div className="lg:col-span-2 bg-white rounded-md">
+                <FlowChart
+                  xirrData={flowData}
+                  ytm={result.answer}
+                  yieldVal={yieldVal}
+                />
+              </div>
+            ) : (
+              <div className=" bg-white rounded-md p-5 py-10 flex justify-center items-center flex-col">
+                <h3 className="md:text-4xl text-3xl text-center">
+                  YTM:{" "}
+                  {isNaN(result.answer) ? (
+                    <span className="text-red-600">CHECK INPUTS</span>
+                  ) : (
+                    <span
+                      className={cn("font-semibold", {
+                        "text-green-600": Number(result.answer) > 0,
+                        "text-red-600": Number(result.answer) < 0,
+                      })}
+                    >
+                      {result.answer?.toFixed(4)}%
+                    </span>
+                  )}
+                </h3>
+              </div>
+            )}
           </SectionWrapper>
         </div>
       </div>
-      <SectionWrapper className="pb-5">
-        <FlowTable flowData={flowData} />
-      </SectionWrapper>
+      {/* <p className="text-xl font-bold text-muted-foreground text-center">
+        {(getXirr(prepareXirrValues(flowData.cashflow)) * 100).toFixed(4)}%
+      </p> */}
+      {showFlowChart && (
+        <SectionWrapper className="pb-5">
+          <FlowTable flowData={flowData} />
+        </SectionWrapper>
+      )}
     </>
   );
 }

@@ -1,13 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  calculateCompoundReturn,
-  calculateDate,
-  calculateFraction,
-  calculateRate,
-  calculateValueNPER,
-  calculateYearFraction,
-  validateInputs,
-} from "./formula";
 export const cFrequencyMap = {
   Annual: 1,
   "Semi-Annual": 2,
@@ -61,13 +52,8 @@ const defaultDates = () => {
 };
 
 export const useYtm = () => {
-  const {
-    issue,
-    settlement,
-    maturity,
-    lastCoupon,
-    defaultFrequency,
-  } = defaultDates();
+  const { issue, settlement, maturity, lastCoupon, defaultFrequency } =
+    defaultDates();
   const [faceValue, setFaceValue] = useState<number>(10000);
   const [cleanPrice, setCleanPrice] = useState<number>(9990);
   const [annualCouponRate, setAnnualCouponRate] = useState(8.25);
@@ -109,86 +95,56 @@ export const useYtm = () => {
     status: true,
   });
 
-  const calculate = useCallback(() => {
-    const paymentsPerYear = cFrequencyMap[couponFrequency];
-    const YEARFRAC_Basis = dayCountMap[dayCount];
+  useEffect(() => {
+    const controller = new AbortController();
 
-    const monthsPerPeriod = 12 / paymentsPerYear;
-    const nextCouponDate = calculateDate(
-      lastCouponDate,
-      monthsPerPeriod,
-      settlementDate
-    );
+    const fetchYtm = async () => {
+      try {
+        const res = await fetch("/api/ytm", {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            faceValue,
+            cleanPrice,
+            annualCouponRate,
+            couponFrequency,
+            dayCount,
+            issueDate,
+            settlementDate,
+            maturityDate,
+            lastCouponDate,
+          }),
+        });
 
-    const yearsToMaturity = calculateYearFraction(
-      settlementDate,
-      maturityDate,
-      YEARFRAC_Basis
-    );
+        if (!res.ok) {
+          throw new Error(`Request failed (${res.status})`);
+        }
 
-    const NPER = calculateValueNPER(
-      nextCouponDate,
-      maturityDate,
-      YEARFRAC_Basis,
-      paymentsPerYear
-    );
-    const PMT = (faceValue * annualCouponRate) / paymentsPerYear;
-    const annualCouponAmount = faceValue * YEARFRAC_Basis;
-    const accruedFraction = calculateFraction(
-      lastCouponDate,
-      settlementDate,
-      nextCouponDate,
-      YEARFRAC_Basis
-    );
-    const accruedInterest = (PMT * accruedFraction) / 100;
-    const dirtyPrice = cleanPrice + accruedInterest;
+        const data = (await res.json()) as {
+          result: number | "ERROR";
+          check: string;
+        };
 
-    const check = validateInputs({
-      C10: settlementDate,
-      C11: maturityDate,
-      C12: lastCouponDate,
-      C15: paymentsPerYear,
-      C16: monthsPerPeriod,
-      C17: YEARFRAC_Basis,
-      C18: nextCouponDate,
-      C4: faceValue,
-      C5: cleanPrice,
-      C6: annualCouponRate,
-      C9: issueDate,
-    });
-
-    const Periodic_R_RATE = calculateRate({
-      C26: check,
-      C25: Number(dirtyPrice),
-      C21: Number(PMT / 100),
-      C20: Number(NPER),
-      C4: faceValue,
-    });
-
-    const data = calculateCompoundReturn({
-      C15: paymentsPerYear,
-      C26: check,
-      I9: Periodic_R_RATE,
-    });
-
-    return {
-      result: data * 100,
-      check: check,
-      drived: {
-        Periodic_R_RATE,
-        paymentsPerYear,
-        YEARFRAC_Basis,
-        monthsPerPeriod,
-        nextCouponDate,
-        yearsToMaturity,
-        NPER,
-        PMT,
-        annualCouponAmount,
-        accruedFraction,
-        accruedInterest,
-        dirtyPrice,
-      },
+        setResult({
+          answer: typeof data.result === "number" ? data.result : NaN,
+          status: data.check === "OK",
+        });
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return;
+        console.error(error);
+        setResult({
+          answer: NaN,
+          status: false,
+        });
+      }
     };
+
+    fetchYtm();
+
+    return () => controller.abort();
   }, [
     annualCouponRate,
     cleanPrice,
@@ -200,24 +156,6 @@ export const useYtm = () => {
     maturityDate,
     settlementDate,
   ]);
-
-  useEffect(() => {
-    try {
-      const res = calculate();
-      console.log(res);
-
-      setResult({
-        answer: res.result,
-        status: res.check == "OK",
-      });
-    } catch (error) {
-      console.error(error);
-      setResult({
-        answer: NaN,
-        status: false,
-      });
-    }
-  }, [calculate]);
 
   return {
     result,
