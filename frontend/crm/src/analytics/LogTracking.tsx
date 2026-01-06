@@ -8,6 +8,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 import { useClearOnTabClose } from "./hooks/useClearOnTabClose";
 
+const clearAllCookies = () => {
+  document.cookie.split(";").forEach((cookie) => {
+    const name = cookie.split("=")[0]?.trim();
+    if (!name) return;
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+  });
+};
+
+const PAGE_TRACKING_SESSION_KEY = "md_page_tracking_session";
+const closeSessionEndpoint = (userId: string | number) =>
+  `/api/server/auditlogs/crm/close-session/${userId}`;
+
 type PageView = Partial<
   z.infer<typeof appSchema.auditlogsSchema.PageViewSchema>
 >;
@@ -22,6 +34,7 @@ export const PageTrackingProvider: React.FC<{
   const maxScrollRef = useRef(0);
   const interactionsRef = useRef(0);
   const visibilityTimeRef = useRef<number>(Date.now());
+  const sessionIdRef = useRef<string | null>(null);
   const hasEndedRef = useRef<boolean>(false); // Track if current page view has been ended
   const isEndingRef = useRef<boolean>(false); // Prevent concurrent end calls
   const auditApi = useMemo(
@@ -29,11 +42,34 @@ export const PageTrackingProvider: React.FC<{
     []
   );
 
-  const checkSessionExists = () => {
+  const checkSessionExists = useCallback(() => {
     return cookies.SESSION && cookies.token;
-  };
+  }, [cookies.SESSION, cookies.token]);
 
-  useClearOnTabClose(pathname.startsWith("/dashboard"));
+  // Maintain a stable tracking session id per login
+  useEffect(() => {
+    if (cookies.token) {
+      const existing =
+        sessionIdRef.current || localStorage.getItem(PAGE_TRACKING_SESSION_KEY);
+      if (existing) {
+        sessionIdRef.current = existing;
+      } else {
+        const fresh = `session_${Date.now()}_${Math.random()
+          .toString(36)
+          .slice(2, 9)}`;
+        sessionIdRef.current = fresh;
+        localStorage.setItem(PAGE_TRACKING_SESSION_KEY, fresh);
+      }
+    } else {
+      sessionIdRef.current = null;
+      localStorage.removeItem(PAGE_TRACKING_SESSION_KEY);
+    }
+  }, [cookies.token]);
+
+  useClearOnTabClose(pathname.startsWith("/dashboard"), {
+    userId: cookies.userId,
+    sessionId: sessionIdRef.current || cookies.token,
+  });
 
   useEffect(() => {
     if (pathname.startsWith("/dashboard")) {
@@ -41,7 +77,7 @@ export const PageTrackingProvider: React.FC<{
         window.location.href = "/logout";
       }
     }
-  }, [pathname]);
+  }, [pathname, checkSessionExists]);
 
   // End page view function
   const endPageView = useCallback(async () => {
@@ -52,7 +88,8 @@ export const PageTrackingProvider: React.FC<{
       !cookies.token ||
       hasEndedRef.current ||
       isEndingRef.current
-    ) return;
+    )
+      return;
 
     isEndingRef.current = true;
 
@@ -75,7 +112,7 @@ export const PageTrackingProvider: React.FC<{
     } finally {
       isEndingRef.current = false;
     }
-  }, [currentPageView, cookies.userId, cookies.token, auditApi]);
+  }, [currentPageView]);
 
   // Start page view tracking
   useEffect(() => {
@@ -100,7 +137,7 @@ export const PageTrackingProvider: React.FC<{
           userId: Number(cookies.userId),
           pagePath: pathname,
           entryTime: new Date(),
-          sessionId: cookies.token,
+          sessionId: sessionIdRef.current || cookies.token,
           interactions: 0,
           scrollDepth: 0,
           pageTitle: document.title,
@@ -115,7 +152,7 @@ export const PageTrackingProvider: React.FC<{
         setCurrentPageView({
           ...pageData,
           userId: Number(cookies.userId),
-          sessionId: cookies.token,
+          sessionId: sessionIdRef.current || cookies.token,
         });
       } catch {
         // Silently fail - page tracking should not interrupt user flow
@@ -123,7 +160,7 @@ export const PageTrackingProvider: React.FC<{
     };
 
     startPageView();
-  }, [pathname, cookies.userId, cookies.token]);
+  }, [pathname]);
 
   // Handle page unload (browser/tab close) - use sendBeacon for reliability
   useEffect(() => {
@@ -143,23 +180,45 @@ export const PageTrackingProvider: React.FC<{
         // Use sendBeacon for reliable data sending on page unload
         navigator.sendBeacon(
           "/api/server/auditlogs/crm/page-tracking/end/" +
-          pageViewIdRef.current,
+            pageViewIdRef.current,
           JSON.stringify({
             pageViewId: pageViewIdRef.current,
             exitTime,
             duration,
             scrollDepth: maxScrollRef.current,
             interactions: interactionsRef.current,
-            sessionId: cookies.token,
+            sessionId: sessionIdRef.current || cookies.token,
           })
         );
         hasEndedRef.current = true;
+
+        // Also close tracking session on the backend
+        try {
+          if (cookies.userId) {
+            navigator.sendBeacon(
+              closeSessionEndpoint(cookies.userId),
+              JSON.stringify({
+                sessionId: sessionIdRef.current || cookies.token,
+              })
+            );
+          }
+        } catch {
+          // Silently fail - cleanup should not interrupt user flow
+        }
+
+        try {
+          sessionStorage.clear();
+          localStorage.clear();
+          clearAllCookies();
+        } catch {
+          // Silently fail - cleanup should not interrupt user flow
+        }
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [currentPageView, cookies.userId, cookies.token]);
+  }, [currentPageView]);
 
   // Track scroll depth
   useEffect(() => {
