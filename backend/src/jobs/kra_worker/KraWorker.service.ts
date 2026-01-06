@@ -3,6 +3,7 @@ import { env } from "@packages/config/env";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { makeFullname } from "@utils/generate/generate_username";
 import type {
+  PanModifyKraPayload,
   T_APP_PAN_INQ,
   T_APP_PAN_INQ_DOWNLOAD,
   T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
@@ -17,7 +18,7 @@ import {
   checkIsKraMatched,
   checkKraProcessCheckStatus,
 } from "./CheckKraStatus";
-import { getKraCountry, getKraState, kraMobNo } from "./constent";
+import { getKraCountry, getKraState, kraMobNo, occCode } from "./constent";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 import { cacheStorage } from "@store/redis_store";
 import { removeCountryCode } from "@utils/filters/convert";
@@ -198,9 +199,9 @@ export class KraProcess {
       "_" +
       "ENQUIRY" +
       "_" +
-      (enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_UPDT_STATUS ||
-        enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS ||
-        enquiry.APP_RES_ROOT.APP_PAN_INQ.ERROR);
+      (enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS ||
+        enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS ||
+        enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR);
 
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
@@ -228,6 +229,8 @@ export class KraProcess {
   }
 
   async downloadKraReport({ customer, data, kycdataId }: processPayload) {
+    const kraCachedKey = `KRA_DOWNLOAd:${customer.id}-${kycdataId}`;
+    const TTL_28_HOURS = 72 * 60 * 60; // seconds = 100,800
     const reqTime = new Date().toISOString();
 
     const payload = {
@@ -241,12 +244,9 @@ export class KraProcess {
     };
 
     const report = await this.kraInstance.panDownloadDetailsComplete(payload);
+    await cacheStorage.set(kraCachedKey, report, TTL_28_HOURS); // 28 Hr
 
-    const kraStatus =
-      "DOWNLOAD_KRA_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS_DESC ||
-      report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS ||
-      report.APP_RES_ROOT.APP_PAN_INQ.APP_ERROR_DESC ||
-      report.APP_RES_ROOT.APP_PAN_INQ.ERROR;
+    const kraStatus = `DOWNLOAD_KRA`;
 
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
@@ -277,7 +277,8 @@ export class KraProcess {
     const payload = this.buildRegisterPayload(data, customer);
 
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
-    const kraStatus = "REGISTER_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS;
+    const kraStatus =
+      "REGISTER_" + report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS;
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
       where: {
@@ -304,11 +305,14 @@ export class KraProcess {
 
   async modify({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
+    const kraCachedKey = `KRA_MODIFY_DOWNLOAd:${customer.id}-${kycdataId}`;
+    const downloadedReport: T_APP_PAN_INQ_DOWNLOAD | null =
+      await cacheStorage.get(kraCachedKey);
     const payload = this.buildRegisterPayload(data, customer, true);
 
     const p = payload.APP_PAN_INQ;
 
-    const report = await this.kraInstance.panModifyKraXML({
+    const dataKraPayload: PanModifyKraPayload = {
       panInquiry: {
         APP_COR_ADD1: p.APP_COR_ADD1,
         APP_COR_ADD2: p.APP_COR_ADD2,
@@ -336,9 +340,9 @@ export class KraProcess {
         APP_INCOME: p.APP_INCOME,
         APP_IOP_FLG: p.APP_IOP_FLG,
         APP_IPV_DATE: p.APP_IPV_DATE,
-        APP_IPV_FLAG: p.APP_IPV_FLAG,
+        APP_IPV_FLAG: "N",
         APP_KYC_MODE: p.APP_KYC_MODE,
-        APP_MOBILE_NO: p.APP_MOB_NO,
+        APP_MOBILE_NO: env.KRA_MOB_NO,
         APP_NAME: p.APP_NAME,
         APP_NATIONALITY: p.APP_NATIONALITY,
         APP_NO: p.APP_NO,
@@ -366,15 +370,28 @@ export class KraProcess {
       },
 
       fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
-    });
+    };
+
+    let report = await this.kraInstance.panModifyKraXML(dataKraPayload);
+
+    if (
+      report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS_DESC.includes(
+        "INVALID IN-PERSON VERIFICATION FLAG"
+      )
+    ) {
+      // Retry once with IPV_FLAG as 'N'
+      dataKraPayload.panInquiry.APP_IPV_FLAG =
+        downloadedReport?.APP_RES_ROOT.APP_PAN_INQ.APP_IPV_FLAG || "E";
+      report = await this.kraInstance.panModifyKraXML(dataKraPayload);
+    }
 
     const resTime = new Date().toISOString();
 
     const kraStatus =
       "MODIFY_" +
-      (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUSDT ||
-        report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS ||
-        report.APP_REQ_ROOT.APP_PAN_INQ.ERROR);
+      (report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC ||
+        report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS ||
+        report?.APP_REQ_ROOT?.APP_PAN_INQ.ERROR);
 
     await db.dataBase.kraDataLogs.create({
       data: {
@@ -443,7 +460,7 @@ export class KraProcess {
       APP_KYC_MODE: "5",
       APP_EXMT_ID_PROOF: "01",
       APP_IPV_FLAG: "N",
-      APP_IPV_DATE: formatDate(new Date()),
+      APP_IPV_DATE: "",
       APP_GEN: data.step_1.pan.response.details.pan.gender,
       APP_NAME: makeFullname({ firstName, middleName, lastName }),
       APP_F_NAME: data.step_2.fatSpuName,
@@ -509,7 +526,8 @@ export class KraProcess {
         data.step_1.pan.response.details.aadhaar.id_number.replaceAll("x", ""),
       APP_PER_ADD_DT: "",
       APP_INCOME: "",
-      APP_OCC: "",
+      APP_OCC:
+        occCode[data.step_2.occupationType as keyof typeof occCode] || "",
       APP_OTH_OCC: "",
       APP_POL_CONN: "NA",
       APP_DOC_PROOF: "E",

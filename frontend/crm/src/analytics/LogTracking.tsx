@@ -6,7 +6,6 @@ import { appSchema } from "@root/schema";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
-import { useClearOnTabClose } from "./hooks/useClearOnTabClose";
 
 const clearAllCookies = () => {
   document.cookie.split(";").forEach((cookie) => {
@@ -66,10 +65,10 @@ export const PageTrackingProvider: React.FC<{
     }
   }, [cookies.token]);
 
-  useClearOnTabClose(pathname.startsWith("/dashboard"), {
-    userId: cookies.userId,
-    sessionId: sessionIdRef.current || cookies.token,
-  });
+  // useClearOnTabClose(pathname.startsWith("/dashboard"), {
+  //   userId: cookies.userId,
+  //   sessionId: sessionIdRef.current || cookies.token,
+  // });
 
   useEffect(() => {
     if (pathname.startsWith("/dashboard")) {
