@@ -14,7 +14,7 @@ export function genMediaUrl(mediaPath?: string | null): string {
   const normalizedPath = mediaPath.replace(/^\/+/, "");
 
   // Return the full URL
-  return `${ASSETS_URL}/${normalizedPath}`;
+  return `${ASSETS_URL}/files/${normalizedPath}`;
 }
 
 // utils/generatePageUrl.ts
