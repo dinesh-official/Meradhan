@@ -16,6 +16,9 @@ function BondPagePagination({
   if (totalPages && totalPages < 1) {
     return null;
   }
+  if (totalPages == 1) {
+    return null;
+  }
 
   return (
     <CardPagination

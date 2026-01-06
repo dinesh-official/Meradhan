@@ -49,7 +49,7 @@ function ExploreBondsHeader({
   }, [dounce]);
 
   return (
-    <div className="flex flex-col justify-center items-center bg-primary py-14 lg:py-0 w-full lg:min-h-[420px]">
+    <div className="flex flex-col justify-center items-center bg-primary py-14 w-full ">
       <div className="h-full text-white text-center container">
         <div className="flex flex-col justify-center gap-5 h-full">
           {title && (
@@ -358,10 +358,10 @@ function ExploreBondsHeader({
 
             {/* Clear All Filters Button */}
             {manager.filters?.maturity?.length ||
-            manager.filters?.rating?.length ||
-            manager.filters?.taxation?.length ||
-            manager.filters?.coupon?.length ||
-            manager.filters?.interest?.length ? (
+              manager.filters?.rating?.length ||
+              manager.filters?.taxation?.length ||
+              manager.filters?.coupon?.length ||
+              manager.filters?.interest?.length ? (
               <div
                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
                 onClick={() => {
