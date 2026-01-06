@@ -103,6 +103,7 @@ export type T_APP_PAN_INQ_DOWNLOAD = {
       APP_FATCA_COUNTRY_RES: string;
       APP_FATCA_COUNTRY_CITYZENSHIP: string;
       APP_FATCA_DATE_DECLARATION: string;
+      APP_STATUS_DESC: string;
     };
     FATCA_ADDL_DTLS?: Array<{
       APP_FATCA_ENTITY_PAN: string;

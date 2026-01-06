@@ -24,12 +24,14 @@ import { removeCountryCode } from "@utils/filters/convert";
 
 const cbricsManager = new ParticipantManager();
 
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 export class KraWorkerService {
   private kraProcess = new KraProcess();
 
   async processKra(data: KraWorkerJobData) {
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
-    const TTL_28_HOURS = 28 * 60 * 60; // seconds = 100,800
+    const TTL_28_HOURS = 72 * 60 * 60; // seconds = 100,800
 
     const lastTask = await cacheStorage.get(cachedKey);
     const { customerId, kycDataStoreId } = data;
@@ -80,6 +82,7 @@ export class KraWorkerService {
       // Download Allow -
       if (status == "AVAILABLE") {
         let isMatched = false;
+        await delay(5000); // wait for 5 sec before download
         if (!lastTask) {
           const downloadRes = (await this.kraProcess.downloadKraReport({
             kycdataId: kycDataStoreId,
@@ -92,6 +95,7 @@ export class KraWorkerService {
         }
 
         if (isMatched) {
+          await delay(5000);
           try {
             const cbUser = await cbricsManager.registerParticipant(customerId);
             await db.dataBase.customerProfileDataModel.update({
@@ -131,6 +135,7 @@ export class KraWorkerService {
           }
           return;
         } else {
+          await delay(5000);
           await this.kraProcess.modify({
             kycdataId: kycDataStoreId,
             data: kyc,
@@ -188,6 +193,14 @@ export class KraProcess {
     };
 
     const enquiry = await this.kraInstance.panInquiry(payload);
+    const kraStatus =
+      (lastTask || "INIT") +
+      "_" +
+      "ENQUIRY" +
+      "_" +
+      (enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_UPDT_STATUS ||
+        enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS ||
+        enquiry.APP_RES_ROOT.APP_PAN_INQ.ERROR);
 
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
@@ -195,11 +208,7 @@ export class KraProcess {
         id: customer.id,
       },
       data: {
-        kraStatus:
-          "ENQUIRY" +
-          "_" +
-          (enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_UPDT_STATUS ||
-            enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS),
+        kraStatus: kraStatus,
       },
     });
 
@@ -209,10 +218,7 @@ export class KraProcess {
         responseData: enquiry,
         userId: customer.id,
         kycId: kycdataId,
-        stage:
-          (lastTask || "ENQUIRY") +
-          "_" +
-          enquiry.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
+        stage: kraStatus,
         reqTime,
         resTime,
       },
@@ -235,13 +241,20 @@ export class KraProcess {
     };
 
     const report = await this.kraInstance.panDownloadDetailsComplete(payload);
+
+    const kraStatus =
+      "DOWNLOAD_KRA_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS_DESC ||
+      report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS ||
+      report.APP_RES_ROOT.APP_PAN_INQ.APP_ERROR_DESC ||
+      report.APP_RES_ROOT.APP_PAN_INQ.ERROR;
+
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
       where: {
         id: customer.id,
       },
       data: {
-        kraStatus: "DOWNLOAD_KRA_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
+        kraStatus: kraStatus,
       },
     });
     await db.dataBase.kraDataLogs.create({
@@ -250,7 +263,7 @@ export class KraProcess {
         responseData: report,
         userId: customer.id,
         kycId: kycdataId,
-        stage: "DOWNLOAD_KRA_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
+        stage: kraStatus,
         reqTime,
         resTime,
       },
@@ -264,13 +277,14 @@ export class KraProcess {
     const payload = this.buildRegisterPayload(data, customer);
 
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
+    const kraStatus = "REGISTER_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS;
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
       where: {
         id: customer.id,
       },
       data: {
-        kraStatus: "REGISTER_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
+        kraStatus: kraStatus,
       },
     });
     await db.dataBase.kraDataLogs.create({
@@ -279,7 +293,7 @@ export class KraProcess {
         responseData: report as object,
         userId: customer.id,
         kycId: kycdataId,
-        stage: "REGISTER_" + report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
+        stage: kraStatus,
         reqTime,
         resTime,
       },
@@ -356,16 +370,19 @@ export class KraProcess {
 
     const resTime = new Date().toISOString();
 
+    const kraStatus =
+      "MODIFY_" +
+      (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUSDT ||
+        report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS ||
+        report.APP_REQ_ROOT.APP_PAN_INQ.ERROR);
+
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
         responseData: report as object,
         userId: customer.id,
         kycId: kycdataId,
-        stage:
-          "MODIFY_" +
-          (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUSDT ||
-            report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS),
+        stage: kraStatus,
         reqTime,
         resTime,
       },
@@ -375,10 +392,7 @@ export class KraProcess {
         id: customer.id,
       },
       data: {
-        kraStatus:
-          "MODIFY_" +
-          (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUSDT ||
-            report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS),
+        kraStatus: kraStatus,
       },
     });
     return report;

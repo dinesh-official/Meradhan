@@ -12,7 +12,7 @@ interface StoreFileOptions {
 export async function saveFileOnCloud({
   filePath,
   directory,
-  provider = "Local",
+  provider = "S3",
 }: StoreFileOptions): Promise<string> {
   switch (provider) {
     case "S3": {

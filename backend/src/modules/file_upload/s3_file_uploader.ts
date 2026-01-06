@@ -42,7 +42,7 @@ export async function putFileS3(
     return {
       success: true,
       key: fileName,
-      location: `${env.S3_ENDPOINT.replace("/storage/v1/s3", "")}/storage/v1/object/public/${env.S3_BUCKET_NAME}/${savePath}`,
+      location: `/${savePath}`,
       response,
     };
   } catch (error) {
