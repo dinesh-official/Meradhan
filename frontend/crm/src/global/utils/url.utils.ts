@@ -14,7 +14,7 @@ export function genMediaUrl(mediaPath?: string | null): string {
   const normalizedPath = mediaPath.replace(/^\/+/, "");
 
   // Return the full URL
-  return `${ASSETS_URL}/${normalizedPath}`;
+  return `${ASSETS_URL}/files/${normalizedPath}`;
 }
 
 /**
@@ -25,9 +25,11 @@ export function genMediaUrl(mediaPath?: string | null): string {
  */
 export function encodeId(id: number | string): string {
   const numId = typeof id === "string" ? Number(id) : id;
-  
+
   if (isNaN(numId) || !Number.isInteger(numId) || numId < 0) {
-    throw new Error(`Invalid ID to encode: ${id}. Must be a non-negative integer.`);
+    throw new Error(
+      `Invalid ID to encode: ${id}. Must be a non-negative integer.`
+    );
   }
 
   // Convert number to string and encode to base64url
@@ -45,7 +47,9 @@ export function encodeId(id: number | string): string {
  */
 export function decodeId(encodedId: string): number {
   if (!encodedId || typeof encodedId !== "string") {
-    throw new Error(`Invalid encoded ID: ${encodedId}. Must be a non-empty string.`);
+    throw new Error(
+      `Invalid encoded ID: ${encodedId}. Must be a non-empty string.`
+    );
   }
 
   try {
@@ -55,18 +59,22 @@ export function decodeId(encodedId: string): number {
     while (base64.length % 4) {
       base64 += "=";
     }
-    
+
     // Decode from base64
     const decoded = Buffer.from(base64, "base64").toString("utf-8");
     const numId = Number(decoded);
-    
+
     if (isNaN(numId) || !Number.isInteger(numId) || numId < 0) {
       throw new Error(`Decoded value is not a valid ID: ${decoded}`);
     }
-    
+
     return numId;
   } catch (error) {
-    throw new Error(`Failed to decode ID "${encodedId}": ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to decode ID "${encodedId}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 

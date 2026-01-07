@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import { env } from "@packages/config/env";
-import { pdfUrlToBase64 } from "./helper";
+import {
+  getFileDataUri,
+  getFileUrl,
+  getFileUrlToBuffer,
+  pdfUrlToBase64,
+} from "./helper";
 import { getStateSortCode } from "./states/getStateSortCode";
 import {
   removeLastCommaChunks,
@@ -451,8 +455,8 @@ const getAddress = (data: Root) => {
   };
 };
 
-const getSignatureUrl = (data: Root): string =>
-  env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.sign?.url || "";
+const getSignatureUrl = async (data: Root) =>
+  await getFileDataUri(data.step_1?.sign?.url || "");
 
 const getInvestmentExperience = (data: Root): string => {
   const experienceQuestion = data.step_5?.find((q) =>
@@ -496,7 +500,7 @@ const getPrimaryDemat = (data: Root) => {
 // PAGE MAPPERS
 // ============================================
 
-export const mapDataForPage1 = (data: Root): Page1Props => ({
+export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => ({
   applicationType: "NEW",
   kycType: "NORMAL",
   kycMode: "ONLINE",
@@ -518,8 +522,8 @@ export const mapDataForPage1 = (data: Root): Page1Props => ({
   residentialStatus: data.step_2?.residentialStatus || "",
   occupationType: data.step_2?.occupationType || "",
   verifyWith: "AADHAAR",
-  profilePic: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.face?.url || "",
-  signature: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.sign?.url || "",
+  profilePic: await getFileDataUri(data.step_1?.face?.url || ""),
+  signature: await getFileDataUri(data.step_1?.sign?.url || ""),
   kycNo: "MD" + (10 + (data?.user?.id || 0)).toString() + data.user.id + 1,
 });
 
@@ -589,10 +593,10 @@ export const mapDataForPage3 = (data: Root): Page3Props => ({
   mobile: data.user.phoneNo,
 });
 
-export const mapDataForPage4 = (data: Root): Page4Props => ({
+export const mapDataForPage4 = async (data: Root): Promise<Page4Props> => ({
   date: new Date().toLocaleDateString("en-GB"),
   name: getFullName(data),
-  signatureUrl: getSignatureUrl(data),
+  signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
 });
 
 export const mapDataForPage5 = (data: Root): Page5Props => ({
@@ -603,8 +607,7 @@ export const mapDataForPage5 = (data: Root): Page5Props => ({
 export const mapDataForPage6 = async (data: Root): Promise<Page6Props> => ({
   eAaDhar: data.step_1?.pan?.response?.details?.aadhaar?.file_url
     ? await pdfUrlToBase64(
-        env.NEXT_PUBLIC_BACKEND_HOST_URL +
-          data.step_1?.pan?.response?.details?.aadhaar?.file_url || ""
+        getFileUrl(data.step_1?.pan?.response?.details?.aadhaar?.file_url || "")
       )
     : "",
 });
@@ -612,23 +615,22 @@ export const mapDataForPage6 = async (data: Root): Promise<Page6Props> => ({
 export const mapDataForPage7 = async (data: Root): Promise<Page7Props> => ({
   ePan: data.step_1?.pan?.response?.details?.pan?.file_url
     ? await pdfUrlToBase64(
-        env.NEXT_PUBLIC_BACKEND_HOST_URL +
-          data.step_1?.pan?.response?.details?.pan?.file_url || ""
+        getFileUrl(data.step_1?.pan?.response?.details?.pan?.file_url || "")
       )
     : "",
 });
 
-export const mapDataForPage8 = (data: Root): Page8Props => ({
-  face: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.face?.url || "",
+export const mapDataForPage8 = async (data: Root): Promise<Page8Props> => ({
+  face: await getFileDataUri(data.step_1?.face?.url || ""),
 });
 
-export const mapDataForPage9 = (data: Root): Page9Props => ({
-  sign: env.NEXT_PUBLIC_BACKEND_HOST_URL + data.step_1?.sign?.url || "",
+export const mapDataForPage9 = async (data: Root): Promise<Page9Props> => ({
+  sign: await getFileDataUri(data.step_1?.sign?.url || ""),
 });
 
 export const mapDataForPage10 = (data: Root): Page10Props => ({});
 
-export const mapDataForPage11 = (data: Root): Page11Props => {
+export const mapDataForPage11 = async (data: Root): Promise<Page11Props> => {
   const bank = getPrimaryBank(data);
   const demat = getPrimaryDemat(data);
   const primaryBankAccount =
@@ -653,11 +655,11 @@ export const mapDataForPage11 = (data: Root): Page11Props => {
       isPrimary: true,
       nameAsPerPAN: getFullName(data),
     },
-    signatureUrl: getSignatureUrl(data),
+    signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
   };
 };
 
-export const mapDataForPage12 = (data: Root): Page12Props => ({
+export const mapDataForPage12 = async (data: Root): Promise<Page12Props> => ({
   annualGrossIncome: data.step_2?.annualGrossIncome || " ",
   nameOfStockBroker: " ",
   subBroker: " ",
@@ -668,8 +670,9 @@ export const mapDataForPage12 = (data: Root): Page12Props => ({
   investmentExperience: getInvestmentExperience(data),
 });
 
-export const mapDataForPage13 = (data: Root): Page13Props => {
+export const mapDataForPage13 = async (data: Root): Promise<Page13Props> => {
   const address = getAddress(data);
+
   return {
     introducerName: " ",
     introducerStatus: " ",
@@ -680,11 +683,11 @@ export const mapDataForPage13 = (data: Root): Page13Props => {
     lastName: data.step_1?.pan?.lastName || " ",
     city: address.city,
     state: address.state,
-    signatureUrl: getSignatureUrl(data),
+    signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
   };
 };
 
-export const mapDataForPage14 = (data: Root): Page14Props => {
+export const mapDataForPage14 = async (data: Root): Promise<Page14Props> => {
   const address = getAddress(data);
   return {
     firstName: data.step_1?.pan?.firstName || " ",
@@ -705,7 +708,7 @@ export function splitInto8(str: string): string[] {
   return result;
 }
 
-export const mapDataForPage15 = (data: Root): Page15Props => {
+export const mapDataForPage15 = async (data: Root): Promise<Page15Props> => {
   const bank = getPrimaryBank(data);
   const demat = getPrimaryDemat(data);
 
@@ -716,11 +719,11 @@ export const mapDataForPage15 = (data: Root): Page15Props => {
     firstName: data.step_1?.pan?.firstName || "",
     middleName: data.step_1?.pan?.middleName || "",
     lastName: data.step_1?.pan?.lastName || "",
-    signatureUrl: getSignatureUrl(data),
+    signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
   };
 };
 
-export const mapDataForPage16 = (data: Root): Page16Props => ({
+export const mapDataForPage16 = async (data: Root): Promise<Page16Props> => ({
   banks:
     data.step_3
       ?.filter((b) => !b.isDefault)
@@ -736,7 +739,7 @@ export const mapDataForPage16 = (data: Root): Page16Props => ({
       })) || [],
 });
 
-export const mapDataForPage17 = (data: Root): Page17Props => ({
+export const mapDataForPage17 = async (data: Root): Promise<Page17Props> => ({
   demates:
     data.step_4
       ?.filter((d) => !d.isDefault)
@@ -768,38 +771,38 @@ export const mapDataForPage38 = (data: Root): Page38Props => {
   };
 };
 
-export const mapDataForPage39 = (data: Root): Page39Props => ({
+export const mapDataForPage39 = async (data: Root): Promise<Page39Props> => ({
   firstName: data.step_1?.pan?.firstName || "",
   lastName: data.step_1?.pan?.lastName || "",
   nomineeName: "",
   hasNominee: false,
-  signatureUrl: getSignatureUrl(data),
+  signatureUrl: await getSignatureUrl(data),
 });
 
-export const mapDataForPage42 = (data: Root): Page42Props => ({
+export const mapDataForPage42 = async (data: Root): Promise<Page42Props> => ({
   firstName: data.step_1?.pan?.firstName || "",
   lastName: data.step_1?.pan?.lastName || "",
   uccId: "",
-  signatureUrl: getSignatureUrl(data),
+  signatureUrl: await getSignatureUrl(data),
 });
 
-export const mapDataForPage47 = (data: Root): Page47Props => {
+export const mapDataForPage47 = async (data: Root): Promise<Page47Props> => {
   const address = getAddress(data);
   return {
     name: getFullName(data),
     place: address.city,
     date: new Date().toLocaleDateString("en-GB"),
-    signatureUrl: getSignatureUrl(data),
+    signatureUrl: await getSignatureUrl(data),
   };
 };
 
-export const mapDataForPage48 = (data: Root): Page48Props => {
+export const mapDataForPage48 = async (data: Root): Promise<Page48Props> => {
   const address = getAddress(data);
   return {
     name: getFullName(data),
     place: address.city,
     date: new Date().toLocaleDateString("en-GB"),
-    signatureUrl: getSignatureUrl(data),
+    signatureUrl: await getSignatureUrl(data),
   };
 };
 
@@ -893,23 +896,23 @@ export type AllPagesData = {
 };
 
 export const mapAllPages = async (data: Root): Promise<AllPagesData> => ({
-  page1: mapDataForPage1(data),
+  page1: await mapDataForPage1(data),
   page2: mapDataForPage2(data),
   page3: mapDataForPage3(data),
-  page4: mapDataForPage4(data),
+  page4: await mapDataForPage4(data),
   page5: mapDataForPage5(data),
   page6: await mapDataForPage6(data),
   page7: await mapDataForPage7(data),
-  page8: mapDataForPage8(data),
-  page9: mapDataForPage9(data),
+  page8: await mapDataForPage8(data),
+  page9: await mapDataForPage9(data),
   page10: mapDataForPage10(data),
-  page11: mapDataForPage11(data),
-  page12: mapDataForPage12(data),
-  page13: mapDataForPage13(data),
-  page14: mapDataForPage14(data),
-  page15: mapDataForPage15(data),
-  page16: mapDataForPage16(data),
-  page17: mapDataForPage17(data),
+  page11: await mapDataForPage11(data),
+  page12: await mapDataForPage12(data),
+  page13: await mapDataForPage13(data),
+  page14: await mapDataForPage14(data),
+  page15: await mapDataForPage15(data),
+  page16: await mapDataForPage16(data),
+  page17: await mapDataForPage17(data),
   page18: mapDataForPage18(data),
   page19: mapDataForPage19(data),
   page20: mapDataForPage20(data),
@@ -934,14 +937,14 @@ export const mapAllPages = async (data: Root): Promise<AllPagesData> => ({
   page36_3: mapDataForPage36_3(data),
   page37: mapDataForPage37(data),
   page38: mapDataForPage38(data),
-  page39: mapDataForPage39(data),
+  page39: await mapDataForPage39(data),
   page40: mapDataForPage40(data),
   page41: mapDataForPage41(data),
-  page42: mapDataForPage42(data),
+  page42: await mapDataForPage42(data),
   page43: mapDataForPage43(data),
   page44: mapDataForPage44(data),
   page45: mapDataForPage45(data),
   page46: mapDataForPage46(data),
-  page47: mapDataForPage47(data),
-  page48: mapDataForPage48(data),
+  page47: await mapDataForPage47(data),
+  page48: await mapDataForPage48(data),
 });

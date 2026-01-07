@@ -30,7 +30,7 @@ function Page1(data: {
   | "OTHERS";
   profilePic?: string;
   signature?: string;
-  kycNo: string
+  kycNo: string;
 }) {
   return (
     <View style={tw("px-4")}>
@@ -55,7 +55,6 @@ function Page1(data: {
           </View>
           <View style={tw("w-[19%] ")}></View>
         </View>
-
         {/* // section 2  */}
         <View style={tw(" mx-auto mt-4 flex flex-row")}>
           <View style={tw("w-[26%] ")}>
@@ -262,7 +261,9 @@ function Page1(data: {
             }}
           >
             <Image
-              source={data.profilePic}
+              source={{
+                uri: data.profilePic || "",
+              }}
               style={{
                 width: 110,
                 height: 120,
@@ -273,7 +274,9 @@ function Page1(data: {
             />
           </view>
 
-          <Image source={data.signature} style={tw(`w-auto h-10 mx-auto`)} />
+          <Image source={{
+            uri: data.signature || ""
+          }} style={tw(`w-auto h-10 mx-auto`)} />
         </View>
       </View>
 
