@@ -127,8 +127,6 @@ model RFQNegotiation {
     @@map("rfq_negotiable")
 }
 
-
-
 enum RFQSegment {
     R
     C
@@ -188,6 +186,7 @@ enum NegotiationStatus {
     A
     C
     E
+    X
 }
 
 enum NegotiationConfirmationStatus {

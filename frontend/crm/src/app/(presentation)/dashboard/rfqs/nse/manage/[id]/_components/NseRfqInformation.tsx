@@ -8,6 +8,7 @@ import {
   TradeTypeBadge,
   YieldTypeBadge
 } from "../../../_components/bages/NseRfqBadges";
+import RefqRegType from "../../../participants/_components/RefqRegType";
 
 export interface RfqInformationDataProps {
   isin: string;
@@ -55,7 +56,7 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
 
             <LabelView title="RFQ Size (Value in Crores)">
               <p className="font-medium text-sm">
-                {RfqInformationData.rfqSizeCrores}
+                {(Number(RfqInformationData.rfqSizeCrores) * 10000000).toFixed(2)}
               </p>
             </LabelView>
             <LabelView title="Settlement Date">
@@ -80,9 +81,8 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
               </p>
             </LabelView>
             <LabelView title="Client Registration Type">
-              <p className="font-medium text-sm">
-                {RfqInformationData.clientRegistrationType}
-              </p>
+              <RefqRegType type={RfqInformationData.clientRegistrationType} />
+
             </LabelView>
             <LabelView title="Status">
               <RfqStatusBadge status={`${RfqInformationData.status}`} />

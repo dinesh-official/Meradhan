@@ -1,42 +1,14 @@
 import { Text, View } from "@react-pdf/renderer";
-import React from "react";
 import { tw } from "../MdPdf";
+import type { Page2Props } from "../dataMapper";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
-
-
-type Address = {
-  addressType: "RESIDENTIAL" | "BUSINESS" | "REG_OFFICE" | "UNSPECIFIED";
-  addressLine1: string;
-  addressLine2: string;
-  addressLine3: string;
-  city: string;
-  state: string;
-  district: string;
-  pincode: string;
-  country: string;
-  postOffice: string;
-  stateUTCode: string;
-};
 
 function Page2({
   currentAddress,
   permanentAddress,
   proofWith,
-}: {
-  permanentAddress: Address;
-  currentAddress: {
-    sameAsPermanentAddress: boolean;
-    data: Address;
-  };
-  proofWith?:
-    | "AADHAAR"
-    | "DL"
-    | "VID"
-    | "PASSPORT"
-    | "NREGA"
-    | "NPR"
-    | "OTHERS";
-}) {
+  aadharNo
+}: Page2Props) {
   return (
     <View style={tw("px-4")}>
       <View
@@ -265,11 +237,10 @@ function Page2({
               />
             </View>
             <View>
-              <Text style={tw(`text-xs mt-[1px]`)}>XXXX-XXXX-5868</Text>
+              <Text style={tw(`text-xs mt-[1px]`)}>{aadharNo}</Text>
             </View>
           </View>
           {/* // L2 */}
-
           <View style={tw(`flex flex-row  `)}>
             <View style={tw(`w-[20%]`)}>
               <CheckBoxRow

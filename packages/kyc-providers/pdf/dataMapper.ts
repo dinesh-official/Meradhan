@@ -185,6 +185,7 @@ export type Page1Props = {
   profilePic?: string;
   signature?: string;
   kycNo: string;
+  aadhaarNo: string;
 };
 
 export type AddressType = {
@@ -215,6 +216,7 @@ export type Page2Props = {
     | "NREGA"
     | "NPR"
     | "OTHERS";
+  aadharNo: string;
 };
 
 export type Page3Props = {
@@ -525,6 +527,7 @@ export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => ({
   profilePic: await getFileDataUri(data.step_1?.face?.url || ""),
   signature: await getFileDataUri(data.step_1?.sign?.url || ""),
   kycNo: "MD" + (10 + (data?.user?.id || 0)).toString() + data.user.id + 1,
+  aadhaarNo: data.step_1.pan.response.details.aadhaar.id_number,
 });
 
 export const mapDataForPage2 = (data: Root): Page2Props => {
@@ -583,6 +586,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
       data: isSameAddresss ? permanentAddress : currentAddress,
     },
     proofWith: "AADHAAR",
+    aadharNo: data.step_1.pan.response.details.aadhaar.id_number,
   };
 };
 

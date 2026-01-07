@@ -102,7 +102,7 @@ commonApiRoutes.get("/files-public/*path", async (req, res) => {
   }
 });
 
-commonApiRoutes.get(
+commonApiRoutes.all(
   "/files/*path",
   allowAccessMiddleware("ADMIN", "USER"),
   async (req, res) => {

@@ -373,6 +373,7 @@ export class KraProcess {
     };
 
     let report = await this.kraInstance.panModifyKraXML(dataKraPayload);
+    console.log(report);
 
     if (
       report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
@@ -391,11 +392,12 @@ export class KraProcess {
       "MODIFY_" +
       (report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC ||
         report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS ||
-        report?.APP_REQ_ROOT?.APP_PAN_INQ.ERROR);
+        report?.APP_REQ_ROOT?.APP_PAN_INQ.ERROR ||
+        "REQUEST");
 
     await db.dataBase.kraDataLogs.create({
       data: {
-        requestData: payload,
+        requestData: dataKraPayload as object,
         responseData: report as object,
         userId: customer.id,
         kycId: kycdataId,

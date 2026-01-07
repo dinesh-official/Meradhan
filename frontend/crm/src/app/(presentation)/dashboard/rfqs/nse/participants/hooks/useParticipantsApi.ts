@@ -1,33 +1,38 @@
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react"
+import { useState } from "react";
 
 export const useParticipantsApi = () => {
-    const [search, setSearch] = useState("");
-    const [workflowStatus, setWorkflowStatus] = useState<string | undefined>(undefined)
-    const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("A");
+  const [workflowStatus, setWorkflowStatus] = useState<string | undefined>(
+    undefined
+  );
+  const [page, setPage] = useState(1);
 
-    const participantsApi = new apiGateway.crm.rfq.participants.RfqParticipantsApi(apiClientCaller);
+  const participantsApi =
+    new apiGateway.crm.rfq.participants.RfqParticipantsApi(apiClientCaller);
 
-    const fetchParticipantsQuery = useQuery({
-        queryKey: ["fetchParticipantsQuery", search, workflowStatus, page],
-        queryFn: async () => {
-            return await participantsApi.getAllParticipants({
-                page: page.toString(),
-                search: search,
-                workflowStatus: workflowStatus != "ALL" ? (workflowStatus) : undefined,
-            })
-        }
-    })
+  const fetchParticipantsQuery = useQuery({
+    queryKey: ["fetchParticipantsQuery", search, workflowStatus, page],
+    queryFn: async () => {
+      return await participantsApi.getAllParticipants({
+        page: page.toString(),
+        search: search,
+        workflowStatus: workflowStatus != "ALL" ? workflowStatus : undefined,
+      });
+    },
+  });
 
-    return {
-        fetchParticipantsQuery,
-        state: {
-            search, setSearch,
-            workflowStatus, setWorkflowStatus,
-            page, setPage
-        }
-    }
-
-}
+  return {
+    fetchParticipantsQuery,
+    state: {
+      search,
+      setSearch,
+      workflowStatus,
+      setWorkflowStatus,
+      page,
+      setPage,
+    },
+  };
+};

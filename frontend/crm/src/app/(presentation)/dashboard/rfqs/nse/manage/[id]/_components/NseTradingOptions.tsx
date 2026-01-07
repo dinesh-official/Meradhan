@@ -73,7 +73,7 @@ const NseTradingOptions = (tradingOptionsData: TradingOptionsDataProps) => {
 
             <LabelView title="Minimum Value (Crores)">
               <p className="font-medium text-sm">
-                {tradingOptionsData.minimumValueCrores}
+                {Number(tradingOptionsData.minimumValueCrores).toFixed(2)}
               </p>
             </LabelView>
 
