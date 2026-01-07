@@ -375,7 +375,7 @@ export class KraProcess {
     let report = await this.kraInstance.panModifyKraXML(dataKraPayload);
 
     if (
-      report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS_DESC.includes(
+      report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
         "INVALID IN-PERSON VERIFICATION FLAG"
       )
     ) {

@@ -1,5 +1,6 @@
 export const strApi = process.env.NEXT_PUBLIC_STRAPI_HOST_URL;
 
+import { env } from "@packages/config/env";
 import axios from "axios";
 import { pdf } from "pdf-to-img";
 // Define allowed formats as a TypeScript type
@@ -123,3 +124,50 @@ export async function pdfUrlToBase64(
   // 4. Convert buffer to base64
   return pageBuffer.toString("base64");
 }
+
+export async function getFileUrlToBuffer(file: string) {
+  const token = "meradhan24873284sadsrFAD";
+  const url =
+    env.NEXT_PUBLIC_BACKEND_HOST_URL +
+    "/files-public" +
+    file +
+    `?token=${token}`;
+  const response = await axios.get<ArrayBuffer>(url, {
+    responseType: "arraybuffer",
+  });
+  return Buffer.from(response.data);
+}
+
+export async function getFileDataUri(
+  file: string,
+  mimeType: string = "image/png"
+) {
+  if (!file) return "";
+
+  const token = "meradhan24873284sadsrFAD";
+  const url =
+    env.NEXT_PUBLIC_BACKEND_HOST_URL +
+    "/files-public" +
+    file +
+    `?token=${token}`;
+
+  const response = await axios.get<ArrayBuffer>(url, {
+    responseType: "arraybuffer",
+  });
+
+  const detectedMime =
+    response.headers["content-type"]?.split(";")?.[0] || mimeType;
+  const buffer = Buffer.from(response.data);
+
+  return `data:${detectedMime};base64,${buffer.toString("base64")}`;
+}
+
+export const getFileUrl = (file: string) => {
+  const token = "meradhan24873284sadsrFAD";
+  const url =
+    env.NEXT_PUBLIC_BACKEND_HOST_URL +
+    "/files-public" +
+    file +
+    `?token=${token}`;
+  return url;
+};

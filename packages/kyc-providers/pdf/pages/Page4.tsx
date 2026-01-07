@@ -135,7 +135,9 @@ function Page4(data: {
             </View>
             <View style={tw(`flex flex-col gap-8 justify-center items-center`)}>
               <Image
-                src={data.signatureUrl}
+                source={{
+                  uri: data.signatureUrl,
+                }}
                 style={tw(`w-40 h-24 object-contain`)}
               />
               <Text style={tw(`text-xs flex flex-col gap-5`)}>Signature</Text>
