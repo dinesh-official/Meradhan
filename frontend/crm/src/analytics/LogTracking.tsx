@@ -41,42 +41,42 @@ export const PageTrackingProvider: React.FC<{
     []
   );
 
-  const checkSessionExists = useCallback(() => {
-    return cookies.SESSION && cookies.token;
-  }, [cookies.SESSION, cookies.token]);
+  // const checkSessionExists = useCallback(() => {
+  //   return cookies.SESSION && cookies.token;
+  // }, [cookies.SESSION, cookies.token]);
 
   // Maintain a stable tracking session id per login
-  useEffect(() => {
-    if (cookies.token) {
-      const existing =
-        sessionIdRef.current || localStorage.getItem(PAGE_TRACKING_SESSION_KEY);
-      if (existing) {
-        sessionIdRef.current = existing;
-      } else {
-        const fresh = `session_${Date.now()}_${Math.random()
-          .toString(36)
-          .slice(2, 9)}`;
-        sessionIdRef.current = fresh;
-        localStorage.setItem(PAGE_TRACKING_SESSION_KEY, fresh);
-      }
-    } else {
-      sessionIdRef.current = null;
-      localStorage.removeItem(PAGE_TRACKING_SESSION_KEY);
-    }
-  }, [cookies.token]);
+  // useEffect(() => {
+  //   if (cookies.token) {
+  //     const existing =
+  //       sessionIdRef.current || localStorage.getItem(PAGE_TRACKING_SESSION_KEY);
+  //     if (existing) {
+  //       sessionIdRef.current = existing;
+  //     } else {
+  //       const fresh = `session_${Date.now()}_${Math.random()
+  //         .toString(36)
+  //         .slice(2, 9)}`;
+  //       sessionIdRef.current = fresh;
+  //       localStorage.setItem(PAGE_TRACKING_SESSION_KEY, fresh);
+  //     }
+  //   } else {
+  //     sessionIdRef.current = null;
+  //     localStorage.removeItem(PAGE_TRACKING_SESSION_KEY);
+  //   }
+  // }, [cookies.token]);
 
   // useClearOnTabClose(pathname.startsWith("/dashboard"), {
   //   userId: cookies.userId,
   //   sessionId: sessionIdRef.current || cookies.token,
   // });
 
-  useEffect(() => {
-    if (pathname.startsWith("/dashboard")) {
-      if (!checkSessionExists()) {
-        window.location.href = "/logout";
-      }
-    }
-  }, [pathname, checkSessionExists]);
+  // useEffect(() => {
+  //   if (pathname.startsWith("/dashboard")) {
+  //     if (!checkSessionExists()) {
+  //       window.location.href = "/logout";
+  //     }
+  //   }
+  // }, [pathname, checkSessionExists]);
 
   // End page view function
   const endPageView = useCallback(async () => {
@@ -162,62 +162,62 @@ export const PageTrackingProvider: React.FC<{
   }, [pathname]);
 
   // Handle page unload (browser/tab close) - use sendBeacon for reliability
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (
-        currentPageView &&
-        pageViewIdRef.current &&
-        cookies.userId &&
-        !hasEndedRef.current
-      ) {
-        const exitTime = new Date();
-        const duration = Math.floor(
-          (exitTime.getTime() - currentPageView.entryTime!.getTime()) / 1000
-        );
-        sessionStorage.clear();
-        localStorage.clear();
-        // Use sendBeacon for reliable data sending on page unload
-        navigator.sendBeacon(
-          "/api/server/auditlogs/crm/page-tracking/end/" +
-            pageViewIdRef.current,
-          JSON.stringify({
-            pageViewId: pageViewIdRef.current,
-            exitTime,
-            duration,
-            scrollDepth: maxScrollRef.current,
-            interactions: interactionsRef.current,
-            sessionId: sessionIdRef.current || cookies.token,
-          })
-        );
-        hasEndedRef.current = true;
+  // useEffect(() => {
+  //   const handleBeforeUnload = () => {
+  //     if (
+  //       currentPageView &&
+  //       pageViewIdRef.current &&
+  //       cookies.userId &&
+  //       !hasEndedRef.current
+  //     ) {
+  //       const exitTime = new Date();
+  //       const duration = Math.floor(
+  //         (exitTime.getTime() - currentPageView.entryTime!.getTime()) / 1000
+  //       );
+  //       sessionStorage.clear();
+  //       localStorage.clear();
+  //       // Use sendBeacon for reliable data sending on page unload
+  //       navigator.sendBeacon(
+  //         "/api/server/auditlogs/crm/page-tracking/end/" +
+  //         pageViewIdRef.current,
+  //         JSON.stringify({
+  //           pageViewId: pageViewIdRef.current,
+  //           exitTime,
+  //           duration,
+  //           scrollDepth: maxScrollRef.current,
+  //           interactions: interactionsRef.current,
+  //           sessionId: sessionIdRef.current || cookies.token,
+  //         })
+  //       );
+  //       hasEndedRef.current = true;
 
-        // Also close tracking session on the backend
-        try {
-          if (cookies.userId) {
-            navigator.sendBeacon(
-              closeSessionEndpoint(cookies.userId),
-              JSON.stringify({
-                sessionId: sessionIdRef.current || cookies.token,
-              })
-            );
-          }
-        } catch {
-          // Silently fail - cleanup should not interrupt user flow
-        }
+  //       // Also close tracking session on the backend
+  //       try {
+  //         if (cookies.userId) {
+  //           navigator.sendBeacon(
+  //             closeSessionEndpoint(cookies.userId),
+  //             JSON.stringify({
+  //               sessionId: sessionIdRef.current || cookies.token,
+  //             })
+  //           );
+  //         }
+  //       } catch {
+  //         // Silently fail - cleanup should not interrupt user flow
+  //       }
 
-        try {
-          sessionStorage.clear();
-          localStorage.clear();
-          clearAllCookies();
-        } catch {
-          // Silently fail - cleanup should not interrupt user flow
-        }
-      }
-    };
+  //       try {
+  //         sessionStorage.clear();
+  //         localStorage.clear();
+  //         clearAllCookies();
+  //       } catch {
+  //         // Silently fail - cleanup should not interrupt user flow
+  //       }
+  //     }
+  //   };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [currentPageView]);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
+  //   return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  // }, [currentPageView]);
 
   // Track scroll depth
   useEffect(() => {

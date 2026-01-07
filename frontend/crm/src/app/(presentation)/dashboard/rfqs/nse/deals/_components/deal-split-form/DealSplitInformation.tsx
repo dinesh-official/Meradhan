@@ -25,15 +25,15 @@ const DealSplitInformation = ({
       </LabelView>
 
       <LabelView title="Price">
-        <p className="font-medium text-sm">{data.acceptedPrice}</p>
+        <p className="font-medium text-sm">{Number(data.acceptedPrice).toFixed(2)}</p>
       </LabelView>
 
       <LabelView title="Accrued Interest">
-        <p className="font-medium text-sm">{data.acceptedAccruedInterest}</p>
+        <p className="font-medium text-sm">{Number(data.acceptedAccruedInterest).toFixed(2)}</p>
       </LabelView>
       <div className="col-span-2">
         <LabelView title="Consideration without stamp duty">
-          <p className="font-medium text-sm">{data.acceptedConsideration}</p>
+          <p className="font-medium text-sm">{Number(data.acceptedConsideration).toFixed(2)}</p>
         </LabelView>
       </div>
       <LabelView title="Settlement Date">

@@ -63,14 +63,12 @@ function Page2({
               {permanentAddress.addressLine1}
             </Text>
           </View>
-
           <View style={tw(`text-xs flex flex-row gap-3`)}>
             <Text>Line 2:</Text>
             <Text style={tw(`font-[500]`)}>
               {permanentAddress.addressLine2}
             </Text>
           </View>
-
           <View style={tw(`text-xs flex flex-row gap-3`)}>
             <Text>Line 3:</Text>
             <Text style={tw(`font-[500]`)}>
@@ -243,7 +241,6 @@ function Page2({
             </View>
           </View>
           {/* // L2 */}
-
           <View style={tw(`flex flex-row  `)}>
             <View style={tw(`w-[20%]`)}>
               <CheckBoxRow

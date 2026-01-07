@@ -63,6 +63,7 @@ function BondsView({
         applyFilters={() => {
           bondFilterManager.applyFilters(bondFilterManager.filters);
         }}
+
         rootUrl={pathname}
       />
       <SectionViewWrapper>
@@ -82,6 +83,7 @@ function BondsView({
             pathname={pathname}
             setViewMode={setViewMode}
             viewMode={viewMode}
+
             isFiltered={bondFilterManager.anyFilterApplied}
           />
         )}
@@ -123,6 +125,7 @@ function RenderBondView({
         onReset={() => {
           window.location.href = pathname;
         }}
+        hideBorder={!options.showBondsByCategory}
       />
     );
 
@@ -186,10 +189,10 @@ function RenderBondView({
   );
 }
 
-function NotBondsFound({ onReset }: { onReset: () => void }) {
+function NotBondsFound({ onReset, hideBorder }: { onReset: () => void, hideBorder: boolean }) {
   return (
     <div className="mt-14 container">
-      <div className="flex flex-col justify-center items-center gap-5 pt-14 border-gray-300 border-t text-center">
+      <div className={cn("flex flex-col justify-center items-center gap-5 pt-14 border-gray-300 border-t text-center", hideBorder && "border-t-0 pt-0")}>
         <Image
           src="/static/sad-emoji.svg"
           alt="No Data"

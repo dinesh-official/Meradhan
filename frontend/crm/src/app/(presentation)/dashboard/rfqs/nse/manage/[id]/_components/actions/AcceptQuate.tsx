@@ -101,7 +101,7 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
           <LabelView title="Yield Type">
             <YieldTypeBadge type={`${data.yieldType}`} />
           </LabelView>
-          <LabelView title="Price">{data.price || "Null"}</LabelView>
+          <LabelView title="Price">{data.price || "--"}</LabelView>
           <LabelView title="Buy/Sell">
             <TradeTypeBadge type={`${data.buySell}`} />
           </LabelView>
