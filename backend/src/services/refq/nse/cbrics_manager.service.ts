@@ -466,6 +466,7 @@ export class ParticipantManager {
     if (!user?.nseDataSet?.participant.id) {
       throw new AppError("No participant Found");
     }
+
     const addedBank = await this.cbrics.addUnregisteredBankAccount({
       bankIFSC: bank.ifscCode,
       bankName: bank.bankName,
@@ -473,6 +474,7 @@ export class ParticipantManager {
       bankAccountNo: bank.accountNumber,
       participantCode: user.nseDataSet.participant.loginId,
     });
+
     await this.syncParticipant(userId);
     return addedBank;
   }

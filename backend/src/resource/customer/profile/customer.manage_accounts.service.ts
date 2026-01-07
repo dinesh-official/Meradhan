@@ -61,6 +61,7 @@ export class CustomerManageAccountsService {
         },
       },
     });
+
     try {
       await this.cbricsManager.addBankAccount(customerId, {
         accountNumber: bankDetails.accountNumber,
@@ -308,4 +309,3 @@ export class CustomerManageAccountsService {
     return true;
   }
 }
-

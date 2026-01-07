@@ -4,34 +4,9 @@ import { tw } from "../MdPdf";
 import { CheckBoxRow } from "../elements/CheckBoxRow";
 
 import { formatDate } from "../helper";
+import type { Page1Props } from "../dataMapper";
 
-function Page1(data: {
-  applicationType?: "NEW" | "UPDATE";
-  kycType?: "NORMAL" | "PAN_EXEMPTED";
-  kycMode?: "ONLINE" | "OFFLINE" | "DIGILOCKER";
-  panNo: string;
-  name: string;
-  maidanName?: string;
-  fatherSpouseName?: string;
-  motherName?: string;
-  dateOfBirth: string;
-  gender?: "MALE" | "FEMALE" | "OTHER";
-  maritalStatus?: "SINGLE" | "MARRIED" | "OTHERS";
-  nationality?: "INDIAN" | "OTHERS";
-  residentialStatus?: string;
-  occupationType?: string;
-  verifyWith?:
-  | "AADHAAR"
-  | "DL"
-  | "VID"
-  | "PASSPORT"
-  | "NREGA"
-  | "NPR"
-  | "OTHERS";
-  profilePic?: string;
-  signature?: string;
-  kycNo: string;
-}) {
+function Page1(data: Page1Props) {
   return (
     <View style={tw("px-4")}>
       <View style={tw(" border-b border-gray-200 pb-4 w-[90%] mx-auto")}>
@@ -472,7 +447,7 @@ function Page1(data: {
               />
             </View>
             <View>
-              <Text style={tw(`text-xs mt-[1px]`)}>XXXX-XXXX-5868</Text>
+              <Text style={tw(`text-xs mt-[1px]`)}>{data.aadhaarNo}</Text>
             </View>
           </View>
           {/* // L2 */}
