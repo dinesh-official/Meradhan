@@ -138,13 +138,13 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Orders",
     icon: ShoppingCart,
     module: "orders",
-    // allowOnly: ["view:orders", "edit:orders", "create:orders"],
+    allowOnly: ["view:orders", "edit:orders", "create:orders"],
     children: [
       {
         label: "View Orders",
         path: "/dashboard/orders",
         module: "orders",
-        // allowOnly: ["view:orders"],
+        allowOnly: ["view:orders"],
       },
     ],
   },

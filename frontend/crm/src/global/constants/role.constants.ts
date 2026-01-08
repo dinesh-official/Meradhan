@@ -89,6 +89,11 @@ export const PERMISSIONS: Permission[] = [
   "view:webanalytics",
 
   "view:bonds",
+
+  "view:orders",
+  "create:orders",
+  "edit:orders",
+  "delete:orders",
 ];
 
 // 6️ Map roles to permissions
