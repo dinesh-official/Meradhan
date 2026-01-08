@@ -16,7 +16,7 @@ const DealSplitInformation = ({
 }) => {
   return (
     <div className={cn("gap-5 gap-y-6 grid md:grid-cols-5 my-3", className)}>
-      <LabelView title="Trade NO">
+      <LabelView title="Trade No">
         <p className="font-medium text-sm">{data.tradeNumber}</p>
       </LabelView>
 

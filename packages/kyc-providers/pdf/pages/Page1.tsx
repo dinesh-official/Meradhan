@@ -435,7 +435,7 @@ function Page1(data: Page1Props) {
       </View>
 
       <View style={tw(`w-[90%] mx-auto py-4`)}>
-        <Text style={tw(`text-xs `)}>Proof of Identity (PoI):*</Text>
+        <Text style={tw(`text-xs font-[600] `)}>Proof of Identity (PoI):*</Text>
         {/* // L1 */}
 
         <View style={tw(`flex flex-col gap-2 py-3 pb-3`)}>

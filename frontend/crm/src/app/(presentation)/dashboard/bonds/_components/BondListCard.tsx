@@ -20,6 +20,7 @@ import { PiCurrencyInrBold } from "react-icons/pi";
 
 import { BondInfoLabel } from "./BondInfoLabel";
 import CreditRatingBadge from "./CreaditRatingBadge";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
 export function BondListCard({
   gridMode,
@@ -59,8 +60,8 @@ export function BondListCard({
     onError: (error: AxiosError) => {
       toast.error(
         (error?.response?.data as { message?: string })?.message ||
-          error?.message ||
-          "Failed to update"
+        error?.message ||
+        "Failed to update"
       );
       setAllowForPurchase(data.allowForPurchase ?? false);
     },
@@ -82,27 +83,33 @@ export function BondListCard({
           <div className="flex flex-col gap-3">
             <div className="flex justify-between items-center">
               <p className="text-xl line-clamp-1">{data.bondName}</p>
-              <Link href={`/dashboard/bonds/update/${data.isin}`}>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Edit size={14} />
-                  Edit
-                </Button>
-              </Link>
+              <AllowOnlyView permissions={
+                ['edit:bonds']
+              }>
+                <Link href={`/dashboard/bonds/update/${data.isin}`}>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Edit size={14} />
+                    Edit
+                  </Button>
+                </Link>
+              </AllowOnlyView>
             </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id={`allow-for-purchase-${data.isin}`}
-                checked={allowForPurchase}
-                disabled={updateAllowForPurchase.isPending}
-                onCheckedChange={handleAllowForPurchaseChange}
-              />
-              <Label
-                htmlFor={`allow-for-purchase-${data.isin}`}
-                className="text-sm font-medium cursor-pointer"
-              >
-                Allow for Purchase
-              </Label>
-            </div>
+            <AllowOnlyView permissions={['edit:bonds']} >
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id={`allow-for-purchase-${data.isin}`}
+                  checked={allowForPurchase}
+                  disabled={updateAllowForPurchase.isPending}
+                  onCheckedChange={handleAllowForPurchaseChange}
+                />
+                <Label
+                  htmlFor={`allow-for-purchase-${data.isin}`}
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Allow for Purchase
+                </Label>
+              </div>
+            </AllowOnlyView>
             <div
               className={cn(
                 "flex items-center gap-8 pb-5 border-b",

@@ -103,8 +103,7 @@ function Page10() {
           return (
             <View
               style={tw(
-                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs  ${
-                  i == 0 && "border-t"
+                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs  ${i == 0 && "border-t"
                 }`
               )}
             >
@@ -127,8 +126,7 @@ function Page10() {
           return (
             <View
               style={tw(
-                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs ${
-                  i == 0 && "border-t"
+                `w-[90%]  border-b mx-auto flex flex-row border-gray-200 text-xs ${i == 0 && "border-t"
                 }`
               )}
             >
@@ -191,7 +189,7 @@ function Page10() {
         </View>
         <Text style={{ lineHeight: 1.3, fontSize: 8 }}>
           For any grievances please contact at the above address or email at
-          compliance@meradhan.co & Phone no. +919831311515. In case not
+          compliance@meradhan.co & Phone no. +919845432677. In case not
           satisfied with the response, please contact the concerned exchange at
           NSE: ignse@nse.co.in or contact at 022-26598100 or BSE:
           is@bseindia.com or contact at 022-22728097

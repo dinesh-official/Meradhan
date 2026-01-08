@@ -526,7 +526,7 @@ export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => ({
   verifyWith: "AADHAAR",
   profilePic: await getFileDataUri(data.step_1?.face?.url || ""),
   signature: await getFileDataUri(data.step_1?.sign?.url || ""),
-  kycNo: "MD" + (10 + (data?.user?.id || 0)).toString() + data.user.id + 1,
+  kycNo: "MD" + (100 + (data?.user?.id || 0)),
   aadhaarNo: data.step_1.pan.response.details.aadhaar.id_number,
 });
 

@@ -35,6 +35,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
 // Helper functions to safely extract values from Record<string, unknown>
 const getBondDetail = (
@@ -164,30 +165,32 @@ function OrderDetailsView() {
       </div>
 
       {/* Status Update Section - Admin Only */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground whitespace-nowrap">
-          Update Status:
-        </span>
-        <Select
-          value={order.status}
-          onValueChange={handleStatusChange}
-          disabled={updateStatusMutation.isPending}
-        >
-          <SelectTrigger className="w-[180px] h-9">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PENDING">PENDING</SelectItem>
-            <SelectItem value="SETTLED">SETTLED</SelectItem>
-            <SelectItem value="APPLIED">APPLIED</SelectItem>
-            <SelectItem value="REJECTED">REJECTED</SelectItem>
-          </SelectContent>
-        </Select>
-        {updateStatusMutation.isPending && (
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-        )}
-      </div>
+      <AllowOnlyView permissions={['edit:orders']} >
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground whitespace-nowrap">
+            Update Status:
+          </span>
+          <Select
+            value={order.status}
+            onValueChange={handleStatusChange}
+            disabled={updateStatusMutation.isPending}
+          >
+            <SelectTrigger className="w-[180px] h-9">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PENDING">PENDING</SelectItem>
+              <SelectItem value="SETTLED">SETTLED</SelectItem>
+              <SelectItem value="APPLIED">APPLIED</SelectItem>
+              <SelectItem value="REJECTED">REJECTED</SelectItem>
+            </SelectContent>
+          </Select>
+          {updateStatusMutation.isPending && (
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          )}
+        </div>
 
+      </AllowOnlyView>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Order Information */}
         <div className="lg:col-span-2 space-y-6">
@@ -320,161 +323,161 @@ function OrderDetailsView() {
                     {(hasBondDetail(order.bondDetails, "maturityDate") ||
                       hasBondDetail(order.bondDetails, "redemptionDate") ||
                       hasBondDetail(order.bondDetails, "dateOfAllotment")) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                          Important Dates
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "maturityDate"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Maturity Date
-                              </p>
-                              <p className="font-medium">
-                                {dateTimeUtils.formatDateTime(
-                                  getBondDetailString(
-                                    order.bondDetails,
-                                    "maturityDate"
-                                  )!,
-                                  "DD MMM YYYY"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "redemptionDate"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Redemption Date
-                              </p>
-                              <p className="font-medium">
-                                {dateTimeUtils.formatDateTime(
-                                  getBondDetailString(
-                                    order.bondDetails,
-                                    "redemptionDate"
-                                  )!,
-                                  "DD MMM YYYY"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "dateOfAllotment"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Date of Allotment
-                              </p>
-                              <p className="font-medium">
-                                {dateTimeUtils.formatDateTime(
-                                  getBondDetailString(
-                                    order.bondDetails,
-                                    "dateOfAllotment"
-                                  )!,
-                                  "DD MMM YYYY"
-                                )}
-                              </p>
-                            </div>
-                          )}
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                            Important Dates
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "maturityDate"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Maturity Date
+                                  </p>
+                                  <p className="font-medium">
+                                    {dateTimeUtils.formatDateTime(
+                                      getBondDetailString(
+                                        order.bondDetails,
+                                        "maturityDate"
+                                      )!,
+                                      "DD MMM YYYY"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "redemptionDate"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Redemption Date
+                                  </p>
+                                  <p className="font-medium">
+                                    {dateTimeUtils.formatDateTime(
+                                      getBondDetailString(
+                                        order.bondDetails,
+                                        "redemptionDate"
+                                      )!,
+                                      "DD MMM YYYY"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "dateOfAllotment"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Date of Allotment
+                                  </p>
+                                  <p className="font-medium">
+                                    {dateTimeUtils.formatDateTime(
+                                      getBondDetailString(
+                                        order.bondDetails,
+                                        "dateOfAllotment"
+                                      )!,
+                                      "DD MMM YYYY"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Rating & Status */}
                     {(hasBondDetail(order.bondDetails, "creditRating") ||
                       hasBondDetail(order.bondDetails, "taxStatus") ||
                       hasBondDetail(order.bondDetails, "isListed")) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                          Rating & Status
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                            Rating & Status
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "creditRating"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Credit Rating
+                                  </p>
+                                  <p className="font-medium">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "creditRating"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "taxStatus"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Tax Status
+                                  </p>
+                                  <p className="font-medium">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "taxStatus"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {hasBondDetail(order.bondDetails, "isListed") && (
+                              <div>
+                                <p className="text-sm text-muted-foreground">
+                                  Listing Status
+                                </p>
+                                <Badge variant="outline">
+                                  {getBondDetailString(
+                                    order.bondDetails,
+                                    "isListed"
+                                  )}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
                           {getBondDetailString(
                             order.bondDetails,
-                            "creditRating"
+                            "creditRatingInfo"
                           ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Credit Rating
-                              </p>
-                              <p className="font-medium">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "creditRating"
-                                )}
-                              </p>
-                            </div>
-                          )}
+                              <div className="mt-3">
+                                <p className="text-sm text-muted-foreground">
+                                  Credit Rating Info
+                                </p>
+                                <p className="font-medium text-sm">
+                                  {getBondDetailString(
+                                    order.bondDetails,
+                                    "creditRatingInfo"
+                                  )}
+                                </p>
+                              </div>
+                            )}
                           {getBondDetailString(
                             order.bondDetails,
-                            "taxStatus"
+                            "ratingAgencyName"
                           ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Tax Status
-                              </p>
-                              <p className="font-medium">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "taxStatus"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {hasBondDetail(order.bondDetails, "isListed") && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Listing Status
-                              </p>
-                              <Badge variant="outline">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "isListed"
-                                )}
-                              </Badge>
-                            </div>
-                          )}
+                              <div className="mt-3">
+                                <p className="text-sm text-muted-foreground">
+                                  Rating Agency
+                                </p>
+                                <p className="font-medium">
+                                  {getBondDetailString(
+                                    order.bondDetails,
+                                    "ratingAgencyName"
+                                  )}
+                                </p>
+                              </div>
+                            )}
                         </div>
-                        {getBondDetailString(
-                          order.bondDetails,
-                          "creditRatingInfo"
-                        ) && (
-                          <div className="mt-3">
-                            <p className="text-sm text-muted-foreground">
-                              Credit Rating Info
-                            </p>
-                            <p className="font-medium text-sm">
-                              {getBondDetailString(
-                                order.bondDetails,
-                                "creditRatingInfo"
-                              )}
-                            </p>
-                          </div>
-                        )}
-                        {getBondDetailString(
-                          order.bondDetails,
-                          "ratingAgencyName"
-                        ) && (
-                          <div className="mt-3">
-                            <p className="text-sm text-muted-foreground">
-                              Rating Agency
-                            </p>
-                            <p className="font-medium">
-                              {getBondDetailString(
-                                order.bondDetails,
-                                "ratingAgencyName"
-                              )}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      )}
 
                     {/* Payment & Interest Details */}
                     {(hasBondDetail(order.bondDetails, "interestPaymentMode") ||
@@ -482,135 +485,135 @@ function OrderDetailsView() {
                         order.bondDetails,
                         "interestPaymentFrequency"
                       )) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                          Payment & Interest
-                        </h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "interestPaymentMode"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Interest Payment Mode
-                              </p>
-                              <p className="font-medium">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "interestPaymentMode"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "interestPaymentFrequency"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Payment Frequency
-                              </p>
-                              <p className="font-medium">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "interestPaymentFrequency"
-                                )}
-                              </p>
-                            </div>
-                          )}
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                            Payment & Interest
+                          </h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "interestPaymentMode"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Interest Payment Mode
+                                  </p>
+                                  <p className="font-medium">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "interestPaymentMode"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "interestPaymentFrequency"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Payment Frequency
+                                  </p>
+                                  <p className="font-medium">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "interestPaymentFrequency"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Additional Information */}
                     {(hasBondDetail(order.bondDetails, "description") ||
                       hasBondDetail(order.bondDetails, "instrumentName") ||
                       hasBondDetail(order.bondDetails, "sectorName") ||
                       hasBondDetail(order.bondDetails, "categories")) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                          Additional Information
-                        </h4>
-                        <div className="space-y-3">
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "description"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Description
-                              </p>
-                              <p className="font-medium text-sm">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "description"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "instrumentName"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Instrument Name
-                              </p>
-                              <p className="font-medium text-sm">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "instrumentName"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "sectorName"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Sector
-                              </p>
-                              <p className="font-medium">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "sectorName"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {Array.isArray(
-                            getBondDetail(order.bondDetails, "categories")
-                          ) &&
-                            (
-                              getBondDetail(
-                                order.bondDetails,
-                                "categories"
-                              ) as unknown[]
-                            ).length > 0 && (
-                              <div>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  Categories
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                  {(
-                                    getBondDetail(
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                            Additional Information
+                          </h4>
+                          <div className="space-y-3">
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "description"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Description
+                                  </p>
+                                  <p className="font-medium text-sm">
+                                    {getBondDetailString(
                                       order.bondDetails,
-                                      "categories"
-                                    ) as unknown[]
-                                  ).map((cat: unknown, idx: number) => (
-                                    <Badge key={idx} variant="secondary">
-                                      {String(cat)}
-                                    </Badge>
-                                  ))}
+                                      "description"
+                                    )}
+                                  </p>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "instrumentName"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Instrument Name
+                                  </p>
+                                  <p className="font-medium text-sm">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "instrumentName"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "sectorName"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Sector
+                                  </p>
+                                  <p className="font-medium">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "sectorName"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {Array.isArray(
+                              getBondDetail(order.bondDetails, "categories")
+                            ) &&
+                              (
+                                getBondDetail(
+                                  order.bondDetails,
+                                  "categories"
+                                ) as unknown[]
+                              ).length > 0 && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground mb-2">
+                                    Categories
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {(
+                                      getBondDetail(
+                                        order.bondDetails,
+                                        "categories"
+                                      ) as unknown[]
+                                    ).map((cat: unknown, idx: number) => (
+                                      <Badge key={idx} variant="secondary">
+                                        {String(cat)}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Registrar & Trustee Details */}
                     {(hasBondDetail(order.bondDetails, "registrarDetails") ||
@@ -619,62 +622,62 @@ function OrderDetailsView() {
                         order.bondDetails,
                         "certificateNumbers"
                       )) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                          Registrar & Trustee
-                        </h4>
-                        <div className="space-y-3">
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "registrarDetails"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Registrar Details
-                              </p>
-                              <p className="font-medium text-sm">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "registrarDetails"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "debentureTrustee"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Debenture Trustee
-                              </p>
-                              <p className="font-medium text-sm">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "debentureTrustee"
-                                )}
-                              </p>
-                            </div>
-                          )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "certificateNumbers"
-                          ) && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Certificate Numbers
-                              </p>
-                              <p className="font-medium text-sm">
-                                {getBondDetailString(
-                                  order.bondDetails,
-                                  "certificateNumbers"
-                                )}
-                              </p>
-                            </div>
-                          )}
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                            Registrar & Trustee
+                          </h4>
+                          <div className="space-y-3">
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "registrarDetails"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Registrar Details
+                                  </p>
+                                  <p className="font-medium text-sm">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "registrarDetails"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "debentureTrustee"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Debenture Trustee
+                                  </p>
+                                  <p className="font-medium text-sm">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "debentureTrustee"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "certificateNumbers"
+                            ) && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Certificate Numbers
+                                  </p>
+                                  <p className="font-medium text-sm">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "certificateNumbers"
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Options & Other Details */}
                     {(hasBondDetail(
@@ -690,70 +693,70 @@ function OrderDetailsView() {
                         "defaultedInRedemption"
                       ) ||
                       hasBondDetail(order.bondDetails, "remarks")) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                          Options & Other Details
-                        </h4>
-                        <div className="space-y-3">
-                          {(() => {
-                            const value = getBondDetailString(
-                              order.bondDetails,
-                              "putCallOptionDetails"
-                            );
-                            return value && value.trim() ? (
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Put/Call Option Details
-                                </p>
-                                <p className="font-medium text-sm">{value}</p>
-                              </div>
-                            ) : null;
-                          })()}
-                          {(() => {
-                            const value = getBondDetailString(
-                              order.bondDetails,
-                              "physicalSecurityAddress"
-                            );
-                            return value && value.trim() ? (
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Physical Security Address
-                                </p>
-                                <p className="font-medium text-sm">{value}</p>
-                              </div>
-                            ) : null;
-                          })()}
-                          {(() => {
-                            const value = getBondDetailString(
-                              order.bondDetails,
-                              "defaultedInRedemption"
-                            );
-                            return value && value.trim() ? (
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Defaulted in Redemption
-                                </p>
-                                <p className="font-medium text-sm">{value}</p>
-                              </div>
-                            ) : null;
-                          })()}
-                          {(() => {
-                            const value = getBondDetailString(
-                              order.bondDetails,
-                              "remarks"
-                            );
-                            return value && value.trim() ? (
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Remarks
-                                </p>
-                                <p className="font-medium text-sm">{value}</p>
-                              </div>
-                            ) : null;
-                          })()}
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                            Options & Other Details
+                          </h4>
+                          <div className="space-y-3">
+                            {(() => {
+                              const value = getBondDetailString(
+                                order.bondDetails,
+                                "putCallOptionDetails"
+                              );
+                              return value && value.trim() ? (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Put/Call Option Details
+                                  </p>
+                                  <p className="font-medium text-sm">{value}</p>
+                                </div>
+                              ) : null;
+                            })()}
+                            {(() => {
+                              const value = getBondDetailString(
+                                order.bondDetails,
+                                "physicalSecurityAddress"
+                              );
+                              return value && value.trim() ? (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Physical Security Address
+                                  </p>
+                                  <p className="font-medium text-sm">{value}</p>
+                                </div>
+                              ) : null;
+                            })()}
+                            {(() => {
+                              const value = getBondDetailString(
+                                order.bondDetails,
+                                "defaultedInRedemption"
+                              );
+                              return value && value.trim() ? (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Defaulted in Redemption
+                                  </p>
+                                  <p className="font-medium text-sm">{value}</p>
+                                </div>
+                              ) : null;
+                            })()}
+                            {(() => {
+                              const value = getBondDetailString(
+                                order.bondDetails,
+                                "remarks"
+                              );
+                              return value && value.trim() ? (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Remarks
+                                  </p>
+                                  <p className="font-medium text-sm">{value}</p>
+                                </div>
+                              ) : null;
+                            })()}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 </div>
               )}

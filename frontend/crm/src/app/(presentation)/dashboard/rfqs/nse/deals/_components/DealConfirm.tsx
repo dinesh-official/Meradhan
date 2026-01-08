@@ -50,7 +50,7 @@ const DealConfirmPopup = ({
     },
 
     onError: (error) => {
-      setOpen(false);
+      setTimeout(() => setOpen(false), 1000)
       // Properly type guard for ApiError
       if (error instanceof ApiError) {
         Swal.fire({
