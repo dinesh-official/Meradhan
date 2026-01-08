@@ -110,7 +110,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "view:sales",
     "create:sales",
     "edit:sales",
-    "view:rfq",
+    // "view:rfq",
     //  'create:rfq', 'edit:rfq',
     "view:reports",
     "view:bonds",
