@@ -15,7 +15,7 @@ const page = async ({
     <Workspace>
       <div className="flex flex-col gap-5">
         <PageInfoBar
-          title="Rfq Details"
+          title="RFQ Details"
           description="a small detachment of troops or police."
           showBack
         />

@@ -80,6 +80,7 @@ export class PaymentService {
       // method: "netbanking",
       bank_account: bank,
     };
+    console.log(options);
 
     try {
       logger.logInfo(

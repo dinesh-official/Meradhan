@@ -158,6 +158,7 @@ export function useRazorpay() {
         key,
         amount: Math.round(amount * 100),
         currency,
+
         order_id: paymentOrderId,
         name: "MeraDhan",
         image: "https://www.meradhan.co/favicon/apple-icon-76x76.png",
