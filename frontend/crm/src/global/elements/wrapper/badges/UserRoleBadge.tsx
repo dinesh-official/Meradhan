@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 function getStatusClass(role: string) {
   switch (role) {
     case "ADMIN":
-      return "bg-red-100 text-red-700 ";
+      return "bg-orange-100 text-orange-700 ";
     case "SALES":
       return "bg-green-100 text-green-700 ";
     case "SUPPORT":
@@ -21,11 +21,11 @@ function getStatusClass(role: string) {
   }
 }
 
-export default function UserRoleBadge({ value }: { value: string }) {
+export default function UserRoleBadge({ value, className }: { value: string, className?: string }) {
   const cls = useMemo(() => getStatusClass(value), [value]);
 
   return (
-    <Badge className={cn(`px-2 rounded text-xs font-medium`, cls)}>
+    <Badge className={cn(`px-2 rounded text-xs font-medium`, cls, className)}>
       {value.replaceAll("_", " ")}
     </Badge>
   );

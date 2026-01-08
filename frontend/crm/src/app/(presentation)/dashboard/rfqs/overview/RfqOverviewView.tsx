@@ -4,6 +4,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import SettleOrdersView from "../nse/settle-orders/SettleOrdersView";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
 function RfqOverviewView() {
   return (
@@ -12,11 +13,13 @@ function RfqOverviewView() {
         title="RFQ Management"
         description="Manage Request for Quotes and NSE submissions"
         actions={
-          <Link href={`/dashboard/leads/create`}>
-            <Button>
-              <Plus /> Create New RFQ
-            </Button>
-          </Link>
+          <AllowOnlyView permissions={['create:rfq']}>
+            <Link href={`/dashboard/leads/create`}>
+              <Button>
+                <Plus /> Create New RFQ
+              </Button>
+            </Link>
+          </AllowOnlyView>
         }
       />
       {/* <div className="gap-5 grid grid-cols-4">

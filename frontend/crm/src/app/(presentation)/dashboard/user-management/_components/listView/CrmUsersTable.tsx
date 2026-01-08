@@ -26,17 +26,14 @@ function UsersTable({ data, pageSize, isLoading }: UsersTableProps) {
 
           cell: (row) => {
             return (
-              <div className="flex  justify-start gap-4 items-center">
-                <p className="text-md">{row.name}</p>
+              <div className="flex  justify-start gap-1 flex-col items-start">
+                <p className="text-md">{row.name} <UserRoleBadge value={row.role} className="p-0 bg-transparent" /> </p>
+                <p className="text-xs" >{row.email}</p>
               </div>
             );
           },
         },
-        {
-          key: "email",
-          label: "Email",
-          cell: (row) => <span className="lowercase">{row.email}</span>,
-        },
+
         { key: "phoneNo", label: "Phone" },
         {
           key: "accountStatus",
@@ -53,34 +50,34 @@ function UsersTable({ data, pageSize, isLoading }: UsersTableProps) {
                 {!row.lastLogin
                   ? "NO Login"
                   : dateTimeUtils.formatDateTime(
-                      row.lastLogin,
-                      "DD MMMM YYYY hh:mm AA"
-                    )}
+                    row.lastLogin,
+                    "DD MMMM YYYY hh:mm AA"
+                  )}
               </p>
             );
           },
         },
-        {
-          key: "role",
-          label: "Role",
-          cell: (row) => <UserRoleBadge value={row.role} />,
-        },
+        // {
+        //   key: "role",
+        //   label: "Role",
+        //   cell: (row) => <UserRoleBadge value={row.role} />,
+        // },
         // { key: "createdBy", label: "Created By" },
         {
           key: "createdAt",
-          label: "Created At",
+          label: "Created/Update At",
           type: "datetime",
           cell(row) {
             return (
               <div className="text-sm">
                 <p>
-                  {dateTimeUtils.formatDateTime(
+                  Create:  {dateTimeUtils.formatDateTime(
                     row.createdAt,
                     "DD MMMM YYYY hh:mm AA"
                   )}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {dateTimeUtils.formatDateTime(
+                  Update: {dateTimeUtils.formatDateTime(
                     row.updatedAt,
                     "DD MMMM YYYY hh:mm AA"
                   )}

@@ -44,7 +44,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: "Leads",
     icon: Users,
-    allowOnly: ["create:leads", "edit:leads", "view:leads", "delete:leads"],
+    allowOnly: ["view:leads"],
     path: "/dashboard/leads",
     // children: [
     //   {
@@ -65,7 +65,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: "Customers",
     icon: FileText,
-    allowOnly: ["view:customer", "create:customer"],
+    allowOnly: ["view:customer"],
     path: "/dashboard/customers",
     // children: [
     //   {
@@ -87,7 +87,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "RFQ Management",
     icon: ClipboardList,
     module: "rfq",
-    allowOnly: ["view:rfq", "edit:rfq", "create:rfq"],
+    allowOnly: ["view:rfq"],
     children: [
       {
         label: "Overview",
@@ -97,7 +97,7 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         label: "NSE RFQs",
-        allowOnly: ["view:rfq", "edit:rfq"],
+        allowOnly: ["view:rfq"],
         children: [
           {
             label: "Manage RFQs",
@@ -115,7 +115,7 @@ export const NAV_ITEMS: NavItem[] = [
             label: "Settle Orders",
             path: "/dashboard/rfqs/nse/settle-orders",
             module: "rfq",
-            allowOnly: ["edit:rfq"],
+            allowOnly: ["view:rfq"],
           },
           {
             label: "Participants",

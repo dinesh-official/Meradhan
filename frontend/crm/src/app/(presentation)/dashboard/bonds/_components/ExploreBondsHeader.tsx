@@ -23,6 +23,7 @@ import { BondsFilterHook } from "../_hooks/useBondsFilters";
 import { useRouter } from "nextjs-toploader/app";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
 function ExploreBondsHeader({
   manager,
@@ -68,12 +69,14 @@ function ExploreBondsHeader({
               )}
               {desc && <p>{desc}</p>}
             </div>
-            <Link href="/dashboard/bonds/create">
-              <Button className="gap-2">
-                <Plus size={16} />
-                Create Bond
-              </Button>
-            </Link>
+            <AllowOnlyView permissions={['create:bonds']} >
+              <Link href="/dashboard/bonds/create">
+                <Button className="gap-2">
+                  <Plus size={16} />
+                  Create Bond
+                </Button>
+              </Link>
+            </AllowOnlyView>
           </div>
           <div className="relative">
             <Input
@@ -369,10 +372,10 @@ function ExploreBondsHeader({
 
             {/* Clear All Filters Button */}
             {manager.filters?.maturity?.length ||
-            manager.filters?.rating?.length ||
-            manager.filters?.taxation?.length ||
-            manager.filters?.coupon?.length ||
-            manager.filters?.interest?.length ? (
+              manager.filters?.rating?.length ||
+              manager.filters?.taxation?.length ||
+              manager.filters?.coupon?.length ||
+              manager.filters?.interest?.length ? (
               <div
                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
                 onClick={() => {

@@ -4,10 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export const useParticipantsApi = () => {
-  const [search, setSearch] = useState("A");
-  const [workflowStatus, setWorkflowStatus] = useState<string | undefined>(
-    undefined
-  );
+  const [search, setSearch] = useState("");
+  const [workflowStatus, setWorkflowStatus] = useState<string | undefined>("1");
   const [page, setPage] = useState(1);
 
   const participantsApi =
