@@ -30,5 +30,10 @@ crmUsersRoutes.get(
   allowAccessMiddleware("ADMIN"),
   (req, res) => controller.findManyUser(req, res)
 );
+crmUsersRoutes.get(
+  "/api/crm/users/summary",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.getSummary(req, res)
+);
 
 export default crmUsersRoutes;

@@ -5,6 +5,7 @@ import type {
   FindLeadsResponse,
   GetNewLeadByIdResponse,
   UpdateNewLeadByIDResponse,
+  LeadSourceSummaryResponse,
 } from "../../../types/response.types";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
@@ -36,6 +37,10 @@ export interface TCrmLeadInterface {
     query?: z.infer<(typeof appSchema.crm.leads)["findManyLeadsSchema"]>,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<FindLeadsResponse>>;
+
+  getLeadSourceSummary(
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<LeadSourceSummaryResponse>>;
 }
 
 export class CrmLeadApi implements TCrmLeadInterface {
@@ -93,5 +98,14 @@ export class CrmLeadApi implements TCrmLeadInterface {
       params: { ...(config?.params ?? {}), ...(query ?? {}) },
     };
     return this.apiClient.get<FindLeadsResponse>(`crm/leads`, mergedConfig);
+  }
+
+  async getLeadSourceSummary(
+    config?: AxiosRequestConfig
+  ): ReturnType<TCrmLeadInterface["getLeadSourceSummary"]> {
+    return this.apiClient.get<LeadSourceSummaryResponse>(
+      `/crm/leads/summary`,
+      config
+    );
   }
 }

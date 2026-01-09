@@ -20,6 +20,58 @@ export type BaseResponseData<T = undefined> = {
   message: string;
   responseData: T;
 };
+
+export type DashboardMetric = {
+  total: number;
+  currentWindow: number;
+  previousWindow: number;
+  trendPct: number;
+};
+
+export type DashboardRateMetric = DashboardMetric & {
+  ratePct: number;
+  totalUsers: number;
+};
+
+export type DashboardSummaryPayload = {
+  activeLeads: DashboardMetric;
+  completedProjects: DashboardMetric;
+  userDropRate: DashboardRateMetric;
+  userGainRate: DashboardRateMetric;
+};
+
+export type DashboardSummaryResponse =
+  BaseResponseData<DashboardSummaryPayload>;
+export type SalesPerformancePoint = {
+  date: string;
+  current: number;
+  prev: number;
+};
+export type SalesPerformanceResponse = BaseResponseData<{
+  rangeDays: number;
+  data: SalesPerformancePoint[];
+}>;
+
+export type CrmUsersSummaryResponse = BaseResponseData<{
+  totalUsers: number;
+  activeUsers: number;
+  adminUsers: number;
+  salesUsers: number;
+}>;
+
+export type LeadSourceSummary = {
+  source:
+    | "WEBSITE"
+    | "REFERRAL"
+    | "SOCIAL"
+    | "ADVERTISEMENT"
+    | "EVENT"
+    | "COLD_CALL"
+    | "EMAIL"
+    | "OTHER";
+  count: number;
+};
+export type LeadSourceSummaryResponse = BaseResponseData<LeadSourceSummary[]>;
 // auth/login-with-otp
 export type LoginWithOtpDataResponse = BaseResponseData<{
   token: string;

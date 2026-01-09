@@ -1,6 +1,7 @@
 import apiServerCaller from "@/core/connection/apiServerCaller";
 
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import apiGateway from "@root/apiGateway";
 import { validateBondsFilters } from "./_utils/filter";
 import BondsView from "./BondsView";
@@ -29,14 +30,16 @@ async function BondPage({
   });
 
   return (
-    <Workspace>
-      <BondsView
-        pathname="/bonds"
-        category="all"
-        filter={queryFilter}
-        bondsData={responseData}
-      />
-    </Workspace>
+    <AllowOnlyView permissions={["view:bonds"]}>
+      <Workspace>
+        <BondsView
+          pathname="/bonds"
+          category="all"
+          filter={queryFilter}
+          bondsData={responseData}
+        />
+      </Workspace>
+    </AllowOnlyView>
   );
 }
 

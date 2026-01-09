@@ -4,6 +4,7 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type z from "zod";
 import type {
   CreateUsersResponse,
+  CrmUsersSummaryResponse,
   DeleteUserResponse,
   FindManyUsersResponse,
   UpdateUserResponse,
@@ -36,6 +37,10 @@ export interface TCrmUsersInterface {
     query?: z.infer<(typeof appSchema.crm.user)["findManyUserSchema"]>,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<FindManyUsersResponse>>;
+
+  getSummary(
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<CrmUsersSummaryResponse>>;
 }
 
 export class CrmUsersApi implements TCrmUsersInterface {
@@ -87,6 +92,15 @@ export class CrmUsersApi implements TCrmUsersInterface {
     return this.apiClient.get<FindManyUsersResponse>(
       "/crm/users",
       mergedConfig
+    );
+  }
+
+  async getSummary(
+    config?: AxiosRequestConfig
+  ): ReturnType<TCrmUsersInterface["getSummary"]> {
+    return this.apiClient.get<CrmUsersSummaryResponse>(
+      "/crm/users/summary",
+      config
     );
   }
 }
