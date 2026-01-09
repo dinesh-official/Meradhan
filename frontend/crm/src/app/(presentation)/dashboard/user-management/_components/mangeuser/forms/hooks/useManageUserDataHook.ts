@@ -48,7 +48,7 @@ export const useManageUserDataHook = (initial: UserFormData = initUserData) => {
   /** ✅ Validate a single field using Zod schema */
   const validateField = useCallback(
     <K extends keyof UserFormData>(key: K, value: UserFormData[K]) => {
-      const fieldSchema = userFormSchema.pick({ [key]: true });
+      const fieldSchema = userFormSchema.shape[key];
       try {
         fieldSchema.parse({ [key]: value });
         setErrors((prev) => {

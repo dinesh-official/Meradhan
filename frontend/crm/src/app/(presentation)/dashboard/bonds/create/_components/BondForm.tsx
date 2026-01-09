@@ -32,13 +32,18 @@ import { appSchema } from "@root/schema";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "nextjs-toploader/app";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
 
 type BondFormData = z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>;
+const bondSchema = appSchema.bonds
+  .bondCreateUpdateSchema as unknown as z.ZodType<BondFormData>;
+const bondResolver = (
+  zodResolver as unknown as (schema: z.ZodTypeAny) => Resolver<BondFormData>
+)(bondSchema as z.ZodTypeAny);
 type BondDetailsResponse = {
   id: number;
   isin: string;
@@ -109,8 +114,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiClientCaller);
   const isUpdateMode = !!isin && !!initialData;
 
-  const form = useForm({
-    resolver: zodResolver(appSchema.bonds.bondCreateUpdateSchema),
+  const form = useForm<BondFormData>({
+    resolver: bondResolver,
     defaultValues: initialData
       ? {
           isin: initialData.isin,
@@ -647,7 +652,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as string)
+                              ? new Date(field.value as unknown as string)
                                   .toISOString()
                                   .split("T")[0]
                               : ""
@@ -676,7 +681,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as string)
+                              ? new Date(field.value as unknown as string)
                                   .toISOString()
                                   .split("T")[0]
                               : ""
@@ -705,7 +710,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as string)
+                              ? new Date(field.value as unknown as string)
                                   .toISOString()
                                   .split("T")[0]
                               : ""
@@ -895,7 +900,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as string)
+                              ? new Date(field.value as unknown as string)
                                   .toISOString()
                                   .split("T")[0]
                               : ""

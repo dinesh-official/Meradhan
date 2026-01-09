@@ -6,7 +6,6 @@ import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { BasicDetailsFormData } from "./basicDetails";
 import { basicDetailsSchema } from "./basicDetails.schema";
 
-
 /** Default initial Basic Details form values */
 export const initBasicData: BasicDetailsFormData = {
   loginId: "",
@@ -48,7 +47,7 @@ export const useBasicFormDataHook = (
     key: K,
     value: BasicDetailsFormData[K]
   ) => {
-    const fieldSchema = basicDetailsSchema.pick({ [key]: true });
+    const fieldSchema = basicDetailsSchema.shape[key];
     try {
       fieldSchema.parse({ [key]: value });
       // If valid → clear error

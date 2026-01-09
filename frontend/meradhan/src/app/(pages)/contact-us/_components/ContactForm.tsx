@@ -15,7 +15,14 @@ import ContactInput from "./ContactInput";
 import Swal from "sweetalert2";
 
 type ContactFormValues = z.infer<typeof appSchema.contact.contactSchema>;
+const contactSchema = appSchema.contact
+  .contactSchema as unknown as z.ZodType<ContactFormValues>;
 function ContactForm() {
+  // Cast to align mixed zod versions between appSchema and resolver
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const contactResolver = (zodResolver as unknown as any)(
+    contactSchema as unknown
+  ) as import("react-hook-form").Resolver<ContactFormValues>;
   const {
     watch,
     setValue,
@@ -31,7 +38,7 @@ function ContactForm() {
       message: "",
       phone: "",
     },
-    resolver: zodResolver(appSchema.contact.contactSchema),
+    resolver: contactResolver,
   });
 
   const apiClient = new apiGateway.meradhan.commonApi.CommonApi(

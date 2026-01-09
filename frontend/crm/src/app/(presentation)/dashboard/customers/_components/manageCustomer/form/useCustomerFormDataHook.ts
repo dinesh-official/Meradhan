@@ -32,8 +32,9 @@ export const useCustomerFromDataHook = (
   state: CustomerFormData = initData,
   backOnDone: boolean = true
 ): ICustomerDataFormHook => {
-
-  const [relationManager, setRelationManager] = useState<CrmUsersProfile | undefined>(undefined)
+  const [relationManager, setRelationManager] = useState<
+    CrmUsersProfile | undefined
+  >(undefined);
 
   const [data, setData] = useState(state);
   const [errors, setErrors] = useState<
@@ -41,7 +42,6 @@ export const useCustomerFromDataHook = (
   >({});
   const customerApi = useCustomerApiHook({ backOnDone });
   const { createCustomerMutation } = customerApi;
-
 
   /** Update any field and clear its error */
   const setCustomerData = useCallback(
@@ -60,9 +60,10 @@ export const useCustomerFromDataHook = (
   /** Validate a single field */
   const validateField = useCallback(
     <K extends keyof CustomerFormData>(key: K, value: CustomerFormData[K]) => {
-      const fieldSchema = customerFormDataSchema.pick({ [key]: true });
+      // Build a single-field schema without triggering the pick mask type issue
+      const fieldSchema = customerFormDataSchema.shape[key];
       try {
-        fieldSchema.parse({ [key]: value });
+        fieldSchema.parse(value);
         setErrors((prev) => {
           const newErrors = { ...prev };
           delete newErrors[key];
@@ -87,7 +88,7 @@ export const useCustomerFromDataHook = (
 
       createCustomerMutation.mutate({
         ...payload,
-        relationshipManagerId: relationManager?.id
+        relationshipManagerId: relationManager?.id,
       });
       return true;
     } catch (error) {
@@ -105,7 +106,7 @@ export const useCustomerFromDataHook = (
   const resetCustomerData = useCallback(() => {
     setData(initData);
     setErrors({});
-    setRelationManager(undefined)
+    setRelationManager(undefined);
   }, []);
 
   return {
@@ -119,7 +120,7 @@ export const useCustomerFromDataHook = (
     validateCustomerData,
     relationManager: {
       relationManager: relationManager,
-      setRelationManager
+      setRelationManager,
     },
   };
 };
