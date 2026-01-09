@@ -532,7 +532,7 @@ export class KraProcess {
         occCode[data.step_2.occupationType as keyof typeof occCode] || "",
       APP_OTH_OCC: "",
       APP_POL_CONN: "NA",
-      APP_DOC_PROOF: "E",
+      APP_DOC_PROOF: "T",
       APP_INTERNAL_REF: "",
       APP_BRANCH_CODE: "",
       APP_MAR_STATUS: MAR_STATUS,
