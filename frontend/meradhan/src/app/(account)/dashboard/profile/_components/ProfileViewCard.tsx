@@ -110,6 +110,7 @@ function ProfileViewCard({
           {profile.kycStatus == "VERIFIED" && (
             <Link
               href={genMediaUrl(profile.personalInformation?.signPdfUrl || "#")}
+              target="_blank"
             >
               <Button variant={`defaultLight`}>
                 KYC Copy
