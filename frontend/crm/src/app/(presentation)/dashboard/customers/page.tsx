@@ -6,9 +6,9 @@ import CustomersView from "./CustomersView";
 function page() {
   return (
     <AllowOnlyView permissions={["view:customer"]}>
-      <Workspace>
-        <CustomersView />
-      </Workspace>
+    <Workspace>
+      <CustomersView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

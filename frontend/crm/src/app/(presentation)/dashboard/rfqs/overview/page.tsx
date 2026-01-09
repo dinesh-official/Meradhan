@@ -5,9 +5,9 @@ import RfqOverviewView from "./RfqOverviewView";
 function RfqOverview() {
   return (
     <AllowOnlyView permissions={["view:rfq"]}>
-      <Workspace>
-        <RfqOverviewView />
-      </Workspace>
+    <Workspace>
+      <RfqOverviewView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

@@ -12,14 +12,14 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
   const id = decodeId(encodedId);
   return (
     <AllowOnlyView permissions={["edit:leads"]}>
-      <Workspace>
-        <PageInfoBar
-          title="Update Leads Information"
-          description="update leads Information"
-          showBack
-        />
-        <UpdateLeadView id={id} />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar
+        title="Update Leads Information"
+        description="update leads Information"
+        showBack
+      />
+      <UpdateLeadView id={id} />
+    </Workspace>
     </AllowOnlyView>
   );
 }

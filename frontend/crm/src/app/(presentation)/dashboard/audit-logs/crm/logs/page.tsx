@@ -6,20 +6,20 @@ import { LoginLogsHistory } from "./_login_logs/LoginLogsHistory";
 function page() {
   return (
     <AllowOnlyView permissions={["view:crmauditlogs"]}>
-      <Workspace>
-        <Tabs defaultValue="activity">
-          <TabsList>
-            <TabsTrigger value="activity">Activity History</TabsTrigger>
-            <TabsTrigger value="session">Session Logs</TabsTrigger>
-          </TabsList>
-          <TabsContent value="activity">
-            <CrmActivityLogsVIew />
-          </TabsContent>
-          <TabsContent value="session">
-            <LoginLogsHistory />
-          </TabsContent>
-        </Tabs>
-      </Workspace>
+    <Workspace>
+      <Tabs defaultValue="activity">
+        <TabsList>
+          <TabsTrigger value="activity">Activity History</TabsTrigger>
+          <TabsTrigger value="session">Session Logs</TabsTrigger>
+        </TabsList>
+        <TabsContent value="activity">
+          <CrmActivityLogsVIew />
+        </TabsContent>
+        <TabsContent value="session">
+          <LoginLogsHistory />
+        </TabsContent>
+      </Tabs>
+    </Workspace>
     </AllowOnlyView>
   );
 }

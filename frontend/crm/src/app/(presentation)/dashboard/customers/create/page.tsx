@@ -7,14 +7,14 @@ import NewCustomerView from "./NewCustomerView";
 function page() {
   return (
     <AllowOnlyView permissions={["create:customer"]}>
-      <Workspace>
-        <PageInfoBar
-          title="Create Customer Profile"
-          description="Add customer details to build a new profile."
-          showBack
-        />
-        <NewCustomerView />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar
+        title="Create Customer Profile"
+        description="Add customer details to build a new profile."
+        showBack
+      />
+      <NewCustomerView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

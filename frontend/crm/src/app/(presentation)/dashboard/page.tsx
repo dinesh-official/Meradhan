@@ -5,9 +5,9 @@ import DashBoardView from "./DashBoardView";
 function page() {
   return (
     <AllowOnlyView permissions={["view:dashboard"]}>
-      <Workspace>
-        <DashBoardView />
-      </Workspace>
+    <Workspace>
+      <DashBoardView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

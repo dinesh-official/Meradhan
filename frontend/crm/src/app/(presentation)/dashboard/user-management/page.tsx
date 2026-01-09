@@ -6,9 +6,9 @@ import UsersManagementView from "./UsersManagementView";
 function UsersManagementPage() {
   return (
     <AllowOnlyView permissions={["view:user"]}>
-      <Workspace>
-        <UsersManagementView />
-      </Workspace>
+    <Workspace>
+      <UsersManagementView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

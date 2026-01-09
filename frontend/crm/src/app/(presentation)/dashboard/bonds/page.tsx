@@ -31,14 +31,14 @@ async function BondPage({
 
   return (
     <AllowOnlyView permissions={["view:bonds"]}>
-      <Workspace>
-        <BondsView
-          pathname="/bonds"
-          category="all"
-          filter={queryFilter}
-          bondsData={responseData}
-        />
-      </Workspace>
+    <Workspace>
+      <BondsView
+        pathname="/bonds"
+        category="all"
+        filter={queryFilter}
+        bondsData={responseData}
+      />
+    </Workspace>
     </AllowOnlyView>
   );
 }

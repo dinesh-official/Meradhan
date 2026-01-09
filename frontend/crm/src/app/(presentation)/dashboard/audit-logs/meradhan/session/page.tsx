@@ -6,15 +6,15 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 function Page() {
   return (
     <AllowOnlyView permissions={["view:webauditlogs"]}>
-      <Workspace>
-        <PageInfoBar
-          title="Meradhan Session Logs"
-          description="Detailed records of user sessions including IP addresses, browsers, and device types"
-          showBack
-        />
-        <br />
-        <MeradhanSessionLogsView />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar
+        title="Meradhan Session Logs"
+        description="Detailed records of user sessions including IP addresses, browsers, and device types"
+        showBack
+      />
+      <br />
+      <MeradhanSessionLogsView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

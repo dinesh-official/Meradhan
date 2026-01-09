@@ -6,16 +6,16 @@ import { LoginLogsMeradhan } from "./LoginLogsMeradhan";
 function Page() {
   return (
     <AllowOnlyView permissions={["view:webauditlogs"]}>
-      <Workspace>
-        <div className="flex flex-col gap-5">
-          <PageInfoBar
-            title="Meradhan Authentication Activity Logs"
-            description="Login history and session termination tracking with browser and device information"
-            showBack
-          />
-          <LoginLogsMeradhan />
-        </div>
-      </Workspace>
+    <Workspace>
+      <div className="flex flex-col gap-5">
+        <PageInfoBar
+          title="Meradhan Authentication Activity Logs"
+          description="Login history and session termination tracking with browser and device information"
+          showBack
+        />
+        <LoginLogsMeradhan />
+      </div>
+    </Workspace>
     </AllowOnlyView>
   );
 }
