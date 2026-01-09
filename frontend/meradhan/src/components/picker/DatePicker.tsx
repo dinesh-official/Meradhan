@@ -3,18 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
-function formatWithTimeZone(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).format(date);
-}
+
 type DatePickerProps = {
   value: Date | null;
   onChange: (date: Date | null) => void;

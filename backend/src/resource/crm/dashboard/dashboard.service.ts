@@ -1,4 +1,5 @@
 import { db } from "@core/database/database";
+import { appSchema } from "@root/schema";
 import dayjs from "dayjs";
 
 type PercentSummary = {
@@ -36,12 +37,16 @@ export class DashboardService {
   }
 
   async getSummary(rangeDays = 30): Promise<DashboardSummary> {
-    const { currentWindowStart, previousWindowStart } = this.getRange(rangeDays);
+    const { currentWindowStart, previousWindowStart } =
+      this.getRange(rangeDays);
 
     // Active leads (NEW, CONTACTED, QUALIFIED)
-    const activeStatuses = ["NEW", "CONTACTED", "QUALIFIED"] as const;
+    type LeadStatus = (typeof appSchema.crm.leads.status)[number];
+    const activeStatuses: LeadStatus[] = ["NEW", "CONTACTED", "QUALIFIED"];
     const [activeTotal, activeCurrent, activePrevious] = await Promise.all([
-      db.dataBase.leadsModel.count({ where: { status: { in: activeStatuses } } }),
+      db.dataBase.leadsModel.count({
+        where: { status: { in: activeStatuses } },
+      }),
       db.dataBase.leadsModel.count({
         where: {
           status: { in: activeStatuses },
@@ -57,8 +62,8 @@ export class DashboardService {
     ]);
 
     // Completed projects → settled orders
-    const [projectsTotal, projectsCurrent, projectsPrevious] = await Promise.all(
-      [
+    const [projectsTotal, projectsCurrent, projectsPrevious] =
+      await Promise.all([
         db.dataBase.order.count({ where: { status: "SETTLED" } }),
         db.dataBase.order.count({
           where: { status: "SETTLED", updatedAt: { gte: currentWindowStart } },
@@ -69,39 +74,33 @@ export class DashboardService {
             updatedAt: { gte: previousWindowStart, lt: currentWindowStart },
           },
         }),
-      ]
-    );
+      ]);
 
     // User metrics
-    const [
-      totalUsers,
-      gainCurrent,
-      gainPrevious,
-      dropCurrent,
-      dropPrevious,
-    ] = await Promise.all([
-      db.dataBase.customerProfileDataModel.count(),
-      db.dataBase.customerProfileDataModel.count({
-        where: { createdAt: { gte: currentWindowStart } },
-      }),
-      db.dataBase.customerProfileDataModel.count({
-        where: {
-          createdAt: { gte: previousWindowStart, lt: currentWindowStart },
-        },
-      }),
-      db.dataBase.customersAuthDataModel.count({
-        where: {
-          accountStatus: "SUSPENDED",
-          updatedAt: { gte: currentWindowStart },
-        },
-      }),
-      db.dataBase.customersAuthDataModel.count({
-        where: {
-          accountStatus: "SUSPENDED",
-          updatedAt: { gte: previousWindowStart, lt: currentWindowStart },
-        },
-      }),
-    ]);
+    const [totalUsers, gainCurrent, gainPrevious, dropCurrent, dropPrevious] =
+      await Promise.all([
+        db.dataBase.customerProfileDataModel.count(),
+        db.dataBase.customerProfileDataModel.count({
+          where: { createdAt: { gte: currentWindowStart } },
+        }),
+        db.dataBase.customerProfileDataModel.count({
+          where: {
+            createdAt: { gte: previousWindowStart, lt: currentWindowStart },
+          },
+        }),
+        db.dataBase.customersAuthDataModel.count({
+          where: {
+            accountStatus: "SUSPENDED",
+            updatedAt: { gte: currentWindowStart },
+          },
+        }),
+        db.dataBase.customersAuthDataModel.count({
+          where: {
+            accountStatus: "SUSPENDED",
+            updatedAt: { gte: previousWindowStart, lt: currentWindowStart },
+          },
+        }),
+      ]);
 
     const gainRatePct = totalUsers === 0 ? 0 : (gainCurrent / totalUsers) * 100;
     const dropRatePct = totalUsers === 0 ? 0 : (dropCurrent / totalUsers) * 100;
@@ -142,8 +141,6 @@ export class DashboardService {
     const { currentWindowStart, previousWindowStart, now } =
       this.getRange(rangeDays);
 
-    const previousWindowEnd = currentWindowStart;
-
     const orders = await db.dataBase.order.findMany({
       where: {
         createdAt: { gte: previousWindowStart, lte: now },
@@ -154,8 +151,7 @@ export class DashboardService {
       },
     });
 
-    const toKey = (date: Date) =>
-      dayjs(date).format("YYYY-MM-DD"); // day resolution
+    const toKey = (date: Date) => dayjs(date).format("YYYY-MM-DD"); // day resolution
 
     const currentMap = new Map<string, number>();
     const previousMap = new Map<string, number>();
@@ -171,7 +167,9 @@ export class DashboardService {
     }
 
     const daysRange = Array.from({ length: rangeDays }, (_, idx) =>
-      dayjs(now).subtract(rangeDays - 1 - idx, "day").format("YYYY-MM-DD")
+      dayjs(now)
+        .subtract(rangeDays - 1 - idx, "day")
+        .format("YYYY-MM-DD")
     );
 
     const data = daysRange.map((dateKey) => ({
@@ -183,4 +181,3 @@ export class DashboardService {
     return { rangeDays, data };
   }
 }
-
