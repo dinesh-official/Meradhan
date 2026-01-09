@@ -102,4 +102,12 @@ export class CrmUserController {
       responseData: response,
     });
   }
+
+  async getSummary(_req: Request, res: Response): Promise<void> {
+    const response = await this.crmUserService.getSummary();
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
 }

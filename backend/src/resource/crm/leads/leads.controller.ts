@@ -102,4 +102,13 @@ export class LeadController {
       responseData: response,
     });
   }
+
+  async leadSourceSummary(req: Request, res: Response): Promise<void> {
+    const rangeDays = Number(req.query.rangeDays) || 30;
+    const summary = await this.manager.getLeadSourceSummary(rangeDays);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: summary,
+    });
+  }
 }

@@ -18,6 +18,7 @@ import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
 import localDataRfqRoutes from "@resource/crm/refq/nse/local/localdata_rfq.routes";
 import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
 import nseWebhookRoutes from "@modules/RFQ/nse/webhook_notification.routes";
+import dashboardRoutes from "@resource/crm/dashboard/dashboard.routes";
 import crmUsersRoutes from "@resource/crm/users/crmusers.routes";
 import auditlogsRoutes from "@resource/customer/auditlogs/auditlogs.routes";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.routes";
@@ -57,6 +58,7 @@ server.addRoutes([
   crmOrdersRoutes,
   participantsRouter,
   commonApiRoutes,
+  dashboardRoutes,
   // rfq routes
   nseIsinRoute,
   rfqMasterRouter,

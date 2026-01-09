@@ -1,12 +1,15 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import React from "react";
 import CustomersView from "./CustomersView";
 
 function page() {
   return (
-    <Workspace>
-      <CustomersView />
-    </Workspace>
+    <AllowOnlyView permissions={["view:customer"]}>
+      <Workspace>
+        <CustomersView />
+      </Workspace>
+    </AllowOnlyView>
   );
 }
 

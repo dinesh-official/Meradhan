@@ -160,7 +160,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: "Support Tickets",
     icon: HelpCircle,
-    allowOnly: ["view:support", "edit:support", "create:support"],
+    allowOnly: ["view:support"],
     children: [
       {
         label: "Manage Tickets",

@@ -10,6 +10,7 @@ import CustomerTable from "./_components/listView/CustomerTable";
 import { useFilterListApiHook } from "./_components/listView/useCustomerListApiHook";
 import { useCustomerFilterListHook } from "./_components/listView/useCustomerListHook";
 import NewCustomerView from "./create/NewCustomerView";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 function CustomersView() {
   const filterManager = useCustomerFilterListHook();
   const filterApiManager = useFilterListApiHook(filterManager);
@@ -29,16 +30,18 @@ function CustomersView() {
         title="Customer Management"
         description="Manage customer profiles and KYC status"
         actions={
-          <Dialog>
-            <DialogTrigger>
-              <Button >
-                <Plus /> Add New Customer
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="mt-0 p-0 min-w-[660px]">
-              <NewCustomerView popup />
-            </DialogContent>
-          </Dialog>
+          <AllowOnlyView permissions={["create:customer"]}>
+            <Dialog>
+              <DialogTrigger>
+                <Button>
+                  <Plus /> Add New Customer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="mt-0 p-0 min-w-[660px]">
+                <NewCustomerView popup />
+              </DialogContent>
+            </Dialog>
+          </AllowOnlyView>
         }
       />
       <Card className="mt-5">

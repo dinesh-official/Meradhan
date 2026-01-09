@@ -114,6 +114,22 @@ export class LeadManagerService {
     return true;
   }
 
+  async getLeadSourceSummary(rangeDays = 30) {
+    const from = new Date();
+    from.setDate(from.getDate() - rangeDays);
+
+    const grouped = await db.dataBase.leadsModel.groupBy({
+      by: ["leadSource"],
+      _count: { _all: true },
+      where: { createdAt: { gte: from } },
+    });
+
+    return grouped.map((item) => ({
+      source: item.leadSource,
+      count: item._count._all,
+    }));
+  }
+
   async filterLead(
     payload: z.infer<typeof appSchema.crm.leads.findManyLeadsSchema>
   ) {

@@ -12,6 +12,11 @@ leadsRoutes.post("/api/crm/lead", allowAccessMiddleware("ADMIN"), (req, res) =>
   controller.createLead(req, res)
 );
 leadsRoutes.get(
+  "/api/crm/leads/summary",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.leadSourceSummary(req, res)
+);
+leadsRoutes.get(
   "/api/crm/lead/:leadId",
   allowAccessMiddleware("ADMIN"),
   (req, res) => controller.getLead(req, res)

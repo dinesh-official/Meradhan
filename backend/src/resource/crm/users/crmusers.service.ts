@@ -90,4 +90,17 @@ export class CrmUserService {
     });
     return response;
   }
+
+  async getSummary() {
+    const [totalUsers, activeUsers, adminUsers, salesUsers] = await Promise.all(
+      [
+        this.crmUserRepo.countUsers({ where: {} }),
+        this.crmUserRepo.countUsers({ where: { accountStatus: "ACTIVE" } }),
+        this.crmUserRepo.countUsers({ where: { role: "ADMIN" } }),
+        this.crmUserRepo.countUsers({ where: { role: "SALES" } }),
+      ]
+    );
+
+    return { totalUsers, activeUsers, adminUsers, salesUsers };
+  }
 }

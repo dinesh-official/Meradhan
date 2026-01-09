@@ -10,10 +10,24 @@ import UsersSearchFilterBar from "./_components/listView/UsersSearchFilterBar";
 import CreateNewUserPopup from "./_components/mangeuser/CreateNewUserPopup";
 import { useUserFilterListHook } from "./_components/listView/useUserFilterListHook";
 import { useFilterListApiHook } from "./_components/listView/useUserFilterListApiHook";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import { useQuery } from "@tanstack/react-query";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import apiGateway from "@root/apiGateway";
+
+const crmUsersApi = new apiGateway.crm.user.CrmUsersApi(apiClientCaller);
 
 function UsersManagementView() {
   const filterManager = useUserFilterListHook();
   const filterApiManager = useFilterListApiHook(filterManager);
+  const summaryQuery = useQuery({
+    queryKey: ["crm-users-summary"],
+    queryFn: async () => {
+      const response = await crmUsersApi.getSummary();
+      return response.data.responseData;
+    },
+    staleTime: 60_000,
+  });
 
   const isShowPagination = () => {
     return (
@@ -30,19 +44,23 @@ function UsersManagementView() {
         title="User Management"
         description="Manage system users and their permissions"
         actions={
-          <CreateNewUserPopup>
-            <Button>
-              <Plus /> Add New User
-            </Button>
-          </CreateNewUserPopup>
+          <AllowOnlyView permissions={["create:user"]}>
+            <CreateNewUserPopup>
+              <Button>
+                <Plus /> Add New User
+              </Button>
+            </CreateNewUserPopup>
+          </AllowOnlyView>
         }
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
         {/* Total Users */}
         <StatusCountCard
           title="Total Users"
-          value={5}
-          changeText=""
+          value={
+            summaryQuery.isLoading ? "…" : summaryQuery.data?.totalUsers ?? 0
+          }
+          changeText="Active directory counts"
           variant="purpleGradient"
           bgIcon={Users}
         />
@@ -50,8 +68,10 @@ function UsersManagementView() {
         {/* Active Users */}
         <StatusCountCard
           title="Active Users"
-          value={4}
-          changeText=""
+          value={
+            summaryQuery.isLoading ? "…" : summaryQuery.data?.activeUsers ?? 0
+          }
+          changeText="Account status = ACTIVE"
           variant="greenGradient"
           bgIcon={Heart}
         />
@@ -59,8 +79,10 @@ function UsersManagementView() {
         {/* Admins */}
         <StatusCountCard
           title="Admins"
-          value={5}
-          changeText=""
+          value={
+            summaryQuery.isLoading ? "…" : summaryQuery.data?.adminUsers ?? 0
+          }
+          changeText="Role = ADMIN"
           variant="redGradient"
           bgIcon={Briefcase}
         />
@@ -68,8 +90,10 @@ function UsersManagementView() {
         {/* Sales Team */}
         <StatusCountCard
           title="Sales Team"
-          value={0}
-          changeText=""
+          value={
+            summaryQuery.isLoading ? "…" : summaryQuery.data?.salesUsers ?? 0
+          }
+          changeText="Role = SALES"
           variant="blueGradient"
           bgIcon={Layers}
         />
