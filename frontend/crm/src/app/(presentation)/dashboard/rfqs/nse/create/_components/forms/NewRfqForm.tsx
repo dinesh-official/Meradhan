@@ -22,7 +22,7 @@ import { NSE_ISIN_DATA } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { addDays } from "date-fns";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -82,6 +82,7 @@ const dateTimeUtils = {
 };
 
 export type SchemaType = z.infer<typeof appSchema.rfq.addIsinSchema>;
+const CRORE_TO_UNITS = 10_000_000;
 
 function NewRfqForm({
   onSubmit,
@@ -134,18 +135,28 @@ function NewRfqForm({
   const [isin, setIsin] = useState<NSE_ISIN_DATA | undefined>(undefined);
 
   const calculateQuantity = (
-    valueInCrores: number | undefined,
+    valueInRupees: number | undefined,
     isinData: NSE_ISIN_DATA | undefined
   ) => {
-    if (valueInCrores && isinData) {
+    if (valueInRupees && isinData) {
       const faceValue = isinData.faceValue;
-      const quantity = (valueInCrores * 10000000) / faceValue;
+      const quantity = valueInRupees / faceValue;
       return Math.floor(quantity); // Round down to nearest whole number
     }
     return undefined;
   };
   const [openParticipant, setOpenParticipant] = useState(false);
   const [openClientCOde, setOpenClientCOde] = useState(false);
+  const [valueInRupees, setValueInRupees] = useState<string>("");
+
+  useEffect(() => {
+    const existingCroreValue = watch("value"); // value stored/sent in crores
+    if (existingCroreValue) {
+      setValueInRupees(
+        (Number(existingCroreValue) * CRORE_TO_UNITS).toString()
+      );
+    }
+  }, [watch]);
 
   return (
     <Form control={control} className="space-y-6">
@@ -371,19 +382,35 @@ function NewRfqForm({
               />
             </div>
 
-            <div className="gap-5 grid md:grid-cols-3 md:col-span-2">
+            <div className="gap-5 grid md:grid-cols-4 md:col-span-2 items-start">
               <InputField
                 id="value"
-                label="RFQ Size (Value in Cores)"
-                placeholder="RFQ Size (Value in Cores)"
-                value={watch("value")?.toString()}
+                label={`RFQ Size (Value is ${
+                  Number(valueInRupees) / CRORE_TO_UNITS
+                } crores)`}
+                placeholder="RFQ Size (in ₹)"
+                value={valueInRupees}
                 type="number"
                 required
                 onChangeAction={(e) => {
-                  setValue("value", e);
-                  clearErrors("value");
+                  setValueInRupees(e);
+                  const rupeesNumber = Number(e);
+                  const croreValue = Number.isFinite(rupeesNumber)
+                    ? rupeesNumber / CRORE_TO_UNITS
+                    : undefined;
+                  const valueForQuantity = Number.isFinite(rupeesNumber)
+                    ? rupeesNumber
+                    : undefined;
+
+                  if (croreValue !== undefined) {
+                    setValue("value", croreValue);
+                    clearErrors("value");
+                  } else {
+                    setValue("value", undefined as unknown as number);
+                  }
+
                   const quantity = calculateQuantity(
-                    Number(e),
+                    valueForQuantity,
                     isin?.faceValue ? isin : undefined
                   );
                   setValue("quantity", quantity);

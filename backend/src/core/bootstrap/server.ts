@@ -66,6 +66,10 @@ export class ExpressServer implements IServer, IExpressRoute {
       "https://api.meradhan.co", // Allow API subdomain
       "https://awscrm.meradhan.co",
       "https://aws.meradhan.co",
+      "https://spyder.meradhan.co",
+      "https://dev-crm.meradhan.co",
+      "https://dev-api.meradhan.co",
+      "https://dev.meradhan.co",
       ...(isDevelopment
         ? [
             "http://localhost:3000",

@@ -6,9 +6,9 @@ import LeadsView from "./LeadsView";
 function LeadsPage() {
   return (
     <AllowOnlyView permissions={["view:leads"]}>
-      <Workspace>
-        <LeadsView />
-      </Workspace>
+    <Workspace>
+      <LeadsView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

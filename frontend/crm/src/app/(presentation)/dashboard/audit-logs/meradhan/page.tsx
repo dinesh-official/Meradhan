@@ -7,20 +7,20 @@ import MeradhanAuthenticationLogsView from "./authentication/MeradhanAuthenticat
 function page() {
   return (
     <AllowOnlyView permissions={["view:webauditlogs"]}>
-      <Workspace>
-        <Tabs defaultValue="activity">
-          <TabsList>
-            <TabsTrigger value="activity">Activity History</TabsTrigger>
-            <TabsTrigger value="session">Session Logs</TabsTrigger>
-          </TabsList>
-          <TabsContent value="activity">
-            <MeradhanActivityLogsView />
-          </TabsContent>
-          <TabsContent value="session">
-            <MeradhanAuthenticationLogsView />
-          </TabsContent>
-        </Tabs>
-      </Workspace>
+    <Workspace>
+      <Tabs defaultValue="activity">
+        <TabsList>
+          <TabsTrigger value="activity">Activity History</TabsTrigger>
+          <TabsTrigger value="session">Session Logs</TabsTrigger>
+        </TabsList>
+        <TabsContent value="activity">
+          <MeradhanActivityLogsView />
+        </TabsContent>
+        <TabsContent value="session">
+          <MeradhanAuthenticationLogsView />
+        </TabsContent>
+      </Tabs>
+    </Workspace>
     </AllowOnlyView>
   );
 }

@@ -12,16 +12,16 @@ export const metadata: Metadata = {
 function CrmAAcitivityuditLogsPage() {
   return (
     <AllowOnlyView permissions={["view:webauditlogs"]}>
-      <Workspace>
-        <div className="flex flex-col gap-5">
-          <PageInfoBar
-            title="Activity Logs"
-            description="Comprehensive tracking of user actions and system events within the CRM"
-            showBack
-          />
-          <AuthenticationActivityLogsView />
-        </div>
-      </Workspace>
+    <Workspace>
+      <div className="flex flex-col gap-5">
+        <PageInfoBar
+          title="Activity Logs"
+          description="Comprehensive tracking of user actions and system events within the CRM"
+          showBack
+        />
+        <AuthenticationActivityLogsView />
+      </div>
+    </Workspace>
     </AllowOnlyView>
   );
 }

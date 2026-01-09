@@ -7,14 +7,14 @@ import NewLeadView from "./NewLeadView";
 function CreateNewLead() {
   return (
     <AllowOnlyView permissions={["create:leads"]}>
-      <Workspace>
-        <PageInfoBar
-          title="Create New Lead"
-          description="Add details to build a new lead."
-          showBack
-        />
-        <NewLeadView />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar
+        title="Create New Lead"
+        description="Add details to build a new lead."
+        showBack
+      />
+      <NewLeadView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

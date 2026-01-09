@@ -6,9 +6,9 @@ import CrmOrdersView from "./CrmOrdersView";
 function page() {
   return (
     <AllowOnlyView permissions={["view:orders"]}>
-      <Workspace>
-        <CrmOrdersView />
-      </Workspace>
+    <Workspace>
+      <CrmOrdersView />
+    </Workspace>
     </AllowOnlyView>
   );
 }

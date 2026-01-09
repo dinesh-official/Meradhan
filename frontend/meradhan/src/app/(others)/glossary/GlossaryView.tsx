@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTitleDesc from "@/global/components/basic/page/PageTitleDesc";
 import { cn } from "@/lib/utils";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import Image from "next/image";
 import GlossaryPost from "./_components/glossaryPost";
 import { useGlossaryHook } from "./_gql/useGlossaryGQLHook";
@@ -67,13 +67,24 @@ const GlossaryView = ({ pageData }: { pageData: DynamicPageData }) => {
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
             />
-            <div
-              className="absolute inset-y-0 flex justify-center items-center pe-4 text-muted-foreground text-xs pointer-events-none end-0"
-              aria-live="polite"
-              role="status"
-            >
-              <Search className="text-secondary" size={20} />
-            </div>
+            {search ? (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="absolute cursor-pointer inset-y-0 flex justify-center items-center pe-4 text-muted-foreground text-xs end-0"
+                aria-label="Clear search"
+              >
+                <X className="text-secondary" size={20} />
+              </button>
+            ) : (
+              <div
+                className="absolute inset-y-0 flex justify-center items-center pe-4 text-muted-foreground text-xs pointer-events-none end-0"
+                aria-live="polite"
+                role="status"
+              >
+                <Search className="text-secondary" size={20} />
+              </div>
+            )}
           </div>
 
           {/* Alphabet Filter */}

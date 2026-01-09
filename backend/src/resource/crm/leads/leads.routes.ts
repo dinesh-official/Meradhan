@@ -5,6 +5,7 @@ import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 const leadsRoutes = Router();
 const controller = new LeadController();
 
+// Allow ADMIN full access; USER can access but will be filtered to own/assigned
 leadsRoutes.get("/api/crm/leads", allowAccessMiddleware("ADMIN"), (req, res) =>
   controller.filterLead(req, res)
 );

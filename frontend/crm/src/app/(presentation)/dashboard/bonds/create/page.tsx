@@ -6,14 +6,14 @@ import BondForm from "./_components/BondForm";
 function CreateBondPage() {
   return (
     <AllowOnlyView permissions={["create:bonds"]}>
-      <Workspace>
-        <PageInfoBar
-          title="Create Bond"
-          description="Add a new bond to the system"
-          showBack
-        />
-        <BondForm />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar
+        title="Create Bond"
+        description="Add a new bond to the system"
+        showBack
+      />
+      <BondForm />
+    </Workspace>
     </AllowOnlyView>
   );
 }

@@ -131,7 +131,8 @@ export class LeadManagerService {
   }
 
   async filterLead(
-    payload: z.infer<typeof appSchema.crm.leads.findManyLeadsSchema>
+    payload: z.infer<typeof appSchema.crm.leads.findManyLeadsSchema>,
+    restrictedUserId?: number
   ) {
     const page = Number(payload.page) || 1;
     const pageSize = 10; // You can make this configurable if needed
@@ -153,6 +154,23 @@ export class LeadManagerService {
         { companyName: { contains: payload.search, mode: "insensitive" } },
         { emailAddress: { contains: payload.search, mode: "insensitive" } },
         { phoneNo: { contains: payload.search, mode: "insensitive" } },
+      ];
+    }
+
+    if (restrictedUserId) {
+      const existingAnd = Array.isArray(filters.AND)
+        ? filters.AND
+        : filters.AND
+          ? [filters.AND]
+          : [];
+      filters.AND = [
+        ...existingAnd,
+        {
+          OR: [
+            { assignTo: { id: restrictedUserId } },
+            { createdBy: restrictedUserId },
+          ],
+        },
       ];
     }
 

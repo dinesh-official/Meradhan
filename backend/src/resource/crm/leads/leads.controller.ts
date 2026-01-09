@@ -3,6 +3,7 @@ import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { LeadManagerService } from "./services/leads_manager.service";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
+import { db } from "@core/database/database";
 
 export class LeadController {
   private manager: LeadManagerService;
@@ -94,8 +95,19 @@ export class LeadController {
 
   async filterLead(req: Request, res: Response): Promise<void> {
     const payload = appSchema.crm.leads.findManyLeadsSchema.parse(req.query);
+    // ADMIN sees all; USER (req.customer) is restricted to own or assigned leads
+    const currentUserId = req.session?.id;
+    const user = await db.dataBase.cRMUserDataModel.findUnique({
+      where: {
+        id: currentUserId,
+      },
+    });
+    const isAdmin = user?.role === "ADMIN";
 
-    const response = await this.manager.filterLead(payload);
+    const response = await this.manager.filterLead(
+      payload,
+      isAdmin ? undefined : currentUserId
+    );
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "lead get successfully",
