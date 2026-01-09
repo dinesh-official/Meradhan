@@ -6,7 +6,6 @@ import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { AddressInformationFormData } from "./addressFormData";
 import { addressInformationSchema } from "./addressForm.schema";
 
-
 /** Default initial Address Information form values */
 export const initAddressData: AddressInformationFormData = {
   addressLine1: "",
@@ -46,7 +45,7 @@ export const useAddressFormDataHook = (
     key: K,
     value: AddressInformationFormData[K]
   ) => {
-    const fieldSchema = addressInformationSchema.pick({ [key]: true });
+    const fieldSchema = addressInformationSchema.shape[key];
     try {
       fieldSchema.parse({ [key]: value });
       // If valid → clear error

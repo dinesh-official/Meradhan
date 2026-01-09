@@ -23,7 +23,7 @@ import { appSchema } from "@root/schema";
 import { addDays } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Form, SubmitHandler, useForm } from "react-hook-form";
+import { Form, SubmitHandler, useForm, type Resolver } from "react-hook-form";
 import z from "zod";
 
 // Ratings
@@ -82,6 +82,11 @@ const dateTimeUtils = {
 };
 
 export type SchemaType = z.infer<typeof appSchema.rfq.addIsinSchema>;
+const rfqSchema = appSchema.rfq
+  .addIsinSchema as unknown as z.ZodType<SchemaType>;
+const rfqResolver = (
+  zodResolver as unknown as (schema: z.ZodTypeAny) => Resolver<SchemaType>
+)(rfqSchema as z.ZodTypeAny);
 const CRORE_TO_UNITS = 10_000_000;
 
 function NewRfqForm({
@@ -101,8 +106,8 @@ function NewRfqForm({
     formState: { errors },
 
     clearErrors,
-  } = useForm({
-    resolver: zodResolver(appSchema.rfq.addIsinSchema),
+  } = useForm<SchemaType>({
+    resolver: rfqResolver,
     mode: "onChange", // re-checks validation on every change
     reValidateMode: "onChange", // ensures validation runs again when fields update
 

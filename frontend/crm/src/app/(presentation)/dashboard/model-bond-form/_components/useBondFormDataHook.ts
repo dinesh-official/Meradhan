@@ -74,7 +74,7 @@ export const useBondFormDataHook = (initial: BondFormData = initBondData) => {
   /** 🧭 Validate one field */
   const validateField = useCallback(
     <K extends keyof BondFormData>(key: K, value: BondFormData[K]) => {
-      const fieldSchema = bondSchema.pick({ [key]: true });
+      const fieldSchema = bondSchema.shape[key];
       try {
         fieldSchema.parse({ [key]: value });
         setErrors((prev) => {

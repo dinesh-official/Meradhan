@@ -3,9 +3,11 @@
 import { useState, useCallback } from "react";
 import { ZodError } from "zod";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
-import { FollowUpNoteFormData, followUpNoteSchema } from "./leadFollowUpFormData.schema";
+import {
+  FollowUpNoteFormData,
+  followUpNoteSchema,
+} from "./leadFollowUpFormData.schema";
 import { useFollowUpApiHook } from "./useFollowUpApiHook";
-
 
 const initData: FollowUpNoteFormData = {
   text: "",
@@ -46,9 +48,9 @@ export const useFollowUpNoteFormHook = (
       key: K,
       value: FollowUpNoteFormData[K]
     ) => {
-      const fieldSchema = followUpNoteSchema.pick({ [key]: true });
+      const fieldSchema = followUpNoteSchema.shape[key];
       try {
-        fieldSchema.parse({ [key]: value });
+        fieldSchema.parse(value);
         setErrors((prev) => {
           const copy = { ...prev };
           delete copy[key];

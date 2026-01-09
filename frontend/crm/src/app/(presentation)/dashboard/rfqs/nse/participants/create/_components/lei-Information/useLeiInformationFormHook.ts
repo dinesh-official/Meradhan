@@ -42,7 +42,7 @@ export const useLEIInformationFormHook = (
     key: K,
     value: LEIInformationFormData[K]
   ) => {
-    const fieldSchema = leiInformationSchema.pick({ [key]: true });
+    const fieldSchema = leiInformationSchema.shape[key];
     try {
       fieldSchema.parse({ [key]: value });
       // If valid, clear error

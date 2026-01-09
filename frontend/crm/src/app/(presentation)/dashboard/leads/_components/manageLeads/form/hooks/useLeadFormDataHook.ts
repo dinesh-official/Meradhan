@@ -27,14 +27,21 @@ export const initLeadData: LeadFormData = {
   note: "",
 };
 
-export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onComplete, goBackOnSuccess }: { onComplete?: () => void, goBackOnSuccess?: boolean }) => {
-
+export const useLeadFormDataHook = (
+  initial: LeadFormData = initLeadData,
+  {
+    onComplete,
+    goBackOnSuccess,
+  }: { onComplete?: () => void; goBackOnSuccess?: boolean }
+) => {
   const [data, setData] = useState<LeadFormData>(initial);
   const [errors, setErrors] = useState<
     Partial<Record<keyof LeadFormData, string[]>>
   >({});
 
-  const [relationManager, setRelationManager] = useState<CrmUsersProfile | undefined>(undefined)
+  const [relationManager, setRelationManager] = useState<
+    CrmUsersProfile | undefined
+  >(undefined);
 
   const leadsApi = useLeadFollowUpApiHook({ goBackOnSuccess, onComplete });
   const { createLeadMutation } = leadsApi;
@@ -52,10 +59,10 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onCo
     []
   );
   const setLeadDataMany = useCallback((patch: Partial<LeadFormData>) => {
-    setData(prev => ({ ...prev, ...patch }));
-    setErrors(prev => {
+    setData((prev) => ({ ...prev, ...patch }));
+    setErrors((prev) => {
       const copy = { ...prev };
-      (Object.keys(patch) as (keyof LeadFormData)[]).forEach(k => {
+      (Object.keys(patch) as (keyof LeadFormData)[]).forEach((k) => {
         if (copy[k]) delete copy[k];
       });
       return copy;
@@ -65,9 +72,9 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onCo
   /** Validate a single field against the Zod schema */
   const validateField = useCallback(
     <K extends keyof LeadFormData>(key: K, value: LeadFormData[K]) => {
-      const fieldSchema = leadFormDataSchema.pick({ [key]: true });
+      const fieldSchema = leadFormDataSchema.shape[key];
       try {
-        fieldSchema.parse({ [key]: value });
+        fieldSchema.parse(value);
         setErrors((prev) => {
           const copy = { ...prev };
           delete copy[key];
@@ -102,7 +109,6 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onCo
     }
   }, [data, createLeadMutation]);
 
-
   /** Reset state and errors */
   const resetLeadData = useCallback(() => {
     setData(initial ?? initLeadData);
@@ -120,7 +126,7 @@ export const useLeadFormDataHook = (initial: LeadFormData = initLeadData, { onCo
     validateLeadData,
     relationManager: {
       relationManager,
-      setRelationManager
-    }
+      setRelationManager,
+    },
   };
 };
