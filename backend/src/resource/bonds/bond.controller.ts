@@ -9,7 +9,7 @@ export class BondController {
   private bondService = new BondService();
 
   async getBondDetails(req: Request, res: Response) {
-    const isin = req.params.isin!;
+    const isin = req.params.isin!.toString();
     const data = await this.bondService.getBondDetails(isin);
     return res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -55,7 +55,7 @@ export class BondController {
     try {
       const bondData = appSchema.bonds.bondCreateUpdateSchema.parse(req.body);
       const data = await this.bondService.createBond(bondData);
-      
+
       // Create CRM activity log
       const userId = Number(req.session?.id);
       if (userId) {
@@ -102,14 +102,14 @@ export class BondController {
 
   async updateBond(req: Request, res: Response) {
     try {
-      const isin = req.params.isin!;
+      const isin = req.params.isin!.toString();
       const bondData = appSchema.bonds.bondCreateUpdateSchema.parse(req.body);
-      
+
       // Get existing bond data for comparison in activity log
       const existingBond = await this.bondService.getBondDetails(isin);
-      
+
       const data = await this.bondService.updateBond(isin, bondData);
-      
+
       // Create CRM activity log
       const userId = Number(req.session?.id);
       if (userId) {
@@ -129,7 +129,7 @@ export class BondController {
             "interestPaymentMode",
             "sectorName",
           ];
-          
+
           fieldsToTrack.forEach((field) => {
             const oldValue = (existingBond as any)[field];
             const newValue = (bondData as any)[field];

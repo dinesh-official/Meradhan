@@ -81,7 +81,10 @@ export class OrderController {
     if (!orderId) throw new AppError("Order ID is required");
     if (!status) throw new AppError("Status is required");
 
-    await this.orderService.updateOrderStatusByOrderNo(orderId, status);
+    await this.orderService.updateOrderStatusByOrderNo(
+      orderId.toString(),
+      status
+    );
     return res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: { message: "Order status updated successfully" },

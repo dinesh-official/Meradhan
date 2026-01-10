@@ -1,11 +1,9 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import dynamic from "next/dynamic";
 
 // Dynamically import ReactJson to avoid SSR issues
-const ReactJson = dynamic(() => import("react-json-view"), {
-  ssr: false,
-});
+import { JsonView, defaultStyles } from 'react-json-view-lite';
+
 import { Root } from "./CheckedCompances";
 function ShowResponseJson({ data }: { data?: Root }) {
   return (
@@ -14,7 +12,9 @@ function ShowResponseJson({ data }: { data?: Root }) {
         <CardTitle className="text-sm">Response JSON</CardTitle>
       </CardHeader>
       <CardContent>
-        <ReactJson src={data?.step_1.pan?.response || {}} collapsed />
+        <JsonView data={data?.step_1.pan?.response || {}}
+          style={defaultStyles}
+        />
       </CardContent>
     </Card>
   );
