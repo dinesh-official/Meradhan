@@ -49,7 +49,7 @@ export class LeadController {
         Status: lead.status,
       },
       entityType: "Lead",
-      entityId: leadId,
+      entityId: leadId.toString(),
       userId: Number(req.session?.id),
     });
     res.sendResponse({
@@ -73,7 +73,7 @@ export class LeadController {
         Status: response.status,
       },
       entityType: "Lead",
-      entityId: leadId,
+      entityId: leadId?.toString(),
       userId: Number(req.session?.id),
     });
     res.sendResponse({

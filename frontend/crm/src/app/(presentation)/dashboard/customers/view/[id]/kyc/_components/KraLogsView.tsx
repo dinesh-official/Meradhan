@@ -1,16 +1,13 @@
 "use client";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import dynamic from "next/dynamic";
 import { FaSpinner } from "react-icons/fa";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { JsonView, defaultStyles } from 'react-json-view-lite';
 
 // Dynamically import ReactJson to avoid SSR issues
-const ReactJson = dynamic(() => import("react-json-view"), {
-  ssr: false,
-});
+
 
 function KraLogsView({ id }: { id: number }) {
   const profileApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
@@ -84,36 +81,27 @@ function KraLogsView({ id }: { id: number }) {
                   <span className="font-semibold text-gray-700">
                     Request Data:
                   </span>
-                  <ReactJson
-                    src={log.requestData || {}}
-                    theme="rjv-default"
-                    collapsed={1}
-                    enableClipboard={false}
-                    displayDataTypes={false}
+                  <JsonView
+                    data={log.requestData || {}}
+                    style={defaultStyles}
                   />
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">
                     Response Data:
                   </span>
-                  <ReactJson
-                    src={log.responseData || {}}
-                    theme="rjv-default"
-                    collapsed={2}
-                    enableClipboard={false}
-                    displayDataTypes={false}
+                  <JsonView
+                    data={log.responseData || {}}
+                    style={defaultStyles}
                   />
                 </div>
               </div>
               {log.error && (
                 <div className="mt-4">
                   <span className="font-semibold text-red-700">Error:</span>
-                  <ReactJson
-                    src={log.error}
-                    theme="rjv-default"
-                    collapsed={2}
-                    enableClipboard={false}
-                    displayDataTypes={false}
+                  <JsonView
+                    data={log.responseData || {}}
+                    style={defaultStyles}
                   />
                 </div>
               )}

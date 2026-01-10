@@ -25,7 +25,7 @@ export class CustomerKycKycController {
 
   // pan verify response
   async verifyPanResponse(req: Request, res: Response) {
-    const kid = req.params.kid!;
+    const kid = req.params.kid!.toString();
     const id = req.customer?.id;
     const user = await db.dataBase.customerProfileDataModel.findFirst({
       where: {
@@ -95,7 +95,7 @@ export class CustomerKycKycController {
 
   // selfie verify response
   async verifySelfieResponse(req: Request, res: Response) {
-    const kid = req.params.kid!;
+    const kid = req.params.kid!.toString();
     const id = req.customer?.id;
     const user = await db.dataBase.customerProfileDataModel.findFirst({
       where: {
@@ -128,7 +128,7 @@ export class CustomerKycKycController {
 
   // sign verify response
   async verifySignResponse(req: Request, res: Response) {
-    const kid = req.params.kid!;
+    const kid = req.params.kid!.toString();
     const id = req.customer?.id;
     const user = await db.dataBase.customerProfileDataModel.findFirst({
       where: {
@@ -148,7 +148,7 @@ export class CustomerKycKycController {
   // fetch ifsc info
   async fetchIfscInfo(req: Request, res: Response) {
     const ifsc = req.params.ifsc!;
-    const response = await this.panKycService.fetchIfscInfo(ifsc);
+    const response = await this.panKycService.fetchIfscInfo(ifsc.toString());
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,
@@ -197,7 +197,7 @@ export class CustomerKycKycController {
       },
     });
     const data = await this.panKycService.downloadEsignPdf(
-      doc,
+      doc.toString(),
       userId,
       user?.userName
     );
