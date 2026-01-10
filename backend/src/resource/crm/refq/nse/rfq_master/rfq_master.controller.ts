@@ -99,7 +99,7 @@ export class RfqMasterController {
   async getRfqById(req: Request, res: Response) {
     const id = req.params.number;
     const result = await this.rfqMasterService.getAllRfqList({
-      number: id,
+      number: id?.toString(),
     });
     res.sendResponse({
       statusCode: 200,
