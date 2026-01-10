@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 0;
 export const POST = async (request: Request) => {
+  console.log(process.env);
+
   const cookie = await cookies();
   const reqBody = await request.json();
   const authApi = new apiGateway.auth.AuthApi(apiServerCaller);
