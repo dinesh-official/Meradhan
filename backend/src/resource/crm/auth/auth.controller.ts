@@ -22,6 +22,7 @@ export class AuthController {
 
   async loginWithOtp(req: Request, res: Response): Promise<void> {
     const data = appSchema.auth.loginWithOtpSchema.parse(req.body);
+    console.log(data);
     const payload = await this.emailAuthService.sendAuthEmailOtp(data.email);
 
     // Audit log for login attempt with otp
@@ -41,6 +42,7 @@ export class AuthController {
 
   async verifyLoginOtp(req: Request, res: Response): Promise<void> {
     const data = appSchema.auth.verifyOtpSchema.parse(req.body);
+    console.log(data);
     const payload = await this.emailAuthService.verifyAuthEmailOtp(
       data.email,
       data.token,

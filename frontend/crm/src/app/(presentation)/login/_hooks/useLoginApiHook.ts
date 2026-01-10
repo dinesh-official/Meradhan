@@ -5,6 +5,7 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
@@ -43,12 +44,10 @@ export const useLoginApiHook = () => {
     mutationFn: async (
       payload: z.infer<typeof appSchema.auth.verifyOtpSchema>
     ) => {
-      const response = await fetch("/api/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      return response.json();
+      console.log(payload);
+
+      const response = await axios.post("/api/verify", payload);
+      return response.data;
     },
     onSuccess(data) {
       toast.success("Login Successful");
@@ -67,8 +66,12 @@ export const useLoginApiHook = () => {
       window.location.href = "/dashboard";
     },
     onError(error) {
-      if (error instanceof ApiError) {
-        toast.error(error?.message);
+      if (error instanceof AxiosError) {
+        toast.error(
+          error?.response?.data?.message ||
+            error?.response?.data.message ||
+            "Something went wrong"
+        );
       } else {
         toast.error(error.message);
       }
