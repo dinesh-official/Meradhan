@@ -1,4 +1,4 @@
-import { API_BACKEND_URL_IP, API_SERVER_URL } from "@/global/constants/domains";
+import { API_BACKEND_URL_IP } from "@/global/constants/domains";
 import { ApiError, IApiCaller } from "@root/apiGateway";
 import axios, {
   AxiosInstance,
@@ -18,7 +18,7 @@ import "server-only";
 class ApiServerCaller implements IApiCaller {
   private instance: AxiosInstance;
 
-  constructor(baseURL: string = API_SERVER_URL) {
+  constructor(baseURL: string = API_BACKEND_URL_IP) {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
