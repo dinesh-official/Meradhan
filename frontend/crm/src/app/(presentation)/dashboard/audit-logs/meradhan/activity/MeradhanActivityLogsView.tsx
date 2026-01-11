@@ -103,18 +103,15 @@ function MeradhanActivityLogsView() {
       return;
     }
 
+    const escapeCsvValue = (val: string | number | null | undefined): string => {
+      if (val === null || val === undefined) return "";
+      const str = String(val);
+      // Always wrap in quotes for proper CSV formatting and escape internal quotes
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
     const toCsvRow = (values: Array<string | number | null | undefined>) => {
-      return values
-        .map((val) => {
-          if (val === null || val === undefined) return "";
-          const str = String(val);
-          // Escape quotes and wrap in quotes if contains comma, quote, or newline
-          if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-            return `"${str.replace(/"/g, '""')}"`;
-          }
-          return str;
-        })
-        .join(",");
+      return values.map(escapeCsvValue).join(",");
     };
 
     const lines: string[] = [];
@@ -144,35 +141,47 @@ function MeradhanActivityLogsView() {
           )
         : "";
 
-      // Format details
+      // Format details in a more readable format (one key-value per line)
       const detailsStr =
         Object.keys(item.details).length > 0
           ? Object.entries(item.details)
               .map(([key, value]) => `${key}: ${String(value)}`)
-              .join("; ")
+              .join(" | ") // Use pipe separator for better readability
           : "No details";
 
       // Format device info
       const deviceStr = item.deviceType
         ? item.deviceType.charAt(0).toUpperCase() +
           item.deviceType.slice(1).toLowerCase()
-        : "";
+        : "N/A";
 
-      const browserStr = item.browserName || "";
-      const osStr = item.operatingSystem || "";
+      const browserStr = item.browserName || "N/A";
+      const osStr = item.operatingSystem || "N/A";
 
       // Correct action spelling before export
       const correctedAction = correctActionSpelling(item.action || "");
 
+      // Format user name - handle empty/null values
+      const userName = item.name?.trim() || "Guest";
+
+      // Format user email - handle empty/null values
+      const userEmail = item.email?.trim() || "N/A";
+
+      // Format IP address
+      const ipAddress = item.ipAddress?.trim() || "N/A";
+
+      // Format entity type
+      const entityType = item.entityType?.trim() || "N/A";
+
       lines.push(
         toCsvRow([
           timestamp,
-          item.entityType || "",
+          entityType,
           correctedAction,
           detailsStr,
-          item.name || "Guest",
-          item.email || "",
-          item.ipAddress || "N/A",
+          userName,
+          userEmail,
+          ipAddress,
           deviceStr,
           browserStr,
           osStr,
@@ -180,7 +189,9 @@ function MeradhanActivityLogsView() {
       );
     });
 
-    const csvContent = lines.join("\n");
+    // Add BOM for Excel compatibility (UTF-8 with BOM)
+    const BOM = "\uFEFF";
+    const csvContent = BOM + lines.join("\r\n"); // Use \r\n for better Excel compatibility
     const blob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
     });

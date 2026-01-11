@@ -114,18 +114,15 @@ function SessionLogsMeradhan() {
       return;
     }
 
+    const escapeCsvValue = (val: string | number | null | undefined): string => {
+      if (val === null || val === undefined) return "";
+      const str = String(val);
+      // Always wrap in quotes for proper CSV formatting and escape internal quotes
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
     const toCsvRow = (values: Array<string | number | null | undefined>) => {
-      return values
-        .map((val) => {
-          if (val === null || val === undefined) return "";
-          const str = String(val);
-          // Escape quotes and wrap in quotes if contains comma, quote, or newline
-          if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-            return `"${str.replace(/"/g, '""')}"`;
-          }
-          return str;
-        })
-        .join(",");
+      return values.map(escapeCsvValue).join(",");
     };
 
     const formatDuration = (seconds: number) => {
@@ -163,13 +160,15 @@ function SessionLogsMeradhan() {
     // Data rows
     filteredData.forEach((session) => {
       // Format user name
+      // Format user name - handle empty/null values
       const userName = session.user
         ? `${session.user.firstName || ""} ${session.user.middleName || ""} ${
             session.user.lastName || ""
           }`.trim() || "Unknown"
         : "Unknown";
 
-      const userEmail = session.user?.email || "";
+      // Format user email - handle empty/null values
+      const userEmail = session.user?.email?.trim() || "N/A";
 
       // Format timestamps with seconds (matching UI format)
       const startTime = dateTimeUtils.formatDateTime(
@@ -210,9 +209,15 @@ function SessionLogsMeradhan() {
         status = "Auto Expired";
       }
 
+      // Format IP address
+      const ipAddress = session.ipAddress?.trim() || "N/A";
+
+      // Format session ID
+      const sessionId = `#${String(session.id + 9).padStart(6, "0")}`;
+
       lines.push(
         toCsvRow([
-          `#${String(session.id + 9).padStart(6, "0")}`,
+          sessionId,
           userName,
           userEmail,
           startTime,
@@ -220,14 +225,16 @@ function SessionLogsMeradhan() {
           formatDuration(session.duration),
           status,
           environment,
-          session.ipAddress || "N/A",
+          ipAddress,
           session.pageViews.length,
           session.duration,
         ])
       );
     });
 
-    const csvContent = lines.join("\n");
+    // Add BOM for Excel compatibility (UTF-8 with BOM)
+    const BOM = "\uFEFF";
+    const csvContent = BOM + lines.join("\r\n"); // Use \r\n for better Excel compatibility
     const blob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
     });
