@@ -16,9 +16,9 @@ jobs:
         shell: bash
         run: |
           {
-            echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co"
-            echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co"
-            echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co"
+            echo "NEXT_PUBLIC_HOST_URL=https://www.meradhan.co"
+            echo "NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co"
+            echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://api.meradhan.co"
             echo "NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000"
             echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co"
             echo "NEXT_PUBLIC_DIGIO=production"
