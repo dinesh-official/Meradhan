@@ -152,7 +152,7 @@ export function LoginLogsTable({
                     variant="secondary"
                     className={getDeviceBadgeColor(log.deviceType)}
                   >
-                    {log.deviceType}
+                    <span className="capitalize">{log.deviceType}</span>
                   </Badge>
                 </TableCell>
                 <TableCell>

@@ -26,6 +26,7 @@ import { T_SESSION_LOGS_CRM_RESPONSE } from "@root/apiGateway";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
 import { useState } from "react";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 interface SessionLogsTableProps {
   data: T_SESSION_LOGS_CRM_RESPONSE["responseData"]["data"];
@@ -86,6 +87,21 @@ const getSessionStatus = (
   const startTime = new Date(session.startTime);
   const hoursSinceStart =
     (now.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+
+  // Check for logout specifically - endReason might contain "logout" or sessionType might be set
+  const endReasonLower = session.endReason?.toLowerCase() || "";
+  const isLogout =
+    endReasonLower.includes("logout") ||
+    endReasonLower === "logout" ||
+    session.endReason === "logout";
+
+  // If session has end time with logout reason, show Logout
+  if (session.endTime && isLogout) {
+    return {
+      status: "Logout",
+      color: "bg-purple-100 text-purple-800",
+    };
+  }
 
   // If session has end time with a reason, show the reason
   if (session.endTime && session.endReason) {
@@ -251,7 +267,7 @@ const SessionRow = ({
                         )} text-xs px-2 py-0.5 whitespace-nowrap`}
                         title={`Device: ${session.deviceType}`}
                       >
-                        {session.deviceType}
+                        <span className="capitalize">{session.deviceType}</span>
                       </Badge>
                       <Badge
                         className={`${getOSBadgeColor(
@@ -308,26 +324,26 @@ const SessionRow = ({
                 No page views recorded
               </div>
             ) : (
-              <div className="rounded-md border bg-white overflow-x-auto">
+              <div className="rounded-md border bg-white overflow-x-auto max-h-[600px] overflow-y-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-10 bg-gray-50">
                     <TableRow>
-                      <TableHead className="text-xs font-semibold w-[300px]">
+                      <TableHead className="text-xs font-semibold text-black align-top w-[300px] min-w-[300px] max-w-[300px]">
                         Page Path
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Entry Time
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Exit Time
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Duration
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Scroll Depth
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Interactions
                       </TableHead>
                     </TableRow>
@@ -335,26 +351,36 @@ const SessionRow = ({
                   <TableBody>
                     {session.pageViews.map((pageView) => (
                       <TableRow key={pageView.id}>
-                        <TableCell className="text-xs text-gray-600 w-[300px]">
-                          <div 
-                            className="truncate" 
-                            title={pageView.pagePath}
-                          >
-                            {pageView.pagePath}
+                        <TableCell className="text-xs text-gray-600 w-[300px] min-w-[300px] max-w-[300px]">
+                          <div className="w-full">
+                            {pageView.pageTitle && (
+                              <div
+                                className="font-medium mb-1 truncate w-full max-w-[300px]"
+                                title={pageView.pageTitle}
+                              >
+                                {pageView.pageTitle}
+                              </div>
+                            )}
+                            <div
+                              className="text-gray-500 truncate w-full max-w-[300px]"
+                              title={pageView.pagePath}
+                            >
+                              {pageView.pagePath}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-xs">
-                          {format(
-                            new Date(pageView.entryTime),
-                            "MMM dd, yyyy hh:mm a"
+                          {dateTimeUtils.formatDateTime(
+                            pageView.entryTime,
+                            "DD MMM YYYY hh:mm:ss AA"
                           )}
                         </TableCell>
                         <TableCell className="text-xs">
                           {pageView.exitTime ? (
                             <span>
-                              {format(
-                                new Date(pageView.exitTime),
-                                "MMM dd, yyyy hh:mm a"
+                              {dateTimeUtils.formatDateTime(
+                                pageView.exitTime,
+                                "DD MMM YYYY hh:mm:ss AA"
                               )}
                             </span>
                           ) : (
@@ -365,7 +391,17 @@ const SessionRow = ({
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3 text-gray-400" />
                             <span className="text-xs">
-                              {formatDuration(pageView.duration)}
+                              {pageView.exitTime
+                                ? formatDuration(
+                                    Math.floor(
+                                      (new Date(pageView.exitTime).getTime() -
+                                        new Date(
+                                          pageView.entryTime
+                                        ).getTime()) /
+                                        1000
+                                    )
+                                  )
+                                : formatDuration(pageView.duration)}
                             </span>
                           </div>
                         </TableCell>

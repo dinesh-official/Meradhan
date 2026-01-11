@@ -7,11 +7,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import {
-  ChevronDown,
-  ChevronRight,
-  Globe,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Globe } from "lucide-react";
 import { useState } from "react";
 
 interface MeradhanSessionLogCardProps {
@@ -66,7 +62,9 @@ function MeradhanSessionLogCard({ session }: MeradhanSessionLogCardProps) {
   };
 
   const userName = session.user
-    ? `${session.user.firstName} ${session.user.middleName || ""} ${session.user.lastName}`.trim()
+    ? `${session.user.firstName} ${session.user.middleName || ""} ${
+        session.user.lastName
+      }`.trim()
     : "Guest User";
 
   return (
@@ -177,7 +175,7 @@ function MeradhanSessionLogCard({ session }: MeradhanSessionLogCardProps) {
                     <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
                       Device
                     </span>
-                    <span className="text-gray-900 text-sm">
+                    <span className="text-gray-900 text-sm capitalize">
                       {session.deviceType}
                     </span>
                   </div>
