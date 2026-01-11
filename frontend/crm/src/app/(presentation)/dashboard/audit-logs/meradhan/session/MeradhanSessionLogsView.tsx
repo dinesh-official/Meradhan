@@ -114,7 +114,9 @@ function SessionLogsMeradhan() {
       return;
     }
 
-    const escapeCsvValue = (val: string | number | null | undefined): string => {
+    const escapeCsvValue = (
+      val: string | number | null | undefined
+    ): string => {
       if (val === null || val === undefined) return "";
       const str = String(val);
       // Always wrap in quotes for proper CSV formatting and escape internal quotes
