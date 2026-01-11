@@ -127,7 +127,7 @@ export function DataTable<TData, TValue>({
                     <TableHead
                       key={header.id}
                       className={cn(
-                        "px-4 py-2 last:border-0 border-r font-normal",
+                        "px-4 py-3 last:border-0 border-r font-normal align-top text-xs text-black",
                         stickyRight
                           ? "sticky right-0 z-20  text-center  bg-gray-50"
                           : undefined
@@ -190,7 +190,7 @@ export function DataTable<TData, TValue>({
                       <TableCell
                         key={cell.id}
                         className={cn(
-                          "px-4 py-2 last:border-0 border-r",
+                          "px-4 py-3 last:border-0 border-r align-top leading-relaxed",
                           stickyRight
                             ? "sticky right-0 z-10 bg-white text-center "
                             : undefined

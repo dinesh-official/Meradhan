@@ -19,7 +19,8 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Search, X } from "lucide-react";
+import { Download, Search, X } from "lucide-react";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { useEffect, useState } from "react";
 import SessionLogsMeradhanTable from "./_components/SessionLogsMeradhanTable";
 
@@ -108,6 +109,137 @@ function SessionLogsMeradhan() {
 
   const hasActiveFilters = searchTerm || deviceFilter || startDate || endDate;
 
+  const handleExport = () => {
+    if (!filteredData || filteredData.length === 0) {
+      return;
+    }
+
+    const toCsvRow = (values: Array<string | number | null | undefined>) => {
+      return values
+        .map((val) => {
+          if (val === null || val === undefined) return "";
+          const str = String(val);
+          // Escape quotes and wrap in quotes if contains comma, quote, or newline
+          if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
+        })
+        .join(",");
+    };
+
+    const formatDuration = (seconds: number) => {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${secs}s`;
+      }
+      if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+      }
+      return `${secs}s`;
+    };
+
+    const lines: string[] = [];
+    // Header row
+    lines.push(
+      toCsvRow([
+        "Session ID",
+        "User Name",
+        "User Email",
+        "Start Time",
+        "End Time",
+        "Duration",
+        "Status",
+        "Environment (Device, Browser, OS)",
+        "IP Address",
+        "Total Pages",
+        "Total Duration (seconds)",
+      ])
+    );
+
+    // Data rows
+    filteredData.forEach((session) => {
+      // Format user name
+      const userName = session.user
+        ? `${session.user.firstName || ""} ${session.user.middleName || ""} ${
+            session.user.lastName || ""
+          }`.trim() || "Unknown"
+        : "Unknown";
+
+      const userEmail = session.user?.email || "";
+
+      // Format timestamps with seconds (matching UI format)
+      const startTime = dateTimeUtils.formatDateTime(
+        session.startTime,
+        "DD MMM YYYY hh:mm:ss AA"
+      );
+      const endTime = session.endTime
+        ? dateTimeUtils.formatDateTime(
+            session.endTime,
+            "DD MMM YYYY hh:mm:ss AA"
+          )
+        : "N/A";
+
+      // Format environment in combined format (same as UI)
+      const envParts: string[] = [];
+      if (session.browserName) envParts.push(session.browserName);
+      if (session.deviceType) {
+        envParts.push(
+          session.deviceType.charAt(0).toUpperCase() +
+            session.deviceType.slice(1).toLowerCase()
+        );
+      }
+      if (session.operatingSystem) envParts.push(session.operatingSystem);
+      const environment = envParts.join(", ") || "N/A";
+
+      // Get session status
+      const now = new Date();
+      const startTimeDate = new Date(session.startTime);
+      const hoursSinceStart =
+        (now.getTime() - startTimeDate.getTime()) / (1000 * 60 * 60);
+
+      let status = "Active";
+      if (session.endTime && session.endReason) {
+        status = session.endReason;
+      } else if (session.endTime) {
+        status = "Expired";
+      } else if (hoursSinceStart > 24) {
+        status = "Auto Expired";
+      }
+
+      lines.push(
+        toCsvRow([
+          `#${String(session.id + 9).padStart(6, "0")}`,
+          userName,
+          userEmail,
+          startTime,
+          endTime,
+          formatDuration(session.duration),
+          status,
+          environment,
+          session.ipAddress || "N/A",
+          session.pageViews.length,
+          session.duration,
+        ])
+      );
+    });
+
+    const csvContent = lines.join("\n");
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const dateStr = format(new Date(), "yyyy-MM-dd");
+    link.download = `meradhan-session-logs-${dateStr}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <Card>
@@ -188,14 +320,26 @@ function SessionLogsMeradhan() {
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>
-                Showing {filteredData.length} of{" "}
-                {sessionData.data?.meta.total || 0} results
-              </span>
-              {hasActiveFilters && (
-                <span className="text-blue-600">(filtered)</span>
-              )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>
+                  Showing {filteredData.length} of{" "}
+                  {sessionData.data?.meta.total || 0} results
+                </span>
+                {hasActiveFilters && (
+                  <span className="text-blue-600">(filtered)</span>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={!filteredData || filteredData.length === 0}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
             </div>
           </div>
         </CardHeader>
