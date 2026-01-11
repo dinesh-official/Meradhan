@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { queryClient } from "@/core/config/service-clients";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { useTimer } from "@/hooks/useTimer";
 import apiGateway, { GetCustomerResponseById } from "@root/apiGateway";
 import { useMutation } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
@@ -160,6 +161,13 @@ function MobileNoVerify({
   profile: GetCustomerResponseById["responseData"];
 }) {
   const [openOtpPopup, setOpenOtpPopup] = useState(false);
+  const [allowResend, setAllowResend] = useState(false);
+  const { isActive, reset, start, time } = useTimer({
+    duration: 180,
+    onFinish() {
+      setAllowResend(true);
+    },
+  });
   const [resendCount, setresendCount] = useState(0);
 
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
@@ -178,7 +186,10 @@ function MobileNoVerify({
     onSuccess: () => {
       toast.success("Otp Sent Successfully");
       setresendCount(resendCount + 1);
+      setAllowResend(false);
       setOpenOtpPopup(true);
+      reset(); // Reset and start the timer
+      start(); // Start the countdown
       queryClient.invalidateQueries({
         queryKey: ["profile-page", profile.id],
       });
@@ -278,17 +289,29 @@ function MobileNoVerify({
           </DialogFooter>
           <Button
             variant={"link"}
-            disabled={sendMobileOtpMutation.isPending}
+            disabled={
+              sendMobileOtpMutation.isPending ||
+              isActive ||
+              resendCount >= 3 ||
+              !allowResend
+            }
             onClick={() => {
               // max 3 resend
               if (resendCount >= 3) {
                 toast.error("Maximum resend attempts reached");
                 return;
               }
+              if (isActive) {
+                return;
+              }
               sendMobileOtpMutation.mutate();
             }}
           >
-            Resend OTP
+            {sendMobileOtpMutation.isPending
+              ? "Sending..."
+              : isActive
+                ? `Resend OTP (${time})`
+                : "Resend OTP"}
           </Button>
         </DialogContent>
       </Dialog>
@@ -407,9 +430,8 @@ function MobileNoUpdate({
           <div className="relative">
             <Input
               placeholder="Mobile No*"
-              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
-                errors.mobile ? "border-red-500 border" : ""
-              }`}
+              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.mobile ? "border-red-500 border" : ""
+                }`}
               type="text"
               value={mobileNumber}
               onChange={(e) => handleMobileChange(e.target.value)}
@@ -441,9 +463,8 @@ function MobileNoUpdate({
             <div className="relative">
               <Input
                 placeholder="Whatsapp Number"
-                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
-                  errors.whatsapp ? "border-red-500 border" : ""
-                }`}
+                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.whatsapp ? "border-red-500 border" : ""
+                  }`}
                 type="text"
                 value={whatsappNumber}
                 onChange={(e) => handleWhatsappChange(e.target.value)}
@@ -543,9 +564,9 @@ function FullKycInfo({
         <p className="font-medium text-sm">
           {profile.personalInformation?.dateOfBirth
             ? dateTimeUtils.formatDateTime(
-                profile.personalInformation?.dateOfBirth,
-                "DD MMM YYYY"
-              )
+              profile.personalInformation?.dateOfBirth,
+              "DD MMM YYYY"
+            )
             : "--"}
         </p>
       </DataInfoLabel>

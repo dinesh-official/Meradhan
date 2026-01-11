@@ -92,11 +92,16 @@ export const resetPasswordSchema = z.object({
 export const createNewCustomerSchema = z.object({
   firstName: z
     .string({ error: "First name is required" })
-    .min(2, { message: "First name must be at least 2 characters long" }),
-  middleName: z.string().optional(),
+    .min(2, { message: "First name must be at least 2 characters long" })
+    .max(15, { message: "First name must be at most 15 characters long" }),
+  middleName: z
+    .string()
+    .max(15, { message: "Middle name must be at most 15 characters long" })
+    .optional(),
   lastName: z
     .string({ error: "Last name is required" })
-    .min(2, { message: "Last name must be at least 2 characters long" }),
+    .min(2, { message: "Last name must be at least 2 characters long" })
+    .max(15, { message: "Last name must be at most 15 characters long" }),
   emailId: z.email({ message: "Please enter a valid email address" }),
   phoneNo: z
     .string({ error: "Phone number is required" })

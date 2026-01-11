@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { correctActionSpelling } from "@/app/(presentation)/dashboard/audit-logs/meradhan/activity/_utils/actionSpellingCorrections";
 
 export type Customer = {
   id: string;
@@ -133,14 +134,17 @@ function ActivityLogsCrmTable({
           {
             key: "action",
             label: "Action",
-            cell: (row) => (
-              <Badge
-                variant="outline"
-                className={getActionBadgeColor(row.action)}
-              >
-                {row.action}
-              </Badge>
-            ),
+            cell: (row) => {
+              const correctedAction = correctActionSpelling(row.action);
+              return (
+                <Badge
+                  variant="outline"
+                  className={getActionBadgeColor(correctedAction)}
+                >
+                  {correctedAction}
+                </Badge>
+              );
+            },
           },
           {
             key: "entityType",

@@ -17,10 +17,8 @@ export function meraDhanOtpEmailText({
   
   If you did not request this verification, you can safely ignore this email.
   
-  —
   MeraDhan Team
   
-  © ${year} MeraDhan. All rights reserved.
-  Need help? Contact us at support@meradhan.co
+  © ${year} MeraDhan. All rights reserved. Need help? Contact us at support@meradhan.co
   `.trim();
 }
