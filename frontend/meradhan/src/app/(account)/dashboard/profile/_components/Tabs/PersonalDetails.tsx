@@ -310,8 +310,8 @@ function MobileNoVerify({
             {sendMobileOtpMutation.isPending
               ? "Sending..."
               : isActive
-              ? `Resend OTP (${time})`
-              : "Resend OTP"}
+                ? `Resend OTP (${time})`
+                : "Resend OTP"}
           </Button>
         </DialogContent>
       </Dialog>
@@ -430,9 +430,8 @@ function MobileNoUpdate({
           <div className="relative">
             <Input
               placeholder="Mobile No*"
-              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
-                errors.mobile ? "border-red-500 border" : ""
-              }`}
+              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.mobile ? "border-red-500 border" : ""
+                }`}
               type="text"
               value={mobileNumber}
               onChange={(e) => handleMobileChange(e.target.value)}
@@ -464,9 +463,8 @@ function MobileNoUpdate({
             <div className="relative">
               <Input
                 placeholder="Whatsapp Number"
-                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
-                  errors.whatsapp ? "border-red-500 border" : ""
-                }`}
+                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.whatsapp ? "border-red-500 border" : ""
+                  }`}
                 type="text"
                 value={whatsappNumber}
                 onChange={(e) => handleWhatsappChange(e.target.value)}
@@ -566,9 +564,9 @@ function FullKycInfo({
         <p className="font-medium text-sm">
           {profile.personalInformation?.dateOfBirth
             ? dateTimeUtils.formatDateTime(
-                profile.personalInformation?.dateOfBirth,
-                "DD MMM YYYY"
-              )
+              profile.personalInformation?.dateOfBirth,
+              "DD MMM YYYY"
+            )
             : "--"}
         </p>
       </DataInfoLabel>
