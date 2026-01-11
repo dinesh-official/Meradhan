@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { correctActionSpelling } from "../_utils/actionSpellingCorrections";
 
 interface ActivityLogsMeradhanTableProps {
   data: T_ACTIVITY_LOGS_MERADHAN_RESPONSE["responseData"]["data"];
@@ -115,14 +116,17 @@ function ActivityLogsMeradhanTable({
           {
             key: "action",
             label: "Action",
-            cell: (row) => (
-              <Badge
-                variant="outline"
-                className={getActionBadgeColor(row.action)}
-              >
-                {row.action}
-              </Badge>
-            ),
+            cell: (row) => {
+              const correctedAction = correctActionSpelling(row.action);
+              return (
+                <Badge
+                  variant="outline"
+                  className={getActionBadgeColor(correctedAction)}
+                >
+                  {correctedAction}
+                </Badge>
+              );
+            },
           },
           {
             key: "entityType",

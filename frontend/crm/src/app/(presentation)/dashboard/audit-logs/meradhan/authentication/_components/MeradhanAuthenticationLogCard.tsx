@@ -134,7 +134,9 @@ function MeradhanAuthenticationLogCard({
                     variant="secondary"
                     className={getDeviceBadgeColor(log.deviceType)}
                   >
-                    {log.deviceType || "Unknown"}
+                    <span className="capitalize">
+                      {log.deviceType || "Unknown"}
+                    </span>
                   </Badge>
                 </TableCell>
                 <TableCell>

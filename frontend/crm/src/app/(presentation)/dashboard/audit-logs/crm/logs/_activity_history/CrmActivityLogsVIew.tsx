@@ -19,9 +19,11 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Search, X } from "lucide-react";
+import { Download, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import ActivityLogsCrmTable from "./ActivityLogsCrmTable";
+import { correctActionSpelling } from "@/app/(presentation)/dashboard/audit-logs/meradhan/activity/_utils/actionSpellingCorrections";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 function CrmActivityLogsVIew() {
   const apiCaller = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
@@ -93,6 +95,101 @@ function CrmActivityLogsVIew() {
 
   const hasActiveFilters =
     searchTerm || entityTypeFilter || startDate || endDate;
+
+  const handleExport = () => {
+    if (!filteredData || filteredData.length === 0) {
+      return;
+    }
+
+    const toCsvRow = (values: Array<string | number | null | undefined>) => {
+      return values
+        .map((val) => {
+          if (val === null || val === undefined) return "";
+          const str = String(val);
+          // Escape quotes and wrap in quotes if contains comma, quote, or newline
+          if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
+        })
+        .join(",");
+    };
+
+    const lines: string[] = [];
+    // Header row
+    lines.push(
+      toCsvRow([
+        "Timestamp",
+        "Entity",
+        "Action",
+        "Details",
+        "User Name",
+        "User Email",
+        "IP Address",
+        "Device",
+        "Browser",
+        "Operating System",
+      ])
+    );
+
+    // Data rows
+    filteredData.forEach((item) => {
+      // Format timestamp with seconds (matching UI format)
+      const timestamp = item.createdAt
+        ? dateTimeUtils.formatDateTime(
+            item.createdAt,
+            "DD MMM YYYY hh:mm:ss AA"
+          )
+        : "";
+
+      // Format details
+      const detailsStr =
+        Object.keys(item.details).length > 0
+          ? Object.entries(item.details)
+              .map(([key, value]) => `${key}: ${String(value)}`)
+              .join("; ")
+          : "No details";
+
+      // Format device info
+      const deviceStr = item.deviceType
+        ? item.deviceType.charAt(0).toUpperCase() +
+          item.deviceType.slice(1).toLowerCase()
+        : "";
+
+      const browserStr = item.browserName || "";
+      const osStr = item.operatingSystem || "";
+
+      // Correct action spelling before export
+      const correctedAction = correctActionSpelling(item.action || "");
+
+      lines.push(
+        toCsvRow([
+          timestamp,
+          item.entityType || "",
+          correctedAction,
+          detailsStr,
+          item.name || "Guest",
+          item.email || "",
+          item.ipAddress || "N/A",
+          deviceStr,
+          browserStr,
+          osStr,
+        ])
+      );
+    });
+
+    const csvContent = lines.join("\n");
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const dateStr = format(new Date(), "yyyy-MM-dd");
+    link.download = `crm-activity-logs-${dateStr}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div>
@@ -176,14 +273,26 @@ function CrmActivityLogsVIew() {
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>
-                Showing {filteredData.length} of{" "}
-                {activityData.data?.meta.total || 0} results
-              </span>
-              {hasActiveFilters && (
-                <span className="text-blue-600">(filtered)</span>
-              )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>
+                  Showing {filteredData.length} of{" "}
+                  {activityData.data?.meta.total || 0} results
+                </span>
+                {hasActiveFilters && (
+                  <span className="text-blue-600">(filtered)</span>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={!filteredData || filteredData.length === 0}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
             </div>
           </div>
         </CardHeader>

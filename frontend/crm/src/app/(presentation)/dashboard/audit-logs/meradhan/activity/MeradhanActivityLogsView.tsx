@@ -23,6 +23,7 @@ import { Download, Search, X } from "lucide-react";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { useEffect, useState } from "react";
 import ActivityLogsMeradhanTable from "./_components/ActivityLogsMeradhanTable";
+import { correctActionSpelling } from "./_utils/actionSpellingCorrections";
 
 function MeradhanActivityLogsView() {
   const apiCaller = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
@@ -160,11 +161,14 @@ function MeradhanActivityLogsView() {
       const browserStr = item.browserName || "";
       const osStr = item.operatingSystem || "";
 
+      // Correct action spelling before export
+      const correctedAction = correctActionSpelling(item.action || "");
+
       lines.push(
         toCsvRow([
           timestamp,
           item.entityType || "",
-          item.action || "",
+          correctedAction,
           detailsStr,
           item.name || "Guest",
           item.email || "",
