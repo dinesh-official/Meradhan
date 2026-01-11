@@ -179,6 +179,7 @@ export type T_SESSION_LOGS_MERADHAN_RESPONSE = BaseResponseData<{
       firstName: string;
       middleName?: string | null;
       lastName: string;
+      email?: string | null;
     } | null;
     pageViews: Array<{
       id: number;
