@@ -19,16 +19,18 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Search, X } from "lucide-react";
+import { Download, Search, X } from "lucide-react";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { useEffect, useState } from "react";
 import ActivityLogsMeradhanTable from "./_components/ActivityLogsMeradhanTable";
+import { correctActionSpelling } from "./_utils/actionSpellingCorrections";
 
 function MeradhanActivityLogsView() {
   const apiCaller = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
 
   // Filter states
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(100);
+  const [pageSize, setPageSize] = useState(20);
   const [searchTerm, setSearchTerm] = useState("");
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | undefined>();
@@ -95,6 +97,112 @@ function MeradhanActivityLogsView() {
 
   const hasActiveFilters =
     searchTerm || entityTypeFilter || startDate || endDate;
+
+  const handleExport = () => {
+    if (!filteredData || filteredData.length === 0) {
+      return;
+    }
+
+    const escapeCsvValue = (val: string | number | null | undefined): string => {
+      if (val === null || val === undefined) return "";
+      const str = String(val);
+      // Always wrap in quotes for proper CSV formatting and escape internal quotes
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const toCsvRow = (values: Array<string | number | null | undefined>) => {
+      return values.map(escapeCsvValue).join(",");
+    };
+
+    const lines: string[] = [];
+    // Header row
+    lines.push(
+      toCsvRow([
+        "Timestamp",
+        "Entity",
+        "Action",
+        "Details",
+        "User Name",
+        "User Email",
+        "IP Address",
+        "Device",
+        "Browser",
+        "Operating System",
+      ])
+    );
+
+    // Data rows
+    filteredData.forEach((item) => {
+      // Format timestamp with seconds (matching UI format)
+      const timestamp = item.createdAt
+        ? dateTimeUtils.formatDateTime(
+            item.createdAt,
+            "DD MMM YYYY hh:mm:ss AA"
+          )
+        : "";
+
+      // Format details in a more readable format (one key-value per line)
+      const detailsStr =
+        Object.keys(item.details).length > 0
+          ? Object.entries(item.details)
+              .map(([key, value]) => `${key}: ${String(value)}`)
+              .join(" | ") // Use pipe separator for better readability
+          : "No details";
+
+      // Format device info
+      const deviceStr = item.deviceType
+        ? item.deviceType.charAt(0).toUpperCase() +
+          item.deviceType.slice(1).toLowerCase()
+        : "N/A";
+
+      const browserStr = item.browserName || "N/A";
+      const osStr = item.operatingSystem || "N/A";
+
+      // Correct action spelling before export
+      const correctedAction = correctActionSpelling(item.action || "");
+
+      // Format user name - handle empty/null values
+      const userName = item.name?.trim() || "Guest";
+
+      // Format user email - handle empty/null values
+      const userEmail = item.email?.trim() || "N/A";
+
+      // Format IP address
+      const ipAddress = item.ipAddress?.trim() || "N/A";
+
+      // Format entity type
+      const entityType = item.entityType?.trim() || "N/A";
+
+      lines.push(
+        toCsvRow([
+          timestamp,
+          entityType,
+          correctedAction,
+          detailsStr,
+          userName,
+          userEmail,
+          ipAddress,
+          deviceStr,
+          browserStr,
+          osStr,
+        ])
+      );
+    });
+
+    // Add BOM for Excel compatibility (UTF-8 with BOM)
+    const BOM = "\uFEFF";
+    const csvContent = BOM + lines.join("\r\n"); // Use \r\n for better Excel compatibility
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const dateStr = format(new Date(), "yyyy-MM-dd");
+    link.download = `meradhan-activity-logs-${dateStr}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div>
@@ -179,14 +287,26 @@ function MeradhanActivityLogsView() {
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>
-                Showing {filteredData.length} of{" "}
-                {activityData.data?.meta.total || 0} results
-              </span>
-              {hasActiveFilters && (
-                <span className="text-blue-600">(filtered)</span>
-              )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>
+                  Showing {filteredData.length} of{" "}
+                  {activityData.data?.meta.total || 0} results
+                </span>
+                {hasActiveFilters && (
+                  <span className="text-blue-600">(filtered)</span>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={!filteredData || filteredData.length === 0}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
             </div>
           </div>
         </CardHeader>

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { correctActionSpelling } from "../_utils/actionSpellingCorrections";
 
 interface ActivityLogsMeradhanTableProps {
   data: T_ACTIVITY_LOGS_MERADHAN_RESPONSE["responseData"]["data"];
@@ -115,37 +116,33 @@ function ActivityLogsMeradhanTable({
           {
             key: "action",
             label: "Action",
-            cell: (row) => (
-              <Badge
-                variant="outline"
-                className={getActionBadgeColor(row.action)}
-              >
-                {row.action}
-              </Badge>
-            ),
+            cell: (row) => {
+              const correctedAction = correctActionSpelling(row.action);
+              return (
+                <Badge
+                  variant="outline"
+                  className={getActionBadgeColor(correctedAction)}
+                >
+                  {correctedAction}
+                </Badge>
+              );
+            },
           },
           {
             key: "entityType",
             label: "Details",
             cell(row) {
               return (
-                <div className="text-xs text-gray-600 max-w-md">
-                  <div className="mb-1">
+                <div className="text-xs text-gray-600 max-w-md leading-relaxed">
+                  <div className="mb-2">
                     {Object.keys(row.details).length > 0 ? (
-                      <div className="space-y-0.5">
-                        {Object.entries(row.details)
-                          .slice(0, 3)
-                          .map(([key, value]) => (
-                            <div key={key} className="truncate">
-                              <span className="font-medium">{key}:</span>{" "}
-                              {String(value)}
-                            </div>
-                          ))}
-                        {Object.keys(row.details).length > 3 && (
-                          <div className="text-gray-400">
-                            +{Object.keys(row.details).length - 3} more
+                      <div className="space-y-1.5">
+                        {Object.entries(row.details).map(([key, value]) => (
+                          <div key={key} className="truncate">
+                            <span className="font-medium">{key}:</span>{" "}
+                            {String(value)}
                           </div>
-                        )}
+                        ))}
                       </div>
                     ) : (
                       <span className="text-gray-400">No details</span>
@@ -154,10 +151,13 @@ function ActivityLogsMeradhanTable({
                   {(row.deviceType ||
                     row.browserName ||
                     row.operatingSystem) && (
-                    <div className="text-gray-500 mt-2 pt-2 border-t">
+                    <div className="text-gray-500 mt-3 pt-3 border-t space-y-1">
                       {row.deviceType && row.browserName && (
                         <div>
-                          Device: {row.deviceType} - {row.browserName}
+                          Device:{" "}
+                          {row.deviceType.charAt(0).toUpperCase() +
+                            row.deviceType.slice(1).toLowerCase()}{" "}
+                          - {row.browserName}
                         </div>
                       )}
                       {row.operatingSystem && (
@@ -173,9 +173,9 @@ function ActivityLogsMeradhanTable({
             key: "userId",
             label: "User",
             cell: (row) => (
-              <div className="text-sm">
+              <div className="text-sm leading-relaxed">
                 <p className="font-medium">{row.name || "Guest"}</p>
-                <p className="text-gray-500 text-xs">{row.email}</p>
+                <p className="text-gray-500 text-xs mt-1">{row.email}</p>
               </div>
             ),
           },

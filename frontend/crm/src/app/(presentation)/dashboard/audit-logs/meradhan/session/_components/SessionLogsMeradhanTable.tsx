@@ -26,6 +26,7 @@ import { T_SESSION_LOGS_MERADHAN_RESPONSE } from "@root/apiGateway";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
 import { useState } from "react";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 interface SessionLogsMeradhanTableProps {
   data: T_SESSION_LOGS_MERADHAN_RESPONSE["responseData"]["data"];
@@ -144,11 +145,14 @@ const SessionRow = ({
   const [isOpen, setIsOpen] = useState(false);
   const sessionStatus = getSessionStatus(session);
 
+  // Handle user data - gracefully handle missing or undefined user data
   const userName = session.user
-    ? `${session.user.firstName} ${session.user.middleName || ""} ${
-        session.user.lastName
-      }`.trim()
-    : "Unknown";
+    ? `${session.user.firstName || ""} ${session.user.middleName || ""} ${
+        session.user.lastName || ""
+      }`.trim() || "Guest User"
+    : session.userId
+    ? `User #${session.userId}`
+    : "Guest User";
 
   return (
     <Collapsible
@@ -237,7 +241,9 @@ const SessionRow = ({
                 </div>
 
                 {/* Environment Info - Browser, Device, OS combined */}
-                {(session.browserName || session.deviceType || session.operatingSystem) && (
+                {(session.browserName ||
+                  session.deviceType ||
+                  session.operatingSystem) && (
                   <div className="flex-shrink-0 min-w-[180px] max-w-[220px]">
                     <div className="flex flex-col gap-1.5">
                       <span className="text-xs text-gray-500">Environment</span>
@@ -256,10 +262,12 @@ const SessionRow = ({
                           <Badge
                             className={`${getDeviceBadgeColor(
                               session.deviceType
-                            )} text-xs px-2 py-0.5 whitespace-nowrap`}
+                            )} text-xs px-2 py-0.5 whitespace-nowrap capitalize`}
                             title={`Device: ${session.deviceType}`}
                           >
-                            {session.deviceType}
+                            <span className="capitalize">
+                              {session.deviceType}
+                            </span>
                           </Badge>
                         )}
                         {session.operatingSystem && (
@@ -322,26 +330,26 @@ const SessionRow = ({
                 No page views recorded
               </div>
             ) : (
-              <div className="rounded-md border bg-white overflow-x-auto">
+              <div className="rounded-md border bg-white overflow-x-auto max-h-[600px] overflow-y-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-10 bg-gray-50">
                     <TableRow>
-                      <TableHead className="text-xs font-semibold w-[300px]">
+                      <TableHead className="text-xs font-semibold text-black align-top w-[300px] min-w-[300px] max-w-[300px]">
                         Page Path
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Entry Time
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Exit Time
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Duration
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Scroll Depth
                       </TableHead>
-                      <TableHead className="text-xs font-semibold">
+                      <TableHead className="text-xs font-semibold text-black align-top">
                         Interactions
                       </TableHead>
                     </TableRow>
@@ -349,18 +357,18 @@ const SessionRow = ({
                   <TableBody>
                     {session.pageViews.map((pageView) => (
                       <TableRow key={pageView.id}>
-                        <TableCell className="text-xs text-gray-600 w-[300px]">
-                          <div>
+                        <TableCell className="text-xs text-gray-600 w-[300px] min-w-[300px] max-w-[300px]">
+                          <div className="w-full">
                             {pageView.pageTitle && (
-                              <div 
-                                className="font-medium mb-1 truncate" 
+                              <div
+                                className="font-medium mb-1 truncate w-full max-w-[300px]"
                                 title={pageView.pageTitle}
                               >
                                 {pageView.pageTitle}
                               </div>
                             )}
-                            <div 
-                              className="text-gray-500 truncate" 
+                            <div
+                              className="text-gray-500 truncate w-full max-w-[300px]"
                               title={pageView.pagePath}
                             >
                               {pageView.pagePath}
@@ -368,17 +376,17 @@ const SessionRow = ({
                           </div>
                         </TableCell>
                         <TableCell className="text-xs">
-                          {format(
-                            new Date(pageView.entryTime),
-                            "MMM dd, yyyy hh:mm a"
+                          {dateTimeUtils.formatDateTime(
+                            pageView.entryTime,
+                            "DD MMM YYYY hh:mm:ss AA"
                           )}
                         </TableCell>
                         <TableCell className="text-xs">
                           {pageView.exitTime ? (
                             <span>
-                              {format(
-                                new Date(pageView.exitTime),
-                                "MMM dd, yyyy hh:mm a"
+                              {dateTimeUtils.formatDateTime(
+                                pageView.exitTime,
+                                "DD MMM YYYY hh:mm:ss AA"
                               )}
                             </span>
                           ) : (
@@ -389,7 +397,17 @@ const SessionRow = ({
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3 text-gray-400" />
                             <span className="text-xs">
-                              {formatDuration(pageView.duration)}
+                              {pageView.exitTime
+                                ? formatDuration(
+                                    Math.floor(
+                                      (new Date(pageView.exitTime).getTime() -
+                                        new Date(
+                                          pageView.entryTime
+                                        ).getTime()) /
+                                        1000
+                                    )
+                                  )
+                                : formatDuration(pageView.duration)}
                             </span>
                           </div>
                         </TableCell>

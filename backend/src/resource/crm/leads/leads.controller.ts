@@ -106,7 +106,7 @@ export class LeadController {
 
     const response = await this.manager.filterLead(
       payload,
-      isAdmin ? undefined : currentUserId
+      isAdmin ? undefined : user?.id
     );
     res.sendResponse({
       statusCode: HttpStatus.OK,
