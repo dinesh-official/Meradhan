@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { queryClient } from "@/core/config/service-clients";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { useTimer } from "@/hooks/useTimer";
 import apiGateway, { GetCustomerResponseById } from "@root/apiGateway";
 import { useMutation } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
@@ -160,6 +161,13 @@ function MobileNoVerify({
   profile: GetCustomerResponseById["responseData"];
 }) {
   const [openOtpPopup, setOpenOtpPopup] = useState(false);
+  const [allowResend, setAllowResend] = useState(false);
+  const { isActive, reset, start, time } = useTimer({
+    duration: 180,
+    onFinish() {
+      setAllowResend(true);
+    },
+  });
   const [resendCount, setresendCount] = useState(0);
 
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
@@ -178,7 +186,10 @@ function MobileNoVerify({
     onSuccess: () => {
       toast.success("Otp Sent Successfully");
       setresendCount(resendCount + 1);
+      setAllowResend(false);
       setOpenOtpPopup(true);
+      reset(); // Reset and start the timer
+      start(); // Start the countdown
       queryClient.invalidateQueries({
         queryKey: ["profile-page", profile.id],
       });
@@ -278,17 +289,29 @@ function MobileNoVerify({
           </DialogFooter>
           <Button
             variant={"link"}
-            disabled={sendMobileOtpMutation.isPending}
+            disabled={
+              sendMobileOtpMutation.isPending ||
+              isActive ||
+              resendCount >= 3 ||
+              !allowResend
+            }
             onClick={() => {
               // max 3 resend
               if (resendCount >= 3) {
                 toast.error("Maximum resend attempts reached");
                 return;
               }
+              if (isActive) {
+                return;
+              }
               sendMobileOtpMutation.mutate();
             }}
           >
-            Resend OTP
+            {sendMobileOtpMutation.isPending
+              ? "Sending..."
+              : isActive
+              ? `Resend OTP (${time})`
+              : "Resend OTP"}
           </Button>
         </DialogContent>
       </Dialog>
