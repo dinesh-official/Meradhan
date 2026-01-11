@@ -1,8 +1,9 @@
 name: stage crm deploy
 
 on:
-  workflow_dispatch:
-
+  push:
+    branches:
+      - lokesh/stg
 jobs:
   deploy:
     runs-on: ubuntu-latest
