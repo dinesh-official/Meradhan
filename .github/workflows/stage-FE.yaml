@@ -190,7 +190,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: stage-crm-ui-revision.json
+          task-definition: stage-fe-revision.json
           cluster: stage-cluster
           service: meradhan-fe
           force-new-deployment: true
