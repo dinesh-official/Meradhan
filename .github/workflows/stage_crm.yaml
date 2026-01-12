@@ -3,7 +3,7 @@ name: stage crm deploy
 on:
   push:
     branches:
-      - lokesh/stg
+      - staging
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -187,10 +187,10 @@ jobs:
           docker build -f crmdockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      # - name: Deploy to Amazon ECS
-      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      #   with:
-      #     task-definition: stage-meradhan-crm-task.json
-      #     cluster: stage-cluster
-      #     service: stage-crm-ui
-      #     force-new-deployment: true
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: stage-crm-ui-revision.json
+          cluster: stage-cluster
+          service: stage-crm-ui-service-2drpd2xj
+          force-new-deployment: true
