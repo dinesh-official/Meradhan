@@ -3,7 +3,7 @@ name: stage worker deploy
 on:
   push:
     branches:
-      - lokesh/stg
+      - staging
 
 jobs:
   deploy:
@@ -188,10 +188,10 @@ jobs:
           docker build -f workerDocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      # - name: Deploy to Amazon ECS
-      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      #   with:
-      #     task-definition: stage-meradhan-crm-task.json
-      #     cluster: stage-cluster
-      #     service: stage-crm-ui
-      #     force-new-deployment: true
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: stage-worker.json
+          cluster: stage-cluster
+          service: meradhan-worker
+          force-new-deployment: true
