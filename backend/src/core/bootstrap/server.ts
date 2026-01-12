@@ -97,10 +97,11 @@ export class ExpressServer implements IServer, IExpressRoute {
           }
 
           // In development, be more permissive - allow localhost with any port
-          if (
-            (isDevelopment && origin.startsWith("http://localhost:")) ||
-            origin.startsWith("http://127.0.0.1:")
-          ) {
+          const isDevelopmentHost =
+            origin.startsWith("http://localhost:") ||
+            origin.startsWith("http://127.0.0.1:");
+
+          if (isDevelopmentHost && !isProduction) {
             return callback(null, true);
           }
 

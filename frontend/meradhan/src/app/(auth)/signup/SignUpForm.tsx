@@ -61,6 +61,7 @@ function SignUpForm() {
     ) => signupApi.singUpWithCredentials(payload),
     onSuccess(data) {
       // get the id from the response data to use.
+      toast.success("Account created successfully");
       form.handleSignUpFormChange("id", data.responseData!.id);
       sendVerifyOtp({
         emailId: signUpFormData.email,
@@ -102,6 +103,22 @@ function SignUpForm() {
     console.log("Form submitted ✅", signUpFormData);
   };
 
+  const disabled = () => {
+    const res = appSchema.customer.createNewCustomerSchema.safeParse({
+      firstName: signUpFormData.firstName,
+      lastName: signUpFormData.lastName,
+      emailId: signUpFormData.email,
+      password: signUpFormData.password,
+      phoneNo: signUpFormData.mobile,
+      termsAccepted: signUpFormData.isAcceptedTerms,
+      whatsAppNo: signUpFormData.mobile,
+      whatsAppNotificationAllow: signUpFormData.isAcceptedWhatsapp,
+      userType:
+        signUpFormData.userType as (typeof appSchema.customer.UserAccountType)[number],
+    });
+    return !res.success;
+  };
+
   return (
     <>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-8 lg:p-12">
@@ -115,9 +132,11 @@ function SignUpForm() {
               placeholder="First Name*"
               className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
               value={signUpFormData.firstName}
-              onChange={(e) =>
-                handleSignUpFormChange("firstName", e.target.value)
-              }
+              pattern="[A-Za-z\s.]+"
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^A-Za-z\s.]/g, "");
+                handleSignUpFormChange("firstName", value);
+              }}
             />
           </Field>
 
@@ -126,9 +145,11 @@ function SignUpForm() {
               placeholder="Last Name*"
               className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
               value={signUpFormData.lastName}
-              onChange={(e) =>
-                handleSignUpFormChange("lastName", e.target.value)
-              }
+              pattern="[A-Za-z\s.]+"
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^A-Za-z\s.]/g, "");
+                handleSignUpFormChange("lastName", value);
+              }}
             />
           </Field>
 
@@ -148,9 +169,11 @@ function SignUpForm() {
                 className="peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2]"
                 type="text"
                 value={signUpFormData.mobile}
-                onChange={(e) =>
-                  handleSignUpFormChange("mobile", e.target.value)
-                }
+                pattern="[5-9][0-9]{9}"
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^5-9][0-9]{9}/g, "");
+                  handleSignUpFormChange("mobile", value);
+                }}
               />
               <span className="absolute inset-y-0 flex items-center ps-3 text-gray-800 text-sm pointer-events-none start-0">
                 +91
@@ -235,11 +258,19 @@ function SignUpForm() {
             >
               By continuing, I certify that I am 18 years of age or older, and
               agree to the{" "}
-              <Link href="/terms-of-use" className="text-primary underline">
+              <Link
+                href="/terms-of-use"
+                target="_blank"
+                className="text-primary underline"
+              >
                 Terms & Conditions
               </Link>{" "}
               and{" "}
-              <Link href="/privacy-policy" className="text-primary underline">
+              <Link
+                href="/privacy-policy"
+                target="_blank"
+                className="text-primary underline"
+              >
                 Privacy Policy
               </Link>
               .
@@ -266,7 +297,11 @@ function SignUpForm() {
         <Button
           type="submit"
           className="mt-3"
-          disabled={isPending || createCustomerMutation.isPending}
+          disabled={
+            isPending ||
+            createCustomerMutation.isPending
+
+          }
         >
           Sign Up
         </Button>
