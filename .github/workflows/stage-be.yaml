@@ -1,4 +1,4 @@
-name: stage crm deploy
+name: stage be deploy
 
 on:
   push:
@@ -15,15 +15,7 @@ jobs:
       - name: Create .env from GitHub Secrets
         shell: bash
         env:
-          DEV_NEXT_PUBLIC_HOST_URL: ${{ secrets.DEV_NEXT_PUBLIC_HOST_URL }}
-          DEV_NEXT_PUBLIC_CRM_HOST_URL: ${{ secrets.DEV_NEXT_PUBLIC_CRM_HOST_URL }}
-          DEV_NEXT_PUBLIC_BACKEND_HOST_URL: ${{ secrets.DEV_NEXT_PUBLIC_BACKEND_HOST_URL }}
-          DEV_NEXT_PUBLIC_BACKEND_IP_URL: ${{ secrets.DEV_NEXT_PUBLIC_BACKEND_IP_URL }}
-          DEV_NEXT_PUBLIC_STRAPI_HOST_URL: ${{ secrets.DEV_NEXT_PUBLIC_STRAPI_HOST_URL }}
-          
-          DEV_NEXT_PUBLIC_DIGIO: ${{ secrets.DEV_NEXT_PUBLIC_DIGIO }}
 
-          DEV_STRAPI_API_URL: ${{ secrets.DEV_STRAPI_API_URL }}
           DEV_STRAPI_API_TOKEN: ${{ secrets.DEV_STRAPI_API_TOKEN }}
           DEV_NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.DEV_NEXT_PUBLIC_GRAPHQL_KEY }}
 
@@ -35,7 +27,7 @@ jobs:
           DEV_DIRECT_URL: ${{ secrets.DEV_DIRECT_URL }}
 
           DEV_REDIS_HOST: ${{ secrets.DEV_REDIS_HOST }}
-          DEV_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }}
+          DEV_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }
 
           DEV_KRA_USERNAME: ${{ secrets.DEV_KRA_USERNAME }}
           DEV_KRA_PASSWORD: ${{ secrets.DEV_KRA_PASSWORD }}
@@ -93,18 +85,21 @@ jobs:
           DEV_S3_BUCKET_NAME: meradhan-storage
 
         run: |
-          echo "NEXT_PUBLIC_HOST_URL=${DEV_NEXT_PUBLIC_HOST_URL}" > .env
-          echo "NEXT_PUBLIC_CRM_HOST_URL=${DEV_NEXT_PUBLIC_CRM_HOST_URL}" >> .env
-          echo "NEXT_PUBLIC_BACKEND_HOST_URL=${DEV_NEXT_PUBLIC_BACKEND_HOST_URL}" >> .env
-          echo "NEXT_PUBLIC_BACKEND_IP_URL=${DEV_NEXT_PUBLIC_BACKEND_IP_URL}" >> .env
-          echo "NEXT_PUBLIC_STRAPI_HOST_URL=${DEV_NEXT_PUBLIC_STRAPI_HOST_URL}" >> .env
-          echo "NEXT_PUBLIC_DIGIO=${DEV_NEXT_PUBLIC_DIGIO}" >> .env
+          echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
+          echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000" >> .env
+          echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_DIGIO=production" >> .env
+          echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
+          echo "PORT=4000" >> .env
+    
 
-          echo "STRAPI_API_URL=${DEV_STRAPI_API_URL}" >> .env
+        
           echo "NEXT_PUBLIC_GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}" >> .env
           echo "STRAPI_API_TOKEN=${DEV_STRAPI_API_TOKEN}" >> .env
 
-          echo "PORT=${DEV_PORT}" >> .env
+          
           echo "JWT_SECRET=${DEV_JWT_SECRET}" >> .env
           echo "PASSWORD_PEPPER=${DEV_PASSWORD_PEPPER}" >> .env
 
