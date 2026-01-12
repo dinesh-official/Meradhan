@@ -48,9 +48,9 @@ jobs:
           DEV_SMTP_USER: ${{ secrets.SMTP_USER }}
           DEV_SMTP_PASS: ${{ secrets.SMTP_PASS }}
 
-          DEV_CBRICS_DOMAIN: ${{ secrets.DEV_CBRICS_DOMAIN }}
-          DEV_CBRICS_LOGIN: ${{ secrets.DEV_CBRICS_LOGIN }}
-          DEV_CBRICS_PASSWORD: ${{ secrets.DEV_CBRICS_PASSWORD }}
+          DEV_CBRICS_DOMAIN: ${{ secrets.CBRICS_DOMAIN }}
+          DEV_CBRICS_LOGIN: ${{ secrets.CBRICS_LOGIN }}
+          DEV_CBRICS_PASSWORD: ${{ secrets.CBRICS_PASSWORD }}
 
           DEV_RFQ_CBRICS_DOMAIN: ${{ secrets.DEV_RFQ_CBRICS_DOMAIN }}
           DEV_RFQ_CBRICS_LOGIN: ${{ secrets.DEV_RFQ_CBRICS_LOGIN }}
