@@ -17,7 +17,7 @@
 - Authentication: JWT (JSON Web Tokens) and Argon2 for secure password hashing.
 - Validation: Zod for schema-based validation.
 - Caching & Background Jobs: Redis via ioredis and Bull for queue management.
-- Emails: React Email with Nodemailer.
+- Emails: React Email with Nodemailer
 - Utilities:
 - Axios (HTTP Client).
 - Multer (File uploads).
