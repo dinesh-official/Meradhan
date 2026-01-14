@@ -22,6 +22,22 @@ export async function saveFileOnCloud({
     }
 
     case "Local": {
+      /**
+       * SECURITY WARNING: Local file storage should NEVER be used for sensitive files!
+       * 
+       * ⚠️  DO NOT use "Local" provider for:
+       * - KYC documents (PAN, Aadhar, etc.)
+       * - PII (Personally Identifiable Information)
+       * - Financial documents
+       * - Any sensitive user data
+       * 
+       * ✅ Use "S3" provider instead for all sensitive files.
+       * 
+       * The uploads/ directory is NOT publicly accessible in production,
+       * but files stored here should still be considered less secure than S3.
+       * Use this only for non-sensitive temporary files or development/testing.
+       */
+      
       // cria subpasta como Multer faria
       const destFolder = path.join("uploads", directory || "");
 
@@ -41,6 +57,8 @@ export async function saveFileOnCloud({
       fs.copyFileSync(filePath, savedPath);
 
       // retorno no mesmo formato de uploadFile()
+      // Note: Files stored locally must be accessed via /api/uploads/*path (authenticated route)
+      // NOT via /uploads/* (static serving is disabled in production)
       return `/${savedPath}`;
     }
 

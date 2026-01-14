@@ -53,6 +53,9 @@ const nextConfig: NextConfig = {
         source: "/assets/cms/media/:path*",
         destination: `${BASES_URLS.CMS}/:path*`,
       },
+      // Note: /api/cms/graphql is handled by a route handler (route.ts) for security
+      // Route handlers take precedence over rewrites, so graphql requests will be
+      // proxied server-side with the token, while other /api/cms/* paths use this rewrite
       {
         source: "/api/cms/:path*",
         destination: `${BASES_URLS.CMS}/:path*`,

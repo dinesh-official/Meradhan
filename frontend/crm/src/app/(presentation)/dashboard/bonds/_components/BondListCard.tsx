@@ -60,8 +60,8 @@ export function BondListCard({
     onError: (error: AxiosError) => {
       toast.error(
         (error?.response?.data as { message?: string })?.message ||
-        error?.message ||
-        "Failed to update"
+          error?.message ||
+          "Failed to update"
       );
       setAllowForPurchase(data.allowForPurchase ?? false);
     },
@@ -83,9 +83,7 @@ export function BondListCard({
           <div className="flex flex-col gap-3">
             <div className="flex justify-between items-center">
               <p className="text-xl line-clamp-1">{data.bondName}</p>
-              <AllowOnlyView permissions={
-                ['edit:bonds']
-              }>
+              <AllowOnlyView permissions={["edit:bonds"]}>
                 <Link href={`/dashboard/bonds/update/${data.isin}`}>
                   <Button variant="outline" size="sm" className="gap-2">
                     <Edit size={14} />
@@ -94,7 +92,7 @@ export function BondListCard({
                 </Link>
               </AllowOnlyView>
             </div>
-            <AllowOnlyView permissions={['edit:bonds']} >
+            <AllowOnlyView permissions={["edit:bonds"]}>
               <div className="flex items-center gap-2">
                 <Checkbox
                   id={`allow-for-purchase-${data.isin}`}

@@ -16,10 +16,13 @@ import * as crmUser from "./src/core/api/crm/crmUsers.api";
 
 import * as crmFollowUpLeads from "./src/core/api/crm/crmFollowUp.api";
 import * as crmLeads from "./src/core/api/crm/crmLeads.api";
+import * as crmPartnership from "./src/core/api/crm/crmPartnership.api";
 import { CrmOrdersApi } from "./src/core/api/crm/orders.api";
 import { CrmDashboardApi } from "./src/core/api/crm/dashboard.api";
 export * from "./src/core/api/crm/crmLeads.api";
+export * from "./src/core/api/crm/crmPartnership.api";
 export * from "./src/core/api/crm/dashboard.api";
+export type { PartnershipPayload } from "./src/core/api/crm/crmPartnership.api";
 export type * from "./src/core/api/crm/orders.response";
 
 import * as auditlogs from "./src/core/api/crm/auditlogs/auditlogs.api";
@@ -53,6 +56,7 @@ export default {
     user: crmUser,
     customer: crmCustomer,
     crmLeads: crmLeads,
+    crmPartnership: crmPartnership,
     crmFollowup: crmFollowUpLeads,
     crmOrdersApi: CrmOrdersApi,
     dashboard: {
