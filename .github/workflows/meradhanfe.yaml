@@ -99,7 +99,9 @@ jobs:
           CBRICS_LOGIN="${{ secrets.CBRICS_LOGIN }}"
           echo "CBRICS_LOGIN=$CBRICS_LOGIN" >> .env
 
-          echo "CBRICS_PASSWORD=${{ secrets.CBRICS_PASSWORD }}" >> .env
+      
+          printf "CBRICS_PASSWORD=%s\n" '${{ secrets.CBRICS_PASSWORD }}' >> .env
+
 
           RFQ_CBRICS_DOMAIN="${{ secrets.RFQ_CBRICS_DOMAIN }}"
           echo "RFQ_CBRICS_DOMAIN=$RFQ_CBRICS_DOMAIN" >> .env
@@ -107,7 +109,8 @@ jobs:
           RFQ_CBRICS_LOGIN="${{ secrets.RFQ_CBRICS_LOGIN }}"
           echo "RFQ_CBRICS_LOGIN=$RFQ_CBRICS_LOGIN" >> .env
 
-          echo "RFQ_CBRICS_PASSWORD=${{ secrets.RFQ_CBRICS_PASSWORD }}" >> .env
+          printf "RFQ_CBRICS_PASSWORD=%s\n" '${{ secrets.RFQ_CBRICS_PASSWORD }}' >> .env
+
 
           DIGIO_USERNAME_PASS="${{ secrets.DIGIO_USERNAME_PASS }}"
           echo "DIGIO_USERNAME_PASS=$DIGIO_USERNAME_PASS" >> .env
