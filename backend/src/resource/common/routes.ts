@@ -4,6 +4,9 @@ import { Router } from "express";
 import { CommonApiController } from "./controller";
 import { Readable } from "stream";
 import { allowAccessMiddleware } from "@middlewares/auth_middleware";
+import fs from "fs";
+import path from "path";
+import logger from "@utils/logger/logger";
 
 const s3 = new S3Client({
   region: env.S3_REGION,
@@ -20,6 +23,10 @@ const commonApiController = new CommonApiController();
 
 commonApiRoutes.post("/api/contact/submit", (req, res) =>
   commonApiController.contactSubmit(req, res)
+);
+
+commonApiRoutes.post("/api/partnership/submit", (req, res) =>
+  commonApiController.partnershipSubmit(req, res)
 );
 
 commonApiRoutes.post("/api/strapi/files/upload", (req, res) =>
@@ -102,6 +109,11 @@ commonApiRoutes.get("/files-public/*path", async (req, res) => {
   }
 });
 
+/**
+ * SECURE: Authenticated file serving from S3
+ * Requires authentication (USER or ADMIN role)
+ * Example: GET /api/files/2026/MDVZ0U0ON/kyc/1767688525623-selfie.jpeg
+ */
 commonApiRoutes.all(
   "/files/*path",
   allowAccessMiddleware("ADMIN", "USER"),
@@ -168,6 +180,104 @@ commonApiRoutes.all(
 
       const status = code === 404 || name === "NoSuchKey" ? 404 : 403;
       res.status(status).json({ message: "File access denied" });
+    }
+  }
+);
+
+/**
+ * SECURE: Authenticated file serving from local uploads directory
+ *
+ * WARNING: This route should only be used for non-sensitive files.
+ * Sensitive files (KYC/PII documents) should ALWAYS be stored in S3, not in uploads/.
+ *
+ * Requires authentication (USER or ADMIN role)
+ * Example: GET /api/uploads/2024-01-01/files/1234567890-document.pdf
+ */
+commonApiRoutes.get(
+  "/uploads/*path",
+  allowAccessMiddleware("ADMIN", "USER"),
+  async (req, res) => {
+    try {
+      const filePath = decodeURIComponent(
+        (req.params as unknown as { path: string[] })["path"].join("/")
+      );
+
+      if (!filePath) {
+        res.status(400).json({ message: "Missing file path" });
+        return;
+      }
+
+      // Security: Prevent directory traversal attacks
+      const normalizedPath = path.normalize(filePath);
+      if (normalizedPath.includes("..") || normalizedPath.startsWith("/")) {
+        logger.logError(`Blocked directory traversal attempt: ${filePath}`);
+        res.status(403).json({ message: "Invalid file path" });
+        return;
+      }
+
+      // Resolve the full file path within uploads directory
+      const uploadsDir = path.join(process.cwd(), "uploads");
+      const fullPath = path.join(uploadsDir, normalizedPath);
+
+      // Ensure the file is within the uploads directory (prevent escaping)
+      if (!fullPath.startsWith(path.resolve(uploadsDir))) {
+        logger.logError(`Blocked path escape attempt: ${filePath}`);
+        res.status(403).json({ message: "Invalid file path" });
+        return;
+      }
+
+      // Check if file exists
+      if (!fs.existsSync(fullPath)) {
+        res.status(404).json({ message: "File not found" });
+        return;
+      }
+
+      // Check if it's a file (not a directory)
+      const stats = fs.statSync(fullPath);
+      if (!stats.isFile()) {
+        res.status(403).json({ message: "Path is not a file" });
+        return;
+      }
+
+      // Log file access for audit
+      logger.logInfo(
+        `File accessed via secure route: ${filePath} by user ${req.customer?.id || req.session?.id || "unknown"}`
+      );
+
+      // Determine content type
+      const ext = path.extname(fullPath).toLowerCase();
+      const contentTypes: Record<string, string> = {
+        ".pdf": "application/pdf",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".gif": "image/gif",
+        ".txt": "text/plain",
+        ".json": "application/json",
+      };
+      const contentType = contentTypes[ext] || "application/octet-stream";
+
+      // Set headers
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Length", stats.size.toString());
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="${path.basename(fullPath)}"`
+      );
+
+      // Stream the file
+      const fileStream = fs.createReadStream(fullPath);
+      fileStream.pipe(res);
+
+      fileStream.on("error", (err) => {
+        logger.logError(`Error streaming file ${filePath}:`, err);
+        if (!res.headersSent) {
+          res.status(500).json({ message: "Error reading file" });
+        }
+      });
+    } catch (err) {
+      logger.logError("Local file fetch error:", err);
+      res.status(500).json({ message: "File access error" });
     }
   }
 );

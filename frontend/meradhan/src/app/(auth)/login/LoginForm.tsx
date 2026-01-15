@@ -229,7 +229,7 @@ function LoginForm() {
        * Welcome Message
        * --------------------------------------------------- */}
       <p>
-        Welcome{" "}
+        {/* Welcome{" "}
         {requestLoginMutation.data?.responseData?.id ? (
           <span className="font-semibold">
             {requestLoginMutation.data?.responseData?.firstName}{" "}
@@ -237,7 +237,8 @@ function LoginForm() {
           </span>
         ) : (
           "Back!"
-        )}
+        )} */}
+        Sign in to your account
       </p>
 
       {/* ---------------------------------------------------

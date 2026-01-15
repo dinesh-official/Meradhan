@@ -97,10 +97,11 @@ export class ExpressServer implements IServer, IExpressRoute {
           }
 
           // In development, be more permissive - allow localhost with any port
-          if (
-            (isDevelopment && origin.startsWith("http://localhost:")) ||
-            origin.startsWith("http://127.0.0.1:")
-          ) {
+          const isDevelopmentHost =
+            origin.startsWith("http://localhost:") ||
+            origin.startsWith("http://127.0.0.1:");
+
+          if (isDevelopmentHost && !isProduction) {
             return callback(null, true);
           }
 
@@ -122,12 +123,41 @@ export class ExpressServer implements IServer, IExpressRoute {
     );
     this.app.use(morgan("common"));
     this.app.use(helmet());
-    // Files should be served via signed URLs only - static serving removed for security
-    this.app.use("/uploads", express.static("uploads"));
+    
+    // SECURITY: Do NOT serve /uploads statically - sensitive files (KYC/PII) may be stored there
+    // Files should be served via:
+    // 1. S3 with signed URLs (recommended for production)
+    // 2. Authenticated API routes (see /api/files route)
+    // Static serving removed to prevent unauthorized access to sensitive documents
+    if (isDevelopment) {
+      // In development only: serve uploads with a warning
+      // This is for convenience during development but should never be used in production
+      logger.logInfo(
+        "⚠️  WARNING: /uploads is being served statically in development mode. " +
+        "This is INSECURE and should never be enabled in production. " +
+        "Sensitive files (KYC/PII) should only be stored in S3, not in uploads/."
+      );
+      this.app.use("/uploads", express.static("uploads"));
+    } else {
+      // Production: Block all access to /uploads via static serving
+      this.app.use("/uploads", (req, res) => {
+        logger.logError(`Blocked unauthorized access attempt to /uploads${req.path}`);
+        res.status(403).json({
+          status: false,
+          code: "FORBIDDEN",
+          message: "Direct access to uploads is not allowed. Use authenticated API routes or S3 signed URLs.",
+        });
+      });
+    }
+    
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(express.json(), express.text({ type: "*/*" }));
+    // SECURITY: Only parse JSON globally. Text parsing should be route-specific (e.g., webhook signature verification)
+    // Routes that need raw body text (like payment webhooks) should use express.text() middleware on that specific route
+    this.app.use(express.json());
     this.app.use(cookieParser());
     this.app.use(responseHandler);
+    
+    // Public folder is safe - only contains non-sensitive static assets (images, etc.)
     this.app.use(express.static("public"));
 
     // add response time monitor -

@@ -5,6 +5,7 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import axios from "axios";
 import type { Request, Response } from "express";
 import FormData from "form-data";
+import { PartnershipManagerService } from "@resource/crm/partnership/services/partnership_manager.service";
 
 export class CommonApiController {
   async contactSubmit(req: Request, res: Response) {
@@ -27,6 +28,25 @@ export class CommonApiController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "Your form submitted successfully",
+      success: true,
+    });
+  }
+
+  async partnershipSubmit(req: Request, res: Response) {
+    const data = appSchema.crm.partnership.createPartnershipSchema.parse(
+      req.body
+    );
+    const admin = await db.dataBase.cRMUserDataModel.findFirst({
+      where: { role: "ADMIN" },
+    });
+    const partnershipManager = new PartnershipManagerService();
+    await partnershipManager.createNewPartnership(admin!.id, {
+      ...data,
+      status: "NEW",
+    });
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "Your partnership request has been submitted successfully",
       success: true,
     });
   }

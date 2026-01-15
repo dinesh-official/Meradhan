@@ -1,0 +1,54 @@
+model PartnershipSubmissionModel {
+    id Int @id @default(autoincrement())
+
+    // Organization Details
+    organizationName String
+    organizationType String
+    city             String
+    state            String
+    website          String?
+
+    // Contact Person Details
+    fullName     String
+    designation  String
+    emailAddress String
+    mobileNumber String
+
+    // Partnership Information
+    partnershipModel String
+    clientBase       String?
+    message          String?
+
+    // Status and Assignment
+    status    PartnershipStatus @default(NEW)
+    assignTo  CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
+    createdBy Int
+
+    /// Timestamps
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+    cRMUserDataModelId Int?
+
+    // Follow-up notes relation
+    followUpNotes PartnershipFollowUpNotesModel[]
+
+    @@map("partnership_submissions")
+}
+
+model PartnershipFollowUpNotesModel {
+    id            Int @id @default(autoincrement())
+    partnershipId Int
+
+    createdByName String
+    createdByID   Int
+    text          String
+    nextDate      DateTime?
+
+    /// Timestamps
+    createdAt                    DateTime                    @default(now())
+    updatedAt                    DateTime                    @updatedAt
+    partnershipSubmissionModel   PartnershipSubmissionModel? @relation(fields: [partnershipSubmissionModelId], references: [id])
+    partnershipSubmissionModelId Int?
+
+    @@map("partnership_follow_up_notes")
+}
