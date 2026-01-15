@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
+import Link from "next/link";
 import { FaBrain, FaCalculator } from "react-icons/fa6";
 function ToolsOfferedByMeraDhan() {
   return (
@@ -28,9 +29,9 @@ function ToolsOfferedByMeraDhan() {
                   helps you understand bonds at your own pace—in simple Indian
                   English.
                 </p>
-                <div>
-                  <Button variant={"outline"}>Coming Soon</Button>
-                </div>
+                <Link href={`/dhangpt`}>
+                  <Button variant={"outline"}>Explore</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -39,15 +40,17 @@ function ToolsOfferedByMeraDhan() {
             <CardContent>
               <div className="flex flex-col gap-5">
                 <FaCalculator size={30} className="text-secondary" />
-                <p className="text-2xl quicksand-medium">Yield to Maturity Calculator</p>
+                <p className="text-2xl quicksand-medium">
+                  Yield to Maturity Calculator
+                </p>
                 <p>
                   Curious about how bond returns are calculated? Use our Yield
                   to Maturity (YTM) calculator to explore how bond returns are
                   measured—no login required, no complex steps.
                 </p>
-                <div>
-                  <Button variant={"outline"}>Coming Soon</Button>
-                </div>
+                <Link href={`/ytm-calculator`}>
+                  <Button variant={"outline"}>Calculate YTM</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
