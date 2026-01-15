@@ -97,7 +97,7 @@ jobs:
     
 
         
-          echo "NEXT_PUBLIC_GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}" >> .env
+          echo "GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}" >> .env
           echo "STRAPI_API_TOKEN=${DEV_STRAPI_API_TOKEN}" >> .env
 
           
