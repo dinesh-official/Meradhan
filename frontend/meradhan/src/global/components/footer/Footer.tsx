@@ -139,7 +139,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   </li>
                   <li>
                     <Link
-                      href="/partners-distributors"
+                      href="/partners-and-distributors"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Partners & Distributors

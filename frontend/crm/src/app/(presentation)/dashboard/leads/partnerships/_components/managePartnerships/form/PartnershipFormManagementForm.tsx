@@ -187,7 +187,6 @@ const PartnershipFormManagementForm = ({
       </div>
 
       <div>
-        <Label>Client Base / AUM (Optional)</Label>
         <InputField
           id="clientBase"
           label="Client Base / AUM (Optional)"
