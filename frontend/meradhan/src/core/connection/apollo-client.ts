@@ -5,51 +5,74 @@ import { SetContextLink } from "@apollo/client/link/context";
 import axios from "axios";
 export const strApi = HOST_URL;
 export const strAssets = HOST_URL + "/assets/cms/media";
-// Load the API key from environment variables
-// SECURITY: Never hardcode API keys. Must be set in environment variables.
-// If not set, throw error in production, use empty string in development
-export const API_KEY =
-  process.env.NEXT_PUBLIC_GRAPHQL_KEY ||
-  (() => {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "NEXT_PUBLIC_GRAPHQL_KEY environment variable is required in production"
-      );
-    }
+
+/**
+ * SECURITY FIX: GraphQL token is now handled server-side only.
+ *
+ * For client-side requests (browser), we route through /api/cms/graphql
+ * which is a Next.js API route handler that adds the token server-side.
+ *
+ * For server-side requests (SSR), we use the token directly since it's
+ * already in a secure server environment.
+ */
+const isBrowser = typeof window !== "undefined";
+
+// Server-side only: Load the API key for SSR requests
+// This should use GRAPHQL_KEY (without NEXT_PUBLIC_) for server-only access
+const getServerApiKey = () => {
+  if (isBrowser) {
+    // Never expose token to browser
     return "";
-  })();
+  }
+
+  // Server-side: use server-only env var first, fallback for migration
+  const serverKey = process.env.GRAPHQL_KEY;
+
+  if (!serverKey && process.env.NODE_ENV === "production") {
+    throw new Error(
+      "GRAPHQL_KEY environment variable is required in production (server-side only)"
+    );
+  }
+
+  return serverKey || "";
+};
 
 export const strapiUrl = () => {
-  // Determine the correct URL based on the environment
-  try {
-    // browser environment
-    if (window.document) {
-      return strApi + "/api/cms/graphql";
-    } else {
-      // server environment
-      return CMS_URL + "/graphql";
-    }
-  } catch {
-    return CMS_URL + "/graphql";
+  // Client-side: route through Next.js API proxy (token added server-side)
+  if (isBrowser) {
+    return strApi + "/api/cms/graphql";
   }
+
+  // Server-side: connect directly to CMS (token added here)
+  return CMS_URL + "/graphql";
 };
 
 // Create an HTTP link to your GraphQL endpoint
 const httpLink = new HttpLink({
-  uri: strapiUrl(), // Replace with your GraphQL endpoint
+  uri: strapiUrl(),
 });
 
 const authLink = new SetContextLink((prevContext) => {
+  const headers: Record<string, string> = {
+    ...prevContext.headers,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+
+  // SECURITY: Only add Authorization header on server-side
+  // Client-side requests go through /api/cms/graphql which adds the token server-side
+  if (!isBrowser) {
+    const serverKey = getServerApiKey();
+    if (serverKey) {
+      headers.Authorization = `Bearer ${serverKey}`;
+    }
+  }
+  // Client-side: Do NOT add Authorization header - let the API route handle it
+
   return {
     credentials: "include",
     next: { revalidate: 0 },
-    headers: {
-      ...prevContext.headers,
-      Authorization: `Bearer ${API_KEY}`, // Or 'x-api-key' depending on the API requirement
-      fetchPolicy: "no-cache",
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    headers,
   };
 });
 
@@ -72,10 +95,18 @@ export const gqlClient = new ApolloClient({
   },
 });
 
+/**
+ * Axios client for Strapi REST API calls
+ *
+ * SECURITY: For client-side requests, this should route through a server-side
+ * proxy that adds the Authorization header. For now, we remove the token
+ * from client-side requests to prevent exposure.
+ *
+ * TODO: Consider creating a similar proxy route for REST API calls if needed.
+ */
 export const strApiClient = axios.create({
   baseURL: strApi,
   headers: {
-    Authorization: `Bearer ${API_KEY}`, // Or 'x-api-key' depending on the API requirement
     Accept: "application/json",
     "Content-Type": "application/json",
     "Cache-Control": "no-cache",
@@ -84,3 +115,14 @@ export const strApiClient = axios.create({
     cache: "no-store",
   },
 });
+
+// Add Authorization header only for server-side requests
+if (!isBrowser) {
+  const serverKey = getServerApiKey();
+  if (serverKey) {
+    strApiClient.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${serverKey}`;
+  }
+}
+// Client-side: Do NOT add Authorization header to prevent token exposure

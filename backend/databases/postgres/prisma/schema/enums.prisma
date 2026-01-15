@@ -98,3 +98,12 @@ enum BondType {
   PSU
   OTHER
 }
+
+enum PartnershipStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  UNQUALIFIED
+  CONVERTED
+  REJECTED
+}

@@ -92,25 +92,38 @@ export const resetPasswordSchema = z.object({
 export const createNewCustomerSchema = z.object({
   firstName: z
     .string({ error: "First name is required" })
-    .min(2, { message: "First name must be at least 2 characters long" })
-    .max(15, { message: "First name must be at most 15 characters long" }),
+    .min(1, { message: "First name must be at least 2 characters long" })
+    .max(20, { message: "First name must be at most 20 characters long" })
+    .regex(/^[A-Za-z\s.]+$/, {
+      message: "First name can only contain letters, spaces, and periods",
+    }),
   middleName: z
     .string()
-    .max(15, { message: "Middle name must be at most 15 characters long" })
+    .max(20, { message: "Middle name must be at most 20 characters long" })
+    .regex(/^[A-Za-z\s.]*$/, {
+      message: "Middle name can only contain letters, spaces, and periods",
+    })
     .optional(),
   lastName: z
     .string({ error: "Last name is required" })
-    .min(2, { message: "Last name must be at least 2 characters long" })
-    .max(15, { message: "Last name must be at most 15 characters long" }),
+    .min(1, { message: "Last name must be at least 2 characters long" })
+    .max(15, { message: "Last name must be at most 15 characters long" })
+    .regex(/^[A-Za-z\s.]+$/, {
+      message: "Last name can only contain letters, spaces, and periods",
+    }),
   emailId: z.email({ message: "Please enter a valid email address" }),
   phoneNo: z
     .string({ error: "Phone number is required" })
-    .min(10, { message: "Phone number must be at least 10 digits long" })
-    .max(14, { message: "Phone number must be at most 14 digits long" }),
+    .regex(/^[5-9][0-9]{9}$/, {
+      message:
+        "Phone number must be 10 digits and cannot start with 0, 1, 2, 3, or 4",
+    }),
   whatsAppNo: z
     .string({ error: "WhatsApp number is required" })
-    .min(10, { message: "WhatsApp number must be at least 10 digits long" })
-    .max(14, { message: "WhatsApp number must be at most 14 digits long" }),
+    .regex(/^[5-9][0-9]{9}$/, {
+      message:
+        "WhatsApp number must be 10 digits and cannot start with 0, 1, 2, 3, or 4",
+    }),
   userType: z.enum(UserAccountType, {
     error: "User account type is required",
   }),
@@ -143,6 +156,7 @@ export const createNewCustomerSchema = z.object({
     .regex(/[A-Z]/, {
       message: "Password must contain at least one uppercase letter",
     })
+    .max(20, { message: "Password must be at most 20 characters long" })
     .regex(/[a-z]/, {
       message: "Password must contain at least one lowercase letter",
     })

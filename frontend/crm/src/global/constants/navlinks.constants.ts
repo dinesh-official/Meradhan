@@ -46,20 +46,20 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Users,
     allowOnly: ["view:leads"],
     path: "/dashboard/leads",
-    // children: [
-    //   {
-    //     label: "All Leads",
-    //     path: "/dashboard/leads",
-    //     module: "leads",
-    //     allowOnly: ["view:leads"],
-    //   },
-    //   {
-    //     label: "New Lead",
-    //     path: "/dashboard/leads/create",
-    //     module: "leads",
-    //     allowOnly: ["create:leads", "edit:leads", "delete:leads"],
-    //   },
-    // ],
+    children: [
+      {
+        label: "All Leads",
+        path: "/dashboard/leads",
+        module: "leads",
+        allowOnly: ["view:leads"],
+      },
+      {
+        label: "Partners & Distributors",
+        path: "/dashboard/leads/partnerships",
+        module: "leads",
+        allowOnly: ["view:leads"],
+      },
+    ],
   },
 
   {

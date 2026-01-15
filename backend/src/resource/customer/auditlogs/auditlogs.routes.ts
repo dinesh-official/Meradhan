@@ -91,13 +91,13 @@ auditlogsRoutes.post(
 // ==================== Web Tracking Routes ====================
 // Web tracking routes (webAuditLogs table) - for customer website tracking
 // These routes are internal-only to prevent log injection/spam and protect customer data
-// Accessible via: ADMIN auth (via allowAccessMiddleware), service token, or internal IP (dev only)
-// Note: allowAccessMiddleware("ADMIN") is optional - requireInternalAccess will also check for service tokens
+// SECURITY: Require authentication (ADMIN or USER) - no unauthenticated writes allowed
+// Note: If service token or IP-based access is needed, implement requireInternalAccess middleware
 auditlogsRoutes.all(
   "/api/web/tracking",
   meradhanTrackingLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN", "USER"), // Allow PUBLIC to pass through, requireInternalAccess will enforce
+  allowAccessMiddleware("ADMIN", "USER"), // Require authentication - no PUBLIC access
   async (req, res) => auditLogsController.createWebTracking(req, res)
 );
 
@@ -105,8 +105,7 @@ auditlogsRoutes.all(
   "/api/web/tracking/revalidate",
   meradhanTrackingLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN", "USER"), // Allow PUBLIC to pass through, requireInternalAccess will enforce
-
+  allowAccessMiddleware("ADMIN", "USER"), // Require authentication - no PUBLIC access
   async (req, res) => auditLogsController.revalidateWebTracking(req, res)
 );
 

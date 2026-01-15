@@ -30,7 +30,7 @@ export type Permission = `${Action}:${ModuleName}`;
 export const PERMISSIONS: Permission[] = [
   // Dashboard
   "view:dashboard",
-
+  "edit:bonds",
   // Leads
   "view:leads",
   "create:leads",
@@ -89,6 +89,7 @@ export const PERMISSIONS: Permission[] = [
   "view:webanalytics",
 
   "view:bonds",
+  "create:bonds",
 
   "view:orders",
   "create:orders",
