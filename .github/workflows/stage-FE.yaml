@@ -91,7 +91,7 @@ jobs:
           echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_DIGIO=production" >> .env
+          echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
     
