@@ -24,7 +24,7 @@ jobs:
             echo "NEXT_PUBLIC_DIGIO=production"
             echo "STRAPI_API_URL=https://spyder.meradhan.co/api"
 
-            echo "NEXT_PUBLIC_GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
+            echo "GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
             echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}"
 
             echo "PORT=4000"
