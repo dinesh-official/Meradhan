@@ -29,7 +29,7 @@ jobs:
 
           # Secrets
           NEXT_PUBLIC_GRAPHQL_KEY="${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
-          echo "NEXT_PUBLIC_GRAPHQL_KEY=$NEXT_PUBLIC_GRAPHQL_KEY" >> .env
+          echo "GRAPHQL_KEY=$NEXT_PUBLIC_GRAPHQL_KEY" >> .env
 
           STRAPI_API_TOKEN="${{ secrets.STRAPI_API_TOKEN }}"
           echo "STRAPI_API_TOKEN=$STRAPI_API_TOKEN" >> .env
