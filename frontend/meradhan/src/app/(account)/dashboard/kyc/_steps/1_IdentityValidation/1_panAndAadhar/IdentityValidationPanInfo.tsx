@@ -1,4 +1,5 @@
 "use client";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,14 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { dataMatcherUtils } from "@/global/utils/matcher";
-import { genMediaUrl } from "@/global/utils/url.utils";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
@@ -31,10 +29,7 @@ function IdentityValidationPanInfo() {
     F: "Female",
   };
 
-  const isPanMatched = dataMatcherUtils.areValuesMatched(
-    data.response?.details.pan.name,
-    data.response?.details.aadhaar.name
-  );
+  const isPanMatched = data.response?.details.panInfo.name_as_per_pan_match;
 
   const isNameMatched = dataMatcherUtils.areNamesMatched(
     dataMatcherUtils.splitFullName(data.response?.details.pan.name),
@@ -84,8 +79,16 @@ function IdentityValidationPanInfo() {
           </DataInfoLabel>
           <DataInfoLabel
             title="Date of Birth"
-            status={isDobMatched ? "SUCCESS" : "ERROR"}
-            statusLabel={isDobMatched ? "Verified" : "Invalid"}
+            status={
+              data.response?.details.panInfo.date_of_birth_match
+                ? "SUCCESS"
+                : "ERROR"
+            }
+            statusLabel={
+              data.response?.details.panInfo.date_of_birth_match
+                ? "Matched"
+                : "Not Matched"
+            }
             showStatus
           >
             <p className="font-medium">
@@ -93,7 +96,7 @@ function IdentityValidationPanInfo() {
             </p>
           </DataInfoLabel>
 
-          <DataInfoLabel
+          {/* <DataInfoLabel
             title="Gender"
             status="SUCCESS"
             statusLabel="Fetched"
@@ -103,16 +106,16 @@ function IdentityValidationPanInfo() {
               {genders[data.response?.details.pan.gender as "M" | "F"] ||
                 "Others"}
             </p>
-          </DataInfoLabel>
+          </DataInfoLabel> */}
 
-          <div className="gap-5 grid lg:grid-cols-3 md:col-span-2 lg:col-span-3">
+          {/* <div className="gap-5 grid lg:grid-cols-3 md:col-span-2 lg:col-span-3">
             <div className="md:col-span-3">
               <RenderPdf
                 file={genMediaUrl(data.response?.details.pan.file_url)}
                 height={280}
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 mt-5">

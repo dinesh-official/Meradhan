@@ -201,12 +201,11 @@ function IdentityValidationForm() {
                 applicable laws of India and not a Non-Resident Indian (NRI).
               </li>
               <li>
-                I hereby confirm to authorize MeraDhan to access and retrieve my
-                PAN and Aadhaar card details from DigiLocker for the purpose of
-                conducting SEBI-compliant KYC verification. I understand that
-                this information will be used solely for regulatory compliance
-                and will be securely stored in accordance with applicable laws
-                and SEBI guidelines.
+                I authorize MeraDhan to access and verify my PAN details from
+                authorized government or regulatory sources for SEBI-compliant
+                KYC purposes. I understand that my information will be used only
+                for regulatory compliance and handled securely as per applicable
+                laws.
               </li>
               <li>
                 I hereby provide my consent to MeraDhan to collect, use, store,
@@ -214,7 +213,7 @@ function IdentityValidationForm() {
                 purposes in compliance with SEBI regulations. This includes
                 retrieval of KYC records from KYC Registration Agencies (KRAs),
                 as may be required, and share my details with KYC registration
-                agencies.{" "}
+                agencies.
               </li>
             </ul>
           </div>

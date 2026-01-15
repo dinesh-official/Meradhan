@@ -1,5 +1,11 @@
 import z from "zod";
 
+export const panVerifyInfoSchema = z.object({
+  id: z.string().min(8, "Date of birth is required"),
+  name: z.string().optional().default(""), // can be empty
+  dob: z.string(), // can be empty
+});
+
 export const kycPanInfoDataSchema = z.object({
   panCardNo: z
     .string()

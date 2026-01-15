@@ -8,6 +8,11 @@ const controller = new CustomerKycKycController();
 
 // pan
 kycRoutes.post(
+  "/api/customer/kyc/pan/info-verify",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.panInfoVerifyRequest(req, res)
+);
+kycRoutes.post(
   "/api/customer/kyc/pan/request",
   allowAccessMiddleware("USER"),
   (req, res) => controller.createPanVerifyRequest(req, res)

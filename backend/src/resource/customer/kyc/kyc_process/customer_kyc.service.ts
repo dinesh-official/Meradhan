@@ -9,6 +9,15 @@ import { KycProvider } from "./kyc_provider";
 export class CustomerKycKycService {
   private kycProvider = new KycProvider();
 
+  async verifyPanInfo(data: z.infer<typeof appSchema.kyc.panVerifyInfoSchema>) {
+    const response = await this.kycProvider.panVerifyInfo({
+      date: data.dob,
+      name: data.name,
+      id: data.id,
+    });
+    return response;
+  }
+
   // pan verify request
   async createPanVerifyRequest({
     id,
@@ -30,9 +39,9 @@ export class CustomerKycKycService {
     }
 
     const fullName = makeFullname({ firstName, middleName, lastName });
-    const panDetails = await this.kycProvider.createPanVerifyRequest({
-      email: user?.emailAddress,
-      id: user?.userName,
+    const panDetails = await this.kycProvider.panVerifyInfo({
+      date: data.dateOfBirth,
+      id: data.panCardNo,
       name: fullName,
     });
     return panDetails;

@@ -7,6 +7,7 @@ import IdentityValidationCaptureSelfie from "./2_selfie/IdentityValidationCaptur
 import IdentityValidationSelfiePreview from "./2_selfie/IdentityValidationSelfiePreview";
 import IdentityValidationAddSign from "./3_sign/IdentityValidationAddSign";
 import IdentityValidationPreviewSign from "./3_sign/IdentityValidationPreviewSign";
+import AdharInfoForm from "./4_adharInfo/AdharInfoForm";
 
 function IdentityValidationStep() {
   const { state } = useKycDataStorage();
@@ -14,11 +15,12 @@ function IdentityValidationStep() {
   const Steps = [
     <IdentityValidationForm key={0} />,
     <IdentityValidationPanInfo key={1} />,
-    <IdentityValidationAadharInfo key={2} />,
-    <IdentityValidationCaptureSelfie key={3} />,
-    <IdentityValidationSelfiePreview key={4} />,
-    <IdentityValidationAddSign key={5} />,
-    <IdentityValidationPreviewSign key={6} />,
+    <AdharInfoForm key={2} />,
+    <IdentityValidationAadharInfo key={3} />,
+    <IdentityValidationCaptureSelfie key={4} />,
+    <IdentityValidationSelfiePreview key={5} />,
+    <IdentityValidationAddSign key={6} />,
+    <IdentityValidationPreviewSign key={7} />,
   ];
   return <>{Steps[state.stepIndex]}</>;
 }

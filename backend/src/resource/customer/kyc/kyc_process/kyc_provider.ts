@@ -155,6 +155,23 @@ export class KycProvider extends DigioKycFileHelper {
 
   // KYC STEP 1: PAN Verification ---------------------------------------------
 
+  async panVerifyInfo({
+    date,
+    id,
+    name,
+  }: {
+    date: string;
+    name: string;
+    id: string;
+  }) {
+    const panDetails = await this.digio.verifyPanInfo({
+      id_no: id,
+      name,
+      dob: date,
+    });
+    return panDetails;
+  }
+
   // pan aadhar generate request to digio
   async createPanVerifyRequest({
     email,

@@ -9,6 +9,15 @@ import { db } from "@core/database/database";
 export class CustomerKycKycController {
   private panKycService = new CustomerKycKycService();
 
+  async panInfoVerifyRequest(req: Request, res: Response) {
+    const data = appSchema.kyc.panVerifyInfoSchema.parse(req.body);
+    const response = await this.panKycService.verifyPanInfo(data);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
+
   // pan verify request
   async createPanVerifyRequest(req: Request, res: Response) {
     const id = req.customer!.id;
