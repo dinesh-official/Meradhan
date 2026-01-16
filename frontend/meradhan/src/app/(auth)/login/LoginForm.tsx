@@ -73,7 +73,7 @@ const EmailOrPhoneInput = ({
     <Input
       className="peer text-sm  bg-muted py-5 ps-12 border-none placeholder:text-[#7fabd2]"
       placeholder="Email or Phone Number"
-      type="text"
+      type="email"
       value={value}
       onChange={onChange}
       readOnly={readOnly}
@@ -249,7 +249,7 @@ function LoginForm() {
           {/* Email / Phone Input */}
           <EmailOrPhoneInput
             value={state.emailOrPhoneNo}
-            onChange={(e) => setEmailOrPhoneNo(e.target.value)}
+            onChange={(e) => setEmailOrPhoneNo(e.target.value.toLowerCase())}
             readOnly={isVerifyMode}
             error={errors?.emailOrPhone}
             onEnter={handleContinue}

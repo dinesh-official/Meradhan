@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
+import { DatePickerV2 } from "@/components/custom/DatePickerV2";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -63,7 +64,7 @@ function IdentityValidationForm() {
                   setStep1PanData("dateOfBirth", date);
                 }}
               /> */}
-              <DatePicker
+              <DatePickerV2
                 value={
                   data.dateOfBirth
                     ? dateTimeUtils.formatDateTime(
@@ -73,8 +74,8 @@ function IdentityValidationForm() {
                     : ""
                 }
                 onChange={(e) => {
-                  setStep1PanData("dateOfBirth", e.target.value);
-                  console.log(e.target.value);
+                  setStep1PanData("dateOfBirth", e);
+                  console.log(e);
                 }}
               />
             </LabelInput>
