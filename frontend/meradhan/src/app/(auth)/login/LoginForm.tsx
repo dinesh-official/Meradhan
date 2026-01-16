@@ -249,7 +249,7 @@ function LoginForm() {
           {/* Email / Phone Input */}
           <EmailOrPhoneInput
             value={state.emailOrPhoneNo}
-            onChange={(e) => setEmailOrPhoneNo(e.target.value)}
+            onChange={(e) => setEmailOrPhoneNo(e.target.value.toLowerCase())}
             readOnly={isVerifyMode}
             error={errors?.emailOrPhone}
             onEnter={handleContinue}

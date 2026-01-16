@@ -158,7 +158,9 @@ function SignUpForm() {
               placeholder="Email ID*"
               className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
               value={signUpFormData.email}
-              onChange={(e) => handleSignUpFormChange("email", e.target.value)}
+              onChange={(e) =>
+                handleSignUpFormChange("email", e.target.value.toLowerCase())
+              }
             />
           </Field>
 
@@ -297,11 +299,7 @@ function SignUpForm() {
         <Button
           type="submit"
           className="mt-3"
-          disabled={
-            isPending ||
-            createCustomerMutation.isPending
-
-          }
+          disabled={isPending || createCustomerMutation.isPending}
         >
           Sign Up
         </Button>
