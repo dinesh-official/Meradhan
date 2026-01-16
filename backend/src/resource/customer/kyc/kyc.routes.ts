@@ -22,7 +22,12 @@ kycRoutes.get(
   allowAccessMiddleware("USER"),
   (req, res) => controller.verifyPanResponse(req, res)
 );
-
+// aadhaar
+kycRoutes.post(
+  "/api/customer/kyc/aadhaar/request",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.createAadhaarVerifyRequest(req, res)
+);
 // selfie
 kycRoutes.post(
   "/api/customer/kyc/selfie/request",

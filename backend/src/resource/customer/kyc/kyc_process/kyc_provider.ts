@@ -198,6 +198,27 @@ export class KycProvider extends DigioKycFileHelper {
     return panDetails;
   }
 
+  // aadhaar generate request to digio
+  async createAadhaarVerifyRequest({
+    email,
+    id,
+    name,
+  }: {
+    email: string;
+    name: string;
+    id: string;
+  }) {
+    const aadhaarDetails = await this.digio.sendTemplateRequest({
+      emailId: email,
+      name,
+      templateName: "DIGILOCKERAADHAAR",
+      reference_id: id,
+    });
+    return aadhaarDetails;
+  }
+
+  // verify aadhaar from digio kid
+
   // selfie generate request to digio
   async createSelfieVerifyRequest({
     email,

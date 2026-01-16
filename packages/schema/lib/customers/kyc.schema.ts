@@ -45,6 +45,18 @@ export const kycPanInfoDataSchema = z.object({
   fetchedTimestamp: z.string().optional(),
 });
 
+export const kycAadhaarInfoDataSchema = z.object({
+  aadhaarCardNo: z
+    .string()
+    .regex(/^[0-9]{12}$/, "Aadhaar number must be 12 digits")
+    .min(12, "Aadhaar number must be 12 digits")
+    .max(12, "Aadhaar number must be 12 digits"),
+  firstName: z.string().min(1, "First name is required").trim(),
+  middleName: z.string().optional().default(""), // can be empty
+  lastName: z.string().optional().default(""), // can be empty
+  dateOfBirth: z.string().min(8, "Date of birth is required"),
+});
+
 export const selfieSignRequestSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   middleName: z.string().optional(), // can be empty

@@ -30,6 +30,7 @@ export interface FileData<T> {
 
 export interface Step1Data {
   pan: PanData<IPANKycVerifyResponse["responseData"]>;
+  aadhar: string;
   face: FileData<IPANKycVerifyResponse["responseData"]>;
   sign: FileData<ISignKycVerifyResponse["responseData"]>;
 }
@@ -97,6 +98,7 @@ const initData: KycDataStorage = {
       isFatca: false,
       checkKycKraConsent: true,
     },
+    aadhar: "",
     face: {
       url: "",
     },
@@ -197,6 +199,7 @@ export const useKycDataStorage = create<{
 
   // step 1
   setStep1PanData: (Key: keyof Step1Data["pan"], data: any) => void;
+  setAadharData: (data: string) => void;
   setStep1SelfieFaceData: (Key: keyof Step1Data["face"], data: any) => void;
   setStep1SignData: (Key: keyof Step1Data["sign"], data: any) => void;
   setStep2PersonalData: (Key: keyof PersonalData, data: any) => void;
@@ -237,6 +240,17 @@ export const useKycDataStorage = create<{
 
   setStepIndex(index) {
     set((prev) => ({ state: { ...prev.state, stepIndex: index } }));
+  },
+  setAadharData(data) {
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          aadhar: data,
+        },
+      },
+    }));
   },
 
   nextLocalStep() {

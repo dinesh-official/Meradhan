@@ -61,6 +61,18 @@ export class CustomerKycApi {
     return data;
   }
 
+  async requestAadharVerification(
+    payload: z.infer<typeof this.schema.kycAadhaarInfoDataSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IPANInfoVerifyResponse>(
+      "/customer/kyc/aadhaar/request",
+      payload,
+      config
+    );
+    return data;
+  }
+
   async storeKycProgress(
     payload: { step: number; data: unknown; complete?: boolean },
     config?: AxiosRequestConfig

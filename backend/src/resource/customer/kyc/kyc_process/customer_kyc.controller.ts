@@ -88,6 +88,20 @@ export class CustomerKycKycController {
     });
   }
 
+  // aadhaar verify request
+  async createAadhaarVerifyRequest(req: Request, res: Response) {
+    const id = req.customer!.id;
+    const data = appSchema.kyc.kycAadhaarInfoDataSchema.parse(req.body);
+    const response = await this.panKycService.createAadhaarVerifyRequest({
+      id,
+      data,
+    });
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
+
   // selfie verify request
   async createSelfieVerifyRequest(req: Request, res: Response) {
     const id = req.customer!.id;

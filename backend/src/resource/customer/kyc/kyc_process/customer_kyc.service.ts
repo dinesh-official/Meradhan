@@ -53,6 +53,40 @@ export class CustomerKycKycService {
     return panDetails;
   }
 
+  // aadhaar verify request
+  async createAadhaarVerifyRequest({
+    id,
+    data,
+  }: {
+    id: number;
+    data: z.infer<typeof appSchema.kyc.kycAadhaarInfoDataSchema>;
+  }) {
+    try {
+      const { firstName, lastName, middleName } = data;
+      const user = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id },
+      });
+
+      if (!user) {
+        throw new AppError("User profile Not Found", {
+          code: "USER_NOT_FOUND",
+          statusCode: 404,
+        });
+      }
+
+      const fullName = makeFullname({ firstName, middleName, lastName });
+      const aadhaarDetails = await this.kycProvider.createAadhaarVerifyRequest({
+        email: data.dateOfBirth,
+        id: data.aadhaarCardNo,
+        name: fullName,
+      });
+      return aadhaarDetails;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   // get pan aadhar document files
   async getPanAadharDocumentFiles(kid: string, userName?: string) {
     const bytes = await this.kycProvider.getMediaFileDataBytes(kid);
