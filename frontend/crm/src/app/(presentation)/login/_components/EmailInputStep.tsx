@@ -25,14 +25,18 @@ function EmailInputStep({
             type="email"
             value={value}
             disabled={isLoading}
-            onChange={(e) => onChangeAction?.(e.target.value)}
+            onChange={(e) => onChangeAction?.(e.target.value.toLowerCase())}
           />
           <div className="absolute inset-y-0 flex justify-center items-center peer-disabled:opacity-50 ps-3 text-muted-foreground/80 pointer-events-none start-0">
             <Mail size={16} aria-hidden="true" />
           </div>
         </div>
       </div>
-      <Button className="w-full" onClick={onSubmit} disabled={isLoading || !value?.includes("@meradhan.co")}>
+      <Button
+        className="w-full"
+        onClick={onSubmit}
+        disabled={isLoading || !value?.includes("@meradhan.co")}
+      >
         Send OTP
       </Button>
     </div>
