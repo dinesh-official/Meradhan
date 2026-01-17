@@ -13,14 +13,19 @@ import { userSessionStore } from "@/core/auth/userSessionStore";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useMutation } from "@tanstack/react-query";
-import { IoMdArrowDropright } from "react-icons/io";
-import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import toast from "react-hot-toast";
+import { IoMdArrowDropright } from "react-icons/io";
+import Swal from "sweetalert2";
+import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useDigioSDK } from "../../../_providers/useDigioSDK";
+import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 
 function AdharInfoForm() {
   const digio = useDigioSDK();
   const { state, setAadharData, setStep1PanData } = useKycDataStorage();
+  const { pushUserKycState, addAuditLog, } = useKycDataProvider();
+  const { nextLocalStep } = useKycDataStorage();
+
   const { session } = userSessionStore()
 
   const apiClient = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
@@ -35,9 +40,18 @@ function AdharInfoForm() {
     },
     onSuccess: (data) => {
       setStep1PanData("response", {
-        ...state.step_1.pan.response?.details,
-        aadhaar: data.responseData.details.aadhaar
+        ...state.step_1.pan.response,
+        details: {
+          ...state.step_1.pan.response?.details,
+          aadhaar: data.responseData.details.aadhaar
+        }
       })
+
+      setStep1PanData("fetchedTimestamp", new Date(data?.responseData?.completed_at).toISOString());
+
+      pushUserKycState();
+      nextLocalStep();
+
       console.log("Aadhaar verification response successful:", data);
     },
     onError: (error) => {
@@ -79,6 +93,8 @@ function AdharInfoForm() {
         data.responseData.customer_identifier,
         data.responseData.access_token.id
       );
+
+
     },
     onError: (error) => {
       console.error("Error during Aadhaar verification request:", error);
@@ -115,6 +131,7 @@ function AdharInfoForm() {
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handleAadhaarVerify}
+          disabled={requestAadharVerificationMutation.isPending || verifyAadhaarResponseMutation.isPending}
         >
           Verify Aadhaar
           <div className="flex justify-center items-center p-0 h-full">
@@ -122,7 +139,23 @@ function AdharInfoForm() {
           </div>
         </Button>
 
-        <Button variant="link" onClick={async () => { }}>
+        <Button variant="link" onClick={async () => {
+          const result = await Swal.fire({
+            text: "Are you sure you want to save and exit the KYC process?",
+            imageUrl: "/images/icons/sad-emoji.svg",
+            showCancelButton: true,
+            confirmButtonText: "Save & Exit",
+            cancelButtonText: "Cancel",
+          });
+
+          if (result.isConfirmed) {
+            addAuditLog({
+              type: "KYC_PROCESS_EXITED",
+              desc: "User chose to save and exit the KYC process : Aadhar and Identity Validation step.",
+            });
+            pushUserKycState({ exit: true });
+          }
+        }}>
           Save & Exit
         </Button>
       </CardFooter>

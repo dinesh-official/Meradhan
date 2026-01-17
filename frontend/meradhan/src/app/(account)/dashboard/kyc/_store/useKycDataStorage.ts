@@ -33,6 +33,11 @@ export interface Step1Data {
   aadhar: string;
   face: FileData<IPANKycVerifyResponse["responseData"]>;
   sign: FileData<ISignKycVerifyResponse["responseData"]>;
+  nameMismatchDeclaration: {
+    isDownloaded: boolean;
+    isConfirmed: boolean;
+    mismatch: boolean;
+  };
 }
 
 // ==========================
@@ -103,6 +108,12 @@ const initData: KycDataStorage = {
       url: "",
     },
     sign: { url: "" },
+    nameMismatchDeclaration: {
+      isDownloaded: false,
+      isConfirmed: false,
+      mismatch: false,
+    },
+
   },
   step_2: {
     maritalStatus: "",
@@ -199,6 +210,7 @@ export const useKycDataStorage = create<{
 
   // step 1
   setStep1PanData: (Key: keyof Step1Data["pan"], data: any) => void;
+  setStep1NameMismatchDeclaration: (data: Step1Data["nameMismatchDeclaration"]) => void;
   setAadharData: (data: string) => void;
   setStep1SelfieFaceData: (Key: keyof Step1Data["face"], data: any) => void;
   setStep1SignData: (Key: keyof Step1Data["sign"], data: any) => void;
@@ -275,6 +287,17 @@ export const useKycDataStorage = create<{
         step_1: {
           ...prev.state.step_1,
           pan: { ...prev.state.step_1.pan, [key]: data },
+        },
+      },
+    })),
+
+  setStep1NameMismatchDeclaration: (data) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          nameMismatchDeclaration: data,
         },
       },
     })),
@@ -436,9 +459,9 @@ export const useKycDataStorage = create<{
         step_4: prev.state.step_4.map((item, i) =>
           i === index
             ? {
-                ...item,
-                panNumber: [...item.panNumber, ""], // Add new empty PAN field
-              }
+              ...item,
+              panNumber: [...item.panNumber, ""], // Add new empty PAN field
+            }
             : item
         ),
       },

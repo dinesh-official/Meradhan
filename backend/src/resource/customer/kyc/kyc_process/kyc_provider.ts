@@ -22,6 +22,8 @@ class DigioKycFileHelper {
 
   // get pan aadhar document files from digio rid
   async getPanAadharDocumentFiles(bytes: string, userName?: string) {
+    console.log(userName);
+
     const zipBuffer = Buffer.from(bytes);
     const zip = new AdmZip(zipBuffer);
 
@@ -73,21 +75,21 @@ class DigioKycFileHelper {
       });
 
     const pathData = {
-      pan: files?.[0],
-      aadhar: files?.[1],
+      // pan: files?.[0],
+      aadhar: files?.[0],
     };
 
     const aadharUrl = await saveFileOnCloud({
       filePath: pathData.aadhar!,
       directory: `${userName ? userName + "/" : ""}kyc`,
     });
-    const panUrl = await saveFileOnCloud({
-      filePath: pathData.pan!,
-      directory: `${userName ? userName + "/" : ""}kyc`,
-    });
+    // const panUrl = await saveFileOnCloud({
+    //   filePath: pathData.pan!,
+    //   directory: `${userName ? userName + "/" : ""}kyc`,
+    // });
     return {
       aadhar: aadharUrl,
-      pan: panUrl,
+      // pan: panUrl,
     };
   }
 

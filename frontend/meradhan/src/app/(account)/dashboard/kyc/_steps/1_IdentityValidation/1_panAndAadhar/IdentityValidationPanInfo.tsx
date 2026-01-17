@@ -10,15 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { dataMatcherUtils } from "@/global/utils/matcher";
-import dynamic from "next/dynamic";
 import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 
-const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
-  ssr: false,
-});
+
 function IdentityValidationPanInfo() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();

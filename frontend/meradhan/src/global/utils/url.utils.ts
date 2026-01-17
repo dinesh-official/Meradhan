@@ -15,6 +15,8 @@ export function genMediaUrl(mediaPath?: string | null): string {
 
   // Return the full URL
   return `${ASSETS_URL}/files/${normalizedPath}`;
+  // return `${ASSETS_URL}/${normalizedPath}`;
+
 }
 
 // utils/generatePageUrl.ts

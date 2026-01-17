@@ -175,13 +175,13 @@ export type Page1Props = {
   residentialStatus?: string;
   occupationType?: string;
   verifyWith?:
-    | "AADHAAR"
-    | "DL"
-    | "VID"
-    | "PASSPORT"
-    | "NREGA"
-    | "NPR"
-    | "OTHERS";
+  | "AADHAAR"
+  | "DL"
+  | "VID"
+  | "PASSPORT"
+  | "NREGA"
+  | "NPR"
+  | "OTHERS";
   profilePic?: string;
   signature?: string;
   kycNo: string;
@@ -209,13 +209,13 @@ export type Page2Props = {
     data: AddressType;
   };
   proofWith?:
-    | "AADHAAR"
-    | "DL"
-    | "VID"
-    | "PASSPORT"
-    | "NREGA"
-    | "NPR"
-    | "OTHERS";
+  | "AADHAAR"
+  | "DL"
+  | "VID"
+  | "PASSPORT"
+  | "NREGA"
+  | "NPR"
+  | "OTHERS";
   aadharNo: string;
 };
 
@@ -234,13 +234,13 @@ export type Page4Props = {
 
 export type Page5Props = {
   documentsReceived:
-    | "Certified"
-    | "Original"
-    | "Self-Attested"
-    | "e-document"
-    | "DigitalKYC"
-    | "UIDAI"
-    | "VideoKyc";
+  | "Certified"
+  | "Original"
+  | "Self-Attested"
+  | "e-document"
+  | "DigitalKYC"
+  | "UIDAI"
+  | "VideoKyc";
   empSignature: string;
 };
 
@@ -433,9 +433,8 @@ export type Page46Props = {};
 // ============================================
 
 const getFullName = (data: Root): string => {
-  return `${data.step_1?.pan?.firstName || ""} ${
-    data.step_1?.pan?.middleName || ""
-  } ${data.step_1?.pan?.lastName || ""}`.trim();
+  return `${data.step_1?.pan?.firstName || ""} ${data.step_1?.pan?.middleName || ""
+    } ${data.step_1?.pan?.lastName || ""}`.trim();
 };
 
 const getFirstLastName = (data: Root) => ({
@@ -451,9 +450,8 @@ const getAddress = (data: Root) => {
     city: address?.district_or_city || "",
     state: address?.state || "",
     pincode: address?.pincode || "",
-    combined: `${address?.district_or_city || ""} ${address?.state || ""} ${
-      address?.pincode || ""
-    }`.trim(),
+    combined: `${address?.district_or_city || ""} ${address?.state || ""} ${address?.pincode || ""
+      }`.trim(),
   };
 };
 
@@ -513,11 +511,11 @@ export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => ({
   motherName: data.step_2?.motherName || "",
   dateOfBirth: data.step_1?.pan?.dateOfBirth || "",
   gender:
-    data.step_1?.pan?.response?.details?.pan?.gender === "M"
+    data.step_1?.pan?.response?.details?.aadhaar.gender === "M"
       ? "MALE"
-      : data.step_1?.pan?.response?.details?.pan?.gender === "F"
-      ? "FEMALE"
-      : "OTHER",
+      : data.step_1?.pan?.response?.details?.aadhaar.gender === "F"
+        ? "FEMALE"
+        : "OTHER",
   maritalStatus:
     (data.step_2?.maritalStatus as "SINGLE" | "MARRIED" | "OTHERS") || "SINGLE",
   nationality: "INDIAN",
@@ -611,16 +609,16 @@ export const mapDataForPage5 = (data: Root): Page5Props => ({
 export const mapDataForPage6 = async (data: Root): Promise<Page6Props> => ({
   eAaDhar: data.step_1?.pan?.response?.details?.aadhaar?.file_url
     ? await pdfUrlToBase64(
-        getFileUrl(data.step_1?.pan?.response?.details?.aadhaar?.file_url || "")
-      )
+      getFileUrl(data.step_1?.pan?.response?.details?.aadhaar?.file_url || "")
+    )
     : "",
 });
 
 export const mapDataForPage7 = async (data: Root): Promise<Page7Props> => ({
   ePan: data.step_1?.pan?.response?.details?.pan?.file_url
     ? await pdfUrlToBase64(
-        getFileUrl(data.step_1?.pan?.response?.details?.pan?.file_url || "")
-      )
+      getFileUrl(data.step_1?.pan?.response?.details?.pan?.file_url || "")
+    )
     : "",
 });
 

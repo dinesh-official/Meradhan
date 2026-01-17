@@ -40,10 +40,10 @@ function BankViewCard({
           </p>
         </DataInfoLabel>
         <DataInfoLabel
-          title="Name"
-          status={isNameMatched ? "SUCCESS" : "ERROR"}
-          statusLabel={isNameMatched ? "Matched" : "Not Matched"}
-          showStatus
+          title="Name as per your bank account"
+        // status={isNameMatched ? "SUCCESS" : "ERROR"}
+        // statusLabel={isNameMatched ? "Matched" : "Not Matched"}
+        // showStatus
         >
           <p className="font-medium text-sm">{bank.beneficiary_name}</p>
         </DataInfoLabel>

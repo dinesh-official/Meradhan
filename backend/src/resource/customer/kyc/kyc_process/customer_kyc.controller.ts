@@ -46,25 +46,29 @@ export class CustomerKycKycController {
     console.log(response.status);
 
     // check if aadhaar and pan details are present in response actions by digio KYC
-    if (
-      !response.actions?.[0]?.details?.aadhaar &&
-      !response.actions?.[0]?.details?.pan
-    ) {
-      throw new AppError(
-        "Your KYC verification is incomplete — both Aadhaar and PAN details are missing. Please update your KYC details and try again.",
-        { code: "KYC_NOT_APPROVED", statusCode: 400 }
-      );
-    } else if (!response.actions?.[0]?.details?.aadhaar) {
+    // if (
+    //   !response.actions?.[0]?.details?.aadhaar &&
+    //   !response.actions?.[0]?.details?.pan
+    // ) {
+    //   throw new AppError(
+    //     "Your KYC verification is incomplete — both Aadhaar and PAN details are missing. Please update your KYC details and try again.",
+    //     { code: "KYC_NOT_APPROVED", statusCode: 400 }
+    //   );
+    // } else 
+
+    if (!response.actions?.[0]?.details?.aadhaar) {
       throw new AppError(
         "Your KYC verification is incomplete — Aadhaar details are missing. Please select your Aadhaar and try again.",
         { code: "AADHAAR_NOT_FOUND", statusCode: 400 }
       );
-    } else if (!response.actions?.[0]?.details?.pan) {
-      throw new AppError(
-        "Your KYC verification is incomplete — PAN details are missing. Please select your PAN and try again.",
-        { code: "PAN_NOT_FOUND", statusCode: 400 }
-      );
     }
+
+    //  else if (!response.actions?.[0]?.details?.pan) {
+    //   throw new AppError(
+    //     "Your KYC verification is incomplete — PAN details are missing. Please select your PAN and try again.",
+    //     { code: "PAN_NOT_FOUND", statusCode: 400 }
+    //   );
+    // }
 
     // fetch aadhar and pan document files
     const kycdata = response.actions?.[0];
@@ -80,7 +84,7 @@ export class CustomerKycKycController {
     // append file urls to kyc data response
     kycdata.details.aadhaar.image = aadharImage || "";
     kycdata.details.aadhaar.file_url = aadharData.aadhar || "";
-    kycdata.details.pan.file_url = aadharData.pan || "";
+    // kycdata.details.pan.file_url = aadharData.pan || "";
 
     res.sendResponse({
       statusCode: HttpStatus.OK,

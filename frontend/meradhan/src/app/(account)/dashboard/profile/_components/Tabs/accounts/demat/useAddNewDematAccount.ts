@@ -95,7 +95,7 @@ export const useAddNewDematAccountFormHook = ({
       } else {
         toast.error(
           statusCodes?.[data.responseData.status as keyof typeof statusCodes] ||
-            "Something went wrong"
+          "Something went wrong"
         );
       }
     },
