@@ -99,8 +99,9 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <FaLocationDot size={16} />
                   </div>
                   <p>
-                    D 2703, Ashok Tower, Dr SSR Road, Parel (East) <br /> Mumbai
-                    - 400012, Maharashtra
+                    BondNest Capital India Securities Private Limited <br /> D
+                    2703, Ashok Tower, Dr SSR Road, Parel (East) <br /> Mumbai -
+                    400012, Maharashtra
                   </p>
                 </div>
                 <div className="flex items-center gap-4 text-sm flx">
@@ -122,6 +123,36 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Bond Directory
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/docs/Investor-Charter.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Investor Charter
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/docs/Regulatory-Disclosure.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Regulatory Disclosure
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/docs/Investor-Grievance-Redressal-Mechanism.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Investor Grievance
                     </Link>
                   </li>
                 </ul>
