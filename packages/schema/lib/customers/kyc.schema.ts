@@ -55,6 +55,7 @@ export const kycAadhaarInfoDataSchema = z.object({
   middleName: z.string().optional().default(""), // can be empty
   lastName: z.string().optional().default(""), // can be empty
   dateOfBirth: z.string().min(8, "Date of birth is required"),
+  email: z.email("Invalid email address"),
 });
 
 export const selfieSignRequestSchema = z.object({

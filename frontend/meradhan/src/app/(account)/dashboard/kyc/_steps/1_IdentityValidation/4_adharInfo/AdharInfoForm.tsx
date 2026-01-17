@@ -9,32 +9,90 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { userSessionStore } from "@/core/auth/userSessionStore";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
+import { useMutation } from "@tanstack/react-query";
 import { IoMdArrowDropright } from "react-icons/io";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
+import toast from "react-hot-toast";
+import { useDigioSDK } from "../../../_providers/useDigioSDK";
 
 function AdharInfoForm() {
-  const { state, setAadharData } = useKycDataStorage();
+  const digio = useDigioSDK();
+  const { state, setAadharData, setStep1PanData } = useKycDataStorage();
+  const { session } = userSessionStore()
 
   const apiClient = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
   );
 
-  const handleAadhaarVerify = async () => {
-    try {
+  const verifyAadhaarResponseMutation = useMutation({
+    mutationKey: ["verifyAadhaarResponse"],
+    mutationFn: async (kid: string) => {
+      const response = await apiClient.verifyPanVerification({ kid });
+      return response;
+    },
+    onSuccess: (data) => {
+      setStep1PanData("response", {
+        ...state.step_1.pan.response?.details,
+        aadhaar: data.responseData.details.aadhaar
+      })
+      console.log("Aadhaar verification response successful:", data);
+    },
+    onError: (error) => {
+      console.error("Error during Aadhaar verification response:", error);
+    },
+  });
+
+  const requestAadharVerificationMutation = useMutation({
+    mutationKey: ["requestAadharVerification"],
+    mutationFn: async () => {
       const response = await apiClient.requestAadharVerification({
         aadhaarCardNo: state.step_1.aadhar,
         dateOfBirth: state.step_1.pan.dateOfBirth,
         firstName: state.step_1.pan.firstName,
         lastName: state.step_1.pan.lastName,
         middleName: state.step_1.pan.middleName || "",
+        email: session?.emailAddress || ""
       });
-      console.log("Aadhaar verification request successful:", response);
-    } catch (error) {
+      return response;
+    },
+    onSuccess: (data) => {
+      const kycInstance = digio.createInstance({
+        callback(response) {
+          if (response.error_code) {
+            toast.error(response.message || "Something went wrong");
+
+          } else if (response.digio_doc_id) {
+            // TODO: verify aadhaar response
+            console.log(response);
+            verifyAadhaarResponseMutation.mutate(response.digio_doc_id);
+          } else {
+            toast.error(response.message || "Something went wrong");
+          }
+        },
+      });
+      kycInstance.init();
+      kycInstance.submit(
+        data.responseData.access_token.entity_id,
+        data.responseData.customer_identifier,
+        data.responseData.access_token.id
+      );
+    },
+    onError: (error) => {
       console.error("Error during Aadhaar verification request:", error);
+    },
+  });
+
+  const handleAadhaarVerify = () => {
+    if (state.step_1.aadhar.length !== 12) {
+      toast.error("Aadhaar number must be 12 digits");
+      return;
     }
+    requestAadharVerificationMutation.mutate();
   };
+
 
   return (
     <Card accountMode>
@@ -64,7 +122,7 @@ function AdharInfoForm() {
           </div>
         </Button>
 
-        <Button variant="link" onClick={async () => {}}>
+        <Button variant="link" onClick={async () => { }}>
           Save & Exit
         </Button>
       </CardFooter>

@@ -12,7 +12,7 @@ interface StoreFileOptions {
 export async function saveFileOnCloud({
   filePath,
   directory,
-  provider = "S3",
+  provider = "Local",
 }: StoreFileOptions): Promise<string> {
   switch (provider) {
     case "S3": {
@@ -37,7 +37,8 @@ export async function saveFileOnCloud({
        * but files stored here should still be considered less secure than S3.
        * Use this only for non-sensitive temporary files or development/testing.
        */
-      
+      console.log(filePath);
+
       // cria subpasta como Multer faria
       const destFolder = path.join("uploads", directory || "");
 

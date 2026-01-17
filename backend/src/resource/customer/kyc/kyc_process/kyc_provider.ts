@@ -18,7 +18,7 @@ import * as path from "path";
 
 // helper class for digio kyc file operations
 class DigioKycFileHelper {
-  constructor(private digioSdk: DigioSDK) {}
+  constructor(private digioSdk: DigioSDK) { }
 
   // get pan aadhar document files from digio rid
   async getPanAadharDocumentFiles(bytes: string, userName?: string) {
@@ -217,7 +217,21 @@ export class KycProvider extends DigioKycFileHelper {
     return aadhaarDetails;
   }
 
-  // verify aadhaar from digio kid
+  // // verify aadhaar from digio kid
+
+  // async verifyAadhaar({ kid }: { kid: string }) {
+  //   try {
+  //     const aadhaarDetails =
+  //       await this.digio.getKycgetResponse(kid);
+  //     return aadhaarDetails;
+  //   } catch (error) {
+  //     console.log(error?.response?.data);
+  //     throw new AppError("Aadhaar verification failed", {
+  //       code: "AADHAAR_VERIFICATION_FAILED",
+  //       statusCode: 400,
+  //     });
+  //   }
+  // }
 
   // selfie generate request to digio
   async createSelfieVerifyRequest({
@@ -325,11 +339,11 @@ export class KycProvider extends DigioKycFileHelper {
         throw new AppError(
           (error as AxiosError<{ error: string; ErrorDescription?: string }>)
             ?.response?.data?.ErrorDescription ||
-            (error as AxiosError<{ error: string; message?: string }>)?.response
-              ?.data?.error ||
-            (error as AxiosError<{ error: string; message?: string }>)?.response
-              ?.data?.message ||
-            error.toString(),
+          (error as AxiosError<{ error: string; message?: string }>)?.response
+            ?.data?.error ||
+          (error as AxiosError<{ error: string; message?: string }>)?.response
+            ?.data?.message ||
+          error.toString(),
           { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 }
         );
       }

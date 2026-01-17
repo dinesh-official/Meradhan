@@ -76,7 +76,7 @@ export class CustomerKycKycService {
 
       const fullName = makeFullname({ firstName, middleName, lastName });
       const aadhaarDetails = await this.kycProvider.createAadhaarVerifyRequest({
-        email: data.dateOfBirth,
+        email: data.email,
         id: data.aadhaarCardNo,
         name: fullName,
       });

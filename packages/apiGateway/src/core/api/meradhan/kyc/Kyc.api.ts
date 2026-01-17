@@ -10,6 +10,7 @@ import type {
   IDmatKycVerifyResponse,
   IEsignKycRequest,
   IPANInfoVerifyResponse,
+  IPANKycRequestResponse,
   IPANKycVerifyResponse,
   ISelfireKycRequestResponse,
   ISelfireKycVerifyResponse,
@@ -23,7 +24,7 @@ import type {
 export class CustomerKycApi {
   private schema = appSchema.kyc;
 
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   // pan
   async verifyPanInfo(
@@ -65,9 +66,20 @@ export class CustomerKycApi {
     payload: z.infer<typeof this.schema.kycAadhaarInfoDataSchema>,
     config?: AxiosRequestConfig
   ) {
-    const { data } = await this.apiClient.post<IPANInfoVerifyResponse>(
+    const { data } = await this.apiClient.post<IPANKycRequestResponse>(
       "/customer/kyc/aadhaar/request",
       payload,
+      config
+    );
+    return data;
+  }
+
+  async verifyAadharVerification(
+    payload: { kid: string },
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.get<IPANKycVerifyResponse>(
+      "/customer/kyc/aadhaar/response/" + payload.kid,
       config
     );
     return data;
