@@ -52,7 +52,7 @@ export class TZDate {
    */
   toISOString() {
     return `${this.get("year")}-${this.get("month")}-${this.get(
-      "day"
+      "day",
     )}T${this.get("hour")}:${this.get("minute")}:${this.get("second")}`;
   }
 
@@ -100,7 +100,7 @@ export class TZDate {
   }) {
     const d = new Date(this.date);
     d.setUTCSeconds(
-      d.getUTCSeconds() + seconds + minutes * 60 + hours * 3600 + days * 86400
+      d.getUTCSeconds() + seconds + minutes * 60 + hours * 3600 + days * 86400,
     );
     return new TZDate(d, this.timeZone);
   }

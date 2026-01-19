@@ -1,9 +1,6 @@
 import type { CookieOptions } from "express";
 
-const COOKIE_EXPIRY_TIME = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000); // 1 day
-
 export const cookieOptions: CookieOptions = {
-  expires: COOKIE_EXPIRY_TIME,
   httpOnly: true, // Prevent XSS attacks
   secure: true, // HTTPS only in production ✅
   sameSite: "none", // CSRF protection
@@ -18,5 +15,6 @@ export const cookieOptions: CookieOptions = {
   // Cookies set by api.meradhan.co will only be accessible to api.meradhan.co
   // Frontend apps can still send these cookies via CORS with credentials: true
   domain: process.env.NODE_ENV === "production" ? ".meradhan.co" : undefined,
-  maxAge: 24 * 60 * 60, // 1 day in seconds
+  expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  maxAge: 24 * 60 * 60 * 1000,
 };

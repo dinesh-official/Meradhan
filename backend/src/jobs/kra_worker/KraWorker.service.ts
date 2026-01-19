@@ -177,7 +177,7 @@ export class KraProcess {
     this.counter = (this.counter + 1) % 1000;
     return `${base}${this.counter.toString().padStart(3, "0")}`.replaceAll(
       "-",
-      ""
+      "",
     );
   }
 
@@ -236,7 +236,7 @@ export class KraProcess {
     const payload = {
       dob: formatDate(new Date(data.step_1.pan.dateOfBirth)).replaceAll(
         "-",
-        ""
+        "",
       ),
       pan: data.step_1.pan.panCardNo.split("-").reverse().join(""),
       mobile: kraMobNo,
@@ -377,7 +377,7 @@ export class KraProcess {
 
     if (
       report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
-        "INVALID IN-PERSON VERIFICATION FLAG"
+        "INVALID IN-PERSON VERIFICATION FLAG",
       )
     ) {
       // Retry once with IPV_FLAG as 'N'
@@ -420,7 +420,7 @@ export class KraProcess {
   buildRegisterPayload(
     data: Root,
     customer: CustomerProfileDataModel,
-    isModify: boolean = false
+    isModify: boolean = false,
   ): T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"] {
     const panRaw = data.step_1?.pan?.panCardNo || "";
     const panNo = panRaw ? panRaw.split("-").reverse().join("") : "";
@@ -435,16 +435,16 @@ export class KraProcess {
       removeLastCommaChunks(
         data.step_1.pan.response.details.aadhaar.current_address_details
           .address,
-        3
-      )
+        3,
+      ),
     );
 
     const porAddress = splitAddressInto3BalancedLines(
       removeLastCommaChunks(
         data.step_1.pan.response.details.aadhaar.permanent_address_details
           .address,
-        3
-      )
+        3,
+      ),
     );
 
     const appPanInq = {
@@ -463,7 +463,7 @@ export class KraProcess {
       APP_EXMT_ID_PROOF: "01",
       APP_IPV_FLAG: "N",
       APP_IPV_DATE: "",
-      APP_GEN: data.step_1.pan.response.details.pan.gender,
+      APP_GEN: data.step_1.pan.response.details.aadhaar.gender,
       APP_NAME: makeFullname({ firstName, middleName, lastName }),
       APP_F_NAME: data.step_2.fatSpuName,
       APP_REGNO: "",
@@ -478,7 +478,7 @@ export class KraProcess {
       APP_RES_STATUS_PROOF: "",
       APP_UID_NO: data.step_1.pan.response.details.aadhaar.id_number.replaceAll(
         "x",
-        "0"
+        "0",
       ),
       APP_COR_ADD1: corAddress.line1,
       APP_COR_ADD2: corAddress.line2,
@@ -490,14 +490,14 @@ export class KraProcess {
         data.step_1.pan.response.details.aadhaar.current_address_details
           .pincode,
       APP_COR_STATE: getKraState(
-        data.step_1.pan.response.details.aadhaar.current_address_details.state
+        data.step_1.pan.response.details.aadhaar.current_address_details.state,
       )?.code,
 
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
             data.step_1.pan.response.details.aadhaar.current_address_details
-              .state
+              .state,
           )?.code
         : undefined,
       APP_OFF_NO: "",
@@ -519,7 +519,8 @@ export class KraProcess {
         data.step_1.pan.response.details.aadhaar.permanent_address_details
           .pincode,
       APP_PER_STATE: getKraState(
-        data.step_1.pan.response.details.aadhaar.permanent_address_details.state
+        data.step_1.pan.response.details.aadhaar.permanent_address_details
+          .state,
       )?.code,
       APP_OTH_PER_STATE: "",
       APP_PER_CTRY: getKraCountry("india")?.code,
