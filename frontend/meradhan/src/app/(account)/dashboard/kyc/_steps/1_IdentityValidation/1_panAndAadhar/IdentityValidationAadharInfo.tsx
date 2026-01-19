@@ -14,13 +14,17 @@ import { genMediaUrl } from "@/global/utils/url.utils";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
+import { BiLoaderCircle } from "react-icons/bi";
+import { FaRedo } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { FaDownload } from "react-icons/fa";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import type { MatchResult } from "@/global/utils/match_name";
+import { makeFullname } from "@/global/utils/formate";
 const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
   ssr: false,
 });
@@ -35,19 +39,89 @@ function IdentityValidationAadharInfo() {
     state,
     nextLocalStep,
     setStep1PanData,
+    prevLocalStep,
     setStep1NameMismatchDeclaration,
   } = useKycDataStorage();
 
   const data = state.step_1.pan;
 
-  const isNameMatched = dataMatcherUtils.areNamesMatched(
-    dataMatcherUtils.splitFullName(data.response?.details.pan.name),
-    {
+  const [isNameMatched, setisNameMatched] = useState<MatchResult | undefined>(undefined);
+  const [isCheckingName, setIsCheckingName] = useState(false);
+
+  /**
+   * Check name matching via API
+   */
+  const checkNameMatch = useCallback(async () => {
+    const aadhaarName = data.response?.details?.aadhaar?.name || "";
+    const panName = makeFullname({
       firstName: data.firstName,
       middleName: data.middleName,
       lastName: data.lastName,
-    },
-  );
+    });
+
+    // Skip if names are not available
+    if (!aadhaarName || !panName) {
+      return;
+    }
+
+    setIsCheckingName(true);
+    try {
+      const response = await fetch("/api/kyc/check-name", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name1: aadhaarName,
+          name2: panName,
+          dob1: data.response?.details?.aadhaar?.dob || null,
+          dob2: data.response?.details?.pan?.dob || null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to check name match");
+      }
+
+      const result: MatchResult = await response.json();
+      setisNameMatched({
+        score: result.score,
+        decision: result.decision,
+        breakdown: result.breakdown,
+      });
+    } catch (error) {
+      console.error("Error checking name match:", error);
+      // Fallback to MATCH_FAIL on error
+      setisNameMatched({
+        score: 0,
+        decision: "MATCH_FAIL",
+        breakdown: {
+          fuzzy: 0,
+          tokenOverlap: 0,
+          phonetic: 0,
+          initialsMatch: false,
+          lastNameExact: false,
+          initialStyleDetected: false,
+          dateOfBirthMatch: false,
+        },
+      });
+    } finally {
+      setIsCheckingName(false);
+    }
+  }, [
+    data.response?.details?.aadhaar?.name,
+    data.firstName,
+    data.middleName,
+    data.lastName,
+    data.response?.details?.aadhaar?.dob,
+    data.response?.details?.pan?.dob,
+  ]);
+
+  useEffect(() => {
+    checkNameMatch();
+  }, [checkNameMatch]);
+
+
 
   const isDobMatched = dataMatcherUtils.areDatesMatched(
     data.response?.details.aadhaar.dob
@@ -62,14 +136,20 @@ function IdentityValidationAadharInfo() {
     setStep1NameMismatchDeclaration({
       isDownloaded: false,
       isConfirmed: false,
-      mismatch: isNameMatched,
+      mismatch: isNameMatched?.decision != "MATCH_FAIL",
+      score: isNameMatched?.score || 0,
+      decision: isNameMatched?.decision || "MATCH_FAIL",
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isNameMatched]);
   const isGenderMatched =
     state.step_1?.gender == state.step_1.pan.response?.details?.aadhaar?.gender; // Aadhaar does not have
 
   const isAllowToContinue = () => {
-    if (isNameMatched) {
+    if (!isGenderMatched) {
+      return false;
+    }
+    if (isNameMatched?.decision == "MATCH_FULL") {
       return true;
     }
     if (!state.step_1?.nameMismatchDeclaration?.isDownloaded) {
@@ -78,9 +158,7 @@ function IdentityValidationAadharInfo() {
     if (!state.step_1?.nameMismatchDeclaration?.isConfirmed) {
       return false;
     }
-    if (!isGenderMatched) {
-      return false;
-    }
+
     return true;
   };
 
@@ -92,8 +170,8 @@ function IdentityValidationAadharInfo() {
         </CardTitle>
       </CardHeader>
       <CardContent accountMode>
-        <div className="gap-10 grid ">
-          <div className="flex flex-col gap-5 ">
+        <div className="gap-10  w-full flex flex-col">
+          <div className="flex flex-col  gap-5 w-full ">
             <DataInfoLabel
               title="Aadhaar Number (last 4-digits)"
               status="SUCCESS"
@@ -104,23 +182,53 @@ function IdentityValidationAadharInfo() {
                 {data.response?.details.aadhaar.id_number}
               </p>
             </DataInfoLabel>
-            <div className="gap-3 grid md:grid-cols-3">
+            <div className="gap-3 grid md:grid-cols-3 w-full ">
               <DataInfoLabel
                 title="Name"
-                status={isNameMatched ? "SUCCESS" : "WARNING"}
+                status={
+                  isCheckingName
+                    ? undefined
+                    : isNameMatched?.decision == "MATCH_FULL"
+                      ? "SUCCESS"
+                      : isNameMatched?.decision == "MATCH_PARTIAL"
+                        ? "WARNING"
+                        : "ERROR"
+                }
                 statusLabel={
-                  isNameMatched ? "Matched" : "Partially Matched with PAN"
+                  isCheckingName
+                    ? "Checking..."
+                    : isNameMatched?.decision == "MATCH_FULL"
+                      ? "Matched"
+                      : isNameMatched?.decision == "MATCH_PARTIAL"
+                        ? "Partially Matched with PAN"
+                        : "Doesn't Match with PAN"
                 }
                 showStatus
               >
-                <p className="font-medium">
-                  {data.response?.details.aadhaar.name}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-medium">
+                    {data.response?.details.aadhaar.name}
+                  </p>
+                  {isCheckingName && (
+                    <BiLoaderCircle className="text-primary animate-spin" size={20} />
+                  )}
+                  {!isCheckingName && isNameMatched?.decision == "MATCH_FAIL" && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={prevLocalStep}
+                      className="h-auto p-0 text-primary hover:text-primary/80 flex items-center gap-2"
+                    >
+                      Retry
+                      <FaRedo className="w-3 h-3" size={10} />
+                    </Button>
+                  )}
+                </div>
               </DataInfoLabel>
               <DataInfoLabel
                 title="Date of Birth"
                 status={isDobMatched ? "SUCCESS" : "ERROR"}
-                statusLabel={isDobMatched ? "Matched" : "Not Matched"}
+                statusLabel={isDobMatched ? "Matched With PAN" : "Not Matched With PAN"}
                 showStatus
               >
                 <p className="font-medium">
@@ -207,7 +315,7 @@ function IdentityValidationAadharInfo() {
           </p>
         )}
 
-        {!isNameMatched && (
+        {isNameMatched?.decision == "MATCH_PARTIAL" && (
           <div className="flex flex-col gap-5 mt-5">
             <div className="flex flex-col gap-3">
               <Link
@@ -265,21 +373,24 @@ function IdentityValidationAadharInfo() {
             </div>
           </div>
         )}
-        {isNameMatched && (
-          <div className="flex flex-col gap-1 mt-8 mb-3">
-            <p className="font-semibold">
-              We’re unable to fully match your name across documents.
-            </p>
-            <p>
-              Please ensure that the Aadhaar details you’ve entered are correct
-              and try again. If the issue persists, you may contact our support
-              team for assistance.
-            </p>
+        {isNameMatched?.decision == "MATCH_FAIL" && (
+          <div className="flex flex-col gap-3 mt-8 mb-3">
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold">
+                We&apos;re unable to fully match your name across documents.
+              </p>
+              <p>
+                Please ensure that the Aadhaar details you&apos;ve entered are correct
+                and try again. If the issue persists, you may contact our support
+                team for assistance.
+              </p>
+            </div>
+
           </div>
         )}
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
-        <Button
+        {isNameMatched?.decision != "MATCH_FAIL" && <Button
           className="flex items-center gap-1 w-full sm:w-auto"
           onClick={() => {
             setStep1PanData(
@@ -310,7 +421,7 @@ function IdentityValidationAadharInfo() {
           <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
-        </Button>
+        </Button>}
         <Button
           variant={`link`}
           onClick={async () => {

@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { userSessionStore } from "@/core/auth/userSessionStore";
-import useAppCookie from "@/hooks/useAppCookie.hook";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";

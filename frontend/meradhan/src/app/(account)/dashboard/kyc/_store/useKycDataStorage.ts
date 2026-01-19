@@ -4,6 +4,7 @@
   Strongly Typed | Modular | Maintainable
 */
 
+import { MatchResult } from "@/global/utils/match_name";
 import {
   IPANKycVerifyResponse,
   ISignKycVerifyResponse,
@@ -39,6 +40,9 @@ export interface Step1Data {
     isDownloaded: boolean;
     isConfirmed: boolean;
     mismatch: boolean;
+    score: number;
+    decision: MatchResult['decision'];
+
   };
 }
 
@@ -118,6 +122,8 @@ const initData: KycDataStorage = {
       isDownloaded: false,
       isConfirmed: false,
       mismatch: false,
+      decision: "MATCH_FAIL",
+      score: 0,
     },
   },
   step_2: {
@@ -480,9 +486,9 @@ export const useKycDataStorage = create<{
         step_4: prev.state.step_4.map((item, i) =>
           i === index
             ? {
-                ...item,
-                panNumber: [...item.panNumber, ""], // Add new empty PAN field
-              }
+              ...item,
+              panNumber: [...item.panNumber, ""], // Add new empty PAN field
+            }
             : item,
         ),
       },
