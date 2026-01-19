@@ -54,7 +54,7 @@ export const useLoginFormHook = () => {
   const { trackActivity } = useUserTracking();
   // Initialize API instance
   const signinApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller
+    apiClientCaller,
   );
   const router = useRouter();
   const { setCookie } = useAppCookie();
@@ -113,7 +113,7 @@ export const useLoginFormHook = () => {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
             error.message ||
-            "Something went wrong"
+            "Something went wrong",
         );
       }
     },
@@ -144,7 +144,7 @@ export const useLoginFormHook = () => {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
             error.message ||
-            "Something went wrong"
+            "Something went wrong",
         );
       }
     },
@@ -192,7 +192,7 @@ export const useLoginFormHook = () => {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
             error.message ||
-            "Something went wrong"
+            "Something went wrong",
         );
       } else {
         toast.error(error.message);
@@ -223,7 +223,7 @@ export const useLoginFormHook = () => {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
             error.message ||
-            "Something went wrong"
+            "Something went wrong",
         );
       } else {
         toast.error(error.message);
@@ -246,7 +246,7 @@ export const useLoginFormHook = () => {
       dataStore.setErrorMessage("");
       dataStore.setSuccessMessage("");
       dataStore.setSuccessMessage(
-        "Verification email sent successfully. Please check your inbox."
+        "Verification email sent successfully. Please check your inbox.",
       );
       toast.success("Verification email sent successfully");
     },
@@ -332,16 +332,16 @@ export const useLoginFormHook = () => {
     token: string;
     id: string;
   }) => {
-    // Use longer expiry (30 days) if remember me is checked, otherwise use default (1 day)
-    const cookieOptions = state.rememberMe
-      ? {
-          ...COOKIE_OPTIONS,
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-        }
-      : COOKIE_OPTIONS;
+    // // Use longer expiry (30 days) if remember me is checked, otherwise use default (1 day)
+    // const cookieOptions = state.rememberMe
+    //   ? {
+    //       ...COOKIE_OPTIONS,
+    //       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    //     }
+    //   : COOKIE_OPTIONS;
 
-    setCookie("token", token, cookieOptions);
-    setCookie("userId", id, cookieOptions);
+    // setCookie("token", token, cookieOptions);
+    // setCookie("userId", id, cookieOptions);
 
     // redirect to dashboard
     if (localStorage.getItem("redirect")) {

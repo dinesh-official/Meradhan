@@ -26,11 +26,11 @@ export class CustomerAuthController {
   // ✅ Send Auth Email OTP
   async sendAuthEmailOtp(req: Request, res: Response) {
     const { email, name } = appSchema.customer.sendEmailOtpSchema.parse(
-      req.body
+      req.body,
     );
     const response = await this.optManager.generateOtp(
       "CUSTOMER_SIGNUP:" + email,
-      4
+      4,
     );
     await sendCustomerSignupOtpEmail({
       email,
@@ -50,7 +50,7 @@ export class CustomerAuthController {
     const { mobile } = appSchema.customer.sendMobileOtpSchema.parse(req.body);
     const response = await this.optManager.generateOtp(
       "CUSTOMER_SIGNUP:" + mobile,
-      4
+      4,
     );
     await sendMobileOtp({ mobile, otp: response.otp, template: "signup" });
     // Track successful OTP send for rate limiting
@@ -88,14 +88,14 @@ export class CustomerAuthController {
       appSchema.customer.signUpWithCredentialsQuerySchema.parse(req.query);
     const isVerified = await this.optManager.verifyOtp(
       token || "",
-      otp.toString()
+      otp.toString(),
     );
     if (!isVerified) {
       throw new AppError("The OTP provided is invalid.");
     }
     const user = await this.customerAuthService.verifyOtpForSignup(
       Number(id!),
-      verifyBy as "email" | "mobile"
+      verifyBy as "email" | "mobile",
     );
     // send welcome email
     const userData = await db.dataBase.customerProfileDataModel.findUnique({
@@ -123,7 +123,7 @@ export class CustomerAuthController {
   // signin request with email or phone
   async signInRequest(req: Request, res: Response) {
     const payload = appSchema.customer.signInWithEmailPhoneRequestSchema.parse(
-      req.body
+      req.body,
     );
     const response = await this.customerAuthService.signinRequest({
       identifier: payload.identity,
@@ -162,6 +162,8 @@ export class CustomerAuthController {
       userId: data.id,
       sessionId: req.cookies["meradhan_tracking_session"],
     });
+    res.cookie("token", data.token, cookieOptions);
+    res.cookie("userId", data.id.toString(), cookieOptions);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,
@@ -170,7 +172,7 @@ export class CustomerAuthController {
 
   async signInWithOtpSend(req: Request, res: Response) {
     const { identity, value } = appSchema.customer.sendSignInOtpSchema.parse(
-      req.body
+      req.body,
     );
     const data = await this.customerAuthService.sendSigninWithOtp({
       identifier: identity,
@@ -195,6 +197,8 @@ export class CustomerAuthController {
     });
     // Track successful OTP verification for rate limiting
     await trackRateLimitSuccess(req, "otp-verify");
+    res.cookie("token", data.token, cookieOptions);
+    res.cookie("userId", data.id.toString(), cookieOptions);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,
@@ -203,7 +207,7 @@ export class CustomerAuthController {
 
   async signInSocialMedia(req: Request, res: Response) {
     const socialLogin = appSchema.customer.SocialLoginUserSchema.parse(
-      req.body
+      req.body,
     );
     const data = await this.customerAuthService.socialLogin(socialLogin);
     res.sendResponse({
@@ -281,10 +285,10 @@ export class CustomerAuthController {
 
   async resendEmailVerificationForUnverifiedUser(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     const payload = appSchema.customer.signInWithEmailPhoneRequestSchema.parse(
-      req.body
+      req.body,
     );
     await this.customerAuthService.resendEmailVerificationForUnverifiedUser({
       identifier: payload.identity,
