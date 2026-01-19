@@ -51,7 +51,9 @@ function IdentityValidationPanInfo() {
     <Card accountMode>
       {/* {JSON.stringify(data)} */}
       <CardHeader accountMode>
-        <CardTitle className="font-normal">Confirm PAN Details</CardTitle>
+        <CardTitle className="font-normal">
+          Confirm PAN Details {state.stepIndex}
+        </CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="gap-5 grid md:grid-cols-2 lg:grid-cols-3">
@@ -134,8 +136,9 @@ function IdentityValidationPanInfo() {
                 MiddleName: state.step_1.pan.middleName,
                 LastName: state.step_1.pan.lastName,
                 Gender:
-                  genders[data.response?.details.aadhaar.gender as "M" | "F"] ||
-                  "Others",
+                  genders[
+                    data.response?.details?.aadhaar?.gender as "M" | "F"
+                  ] || "Others",
               },
               entityType: "KYC",
             });

@@ -17,8 +17,9 @@ type schema = typeof appSchema.kyc;
 // ==========================
 // 🪪 Step 1: PAN & Identity Data
 // ==========================
-export interface PanData<T = unknown>
-  extends z.infer<schema["kycPanInfoDataSchema"]> {
+export interface PanData<T = unknown> extends z.infer<
+  schema["kycPanInfoDataSchema"]
+> {
   response?: T;
 }
 
@@ -31,6 +32,7 @@ export interface FileData<T> {
 export interface Step1Data {
   pan: PanData<IPANKycVerifyResponse["responseData"]>;
   aadhar: string;
+  gender: string;
   face: FileData<IPANKycVerifyResponse["responseData"]>;
   sign: FileData<ISignKycVerifyResponse["responseData"]>;
   nameMismatchDeclaration: {
@@ -43,16 +45,18 @@ export interface Step1Data {
 // ==========================
 // 👨‍👩‍👧 Step 2: Personal Details
 // ==========================
-export interface PersonalData<T = unknown>
-  extends z.infer<schema["personalInfoSchema"]> {
+export interface PersonalData<T = unknown> extends z.infer<
+  schema["personalInfoSchema"]
+> {
   response?: T;
 }
 
 // ==========================
 // 🏦 Step 3: Bank Details
 // ==========================
-export interface BankAccountData<T = unknown>
-  extends z.infer<schema["bankInfoSchema"]> {
+export interface BankAccountData<T = unknown> extends z.infer<
+  schema["bankInfoSchema"]
+> {
   isVerified?: boolean;
   response?: T;
 }
@@ -60,8 +64,9 @@ export interface BankAccountData<T = unknown>
 // ==========================
 // 🧾 Step 4: Depository Details
 // ==========================
-export interface DepositoryData<T = unknown>
-  extends z.infer<schema["dpAccountInfoSchema"]> {
+export interface DepositoryData<T = unknown> extends z.infer<
+  schema["dpAccountInfoSchema"]
+> {
   response?: T;
 }
 
@@ -104,6 +109,7 @@ const initData: KycDataStorage = {
       checkKycKraConsent: true,
     },
     aadhar: "",
+    gender: "",
     face: {
       url: "",
     },
@@ -113,7 +119,6 @@ const initData: KycDataStorage = {
       isConfirmed: false,
       mismatch: false,
     },
-
   },
   step_2: {
     maritalStatus: "",
@@ -201,7 +206,7 @@ export const useKycDataStorage = create<{
   setState: (state: KycDataStorage) => void;
   updateStep: <K extends keyof KycDataStorage>(
     step: K,
-    data: KycDataStorage[K]
+    data: KycDataStorage[K],
   ) => void;
   reset: () => void;
   setStepIndex: (index: number) => void;
@@ -210,8 +215,11 @@ export const useKycDataStorage = create<{
 
   // step 1
   setStep1PanData: (Key: keyof Step1Data["pan"], data: any) => void;
-  setStep1NameMismatchDeclaration: (data: Step1Data["nameMismatchDeclaration"]) => void;
+  setStep1NameMismatchDeclaration: (
+    data: Step1Data["nameMismatchDeclaration"],
+  ) => void;
   setAadharData: (data: string) => void;
+  setGenderData: (data: string) => void;
   setStep1SelfieFaceData: (Key: keyof Step1Data["face"], data: any) => void;
   setStep1SignData: (Key: keyof Step1Data["sign"], data: any) => void;
   setStep2PersonalData: (Key: keyof PersonalData, data: any) => void;
@@ -253,6 +261,7 @@ export const useKycDataStorage = create<{
   setStepIndex(index) {
     set((prev) => ({ state: { ...prev.state, stepIndex: index } }));
   },
+
   setAadharData(data) {
     set((prev) => ({
       state: {
@@ -260,6 +269,18 @@ export const useKycDataStorage = create<{
         step_1: {
           ...prev.state.step_1,
           aadhar: data,
+        },
+      },
+    }));
+  },
+
+  setGenderData(data) {
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          gender: data,
         },
       },
     }));
@@ -364,7 +385,7 @@ export const useKycDataStorage = create<{
       state: {
         ...prev.state,
         step_3: prev.state.step_3.map((item, i) =>
-          i === index ? { ...item, ...data } : item
+          i === index ? { ...item, ...data } : item,
         ),
       },
     }));
@@ -386,7 +407,7 @@ export const useKycDataStorage = create<{
         step_3: prev.state.step_3.map((item, i) =>
           i === index
             ? { ...item, isDefault: true }
-            : { ...item, isDefault: false }
+            : { ...item, isDefault: false },
         ),
       },
     }));
@@ -412,7 +433,7 @@ export const useKycDataStorage = create<{
       state: {
         ...prev.state,
         step_4: prev.state.step_4.map((item, i) =>
-          i === index ? { ...item, ...data } : item
+          i === index ? { ...item, ...data } : item,
         ),
       },
     }));
@@ -432,7 +453,7 @@ export const useKycDataStorage = create<{
       state: {
         ...prev.state,
         step_4: prev.state.step_4.map((item, i) =>
-          i === index ? { ...item, panNumber: data } : item
+          i === index ? { ...item, panNumber: data } : item,
         ),
       },
     }));
@@ -445,7 +466,7 @@ export const useKycDataStorage = create<{
         step_4: prev.state.step_4.map((item, i) =>
           i === index
             ? { ...item, isDefault: true }
-            : { ...item, isDefault: false }
+            : { ...item, isDefault: false },
         ),
       },
     }));
@@ -459,10 +480,10 @@ export const useKycDataStorage = create<{
         step_4: prev.state.step_4.map((item, i) =>
           i === index
             ? {
-              ...item,
-              panNumber: [...item.panNumber, ""], // Add new empty PAN field
-            }
-            : item
+                ...item,
+                panNumber: [...item.panNumber, ""], // Add new empty PAN field
+              }
+            : item,
         ),
       },
     }));
@@ -505,7 +526,7 @@ export const useKycDataStorage = create<{
       state: {
         ...prev.state,
         step_5: prev.state.step_5.map((item, i) =>
-          i === index ? { ...item, ans: answer } : item
+          i === index ? { ...item, ans: answer } : item,
         ),
       },
     }));

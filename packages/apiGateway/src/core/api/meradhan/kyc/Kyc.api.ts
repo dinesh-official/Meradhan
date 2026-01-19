@@ -24,70 +24,70 @@ import type {
 export class CustomerKycApi {
   private schema = appSchema.kyc;
 
-  constructor(private apiClient: IApiCaller) { }
+  constructor(private apiClient: IApiCaller) {}
 
   // pan
   async verifyPanInfo(
     payload: z.infer<typeof this.schema.panVerifyInfoSchema>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<IPANKycVerifyResponse>(
       "/customer/kyc/pan/info-verify",
       payload,
-      config
+      config,
     );
     return data;
   }
 
   async requestPanVerification(
     payload: z.infer<typeof this.schema.kycPanInfoDataSchema>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<IPANInfoVerifyResponse>(
       "/customer/kyc/pan/request",
       payload,
-      config
+      config,
     );
     return data;
   }
 
   async verifyPanVerification(
     payload: { kid: string },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.get<IPANKycVerifyResponse>(
       "/customer/kyc/pan/response/" + payload.kid,
-      config
+      config,
     );
     return data;
   }
 
   async requestAadharVerification(
     payload: z.infer<typeof this.schema.kycAadhaarInfoDataSchema>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<IPANKycRequestResponse>(
       "/customer/kyc/aadhaar/request",
       payload,
-      config
+      config,
     );
     return data;
   }
 
   async verifyAadharVerification(
     payload: { kid: string },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.get<IPANKycVerifyResponse>(
       "/customer/kyc/aadhaar/response/" + payload.kid,
-      config
+      config,
     );
     return data;
   }
 
   async storeKycProgress(
     payload: { step: number; data: unknown; complete?: boolean },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<IStoreKycSETResponse>(
       "/customer/kyc/store/" + payload.step,
@@ -97,7 +97,7 @@ export class CustomerKycApi {
         params: {
           complete: payload.complete,
         },
-      }
+      },
     );
     return data;
   }
@@ -105,7 +105,7 @@ export class CustomerKycApi {
   async getKycProgress(config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<IStoreKycGETResponse>(
       "/customer/kyc/store/get",
-      config
+      config,
     );
     return data;
   }
@@ -113,23 +113,23 @@ export class CustomerKycApi {
   // selfie
   async requestSelfieVerification(
     payload: z.infer<typeof this.schema.selfieSignRequestSchema>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<ISelfireKycRequestResponse>(
       "/customer/kyc/selfie/request",
       payload,
-      config
+      config,
     );
     return data;
   }
 
   async verifySelfieVerification(
     payload: { kid: string },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.get<ISelfireKycVerifyResponse>(
       "/customer/kyc/selfie/response/" + payload.kid,
-      config
+      config,
     );
 
     return data;
@@ -138,23 +138,23 @@ export class CustomerKycApi {
   // sign
   async requestSignVerification(
     payload: z.infer<typeof this.schema.selfieSignRequestSchema>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<ISignKycRequestResponse>(
       "/customer/kyc/sign/request",
       payload,
-      config
+      config,
     );
     return data;
   }
 
   async verifySignVerification(
     payload: { kid: string },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.get<ISignKycVerifyResponse>(
       "/customer/kyc/sign/response/" + payload.kid,
-      config
+      config,
     );
     return data;
   }
@@ -163,31 +163,31 @@ export class CustomerKycApi {
   async verifyIfscCode(payload: { ifsc: string }, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<I_IFSCResponse>(
       `/bank/${payload.ifsc}`,
-      config
+      config,
     );
     return data;
   }
 
   async verifyBankAccount(
     payload: z.infer<typeof this.schema.bankInfoSchema>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<IBankKycVerifyResponse>(
       `/customer/kyc/bank/verify`,
       payload,
-      config
+      config,
     );
     return data;
   }
 
   async verifyDematAccount(
     payload: z.infer<typeof this.schema.dpAccountInfoSchema>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<IDmatKycVerifyResponse>(
       `/customer/kyc/demat/submit`,
       payload,
-      config
+      config,
     );
     return data;
   }
@@ -196,7 +196,7 @@ export class CustomerKycApi {
     const { data } = await this.apiClient.post<IEsignKycRequest>(
       `/customer/kyc/esign/request`,
       undefined,
-      config
+      config,
     );
     return data;
   }
@@ -204,7 +204,7 @@ export class CustomerKycApi {
   async esignVerifyResponse(docId: string, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<IEsignKycRequest>(
       `/customer/kyc/esign/verify/${docId}`,
-      config
+      config,
     );
     return data;
   }
@@ -212,7 +212,7 @@ export class CustomerKycApi {
   async getKycLevel(customerId: number, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<BaseResponseData<string>>(
       `/customer/kyc/level/${customerId}`,
-      config
+      config,
     );
     return data;
   }
@@ -225,7 +225,7 @@ export class CustomerKycApi {
       timestamp?: string;
       step?: number;
     },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<
       BaseResponseData<{ success: true }>
@@ -236,7 +236,7 @@ export class CustomerKycApi {
   async setCurrentKycStep(
     customerId: number,
     currentStepName: string,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<
       BaseResponseData<{ success: true }>
@@ -247,7 +247,7 @@ export class CustomerKycApi {
   async getKycProgressStoreCrm(id: number, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<IStoreKycGETResponse>(
       "/crm/kyc/store/get/" + id,
-      config
+      config,
     );
     return data;
   }
@@ -255,7 +255,7 @@ export class CustomerKycApi {
   async getKycKraDataById(customerId: number, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<KRAResponse>(
       `/crm/kyc/kra/get/${customerId}`,
-      config
+      config,
     );
     return data;
   }
