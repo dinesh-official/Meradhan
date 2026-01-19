@@ -25,8 +25,6 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
-  const cookieStore = await cookies();
-  console.log(cookieStore.getAll());
 
   if (pathname.startsWith("/login")) {
     const cookieStore = await cookies();
