@@ -49,13 +49,14 @@ export const sendLoginOtpEmail = async (data: {
   await emailOtpSenderQueue.add(
     {
       ...data,
-      subject: `MeraDhan CRM - Login OTP ${getFormattedTimestamp()}`,
+      subject: `OTP for Secure Login to MeraDhan - ${getFormattedTimestamp()}`,
+      type: "login",
     },
     {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };
 
@@ -73,7 +74,7 @@ export const sendAdminLoginOtpEmail = async (data: {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };
 
@@ -85,13 +86,14 @@ export const sendCustomerSignupOtpEmail = async (data: {
   await emailOtpSenderQueue.add(
     {
       ...data,
-      subject: `Your One-Time Password (OTP) for Signup - MeraDhan ${getFormattedTimestamp()}`,
+      subject: `OTP for MeraDhan Signup - ${getFormattedTimestamp()}`,
+      type: "signup",
     },
     {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };
 
@@ -103,13 +105,14 @@ export const sendCustomerSigninOtpEmail = async (data: {
   await emailOtpSenderQueue.add(
     {
       ...data,
-      subject: `Your One-Time Password (OTP) for Signup - MeraDhan ${getFormattedTimestamp()}`,
+      subject: `OTP for Secure Login to MeraDhan - ${getFormattedTimestamp()}`,
+      type: "login",
     },
     {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };
 
@@ -120,13 +123,13 @@ export const sendCustomerWelcomeEmail = async (data: {
   await welcomeEmailSenderQueue.add(
     {
       ...data,
-      subject: `Welcome to MeraDhan – Your Journey to Secure Investments Begins! ${getFormattedTimestamp()}`,
+      subject: `Welcome to MeraDhan – Your Journey to Secure Investments Begins!`,
     },
     {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };
 
@@ -144,7 +147,7 @@ export const sendForgetPasswordEmail = async (data: {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };
 
@@ -161,7 +164,7 @@ export const sendPasswordResetSuccessEmail = async (data: {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };
 
@@ -179,6 +182,6 @@ export const sendEmailVerificationLink = async (data: {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
-    }
+    },
   );
 };

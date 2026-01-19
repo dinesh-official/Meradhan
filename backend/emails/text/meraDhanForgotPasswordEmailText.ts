@@ -4,42 +4,17 @@ export function meraDhanForgotPasswordEmailText({
 } = {}) {
   const year = new Date().getFullYear();
 
-  return `<p>Dear <strong>${userName}</strong>,</p>
+  return `Dear ${userName},
   
-      <p>
-        We received a request to reset the password for your
-        <strong>MeraDhan</strong> account.
-      </p>
-  
-      <p>To set a new password, open the link below:</p>
-  
-      <p>
-        <a href="${resetLink}">
-          ${resetLink}
-        </a>
-      </p>
-  
-      <p>
-        This link will expire in <strong>30 minutes</strong> and can be used only once.
-      </p>
-  
-      <p>
-        If you did not request a password reset, please ignore this email —
-        your account will remain secure.
-      </p>
-  
-      <p>
-        For help or questions, contact us at
-        <a href="mailto:support@meradhan.co">support@meradhan.co</a>.
-      </p>
-  
-      <p>
-        Warm regards,<br />
-        <strong>The MeraDhan Team</strong>
-      </p>
-  
-      <p>
-        © ${year} MeraDhan. All rights reserved.
-      </p>
-  `.trim();
+We received a request to reset your password for your MeraDhan account. Click the link below to set a new password:
+
+<a href="${resetLink}">${resetLink}</a>
+
+This link is valid for 30 minutes. If you didn’t request this, you can safely ignore this email.
+
+For assistance, feel free to contact our support team at support@meradhan.co.
+
+Best regards
+MeraDhan Team
+`.trim();
 }
