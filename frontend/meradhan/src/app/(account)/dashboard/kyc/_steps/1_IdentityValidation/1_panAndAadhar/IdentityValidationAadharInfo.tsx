@@ -31,7 +31,12 @@ function IdentityValidationAadharInfo() {
     O: "Others",
   };
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
-  const { state, nextLocalStep, setStep1PanData, setStep1NameMismatchDeclaration } = useKycDataStorage();
+  const {
+    state,
+    nextLocalStep,
+    setStep1PanData,
+    setStep1NameMismatchDeclaration,
+  } = useKycDataStorage();
 
   const data = state.step_1.pan;
 
@@ -41,12 +46,16 @@ function IdentityValidationAadharInfo() {
       firstName: data.firstName,
       middleName: data.middleName,
       lastName: data.lastName,
-    }
+    },
   );
 
   const isDobMatched = dataMatcherUtils.areDatesMatched(
-    data.response?.details.aadhaar.dob.replaceAll("/", "-").split("-").reverse().join("-"),
-    data.dateOfBirth
+    data.response?.details.aadhaar.dob
+      .replaceAll("/", "-")
+      .split("-")
+      .reverse()
+      .join("-"),
+    data.dateOfBirth,
   );
 
   useEffect(() => {
@@ -68,7 +77,7 @@ function IdentityValidationAadharInfo() {
       return false;
     }
     return true;
-  }
+  };
 
   return (
     <Card accountMode>
@@ -94,7 +103,9 @@ function IdentityValidationAadharInfo() {
               <DataInfoLabel
                 title="Name"
                 status={isNameMatched ? "SUCCESS" : "WARNING"}
-                statusLabel={isNameMatched ? "Matched" : "Partially Matched with PAN"}
+                statusLabel={
+                  isNameMatched ? "Matched" : "Partially Matched with PAN"
+                }
                 showStatus
               >
                 <p className="font-medium">
@@ -118,8 +129,9 @@ function IdentityValidationAadharInfo() {
                 showStatus
               >
                 <p className="font-medium">
-                  {genders[data.response?.details.aadhaar.gender as "M" | "F"] ||
-                    "Others"}
+                  {genders[
+                    data.response?.details?.aadhaar?.gender as "M" | "F"
+                  ] || "Others"}
                 </p>
               </DataInfoLabel>
             </div>
@@ -139,7 +151,7 @@ function IdentityValidationAadharInfo() {
               <p className="font-medium text-wrap">
                 {data.response?.details.aadhaar.current_address.replaceAll(
                   ",",
-                  ", "
+                  ", ",
                 )}
               </p>
             </DataInfoLabel>
@@ -157,19 +169,19 @@ function IdentityValidationAadharInfo() {
             <div className="col-span-3">
               <RenderPdf
                 file={genMediaUrl(
-                  data.response?.details.aadhaar.file_url || ""
+                  data.response?.details.aadhaar.file_url || "",
                 )}
                 height={320}
               />
             </div>
           </div>
-
         </div>
         <div className="gap-5 grid md:grid-cols-3 md:mt-10 py-5 border-gray-200 md:border-t md:border-b">
           <DataInfoLabel title="City or District">
             <p className="font-medium">
               {
-                data.response?.details.aadhaar.current_address_details.district_or_city
+                data.response?.details.aadhaar.current_address_details
+                  .district_or_city
               }
             </p>
           </DataInfoLabel>
@@ -184,52 +196,84 @@ function IdentityValidationAadharInfo() {
             </p>
           </DataInfoLabel>
         </div>
-        {!isNameMatched && <div className="flex flex-col gap-5 mt-5">
-          <div className="flex flex-col gap-3">
-            <Link href="/docs/self_declaration_in_name_mismatch.pdf" target="_blank">
-              <Button variant="defaultLight" className="flex items-center gap-3 px-14">
-                Download Name Mismatch Declaration Form <FaDownload />
-              </Button>
-            </Link>
-            <p className="mt-2">
-              By continue:
-            </p>
-            <label className="flex items-start gap-2 ">
-              <Checkbox checked={state.step_1?.nameMismatchDeclaration?.isConfirmed} onCheckedChange={() => {
-                setStep1NameMismatchDeclaration({
-                  ...state.step_1?.nameMismatchDeclaration,
-                  isConfirmed: !state.step_1?.nameMismatchDeclaration?.isConfirmed,
-                });
-              }} className="mt-0.5" />
-              <p>I confirm that the Aadhaar name refers to the same person as my PAN for KYC purposes.</p>
-            </label>
-            <label className="flex items-start gap-2 ">
-              <Checkbox checked={state.step_1?.nameMismatchDeclaration?.isDownloaded} onCheckedChange={() => {
-
-                setStep1NameMismatchDeclaration({
-                  ...state.step_1?.nameMismatchDeclaration,
-                  isDownloaded: !state.step_1?.nameMismatchDeclaration?.isDownloaded,
-                });
-              }} className="mt-0.5" />
-              <p>I confirm that I have downloaded the declaration form provided on this page relating to name mismatch across my PAN and other documents, and I agree to duly complete, sign, and submit the same by email to <a href="mailto:support@meradhan.co" className="text-primary">support@meradhan.co</a>.</p>
-            </label>
+        {!isNameMatched && (
+          <div className="flex flex-col gap-5 mt-5">
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/docs/self_declaration_in_name_mismatch.pdf"
+                target="_blank"
+              >
+                <Button
+                  variant="defaultLight"
+                  className="flex items-center gap-3 px-14"
+                >
+                  Download Name Mismatch Declaration Form <FaDownload />
+                </Button>
+              </Link>
+              <p className="mt-2">By continue:</p>
+              <label className="flex items-start gap-2 ">
+                <Checkbox
+                  checked={state.step_1?.nameMismatchDeclaration?.isConfirmed}
+                  onCheckedChange={() => {
+                    setStep1NameMismatchDeclaration({
+                      ...state.step_1?.nameMismatchDeclaration,
+                      isConfirmed:
+                        !state.step_1?.nameMismatchDeclaration?.isConfirmed,
+                    });
+                  }}
+                  className="mt-0.5"
+                />
+                <p>
+                  I confirm that the Aadhaar name refers to the same person as
+                  my PAN for KYC purposes.
+                </p>
+              </label>
+              <label className="flex items-start gap-2 ">
+                <Checkbox
+                  checked={state.step_1?.nameMismatchDeclaration?.isDownloaded}
+                  onCheckedChange={() => {
+                    setStep1NameMismatchDeclaration({
+                      ...state.step_1?.nameMismatchDeclaration,
+                      isDownloaded:
+                        !state.step_1?.nameMismatchDeclaration?.isDownloaded,
+                    });
+                  }}
+                  className="mt-0.5"
+                />
+                <p>
+                  I confirm that I have downloaded the declaration form provided
+                  on this page relating to name mismatch across my PAN and other
+                  documents, and I agree to duly complete, sign, and submit the
+                  same by email to{" "}
+                  <a href="mailto:support@meradhan.co" className="text-primary">
+                    support@meradhan.co
+                  </a>
+                  .
+                </p>
+              </label>
+            </div>
           </div>
-
-        </div>}
-        {isNameMatched && <div className="flex flex-col gap-1 mt-8 mb-3">
-          <p className="font-semibold">We’re unable to fully match your name across documents.</p>
-          <p >Please ensure that the Aadhaar details you’ve entered are correct and try again. If the issue persists, you may contact our support team for assistance.</p>
-        </div>}
-
+        )}
+        {isNameMatched && (
+          <div className="flex flex-col gap-1 mt-8 mb-3">
+            <p className="font-semibold">
+              We’re unable to fully match your name across documents.
+            </p>
+            <p>
+              Please ensure that the Aadhaar details you’ve entered are correct
+              and try again. If the issue persists, you may contact our support
+              team for assistance.
+            </p>
+          </div>
+        )}
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
-
           onClick={() => {
             setStep1PanData(
               "confirmAadhaarTimestamp",
-              new Date().toISOString()
+              new Date().toISOString(),
             );
             addAuditLog({
               type: "KYC_PROCESS_CONTINUED",

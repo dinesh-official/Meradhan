@@ -19,17 +19,24 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useDigioSDK } from "../../../_providers/useDigioSDK";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function AdharInfoForm() {
   const digio = useDigioSDK();
-  const { state, setAadharData, setStep1PanData } = useKycDataStorage();
-  const { pushUserKycState, addAuditLog, } = useKycDataProvider();
+  const { state, setGenderData, setStep1PanData } = useKycDataStorage();
+  const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { nextLocalStep } = useKycDataStorage();
 
-  const { session } = userSessionStore()
+  const { session } = userSessionStore();
 
   const apiClient = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const verifyAadhaarResponseMutation = useMutation({
@@ -43,15 +50,17 @@ function AdharInfoForm() {
         ...state.step_1.pan.response,
         details: {
           ...state.step_1.pan.response?.details,
-          aadhaar: data.responseData.details.aadhaar
-        }
-      })
+          aadhaar: data.responseData.details.aadhaar,
+        },
+      });
 
-      setStep1PanData("fetchedTimestamp", new Date(data?.responseData?.completed_at).toISOString());
+      setStep1PanData(
+        "fetchedTimestamp",
+        new Date(data?.responseData?.completed_at).toISOString(),
+      );
 
       pushUserKycState();
       nextLocalStep();
-
       console.log("Aadhaar verification response successful:", data);
     },
     onError: (error) => {
@@ -63,12 +72,13 @@ function AdharInfoForm() {
     mutationKey: ["requestAadharVerification"],
     mutationFn: async () => {
       const response = await apiClient.requestAadharVerification({
-        aadhaarCardNo: state.step_1.aadhar,
+        // aadhaarCardNo: state.step_1.aadhar,
+        gender: state.step_1.gender,
         dateOfBirth: state.step_1.pan.dateOfBirth,
         firstName: state.step_1.pan.firstName,
         lastName: state.step_1.pan.lastName,
         middleName: state.step_1.pan.middleName || "",
-        email: session?.emailAddress || ""
+        email: session?.emailAddress || "",
       });
       return response;
     },
@@ -77,7 +87,6 @@ function AdharInfoForm() {
         callback(response) {
           if (response.error_code) {
             toast.error(response.message || "Something went wrong");
-
           } else if (response.digio_doc_id) {
             // TODO: verify aadhaar response
             console.log(response);
@@ -91,10 +100,8 @@ function AdharInfoForm() {
       kycInstance.submit(
         data.responseData.access_token.entity_id,
         data.responseData.customer_identifier,
-        data.responseData.access_token.id
+        data.responseData.access_token.id,
       );
-
-
     },
     onError: (error) => {
       console.error("Error during Aadhaar verification request:", error);
@@ -102,13 +109,12 @@ function AdharInfoForm() {
   });
 
   const handleAadhaarVerify = () => {
-    if (state.step_1.aadhar.length !== 12) {
-      toast.error("Aadhaar number must be 12 digits");
+    if (state.step_1.gender.length === 0) {
+      toast.error("Please select your gender");
       return;
     }
     requestAadharVerificationMutation.mutate();
   };
-
 
   return (
     <Card accountMode>
@@ -117,13 +123,27 @@ function AdharInfoForm() {
       </CardHeader>
 
       <CardContent accountMode>
-        <LabelInput label="12-Digit Aadhaar Number" required>
-          <Input
-            type="text"
-            className="max-w-96 mt-2"
-            value={state.step_1.aadhar}
-            onChange={(e) => setAadharData(e.target.value)}
-          />
+        <LabelInput label="Confirm Your Gender" required>
+          <Select
+            onValueChange={(e) => {
+              setGenderData(e.toString());
+            }}
+            value={state.step_1?.gender || ""}
+          >
+            <SelectTrigger className="w-full max-w-80">
+              <SelectValue placeholder="Select Your Gender" />
+            </SelectTrigger>
+            <SelectContent>
+              {[
+                { value: "M", label: "Male" },
+                { value: "F", label: "Female" },
+              ].map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </LabelInput>
       </CardContent>
 
@@ -131,7 +151,10 @@ function AdharInfoForm() {
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handleAadhaarVerify}
-          disabled={requestAadharVerificationMutation.isPending || verifyAadhaarResponseMutation.isPending}
+          disabled={
+            requestAadharVerificationMutation.isPending ||
+            verifyAadhaarResponseMutation.isPending
+          }
         >
           Verify Aadhaar
           <div className="flex justify-center items-center p-0 h-full">
@@ -139,23 +162,26 @@ function AdharInfoForm() {
           </div>
         </Button>
 
-        <Button variant="link" onClick={async () => {
-          const result = await Swal.fire({
-            text: "Are you sure you want to save and exit the KYC process?",
-            imageUrl: "/images/icons/sad-emoji.svg",
-            showCancelButton: true,
-            confirmButtonText: "Save & Exit",
-            cancelButtonText: "Cancel",
-          });
-
-          if (result.isConfirmed) {
-            addAuditLog({
-              type: "KYC_PROCESS_EXITED",
-              desc: "User chose to save and exit the KYC process : Aadhar and Identity Validation step.",
+        <Button
+          variant="link"
+          onClick={async () => {
+            const result = await Swal.fire({
+              text: "Are you sure you want to save and exit the KYC process?",
+              imageUrl: "/images/icons/sad-emoji.svg",
+              showCancelButton: true,
+              confirmButtonText: "Save & Exit",
+              cancelButtonText: "Cancel",
             });
-            pushUserKycState({ exit: true });
-          }
-        }}>
+
+            if (result.isConfirmed) {
+              addAuditLog({
+                type: "KYC_PROCESS_EXITED",
+                desc: "User chose to save and exit the KYC process : Aadhar and Identity Validation step.",
+              });
+              pushUserKycState({ exit: true });
+            }
+          }}
+        >
           Save & Exit
         </Button>
       </CardFooter>
