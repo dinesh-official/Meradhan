@@ -34,9 +34,5 @@ export function meraDhanPasswordResetSuccessEmailText({
         Warm regards,<br />
         <strong>The MeraDhan Team</strong>
       </p>
-  
-      <p>
-        © ${year} MeraDhan. All rights reserved.
-      </p>
   `.trim();
 }

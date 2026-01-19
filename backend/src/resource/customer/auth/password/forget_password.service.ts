@@ -32,7 +32,7 @@ export class ForgetPasswordService {
           ". Please continue with " +
           user.utility.signinWith.toLocaleLowerCase +
           " below to log in.",
-        { code: "SIGNIN_WITH_" + user.utility.signinWith }
+        { code: "SIGNIN_WITH_" + user.utility.signinWith },
       );
     }
 
@@ -41,7 +41,7 @@ export class ForgetPasswordService {
         id: user.id,
         role: "USER",
       },
-      "30m"
+      "30m",
     );
 
     const url = `${env.NEXT_PUBLIC_HOST_URL}/reset-password?token=${token}`;
@@ -73,7 +73,7 @@ export class ForgetPasswordService {
     }
 
     const checkToken = await cacheStorage.get(
-      "RESET_PASSWORD_TOKEN:" + user.id
+      "RESET_PASSWORD_TOKEN:" + user.id,
     );
 
     if (checkToken != data.token) {

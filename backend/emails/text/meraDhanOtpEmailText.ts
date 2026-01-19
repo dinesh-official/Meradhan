@@ -1,6 +1,7 @@
+// Use this function to generate the OTP email  copy this code next email
 export function meraDhanOtpEmailText({
   userName = "User",
-  otpCode = "123456",
+  otpCode = "******",
 } = {}) {
   const year = new Date().getFullYear();
 
@@ -11,13 +12,11 @@ export function meraDhanOtpEmailText({
   
   ${otpCode}
   
-  This code is valid for the next 5 minutes.
+  This code is valid for the next 3 minutes.
   Please do not share this code with anyone.
   
   If you did not request this verification, you can safely ignore this email.
   
   MeraDhan Team
-  
-  © ${year} MeraDhan. All rights reserved. Need help? Contact us at support@meradhan.co
   `.trim();
 }

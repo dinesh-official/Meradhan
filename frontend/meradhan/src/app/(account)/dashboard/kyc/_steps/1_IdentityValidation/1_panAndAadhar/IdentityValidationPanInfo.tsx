@@ -15,7 +15,6 @@ import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 
-
 function IdentityValidationPanInfo() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
@@ -34,7 +33,7 @@ function IdentityValidationPanInfo() {
       firstName: data.firstName,
       middleName: data.middleName,
       lastName: data.lastName,
-    }
+    },
   );
 
   const isDobMatched = dataMatcherUtils.areDatesMatched(
@@ -43,7 +42,7 @@ function IdentityValidationPanInfo() {
       .split("-")
       .reverse()
       .join("-"),
-    data.dateOfBirth
+    data.dateOfBirth,
   );
 
   const isAllowToContinue = isPanMatched && isNameMatched && isDobMatched;
@@ -100,7 +99,7 @@ function IdentityValidationPanInfo() {
             showStatus
           >
             <p className="font-medium">
-              {genders[data.response?.details.pan.gender as "M" | "F"] ||
+              {genders[data.response?.details.aadhaar.gender as "M" | "F"] ||
                 "Others"}
             </p>
           </DataInfoLabel> */}
@@ -135,7 +134,7 @@ function IdentityValidationPanInfo() {
                 MiddleName: state.step_1.pan.middleName,
                 LastName: state.step_1.pan.lastName,
                 Gender:
-                  genders[data.response?.details.pan.gender as "M" | "F"] ||
+                  genders[data.response?.details.aadhaar.gender as "M" | "F"] ||
                   "Others",
               },
               entityType: "KYC",
