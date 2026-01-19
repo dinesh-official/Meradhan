@@ -4,8 +4,5 @@ export function meraDhanOtpEmailText({
   otpCode = "******",
 } = {}) {
   const year = new Date().getFullYear();
-
-  return `
-
-  `.trim();
+  return ``.trim();
 }
