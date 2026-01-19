@@ -18,7 +18,10 @@ import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 import { useEffect, useState } from "react";
-import { convertUTCtoIST, formatDateCustom } from "@/global/utils/datetime.utils";
+import {
+  convertUTCtoIST,
+  formatDateCustom,
+} from "@/global/utils/datetime.utils";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -28,10 +31,10 @@ function IdentityValidationForm() {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
 
   useEffect(() => {
-    setDateOfBirth((data.dateOfBirth) ? new Date(formatDateCustom(data.dateOfBirth)) : null);
+    setDateOfBirth(
+      data.dateOfBirth ? new Date(formatDateCustom(data.dateOfBirth)) : null,
+    );
   }, []);
-
-
 
   return (
     <Card accountMode>
@@ -97,7 +100,10 @@ function IdentityValidationForm() {
                 value={dateOfBirth}
                 onChange={(e) => {
                   setDateOfBirth(e);
-                  setStep1PanData("dateOfBirth", convertUTCtoIST(e?.toISOString())?.split("T")[0]);
+                  setStep1PanData(
+                    "dateOfBirth",
+                    convertUTCtoIST(e?.toISOString())?.split("T")[0],
+                  );
                   console.log(e);
                 }}
               />
@@ -160,7 +166,8 @@ function IdentityValidationForm() {
                 checkClass="text-white"
                 className="mt-0.5 border border-gray-200"
               />
-              I hereby confirm that I am not a Politically Exposed Person (PEP) nor related to any PEP
+              I hereby confirm that I am not a Politically Exposed Person (PEP)
+              nor related to any PEP
             </label>
             <small className="text-red-600 text-[10px]">
               {error?.checkTerms1?.[0]}
@@ -174,7 +181,11 @@ function IdentityValidationForm() {
                 checkClass="text-white"
                 className="mt-0.5 border border-gray-200"
               />
-              I hereby confirm that I am not a person and/or entity debarred from accessing the securities market or dealing in securities, as per directions or orders issued by the Securities and Exchange Board of India (SEBI), any recognized stock exchange, or other competent regulatory authorities from time to time.
+              I hereby confirm that I am not a person and/or entity debarred
+              from accessing the securities market or dealing in securities, as
+              per directions or orders issued by the Securities and Exchange
+              Board of India (SEBI), any recognized stock exchange, or other
+              competent regulatory authorities from time to time.
             </label>
             <small className="text-red-600 text-[10px]">
               {error?.checkTerms2?.[0]}
@@ -189,7 +200,8 @@ function IdentityValidationForm() {
                 checkClass="text-white"
                 className="mt-0.5 border border-gray-200"
               />
-              I confirm that I am an Indian citizen and solely a tax resident of India, not of any other country (FATCA)
+              I confirm that I am an Indian citizen and solely a tax resident of
+              India, not of any other country (FATCA)
             </label>
             <small className="text-red-600 text-[10px]">
               {error?.isFatca?.[0]}
@@ -219,10 +231,19 @@ function IdentityValidationForm() {
                 applicable laws of India and not a Non-Resident Indian (NRI).
               </li>
               <li>
-                I authorize MeraDhan to access and verify my PAN details from authorized government or regulatory sources for SEBI-compliant KYC purposes. I understand that my information will be used only for regulatory compliance and handled securely as per applicable laws.
+                I authorize MeraDhan to access and verify my PAN details from
+                authorized government or regulatory sources for SEBI-compliant
+                KYC purposes. I understand that my information will be used only
+                for regulatory compliance and handled securely as per applicable
+                laws.
               </li>
               <li>
-                I hereby provide my consent to MeraDhan to collect, use, store, and process my personal data for Know Your Customer (KYC) purposes in compliance with SEBI regulations. This includes retrieval of KYC records from KYC Registration Agencies (KRAs), as may be required, and share my details with KYC registration agencies.
+                I hereby provide my consent to MeraDhan to collect, use, store,
+                and process my personal data for Know Your Customer (KYC)
+                purposes in compliance with SEBI regulations. This includes
+                retrieval of KYC records from KYC Registration Agencies (KRAs),
+                as may be required, and share my details with KYC registration
+                agencies.
               </li>
             </ul>
           </div>

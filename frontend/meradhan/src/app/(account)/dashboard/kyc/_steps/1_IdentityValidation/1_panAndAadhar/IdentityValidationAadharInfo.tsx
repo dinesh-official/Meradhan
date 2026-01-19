@@ -65,6 +65,8 @@ function IdentityValidationAadharInfo() {
       mismatch: isNameMatched,
     });
   }, [isNameMatched]);
+  const isGenderMatched =
+    state.step_1?.gender == state.step_1.pan.response?.details?.aadhaar?.gender; // Aadhaar does not have
 
   const isAllowToContinue = () => {
     if (isNameMatched) {
@@ -74,6 +76,9 @@ function IdentityValidationAadharInfo() {
       return false;
     }
     if (!state.step_1?.nameMismatchDeclaration?.isConfirmed) {
+      return false;
+    }
+    if (!isGenderMatched) {
       return false;
     }
     return true;
@@ -124,8 +129,8 @@ function IdentityValidationAadharInfo() {
               </DataInfoLabel>
               <DataInfoLabel
                 title="Gender"
-                status="SUCCESS"
-                statusLabel="Fetched"
+                status={isGenderMatched ? "SUCCESS" : "WARNING"}
+                statusLabel={isGenderMatched ? "Matched" : "Not Matched"}
                 showStatus
               >
                 <p className="font-medium">
@@ -196,6 +201,12 @@ function IdentityValidationAadharInfo() {
             </p>
           </DataInfoLabel>
         </div>
+        {!isGenderMatched && (
+          <p className="text-red-500">
+            Your gender does not match the details on your Aadhaar card.
+          </p>
+        )}
+
         {!isNameMatched && (
           <div className="flex flex-col gap-5 mt-5">
             <div className="flex flex-col gap-3">
