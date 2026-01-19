@@ -102,7 +102,6 @@ export const generatePagesMetaData = async (
     };
   } catch (e) {
     console.log(e);
-
     return {};
   }
 };
