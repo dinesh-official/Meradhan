@@ -65,7 +65,7 @@ export const useSignUpAuthFlow = () => {
   ]);
 
   const signupApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller
+    apiClientCaller,
   );
   type schema = typeof appSchema.customer;
 
@@ -88,7 +88,7 @@ export const useSignUpAuthFlow = () => {
       if (error instanceof ApiError) {
         setErrorMessage(
           "mobile",
-          error.response?.data.message || error.message
+          error.response?.data.message || error.message,
         );
         return;
       }
@@ -118,12 +118,12 @@ export const useSignUpAuthFlow = () => {
           "email",
           error.response?.data.message ||
             error.response?.data?.error ||
-            error.message
+            error.message,
         );
         toast.error(
           error.response?.data.message ||
             error.response?.data?.error ||
-            error.message
+            error.message,
         );
         return;
       }
@@ -145,7 +145,7 @@ export const useSignUpAuthFlow = () => {
       if (error instanceof ApiError) {
         setErrorMessage(
           currentStep == "email" ? "email" : "mobile",
-          error.response?.data.message || error.message
+          error.response?.data.message || error.message,
         );
         toast.error(error.response?.data.message || error.message);
         return;
@@ -153,10 +153,13 @@ export const useSignUpAuthFlow = () => {
       toast.error(error.message);
     },
     onSuccess(data) {
-      setAuthCookiesAndRedirect({
-        token: data.responseData.token,
-        id: data.responseData.id.toString(),
-      });
+      // setAuthCookiesAndRedirect({
+      //   token: data.responseData.token,
+      //   id: data.responseData.id.toString(),
+      // });
+
+      router.replace("/login");
+
       trackActivity("session", { method: "Sign up with credentials" });
     },
   });
@@ -185,7 +188,7 @@ export const useSignUpAuthFlow = () => {
   };
 
   const verifySignupOtp = (
-    payload: z.infer<schema["createNewCustomerSchema"]> & { id: number }
+    payload: z.infer<schema["createNewCustomerSchema"]> & { id: number },
   ) => {
     const token =
       currentStep == "email"
@@ -210,23 +213,23 @@ export const useSignUpAuthFlow = () => {
     token: string;
     id: string;
   }) => {
-    setCookie("token", token, COOKIE_OPTIONS);
-    setCookie("userId", id, COOKIE_OPTIONS);
+    // setCookie("token", token, COOKIE_OPTIONS);
+    // setCookie("userId", id, COOKIE_OPTIONS);
 
     // redirect to dashboard
-    if (localStorage.getItem("redirect")) {
-      trackActivity("session", {
-        method:
-          "Sign Up  success | Redirect to " + localStorage.getItem("redirect"),
-      });
-      router.replace(localStorage.getItem("redirect") as string);
-      localStorage.removeItem("redirect");
-    } else {
-      trackActivity("session", {
-        method: "Sign Up  success | Redirect to dashboard",
-      });
-      router.replace("/dashboard");
-    }
+    // if (localStorage.getItem("redirect")) {
+    //   trackActivity("session", {
+    //     method:
+    //       "Sign Up  success | Redirect to " + localStorage.getItem("redirect"),
+    //   });
+    //   router.replace(localStorage.getItem("redirect") as string);
+    //   localStorage.removeItem("redirect");
+    // } else {
+    //   trackActivity("session", {
+    //     method: "Sign Up  success | Redirect to dashboard",
+    //   });
+    // }
+    router.replace("/login");
   };
 
   return {

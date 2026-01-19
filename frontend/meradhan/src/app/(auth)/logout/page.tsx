@@ -12,7 +12,10 @@ function Logout() {
   const { clearCookies, removeCookie } = useAppCookie();
 
   const logout = async () => {
-    await apiClientCaller.post("/api/server/auth/logout");
+    await apiClientCaller.post("/auth/logout").finally(() => {
+      // In case of any failure, still redirect to login after cleanup
+      window.location.replace("/login");
+    });
   };
 
   React.useEffect(() => {
@@ -54,7 +57,7 @@ function Logout() {
             | "name"
             | "email"
             | "meradhan_tracking_session",
-          { path: "/" }
+          { path: "/" },
         );
         // Try with domain if hostname is available
         if (typeof window !== "undefined" && window.location.hostname) {
@@ -65,7 +68,7 @@ function Logout() {
               | "name"
               | "email"
               | "meradhan_tracking_session",
-            { path: "/", domain: window.location.hostname }
+            { path: "/", domain: window.location.hostname },
           );
           // Try with dot-prefixed domain for subdomain cookies
           if (window.location.hostname.includes(".")) {
@@ -79,7 +82,7 @@ function Logout() {
               {
                 path: "/",
                 domain: `.${window.location.hostname}`,
-              }
+              },
             );
           }
         }
@@ -87,36 +90,6 @@ function Logout() {
         // Silently continue if cookie removal fails
       }
     });
-
-    // Clear all cookies via document.cookie (for any cookies not managed by react-cookie)
-    if (typeof document !== "undefined") {
-      const allCookies = document.cookie.split(";");
-      allCookies.forEach(function (c) {
-        const cookieName = c.split("=")[0].trim();
-        if (cookieName) {
-          try {
-            // Clear with current path
-            document.cookie = `${cookieName}=;expires=${new Date(
-              0
-            ).toUTCString()};path=/`;
-            // Clear with root path and domain
-            if (window.location.hostname) {
-              document.cookie = `${cookieName}=;expires=${new Date(
-                0
-              ).toUTCString()};path=/;domain=${window.location.hostname}`;
-              // Clear with dot-prefixed domain for subdomain cookies
-              if (window.location.hostname.includes(".")) {
-                document.cookie = `${cookieName}=;expires=${new Date(
-                  0
-                ).toUTCString()};path=/;domain=.${window.location.hostname}`;
-              }
-            }
-          } catch (error) {
-            // Silently continue if cookie clearing fails
-          }
-        }
-      });
-    }
 
     // Clear localStorage
     localStorage.clear();
@@ -140,9 +113,6 @@ function Logout() {
 
     // Use replace instead of href to prevent back button navigation
     // Add a small delay to ensure all cleanup completes
-    setTimeout(() => {
-      window.location.replace("/login");
-    }, 100);
   }, [clearCookies, removeCookie]);
 
   return (
