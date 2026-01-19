@@ -9,6 +9,15 @@ import { KycProvider } from "./kyc_provider";
 export class CustomerKycKycService {
   private kycProvider = new KycProvider();
 
+  async verifyPanInfo(data: z.infer<typeof appSchema.kyc.panVerifyInfoSchema>) {
+    const response = await this.kycProvider.panVerifyInfo({
+      date: data.dob,
+      name: data.name,
+      id: data.id,
+    });
+    return response;
+  }
+
   // pan verify request
   async createPanVerifyRequest({
     id,
@@ -30,9 +39,9 @@ export class CustomerKycKycService {
     }
 
     const fullName = makeFullname({ firstName, middleName, lastName });
-    const panDetails = await this.kycProvider.createPanVerifyRequest({
-      email: user?.emailAddress,
-      id: user?.userName,
+    const panDetails = await this.kycProvider.panVerifyInfo({
+      date: data.dateOfBirth,
+      id: data.panCardNo,
       name: fullName,
     });
     return panDetails;
@@ -42,6 +51,40 @@ export class CustomerKycKycService {
   async verifyPanResponse({ kid }: { kid: string }) {
     const panDetails = await this.kycProvider.verifyPan({ kid: kid });
     return panDetails;
+  }
+
+  // aadhaar verify request
+  async createAadhaarVerifyRequest({
+    id,
+    data,
+  }: {
+    id: number;
+    data: z.infer<typeof appSchema.kyc.kycAadhaarInfoDataSchema>;
+  }) {
+    try {
+      const { firstName, lastName, middleName } = data;
+      const user = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id },
+      });
+
+      if (!user) {
+        throw new AppError("User profile Not Found", {
+          code: "USER_NOT_FOUND",
+          statusCode: 404,
+        });
+      }
+
+      const fullName = makeFullname({ firstName, middleName, lastName });
+      const aadhaarDetails = await this.kycProvider.createAadhaarVerifyRequest({
+        email: data.email,
+        id: data.aadhaarCardNo,
+        name: fullName,
+      });
+      return aadhaarDetails;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   // get pan aadhar document files

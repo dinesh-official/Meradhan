@@ -1,13 +1,15 @@
 import { appSchema } from "@root/schema";
-import type { IApiCaller } from "../../../connection/apiCaller.interface";
 import type { AxiosRequestConfig } from "axios";
+import type { IApiCaller } from "../../../connection/apiCaller.interface";
 
 import type z from "zod";
+import type { BaseResponseData } from "../../../../types/base";
 import type {
   I_IFSCResponse,
   IBankKycVerifyResponse,
   IDmatKycVerifyResponse,
   IEsignKycRequest,
+  IPANInfoVerifyResponse,
   IPANKycRequestResponse,
   IPANKycVerifyResponse,
   ISelfireKycRequestResponse,
@@ -18,18 +20,30 @@ import type {
   IStoreKycSETResponse,
   KRAResponse,
 } from "./Kyc.response";
-import type { BaseResponseData } from "../../../../types/base";
 
 export class CustomerKycApi {
   private schema = appSchema.kyc;
 
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
+
+  // pan
+  async verifyPanInfo(
+    payload: z.infer<typeof this.schema.panVerifyInfoSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IPANKycVerifyResponse>(
+      "/customer/kyc/pan/info-verify",
+      payload,
+      config
+    );
+    return data;
+  }
 
   async requestPanVerification(
     payload: z.infer<typeof this.schema.kycPanInfoDataSchema>,
     config?: AxiosRequestConfig
   ) {
-    const { data } = await this.apiClient.post<IPANKycRequestResponse>(
+    const { data } = await this.apiClient.post<IPANInfoVerifyResponse>(
       "/customer/kyc/pan/request",
       payload,
       config
@@ -43,6 +57,29 @@ export class CustomerKycApi {
   ) {
     const { data } = await this.apiClient.get<IPANKycVerifyResponse>(
       "/customer/kyc/pan/response/" + payload.kid,
+      config
+    );
+    return data;
+  }
+
+  async requestAadharVerification(
+    payload: z.infer<typeof this.schema.kycAadhaarInfoDataSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IPANKycRequestResponse>(
+      "/customer/kyc/aadhaar/request",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async verifyAadharVerification(
+    payload: { kid: string },
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.get<IPANKycVerifyResponse>(
+      "/customer/kyc/aadhaar/response/" + payload.kid,
       config
     );
     return data;

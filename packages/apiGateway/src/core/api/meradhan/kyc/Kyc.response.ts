@@ -8,6 +8,16 @@ import {
 } from "kyc-providers";
 import type { BaseResponseData } from "../../../../types/base";
 
+// pan
+export type IPANInfoVerifyResponse = BaseResponseData<{
+  aadhaar_seeding_status: string;
+  name_as_per_pan_match: boolean;
+  pan: string;
+  category: string;
+  status: string;
+  date_of_birth_match: boolean;
+}>;
+
 export type IPANKycRequestResponse =
   BaseResponseData<TDigioWithTemplateResponse>;
 export type IPANKycVerifyResponse = BaseResponseData<

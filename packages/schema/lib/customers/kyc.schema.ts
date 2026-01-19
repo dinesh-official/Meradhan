@@ -1,5 +1,11 @@
 import z from "zod";
 
+export const panVerifyInfoSchema = z.object({
+  id: z.string().min(8, "Date of birth is required"),
+  name: z.string().optional().default(""), // can be empty
+  dob: z.string(), // can be empty
+});
+
 export const kycPanInfoDataSchema = z.object({
   panCardNo: z
     .string()
@@ -37,6 +43,19 @@ export const kycPanInfoDataSchema = z.object({
   confirmPanTimestamp: z.string().optional(),
   confirmAadhaarTimestamp: z.string().optional(),
   fetchedTimestamp: z.string().optional(),
+});
+
+export const kycAadhaarInfoDataSchema = z.object({
+  aadhaarCardNo: z
+    .string()
+    .regex(/^[0-9]{12}$/, "Aadhaar number must be 12 digits")
+    .min(12, "Aadhaar number must be 12 digits")
+    .max(12, "Aadhaar number must be 12 digits"),
+  firstName: z.string().min(1, "First name is required").trim(),
+  middleName: z.string().optional().default(""), // can be empty
+  lastName: z.string().optional().default(""), // can be empty
+  dateOfBirth: z.string().min(8, "Date of birth is required"),
+  email: z.email("Invalid email address"),
 });
 
 export const selfieSignRequestSchema = z.object({

@@ -1,4 +1,5 @@
 "use client";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,11 +12,9 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
+import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycStepStore } from "../../_store/useKycStepStore";
-import { IoMdArrowDropright } from "react-icons/io";
-import { useKycDataProvider } from "../../_context/KycDataProvider";
-import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
 function StarterKyc() {
   const apiClient = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);

@@ -157,6 +157,7 @@ function SignUpForm() {
             <Input
               placeholder="Email ID*"
               className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
+              type="email"
               value={signUpFormData.email}
               onChange={(e) =>
                 handleSignUpFormChange("email", e.target.value.toLowerCase())
