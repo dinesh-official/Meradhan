@@ -1,21 +1,29 @@
-import { useCookies } from "react-cookie";
-
 const useAppCookie = () => {
-  const [cookies, setCookie, removeCookie] = useCookies([
-    "token",
-    "userId",
-    "name",
-    "email",
-    "meradhan_tracking_session",
-  ]);
   const clearCookies = () => {
-    removeCookie("token");
-    removeCookie("userId");
-    removeCookie("name");
-    removeCookie("email");
-    removeCookie("meradhan_tracking_session");
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("name");
+    localStorage.removeItem("email");
+    localStorage.removeItem("meradhan_tracking_session");
   };
-  return { cookies, setCookie, removeCookie, clearCookies };
+  return {
+    cookies: {
+      token: localStorage.getItem("token"),
+      userId: localStorage.getItem("userId") as number | string | undefined,
+      name: localStorage.getItem("name"),
+      email: localStorage.getItem("email"),
+      meradhan_tracking_session: localStorage.getItem(
+        "meradhan_tracking_session",
+      ),
+    },
+    setCookie: (name: string, value: string) => {
+      localStorage.setItem(name, value);
+    },
+    removeCookie: (name: string) => {
+      localStorage.removeItem(name);
+    },
+    clearCookies,
+  };
 };
 
 export default useAppCookie;

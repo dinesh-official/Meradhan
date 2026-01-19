@@ -25,7 +25,7 @@ function BondsWatchList() {
   const bondsWatchList = useQuery({
     queryKey: ["bondsWatchList"],
     queryFn: async () => {
-      if (!cookies.token) {
+      if (!cookies.userId) {
         return { data: [] };
       }
       return await apiClientCaller.get<BondDetailsResponse[]>(

@@ -1,21 +1,20 @@
+import { useUserTracking } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import { useTimer } from "@/hooks/useTimer";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useRouter } from "nextjs-toploader/app";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import z from "zod";
 import { useTrackUserVerifyFlowStore } from "./useTrackUserVerifyFlowStore";
-import { useTimer } from "@/hooks/useTimer";
-import { AxiosError } from "axios";
-import { useRouter } from "nextjs-toploader/app";
-import useAppCookie from "@/hooks/useAppCookie.hook";
-import { COOKIE_OPTIONS } from "@/core/config/cookies.config";
-import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
 export const useSignUpAuthFlow = () => {
   const router = useRouter();
-  const { setCookie } = useAppCookie();
+
   const {
     email,
     mobile,
@@ -204,32 +203,6 @@ export const useSignUpAuthFlow = () => {
       },
       payload,
     });
-  };
-
-  const setAuthCookiesAndRedirect = ({
-    id,
-    token,
-  }: {
-    token: string;
-    id: string;
-  }) => {
-    // setCookie("token", token, COOKIE_OPTIONS);
-    // setCookie("userId", id, COOKIE_OPTIONS);
-
-    // redirect to dashboard
-    // if (localStorage.getItem("redirect")) {
-    //   trackActivity("session", {
-    //     method:
-    //       "Sign Up  success | Redirect to " + localStorage.getItem("redirect"),
-    //   });
-    //   router.replace(localStorage.getItem("redirect") as string);
-    //   localStorage.removeItem("redirect");
-    // } else {
-    //   trackActivity("session", {
-    //     method: "Sign Up  success | Redirect to dashboard",
-    //   });
-    // }
-    router.replace("/login");
   };
 
   return {

@@ -64,7 +64,7 @@ function IsshuerNotesAddToWatchList({ issuerId }: { issuerId: string }) {
       <div
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => {
-          if (!cookies.token) {
+          if (!cookies.userId) {
             setOpen(true);
             return;
           }

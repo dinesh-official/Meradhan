@@ -28,7 +28,7 @@ function IssuerWatchList() {
   const issuerWatchList = useQuery({
     queryKey: ["issuerWatchList"],
     queryFn: async () => {
-      if (!cookies.token) {
+      if (!cookies.userId) {
         return [];
       }
 

@@ -340,8 +340,8 @@ export const useLoginFormHook = () => {
     //     }
     //   : COOKIE_OPTIONS;
 
-    // setCookie("token", token, cookieOptions);
-    // setCookie("userId", id, cookieOptions);
+    setCookie("token", token);
+    setCookie("userId", id);
 
     // redirect to dashboard
     if (localStorage.getItem("redirect")) {
