@@ -115,10 +115,10 @@ export interface TrackingContextValue {
 }
 
 export const TrackingContext = createContext<TrackingContextValue>({
-  track: () => {},
+  track: () => { },
   activities: [],
-  trackActivity: () => {},
-  addActivity: async () => {},
+  trackActivity: () => { },
+  addActivity: async () => { },
 });
 
 interface UserTrackingProviderProps {
@@ -181,16 +181,16 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
         os: navigator.platform,
         language: navigator.language,
         userId: cookies.userId,
-        token: cookies.token,
+
         maxScrollPercent: maxScrollPercent,
         ipData: await getUserIpData(),
         user: {
           name: session
             ? makeFullname({
-                firstName: session.firstName,
-                lastName: session.lastName,
-                middleName: session.middleName,
-              })
+              firstName: session.firstName,
+              lastName: session.lastName,
+              middleName: session.middleName,
+            })
             : localStorage.getItem("name"),
           email: session?.emailAddress || localStorage.getItem("email"),
         },
@@ -275,7 +275,7 @@ export const UserTrackingProvider: React.FC<UserTrackingProviderProps> = ({
       if (idleTimeout.current) clearTimeout(idleTimeout.current);
 
       idleTimeout.current = setTimeout(() => {
-        if (cookies.token && pathname.startsWith("/dashboard")) {
+        if (cookies.userId && pathname.startsWith("/dashboard")) {
           trackActivity("auto_logout", {
             reason: "User inactive for 5 minutes",
           });

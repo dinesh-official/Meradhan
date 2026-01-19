@@ -23,7 +23,7 @@ function BondAddToWatchList({ isin }: { isin: string }) {
   const bondsWatchList = useQuery({
     queryKey: ["bondsWatchList"],
     queryFn: async () => {
-      if (!cookies.token) {
+      if (!cookies.userId) {
         return { data: [] };
       }
       return await apiClientCaller.get<BondDetailsResponse[]>(
@@ -70,7 +70,7 @@ function BondAddToWatchList({ isin }: { isin: string }) {
       <div
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => {
-          if (cookies.token) {
+          if (cookies.userId) {
             addToWatchList.mutate();
           } else {
             setOpen(true); // open login needed modal

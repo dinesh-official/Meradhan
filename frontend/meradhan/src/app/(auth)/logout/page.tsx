@@ -57,7 +57,6 @@ function Logout() {
             | "name"
             | "email"
             | "meradhan_tracking_session",
-          { path: "/" },
         );
         // Try with domain if hostname is available
         if (typeof window !== "undefined" && window.location.hostname) {
@@ -68,7 +67,6 @@ function Logout() {
               | "name"
               | "email"
               | "meradhan_tracking_session",
-            { path: "/", domain: window.location.hostname },
           );
           // Try with dot-prefixed domain for subdomain cookies
           if (window.location.hostname.includes(".")) {
@@ -79,10 +77,6 @@ function Logout() {
                 | "name"
                 | "email"
                 | "meradhan_tracking_session",
-              {
-                path: "/",
-                domain: `.${window.location.hostname}`,
-              },
             );
           }
         }
