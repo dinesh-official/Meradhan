@@ -1,5 +1,9 @@
 const useAppCookie = () => {
+  const isBrowser = typeof window !== "undefined";
+
   const clearCookies = () => {
+    if (!isBrowser) return;
+
     localStorage.removeItem("userId");
     localStorage.removeItem("name");
     localStorage.removeItem("email");
@@ -8,17 +12,19 @@ const useAppCookie = () => {
 
   return {
     cookies: {
-      userId: localStorage.getItem("userId") as number | string | undefined,
-      name: localStorage.getItem("name"),
-      email: localStorage.getItem("email"),
-      meradhan_tracking_session: localStorage.getItem(
-        "meradhan_tracking_session",
-      ),
+      userId: isBrowser ? localStorage.getItem("userId") : undefined,
+      name: isBrowser ? localStorage.getItem("name") : undefined,
+      email: isBrowser ? localStorage.getItem("email") : undefined,
+      meradhan_tracking_session: isBrowser
+        ? localStorage.getItem("meradhan_tracking_session")
+        : undefined,
     },
     setCookie: (name: string, value: string) => {
+      if (!isBrowser) return;
       localStorage.setItem(name, value);
     },
     removeCookie: (name: string) => {
+      if (!isBrowser) return;
       localStorage.removeItem(name);
     },
     clearCookies,

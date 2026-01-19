@@ -49,8 +49,8 @@ function dateWithTimeZone(date: Date, timeZone: string): Date {
       Number(get("day")),
       Number(get("hour")),
       Number(get("minute")),
-      Number(get("second"))
-    )
+      Number(get("second")),
+    ),
   );
 }
 
@@ -67,6 +67,7 @@ const toDate = (value: unknown, field: string) => {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
     const {
       faceValue,
       cleanPrice,
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
     if (!paymentsPerYear || YEARFRAC_Basis === undefined) {
       return NextResponse.json(
         { error: "Invalid coupon frequency or day count basis" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -133,10 +134,9 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("YTM API error", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
