@@ -63,7 +63,7 @@ export const PageTrackingProvider: React.FC<{
         const newTrackingID =
           new Date().getTime().toString() +
           Math.random().toString(36).substring(2);
-        localStorage.setItem("meradhan_tracking_session", newTrackingID);
+        localStorage.setItem("analytics_session", newTrackingID);
         await auditApi.createNewTrackingSessionMeradhan({
           sessionId: newTrackingID,
         });
@@ -74,8 +74,8 @@ export const PageTrackingProvider: React.FC<{
       }
     };
 
-    if (localStorage.getItem("meradhan_tracking_session")) {
-      trackingId.current = localStorage.getItem("meradhan_tracking_session");
+    if (localStorage.getItem("analytics_session")) {
+      trackingId.current = localStorage.getItem("analytics_session");
     } else {
       initTracking();
     }
@@ -177,7 +177,7 @@ export const PageTrackingProvider: React.FC<{
 
         navigator.sendBeacon(
           "/api/server/auditlogs/meradhan/page-tracking/end/" +
-            pageViewIdRef.current,
+          pageViewIdRef.current,
           JSON.stringify({
             pageViewId: pageViewIdRef.current,
             exitTime,
