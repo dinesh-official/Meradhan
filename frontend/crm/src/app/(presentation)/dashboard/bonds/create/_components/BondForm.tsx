@@ -78,6 +78,19 @@ type BondDetailsResponse = {
   maturityDate: string | null;
   sortedAt: number;
   isConvertedDeal: boolean | null;
+  yield: number | null;
+  lastTradePrice: number | null;
+  lastTradeYield: number | null;
+  nextCouponDate: string | null;
+  modeOfIssuance: string | null;
+  couponType: string | null;
+  buyYield: number | null;
+  providerName: string | null;
+  providerInterestDate: string | null;
+  providerQuantity: number | null;
+  isOngoingDeal: boolean | null;
+  providerPrice: number | null;
+  ignoreAutoUpdate: boolean | null;
 };
 
 interface BondFormProps {
@@ -170,6 +183,23 @@ function BondForm({ initialData, isin }: BondFormProps) {
             : undefined,
           sortedAt: initialData.sortedAt || 0,
           isConvertedDeal: initialData.isConvertedDeal || undefined,
+          yield: initialData.yield || undefined,
+          lastTradePrice: initialData.lastTradePrice || undefined,
+          lastTradeYield: initialData.lastTradeYield || undefined,
+          nextCouponDate: initialData.nextCouponDate
+            ? new Date(initialData.nextCouponDate)
+            : undefined,
+          modeOfIssuance: initialData.modeOfIssuance || undefined,
+          couponType: initialData.couponType || undefined,
+          buyYield: initialData.buyYield || undefined,
+          providerName: initialData.providerName || undefined,
+          providerInterestDate: initialData.providerInterestDate
+            ? new Date(initialData.providerInterestDate)
+            : undefined,
+          providerQuantity: initialData.providerQuantity || undefined,
+          isOngoingDeal: initialData.isOngoingDeal ?? false,
+          providerPrice: initialData.providerPrice || undefined,
+          ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
         }
       : {
           isin: "",
@@ -188,6 +218,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
           isListed: "UNKNOWN",
           categories: [],
           sortedAt: 0,
+          isOngoingDeal: false,
+          ignoreAutoUpdate: false,
         },
   });
 
@@ -932,6 +964,348 @@ function BondForm({ initialData, isin }: BondFormProps) {
                         />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Additional Bond Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Additional Bond Details</CardTitle>
+              <CardDescription>
+                Additional fields for bond trading and provider information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="yield"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Yield (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lastTradePrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Trade Price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lastTradeYield"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Trade Yield (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="buyYield"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Buy Yield (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="nextCouponDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Next Coupon Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? new Date(field.value as unknown as string)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value ? new Date(e.target.value) : null
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="modeOfIssuance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mode of Issuance</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter mode of issuance"
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="couponType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Coupon Type</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter coupon type"
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Provider Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Provider Information</CardTitle>
+              <CardDescription>
+                Provider details and ongoing deal information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="providerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provider Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter provider name"
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="providerPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provider Price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="providerQuantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provider Quantity</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="1"
+                          placeholder="0"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value, 10)
+                                : undefined
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="providerInterestDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provider Interest Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? new Date(field.value as unknown as string)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value ? new Date(e.target.value) : null
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isOngoingDeal"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border-2 border-primary/20 bg-primary/5 p-4 md:col-span-2 transition-colors hover:bg-primary/10 hover:border-primary/30">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base font-semibold text-primary">
+                          Is Ongoing Deal
+                        </FormLabel>
+                        <FormDescription className="text-sm">
+                          Mark this bond as an ongoing deal
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          className="h-5 w-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="ignoreAutoUpdate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border-2 border-primary/20 bg-primary/5 p-4 md:col-span-3 transition-colors hover:bg-primary/10 hover:border-primary/30">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base font-semibold text-primary">
+                          Ignore Auto Update
+                        </FormLabel>
+                        <FormDescription className="text-sm">
+                          Prevent automatic updates to this bond
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          className="h-5 w-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer"
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />

@@ -127,7 +127,11 @@ export function BondListCard({
                 </p>
               </BondInfoLabel>
               <BondInfoLabel title="Yield">
-                <p> --</p>
+                <p>
+                  {data.yield !== null && data.yield !== undefined
+                    ? `${data.yield}%`
+                    : "--"}
+                </p>
               </BondInfoLabel>
               <BondInfoLabel title="Face Value">
                 <p className="flex items-center">
