@@ -62,7 +62,7 @@ export const kycAadhaarInfoDataSchema = z.object({
 export const selfieSignRequestSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   middleName: z.string().optional(), // can be empty
-  lastName: z.string().min(1, "Last name is required"),
+  lastName: z.string().min(1, "Last name is required").optional(),
   confirmSelfieTimestamp: z.string().optional(),
 });
 
