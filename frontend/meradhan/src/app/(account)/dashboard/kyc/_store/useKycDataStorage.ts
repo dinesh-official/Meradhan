@@ -84,6 +84,11 @@ export type QuestionnaireData = z.infer<schema["riskProfileDataSchema"]>;
 // ==========================
 export interface KycDataStorage {
   stepIndex: number;
+  names: {
+    fullNameAsPerPan: string;
+    fullNameAsPerAadhar: string;
+    fullNameAsPerBank: string;
+  },
   step_1: Step1Data;
   step_2: PersonalData;
   step_3: BankAccountData[];
@@ -100,6 +105,11 @@ export interface KycDataStorage {
 // ==========================
 const initData: KycDataStorage = {
   stepIndex: 0,
+  names: {
+    fullNameAsPerPan: "",
+    fullNameAsPerAadhar: "",
+    fullNameAsPerBank: "",
+  },
   step_1: {
     pan: {
       panCardNo: "",
@@ -215,6 +225,7 @@ export const useKycDataStorage = create<{
     step: K,
     data: KycDataStorage[K],
   ) => void;
+  setNames: (key: keyof KycDataStorage["names"], data: string) => void;
   reset: () => void;
   setStepIndex: (index: number) => void;
   nextLocalStep: () => void;
@@ -254,7 +265,14 @@ export const useKycDataStorage = create<{
   setStep6Data: (Key: keyof KycDataStorage["step_6"], data: any) => void;
 }>((set) => ({
   state: initData,
-
+  setNames: (key: keyof KycDataStorage["names"], data: string) => set({
+    state: {
+      ...initData, names: {
+        ...initData.names,
+        [key]: data,
+      }
+    }
+  }),
   setState: (newState) => set({ state: newState }),
 
   updateStep: (step, data) =>
