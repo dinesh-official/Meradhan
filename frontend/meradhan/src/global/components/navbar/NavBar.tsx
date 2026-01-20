@@ -1,8 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import { getSessionId } from "@/analytics/analytics";
 import { userSessionStore } from "@/core/auth/userSessionStore";
-import useAppCookie from "@/hooks/useAppCookie.hook";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,19 +15,9 @@ function NavBar({
 }) {
   // save data on session store
   const { setSession } = userSessionStore();
-  const { cookies, clearCookies } = useAppCookie();
 
   useEffect(() => {
     setSession(session);
-
-    if (!session) {
-      // clear session data on logout or session expiry session expired but token cookie still exists
-      if (cookies.token) {
-        clearCookies();
-        localStorage.clear();
-        getSessionId(); // create new session id
-      }
-    }
   }, [session, setSession]);
 
   return (

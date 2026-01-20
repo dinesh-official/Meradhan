@@ -8,6 +8,11 @@ const controller = new CustomerKycKycController();
 
 // pan
 kycRoutes.post(
+  "/api/customer/kyc/pan/info-verify",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.panInfoVerifyRequest(req, res)
+);
+kycRoutes.post(
   "/api/customer/kyc/pan/request",
   allowAccessMiddleware("USER"),
   (req, res) => controller.createPanVerifyRequest(req, res)
@@ -17,7 +22,12 @@ kycRoutes.get(
   allowAccessMiddleware("USER"),
   (req, res) => controller.verifyPanResponse(req, res)
 );
-
+// aadhaar
+kycRoutes.post(
+  "/api/customer/kyc/aadhaar/request",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.createAadhaarVerifyRequest(req, res)
+);
 // selfie
 kycRoutes.post(
   "/api/customer/kyc/selfie/request",

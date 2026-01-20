@@ -10,10 +10,12 @@ import {
 } from "./queue/worker_queues";
 import { render } from "@react-email/components";
 import MeraDhanOtpEmail from "@emails/crm_login_otp_email";
+import { meraDhanOtpEmailTextLogin } from "@emails/text/meraDhanOtpEmailTextLogin";
+import { meraDhanOtpEmailTextSignup } from "@emails/text/meraDhanOtpEmailTextSignup";
 
 startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
   const emailSend = new EmailCommunication();
-  const { email, userName, subject, otp } = job.data;
+  const { email, userName, subject, otp, type } = job.data;
   console.log("Sending Email - " + email);
   // const emailHtml = await render(
   //   MeraDhanOtpEmail({
@@ -21,6 +23,22 @@ startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
   //     userName,
   //   })
   // );
+  if (type == "login") {
+    await emailSend.sendEmail({
+      to: email,
+      subject: subject,
+      text: meraDhanOtpEmailTextLogin({ userName, otpCode: otp }),
+    });
+    return;
+  }
+  if (type == "signup") {
+    await emailSend.sendEmail({
+      to: email,
+      subject: subject,
+      text: meraDhanOtpEmailTextSignup({ userName, otpCode: otp }),
+    });
+    return;
+  }
 
   await emailSend.sendEmail({
     to: email,
@@ -37,7 +55,7 @@ startQueueWorker(emailAdminOtpSenderQueue, async (job: Job) => {
     MeraDhanOtpEmail({
       otpCode: otp,
       userName,
-    })
+    }),
   );
 
   await emailSend.sendEmail({

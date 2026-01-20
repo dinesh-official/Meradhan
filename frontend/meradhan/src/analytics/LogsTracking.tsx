@@ -26,7 +26,7 @@ export const PageTrackingProvider: React.FC<{
 
   const auditApi = useMemo(
     () => new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller),
-    []
+    [],
   );
 
   const clearAllClientStorage = useCallback(() => {
@@ -56,14 +56,14 @@ export const PageTrackingProvider: React.FC<{
   useEffect(() => {
     // Initialize tracking session on mount
     const initTracking = async () => {
-      if (!cookies.token) {
+      if (!cookies.userId) {
         return;
       }
       try {
         const newTrackingID =
           new Date().getTime().toString() +
           Math.random().toString(36).substring(2);
-        localStorage.setItem("meradhan_tracking_session", newTrackingID);
+        localStorage.setItem("analytics_session", newTrackingID);
         await auditApi.createNewTrackingSessionMeradhan({
           sessionId: newTrackingID,
         });
@@ -74,8 +74,8 @@ export const PageTrackingProvider: React.FC<{
       }
     };
 
-    if (localStorage.getItem("meradhan_tracking_session")) {
-      trackingId.current = localStorage.getItem("meradhan_tracking_session");
+    if (localStorage.getItem("analytics_session")) {
+      trackingId.current = localStorage.getItem("analytics_session");
     } else {
       initTracking();
     }
@@ -83,7 +83,7 @@ export const PageTrackingProvider: React.FC<{
 
   // End page view function
   const endPageView = useCallback(async () => {
-    if (!cookies.token) {
+    if (!cookies.userId) {
       return;
     }
     if (!currentPageView || !pageViewIdRef.current || !trackingId.current)
@@ -91,7 +91,7 @@ export const PageTrackingProvider: React.FC<{
 
     const exitTime = new Date();
     const duration = Math.floor(
-      (exitTime.getTime() - currentPageView!.entryTime!.getTime()) / 1000
+      (exitTime.getTime() - currentPageView!.entryTime!.getTime()) / 1000,
     );
 
     try {
@@ -101,7 +101,7 @@ export const PageTrackingProvider: React.FC<{
         scrollDepth: maxScrollRef.current,
         interactions: interactionsRef.current,
         sessionId: trackingId.current,
-        userId: cookies.userId || undefined,
+        userId: Number(cookies.userId) || undefined,
       });
     } catch (error) {
       console.error("Failed to end page tracking:", error);
@@ -134,7 +134,7 @@ export const PageTrackingProvider: React.FC<{
         interactionsRef.current = 0;
 
         const pageData = {
-          userId: cookies.userId || undefined, // Optional
+          userId: Number(cookies.userId) || undefined, // Optional
           pagePath: pathname,
           entryTime: new Date(),
           sessionId: trackingId.current,
@@ -151,14 +151,14 @@ export const PageTrackingProvider: React.FC<{
         pageViewIdRef.current = pageViewData.pageViewId;
         setCurrentPageView({
           ...pageData,
-          userId: cookies.userId,
+          userId: Number(cookies.userId),
           sessionId: trackingId.current,
         });
       } catch (error) {
         console.error("Failed to start page tracking:", error);
       }
     };
-    if (!cookies.token) {
+    if (!cookies.userId) {
       return;
     }
     startPageView();
@@ -172,12 +172,12 @@ export const PageTrackingProvider: React.FC<{
       if (currentPageView && pageViewIdRef.current && trackingId.current) {
         const exitTime = new Date();
         const duration = Math.floor(
-          (exitTime.getTime() - currentPageView.entryTime.getTime()) / 1000
+          (exitTime.getTime() - currentPageView.entryTime.getTime()) / 1000,
         );
 
         navigator.sendBeacon(
           "/api/server/auditlogs/meradhan/page-tracking/end/" +
-            pageViewIdRef.current,
+          pageViewIdRef.current,
           JSON.stringify({
             pageViewId: pageViewIdRef.current,
             exitTime,
@@ -186,7 +186,7 @@ export const PageTrackingProvider: React.FC<{
             interactions: interactionsRef.current,
             sessionId: trackingId.current,
             userId: cookies.userId || undefined,
-          })
+          }),
         );
       }
     };

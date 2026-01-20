@@ -1,7 +1,7 @@
 "use client";
 import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import LabelInput from "@/app/(account)/_components/wrapper/LableInput";
-import { DatePicker } from "@/components/custom/DatePicker";
+import DatePicker from "@/components/picker/DatePicker";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,18 +12,30 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
+import { useEffect, useState } from "react";
+import {
+  convertUTCtoIST,
+  formatDateCustom,
+} from "@/global/utils/datetime.utils";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
   const data = state.step_1.pan;
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { handelPanVerification, isPending, error } = usePanCardVerifyHook();
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setDateOfBirth(
+      data.dateOfBirth ? new Date(formatDateCustom(data.dateOfBirth)) : null,
+    );
+  }, []);
+
   return (
     <Card accountMode>
       <CardHeader accountMode>
@@ -64,17 +76,35 @@ function IdentityValidationForm() {
                 }}
               /> */}
               <DatePicker
-                value={
-                  data.dateOfBirth
-                    ? dateTimeUtils.formatDateTime(
-                        data.dateOfBirth,
-                        "DD/MM/YYYY"
-                      )
-                    : ""
-                }
+                // value={
+                //   data.dateOfBirth
+                //     ? dateTimeUtils.formatDateTime(
+                //       data.dateOfBirth,
+                //       "DD/MM/YYYY"
+                //     )
+                //     : ""
+                // }
+
+                containerStyles={{
+                  border: "1px solid #e6e6e6",
+                  padding: "6px",
+                  paddingLeft: "13px",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                }}
+                inputStyles={{
+                  border: "none",
+                  padding: "0",
+                  fontSize: "14px",
+                }}
+                value={dateOfBirth}
                 onChange={(e) => {
-                  setStep1PanData("dateOfBirth", e.target.value);
-                  console.log(e.target.value);
+                  setDateOfBirth(e);
+                  setStep1PanData(
+                    "dateOfBirth",
+                    convertUTCtoIST(e?.toISOString())?.split("T")[0],
+                  );
+                  console.log(e);
                 }}
               />
             </LabelInput>
@@ -137,7 +167,7 @@ function IdentityValidationForm() {
                 className="mt-0.5 border border-gray-200"
               />
               I hereby confirm that I am not a Politically Exposed Person (PEP)
-              nor related to any PEP.
+              nor related to any PEP
             </label>
             <small className="text-red-600 text-[10px]">
               {error?.checkTerms1?.[0]}
@@ -201,12 +231,11 @@ function IdentityValidationForm() {
                 applicable laws of India and not a Non-Resident Indian (NRI).
               </li>
               <li>
-                I hereby confirm to authorize MeraDhan to access and retrieve my
-                PAN and Aadhaar card details from DigiLocker for the purpose of
-                conducting SEBI-compliant KYC verification. I understand that
-                this information will be used solely for regulatory compliance
-                and will be securely stored in accordance with applicable laws
-                and SEBI guidelines.
+                I authorize MeraDhan to access and verify my PAN details from
+                authorized government or regulatory sources for SEBI-compliant
+                KYC purposes. I understand that my information will be used only
+                for regulatory compliance and handled securely as per applicable
+                laws.
               </li>
               <li>
                 I hereby provide my consent to MeraDhan to collect, use, store,
@@ -214,7 +243,7 @@ function IdentityValidationForm() {
                 purposes in compliance with SEBI regulations. This includes
                 retrieval of KYC records from KYC Registration Agencies (KRAs),
                 as may be required, and share my details with KYC registration
-                agencies.{" "}
+                agencies.
               </li>
             </ul>
           </div>

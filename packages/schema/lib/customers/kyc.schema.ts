@@ -1,11 +1,17 @@
 import z from "zod";
 
+export const panVerifyInfoSchema = z.object({
+  id: z.string().min(8, "Date of birth is required"),
+  name: z.string().optional().default(""), // can be empty
+  dob: z.string(), // can be empty
+});
+
 export const kycPanInfoDataSchema = z.object({
   panCardNo: z
     .string()
     .regex(
       /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
-      "Invalid PAN format (e.g., ABCDE1234F)"
+      "Invalid PAN format (e.g., ABCDE1234F)",
     )
     .min(10, "PAN must be 10 characters")
     .max(10, "PAN must be 10 characters"),
@@ -39,10 +45,24 @@ export const kycPanInfoDataSchema = z.object({
   fetchedTimestamp: z.string().optional(),
 });
 
+export const kycAadhaarInfoDataSchema = z.object({
+  // aadhaarCardNo: z
+  //   .string()
+  //   .regex(/^[0-9]{12}$/, "Aadhaar number must be 12 digits")
+  //   .min(12, "Aadhaar number must be 12 digits")
+  //   .max(12, "Aadhaar number must be 12 digits"),
+  gender: z.string(),
+  firstName: z.string().min(1, "First name is required").trim(),
+  middleName: z.string().optional().default(""), // can be empty
+  lastName: z.string().optional().default(""), // can be empty
+  dateOfBirth: z.string().min(8, "Date of birth is required"),
+  email: z.email("Invalid email address"),
+});
+
 export const selfieSignRequestSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   middleName: z.string().optional(), // can be empty
-  lastName: z.string().min(1, "Last name is required"),
+  lastName: z.string().optional().default(""), // can be empty
   confirmSelfieTimestamp: z.string().optional(),
 });
 
@@ -128,14 +148,14 @@ export const dpAccountInfoSchema = z
         {
           message:
             "All PAN numbers except the last one must be valid (e.g., ABCDE1234F)",
-        }
+        },
       )
       .refine(
         (arr) => {
           const last = arr[arr.length - 1];
           return !last || panRegex.test(last);
         },
-        { message: "Invalid format for last PAN number (e.g., ABCDE1234F)" }
+        { message: "Invalid format for last PAN number (e.g., ABCDE1234F)" },
       ),
 
     accountHolderName: z.string().min(1, "Account holder name is required"),
@@ -200,5 +220,5 @@ export const riskProfileDataSchema = z.array(
       .array(z.string().min(1, "Option cannot be empty"))
       .nonempty("At least one option is required"),
     ans: z.string().min(1, "Answer is required"),
-  })
+  }),
 );

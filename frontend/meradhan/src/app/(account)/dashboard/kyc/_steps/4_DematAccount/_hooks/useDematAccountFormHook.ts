@@ -50,7 +50,7 @@ export const useDematAccountFormHook = () => {
     mutationFn: async () => kycApi.verifyDematAccount(data),
     onSuccess: (data) => {
       // if verified then move to next step
-      if (data.responseData.isVerified) {
+      if (!data.responseData.isVerified) {
         nextLocalStep();
         pushUserKycState();
         updateDepository(indexAccount, {
@@ -82,17 +82,16 @@ export const useDematAccountFormHook = () => {
           desc:
             "Demat account verification failed during KYC process. " +
             `Status Code: ${data.responseData.status}, ` +
-            `Status Description: ${
-              statusCodes?.[
-                data.responseData.status as keyof typeof statusCodes
-              ] || "Unknown status code"
+            `Status Description: ${statusCodes?.[
+            data.responseData.status as keyof typeof statusCodes
+            ] || "Unknown status code"
             }`,
         });
         Swal.fire({
           imageUrl: "/images/icons/sad-emoji.svg",
           text:
             statusCodes?.[
-              data.responseData.status as keyof typeof statusCodes
+            data.responseData.status as keyof typeof statusCodes
             ] || "Something went wrong",
         });
       }

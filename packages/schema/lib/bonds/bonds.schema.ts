@@ -97,4 +97,18 @@ export const bondCreateUpdateSchema = z.object({
   maturityDate: z.coerce.date().optional().nullable(),
   sortedAt: z.number().int().default(0).optional(),
   isConvertedDeal: z.boolean().optional().nullable(),
+  // Additional fields for bond details
+  yield: z.number().nonnegative().optional().nullable(),
+  lastTradePrice: z.number().nonnegative().optional().nullable(),
+  lastTradeYield: z.number().nonnegative().optional().nullable(),
+  nextCouponDate: z.coerce.date().optional().nullable(),
+  modeOfIssuance: z.string().trim().optional().nullable(),
+  couponType: z.string().trim().optional().nullable(),
+  buyYield: z.number().nonnegative().optional().nullable(),
+  providerName: z.string().trim().optional().nullable(),
+  providerInterestDate: z.coerce.date().optional().nullable(),
+  providerQuantity: z.number().int().nonnegative().optional().nullable(),
+  isOngoingDeal: z.boolean().default(false).optional().nullable(),
+  providerPrice: z.number().nonnegative().optional().nullable(),
+  ignoreAutoUpdate: z.boolean().default(false).optional().nullable(),
 });

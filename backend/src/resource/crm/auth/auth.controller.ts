@@ -1,4 +1,3 @@
-import { appSchema } from "@root/schema";
 import {
   addCrmLoginBasedAuditLog,
   AuditLogRepository,
@@ -8,10 +7,10 @@ import {
   getClientIP,
   parseBrowserInfo,
 } from "@resource/customer/auditlogs/auditlogs.utility";
+import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { EmailAuthService } from "./email_auth.service";
-import { cookieOptions } from "@config/cookie";
 
 export class AuthController {
   private auditLogsRepo = new AuditLogRepository();
@@ -54,7 +53,7 @@ export class AuthController {
           userId: Number(id), // Replace with actual userId if available
           success: status,
         });
-      }
+      },
     );
 
     // Start audit log session
@@ -89,10 +88,9 @@ export class AuthController {
 
   async logout(req: Request, res: Response): Promise<void> {
     // Clear all cookies
-    res.cookie("token", "", {
-      ...cookieOptions,
-      expires: new Date(0),
-    });
+    res.clearCookie("userId");
+    res.clearCookie("token");
+
     await addCrmLoginBasedAuditLog(req, {
       sessionType: "logout",
       userId: Number(req.cookies.userId),

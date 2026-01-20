@@ -63,7 +63,6 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
-    "i": "^0.3.7",
     "ioredis": "^5.8.1",
     "jsonwebtoken": "^9.0.2",
     "kyc-providers": "file:../packages/kyc-providers",

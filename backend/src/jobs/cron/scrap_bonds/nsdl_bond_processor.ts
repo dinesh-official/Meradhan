@@ -5,7 +5,7 @@ import { type BondDataSet } from "./nsdl_bond_service";
 import fs from "fs";
 
 export class NsdlBondProcessor {
-  constructor(private bond: BondDataSet) {}
+  constructor(private bond: BondDataSet) { }
 
   // Extract dates from text using multiple formats UTIL function
   private extractDatesFromText(text: string) {

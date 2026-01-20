@@ -48,7 +48,7 @@ function SignUpForm() {
   } = form;
 
   const signupApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const signUpFlow = useSignUpAuthFlow();
@@ -57,7 +57,7 @@ function SignUpForm() {
   const createCustomerMutation = useMutation({
     mutationKey: ["signUpWithCredentials"],
     mutationFn: (
-      payload: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>
+      payload: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>,
     ) => signupApi.singUpWithCredentials(payload),
     onSuccess(data) {
       // get the id from the response data to use.
@@ -157,6 +157,7 @@ function SignUpForm() {
             <Input
               placeholder="Email ID*"
               className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
+              type="email"
               value={signUpFormData.email}
               onChange={(e) =>
                 handleSignUpFormChange("email", e.target.value.toLowerCase())
@@ -247,12 +248,12 @@ function SignUpForm() {
               onClick={() =>
                 handleSignUpFormChange(
                   "isAcceptedTerms",
-                  !signUpFormData.isAcceptedTerms
+                  !signUpFormData.isAcceptedTerms,
                 )
               }
               className={cn(
                 "data-[state=checked]:bg-secondary mt-[2px] border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white",
-                signUpFormError.isAcceptedTerms && "border-red-500"
+                signUpFormError.isAcceptedTerms && "border-red-500",
               )}
             />
             <span
@@ -286,7 +287,7 @@ function SignUpForm() {
               onClick={() =>
                 handleSignUpFormChange(
                   "isAcceptedWhatsapp",
-                  !signUpFormData.isAcceptedWhatsapp
+                  !signUpFormData.isAcceptedWhatsapp,
                 )
               }
               className="data-[state=checked]:bg-secondary mt-0.5 border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white"

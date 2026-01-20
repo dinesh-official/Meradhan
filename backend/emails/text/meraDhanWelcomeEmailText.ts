@@ -1,7 +1,7 @@
 export function meraDhanWelcomeEmailText({ userName = "User" } = {}) {
   const year = new Date().getFullYear();
 
-  return `<p>Dear User,</p>
+  return `<p>Dear ${userName},</p>
 
 <p>
   Congratulations on successfully signing up for MeraDhan.co!

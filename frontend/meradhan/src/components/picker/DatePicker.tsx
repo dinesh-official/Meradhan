@@ -17,6 +17,8 @@ type DatePickerProps = {
   headerClassName?: string;
   allowedDates?: Date[];
   inputClassName?: string;
+  inputStyles?: React.CSSProperties;
+  containerStyles?: React.CSSProperties;
 };
 
 type CalendarCell = {
@@ -134,6 +136,7 @@ export default function DatePicker({
   value,
   onChange,
   placeholder = "DD/MM/YYYY",
+
   label,
   minDate,
   maxDate,
@@ -143,6 +146,8 @@ export default function DatePicker({
   headerClassName,
   allowedDates,
   inputClassName,
+  inputStyles,
+  containerStyles
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(formatDate(value));
@@ -325,14 +330,12 @@ export default function DatePicker({
 
   return (
     <div
-      className={`date-picker${disabled ? " date-picker--disabled" : ""}${
-        className ? ` ${className}` : ""
-      }`}
+      className={cn(`date-picker${disabled ? " date-picker--disabled" : ""}`, className)}
       ref={containerRef}
     >
       {label ? <label className="date-picker__label">{label}</label> : null}
 
-      <div className="date-picker__control">
+      <div className="date-picker__control" style={containerStyles}>
         <input
           aria-label={label ?? "Date"}
           className={cn("date-picker__input", inputClassName)}
@@ -342,6 +345,7 @@ export default function DatePicker({
           disabled={disabled}
           onBlur={handleInputBlur}
           onChange={handleInputChange}
+          style={inputStyles}
         />
         <button
           type="button"
@@ -356,15 +360,13 @@ export default function DatePicker({
 
       {isOpen ? (
         <div
-          className={`date-picker__popover${
-            popoverClassName ? ` ${popoverClassName}` : ""
-          }`}
+          className={`date-picker__popover${popoverClassName ? ` ${popoverClassName}` : ""
+            }`}
           role="dialog"
         >
           <div
-            className={`date-picker__header${
-              headerClassName ? ` ${headerClassName}` : ""
-            }`}
+            className={`date-picker__header${headerClassName ? ` ${headerClassName}` : ""
+              }`}
           >
             <button
               type="button"

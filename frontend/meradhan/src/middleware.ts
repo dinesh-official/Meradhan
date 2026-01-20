@@ -12,7 +12,7 @@ const fetchUserSession = async (token: string) => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     ).then((res) => res.json());
     return sessionResponse as Promise<UserSessionDataResponse>;
   } catch (error) {
@@ -49,6 +49,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/place-order")
   ) {
     const cookieStore = await cookies();
+
     const token = cookieStore.get("token")?.value;
 
     // No token? Try to restore session
@@ -63,15 +64,7 @@ export async function middleware(request: NextRequest) {
         const response = NextResponse.redirect(new URL("/login", origin), {
           headers: requestHeaders,
         });
-        const allCookies = cookieStore.getAll();
-        for (const cookie of allCookies) {
-          response.cookies.set({
-            name: cookie.name,
-            value: "",
-            expires: new Date(0),
-            path: "/",
-          });
-        }
+
         // Redirect to login if session is invalid
         return response;
       }

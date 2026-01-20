@@ -84,7 +84,6 @@ export const PageTrackingProvider: React.FC<{
       !currentPageView ||
       !pageViewIdRef.current ||
       !cookies.userId ||
-      !cookies.token ||
       hasEndedRef.current ||
       isEndingRef.current
     )
@@ -103,7 +102,7 @@ export const PageTrackingProvider: React.FC<{
         duration,
         scrollDepth: maxScrollRef.current,
         interactions: interactionsRef.current,
-        sessionId: cookies.token,
+
       });
       hasEndedRef.current = true;
     } catch {
@@ -119,7 +118,7 @@ export const PageTrackingProvider: React.FC<{
       // End previous page view if exists
       await endPageView();
 
-      if (!cookies.userId || !cookies.token) return;
+      if (!cookies.userId) return;
 
       if (pathname.startsWith("/logout")) {
         return;

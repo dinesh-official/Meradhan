@@ -18,10 +18,12 @@ import * as path from "path";
 
 // helper class for digio kyc file operations
 class DigioKycFileHelper {
-  constructor(private digioSdk: DigioSDK) {}
+  constructor(private digioSdk: DigioSDK) { }
 
   // get pan aadhar document files from digio rid
   async getPanAadharDocumentFiles(bytes: string, userName?: string) {
+    console.log(userName);
+
     const zipBuffer = Buffer.from(bytes);
     const zip = new AdmZip(zipBuffer);
 
@@ -73,21 +75,21 @@ class DigioKycFileHelper {
       });
 
     const pathData = {
-      pan: files?.[0],
-      aadhar: files?.[1],
+      // pan: files?.[0],
+      aadhar: files?.[0],
     };
 
     const aadharUrl = await saveFileOnCloud({
       filePath: pathData.aadhar!,
       directory: `${userName ? userName + "/" : ""}kyc`,
     });
-    const panUrl = await saveFileOnCloud({
-      filePath: pathData.pan!,
-      directory: `${userName ? userName + "/" : ""}kyc`,
-    });
+    // const panUrl = await saveFileOnCloud({
+    //   filePath: pathData.pan!,
+    //   directory: `${userName ? userName + "/" : ""}kyc`,
+    // });
     return {
       aadhar: aadharUrl,
-      pan: panUrl,
+      // pan: panUrl,
     };
   }
 
@@ -155,6 +157,23 @@ export class KycProvider extends DigioKycFileHelper {
 
   // KYC STEP 1: PAN Verification ---------------------------------------------
 
+  async panVerifyInfo({
+    date,
+    id,
+    name,
+  }: {
+    date: string;
+    name: string;
+    id: string;
+  }) {
+    const panDetails = await this.digio.verifyPanInfo({
+      id_no: id,
+      name,
+      dob: date,
+    });
+    return panDetails;
+  }
+
   // pan aadhar generate request to digio
   async createPanVerifyRequest({
     email,
@@ -180,6 +199,41 @@ export class KycProvider extends DigioKycFileHelper {
       await this.digio.getKycgetResponse<DigioAadharPanData>(kid);
     return panDetails;
   }
+
+  // aadhaar generate request to digio
+  async createAadhaarVerifyRequest({
+    email,
+    id,
+    name,
+  }: {
+    email: string;
+    name: string;
+    id: string;
+  }) {
+    const aadhaarDetails = await this.digio.sendTemplateRequest({
+      emailId: email,
+      name,
+      templateName: "DIGILOCKERAADHAAR",
+      reference_id: id,
+    });
+    return aadhaarDetails;
+  }
+
+  // // verify aadhaar from digio kid
+
+  // async verifyAadhaar({ kid }: { kid: string }) {
+  //   try {
+  //     const aadhaarDetails =
+  //       await this.digio.getKycgetResponse(kid);
+  //     return aadhaarDetails;
+  //   } catch (error) {
+  //     console.log(error?.response?.data);
+  //     throw new AppError("Aadhaar verification failed", {
+  //       code: "AADHAAR_VERIFICATION_FAILED",
+  //       statusCode: 400,
+  //     });
+  //   }
+  // }
 
   // selfie generate request to digio
   async createSelfieVerifyRequest({
@@ -287,11 +341,11 @@ export class KycProvider extends DigioKycFileHelper {
         throw new AppError(
           (error as AxiosError<{ error: string; ErrorDescription?: string }>)
             ?.response?.data?.ErrorDescription ||
-            (error as AxiosError<{ error: string; message?: string }>)?.response
-              ?.data?.error ||
-            (error as AxiosError<{ error: string; message?: string }>)?.response
-              ?.data?.message ||
-            error.toString(),
+          (error as AxiosError<{ error: string; message?: string }>)?.response
+            ?.data?.error ||
+          (error as AxiosError<{ error: string; message?: string }>)?.response
+            ?.data?.message ||
+          error.toString(),
           { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 }
         );
       }

@@ -56,7 +56,7 @@ type PagesMetaDataResponse = {
 };
 
 export const generatePagesMetaData = async (
-  slug: string
+  slug: string,
 ): Promise<Metadata> => {
   try {
     const { data } = await gqlClient.query<PagesMetaDataResponse>({
@@ -76,7 +76,6 @@ export const generatePagesMetaData = async (
     });
 
     const metadata = data?.pagesMetaData?.[0]?.MetaData;
-    console.log(data);
 
     if (!data?.pagesMetaData?.[0]?.MetaData?.Title) {
       return {};
@@ -103,7 +102,6 @@ export const generatePagesMetaData = async (
     };
   } catch (e) {
     console.log(e);
-
     return {};
   }
 };
@@ -116,7 +114,7 @@ function fillTemplate(template: string, data: any): string {
 
 export const generateBondInfoPageMetaData = async (
   isin: string,
-  slug?: string
+  slug?: string,
 ): Promise<Metadata> => {
   const gqlCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const bond = await gqlCaller.getBondDetailsByIsin(isin);
@@ -196,7 +194,7 @@ const pageMetaDataGql_Category = `query Author($pagination: PaginationArg, $filt
 }`;
 
 export const getBlogCategoryMetaData = async (
-  categorySlug: string
+  categorySlug: string,
 ): Promise<Metadata> => {
   try {
     const { data } = await gqlClient.query<{
@@ -291,7 +289,7 @@ const pageMetaDataGql_NewsCategory = `query Author($pagination: PaginationArg) {
 }`;
 
 export const getNewsCategoryMetaData = async (
-  categorySlug: string
+  categorySlug: string,
 ): Promise<Metadata> => {
   try {
     const { data } = await gqlClient.query<{

@@ -1,4 +1,5 @@
 "use client";
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,18 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { dataMatcherUtils } from "@/global/utils/matcher";
-import { genMediaUrl } from "@/global/utils/url.utils";
-import dynamic from "next/dynamic";
-import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { addActivityLog } from "@/analytics/UserTrackingProvider";
 
-const RenderPdf = dynamic(() => import("@/components/custom/RenderPdf"), {
-  ssr: false,
-});
 function IdentityValidationPanInfo() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
@@ -31,10 +25,7 @@ function IdentityValidationPanInfo() {
     F: "Female",
   };
 
-  const isPanMatched = dataMatcherUtils.areValuesMatched(
-    data.response?.details.pan.name,
-    data.response?.details.aadhaar.name
-  );
+  const isPanMatched = data.response?.details.panInfo.name_as_per_pan_match;
 
   const isNameMatched = dataMatcherUtils.areNamesMatched(
     dataMatcherUtils.splitFullName(data.response?.details.pan.name),
@@ -42,7 +33,7 @@ function IdentityValidationPanInfo() {
       firstName: data.firstName,
       middleName: data.middleName,
       lastName: data.lastName,
-    }
+    },
   );
 
   const isDobMatched = dataMatcherUtils.areDatesMatched(
@@ -51,7 +42,7 @@ function IdentityValidationPanInfo() {
       .split("-")
       .reverse()
       .join("-"),
-    data.dateOfBirth
+    data.dateOfBirth,
   );
 
   const isAllowToContinue = isPanMatched && isNameMatched && isDobMatched;
@@ -60,7 +51,9 @@ function IdentityValidationPanInfo() {
     <Card accountMode>
       {/* {JSON.stringify(data)} */}
       <CardHeader accountMode>
-        <CardTitle className="font-normal">Confirm PAN Details</CardTitle>
+        <CardTitle className="font-normal">
+          Confirm PAN Details {state.stepIndex}
+        </CardTitle>
       </CardHeader>
       <CardContent accountMode>
         <div className="gap-5 grid md:grid-cols-2 lg:grid-cols-3">
@@ -84,8 +77,16 @@ function IdentityValidationPanInfo() {
           </DataInfoLabel>
           <DataInfoLabel
             title="Date of Birth"
-            status={isDobMatched ? "SUCCESS" : "ERROR"}
-            statusLabel={isDobMatched ? "Verified" : "Invalid"}
+            status={
+              data.response?.details.panInfo.date_of_birth_match
+                ? "SUCCESS"
+                : "ERROR"
+            }
+            statusLabel={
+              data.response?.details.panInfo.date_of_birth_match
+                ? "Matched"
+                : "Not Matched"
+            }
             showStatus
           >
             <p className="font-medium">
@@ -93,26 +94,26 @@ function IdentityValidationPanInfo() {
             </p>
           </DataInfoLabel>
 
-          <DataInfoLabel
+          {/* <DataInfoLabel
             title="Gender"
             status="SUCCESS"
             statusLabel="Fetched"
             showStatus
           >
             <p className="font-medium">
-              {genders[data.response?.details.pan.gender as "M" | "F"] ||
+              {genders[data.response?.details.aadhaar.gender as "M" | "F"] ||
                 "Others"}
             </p>
-          </DataInfoLabel>
+          </DataInfoLabel> */}
 
-          <div className="gap-5 grid lg:grid-cols-3 md:col-span-2 lg:col-span-3">
+          {/* <div className="gap-5 grid lg:grid-cols-3 md:col-span-2 lg:col-span-3">
             <div className="md:col-span-3">
               <RenderPdf
                 file={genMediaUrl(data.response?.details.pan.file_url)}
                 height={280}
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 mt-5">
@@ -135,8 +136,9 @@ function IdentityValidationPanInfo() {
                 MiddleName: state.step_1.pan.middleName,
                 LastName: state.step_1.pan.lastName,
                 Gender:
-                  genders[data.response?.details.pan.gender as "M" | "F"] ||
-                  "Others",
+                  genders[
+                    data.response?.details?.aadhaar?.gender as "M" | "F"
+                  ] || "Others",
               },
               entityType: "KYC",
             });

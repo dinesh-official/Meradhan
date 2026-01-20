@@ -23,6 +23,18 @@ export class DigioSDK {
     });
   }
 
+  async verifyPanInfo(data: { id_no: string; name: string; dob: string }) {
+    const response = await this.client.post<{
+      aadhaar_seeding_status: string;
+      name_as_per_pan_match: boolean;
+      pan: string;
+      category: string;
+      status: string;
+      date_of_birth_match: boolean;
+    }>("/v3/client/kyc/fetch_id_data/PAN", data);
+    return response.data;
+  }
+
   async sendTemplateRequest({
     emailId,
     name,
