@@ -10,7 +10,7 @@ function Page7({ }: { ePan: string }) {
           uri: `data:image/png;base64,${ePan}`,
         }}
       /> */}
-      <Text style={tw(`text-center`)} >PAN card verified by ITD</Text>
+      <Text style={tw(`text-center`)} >PAN details verified successfully through ITD</Text>
     </View>
   );
 }
