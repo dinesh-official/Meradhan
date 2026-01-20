@@ -1,9 +1,9 @@
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { OngoingDealList } from "./OngoingDealList";
 
@@ -21,12 +21,13 @@ function OngoingDealsCard() {
       </CardHeader>
 
       <CardContent className="">
+        {/* <OngoingDealList></OngoingDealList>
         <OngoingDealList></OngoingDealList>
         <OngoingDealList></OngoingDealList>
         <OngoingDealList></OngoingDealList>
         <OngoingDealList></OngoingDealList>
-        <OngoingDealList></OngoingDealList>
-        <OngoingDealList></OngoingDealList>
+        <OngoingDealList></OngoingDealList> */}
+        <p className="text-center text-gray-500 text-base mt-10">Coming Soon</p>
       </CardContent>
     </Card>
   );
