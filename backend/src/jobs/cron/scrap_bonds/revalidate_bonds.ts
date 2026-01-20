@@ -98,16 +98,32 @@ export const revalidateBonds = async () => {
       const { _index, ...bondData } = e;
       console.log(_index);
 
+      // Check if bond exists and has ignoreAutoUpdate enabled
+      const existingBond = await db.dataBase.bonds.findUnique({
+        where: { isin: bondData.isin },
+        select: { ignoreAutoUpdate: true },
+      });
+
+      // If bond exists and ignoreAutoUpdate is true, skip the update
+      if (existingBond && existingBond.ignoreAutoUpdate === true) {
+        console.log(`Skipping update for bond ${bondData.isin} (ignoreAutoUpdate is enabled)`);
+        index++;
+        continue;
+      }
+
       // Use Prisma upsert for atomic create/update operation
       const result = await db.dataBase.bonds.upsert({
         where: { isin: bondData.isin },
         update: {
           ...bondData,
           sortedAt: index,
+          // Preserve ignoreAutoUpdate if it was set to true
+          ignoreAutoUpdate: existingBond?.ignoreAutoUpdate ?? false,
         },
         create: {
           ...bondData,
           sortedAt: index,
+          ignoreAutoUpdate: false, // Default for new bonds
         },
       });
 

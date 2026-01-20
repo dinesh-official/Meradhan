@@ -35,6 +35,21 @@ model Bonds {
     categories String[]
     sectorName String?
 
+    // Additional fields for bond details
+    yield                Float?
+    lastTradePrice       Float?
+    lastTradeYield       Float?
+    nextCouponDate       DateTime?
+    modeOfIssuance       String?
+    couponType           String?
+    buyYield             Float?
+    providerName         String?
+    providerInterestDate DateTime?
+    providerQuantity     Int?
+    isOngoingDeal        Boolean?  @default(false)
+    providerPrice        Float?
+    ignoreAutoUpdate     Boolean?  @default(false)
+
     /// Timestamps
     dateOfAllotment DateTime?
     redemptionDate  DateTime?

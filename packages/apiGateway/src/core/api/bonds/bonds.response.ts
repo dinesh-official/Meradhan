@@ -36,6 +36,19 @@ export interface BondDetailsResponse {
   updatedAt: string;
   sortedAt: number;
   isConvertedDeal: boolean | null;
+  yield: number | null;
+  lastTradePrice: number | null;
+  lastTradeYield: number | null;
+  nextCouponDate: string | null;
+  modeOfIssuance: string | null;
+  couponType: string | null;
+  buyYield: number | null;
+  providerName: string | null;
+  providerInterestDate: string | null;
+  providerQuantity: number | null;
+  isOngoingDeal: boolean | null;
+  providerPrice: number | null;
+  ignoreAutoUpdate: boolean | null;
 }
 
 export type ListedBondsResponse = BaseResponseData<{
