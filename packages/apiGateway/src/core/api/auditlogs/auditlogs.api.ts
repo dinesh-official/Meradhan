@@ -14,7 +14,7 @@ import type {
 } from "./auditlog.response";
 
 export class AuditLogsApiV2 {
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   async startPageTrackingCrm(
     data: z.infer<(typeof appSchema.auditlogsSchema)["PageViewSchema"]>,
@@ -123,6 +123,7 @@ export class AuditLogsApiV2 {
   async createNewTrackingSessionMeradhan(
     data: {
       sessionId: string;
+      userId?: number;
     },
     config?: AxiosRequestConfig
   ) {

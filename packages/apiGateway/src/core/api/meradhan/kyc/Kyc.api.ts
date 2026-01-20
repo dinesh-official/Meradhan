@@ -24,7 +24,7 @@ import type {
 export class CustomerKycApi {
   private schema = appSchema.kyc;
 
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   // pan
   async verifyPanInfo(

@@ -59,27 +59,14 @@ export const PageTrackingProvider: React.FC<{
       if (!cookies.userId) {
         return;
       }
-      try {
-        const newTrackingID =
-          new Date().getTime().toString() +
-          Math.random().toString(36).substring(2);
-        localStorage.setItem("analytics_session", newTrackingID);
-        await auditApi.createNewTrackingSessionMeradhan({
-          sessionId: newTrackingID,
-        });
-
-        trackingId.current = newTrackingID;
-      } catch (error) {
-        console.error("Failed to initialize tracking session:", error);
-      }
-    };
-
-    if (localStorage.getItem("analytics_session")) {
       trackingId.current = localStorage.getItem("analytics_session");
-    } else {
+    }
+
+    if (cookies.userId && localStorage.getItem("analytics_session")) {
       initTracking();
     }
-  }, [auditApi]);
+
+  }, [cookies.userId]);
 
   // End page view function
   const endPageView = useCallback(async () => {
