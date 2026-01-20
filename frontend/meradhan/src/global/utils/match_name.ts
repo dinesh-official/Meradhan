@@ -252,9 +252,10 @@ export function compareNames(
     let decision: MatchResult["decision"];
 
     // MATCH_FAIL if DOB is provided but doesn't match
-    if (dob1 && dob2 && !dateOfBirthMatch) {
-        decision = "MATCH_FAIL";
-    } else if (finalScore >= 0.95) {
+    // if (dob1 && dob2 && !dateOfBirthMatch) {
+    //     decision = "MATCH_FAIL";
+    // } else
+    if (finalScore >= 0.95) {
         decision = "MATCH_FULL";
     } else if (finalScore >= 0.8) {
         decision = "MATCH_PARTIAL";
