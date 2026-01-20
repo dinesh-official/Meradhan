@@ -42,7 +42,7 @@ export interface Step1Data {
     mismatch: boolean;
     score: number;
     decision: MatchResult['decision'];
-
+    retryCount: number;
   };
 }
 
@@ -124,6 +124,7 @@ const initData: KycDataStorage = {
       mismatch: false,
       decision: "MATCH_FAIL",
       score: 0,
+      retryCount: 0,
     },
   },
   step_2: {
@@ -224,6 +225,8 @@ export const useKycDataStorage = create<{
   setStep1NameMismatchDeclaration: (
     data: Step1Data["nameMismatchDeclaration"],
   ) => void;
+  incrementNameRetryCount: () => void;
+  resetNameRetryCount: () => void;
   setAadharData: (data: string) => void;
   setGenderData: (data: string) => void;
   setStep1SelfieFaceData: (Key: keyof Step1Data["face"], data: any) => void;
@@ -325,6 +328,34 @@ export const useKycDataStorage = create<{
         step_1: {
           ...prev.state.step_1,
           nameMismatchDeclaration: data,
+        },
+      },
+    })),
+
+  incrementNameRetryCount: () =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          nameMismatchDeclaration: {
+            ...prev.state.step_1.nameMismatchDeclaration,
+            retryCount: prev.state.step_1.nameMismatchDeclaration.retryCount + 1,
+          },
+        },
+      },
+    })),
+
+  resetNameRetryCount: () =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          nameMismatchDeclaration: {
+            ...prev.state.step_1.nameMismatchDeclaration,
+            retryCount: 0,
+          },
         },
       },
     })),

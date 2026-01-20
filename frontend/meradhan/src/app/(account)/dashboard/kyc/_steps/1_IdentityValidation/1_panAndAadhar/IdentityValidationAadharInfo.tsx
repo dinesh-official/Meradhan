@@ -39,8 +39,10 @@ function IdentityValidationAadharInfo() {
     state,
     nextLocalStep,
     setStep1PanData,
-    prevLocalStep,
     setStep1NameMismatchDeclaration,
+    prevLocalStep,
+    incrementNameRetryCount,
+    resetNameRetryCount,
   } = useKycDataStorage();
 
   const data = state.step_1.pan;
@@ -53,6 +55,7 @@ function IdentityValidationAadharInfo() {
    */
   const checkNameMatch = useCallback(async () => {
     const aadhaarName = data.response?.details?.aadhaar?.name || "";
+
     const panName = makeFullname({
       firstName: data.firstName,
       middleName: data.middleName,
@@ -89,6 +92,12 @@ function IdentityValidationAadharInfo() {
         decision: result.decision,
         breakdown: result.breakdown,
       });
+
+      // Reset retry count on successful match
+      if (result.decision !== "MATCH_FAIL") {
+        resetNameRetryCount();
+      }
+
     } catch (error) {
       console.error("Error checking name match:", error);
       // Fallback to MATCH_FAIL on error
@@ -115,6 +124,7 @@ function IdentityValidationAadharInfo() {
     data.lastName,
     data.response?.details?.aadhaar?.dob,
     data.response?.details?.pan?.dob,
+    resetNameRetryCount,
   ]);
 
   useEffect(() => {
@@ -139,6 +149,7 @@ function IdentityValidationAadharInfo() {
       mismatch: isNameMatched?.decision != "MATCH_FAIL",
       score: isNameMatched?.score || 0,
       decision: isNameMatched?.decision || "MATCH_FAIL",
+      retryCount: state.step_1.nameMismatchDeclaration.retryCount,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isNameMatched]);
@@ -146,19 +157,23 @@ function IdentityValidationAadharInfo() {
     state.step_1?.gender == state.step_1.pan.response?.details?.aadhaar?.gender; // Aadhaar does not have
 
   const isAllowToContinue = () => {
+    if (isCheckingName) {
+      return false;
+    }
     if (!isGenderMatched) {
       return false;
     }
     if (isNameMatched?.decision == "MATCH_FULL") {
       return true;
     }
+
     if (!state.step_1?.nameMismatchDeclaration?.isDownloaded) {
       return false;
     }
+
     if (!state.step_1?.nameMismatchDeclaration?.isConfirmed) {
       return false;
     }
-
     return true;
   };
 
@@ -201,7 +216,9 @@ function IdentityValidationAadharInfo() {
                       ? "Matched"
                       : isNameMatched?.decision == "MATCH_PARTIAL"
                         ? "Partially Matched with PAN"
-                        : "Doesn't Match with PAN"
+                        : !isDobMatched && isNameMatched?.decision == "MATCH_FAIL"
+                          ? "Not Matched With PAN Date of birth"
+                          : "Doesn't Match with PAN"
                 }
                 showStatus
               >
@@ -216,8 +233,14 @@ function IdentityValidationAadharInfo() {
                     <Button
                       variant="link"
                       size="sm"
-                      onClick={prevLocalStep}
-                      className="h-auto p-0 text-primary hover:text-primary/80 flex items-center gap-2"
+                      onClick={() => {
+                        incrementNameRetryCount();
+                        prevLocalStep();
+                      }}
+                      disabled={
+                        state.step_1.nameMismatchDeclaration.retryCount > 3
+                      }
+                      className="h-auto p-0 text-primary hover:text-primary/80 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Retry
                       <FaRedo className="w-3 h-3" size={10} />
