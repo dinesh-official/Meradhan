@@ -2,7 +2,7 @@
 
 - Monorepo: Modular structure with shared packages (packages/) for schema, API gateway, and configuration.
 - Languages: TypeScript (Primary), Shell Scripting
-- Runtimes: Bun (Primary for backend/scripts), Node.js (v20+).
+- Runtimes: Bun (Primary for backend/scripts), Node.js (v20+)
 
 ### Strapi Cms
 
