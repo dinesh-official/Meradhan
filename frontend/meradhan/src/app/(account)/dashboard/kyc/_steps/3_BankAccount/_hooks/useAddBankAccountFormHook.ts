@@ -25,7 +25,7 @@ export const useAddBankAccountFormHook = () => {
   const data = state.step_3[state.step_3.length - 1];
   const updateData = (
     key: keyof KycDataStorage["step_3"][number],
-    data: string | boolean | unknown
+    data: string | boolean | unknown,
   ) => {
     removeError(key);
     updateBankAccount(state.step_3.length - 1, {
@@ -42,7 +42,7 @@ export const useAddBankAccountFormHook = () => {
   };
 
   const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const fetchBankIfsc = useMutation({
@@ -56,7 +56,7 @@ export const useAddBankAccountFormHook = () => {
           firstName: state.step_1.pan.firstName,
           middleName: state.step_1.pan.middleName,
           lastName: state.step_1.pan.lastName,
-        })
+        }),
       );
       updateData("bankName", data.responseData.BANK);
       updateData("branchName", data.responseData.BRANCH);
@@ -79,8 +79,9 @@ export const useAddBankAccountFormHook = () => {
         updateData("response", data.responseData);
         updateData(
           "beneficiary_name",
-          data.responseData.beneficiary_name_with_bank
+          data.responseData.beneficiary_name_with_bank,
         );
+
         updateData("isVerified", data.responseData.verified);
 
         // set confirm timestamp

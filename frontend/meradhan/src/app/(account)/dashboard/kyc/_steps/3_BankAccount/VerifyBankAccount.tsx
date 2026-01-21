@@ -34,9 +34,9 @@ function VerifyBankAccount() {
   const isAllowToContinue = () => {
     const defaltSelcted = data.filter((item) => item.isDefault);
     const allValid = data.filter((item) => item.isVerified);
-
     return defaltSelcted.length !== 0 && allValid.length !== 0;
   };
+
   const jumpNext = () => {
     addAuditLog({
       type: "START_BANK_ACCOUNT_VERIFICATION",
