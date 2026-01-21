@@ -24,7 +24,7 @@ import { riskProfileData } from "@/global/constants/riskProfileData";
 import KraLogsView from "./KraLogsView";
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const getLevelQuery = useQuery({
@@ -36,7 +36,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   });
 
   const apiGt = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
+    apiClientCaller,
   );
   const kycStore = useQuery({
     queryKey: ["KycProgressStoreChecks", data.id],
@@ -54,7 +54,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           name={`${data.firstName} ${data.middleName} ${data.lastName}`}
           customerSince={dateTimeUtils.formatDateTime(
             data.createdAt,
-            "DD MMM YYYY hh:mm:ss AA"
+            "DD MMM YYYY hh:mm:ss AA",
           )}
           kycStatus={data.kycStatus}
         />
@@ -66,9 +66,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             !data.verifyDate
               ? "--"
               : dateTimeUtils.formatDateTime(
-                data.verifyDate,
-                "DD MMM YYYY hh:mm:ss AA"
-              )
+                  data.verifyDate,
+                  "DD MMM YYYY hh:mm:ss AA",
+                )
           }
         />
       </div>
@@ -87,9 +87,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             !data.personalInformation?.dateOfBirth
               ? "--"
               : dateTimeUtils.formatDateTime(
-                data.personalInformation?.dateOfBirth,
-                "DD/MM/YYYY"
-              )
+                  data.personalInformation?.dateOfBirth,
+                  "DD/MM/YYYY",
+                )
           }
           gender={data.gender}
           maritalStatus={data.personalInformation?.maritalStatus || "--"}
@@ -125,15 +125,16 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               <div>
                 <PanCard
                   panNumber={data.panCard?.panCardNo || "--------"}
-                  name={`${data.panCard?.firstName || "----"} ${data.panCard?.middleName || ""
-                    } ${data.panCard?.lastName || "---"}`}
+                  name={`${data.panCard?.firstName || "----"} ${
+                    data.panCard?.middleName || ""
+                  } ${data.panCard?.lastName || "---"}`}
                   gender={data.panCard?.gender || "----"}
                   dateOfBirth={
                     data.panCard?.dateOfBirth
                       ? dateTimeUtils.formatDateTime(
-                        data.panCard?.dateOfBirth,
-                        "DD/MM/YYYY"
-                      )
+                          data.panCard?.dateOfBirth,
+                          "DD/MM/YYYY",
+                        )
                       : "--/--/----"
                   }
                   isVerified={data.panCard?.isVerified || false}
@@ -158,8 +159,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               </div>
               <div>
                 <AdharaCard
-                  name={`${data.aadhaarCard?.firstName || "----"} ${data.aadhaarCard?.middleName || ""
-                    } ${data.aadhaarCard?.lastName || "---"}`}
+                  name={`${data.aadhaarCard?.firstName || "----"} ${
+                    data.aadhaarCard?.middleName || ""
+                  } ${data.aadhaarCard?.lastName || "---"}`}
                   gender={data.aadhaarCard?.gender || "----"}
                   aadhaarNumberMasked={
                     data.aadhaarCard?.aadhaarNo || "----------------"
@@ -167,9 +169,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                   dateOfBirth={
                     data.aadhaarCard?.dateOfBirth
                       ? dateTimeUtils.formatDateTime(
-                        data.aadhaarCard?.dateOfBirth,
-                        "DD/MM/YYYY"
-                      )
+                          data.aadhaarCard?.dateOfBirth,
+                          "DD/MM/YYYY",
+                        )
                       : "--/--/----"
                   }
                   isVerified={data.aadhaarCard?.isVerified || false}
@@ -196,15 +198,16 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         {/* <ShowResponseJson data={kycStore.data} /> */}
         <PanCardInfoCard
           panCardNumber={data.panCard?.panCardNo || "--------"}
-          Name={`${data.panCard?.firstName || "----"} ${data.panCard?.middleName || ""
-            } ${data.panCard?.lastName || "---"}`}
+          Name={`${data.panCard?.firstName || "----"} ${
+            data.panCard?.middleName || ""
+          } ${data.panCard?.lastName || "---"}`}
           gender={data.panCard?.gender || "----"}
           DateOFBirth={
             data.panCard?.dateOfBirth
               ? dateTimeUtils.formatDateTime(
-                data.panCard?.dateOfBirth,
-                "DD/MM/YYYY"
-              )
+                  data.panCard?.dateOfBirth,
+                  "DD/MM/YYYY",
+                )
               : "--/--/----"
           }
           panVerificationStatus={data.panCard?.isVerified || false}
@@ -218,37 +221,38 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               firstName: data.panCard?.firstName || "",
               lastName: data.panCard?.lastName || "",
               middleName: data.panCard?.middleName || undefined,
-            }
+            },
           )}
           verificationTimeStamp={
             !kycStore.data?.step_1.pan.fetchedTimestamp
               ? "-------"
               : dateTimeUtils.formatDateTime(
-                kycStore.data?.step_1.pan.fetchedTimestamp,
-                "DD MMM YYYY hh:mm:ss AA"
-              )
+                  kycStore.data?.step_1.pan.fetchedTimestamp,
+                  "DD MMM YYYY hh:mm:ss AA",
+                )
           }
           confirmTimeStamp={
             !kycStore.data?.step_1.pan.confirmPanTimestamp
               ? "--/--/----"
               : dateTimeUtils.formatDateTime(
-                kycStore.data?.step_1.pan.confirmPanTimestamp,
-                "DD MMM YYYY hh:mm:ss AA"
-              )
+                  kycStore.data?.step_1.pan.confirmPanTimestamp,
+                  "DD MMM YYYY hh:mm:ss AA",
+                )
           }
         />
 
         <AadhaarCardInfo
-          name={`${data.aadhaarCard?.firstName || "----"} ${data.aadhaarCard?.middleName || ""
-            } ${data.aadhaarCard?.lastName || "---"}`}
+          name={`${data.aadhaarCard?.firstName || "----"} ${
+            data.aadhaarCard?.middleName || ""
+          } ${data.aadhaarCard?.lastName || "---"}`}
           gender={data.aadhaarCard?.gender || "----"}
           aadhaarNumber={data.aadhaarCard?.aadhaarNo || "----------------"}
           dateOfBirth={
             data.aadhaarCard?.dateOfBirth
               ? dateTimeUtils.formatDateTime(
-                data.aadhaarCard?.dateOfBirth,
-                "DD/MM/YYYY"
-              )
+                  data.aadhaarCard?.dateOfBirth,
+                  "DD/MM/YYYY",
+                )
               : "--/--/----"
           }
           nameVerificationStatus={areNamesMatched(
@@ -261,7 +265,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
               firstName: data.aadhaarCard?.firstName || "",
               lastName: data.aadhaarCard?.lastName || "",
               middleName: data.aadhaarCard?.middleName || undefined,
-            }
+            },
           )}
           permanentAddress={{
             addressLine1: data.permanentAddress?.line1 || "------",
@@ -288,17 +292,17 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           verificationTimeStamp={
             kycStore.data?.step_1.pan.fetchedTimestamp
               ? dateTimeUtils.formatDateTime(
-                kycStore.data?.step_1.pan.fetchedTimestamp,
-                "DD MMM YYYY hh:mm:ss AA"
-              )
+                  kycStore.data?.step_1.pan.fetchedTimestamp,
+                  "DD MMM YYYY hh:mm:ss AA",
+                )
               : "--/--/----"
           }
           confirmTimeStamp={
             kycStore.data?.step_1.pan.confirmPanTimestamp
               ? dateTimeUtils.formatDateTime(
-                kycStore.data?.step_1.pan.confirmPanTimestamp,
-                "DD MMM YYYY hh:mm:ss AA"
-              )
+                  kycStore.data?.step_1.pan.confirmPanTimestamp,
+                  "DD MMM YYYY hh:mm:ss AA",
+                )
               : "--/--/----"
           }
         />
@@ -327,21 +331,24 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                       verifiedOn={
                         e.verifyDate
                           ? dateTimeUtils.formatDateTime(
-                            e.verifyDate,
-                            "DD MMM YYYY hh:mm:ss AA"
-                          )
+                              e.verifyDate,
+                              "DD MMM YYYY hh:mm:ss AA",
+                            )
                           : "--/--/----"
                       }
                       isDefault={e.isPrimary}
                       verified={e.isVerified}
-                      isNameVerified={e.accountHolderName.toLowerCase() == `${data.firstName} ${data.middleName ? data.middleName + " " : ""}${data.lastName}`.toLowerCase()}
+                      isNameVerified={
+                        e.accountHolderName.toLowerCase() ==
+                        `${data.firstName} ${data.middleName ? data.middleName + " " : ""}${data.lastName}`.toLowerCase()
+                      }
                     />
                     {e.confirmTimeStamp && (
                       <p className="text-center text-xs mt-4">
                         Confirmed At:{" "}
                         {dateTimeUtils.formatDateTime(
                           e.confirmTimeStamp,
-                          "DD MMM YYYY hh:mm:ss AA"
+                          "DD MMM YYYY hh:mm:ss AA",
                         )}
                       </p>
                     )}
@@ -385,9 +392,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                       verifiedOn={
                         e.verifyDate
                           ? dateTimeUtils.formatDateTime(
-                            e.verifyDate,
-                            "DD MMM YYYY hh:mm:ss AA"
-                          )
+                              e.verifyDate,
+                              "DD MMM YYYY hh:mm:ss AA",
+                            )
                           : "--/--/----"
                       }
                     />
@@ -396,7 +403,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                         Confirmed At:{" "}
                         {dateTimeUtils.formatDateTime(
                           e.confirmTimeStamp,
-                          "DD MMM YYYY hh:mm:ss AA"
+                          "DD MMM YYYY hh:mm:ss AA",
                         )}
                       </p>
                     )}
