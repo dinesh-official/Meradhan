@@ -2,11 +2,11 @@ import { Text, View } from "@react-pdf/renderer";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
 
-function Page44() {
+function Page44({ email }: { email: string }) {
   return (
     <View
       style={tw(
-        `w-[90%] px-4 mx-auto mt-4 text-xs flex flex-col gap-3 leading-6`
+        `w-[90%] px-4 mx-auto mt-4 text-xs flex flex-col gap-3 leading-6`,
       )}
     >
       <TextList count="h.">
@@ -53,7 +53,7 @@ function Page44() {
         <View style={tw(`flex flex-row gap-4 justify-start items-start`)}>
           <Text>I further confirm that my email address is </Text>
           <View style={tw(`border-b border-gray-200  w-[40%]`)}>
-            <Text> vikas.kukreja83@gmail.com </Text>
+            <Text> {email} </Text>
           </View>
           <Text>and the same shall be</Text>
         </View>
