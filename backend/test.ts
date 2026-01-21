@@ -9,7 +9,6 @@ await addKraWorkerJob(
     kycDataStoreId: 217,
     stage: "ENQUIRY_KRA",
   },
-  1000,
 );
 
 console.log("DONE");

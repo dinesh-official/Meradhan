@@ -8,21 +8,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
-import Link from "next/link";
-import { FaBell, FaSearch, FaUser } from "react-icons/fa";
-import { FaCartShopping } from "react-icons/fa6";
-import { MdLogout } from "react-icons/md";
-import { SideBarCollapseButton } from "./ActionSideBar";
-import MobSideBar from "./MobSideBar";
-import { memo, useEffect } from "react";
 import { userSessionStore } from "@/core/auth/userSessionStore";
 import { ISessionResponse } from "@root/apiGateway";
-import { IoIosArrowDown } from "react-icons/io";
-import { status } from "../../../../../../../packages/schema/lib/crm/leads.schema";
-import { IoWarning } from "react-icons/io5";
-import { Check } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { memo, useEffect } from "react";
 import { BiSolidFileFind } from "react-icons/bi";
+import { FaBell, FaSearch, FaUser } from "react-icons/fa";
+import { FaCartShopping } from "react-icons/fa6";
+import { IoIosArrowDown } from "react-icons/io";
+import { MdDashboard, MdLogout } from "react-icons/md";
+import { SideBarCollapseButton } from "./ActionSideBar";
+import MobSideBar from "./MobSideBar";
 
 function AccountNavBar({
   session,
@@ -98,23 +95,23 @@ function AccountNavBar({
 
             {/* Icon Buttons */}
             <div className="flex items-center gap-8 sm:gap-5 lg:gap-10">
-              <button
+              {/* <button
                 type="button"
                 className="hover:opacity-80 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-primary"
                 aria-label="View Cart"
               >
                 <FaCartShopping size={20} aria-hidden="true" />
-              </button>
+              </button> */}
 
-              <button
+              {/* <button
                 type="button"
                 className="hover:opacity-80 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-primary"
                 aria-label="Search"
               >
                 <FaSearch size={20} aria-hidden="true" />
-              </button>
+              </button> */}
 
-              <button
+              {/* <button
                 type="button"
                 className="relative hover:opacity-80 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-primary"
               >
@@ -122,7 +119,7 @@ function AccountNavBar({
                   5
                 </span>
                 <FaBell size={20} aria-hidden="true" />
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -173,10 +170,10 @@ export function ShowUserBadge(
       >
         <DropdownMenuItem asChild>
           <Link
-            href="/dashboard/profile"
+            href="/dashboard"
             className="flex items-center gap-2 cursor-pointer"
           >
-            <FaUser aria-hidden="true" /> Profile
+            <MdDashboard aria-hidden="true" /> Dashboard
           </Link>
         </DropdownMenuItem>
 

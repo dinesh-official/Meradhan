@@ -31,44 +31,31 @@ function WhyPoints({
 
 const whyCardInfo = [
   {
-    title: "AI-Powered Learning Support",
+    title: "AI-Powered Insights",
     content: (
       <>
         <p>
-          Powered by intelligent search, DhanGPT answers your questions about
-          bonds—whether it’s “What is a government bond?” or “How does interest
-          work in fixed income?”
-        </p>
-        <p className="mt-2">
-          No jargon. Just clear, contextual learning in seconds.
+          MeraDhan stands out with its intelligent AI-driven search engine, providing personalised bond recommendations and answering all user queries—from investment options to buying/selling guidance—making bond investing effortless and informed.
         </p>
       </>
     ),
   },
   {
-    title: "Expert-Led Learning",
+    title: "Expert-Led Platform",
     content: (
       <>
         <p>
-          MeraDhan is founded by professionals with rich backgrounds in
-          financial markets, risk management, and digital transformation.
-        </p>
-        <p className="mt-2">
-          Our content is crafted and reviewed by experts to ensure accuracy,
-          simplicity, and real-world relevance for Indian audiences.
+          Founded by a seasoned leader with extensive experience in major financial institutions and digital transformation, MeraDhan brings unparalleled expertise in risk management, financial markets, and bond investments, providing users with top-tier strategic insight and support.
         </p>
       </>
     ),
   },
   {
-    title: "Retail Learning, Made Simple",
+    title: "Retail Investor Focus",
     content: (
       <>
         <p>
-          We focus on individual learners—first-time investors, working
-          professionals, senior citizens, and students—by offering
-          plain-language explainers, tools, and infographics to help you
-          understand bonds confidently and independently.
+          MeraDhan focuses on empowering retail investors with intuitive tools, educational resources, and curated bond options, allowing individuals to confidently grow their wealth and navigate the bond market with ease.
         </p>
       </>
     ),
@@ -85,10 +72,7 @@ function WhyMeraDhanSection() {
               Why <span className="font-semibold text-secondary">MeraDhan</span>
             </>
           }
-          description=" MeraDhan is built on decades of financial expertise, drawing from
-          experience in global institutions. We blend deep market knowledge with
-          data-driven insights to bring accessible, unbiased, and
-          easy-to-understand fixed income knowledge sharing with every Indian."
+          description="MeraDhan is built on decades of expertise in global financial institutions, leveraging deep industry knowledge to drive financial innovation. With a strong foundation in data-driven transformations, risk management strategies, and digital advancements, MeraDhan is committed to empowering users with smarter financial solutions. "
         />
 
         <div className="bg-muted my-4 px-8 lg:px-0 py-6 rounded-lg">
