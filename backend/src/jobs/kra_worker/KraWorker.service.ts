@@ -379,13 +379,12 @@ export class KraProcess {
       )
     ) {
       // Retry once with IPV_FLAG as 'N'
-
       dataKraPayload = {
         ...dataKraPayload,
         panInquiry: {
           ...dataKraPayload.panInquiry,
           APP_IPV_FLAG:
-            downloadedReport?.APP_RES_ROOT?.APP_PAN_INQ?.APP_IPV_FLAG || "R",
+            downloadedReport?.APP_RES_ROOT?.APP_PAN_INQ?.APP_IPV_FLAG || "E",
         },
       };
       report = await this.kraInstance.panModifyKraXML(dataKraPayload);
