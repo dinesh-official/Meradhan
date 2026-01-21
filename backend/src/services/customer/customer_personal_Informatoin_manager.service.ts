@@ -6,7 +6,7 @@ import type z from "zod";
 export class CustomerPersonalInformationManager {
   async createPersonalInfo(
     customerProfileId: number,
-    data: z.infer<typeof appSchema.customer.createPersonalInfoSchema>
+    data: z.infer<typeof appSchema.customer.createPersonalInfoSchema>,
   ) {
     const createdPersonalInfo =
       await db.dataBase.customerPersonalInfoModel.create({
@@ -34,9 +34,7 @@ export class CustomerPersonalInformationManager {
     return createdPersonalInfo;
   }
 
-  async getPersonalInfo(
-    personalInfoId: number
-  ) {
+  async getPersonalInfo(personalInfoId: number) {
     const personalInformation =
       await db.dataBase.customerPersonalInfoModel.findUnique({
         where: { id: personalInfoId },
@@ -51,9 +49,7 @@ export class CustomerPersonalInformationManager {
     return personalInformation;
   }
 
-  async getCustomerPersonalInfo(
-    customerProfileId: number
-  ) {
+  async getCustomerPersonalInfo(customerProfileId: number) {
     const customerPersonalInformation =
       await db.dataBase.customerPersonalInfoModel.findFirst({
         where: { customerProfileDataModel: { id: customerProfileId } },
@@ -64,15 +60,13 @@ export class CustomerPersonalInformationManager {
         {
           statusCode: 404,
           code: "CUSTOMER_PERSONAL_INFO_NOT_FOUND",
-        }
+        },
       );
     }
     return customerPersonalInformation;
   }
 
-  async removePersonalInfo(
-    personalInfoId: number
-  ) {
+  async removePersonalInfo(personalInfoId: number) {
     const existing = await db.dataBase.customerPersonalInfoModel.findUnique({
       where: { id: personalInfoId },
       select: { id: true },
@@ -94,7 +88,7 @@ export class CustomerPersonalInformationManager {
 
   async updatePersonalInfo(
     personalInfoId: number,
-    data: z.infer<typeof appSchema.customer.updatePersonalInfoSchema>
+    data: z.infer<typeof appSchema.customer.updatePersonalInfoSchema>,
   ) {
     const existing = await db.dataBase.customerPersonalInfoModel.findUnique({
       where: { id: personalInfoId },
@@ -108,19 +102,20 @@ export class CustomerPersonalInformationManager {
       });
     }
 
-    const updatedPersonalInfo = await db.dataBase.customerPersonalInfoModel.update({
-      where: { id: personalInfoId },
-      data: {
-        annualGrossIncome: data.annualGrossIncome?.trim(),
-        fatherOrSpouseName: data.fatherOrSpouseName?.trim(),
-        maritalStatus: data.maritalStatus?.trim(),
-        mothersName: data.mothersName?.trim(),
-        nationality: data.nationality?.trim(),
-        occupationType: data.occupationType?.trim(),
-        qualification: data.qualification?.trim(),
-        residentialStatus: data.residentialStatus?.trim(),
-      },
-    });
+    const updatedPersonalInfo =
+      await db.dataBase.customerPersonalInfoModel.update({
+        where: { id: personalInfoId },
+        data: {
+          annualGrossIncome: data.annualGrossIncome?.trim(),
+          fatherOrSpouseName: data.fatherOrSpouseName?.trim(),
+          maritalStatus: data.maritalStatus?.trim(),
+          mothersName: data.mothersName?.trim(),
+          nationality: data.nationality?.trim(),
+          occupationType: data.occupationType?.trim(),
+          qualification: data.qualification?.trim(),
+          residentialStatus: data.residentialStatus?.trim(),
+        },
+      });
 
     if (!updatedPersonalInfo) {
       throw new AppError("Failed to update personal information", {
@@ -130,6 +125,5 @@ export class CustomerPersonalInformationManager {
     }
 
     return updatedPersonalInfo;
-
   }
 }

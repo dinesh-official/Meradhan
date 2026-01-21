@@ -1,3 +1,4 @@
-import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
+import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 
-await revalidateBonds();
+const kycManager = new CustomerKycManager();
+await kycManager.saveKycToCustomer(Number(45));

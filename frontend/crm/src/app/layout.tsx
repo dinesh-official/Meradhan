@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import React from "react";
 import Client from "./client";
-
+import "react-json-view-lite/dist/index.css";
 import "./globals.css";
 export const revalidate = 0;
 export const metadata: Metadata = {

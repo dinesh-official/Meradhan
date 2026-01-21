@@ -11,6 +11,7 @@ export enum QueueNames {
   emailVerification = "emailVerificationMD",
   kraProcessWork = "kraProcessWorkMD",
   orderSettlement = "orderSettlementMD",
+  submitProfileCompleat = "submitProfileMD",
 }
 
 // 🔹 Create a shared Redis connection using QueueStore (recommended)

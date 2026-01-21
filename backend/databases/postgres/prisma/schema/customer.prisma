@@ -175,7 +175,7 @@ model PanCardModel {
     verifyDate       DateTime?
     confirmTimeStamp DateTime?
     allowTerms       Boolean   @default(false)
-    fileUrl          String
+    fileUrl          String?
 
     // 1-to-1 back reference
     customerProfileDataModel CustomerProfileDataModel?

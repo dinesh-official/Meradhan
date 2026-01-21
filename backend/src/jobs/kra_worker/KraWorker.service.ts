@@ -1,6 +1,9 @@
 import { db, type CustomerProfileDataModel } from "@core/database/database";
 import { env } from "@packages/config/env";
+import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
+import { cacheStorage } from "@store/redis_store";
+import { removeCountryCode } from "@utils/filters/convert";
 import { makeFullname } from "@utils/generate/generate_username";
 import type {
   PanModifyKraPayload,
@@ -13,15 +16,12 @@ import {
   removeLastCommaChunks,
   splitAddressInto3BalancedLines,
 } from "kyc-providers";
-import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
 import {
   checkIsKraMatched,
   checkKraProcessCheckStatus,
 } from "./CheckKraStatus";
 import { getKraCountry, getKraState, kraMobNo, occCode } from "./constent";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
-import { cacheStorage } from "@store/redis_store";
-import { removeCountryCode } from "@utils/filters/convert";
 
 const cbricsManager = new ParticipantManager();
 
@@ -310,16 +310,19 @@ export class KraProcess {
   async modify({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
     const cachedKey = `KRA:${customer.id}-${kycdataId}`;
+    // const FLASG_KEY = cachedKey + "_IPV";
+    // const IPV_FLAG: string = (await cacheStorage.get(FLASG_KEY)) || "E";
 
-    const kraCachedKey = `KRA_DOWNLOAd:${customer.id}-${kycdataId}`;
+    // const kraCachedKey = `KRA_DOWNLOAd:${customer.id}-${kycdataId}`;
 
-    const downloadedReport: T_APP_PAN_INQ_DOWNLOAD | null =
-      await cacheStorage.get(kraCachedKey);
+    // const downloadedReport: T_APP_PAN_INQ_DOWNLOAD | null =
+    //   await cacheStorage.get(kraCachedKey);
+
     const payload = this.buildRegisterPayload(data, customer, true);
 
     const p = payload.APP_PAN_INQ;
 
-    let dataKraPayload: PanModifyKraPayload = {
+    const dataKraPayload: PanModifyKraPayload = {
       panInquiry: {
         APP_COR_ADD1: p.APP_COR_ADD1,
         APP_COR_ADD2: p.APP_COR_ADD2,
@@ -347,7 +350,7 @@ export class KraProcess {
         APP_INCOME: p.APP_INCOME,
         APP_IOP_FLG: p.APP_IOP_FLG,
         APP_IPV_DATE: p.APP_IPV_DATE,
-        APP_IPV_FLAG: "N",
+        APP_IPV_FLAG: "E",
         APP_KYC_MODE: p.APP_KYC_MODE,
         APP_MOBILE_NO: env.KRA_MOB_NO,
         APP_NAME: p.APP_NAME,
@@ -379,22 +382,14 @@ export class KraProcess {
       fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
     };
 
-    let report = await this.kraInstance.panModifyKraXML(dataKraPayload);
+    const report = await this.kraInstance.panModifyKraXML(dataKraPayload);
     if (
       report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
         "INVALID IN-PERSON VERIFICATION FLAG",
       )
     ) {
-      // Retry once with IPV_FLAG as 'N'
-      dataKraPayload = {
-        ...dataKraPayload,
-        panInquiry: {
-          ...dataKraPayload.panInquiry,
-          APP_IPV_FLAG:
-            downloadedReport?.APP_RES_ROOT?.APP_PAN_INQ?.APP_IPV_FLAG || "E",
-        },
-      };
-      report = await this.kraInstance.panModifyKraXML(dataKraPayload);
+      console.log("INVALID IN-PERSON VERIFICATION FLAG");
+      // await cacheStorage.set(FLASG_KEY, IPV_FLAG, TTL_28_HOURS);
     }
 
     const resTime = new Date().toISOString();

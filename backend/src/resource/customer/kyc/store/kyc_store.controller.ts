@@ -76,10 +76,6 @@ export class KycStoreController {
       },
     });
 
-    if (complete) {
-      await this.kycManager.saveKycToCustomer(Number(id));
-    }
-
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: {

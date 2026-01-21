@@ -87,17 +87,16 @@ export class CustomerKycManager {
       await tx.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
-          firstName: aadhaarData.name,
-          // lastName,
-          // middleName,
+          firstName,
+          lastName,
+          middleName,
           gender,
           kycStatus,
           verifyDate: new Date(),
-          avatar: step1.face.url || null,
-
-          isAFatcaCustomer: step1.pan.isFatca || false,
-          allowSEBITerms: step1.pan.checkTerms2 || false,
-          isAPep: step1.pan.checkTerms1 || false,
+          avatar: step1.face.url,
+          isAFatcaCustomer: !step1.pan.isFatca,
+          allowSEBITerms: step1.pan.checkTerms2,
+          isAPep: !step1.pan.checkTerms1,
           // Create/update Aadhaar card
           aadhaarCard: {
             upsert: {
@@ -118,13 +117,13 @@ export class CustomerKycManager {
               update: {
                 aadhaarNo: aadhaarData.id_number,
                 dateOfBirth: aadhaarData.dob,
-                fatherName: aadhaarData.father_name,
+                fatherName: aadhaarData?.father_name,
                 firstName: aadhaarData.name,
                 lastName: "",
                 middleName: "",
                 gender,
                 image: aadhaarData.image,
-                fileUrl: aadhaarData.file_url,
+                fileUrl: aadhaarData?.file_url,
                 isVerified: true,
                 verifyDate: step1.pan.fetchedTimestamp,
                 confirmTimeStamp: step1.pan.confirmAadhaarTimestamp,
@@ -187,7 +186,7 @@ export class CustomerKycManager {
                 SignatureUrl: step1.sign.url,
                 signPdfUrl: step6.response.fileUrl,
                 maidenName: null,
-                politicallyExposedPerson: step1.pan.checkTerms1 ? "Yes" : "No",
+                politicallyExposedPerson: step1.pan.checkTerms1 ? "No" : "Yes",
                 confirmTimeStamp: step2.confirmPersonalInfoTimestamp,
               },
               update: {
@@ -205,7 +204,7 @@ export class CustomerKycManager {
                 SignatureUrl: step1.sign.url,
                 signPdfUrl: step6.response.fileUrl,
                 maidenName: null,
-                politicallyExposedPerson: step1.pan.checkTerms1 ? "Yes" : "No",
+                politicallyExposedPerson: step1.pan.checkTerms1 ? "No" : "Yes",
                 confirmTimeStamp: step2.confirmPersonalInfoTimestamp,
               },
             },
