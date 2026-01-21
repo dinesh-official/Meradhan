@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
+import AuthActions from "./AuthActions";
 
 function NavBar({
   session,
@@ -38,7 +39,7 @@ function NavBar({
           {/* Menu Items */}
           <div className="hidden lg:flex justify-center items-center gap-7">
             <NavMenu />
-            {/* <AuthActions session={session} /> */}
+            <AuthActions session={session} />
           </div>
           <MobMenu session={session} />
         </div>

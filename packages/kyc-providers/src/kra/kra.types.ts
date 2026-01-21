@@ -299,7 +299,7 @@ interface FatcaAdditionalDetail {
 }
 
 export type T_PAN_MODIFY_RESPONSE = {
-  APP_REQ_ROOT: {
+  APP_RES_ROOT: {
     APP_PAN_INQ: {
       APP_PAN_NO: string;
       APP_PAN_DOB: string;

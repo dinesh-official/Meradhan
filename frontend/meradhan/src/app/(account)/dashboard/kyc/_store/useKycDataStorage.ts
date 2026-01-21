@@ -41,7 +41,7 @@ export interface Step1Data {
     isConfirmed: boolean;
     mismatch: boolean;
     score: number;
-    decision: MatchResult['decision'];
+    decision: MatchResult["decision"];
     retryCount: number;
   };
 }
@@ -88,7 +88,7 @@ export interface KycDataStorage {
     fullNameAsPerPan: string;
     fullNameAsPerAadhar: string;
     fullNameAsPerBank: string;
-  },
+  };
   step_1: Step1Data;
   step_2: PersonalData;
   step_3: BankAccountData[];
@@ -163,7 +163,7 @@ const initData: KycDataStorage = {
   ],
   step_4: [
     {
-      depositoryName: "NSDL",
+      depositoryName: "CDSL",
       dpId: "",
       beneficiaryClientId: "",
       depositoryParticipantName: "",
@@ -265,14 +265,16 @@ export const useKycDataStorage = create<{
   setStep6Data: (Key: keyof KycDataStorage["step_6"], data: any) => void;
 }>((set) => ({
   state: initData,
-  setNames: (key: keyof KycDataStorage["names"], data: string) => set({
-    state: {
-      ...initData, names: {
-        ...initData.names,
-        [key]: data,
-      }
-    }
-  }),
+  setNames: (key: keyof KycDataStorage["names"], data: string) =>
+    set({
+      state: {
+        ...initData,
+        names: {
+          ...initData.names,
+          [key]: data,
+        },
+      },
+    }),
   setState: (newState) => set({ state: newState }),
 
   updateStep: (step, data) =>
@@ -358,7 +360,8 @@ export const useKycDataStorage = create<{
           ...prev.state.step_1,
           nameMismatchDeclaration: {
             ...prev.state.step_1.nameMismatchDeclaration,
-            retryCount: prev.state.step_1.nameMismatchDeclaration.retryCount + 1,
+            retryCount:
+              prev.state.step_1.nameMismatchDeclaration.retryCount + 1,
           },
         },
       },
@@ -535,9 +538,9 @@ export const useKycDataStorage = create<{
         step_4: prev.state.step_4.map((item, i) =>
           i === index
             ? {
-              ...item,
-              panNumber: [...item.panNumber, ""], // Add new empty PAN field
-            }
+                ...item,
+                panNumber: [...item.panNumber, ""], // Add new empty PAN field
+              }
             : item,
         ),
       },
