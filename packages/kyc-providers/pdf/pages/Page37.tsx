@@ -2,6 +2,7 @@ import { Text, View } from "@react-pdf/renderer";
 import React from "react";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
+import { formatDate } from "../helper";
 const TableData1 = [
   {
     name: "Brokerage (Any transaction)",
@@ -21,6 +22,9 @@ const TableData1 = [
   },
 ];
 function Page37() {
+  // Get today's date formatted as DD/MM/YYYY
+  const today = formatDate(new Date().toISOString(), "DD/MM/YYYY");
+
   return (
     <View style={tw(`w-[90%]  px-4  mx-auto mt-6 text-xs`)}>
       <Text style={tw(`font-[600] text-center text-sm`)}>TARIFF SHEET</Text>
@@ -38,17 +42,17 @@ Lower Parel, Mumbai, Maharashtra 400013`}
       </Text>
       <Text style={tw(`leading-3 mt-3`)}>
         I/We agree to pay the charges as per the following charges structure for
-        our Trading account with BondNest effective from 14/08/2025
+        our Trading account with BondNest effective from {today}
       </Text>
 
       <View
         style={tw(
-          `border-t border-b mx-auto flex flex-row border-gray-200 mt-5`
+          `border-t border-b mx-auto flex flex-row border-gray-200 mt-5`,
         )}
       >
         <View
           style={tw(
-            `w-[40%] border-r border-gray-200 p-2 font-[600]   flex justify-center`
+            `w-[40%] border-r border-gray-200 p-2 font-[600]   flex justify-center`,
           )}
         >
           <Text>Charge Head</Text>

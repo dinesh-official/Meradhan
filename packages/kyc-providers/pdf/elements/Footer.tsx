@@ -8,7 +8,7 @@ const Footer = () => {
         <Text style={tw(`text-[8px]`)}>
           SEBI Registration No.: INZ000330234
         </Text>
-        {/* <Text style={tw(`text-[8px]`)}>BSE Member ID: XXXXX</Text> */}
+        <Text style={tw(`text-[8px]`)}>BSE Member ID: 6963</Text>
         <Text style={tw(`text-[8px]`)}>NSE Member ID: 90480 </Text>
         <Text style={tw(`text-[8px]`)}>CIN: U66190MH2025PTC441753</Text>
       </View>

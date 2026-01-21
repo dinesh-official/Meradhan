@@ -58,12 +58,14 @@ export const allowAccessMiddleware =
           id: data.id,
           email: data.email,
           token: token!,
+          role: "ADMIN",
         };
       } else {
         req.customer = {
           id: data.id,
           email: data.email,
           token: token!,
+          role: "USER",
         };
       }
 

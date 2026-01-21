@@ -438,7 +438,7 @@ const MdPdf = ({
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
         <LogoSvg />
-        <Page44 />
+        <Page44 {...pageData.page44} />
         <Footer />
       </Page>
 

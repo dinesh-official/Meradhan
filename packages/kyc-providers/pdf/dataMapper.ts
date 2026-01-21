@@ -175,13 +175,13 @@ export type Page1Props = {
   residentialStatus?: string;
   occupationType?: string;
   verifyWith?:
-  | "AADHAAR"
-  | "DL"
-  | "VID"
-  | "PASSPORT"
-  | "NREGA"
-  | "NPR"
-  | "OTHERS";
+    | "AADHAAR"
+    | "DL"
+    | "VID"
+    | "PASSPORT"
+    | "NREGA"
+    | "NPR"
+    | "OTHERS";
   profilePic?: string;
   signature?: string;
   kycNo: string;
@@ -209,13 +209,13 @@ export type Page2Props = {
     data: AddressType;
   };
   proofWith?:
-  | "AADHAAR"
-  | "DL"
-  | "VID"
-  | "PASSPORT"
-  | "NREGA"
-  | "NPR"
-  | "OTHERS";
+    | "AADHAAR"
+    | "DL"
+    | "VID"
+    | "PASSPORT"
+    | "NREGA"
+    | "NPR"
+    | "OTHERS";
   aadharNo: string;
 };
 
@@ -230,17 +230,18 @@ export type Page4Props = {
   date: string;
   name: string;
   signatureUrl: string;
+  place: string;
 };
 
 export type Page5Props = {
   documentsReceived:
-  | "Certified"
-  | "Original"
-  | "Self-Attested"
-  | "e-document"
-  | "DigitalKYC"
-  | "UIDAI"
-  | "VideoKyc";
+    | "Certified"
+    | "Original"
+    | "Self-Attested"
+    | "e-document"
+    | "DigitalKYC"
+    | "UIDAI"
+    | "VideoKyc";
   empSignature: string;
 };
 
@@ -424,7 +425,7 @@ export type Page37Props = {};
 export type Page40Props = {};
 export type Page41Props = {};
 export type Page43Props = {};
-export type Page44Props = {};
+export type Page44Props = { email: string };
 export type Page45Props = {};
 export type Page46Props = {};
 
@@ -433,8 +434,9 @@ export type Page46Props = {};
 // ============================================
 
 const getFullName = (data: Root): string => {
-  return `${data.step_1?.pan?.firstName || ""} ${data.step_1?.pan?.middleName || ""
-    } ${data.step_1?.pan?.lastName || ""}`.trim();
+  return `${data.step_1?.pan?.firstName || ""} ${
+    data.step_1?.pan?.middleName || ""
+  } ${data.step_1?.pan?.lastName || ""}`.trim();
 };
 
 const getFirstLastName = (data: Root) => ({
@@ -450,8 +452,9 @@ const getAddress = (data: Root) => {
     city: address?.district_or_city || "",
     state: address?.state || "",
     pincode: address?.pincode || "",
-    combined: `${address?.district_or_city || ""} ${address?.state || ""} ${address?.pincode || ""
-      }`.trim(),
+    combined: `${address?.district_or_city || ""} ${address?.state || ""} ${
+      address?.pincode || ""
+    }`.trim(),
   };
 };
 
@@ -463,8 +466,8 @@ const getInvestmentExperience = (data: Root): string => {
     q.qus
       .toLowerCase()
       .includes(
-        "How many years of investment experience do you have?".toLocaleLowerCase()
-      )
+        "How many years of investment experience do you have?".toLocaleLowerCase(),
+      ),
   );
   return experienceQuestion?.ans.toLowerCase() || "";
 };
@@ -536,7 +539,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
     data.step_1?.pan?.response?.details?.aadhaar?.permanent_address_details;
 
   const perAddress = splitAddressInto3BalancedLines(
-    removeLastCommaChunks(permanent_address.address, 3)
+    removeLastCommaChunks(permanent_address.address, 3),
   );
 
   const perAddresBrake = permanent_address.address?.split(",") || [];
@@ -559,7 +562,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
   };
 
   const curAddress = splitAddressInto3BalancedLines(
-    removeLastCommaChunks(current_address.address, 3)
+    removeLastCommaChunks(current_address.address, 3),
   );
   const curAddresBrake = current_address.address?.split(",") || [];
   const curCityName = curAddresBrake?.[curAddresBrake.length - 5];
@@ -595,11 +598,15 @@ export const mapDataForPage3 = (data: Root): Page3Props => ({
   mobile: data.user.phoneNo,
 });
 
-export const mapDataForPage4 = async (data: Root): Promise<Page4Props> => ({
-  date: new Date().toLocaleDateString("en-GB"),
-  name: getFullName(data),
-  signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
-});
+export const mapDataForPage4 = async (data: Root): Promise<Page4Props> => {
+  const address = getAddress(data);
+  return {
+    date: new Date().toLocaleDateString("en-GB"),
+    name: getFullName(data),
+    signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
+    place: address.city,
+  };
+};
 
 export const mapDataForPage5 = (data: Root): Page5Props => ({
   documentsReceived: "e-document",
@@ -609,16 +616,18 @@ export const mapDataForPage5 = (data: Root): Page5Props => ({
 export const mapDataForPage6 = async (data: Root): Promise<Page6Props> => ({
   eAaDhar: data.step_1?.pan?.response?.details?.aadhaar?.file_url
     ? await pdfUrlToBase64(
-      getFileUrl(data.step_1?.pan?.response?.details?.aadhaar?.file_url || "")
-    )
+        getFileUrl(
+          data.step_1?.pan?.response?.details?.aadhaar?.file_url || "",
+        ),
+      )
     : "",
 });
 
 export const mapDataForPage7 = async (data: Root): Promise<Page7Props> => ({
   ePan: data.step_1?.pan?.response?.details?.pan?.file_url
     ? await pdfUrlToBase64(
-      getFileUrl(data.step_1?.pan?.response?.details?.pan?.file_url || "")
-    )
+        getFileUrl(data.step_1?.pan?.response?.details?.pan?.file_url || ""),
+      )
     : "",
 });
 
@@ -835,7 +844,9 @@ export const mapDataForPage37 = (data: Root): Page37Props => ({});
 export const mapDataForPage40 = (data: Root): Page40Props => ({});
 export const mapDataForPage41 = (data: Root): Page41Props => ({});
 export const mapDataForPage43 = (data: Root): Page43Props => ({});
-export const mapDataForPage44 = (data: Root): Page44Props => ({});
+export const mapDataForPage44 = (data: Root): Page44Props => ({
+  email: data?.user?.emailAddress,
+});
 export const mapDataForPage45 = (data: Root): Page45Props => ({});
 export const mapDataForPage46 = (data: Root): Page46Props => ({});
 
