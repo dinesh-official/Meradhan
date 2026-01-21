@@ -49,8 +49,6 @@ export const useDematAccountFormHook = () => {
     onSuccess: (data) => {
       // if verified then move to next step
       if (data.responseData.isVerified) {
-        nextLocalStep();
-        pushUserKycState();
         updateDepository(indexAccount, {
           isVerified: true,
           verifyTimestamp: new Date().toISOString(),
@@ -65,6 +63,8 @@ export const useDematAccountFormHook = () => {
           },
           entityType: "KYC",
         });
+        nextLocalStep();
+        pushUserKycState();
       } else {
         addActivityLog({
           action: "DEMAT_ACCOUNT_VERIFICATION_FAILED",
