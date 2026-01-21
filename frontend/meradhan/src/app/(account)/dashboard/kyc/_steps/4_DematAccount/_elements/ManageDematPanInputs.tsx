@@ -46,13 +46,14 @@ function ManageDematPanInputs({
               type="text"
               maxLength={10}
               value={item}
-              onChange={(e) =>
-                updateDepositoryPan(
-                  index, // array index of step_4 manage demat account
-                  subIndex + 1, // pan number input index not need to +1 for first pan number in "state"
-                  e.target.value.toUpperCase()
-                )
-              }
+              disabled
+              // onChange={(e) =>
+              //   updateDepositoryPan(
+              //     index,
+              //     subIndex + 1,
+              //     e.target.value.toUpperCase(),
+              //   )
+              // }
             />
 
             {/* Icons — only if isJoined is enabled */}

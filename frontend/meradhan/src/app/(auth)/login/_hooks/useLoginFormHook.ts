@@ -112,8 +112,8 @@ export const useLoginFormHook = () => {
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
+          error.message ||
+          "Something went wrong",
         );
       }
     },
@@ -143,8 +143,8 @@ export const useLoginFormHook = () => {
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
+          error.message ||
+          "Something went wrong",
         );
       }
     },
@@ -176,11 +176,6 @@ export const useLoginFormHook = () => {
         password: state.password,
       }),
     onSuccess: (data) => {
-      revalidateTracking({
-        trackId: localStorage.getItem("analytics_session") || getSessionId(),
-        token: data.responseData.token,
-        userId: data.responseData.id,
-      });
       trackActivity("login", { reason: "Sign in with password" });
       setAuthCookiesAndRedirect({
         token: data.responseData.token,
@@ -191,8 +186,8 @@ export const useLoginFormHook = () => {
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
+          error.message ||
+          "Something went wrong",
         );
       } else {
         toast.error(error.message);
@@ -222,8 +217,8 @@ export const useLoginFormHook = () => {
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
+          error.message ||
+          "Something went wrong",
         );
       } else {
         toast.error(error.message);
@@ -332,6 +327,7 @@ export const useLoginFormHook = () => {
     token: string;
     id: string;
   }) => {
+
     // // Use longer expiry (30 days) if remember me is checked, otherwise use default (1 day)
     // const cookieOptions = state.rememberMe
     //   ? {
@@ -339,9 +335,13 @@ export const useLoginFormHook = () => {
     //       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
     //     }
     //   : COOKIE_OPTIONS;
-
+    const sessionId = getSessionId();
+    const auditApi = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
     setCookie("userId", id);
-
+    auditApi.createNewTrackingSessionMeradhan({
+      sessionId: sessionId,
+      userId: parseInt(id),
+    });
     // redirect to dashboard
     if (localStorage.getItem("redirect")) {
       router.replace(localStorage.getItem("redirect") as string);

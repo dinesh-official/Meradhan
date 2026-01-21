@@ -55,7 +55,7 @@ export class CDSLApi {
     });
 
     const parts = Object.fromEntries(
-      fmt.formatToParts(now).map((p) => [p.type, p.value])
+      fmt.formatToParts(now).map((p) => [p.type, p.value]),
     ) as Record<
       "day" | "month" | "year" | "hour" | "minute" | "second",
       string
@@ -79,7 +79,7 @@ export class CDSLApi {
   /** AES-256-CBC encryption with PKCS7 padding and zero IV (per CDSL spec) */
   private encryptRequestData(
     requestData: object,
-    iv = Buffer.alloc(16, 0x00)
+    iv = Buffer.alloc(16, 0x00),
   ): string {
     const key = Buffer.from(this.AesKey, "utf8");
     if (key.length !== 32)
@@ -111,7 +111,7 @@ export class CDSLApi {
 
   /** Main API method — PAN Verify Request */
   async panVerifyRequest(
-    request: BoPanRequest
+    request: BoPanRequest,
   ): Promise<DemateVerifyResponse<BoPanResponse>> {
     if (!request.boid || !request.pan1)
       throw new Error("Missing required fields: boid and pan1.");
@@ -141,7 +141,7 @@ export class CDSLApi {
     const response = await this.axiosInstance.post<BoPanResponse>(
       "/PANVerifyRequest",
       JSON.stringify(encryptedBody),
-      { headers }
+      { headers },
     );
 
     const data = response.data;
