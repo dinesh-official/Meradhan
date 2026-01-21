@@ -6,7 +6,6 @@ import { SharePopupViewProvider } from "@/global/module/share/SharePopupView";
 import { headers } from "next/headers";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import Script from "next/script";
-import "react-json-view-lite/dist/index.css";
 
 import "./styles/globals.css";
 import "./styles/datepicker.css";
