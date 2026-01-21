@@ -88,10 +88,13 @@ export const useDematAccountFormHook = () => {
         });
         Swal.fire({
           imageUrl: "/images/icons/sad-emoji.svg",
+          title: "Failed to verify demate account",
           text:
+            data.responseData.message ||
             statusCodes?.[
               data.responseData.status as keyof typeof statusCodes
-            ] || "Something went wrong",
+            ] ||
+            "Something went wrong",
         });
       }
     },
