@@ -37,18 +37,19 @@ export const usePersonalDetailsFormHook = () => {
         type: "PERSONAL_DETAILS_SUBMITTED",
         desc: "User submitted personal details during KYC process.",
       });
+
+      const cdate = new Date().toISOString();
+      setStep2PersonalData("confirmPersonalInfoTimestamp", cdate);
       addActivityLog({
         action: "PERSONAL_DETAILS_SUBMITTED",
         details: {
           step: "Personal Details step ",
           Reason: "User Confirmed the Personal Details",
+          ...data,
+          confirmPersonalInfoTimestamp: cdate,
         },
         entityType: "KYC",
       });
-      setStep2PersonalData(
-        "confirmPersonalInfoTimestamp",
-        new Date().toISOString()
-      );
       setStepIndex(0);
       // this is the first `global step` for "step "
       nextStep();
