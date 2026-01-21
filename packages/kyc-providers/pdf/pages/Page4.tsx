@@ -131,7 +131,7 @@ function Page4(data: {
             <View style={tw(`text-xs flex flex-col gap-5`)}>
               <Text>Name: {data.name}</Text>
               <Text>Date: {data.date}</Text>
-              <Text>Place:</Text>
+              <Text>Place: {data.place}</Text>
             </View>
             <View style={tw(`flex flex-col gap-8 justify-center items-center`)}>
               <Image

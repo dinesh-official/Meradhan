@@ -10,11 +10,13 @@ declare global {
         id: number;
         email: string;
         token: string;
+        role: "ADMIN";
       };
       customer?: {
         id: number;
         email: string;
         token: string;
+        role: "USER";
         meradhan_tracking_session?: string;
       };
     }
