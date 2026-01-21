@@ -5,6 +5,10 @@ import {
 } from "@core/database/database";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 import { getStateCode } from "@modules/RFQ/nse/values";
+import {
+  removeLastCommaChunks,
+  splitAddressInto3BalancedLines,
+} from "@packages/kyc-providers";
 import { AppError } from "@utils/error/AppError";
 import { removeCountryCode } from "@utils/filters/convert";
 
@@ -26,18 +30,15 @@ export class ParticipantManager {
         dematAccounts: true,
       },
     });
+
     if (!user) {
       throw new AppError("No User Found");
     }
 
-    const address =
-      user.currentAddress!.cityOrDistrict +
-      "," +
-      user.currentAddress!.postOffice +
-      "," +
-      user.currentAddress!.state +
-      "," +
-      user.currentAddress!.pinCode;
+    const address = splitAddressInto3BalancedLines(
+      removeLastCommaChunks(user.currentAddress!.fullAddress, 3),
+    );
+
     console.log(
       user.dematAccounts.map((e) => {
         return {
@@ -63,9 +64,9 @@ export class ParticipantManager {
     );
 
     const participant = await this.cbrics.unregisteredParticipant({
-      address: address,
-      address2: user.currentAddress?.line2 || undefined,
-      address3: user.currentAddress?.line3 || undefined,
+      address: address?.line1 || "",
+      address2: address?.line2 || undefined,
+      address3: address?.line3 || undefined,
       contactPerson: `${user.firstName} ${user.middleName} ${user.lastName}`,
       firstName: `${user.firstName} ${user.middleName} ${user.lastName}`,
       loginId: user.userName,
@@ -74,6 +75,7 @@ export class ParticipantManager {
       emailList: [user.emailAddress],
       stateCode: getStateCode(user.currentAddress!.state)!,
       regAddress: user.currentAddress!.fullAddress,
+
       telephone: removeCountryCode(user.phoneNo),
       expiryDate: null,
       leiCode: null,

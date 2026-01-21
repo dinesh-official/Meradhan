@@ -28,7 +28,7 @@ export class CustomerProfileService {
     });
     if (existingOtp) {
       throw new AppError(
-        "Mobile number is already associated with another account."
+        "Mobile number is already associated with another account.",
       );
     }
 
@@ -89,7 +89,7 @@ export class CustomerProfileService {
     if (isValid) {
       // Update the customer's mobile number in the database (implementation not shown)
       console.log(
-        `Mobile number for customer ${customerId} updated to ${newMobile}`
+        `Mobile number for customer ${customerId} updated to ${newMobile}`,
       );
 
       await db.dataBase.customerProfileDataModel.update({
@@ -115,7 +115,7 @@ export class CustomerProfileService {
 
   async toggleWhatsAppNotifications(
     customerId: number,
-    enable: boolean
+    enable: boolean,
   ): Promise<boolean> {
     await db.dataBase.customerProfileDataModel.update({
       data: {

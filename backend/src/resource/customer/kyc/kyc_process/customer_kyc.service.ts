@@ -1,5 +1,8 @@
 import { db } from "@core/database/database";
-import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+import {
+  addCompleteCustomerKycProfile,
+  addKraWorkerJob,
+} from "@jobs/kra_worker/kraWroker.helper";
 import { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import { makeFullname } from "@utils/generate/generate_username";
@@ -332,7 +335,7 @@ export class CustomerKycKycService {
         kycSubmitDate: new Date(),
       },
     });
-
+    await addCompleteCustomerKycProfile(customerId);
     // Start KRa Process
     await addKraWorkerJob(
       {
@@ -343,7 +346,7 @@ export class CustomerKycKycService {
           currentStepName: store?.currentStepName,
         },
       },
-      30,
+      0.5 * 60 * 60 * 1000,
     );
     return pdfUrl;
   }
