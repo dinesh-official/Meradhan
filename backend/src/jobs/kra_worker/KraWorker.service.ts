@@ -305,14 +305,14 @@ export class KraProcess {
 
   async modify({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
-    const kraCachedKey = `KRA_MODIFY_DOWNLOAd:${customer.id}-${kycdataId}`;
+    const kraCachedKey = `KRA_DOWNLOAd:${customer.id}-${kycdataId}`;
     const downloadedReport: T_APP_PAN_INQ_DOWNLOAD | null =
       await cacheStorage.get(kraCachedKey);
     const payload = this.buildRegisterPayload(data, customer, true);
 
     const p = payload.APP_PAN_INQ;
 
-    const dataKraPayload: PanModifyKraPayload = {
+    let dataKraPayload: PanModifyKraPayload = {
       panInquiry: {
         APP_COR_ADD1: p.APP_COR_ADD1,
         APP_COR_ADD2: p.APP_COR_ADD2,
@@ -373,16 +373,21 @@ export class KraProcess {
     };
 
     let report = await this.kraInstance.panModifyKraXML(dataKraPayload);
-    console.log(report);
-
     if (
       report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
         "INVALID IN-PERSON VERIFICATION FLAG",
       )
     ) {
       // Retry once with IPV_FLAG as 'N'
-      dataKraPayload.panInquiry.APP_IPV_FLAG =
-        downloadedReport?.APP_RES_ROOT.APP_PAN_INQ.APP_IPV_FLAG || "E";
+
+      dataKraPayload = {
+        ...dataKraPayload,
+        panInquiry: {
+          ...dataKraPayload.panInquiry,
+          APP_IPV_FLAG:
+            downloadedReport?.APP_RES_ROOT?.APP_PAN_INQ?.APP_IPV_FLAG || "R",
+        },
+      };
       report = await this.kraInstance.panModifyKraXML(dataKraPayload);
     }
 
