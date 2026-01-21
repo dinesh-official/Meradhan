@@ -18,7 +18,7 @@ import * as path from "path";
 
 // helper class for digio kyc file operations
 class DigioKycFileHelper {
-  constructor(private digioSdk: DigioSDK) { }
+  constructor(private digioSdk: DigioSDK) {}
 
   // get pan aadhar document files from digio rid
   async getPanAadharDocumentFiles(bytes: string, userName?: string) {
@@ -102,13 +102,13 @@ class DigioKycFileHelper {
   // use for make file from base64 string and upload to cloud
   async getBash64File(
     baseData: string,
-    data?: { name?: string; path?: string }
+    data?: { name?: string; path?: string },
   ) {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "aadhar"));
     const fileName = data?.name || `file.jpeg`;
     fs.writeFileSync(
       path.join(tempDir, fileName),
-      Buffer.from(baseData, "base64")
+      Buffer.from(baseData, "base64"),
     );
     const location = path.join(tempDir, fileName);
     const saveUrl = await saveFileOnCloud({
@@ -121,7 +121,7 @@ class DigioKycFileHelper {
   // use for make file from bytes string and upload to cloud
   async getFileBytesPath(
     bytes: string,
-    data?: { name?: string; path?: string }
+    data?: { name?: string; path?: string },
   ) {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "filedata"));
     const fileName = data?.name || `file.jpeg`;
@@ -148,7 +148,7 @@ export class KycProvider extends DigioKycFileHelper {
   private nsdlApi = new NSDLApi(
     env.NDSL_REQUESTOR_ID || "",
     env.NSDL_SECRET_KEY || "",
-    env.NSDL_MODE === "PROD"
+    env.NSDL_MODE === "PROD",
   );
   private cdslApi = new CDSLApi({
     AESKey: env.CDSL_AES_KEY || "",
@@ -208,7 +208,7 @@ export class KycProvider extends DigioKycFileHelper {
   }: {
     email: string;
     name: string;
-    id: string;
+    id?: string;
   }) {
     const aadhaarDetails = await this.digio.sendTemplateRequest({
       emailId: email,
@@ -314,7 +314,7 @@ export class KycProvider extends DigioKycFileHelper {
       pan1: string;
       pan2?: string | null;
       pan3?: string | null;
-    }
+    },
   ) {
     try {
       if (type == "NSDL") {
@@ -341,12 +341,12 @@ export class KycProvider extends DigioKycFileHelper {
         throw new AppError(
           (error as AxiosError<{ error: string; ErrorDescription?: string }>)
             ?.response?.data?.ErrorDescription ||
-          (error as AxiosError<{ error: string; message?: string }>)?.response
-            ?.data?.error ||
-          (error as AxiosError<{ error: string; message?: string }>)?.response
-            ?.data?.message ||
-          error.toString(),
-          { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 }
+            (error as AxiosError<{ error: string; message?: string }>)?.response
+              ?.data?.error ||
+            (error as AxiosError<{ error: string; message?: string }>)?.response
+              ?.data?.message ||
+            error.toString(),
+          { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 },
         );
       }
     }

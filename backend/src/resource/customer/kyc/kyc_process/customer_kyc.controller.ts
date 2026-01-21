@@ -54,12 +54,12 @@ export class CustomerKycKycController {
     //     "Your KYC verification is incomplete — both Aadhaar and PAN details are missing. Please update your KYC details and try again.",
     //     { code: "KYC_NOT_APPROVED", statusCode: 400 }
     //   );
-    // } else 
+    // } else
 
     if (!response.actions?.[0]?.details?.aadhaar) {
       throw new AppError(
         "Your KYC verification is incomplete — Aadhaar details are missing. Please select your Aadhaar and try again.",
-        { code: "AADHAAR_NOT_FOUND", statusCode: 400 }
+        { code: "AADHAAR_NOT_FOUND", statusCode: 400 },
       );
     }
 
@@ -74,11 +74,11 @@ export class CustomerKycKycController {
     const kycdata = response.actions?.[0];
     const aadharData = await this.panKycService.getPanAadharDocumentFiles(
       kycdata.execution_request_id,
-      user?.userName
+      user?.userName,
     );
     const aadharImage = await this.panKycService.getAadharProfileImage(
       kycdata.details.aadhaar.image,
-      user?.userName
+      user?.userName,
     );
 
     // append file urls to kyc data response
@@ -226,7 +226,7 @@ export class CustomerKycKycController {
     const data = await this.panKycService.downloadEsignPdf(
       doc.toString(),
       userId,
-      user?.userName
+      user?.userName,
     );
 
     res.sendResponse({
@@ -257,7 +257,7 @@ export class CustomerKycKycController {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="MeraDhan-KYC-${new Date().getTime()}-UnsignedForm.pdf"`
+        `attachment; filename="MeraDhan-KYC-${new Date().getTime()}-UnsignedForm.pdf"`,
       );
 
       // Stream the file to the client

@@ -29,12 +29,11 @@ export default function Error({
 
         {/* Title */}
         <h1 className="mb-2 font-semibold text-2xl">
-          Oops! Something went wrong.
+          Site is Under Maintenance
         </h1>
-
         {/* Description */}
         <p className="mb-6 max-w-96 text-gray-600 text-center">
-          An unexpected error occurred. You can try again or go back home.
+          We&apos;ll be back soon!
         </p>
 
         {/* Buttons */}
@@ -88,7 +87,7 @@ export default function Error({
               onClick={() =>
                 copyText(
                   error?.message || "Unknown error occurred.",
-                  setCopiedMessage
+                  setCopiedMessage,
                 )
               }
               className="top-1 right-1 absolute bg-gray-100 hover:bg-gray-800 px-2 py-1 text-xs transition"

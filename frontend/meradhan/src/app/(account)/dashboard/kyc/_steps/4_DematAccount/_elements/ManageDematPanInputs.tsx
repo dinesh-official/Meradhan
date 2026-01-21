@@ -47,6 +47,7 @@ function ManageDematPanInputs({
               maxLength={10}
               value={item}
               disabled
+              adminMode
               // onChange={(e) =>
               //   updateDepositoryPan(
               //     index,

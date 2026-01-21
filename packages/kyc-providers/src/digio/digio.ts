@@ -59,14 +59,14 @@ export class DigioSDK {
         generate_deeplink_info: true,
         transaction_id,
         reference_id,
-      }
+      },
     );
     return response.data;
   }
 
   async getKycgetResponse<T>(kid: string): Promise<T> {
     const response = await this.client.post<T>(
-      `/client/kyc/v2/${kid}/response`
+      `/client/kyc/v2/${kid}/response`,
     );
     return response.data;
   }
@@ -93,7 +93,7 @@ export class DigioSDK {
         // narration: "india",
         unique_request_id: transaction_id,
         validation_mode: "PENNY_DROP",
-      }
+      },
     );
     return response.data;
   }
@@ -103,7 +103,7 @@ export class DigioSDK {
     try {
       const { data } = await this.client.get(
         `https://ifsc.razorpay.com/${payload.ifsc}`,
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { "Content-Type": "application/json" } },
       );
       return data;
     } catch {
@@ -131,7 +131,7 @@ export class DigioSDK {
 
   async esignRequest(
     filePath: string,
-    { email, name }: { email: string; name: string }
+    { email, name }: { email: string; name: string },
   ) {
     try {
       const form = new FormData();
@@ -157,7 +157,7 @@ export class DigioSDK {
               Array.from({ length: 46 }, (_, i) => [
                 (i + 1).toString(),
                 [{ llx: 420, lly: 50, urx: 555, ury: 100 }],
-              ])
+              ]),
             ),
           },
           signers: [
@@ -168,7 +168,7 @@ export class DigioSDK {
               reason: "For MeraDhan Kyc",
             },
           ],
-        })
+        }),
       );
 
       const data = await this.client.post<DigioSignatureResponse>(
@@ -178,7 +178,7 @@ export class DigioSDK {
           headers: {
             ...form.getHeaders(),
           },
-        }
+        },
       );
       return data.data;
     } catch (error) {
@@ -195,7 +195,7 @@ export class DigioSDK {
       {
         params: { document_id },
         responseType: "arraybuffer",
-      }
+      },
     );
     return response.data;
   }

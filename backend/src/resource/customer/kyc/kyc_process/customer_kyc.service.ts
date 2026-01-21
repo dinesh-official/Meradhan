@@ -77,7 +77,6 @@ export class CustomerKycKycService {
       const fullName = makeFullname({ firstName, middleName, lastName });
       const aadhaarDetails = await this.kycProvider.createAadhaarVerifyRequest({
         email: data.email,
-        id: data.aadhaarCardNo,
         name: fullName,
       });
       return aadhaarDetails;
@@ -92,7 +91,7 @@ export class CustomerKycKycService {
     const bytes = await this.kycProvider.getMediaFileDataBytes(kid);
     const files = await this.kycProvider.getPanAadharDocumentFiles(
       bytes,
-      userName
+      userName,
     );
     return files;
   }
@@ -151,7 +150,7 @@ export class CustomerKycKycService {
       });
     }
     const bytes = await this.kycProvider.getMediaFileDataBytes(
-      selfieDetails.actions[0]?.file_id
+      selfieDetails.actions[0]?.file_id,
     );
     const image = await this.kycProvider.getBash64File(bytes, {
       name: "selfie.jpeg",
@@ -207,7 +206,7 @@ export class CustomerKycKycService {
       });
     }
     const bytes = await this.kycProvider.getMediaFileDataBytes(
-      selfieDetails.actions[0]?.file_id
+      selfieDetails.actions[0]?.file_id,
     );
     const image = await this.kycProvider.getBash64File(bytes, {
       name: "sign.jpeg",
@@ -226,7 +225,7 @@ export class CustomerKycKycService {
 
   // verify bank account
   async verifyBankAccount(
-    payload: z.infer<typeof appSchema.kyc.bankInfoSchema>
+    payload: z.infer<typeof appSchema.kyc.bankInfoSchema>,
   ) {
     const bankDetails = await this.kycProvider.verifyBankAccount({
       beneficiary_account_no: payload.accountNumber,
@@ -238,7 +237,7 @@ export class CustomerKycKycService {
 
   // verify demat account
   async verifyDematAccount(
-    payload: z.infer<typeof appSchema.kyc.dpAccountInfoSchema>
+    payload: z.infer<typeof appSchema.kyc.dpAccountInfoSchema>,
   ) {
     const getPans = () => {
       const pans = payload.panNumber;
@@ -276,7 +275,7 @@ export class CustomerKycKycService {
         dpId: payload.dpId,
         boId_or_clientId: payload.beneficiaryClientId,
         ...pans,
-      }
+      },
     );
     return dematDetails;
   }
@@ -316,7 +315,7 @@ export class CustomerKycKycService {
   async downloadEsignPdf(
     document_id: string,
     customerId: number,
-    userName?: string
+    userName?: string,
   ) {
     const pdfUrl = await this.kycProvider.getEsignPdf(document_id, userName);
     // set kyc status
@@ -344,7 +343,7 @@ export class CustomerKycKycService {
           currentStepName: store?.currentStepName,
         },
       },
-      30
+      30,
     );
     return pdfUrl;
   }
