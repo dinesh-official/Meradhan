@@ -49,7 +49,7 @@ function KycDataProvider({ children }: { children: ReactNode }) {
   const { addActivity } = useUserTracking();
 
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   // -- Push Activity Log on Pull KYC Progress

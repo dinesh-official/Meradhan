@@ -18,39 +18,44 @@ const sharedRedisOpts = {
 // 🔹 Initialize all queues using shared redis connections
 export const welcomeEmailSenderQueue = new Bull(
   QueueNames.welComeEmail,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 export const emailOtpSenderQueue = new Bull(
   QueueNames.emailOtpSend,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 export const emailAdminOtpSenderQueue = new Bull(
   QueueNames.emailAdminOtpSend,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 export const mobileOtpSenderQueue = new Bull(
   QueueNames.mobileOtpSend,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 export const forgotPasswordLinkSenderQueue = new Bull(
   QueueNames.forgotPasswordEmail,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 export const successResetPasswordQueue = new Bull(
   QueueNames.successResetPassword,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 export const emailVerificationQueue = new Bull(
   QueueNames.emailVerification,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 
 export const kraWorkerQueue = new Bull(
   QueueNames.kraProcessWork,
-  sharedRedisOpts
+  sharedRedisOpts,
 );
 
 export const orderSettlementQueue = new Bull(
   QueueNames.orderSettlement,
-  sharedRedisOpts
+  sharedRedisOpts,
+);
+
+export const profileSubmitSettlementQueue = new Bull(
+  QueueNames.submitProfileCompleat,
+  sharedRedisOpts,
 );

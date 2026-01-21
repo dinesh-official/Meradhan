@@ -1,11 +1,4 @@
-import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 
-await addKraWorkerJob(
-  {
-    customerId: 45,
-    kycDataStoreId: 217,
-    stage: "ENQUIRY_KRA",
-  },
-  0,
-);
-console.log("JOB ADDED");
+const kycManager = new CustomerKycManager();
+await kycManager.saveKycToCustomer(Number(45));
