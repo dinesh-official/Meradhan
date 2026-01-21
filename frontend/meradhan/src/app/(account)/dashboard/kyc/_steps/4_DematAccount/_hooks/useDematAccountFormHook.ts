@@ -1,3 +1,4 @@
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import apiGateway, { ApiError } from "@root/apiGateway";
@@ -11,9 +12,6 @@ import {
   KycDataStorage,
   useKycDataStorage,
 } from "../../../_store/useKycDataStorage";
-import { findDpId } from "../../../_utils/nsdlDpid";
-import { addActivityLog } from "@/analytics/UserTrackingProvider";
-import { findCdslDpId } from "../../../_utils/cdslDpid";
 const statusCodes = {
   "00": "VALID Record",
   "01": "DP ID does not match",
@@ -31,7 +29,7 @@ export const useDematAccountFormHook = () => {
       Partial<Record<keyof KycDataStorage["step_4"][number], string[]>>
     >();
   const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const { state, nextLocalStep, updateDepository } = useKycDataStorage();
@@ -50,7 +48,7 @@ export const useDematAccountFormHook = () => {
     mutationFn: async () => kycApi.verifyDematAccount(data),
     onSuccess: (data) => {
       // if verified then move to next step
-      if (!data.responseData.isVerified) {
+      if (data.responseData.isVerified) {
         nextLocalStep();
         pushUserKycState();
         updateDepository(indexAccount, {
@@ -82,17 +80,21 @@ export const useDematAccountFormHook = () => {
           desc:
             "Demat account verification failed during KYC process. " +
             `Status Code: ${data.responseData.status}, ` +
-            `Status Description: ${statusCodes?.[
-            data.responseData.status as keyof typeof statusCodes
-            ] || "Unknown status code"
+            `Status Description: ${
+              statusCodes?.[
+                data.responseData.status as keyof typeof statusCodes
+              ] || "Unknown status code"
             }`,
         });
         Swal.fire({
           imageUrl: "/images/icons/sad-emoji.svg",
+          title: "Failed to verify demate account",
           text:
+            data.responseData.message ||
             statusCodes?.[
-            data.responseData.status as keyof typeof statusCodes
-            ] || "Something went wrong",
+              data.responseData.status as keyof typeof statusCodes
+            ] ||
+            "Something went wrong",
         });
       }
     },
