@@ -45,7 +45,9 @@ function IdentityValidationAadharInfo() {
 
   const data = state.step_1.pan;
 
-  const [isNameMatched, setisNameMatched] = useState<MatchResult | undefined>(undefined);
+  const [isNameMatched, setisNameMatched] = useState<MatchResult | undefined>(
+    undefined,
+  );
   const [isCheckingName, setIsCheckingName] = useState(false);
 
   /**
@@ -91,7 +93,6 @@ function IdentityValidationAadharInfo() {
       if (result.decision !== "MATCH_FAIL") {
         resetNameRetryCount();
       }
-
     } catch (error) {
       console.error("Error checking name match:", error);
       // Fallback to MATCH_FAIL on error
@@ -124,8 +125,6 @@ function IdentityValidationAadharInfo() {
   useEffect(() => {
     checkNameMatch();
   }, [checkNameMatch]);
-
-
 
   const isDobMatched = dataMatcherUtils.areDatesMatched(
     data.response?.details.aadhaar.dob
@@ -213,7 +212,8 @@ function IdentityValidationAadharInfo() {
                     : isNameMatched?.decision == "MATCH_FULL"
                       ? "Matched"
                       : isNameMatched?.decision == "MATCH_PARTIAL"
-                        ? "Partially Matched : Confirmation Required" : "Doesn't Match with PAN"
+                        ? "Partially Matched : Confirmation Required"
+                        : "Doesn't Match with PAN"
                 }
                 showStatus
               >
@@ -222,31 +222,37 @@ function IdentityValidationAadharInfo() {
                     {data.response?.details.aadhaar.name}
                   </p>
                   {isCheckingName && (
-                    <BiLoaderCircle className="text-primary animate-spin" size={20} />
+                    <BiLoaderCircle
+                      className="text-primary animate-spin"
+                      size={20}
+                    />
                   )}
-                  {!isCheckingName && isNameMatched?.decision == "MATCH_FAIL" && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onClick={() => {
-                        incrementNameRetryCount();
-                        prevLocalStep();
-                      }}
-                      disabled={
-                        state.step_1.nameMismatchDeclaration.retryCount > 3
-                      }
-                      className="h-auto p-0 text-primary hover:text-primary/80 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Retry
-                      <FaRedo className="w-3 h-3" size={10} />
-                    </Button>
-                  )}
+                  {!isCheckingName &&
+                    isNameMatched?.decision == "MATCH_FAIL" && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => {
+                          incrementNameRetryCount();
+                          prevLocalStep();
+                        }}
+                        disabled={
+                          state.step_1.nameMismatchDeclaration.retryCount > 3
+                        }
+                        className="h-auto p-0 text-primary hover:text-primary/80 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Retry
+                        <FaRedo className="w-3 h-3" size={10} />
+                      </Button>
+                    )}
                 </div>
               </DataInfoLabel>
               <DataInfoLabel
                 title="Date of Birth"
                 status={isDobMatched ? "SUCCESS" : "ERROR"}
-                statusLabel={isDobMatched ? "Matched With PAN" : "Not Matched With PAN"}
+                statusLabel={
+                  isDobMatched ? "Matched With PAN" : "Not Matched With PAN"
+                }
                 showStatus
               >
                 <div className="flex items-center gap-2">
@@ -278,13 +284,11 @@ function IdentityValidationAadharInfo() {
                 statusLabel={isGenderMatched ? "Matched" : "Not Matched"}
                 showStatus
               >
-
                 <p className="font-medium">
                   {genders[
                     data.response?.details?.aadhaar?.gender as "M" | "F"
                   ] || "Others"}
                 </p>
-
               </DataInfoLabel>
             </div>
             <DataInfoLabel
@@ -420,67 +424,69 @@ function IdentityValidationAadharInfo() {
                 We&apos;re unable to fully match your name across documents.
               </p>
               <p>
-                Please ensure that the Aadhaar details you&apos;ve entered are correct
-                and try again. If the issue persists, you may contact our support
-                team for assistance.
+                Please ensure that the Aadhaar details you&apos;ve entered are
+                correct and try again. If the issue persists, you may contact
+                our support team for assistance.
               </p>
             </div>
-
           </div>
         )}
         {/* Date of Birth Mismatch */}
         {!isDobMatched && (
           <div className="flex flex-col gap-3 mt-8 mb-3">
             <div className="flex flex-col gap-1">
-              <p className="font-semibold">
-                Unable to Verify Details
-              </p>
+              <p className="font-semibold">Unable to Verify Details</p>
               <p>
-                We couldn’t complete the verification due to a date of birth mismatch.
-                Please ensure that the date of birth in both Aadhaar and PAN is the same.
-                If you need any assistance, please reach out to our support team.
+                We couldn’t complete the verification due to a date of birth
+                mismatch. Please ensure that the date of birth in both Aadhaar
+                and PAN is the same. If you need any assistance, please reach
+                out to our support team.
               </p>
             </div>
-
           </div>
         )}
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
-        {(isNameMatched?.decision != "MATCH_FAIL" && isDobMatched) && <Button
-          className="flex items-center gap-1 w-full sm:w-auto"
-          onClick={() => {
-            setStep1PanData(
-              "confirmAadhaarTimestamp",
-              new Date().toISOString(),
-            );
-            addAuditLog({
-              type: "KYC_PROCESS_CONTINUED",
-              desc: "User chose to continue the KYC process : Aadhaar and Address Validation step.",
-            });
-            addActivityLog({
-              action: "CONFIRMED_AADHAAR_DETAILS",
-              details: {
-                step: "PAN and Identity Validation step - Confirmed Aadhaar Details",
-                AadhaarNo: data.response?.details.aadhaar.id_number,
-                DateOfBirth: data.response?.details.aadhaar.dob,
-                Name: data.response?.details.aadhaar.name,
-                Address: data.response?.details.aadhaar.current_address,
-              },
-              entityType: "KYC",
-            });
-            nextLocalStep();
-            pushUserKycState();
-          }}
-          disabled={!isAllowToContinue()}
-        >
-          Confirm & Continue
-          <div className="flex justify-center items-center p-0 h-full">
-            <IoMdArrowDropright className="p-0 text-4xl" />
-          </div>
-        </Button>}
+        {isNameMatched?.decision != "MATCH_FAIL" && isDobMatched && (
+          <Button
+            className="flex items-center gap-1 w-full sm:w-auto"
+            onClick={() => {
+              setStep1PanData(
+                "confirmAadhaarTimestamp",
+                new Date().toISOString(),
+              );
+              addAuditLog({
+                type: "KYC_PROCESS_CONTINUED",
+                desc: "User chose to continue the KYC process : Aadhaar and Address Validation step.",
+              });
+              addActivityLog({
+                action: "CONFIRMED_AADHAAR_DETAILS",
+                details: {
+                  step: "PAN and Identity Validation step - Confirmed Aadhaar Details",
+                  AadhaarNo: data.response?.details.aadhaar.id_number,
+                  DateOfBirth: data.response?.details.aadhaar.dob,
+                  Name: data.response?.details.aadhaar.name,
+                  Address: data.response?.details.aadhaar.current_address,
+                },
+                entityType: "KYC",
+              });
+              nextLocalStep();
+              pushUserKycState();
+            }}
+            disabled={!isAllowToContinue()}
+          >
+            Confirm & Continue
+            <div className="flex justify-center items-center p-0 h-full">
+              <IoMdArrowDropright className="p-0 text-4xl" />
+            </div>
+          </Button>
+        )}
         <Button
-          variant={(isNameMatched?.decision != "MATCH_FAIL" && isDobMatched) ? `link` : `outline`}
-
+          variant={
+            isNameMatched?.decision != "MATCH_FAIL" && isDobMatched
+              ? `link`
+              : `outline`
+          }
           onClick={async () => {
             const result = await Swal.fire({
               text: "Are you sure you want to save and exit the KYC process?",
