@@ -135,10 +135,6 @@ function IdentityValidationPanInfo() {
                 FirstName: state.step_1.pan.firstName,
                 MiddleName: state.step_1.pan.middleName,
                 LastName: state.step_1.pan.lastName,
-                Gender:
-                  genders[
-                    data.response?.details?.aadhaar?.gender as "M" | "F"
-                  ] || "Others",
               },
               entityType: "KYC",
             });

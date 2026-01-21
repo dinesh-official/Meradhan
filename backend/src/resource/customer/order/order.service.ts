@@ -71,7 +71,7 @@ export class OrderService {
   async createOrder(
     customerId: number,
     item: OrderPreviewItem,
-    orderId?: string
+    orderId?: string,
   ) {
     const preview = await this.previewOrder(item);
     const customerBank = await db.dataBase.customersBankAccountModel.findFirst({
@@ -96,7 +96,7 @@ export class OrderService {
         account_number: customerBank.accountNumber,
         ifsc: customerBank.ifscCode,
         name: customerBank.accountHolderName,
-      }
+      },
     );
     const order = await db.dataBase.order.create({
       data: {
@@ -135,7 +135,7 @@ export class OrderService {
   async captureOrderPayment(
     paymentOrderId: string,
     paymentId: string,
-    signature?: string
+    signature?: string,
   ) {
     const order = await db.dataBase.order.findUnique({
       where: { paymentOrderId },
@@ -151,7 +151,7 @@ export class OrderService {
       const isValid = this.payment.verifySignature(
         paymentOrderId,
         paymentId,
-        signature
+        signature,
       );
       if (!isValid) {
         await db.dataBase.order.update({
@@ -227,7 +227,7 @@ export class OrderService {
 
   async updateOrderMetadata(
     orderId: number,
-    metadata: Record<string, any>
+    metadata: Record<string, any>,
   ): Promise<void> {
     await db.dataBase.order.update({
       where: { id: orderId },
@@ -239,7 +239,7 @@ export class OrderService {
 
   async updateOrderStatus(
     orderId: number,
-    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED"
+    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED",
   ): Promise<void> {
     await db.dataBase.order.update({
       where: { id: orderId },
@@ -251,7 +251,7 @@ export class OrderService {
 
   async updateOrderStatusByOrderNo(
     orderNumber: string,
-    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED"
+    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED",
   ): Promise<number> {
     const { id } = await db.dataBase.order.update({
       where: { orderNumber },
@@ -284,7 +284,7 @@ export class OrderService {
     step: string,
     status: "SUCCESS" | "FAILED" | "PENDING",
     outputData?: Record<string, any>,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): Promise<void> {
     await db.dataBase.orderLogs.create({
       data: {
@@ -309,7 +309,7 @@ export class OrderService {
     page: number = 1,
     limit: number = 10,
     status?: string,
-    bondType?: string
+    bondType?: string,
   ) {
     const skip = (page - 1) * limit;
 

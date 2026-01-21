@@ -52,7 +52,7 @@ export class CustomerKycManager {
 
   async saveKycToCustomer(
     customerId: number,
-    kycStatus?: KYCStatus
+    kycStatus?: KYCStatus,
   ): Promise<void> {
     const kycData = await this.getKycData(customerId);
 
@@ -70,7 +70,7 @@ export class CustomerKycManager {
     const firstName = step1.pan.firstName;
     const lastName = step1.pan.lastName;
     const middleName = step1.pan.middleName;
-    const gender = this.mapGender(panData.gender);
+    const gender = this.mapGender(aadhaarData.gender);
 
     // Check if customer exists
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
@@ -87,9 +87,9 @@ export class CustomerKycManager {
       await tx.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
-          firstName,
-          lastName,
-          middleName,
+          firstName: aadhaarData.name,
+          // lastName,
+          // middleName,
           gender,
           kycStatus,
           verifyDate: new Date(),
@@ -105,9 +105,9 @@ export class CustomerKycManager {
                 aadhaarNo: aadhaarData.id_number,
                 dateOfBirth: aadhaarData.dob,
                 fatherName: aadhaarData.father_name,
-                firstName,
-                lastName,
-                middleName,
+                firstName: aadhaarData.name,
+                lastName: "",
+                middleName: "",
                 gender,
                 image: aadhaarData.image,
                 fileUrl: aadhaarData.file_url,
@@ -119,9 +119,9 @@ export class CustomerKycManager {
                 aadhaarNo: aadhaarData.id_number,
                 dateOfBirth: aadhaarData.dob,
                 fatherName: aadhaarData.father_name,
-                firstName,
-                lastName,
-                middleName,
+                firstName: aadhaarData.name,
+                lastName: "",
+                middleName: "",
                 gender,
                 image: aadhaarData.image,
                 fileUrl: aadhaarData.file_url,
@@ -313,7 +313,7 @@ export class CustomerKycManager {
                 verifyDate: bank.isVerified
                   ? bank.confirmBankTimestamp
                   : undefined,
-              }) as DataBaseSchema.CustomersBankAccountModelCreateManyInput
+              }) as DataBaseSchema.CustomersBankAccountModelCreateManyInput,
           ),
         });
       }
@@ -377,7 +377,7 @@ export class CustomerKycManager {
 
   // i need to show formatted profile data for kyc view on dashboard need same as getFullCustomerProfile but with kyc flow data
   async getUserKycFlowDataWithFormattedFullProfile(
-    customerId: number
+    customerId: number,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     // Fetch both user and KYC data
@@ -420,7 +420,8 @@ export class CustomerKycManager {
     const firstName = step1?.pan?.firstName || user?.firstName || "------";
     const lastName = step1?.pan?.lastName || user?.lastName || "------";
     const middleName = step1?.pan?.middleName || user?.middleName || null;
-    const gender = this.mapGender(panData?.gender) || user?.gender || "MALE";
+    const gender =
+      this.mapGender(aadhaarData?.gender) || user?.gender || "MALE";
 
     const data: Awaited<
       ReturnType<CustomerProfileService["getFullCustomerProfile"]>
@@ -471,9 +472,9 @@ export class CustomerKycManager {
                 aadhaarData?.father_name ||
                 user?.aadhaarCard?.fatherName ||
                 "------",
-              firstName: firstName,
-              lastName: lastName,
-              middleName: middleName,
+              firstName: aadhaarData.name,
+              lastName: "",
+              middleName: "",
               gender: gender,
               image: aadhaarData?.image || user?.aadhaarCard?.image || "------",
               fileUrl:
@@ -683,7 +684,7 @@ export class CustomerKycManager {
                   updatedAt: new Date(),
                   allowTerms: bank.checkTerms || false,
                   confirmTimeStamp: bank.confirmBankTimestamp || null,
-                }) as DataBaseSchema.CustomersBankAccountModelCreateInput
+                }) as DataBaseSchema.CustomersBankAccountModelCreateInput,
             )
           : user?.bankAccounts || [],
 
@@ -696,12 +697,12 @@ export class CustomerKycManager {
                   id: index,
                   customerProfileDataModelId: customerId,
                   depositoryName: this.mapDepository(
-                    demat.depositoryName || "NSDL"
+                    demat.depositoryName || "NSDL",
                   ),
                   dpId: demat.dpId || "------",
                   clientId: demat.beneficiaryClientId || "------",
                   accountType: this.mapAccountType(
-                    demat.accountType || "SINGLE"
+                    demat.accountType || "SINGLE",
                   ),
                   depositoryParticipantName:
                     demat.depositoryParticipantName || "------",
@@ -717,7 +718,7 @@ export class CustomerKycManager {
                   updatedAt: new Date(),
                   allowTerms: demat.checkTerms || false,
                   confirmTimeStamp: demat.confirmDematTimestamp || null,
-                }) as DataBaseSchema.CustomersDematAccountModelCreateInput
+                }) as DataBaseSchema.CustomersDematAccountModelCreateInput,
             )
           : user?.dematAccounts || [],
 
