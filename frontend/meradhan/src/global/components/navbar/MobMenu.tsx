@@ -19,7 +19,7 @@ interface MenuItemProps {
   level?: number;
 }
 
-function MobMenu({}: { session?: ISessionResponse["responseData"] | null }) {
+function MobMenu({ session }: { session?: ISessionResponse["responseData"] | null }) {
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden block">
@@ -51,7 +51,7 @@ function MobMenu({}: { session?: ISessionResponse["responseData"] | null }) {
         </div>
 
         {/* Bottom Login / Signup Buttons */}
-        {/* <div className="flex flex-col flex-shrink-0 gap-3 p-4 border-t border-t-gray-200">
+        <div className="flex flex-col flex-shrink-0 gap-3 p-4 border-t border-t-gray-200">
           <Link
             href={session?.id ? "/dashboard" : "/login"}
             className="bg-primary hover:bg-primary/90 py-2 rounded-md w-full text-white text-center transition"
@@ -64,7 +64,7 @@ function MobMenu({}: { session?: ISessionResponse["responseData"] | null }) {
           >
             {session?.id ? "Logout" : "Sign Up"}
           </Link>
-        </div> */}
+        </div>
       </SheetContent>
     </Sheet>
   );
@@ -81,9 +81,8 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
     <div className="flex flex-col border-t border-t-gray-200 w-full">
       {/* Menu Item Header */}
       <div
-        className={`flex items-center justify-between w-full px-4 py-3  hover:text-primary transition-all cursor-pointer ${
-          level > 0 ? `pl-${level * 4}` : ""
-        }`}
+        className={`flex items-center justify-between w-full px-4 py-3  hover:text-primary transition-all cursor-pointer ${level > 0 ? `pl-${level * 4}` : ""
+          }`}
       >
         {item.href ? (
           <Link
@@ -105,9 +104,8 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
         {hasChildren && (
           <IoMdArrowDropdown
             onClick={() => setOpen(!open)}
-            className={`transition-transform duration-200 ${
-              open ? "rotate-180" : "-rotate-90"
-            }`}
+            className={`transition-transform duration-200 ${open ? "rotate-180" : "-rotate-90"
+              }`}
           />
         )}
       </div>

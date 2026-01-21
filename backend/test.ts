@@ -1,4 +1,14 @@
-import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
+import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+import { cacheStorage } from "@store/redis_store";
+const TTL_28_HOURS = 72 * 60 * 60; // seconds = 100,800
+await cacheStorage.set("KRA:45-217", "MODIFY", TTL_28_HOURS);
 
-const kycManager = new CustomerKycManager();
-await kycManager.saveKycToCustomer(Number(45));
+await addKraWorkerJob(
+  {
+    customerId: 45,
+    kycDataStoreId: 217,
+    stage: "ENQUIRY_KRA",
+  },
+);
+
+console.log("DONE");

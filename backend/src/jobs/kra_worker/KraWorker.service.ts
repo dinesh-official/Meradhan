@@ -384,7 +384,7 @@ export class KraProcess {
 
     const report = await this.kraInstance.panModifyKraXML(dataKraPayload);
     if (
-      report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
+      report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
         "INVALID IN-PERSON VERIFICATION FLAG",
       )
     ) {
@@ -396,9 +396,9 @@ export class KraProcess {
 
     const kraStatus =
       "MODIFY_" +
-      (report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC ||
-        report?.APP_REQ_ROOT?.APP_PAN_INQ?.APP_STATUS ||
-        report?.APP_REQ_ROOT?.APP_PAN_INQ.ERROR ||
+      (report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC ||
+        report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS ||
+        report?.APP_RES_ROOT?.APP_PAN_INQ.ERROR ||
         "REQUEST");
 
     await db.dataBase.kraDataLogs.create({
@@ -421,7 +421,7 @@ export class KraProcess {
       },
     });
 
-    if (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS == "01") {
+    if (report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS == "01") {
       await cacheStorage.set(cachedKey, "MODIFY", TTL_28_HOURS);
       console.log("KRA MODIFY SUBMITTED");
     }
