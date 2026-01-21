@@ -92,8 +92,11 @@ function VerifyBankAccount() {
               });
               if (data.length === 1) {
                 addBankAccount();
-                prevLocalStep();
               }
+              prevLocalStep();
+              setTimeout(() => {
+                pushUserKycState();
+              }, 500);
             }}
           />
         ))}
