@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 function CustomerKycView({ id }: { id: number }) {
   const profileApi = new apiGateway.crm.customer.CrmCustomerApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const { data, isLoading } = useQuery({

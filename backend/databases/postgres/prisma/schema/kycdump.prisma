@@ -7,7 +7,7 @@ model KYC_FLOW {
     currentStepName String? @default("Not Started")
     complete        Boolean @default(false)
 
-    /// Timestamps
+    /// Timestamps 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 

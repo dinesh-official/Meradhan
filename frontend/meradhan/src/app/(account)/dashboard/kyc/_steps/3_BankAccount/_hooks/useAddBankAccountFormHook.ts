@@ -87,21 +87,23 @@ export const useAddBankAccountFormHook = () => {
         // set confirm timestamp
         updateData("verifyTimestamp", new Date().toISOString());
 
-        nextLocalStep();
-        pushUserKycState();
-        addAuditLog({
-          type: "BANK_ACCOUNT_VERIFIED",
-          desc: "User bank account verified successfully during KYC process.",
-        });
-        addActivityLog({
-          action: "BANK_ACCOUNT_VERIFIED",
-          details: {
-            step: "Bank Account step",
-            Reason: "User bank account verified successfully",
-            ...payloadd,
-          },
-          entityType: "KYC",
-        });
+        setTimeout(() => {
+          nextLocalStep();
+          pushUserKycState();
+          addAuditLog({
+            type: "BANK_ACCOUNT_VERIFIED",
+            desc: "User bank account verified successfully during KYC process.",
+          });
+          addActivityLog({
+            action: "BANK_ACCOUNT_VERIFIED",
+            details: {
+              step: "Bank Account step",
+              Reason: "User bank account verified successfully",
+              ...payloadd,
+            },
+            entityType: "KYC",
+          });
+        }, 500);
       } else {
         Swal.fire({
           imageUrl: "/images",
