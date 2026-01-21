@@ -81,7 +81,7 @@ function Page4(data: {
             }}
           >
             <Text style={{ marginRight: 8, marginTop: -4 }}>•</Text>
-            <Text style={tw(`text-xs w-full  leading-[5px]`)}>
+            <Text style={tw(`text-xs w-full  leading-[5px] `)}>
               I expressly authorize BondNest Capital India Securities Private
               Limited (operating under the brand name “MeraDhan”) to retrieve
               and/or access my KYC information from the Central KYC Registry
