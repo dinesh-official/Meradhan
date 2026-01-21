@@ -125,7 +125,7 @@ export class KraSDK {
     });
 
     return (await KraXMLBuilder.parseSoapReturn(
-      response.data
+      response.data,
     )) as T_APP_PAN_INQ;
   }
 
@@ -162,7 +162,7 @@ export class KraSDK {
     });
 
     return (await KraXMLBuilder.parseSoapReturn(
-      response.data
+      response.data,
     )) as T_APP_PAN_INQ;
   }
 
@@ -196,7 +196,7 @@ export class KraSDK {
     });
 
     return (await KraXMLBuilder.parseSoapReturn(
-      response.data
+      response.data,
     )) as T_APP_PAN_INQ_DOWNLOAD;
   }
 
@@ -230,7 +230,7 @@ export class KraSDK {
 
     // return (await KraXMLBuilder.parseSoapReturn(response.data)) as any;
     return (await KraXMLParser.parseRegistrationResponse(
-      response.data
+      response.data,
     )) as T_PAN_REGISTER_RESPONSE;
   }
 
@@ -251,7 +251,7 @@ export class KraSDK {
     });
 
     return (await KraXMLParser.parseModifyPdfResponse(
-      response.data
+      response.data,
     )) as T_PAN_MODIFY_RESPONSE;
   }
 }

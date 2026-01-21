@@ -47,7 +47,7 @@ export class ParticipantManager {
           isDefault: e.isPrimary ? "Y" : "N",
           status: "A",
         };
-      })
+      }),
     );
 
     console.log(
@@ -59,7 +59,7 @@ export class ParticipantManager {
           isDefault: e.isPrimary ? "Y" : "N",
           status: "A",
         };
-      })
+      }),
     );
 
     const participant = await this.cbrics.unregisteredParticipant({
@@ -352,7 +352,7 @@ export class ParticipantManager {
 
     // send to cbrics
     const participant = await this.cbrics.getUnregisteredParticipantById(
-      user.nseDataSet.participant.id
+      user.nseDataSet.participant.id,
     );
 
     /// delete old nse Bank Accounts form local
@@ -445,7 +445,7 @@ export class ParticipantManager {
       ifscCode: string;
       bankName: string;
       isPrimary: boolean;
-    }
+    },
   ) {
     // query data
     const user = await db.dataBase.customerProfileDataModel.findUnique({
@@ -481,7 +481,7 @@ export class ParticipantManager {
 
   public async setDefaultBankAccount(
     userId: number,
-    bank: CustomersBankAccountModel
+    bank: CustomersBankAccountModel,
   ) {
     // query data
     const user = await db.dataBase.customerProfileDataModel.findUnique({
@@ -513,7 +513,7 @@ export class ParticipantManager {
 
   public async deleteBankAccount(
     userId: number,
-    bank: CustomersBankAccountModel
+    bank: CustomersBankAccountModel,
   ) {
     // query data
     const user = await db.dataBase.customerProfileDataModel.findUnique({
@@ -551,7 +551,7 @@ export class ParticipantManager {
       dpType: "NSDL" | "CDSL";
       dpId?: string;
       isPrimary: boolean;
-    }
+    },
   ) {
     // query data
     const user = await db.dataBase.customerProfileDataModel.findUnique({
@@ -586,7 +586,7 @@ export class ParticipantManager {
 
   public async setDefaultDpAccount(
     userId: number,
-    dpAccount: CustomersDematAccountModel
+    dpAccount: CustomersDematAccountModel,
   ) {
     // query data
     const user = await db.dataBase.customerProfileDataModel.findUnique({
@@ -621,7 +621,7 @@ export class ParticipantManager {
 
   public async deleteDpAccount(
     userId: number,
-    dpAccount: CustomersDematAccountModel
+    dpAccount: CustomersDematAccountModel,
   ) {
     // query data
     const user = await db.dataBase.customerProfileDataModel.findUnique({
