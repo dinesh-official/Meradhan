@@ -40,7 +40,7 @@ function AddDematAccountForm() {
   // user for update state data with type safety
   const updateData = (
     key: keyof KycDataStorage["step_4"][number],
-    data: string | boolean | unknown
+    data: string | boolean | unknown,
   ) => {
     removeError(key);
     updateDepository(state.step_4.length - 1, {
@@ -62,7 +62,7 @@ function AddDematAccountForm() {
           firstName: state.step_1.pan.firstName,
           middleName: state.step_1.pan.middleName,
           lastName: state.step_1.pan.lastName,
-        })
+        }),
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -207,14 +207,14 @@ function AddDematAccountForm() {
             >
               <Input
                 value={data?.panNumber[0]}
-                onChange={(e) =>
-                  updateData("panNumber", [
-                    e.target.value,
-                    ...data.panNumber?.slice(1),
-                  ])
-                }
-              // disabled
-              // adminMode
+                // onChange={(e) =>
+                //   updateData("panNumber", [
+                //     e.target.value,
+                //     ...data.panNumber?.slice(1),
+                //   ])
+                // }
+                disabled
+                adminMode
               />
             </LabelInput>
 

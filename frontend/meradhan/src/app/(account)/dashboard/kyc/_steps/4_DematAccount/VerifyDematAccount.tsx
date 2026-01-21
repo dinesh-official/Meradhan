@@ -96,8 +96,11 @@ function VerifyDematAccount() {
                 });
                 if (accounts.length === 1) {
                   addDepository();
-                  prevLocalStep();
                 }
+                prevLocalStep();
+                setTimeout(() => {
+                  pushUserKycState();
+                }, 500);
               }}
             />
           );

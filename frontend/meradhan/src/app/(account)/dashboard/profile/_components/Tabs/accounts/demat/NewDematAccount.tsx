@@ -29,13 +29,13 @@ function NewDematAccount({
   updateData,
   myPan,
   showCancel,
-  onCancel
+  onCancel,
 }: {
   data: KycDataStorage["step_4"][number];
   error?: Partial<Record<keyof KycDataStorage["step_4"][number], string[]>>;
   updateData: (
     key: keyof KycDataStorage["step_4"][number],
-    data: string | boolean | unknown
+    data: string | boolean | unknown,
   ) => void;
   handelSubmit: () => void;
   isPending: boolean;
@@ -54,7 +54,7 @@ function NewDematAccount({
           <div
             className={cn(
               "gap-3 md:gap-5 grid lg:grid-cols-4",
-              data.depositoryName === "CDSL" && "lg:grid-cols-3"
+              data.depositoryName === "CDSL" && "lg:grid-cols-3",
             )}
           >
             <LabelInput
@@ -164,14 +164,15 @@ function NewDematAccount({
             >
               <Input
                 value={data?.panNumber[0]}
+                disabled
                 onChange={(e) =>
                   updateData("panNumber", [
                     e.target.value,
                     ...data.panNumber?.slice(1),
                   ])
                 }
-              // disabled
-              // adminMode
+                // disabled
+                // adminMode
               />
             </LabelInput>
 
@@ -262,7 +263,7 @@ function ManageDematPanInputs({
   data: KycDataStorage["step_4"][number];
   updateData: (
     key: keyof KycDataStorage["step_4"][number],
-    data: string | boolean | unknown
+    data: string | boolean | unknown,
   ) => void;
 }) {
   const pansData = data.panNumber;
@@ -298,7 +299,7 @@ function ManageDematPanInputs({
                   ...data.panNumber
                     .slice(1)
                     .map((pan, idx) =>
-                      idx === subIndex ? e.target.value.toUpperCase() : pan
+                      idx === subIndex ? e.target.value.toUpperCase() : pan,
                     ),
                 ])
               }

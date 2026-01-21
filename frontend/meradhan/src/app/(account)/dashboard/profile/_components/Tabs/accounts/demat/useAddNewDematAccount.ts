@@ -30,10 +30,10 @@ export const useAddNewDematAccountFormHook = ({
       Partial<Record<keyof KycDataStorage["step_4"][number], string[]>>
     >();
   const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
-    apiClientCaller
+    apiClientCaller,
   );
   const apiModel = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const [data, setData] = useState<KycDataStorage["step_4"][number]>({
@@ -94,8 +94,11 @@ export const useAddNewDematAccountFormHook = ({
         useAddNewDematAccountMutation.mutate();
       } else {
         toast.error(
-          statusCodes?.[data.responseData.status as keyof typeof statusCodes] ||
-          "Something went wrong"
+          data.responseData.message ||
+            statusCodes?.[
+              data.responseData.status as keyof typeof statusCodes
+            ] ||
+            "Something went wrong",
         );
       }
     },
@@ -149,7 +152,7 @@ export const useAddNewDematAccountFormHook = ({
     data,
     updateData: (
       key: keyof KycDataStorage["step_4"][number],
-      value: string | boolean | unknown
+      value: string | boolean | unknown,
     ) => {
       setData((prev) => ({
         ...prev,
