@@ -26,13 +26,13 @@ import { removeCountryCode } from "@utils/filters/convert";
 const cbricsManager = new ParticipantManager();
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const TTL_28_HOURS = 72 * 60 * 60; // seconds = 100,800
 
 export class KraWorkerService {
   private kraProcess = new KraProcess();
 
   async processKra(data: KraWorkerJobData) {
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
-    const TTL_28_HOURS = 72 * 60 * 60; // seconds = 100,800
 
     const lastTask = await cacheStorage.get(cachedKey);
     const { customerId, kycDataStoreId } = data;
@@ -76,7 +76,6 @@ export class KraWorkerService {
           customer,
         });
         await addKraWorkerJob(data);
-        await cacheStorage.set(cachedKey, "REGISTER", TTL_28_HOURS); // 28 Hr
         return;
       }
 
@@ -143,7 +142,7 @@ export class KraWorkerService {
             customer,
           });
           await addKraWorkerJob(data);
-          await cacheStorage.set(cachedKey, "MODIFY", TTL_28_HOURS);
+
           return;
         }
       }
@@ -184,7 +183,7 @@ export class KraProcess {
   async enquiry({ customer, data, kycdataId }: processPayload) {
     const cachedKey = `KRA:${customer.id}-${kycdataId}`;
     const lastTask = await cacheStorage.get(cachedKey);
-
+    console.log("KRA ENQUIRY", lastTask);
     const reqTime = new Date().toISOString();
     const payload = {
       pan: data.step_1.pan.panCardNo,
@@ -193,7 +192,7 @@ export class KraProcess {
       reqNo: this.generateReqNo(),
     };
 
-    const enquiry = await this.kraInstance.panInquiry(payload);
+    const enquiry = await this.kraInstance.panInquiryTwo(payload);
     const kraStatus =
       (lastTask || "INIT") +
       "_" +
@@ -268,14 +267,14 @@ export class KraProcess {
         resTime,
       },
     });
-
+    console.log("KRA DOWNLOADED");
     return report;
   }
 
   async register({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
     const payload = this.buildRegisterPayload(data, customer);
-
+    const cachedKey = `KRA:${customer.id}-${kycdataId}`;
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
     const kraStatus =
       "REGISTER_" + report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS;
@@ -300,12 +299,20 @@ export class KraProcess {
       },
     });
 
+    if (report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS == "7") {
+      await cacheStorage.set(cachedKey, "REGISTER", TTL_28_HOURS); // 28 Hr
+      console.log("KRA REGISTER SUBMITTED");
+    }
+
     return report;
   }
 
   async modify({ customer, data, kycdataId }: processPayload) {
     const reqTime = new Date().toISOString();
+    const cachedKey = `KRA:${customer.id}-${kycdataId}`;
+
     const kraCachedKey = `KRA_DOWNLOAd:${customer.id}-${kycdataId}`;
+
     const downloadedReport: T_APP_PAN_INQ_DOWNLOAD | null =
       await cacheStorage.get(kraCachedKey);
     const payload = this.buildRegisterPayload(data, customer, true);
@@ -418,6 +425,12 @@ export class KraProcess {
         kraStatus: kraStatus,
       },
     });
+
+    if (report.APP_REQ_ROOT.APP_PAN_INQ.APP_STATUS == "01") {
+      await cacheStorage.set(cachedKey, "MODIFY", TTL_28_HOURS);
+      console.log("KRA MODIFY SUBMITTED");
+    }
+
     return report;
   }
 
