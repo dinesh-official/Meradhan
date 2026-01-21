@@ -96,7 +96,7 @@ from/to such stock broker`}
           />
           <CheckBoxRow
             label="10 Lac to 25 Lac"
-            checked={annualGrossIncome == "10-20L"}
+            checked={annualGrossIncome == "10-25L"}
           />
           <CheckBoxRow
             label="Above 25 Lac"
