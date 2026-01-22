@@ -4,13 +4,13 @@ import {
   BarChart,
   Briefcase,
   ClipboardList,
-  FileText,
   HelpCircle,
   PieChart,
   Shield,
   ShoppingCart,
   Trash2,
-  Users,
+  User,
+  Users
 } from "lucide-react";
 import React from "react";
 import { FaMoneyBill } from "react-icons/fa";
@@ -64,7 +64,7 @@ export const NAV_ITEMS: NavItem[] = [
 
   {
     label: "Customers",
-    icon: FileText,
+    icon: User,
     allowOnly: ["view:customer"],
     path: "/dashboard/customers",
     // children: [

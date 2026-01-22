@@ -25,7 +25,7 @@ export const addCompleteCustomerKycProfile = async (id: number) => {
     { id },
     {
       attempts: 1,
-      delay: 0.2 * 60 * 60 * 1000, // initial delay, 1 hr
+      delay: 2 * 60 * 1000, // 5 minutes
     },
   );
 };

@@ -33,12 +33,9 @@ export const customerFormDataSchema = z.object({
     .regex(/^\+?\d{7,15}$/, "Invalid mobile number format"),
 
   // null or "+<country><number>"
-  whatsAppNo: z.union([
-    z.literal(null),
-    z.string().regex(/^\+\d{7,15}$/, {
-      message: "WhatsApp number must include country code (e.g., +1234567890)",
-    }),
-  ]),
+  whatsAppNo: z.string({
+    message: "WhatsApp number must be a valid number",
+  }),
 
   // use the same enum source everywhere
   userType: z.enum(UserAccountType),

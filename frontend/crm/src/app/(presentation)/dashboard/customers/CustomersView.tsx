@@ -20,7 +20,7 @@ function CustomersView() {
       (filterApiManager.fetchCustomerQuery.data?.responseData.data.length ||
         0) > 0 &&
       filterApiManager.fetchCustomerQuery.data?.responseData.meta.totalPages !=
-        1 &&
+      1 &&
       !filterApiManager.fetchCustomerQuery.isPending
     );
   };
@@ -30,7 +30,7 @@ function CustomersView() {
         title="Customer Management"
         description="Manage customer profiles and KYC status"
         actions={
-          <AllowOnlyView permissions={["create:customer"]}>
+          <AllowOnlyView permissions={["create:customer"]}  >
             <Dialog>
               <DialogTrigger>
                 <Button>

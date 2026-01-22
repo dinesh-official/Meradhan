@@ -66,25 +66,8 @@ function IdentityValidationForm() {
               required
               error={error?.dateOfBirth?.[0]}
             >
-              {/* <DatePickerWithEdit/> */}
-              {/* // fix date formatting issue */}
-              {/* <MuiDatePicker
-                value={data.dateOfBirth}
-                onChange={(date) => {
-                  console.log(date.split("T")[0]);
-                  setStep1PanData("dateOfBirth", date);
-                }}
-              /> */}
-              <DatePicker
-                // value={
-                //   data.dateOfBirth
-                //     ? dateTimeUtils.formatDateTime(
-                //       data.dateOfBirth,
-                //       "DD/MM/YYYY"
-                //     )
-                //     : ""
-                // }
 
+              <DatePicker
                 containerStyles={{
                   border: "1px solid #e6e6e6",
                   padding: "6px",

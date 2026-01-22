@@ -2,7 +2,6 @@
 import { Label } from "@/components/ui/label";
 import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
 import { InputField } from "@/global/elements/inputs/InputField";
-import { PhoneField } from "@/global/elements/inputs/PhoneField";
 import { RadioYesNoField } from "@/global/elements/inputs/RadioYesNoField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
 import { UserAccountType } from "../../../../../../../../../../packages/schema/lib/customers/customers.schema";
@@ -58,9 +57,8 @@ function CustomerManagementForm({
         placeholder="Auto-generated from name fields"
         disabled
         required
-        value={`${manager.state.firstName || ""} ${
-          manager.state.middleName || ""
-        } ${manager.state.lastName || ""}`}
+        value={`${manager.state.firstName || ""} ${manager.state.middleName || ""
+          } ${manager.state.lastName || ""}`}
       />
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -75,9 +73,8 @@ function CustomerManagementForm({
           error={manager?.errors?.emailId?.[0]}
         />
 
-        <PhoneField
+        <InputField
           label="Mobile Number"
-          defaultCountry="IN"
           placeholder="mobile number"
           required
           value={manager.state.phoneNo}
@@ -86,9 +83,9 @@ function CustomerManagementForm({
         />
       </div>
 
-      <PhoneField
+      <InputField
         label="WhatsApp Phone Number"
-        defaultCountry="IN"
+
         placeholder="WhatsApp number"
         required
         value={manager.state.whatsAppNo?.toString()}
@@ -142,7 +139,7 @@ function CustomerManagementForm({
           onChangeAction={(e) =>
             manager.setCustomerData("termsAccepted", e == "yes")
           }
-          // error = {manager?.errors?.termsAccepted?.[0]}
+        // error = {manager?.errors?.termsAccepted?.[0]}
         />
         <RadioYesNoField
           id="wa"

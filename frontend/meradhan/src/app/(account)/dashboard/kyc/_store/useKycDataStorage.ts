@@ -22,6 +22,7 @@ export interface PanData<T = unknown> extends z.infer<
   schema["kycPanInfoDataSchema"]
 > {
   response?: T;
+  panRetryCount?: number;
 }
 
 export interface FileData<T> {
@@ -238,6 +239,8 @@ export const useKycDataStorage = create<{
   ) => void;
   incrementNameRetryCount: () => void;
   resetNameRetryCount: () => void;
+  incrementPanRetryCount: () => void;
+  resetPanRetryCount: () => void;
   setAadharData: (data: string) => void;
   setGenderData: (data: string) => void;
   setStep1SelfieFaceData: (Key: keyof Step1Data["face"], data: any) => void;
@@ -376,6 +379,34 @@ export const useKycDataStorage = create<{
           nameMismatchDeclaration: {
             ...prev.state.step_1.nameMismatchDeclaration,
             retryCount: 0,
+          },
+        },
+      },
+    })),
+
+  incrementPanRetryCount: () =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          pan: {
+            ...prev.state.step_1.pan,
+            panRetryCount: (prev.state.step_1.pan.panRetryCount || 0) + 1,
+          },
+        },
+      },
+    })),
+
+  resetPanRetryCount: () =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          pan: {
+            ...prev.state.step_1.pan,
+            panRetryCount: 0,
           },
         },
       },
@@ -538,9 +569,9 @@ export const useKycDataStorage = create<{
         step_4: prev.state.step_4.map((item, i) =>
           i === index
             ? {
-                ...item,
-                panNumber: [...item.panNumber, ""], // Add new empty PAN field
-              }
+              ...item,
+              panNumber: [...item.panNumber, ""], // Add new empty PAN field
+            }
             : item,
         ),
       },

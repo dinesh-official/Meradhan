@@ -30,10 +30,12 @@ export class BondService {
       typeof options?.page === "string"
         ? parseInt(options.page, 10) || 1
         : options?.page || 1;
-    const limitNum =
-      typeof options?.limit === "string"
-        ? parseInt(options.limit, 10) || 9
-        : options?.limit || 9;
+
+
+    const limitNum = typeof options?.limit === "string"
+      ? parseInt(options.limit, 10) || 9
+      : options?.limit || 9;
+
     const paginationOptions = BondQueryBuilder.getPaginationOptions(
       pageNum,
       limitNum
@@ -72,10 +74,15 @@ export class BondService {
       extendedQuery.categories = { has: options?.category || "" };
     }
 
+    console.log(orderBy);
+
+
     const [data, total] = await Promise.all([
       db.dataBase.bonds.findMany({
         where: whereQuery,
-        orderBy,
+        orderBy: options?.all == "YES" ? {
+          allowForPurchase: "desc",
+        } : orderBy,
         ...paginationOptions,
       }),
       db.dataBase.bonds.count({
@@ -285,6 +292,13 @@ export class BondService {
       },
     });
 
+    return data;
+  }
+
+  async getOngoingDeals() {
+    const data = await db.dataBase.bonds.findMany({
+      where: { isOngoingDeal: true },
+    });
     return data;
   }
 }

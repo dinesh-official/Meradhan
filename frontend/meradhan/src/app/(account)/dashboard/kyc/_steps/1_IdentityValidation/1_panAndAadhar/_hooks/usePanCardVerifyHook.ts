@@ -1,21 +1,20 @@
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { convertUTCtoIST } from "@/global/utils/datetime.utils";
+import { makeFullname } from "@/global/utils/formate";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import { ZodError } from "zod";
-import { useDigioSDK } from "../../../../_providers/useDigioSDK";
+import { useKycDataProvider } from "../../../../_context/KycDataProvider";
 import {
   KycDataStorage,
   useKycDataStorage,
 } from "../../../../_store/useKycDataStorage";
-import Swal from "sweetalert2";
-import { useKycDataProvider } from "../../../../_context/KycDataProvider";
-import { addActivityLog } from "@/analytics/UserTrackingProvider";
-import { formatAmount, makeFullname } from "@/global/utils/formate";
-import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 export const usePanCardVerifyHook = () => {
   const [error, setError] =
     useState<
@@ -24,10 +23,9 @@ export const usePanCardVerifyHook = () => {
   const panKycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
   );
-  const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
+  const { state, nextLocalStep, setStep1PanData, incrementPanRetryCount } = useKycDataStorage();
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
 
-  const digio = useDigioSDK();
 
   const verifyPanCardInfoMutation = useMutation({
     mutationKey: ["verifyPanCardInfo"],
@@ -90,7 +88,9 @@ export const usePanCardVerifyHook = () => {
     mutationFn: async (data: KycDataStorage["step_1"]["pan"]) =>
       await panKycApi.requestPanVerification(data),
     onSuccess: (data) => {
+
       if (data.responseData?.status === "valid") {
+        incrementPanRetryCount();
         addActivityLog({
           action: "START_DIGIO_KYC_PROCESS",
           details: {
@@ -108,7 +108,6 @@ export const usePanCardVerifyHook = () => {
           entityType: "KYC",
         });
 
-        toast.success("PAN verification  successfully.");
         setStep1PanData("response", {
           type: "digilocker",
           status: "success",
@@ -181,11 +180,15 @@ export const usePanCardVerifyHook = () => {
     onError: (error) => {
       if (error instanceof ApiError) {
         const errorMessage = error.response?.data?.message || error.message;
-        toast.error(errorMessage);
+        Swal.fire({
+          imageUrl: "/images/icons/sad-emoji.svg",
+          title: "Unable to Verify PAN",
+          text: errorMessage || "We couldn’t verify the PAN details. Please check the PAN number and try again.",
+        });
 
         addAuditLog({
           type: "PAN_VERIFICATION_FAILED",
-          desc: `PAN verification failed with error: ${errorMessage}`,
+          desc: `Unable to Verify PAN with error: ${errorMessage}`,
         });
       } else {
         console.log(error);

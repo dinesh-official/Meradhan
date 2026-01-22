@@ -12,11 +12,13 @@ kycRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.panInfoVerifyRequest(req, res)
 );
+
 kycRoutes.post(
   "/api/customer/kyc/pan/request",
   allowAccessMiddleware("USER"),
   (req, res) => controller.createPanVerifyRequest(req, res)
 );
+
 kycRoutes.get(
   "/api/customer/kyc/pan/response/:kid",
   allowAccessMiddleware("USER"),
@@ -28,24 +30,25 @@ kycRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.createAadhaarVerifyRequest(req, res)
 );
-// selfie
+// selfie verify request
 kycRoutes.post(
   "/api/customer/kyc/selfie/request",
   allowAccessMiddleware("USER"),
   (req, res) => controller.createSelfieVerifyRequest(req, res)
 );
+// selfie verify response
 kycRoutes.get(
   "/api/customer/kyc/selfie/response/:kid",
   allowAccessMiddleware("USER"),
   (req, res) => controller.verifySelfieResponse(req, res)
 );
-
-// sign
+// sign verify request
 kycRoutes.post(
   "/api/customer/kyc/sign/request",
   allowAccessMiddleware("USER"),
   (req, res) => controller.createSignVerifyRequest(req, res)
 );
+// sign verify response
 kycRoutes.get(
   "/api/customer/kyc/sign/response/:kid",
   allowAccessMiddleware("USER"),

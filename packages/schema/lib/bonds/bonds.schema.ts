@@ -33,6 +33,7 @@ export const bondsFilterSchema = z
     coupon: z.array(z.enum(couponPercentEnums)).optional(),
     taxation: z.array(z.enum(taxationEnums)).optional(),
     interest: z.array(z.enum(INTEREST_MODE_VALUES)).optional(),
+    allowForPurchase: z.boolean().optional(),
   })
   .optional();
 

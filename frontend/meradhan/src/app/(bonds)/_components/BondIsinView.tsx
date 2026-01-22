@@ -148,7 +148,7 @@ export default function BondIsinView({
             <SortInfoBox title="Mode of issuance">Coming Soon</SortInfoBox>
             <SortInfoBox title="Security">{isSecured()}</SortInfoBox>
             <SortInfoBox title="Issue Size">
-              <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize)}
+              <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize || 0)}
             </SortInfoBox>
             <SortInfoBox title="Next Interest Payment Date">
               Coming Soon

@@ -368,7 +368,7 @@ function Page1(data: Page1Props) {
             <View style={tw("w-[28%]")}>
               <CheckBoxRow
                 label="Self Employed"
-                checked={data.occupationType === "Self Employed"}
+                checked={data.occupationType === "Self Employed Professional" || data.occupationType === "Self Employed"}
               />
             </View>
 
