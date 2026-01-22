@@ -130,6 +130,10 @@ export const dateTimeUtils = {
     return result;
   },
 
+  isPast(date: Date) {
+    return date < new Date();
+  },
+
   addYears(date: Date, years: number) {
     return addYears(date, years);
   },

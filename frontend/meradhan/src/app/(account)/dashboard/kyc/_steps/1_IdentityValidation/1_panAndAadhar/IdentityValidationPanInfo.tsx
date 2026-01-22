@@ -9,50 +9,52 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { dataMatcherUtils } from "@/global/utils/matcher";
 import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
+import { IoReload } from "react-icons/io5";
+import { useEffect } from "react";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
 
 function IdentityValidationPanInfo() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
-  const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
+  const { state, nextLocalStep, setStep1PanData, prevLocalStep, resetPanRetryCount } = useKycDataStorage();
 
   const data = state.step_1.pan;
-  const genders = {
-    M: "Male",
-    F: "Female",
-  };
 
-  const isPanMatched = data.response?.details.panInfo.name_as_per_pan_match;
+  const isNameMatched = data.response?.details?.panInfo?.name_as_per_pan_match;
+  const isDobMatched = data.response?.details?.panInfo?.date_of_birth_match;
 
-  const isNameMatched = dataMatcherUtils.areNamesMatched(
-    dataMatcherUtils.splitFullName(data.response?.details.pan.name),
-    {
-      firstName: data.firstName,
-      middleName: data.middleName,
-      lastName: data.lastName,
-    },
-  );
+  const isPanMatched = isNameMatched && isDobMatched;
+  const isAllowToContinue = isPanMatched;
 
-  const isDobMatched = dataMatcherUtils.areDatesMatched(
-    data.response?.details.pan.dob
-      .replaceAll("/", "-")
-      .split("-")
-      .reverse()
-      .join("-"),
-    data.dateOfBirth,
-  );
+  useEffect(() => {
+    if (data?.panRetryCount && data?.panRetryCount >= 3) {
 
-  const isAllowToContinue = isPanMatched && isNameMatched && isDobMatched;
+      const nextAllowedExpiresAt = localStorage.getItem("panRetryNextAllowedExpiresAt");
+
+      if (nextAllowedExpiresAt) {
+        // check if the next allowed expires at is in the past
+        if (dateTimeUtils.isPast(new Date(nextAllowedExpiresAt))) {
+          resetPanRetryCount();
+          pushUserKycState();
+          localStorage.removeItem("panRetryNextAllowedExpiresAt");
+        }
+      } else {
+        // 1 hour from now
+        const nextAllowed = new Date(Date.now() + 1 * 60 * 60 * 1000);
+        localStorage.setItem("panRetryNextAllowedExpiresAt", nextAllowed.toISOString());
+      }
+    }
+  }, []);
 
   return (
     <Card accountMode>
       {/* {JSON.stringify(data)} */}
       <CardHeader accountMode>
         <CardTitle className="font-normal">
-          Confirm PAN Details {state.stepIndex}
+          Confirm PAN Details
         </CardTitle>
       </CardHeader>
       <CardContent accountMode>
@@ -60,17 +62,22 @@ function IdentityValidationPanInfo() {
           <DataInfoLabel
             title="PAN Number"
             status={isPanMatched ? "SUCCESS" : "ERROR"}
-            statusLabel={isPanMatched ? "Verified" : "Invalid"}
+            statusLabel={isPanMatched ? "Verified" : "Not Verified"}
             showStatus
           >
-            <p className="font-medium">
-              {data.response?.details.pan.id_number}
+            <p className="font-medium flex items-center gap-2 flex-row">
+              {data.response?.details.pan.id_number}{(data?.panRetryCount || 0) < 3 && <span className="text-xs text-primary flex items-center gap-2 flex-row cursor-pointer" onClick={() => {
+                prevLocalStep();
+                setTimeout(() => {
+                  pushUserKycState();
+                }, 1000);
+              }} >Retry <IoReload className="w-3 h-3" size={10} /></span>}
             </p>
           </DataInfoLabel>
           <DataInfoLabel
             title="Name as per PAN"
             status={isNameMatched ? "SUCCESS" : "ERROR"}
-            statusLabel={isNameMatched ? "Matched" : "Not Matched"}
+            statusLabel={isNameMatched ? "Matched" : "Not Matched with PAN"}
             showStatus
           >
             <p className="font-medium">{data.response?.details.pan.name}</p>
@@ -78,14 +85,14 @@ function IdentityValidationPanInfo() {
           <DataInfoLabel
             title="Date of Birth"
             status={
-              data.response?.details.panInfo.date_of_birth_match
+              isDobMatched
                 ? "SUCCESS"
                 : "ERROR"
             }
             statusLabel={
-              data.response?.details.panInfo.date_of_birth_match
+              isDobMatched
                 ? "Matched"
-                : "Not Matched"
+                : "Not Matched with PAN"
             }
             showStatus
           >
@@ -115,9 +122,16 @@ function IdentityValidationPanInfo() {
             </div>
           </div> */}
         </div>
+
+        {(((data?.panRetryCount || 0) >= 3) && !isAllowToContinue) && <div className="flex flex-col gap-2 p-4 bg-yellow-50 border mt-5 border-yellow-200 rounded-lg mb-4">
+          <p className="text-yellow-900 text-sm font-medium">
+            Maximum Retry Limit Reached. Please contact support.
+          </p>
+        </div>}
+
       </CardContent>
       <CardFooter accountMode className="sm:flex-row flex-col gap-5 mt-5">
-        <Button
+        {isAllowToContinue && <Button
           className="flex items-center gap-1 w-full sm:w-auto"
           disabled={!isAllowToContinue}
           onClick={() => {
@@ -147,9 +161,9 @@ function IdentityValidationPanInfo() {
           <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>
-        </Button>
+        </Button>}
         <Button
-          variant={`link`}
+          variant={isAllowToContinue ? `link` : `outline`}
           onClick={async () => {
             const result = await Swal.fire({
               text: "Are you sure you want to save and exit the KYC process?",

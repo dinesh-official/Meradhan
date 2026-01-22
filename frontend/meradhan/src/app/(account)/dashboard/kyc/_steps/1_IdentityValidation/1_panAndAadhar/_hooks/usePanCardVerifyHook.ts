@@ -24,7 +24,7 @@ export const usePanCardVerifyHook = () => {
   const panKycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
   );
-  const { state, nextLocalStep, setStep1PanData } = useKycDataStorage();
+  const { state, nextLocalStep, setStep1PanData, incrementPanRetryCount } = useKycDataStorage();
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
 
   const digio = useDigioSDK();
@@ -90,7 +90,9 @@ export const usePanCardVerifyHook = () => {
     mutationFn: async (data: KycDataStorage["step_1"]["pan"]) =>
       await panKycApi.requestPanVerification(data),
     onSuccess: (data) => {
+
       if (data.responseData?.status === "valid") {
+        incrementPanRetryCount();
         addActivityLog({
           action: "START_DIGIO_KYC_PROCESS",
           details: {

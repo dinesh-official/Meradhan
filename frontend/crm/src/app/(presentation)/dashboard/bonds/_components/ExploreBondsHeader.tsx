@@ -88,16 +88,29 @@ function ExploreBondsHeader({
               }}
               value={manager.filters?.search || ""}
             />
-            <button
-              className="focus:z-10 absolute inset-y-0 flex justify-center items-center disabled:opacity-50 focus-visible:border-ring rounded-e-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-9 h-full text-muted-foreground/80 hover:text-foreground transition-[color,box-shadow] disabled:cursor-not-allowed disabled:pointer-events-none end-0"
-              aria-label="Subscribe"
-              disabled={!manager.filters?.search}
-              onClick={() => {
-                setDobunce((prev) => prev + 1);
-              }}
-            >
-              <Search className="mr-3" />
-            </button>
+            {manager.filters?.search ? (
+              <button
+                className="focus:z-10 absolute inset-y-0 flex justify-center items-center focus-visible:border-ring rounded-e-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-9 h-full text-muted-foreground/80 hover:text-foreground transition-[color,box-shadow] end-0"
+                aria-label="Clear search"
+                onClick={() => {
+                  manager.setSearch("");
+                  setDobunce((prev) => prev + 1);
+                }}
+              >
+                <X className="mr-3" size={16} />
+              </button>
+            ) : (
+              <button
+                className="focus:z-10 absolute inset-y-0 flex justify-center items-center disabled:opacity-50 focus-visible:border-ring rounded-e-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-9 h-full text-muted-foreground/80 hover:text-foreground transition-[color,box-shadow] disabled:cursor-not-allowed disabled:pointer-events-none end-0"
+                aria-label="Search"
+                disabled={!manager.filters?.search}
+                onClick={() => {
+                  setDobunce((prev) => prev + 1);
+                }}
+              >
+                <Search className="mr-3" />
+              </button>
+            )}
           </div>
           <div className="gap-3 grid grid-cols-2 lg:grid-cols-6">
             <MultiSelect
