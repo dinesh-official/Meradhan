@@ -125,7 +125,7 @@ function IdentityValidationPanInfo() {
 
         {(((data?.panRetryCount || 0) >= 3) && !isAllowToContinue) && <div className="flex flex-col gap-2 p-4 bg-yellow-50 border mt-5 border-yellow-200 rounded-lg mb-4">
           <p className="text-yellow-900 text-sm font-medium">
-            Maximum Retry Limit Reached. Please contact support.
+            You’ve reached the maximum number of PAN verification attempts. Please try again after 1 hour or contact us if you need assistance
           </p>
         </div>}
 
