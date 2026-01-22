@@ -4,14 +4,13 @@ import {
   BarChart,
   Briefcase,
   ClipboardList,
-  FileText,
   HelpCircle,
   PieChart,
   Shield,
   ShoppingCart,
   Trash2,
   User,
-  Users,
+  Users
 } from "lucide-react";
 import React from "react";
 import { FaMoneyBill } from "react-icons/fa";

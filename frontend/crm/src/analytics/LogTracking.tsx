@@ -7,17 +7,17 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 
-const clearAllCookies = () => {
-  document.cookie.split(";").forEach((cookie) => {
-    const name = cookie.split("=")[0]?.trim();
-    if (!name) return;
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-  });
-};
+// const clearAllCookies = () => {
+//   document.cookie.split(";").forEach((cookie) => {
+//     const name = cookie.split("=")[0]?.trim();
+//     if (!name) return;
+//     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+//   });
+// };
 
-const PAGE_TRACKING_SESSION_KEY = "md_page_tracking_session";
-const closeSessionEndpoint = (userId: string | number) =>
-  `/api/server/auditlogs/crm/close-session/${userId}`;
+// const PAGE_TRACKING_SESSION_KEY = "md_page_tracking_session";
+// const closeSessionEndpoint = (userId: string | number) =>
+//   `/api/server/auditlogs/crm/close-session/${userId}`;
 
 type PageView = Partial<
   z.infer<typeof appSchema.auditlogsSchema.PageViewSchema>

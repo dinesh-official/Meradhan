@@ -1,11 +1,6 @@
 import LabelView from "@/global/elements/wrapper/LabelView";
-import { formatNumberTS } from "@/global/utils/formate";
 import { cn } from "@/lib/utils";
 import { CreateNegotiationResponse } from "@root/apiGateway";
-import {
-  DealTypeBadge,
-  TradeTypeBadge,
-} from "../../../_components/bages/NseRfqBadges";
 
 const DealSplitInformation = ({
   data,

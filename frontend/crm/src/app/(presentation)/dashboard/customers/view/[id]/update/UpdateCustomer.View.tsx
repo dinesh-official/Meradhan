@@ -34,7 +34,7 @@ const UpdateCustomerView = ({ id }: { id: number }) => {
         status: cs.utility.accountStatus,
         termsAccepted: cs.utility.termsAccepted,
         userType: cs.userType,
-        whatsAppNo: cs.whatsAppNo,
+        whatsAppNo: cs.whatsAppNo || "",
         whatsAppNotificationAllow: cs.utility.whatsAppNotificationAllow,
         middleName: cs.middleName,
         relationshipManagerId: cs.utility.relationshipManager?.id,
