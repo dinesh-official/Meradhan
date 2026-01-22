@@ -9,7 +9,7 @@ import type {
 } from "./bonds.response";
 
 export class BondsApi {
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   public async getListedBonds(
     payload: {
@@ -78,6 +78,14 @@ export class BondsApi {
     const response = await this.apiClient.put<BondDetailResponse>(
       `/bonds/${isin}`,
       payload,
+      config
+    );
+    return response.data;
+  }
+
+  public async getOngoingDeals(config?: AxiosRequestConfig) {
+    const response = await this.apiClient.get<LatestBondsResponse>(
+      `/bonds/ongoing-deals`,
       config
     );
     return response.data;

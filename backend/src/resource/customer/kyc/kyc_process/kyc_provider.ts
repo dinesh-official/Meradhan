@@ -18,7 +18,7 @@ import * as path from "path";
 
 // helper class for digio kyc file operations
 class DigioKycFileHelper {
-  constructor(private digioSdk: DigioSDK) {}
+  constructor(private digioSdk: DigioSDK) { }
 
   // get pan aadhar document files from digio rid
   async getPanAadharDocumentFiles(bytes: string, userName?: string) {
@@ -73,6 +73,8 @@ class DigioKycFileHelper {
         }
         return filePath;
       });
+
+    console.log(files);
 
     const pathData = {
       // pan: files?.[0],
@@ -341,11 +343,11 @@ export class KycProvider extends DigioKycFileHelper {
         throw new AppError(
           (error as AxiosError<{ error: string; ErrorDescription?: string }>)
             ?.response?.data?.ErrorDescription ||
-            (error as AxiosError<{ error: string; message?: string }>)?.response
-              ?.data?.error ||
-            (error as AxiosError<{ error: string; message?: string }>)?.response
-              ?.data?.message ||
-            error.toString(),
+          (error as AxiosError<{ error: string; message?: string }>)?.response
+            ?.data?.error ||
+          (error as AxiosError<{ error: string; message?: string }>)?.response
+            ?.data?.message ||
+          error.toString(),
           { code: "DEMAT_VERIFICATION_ERROR", statusCode: 400 },
         );
       }

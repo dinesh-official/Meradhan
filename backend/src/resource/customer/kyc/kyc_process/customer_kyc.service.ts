@@ -346,7 +346,7 @@ export class CustomerKycKycService {
           currentStepName: store?.currentStepName,
         },
       },
-      0.5 * 60 * 60 * 1000,
+      5 * 60 * 1000,
     );
     return pdfUrl;
   }

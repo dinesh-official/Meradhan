@@ -173,4 +173,12 @@ export class BondController {
       });
     }
   }
+
+  async getOngoingDeals(req: Request, res: Response) {
+    const data = await this.bondService.getOngoingDeals();
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
 }

@@ -10,6 +10,7 @@ import {
   Shield,
   ShoppingCart,
   Trash2,
+  User,
   Users,
 } from "lucide-react";
 import React from "react";
@@ -64,7 +65,7 @@ export const NAV_ITEMS: NavItem[] = [
 
   {
     label: "Customers",
-    icon: FileText,
+    icon: User,
     allowOnly: ["view:customer"],
     path: "/dashboard/customers",
     // children: [

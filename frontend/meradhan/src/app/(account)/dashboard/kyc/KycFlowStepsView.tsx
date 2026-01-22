@@ -9,6 +9,7 @@ import FinishKyc from "./_steps/End_Finish/FinishKyc";
 import { useKycStepStore } from "./_store/useKycStepStore";
 import StarterKycStep from "./_steps/1_IdentityValidation/StarterKyc";
 import { useEffect } from "react";
+import { useKycDataStorage } from "./_store/useKycDataStorage";
 
 const stepList = [
   <StarterKycStep key={0} />,
@@ -22,11 +23,12 @@ const stepList = [
 
 function KycFlowStepsView() {
   const { step, isComplete } = useKycStepStore();
+  const { state } = useKycDataStorage();
 
   useEffect(() => {
     // make scroll to top
     window?.scrollTo({ top: 0, behavior: "smooth" });
-  }, [step]);
+  }, [step, state.stepIndex]);
 
   if (isComplete) {
     return <FinishKyc key={6} />;

@@ -36,9 +36,11 @@ function BondsView({
         }}
       />
       <div className="flex flex-col justify-center items-center mb-5 py-14 lg:py-0 w-full">
-        <div className="gap-5 grid grid-cols-3 container">
+        <div className="gap-5 grid grid-cols-1 container">
           {bondsListData?.data.map((bond) => (
-            <BondListCard key={bond.isin} gridMode={true} data={bond} />
+            <BondListCard key={bond.isin} gridMode={false
+
+            } data={bond} />
           ))}
         </div>
       </div>
