@@ -25,6 +25,7 @@ function BondsTable({ data, pageSize = 100, isLoading }: BondsTableProps) {
       initialPageSize={pageSize}
       data={data}
       isLoading={isLoading}
+
       fields={[
         {
           key: "isin",
@@ -33,7 +34,7 @@ function BondsTable({ data, pageSize = 100, isLoading }: BondsTableProps) {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <AllowPurchaseCheckbox bond={row} />
-                <p className="font-semibold text-primary text-sm">{row.isin}</p>
+                <Link href={`https://www.meradhan.co/bonds/detail/${row.isin}`} className="font-semibold text-primary text-sm hover:underline" target="_blank">{row.isin}</Link>
               </div>
               <p className="text-sm text-muted-foreground line-clamp-1">
                 {row.bondName}
@@ -70,13 +71,13 @@ function BondsTable({ data, pageSize = 100, isLoading }: BondsTableProps) {
             return (
               <div className="flex flex-col gap-1">
                 <p className="text-sm">
-                  <span className="text-muted-foreground">Offered Yield: </span>
+                  <span className="text-muted-foreground">Offered : </span>
                   {offeredYield !== null && !isNaN(offeredYield)
                     ? `${offeredYield}%`
                     : "--"}
                 </p>
                 <p className="text-sm">
-                  <span className="text-muted-foreground">Buy Yield: </span>
+                  <span className="text-muted-foreground">Buy : </span>
                   {buyYield !== null && !isNaN(buyYield)
                     ? `${buyYield}%`
                     : "--"}

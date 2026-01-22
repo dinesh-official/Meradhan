@@ -35,12 +35,12 @@ export type DataTableProps<TData, TValue> = {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
   getRowIdAction?:
-    | ((
-        originalRow: TData,
-        index: number,
-        parent?: Row<TData> | undefined
-      ) => string)
-    | undefined;
+  | ((
+    originalRow: TData,
+    index: number,
+    parent?: Row<TData> | undefined
+  ) => string)
+  | undefined;
   stickyRightColumnId?: string; // e.g. "actions"
   enableRowSelection?: boolean;
   initialPageSize?: number;
@@ -87,7 +87,7 @@ export function DataTable<TData, TValue>({
         visibilityStorageKey,
         JSON.stringify(columnVisibility)
       );
-    } catch {}
+    } catch { }
   }, [columnVisibility, visibilityStorageKey]);
 
   const table = useReactTable<TData>({
@@ -114,15 +114,13 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="border-1 rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader>
+      <div className="border rounded-xl overflow-hidden relative">
+        <Table className="relative overflow-y-auto overflow-hidden" >
+          <TableHeader >
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id} className="bg-gray-50">
+              <TableRow key={hg.id} >
                 {hg.headers.map((header) => {
-                  const stickyRight =
-                    stickyRightColumnId &&
-                    header.column.id === stickyRightColumnId;
+                  const stickyRight = stickyRightColumnId && header.column.id === stickyRightColumnId;
                   return (
                     <TableHead
                       key={header.id}
@@ -136,9 +134,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}

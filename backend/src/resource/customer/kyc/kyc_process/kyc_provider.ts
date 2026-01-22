@@ -168,12 +168,20 @@ export class KycProvider extends DigioKycFileHelper {
     name: string;
     id: string;
   }) {
-    const panDetails = await this.digio.verifyPanInfo({
-      id_no: id,
-      name,
-      dob: date,
-    });
-    return panDetails;
+    try {
+      const panDetails = await this.digio.verifyPanInfo({
+        id_no: id,
+        name,
+        dob: date,
+      });
+      return panDetails;
+    } catch (error) {
+      console.log((error as AxiosError<{ message: string }>)?.response?.data);
+      throw new AppError("We couldn’t verify the PAN details. Please check the PAN number and try again.", {
+        code: "PAN_VERIFICATION_FAILED",
+        statusCode: 400,
+      });
+    }
   }
 
   // pan aadhar generate request to digio

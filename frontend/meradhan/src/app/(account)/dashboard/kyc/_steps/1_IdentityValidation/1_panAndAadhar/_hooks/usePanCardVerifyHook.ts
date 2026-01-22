@@ -108,7 +108,6 @@ export const usePanCardVerifyHook = () => {
           entityType: "KYC",
         });
 
-        toast.success("PAN verification  successfully.");
         setStep1PanData("response", {
           type: "digilocker",
           status: "success",
@@ -181,11 +180,15 @@ export const usePanCardVerifyHook = () => {
     onError: (error) => {
       if (error instanceof ApiError) {
         const errorMessage = error.response?.data?.message || error.message;
-        toast.error(errorMessage);
+        Swal.fire({
+          imageUrl: "/images/icons/sad-emoji.svg",
+          title: "Unable to Verify PAN",
+          text: errorMessage || "We couldn’t verify the PAN details. Please check the PAN number and try again.",
+        });
 
         addAuditLog({
           type: "PAN_VERIFICATION_FAILED",
-          desc: `PAN verification failed with error: ${errorMessage}`,
+          desc: `Unable to Verify PAN with error: ${errorMessage}`,
         });
       } else {
         console.log(error);
