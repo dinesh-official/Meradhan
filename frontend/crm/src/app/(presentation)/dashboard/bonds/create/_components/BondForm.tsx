@@ -131,96 +131,96 @@ function BondForm({ initialData, isin }: BondFormProps) {
     resolver: bondResolver,
     defaultValues: initialData
       ? {
-          isin: initialData.isin,
-          bondName: initialData.bondName,
-          instrumentName: initialData.instrumentName,
-          description: initialData.description,
-          issuePrice: initialData.issuePrice,
-          faceValue: initialData.faceValue,
-          stampDutyPercentage: initialData.stampDutyPercentage ?? 0,
-          allowForPurchase: initialData.allowForPurchase ?? false,
-          couponRate: initialData.couponRate,
-          interestPaymentFrequency: initialData.interestPaymentFrequency,
-          putCallOptionDetails: initialData.putCallOptionDetails || undefined,
-          certificateNumbers: initialData.certificateNumbers || undefined,
-          totalIssueSize: initialData.totalIssueSize || undefined,
-          registrarDetails: initialData.registrarDetails || undefined,
-          physicalSecurityAddress:
-            initialData.physicalSecurityAddress || undefined,
-          defaultedInRedemption: initialData.defaultedInRedemption || undefined,
-          debentureTrustee: initialData.debentureTrustee || undefined,
-          creditRatingInfo: initialData.creditRatingInfo || undefined,
-          remarks: initialData.remarks || undefined,
-          taxStatus: initialData.taxStatus as
-            | "TAX_FREE"
-            | "TAXABLE"
-            | "TAX_SAVING"
-            | "TAX_EXEMPTION"
-            | "UNKNOWN",
-          creditRating: initialData.creditRating,
-          interestPaymentMode: initialData.interestPaymentMode as
-            | "MONTHLY"
-            | "QUARTERLY"
-            | "HALF_YEARLY"
-            | "YEARLY"
-            | "ON_MATURITY"
-            | "UNKNOWN",
-          isListed: initialData.isListed as "YES" | "NO" | "UNKNOWN",
-          ratingAgencyName: initialData.ratingAgencyName || undefined,
-          ratingDate: initialData.ratingDate
-            ? new Date(initialData.ratingDate)
-            : undefined,
-          categories: initialData.categories || [],
-          sectorName: initialData.sectorName || undefined,
-          dateOfAllotment: initialData.dateOfAllotment
-            ? new Date(initialData.dateOfAllotment)
-            : undefined,
-          redemptionDate: initialData.redemptionDate
-            ? new Date(initialData.redemptionDate)
-            : undefined,
-          maturityDate: initialData.maturityDate
-            ? new Date(initialData.maturityDate)
-            : undefined,
-          sortedAt: initialData.sortedAt || 0,
-          isConvertedDeal: initialData.isConvertedDeal || undefined,
-          yield: initialData.yield || undefined,
-          lastTradePrice: initialData.lastTradePrice || undefined,
-          lastTradeYield: initialData.lastTradeYield || undefined,
-          nextCouponDate: initialData.nextCouponDate
-            ? new Date(initialData.nextCouponDate)
-            : undefined,
-          modeOfIssuance: initialData.modeOfIssuance || undefined,
-          couponType: initialData.couponType || undefined,
-          buyYield: initialData.buyYield || undefined,
-          providerName: initialData.providerName || undefined,
-          providerInterestDate: initialData.providerInterestDate
-            ? new Date(initialData.providerInterestDate)
-            : undefined,
-          providerQuantity: initialData.providerQuantity || undefined,
-          isOngoingDeal: initialData.isOngoingDeal ?? false,
-          providerPrice: initialData.providerPrice || undefined,
-          ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
-        }
+        isin: initialData.isin,
+        bondName: initialData.bondName,
+        instrumentName: initialData.instrumentName,
+        description: initialData.description,
+        issuePrice: initialData.issuePrice,
+        faceValue: initialData.faceValue,
+        stampDutyPercentage: initialData.stampDutyPercentage ?? 0,
+        allowForPurchase: initialData.allowForPurchase ?? false,
+        couponRate: initialData.couponRate,
+        interestPaymentFrequency: initialData.interestPaymentFrequency,
+        putCallOptionDetails: initialData.putCallOptionDetails || undefined,
+        certificateNumbers: initialData.certificateNumbers || undefined,
+        totalIssueSize: initialData.totalIssueSize || undefined,
+        registrarDetails: initialData.registrarDetails || undefined,
+        physicalSecurityAddress:
+          initialData.physicalSecurityAddress || undefined,
+        defaultedInRedemption: initialData.defaultedInRedemption || undefined,
+        debentureTrustee: initialData.debentureTrustee || undefined,
+        creditRatingInfo: initialData.creditRatingInfo || undefined,
+        remarks: initialData.remarks || undefined,
+        taxStatus: initialData.taxStatus as
+          | "TAX_FREE"
+          | "TAXABLE"
+          | "TAX_SAVING"
+          | "TAX_EXEMPTION"
+          | "UNKNOWN",
+        creditRating: initialData.creditRating,
+        interestPaymentMode: initialData.interestPaymentMode as
+          | "MONTHLY"
+          | "QUARTERLY"
+          | "HALF_YEARLY"
+          | "YEARLY"
+          | "ON_MATURITY"
+          | "UNKNOWN",
+        isListed: initialData.isListed as "YES" | "NO" | "UNKNOWN",
+        ratingAgencyName: initialData.ratingAgencyName || undefined,
+        ratingDate: initialData.ratingDate
+          ? new Date(initialData.ratingDate)
+          : undefined,
+        categories: initialData.categories || [],
+        sectorName: initialData.sectorName || undefined,
+        dateOfAllotment: initialData.dateOfAllotment
+          ? new Date(initialData.dateOfAllotment)
+          : undefined,
+        redemptionDate: initialData.redemptionDate
+          ? new Date(initialData.redemptionDate)
+          : undefined,
+        maturityDate: initialData.maturityDate
+          ? new Date(initialData.maturityDate)
+          : undefined,
+        sortedAt: initialData.sortedAt || 0,
+        isConvertedDeal: initialData.isConvertedDeal || undefined,
+        yield: initialData.yield || undefined,
+        lastTradePrice: initialData.lastTradePrice || undefined,
+        lastTradeYield: initialData.lastTradeYield || undefined,
+        nextCouponDate: initialData.nextCouponDate
+          ? new Date(initialData.nextCouponDate)
+          : undefined,
+        modeOfIssuance: initialData.modeOfIssuance || undefined,
+        couponType: initialData.couponType || undefined,
+        buyYield: initialData.buyYield || undefined,
+        providerName: initialData.providerName || undefined,
+        providerInterestDate: initialData.providerInterestDate
+          ? new Date(initialData.providerInterestDate)
+          : undefined,
+        providerQuantity: initialData.providerQuantity || undefined,
+        isOngoingDeal: initialData.isOngoingDeal ?? false,
+        providerPrice: initialData.providerPrice || undefined,
+        ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
+      }
       : {
-          isin: "",
-          bondName: "",
-          instrumentName: "",
-          description: "",
-          issuePrice: 0,
-          faceValue: 0,
-          stampDutyPercentage: 0,
-          allowForPurchase: false,
-          couponRate: 0,
-          interestPaymentFrequency: "",
-          taxStatus: "UNKNOWN",
-          creditRating: "UnRated",
-          interestPaymentMode: "UNKNOWN",
-          isListed: "UNKNOWN",
-          categories: [],
-          sortedAt: 0,
-          isOngoingDeal: false,
-          ignoreAutoUpdate: false,
-        },
+        isin: "",
+        bondName: "",
+        instrumentName: "",
+        description: "",
+        issuePrice: 0,
+        faceValue: 0,
+        stampDutyPercentage: 0,
+        allowForPurchase: false,
+        couponRate: 0,
+        interestPaymentFrequency: "",
+        taxStatus: "UNKNOWN",
+        creditRating: "UnRated",
+        interestPaymentMode: "UNKNOWN",
+        isListed: "UNKNOWN",
+        categories: [],
+        sortedAt: 0,
+        isOngoingDeal: false,
+        ignoreAutoUpdate: false,
+      },
   });
 
   const createMutation = useMutation({
@@ -233,8 +233,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
     onError: (error: AxiosError) => {
       toast.error(
         (error?.response?.data as { message: string })?.message ||
-          error?.message ||
-          "Failed to create bond"
+        error?.message ||
+        "Failed to create bond"
       );
     },
   });
@@ -250,8 +250,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
     onError: (error: AxiosError) => {
       toast.error(
         (error?.response?.data as { message: string })?.message ||
-          error?.message ||
-          "Failed to update bond"
+        error?.message ||
+        "Failed to update bond"
       );
     },
   });
@@ -685,8 +685,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -714,8 +714,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -743,8 +743,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -933,8 +933,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -986,7 +986,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   name="yield"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Yield (%)</FormLabel>
+                      <FormLabel>Yield - Offered / Sell (%)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -1097,8 +1097,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -1244,8 +1244,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>

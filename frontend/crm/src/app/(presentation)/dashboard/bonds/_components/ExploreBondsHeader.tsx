@@ -53,7 +53,7 @@ function ExploreBondsHeader({
 
   return (
     <div className="flex flex-col justify-center items-center py-14 lg:py-0 w-full">
-      <div className="h-full text-center container">
+      <div className="h-full text-center w-full">
         <div className="flex flex-col justify-center gap-5 h-full">
           <div className="flex justify-between items-center">
             <div className="flex-1">

@@ -7,13 +7,16 @@ import { ReactNode } from "react";
 function AllowOnlyView({
   permissions,
   children,
+  condition = true,
 }: {
   permissions: Permission[];
   children: ReactNode;
+  condition?: boolean;
 }) {
   const { cookies } = useAppCookie();
   const isAllow = hasOneOfPermission(cookies.role, permissions);
-  if (isAllow) {
+
+  if (isAllow && condition) {
     return children;
   }
   return null;

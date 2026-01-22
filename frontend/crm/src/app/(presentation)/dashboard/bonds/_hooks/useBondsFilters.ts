@@ -81,7 +81,7 @@ export const useBondsFilters = ({
         filters: {
           ...queryFilter,
         },
-        params: { page: 1, category, all: "YES" },
+        params: { page: 1, category, all: "YES", limit: 100 },
       });
     },
   });
@@ -111,24 +111,24 @@ export const useBondsFilters = ({
     filters: validated.success
       ? validated.data
       : {
-          ...filters,
-          maturity: toValidatedArray(
-            filters.maturity,
-            appSchema.bonds.maturityYearEnums
-          ),
-          coupon: toValidatedArray(
-            filters.coupon,
-            appSchema.bonds.couponPercentEnums
-          ),
-          taxation: toValidatedArray(
-            filters.taxation,
-            appSchema.bonds.taxationEnums
-          ),
-          interest: toValidatedArray(
-            filters.interest,
-            appSchema.bonds.INTEREST_MODE_VALUES
-          ),
-        },
+        ...filters,
+        maturity: toValidatedArray(
+          filters.maturity,
+          appSchema.bonds.maturityYearEnums
+        ),
+        coupon: toValidatedArray(
+          filters.coupon,
+          appSchema.bonds.couponPercentEnums
+        ),
+        taxation: toValidatedArray(
+          filters.taxation,
+          appSchema.bonds.taxationEnums
+        ),
+        interest: toValidatedArray(
+          filters.interest,
+          appSchema.bonds.INTEREST_MODE_VALUES
+        ),
+      },
     setSearch,
     setMaturity,
     setRating,

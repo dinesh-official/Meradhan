@@ -26,19 +26,20 @@ async function BondPage({
       page: pageParams.page ? parseInt(pageParams?.page as string, 10) : 1,
       category: "all",
       all: "YES",
+      limit: 100,
     },
   });
 
   return (
     <AllowOnlyView permissions={["view:bonds"]}>
-    <Workspace>
-      <BondsView
-        pathname="/bonds"
-        category="all"
-        filter={queryFilter}
-        bondsData={responseData}
-      />
-    </Workspace>
+      <Workspace>
+        <BondsView
+          pathname="/bonds"
+          category="all"
+          filter={queryFilter}
+          bondsData={responseData}
+        />
+      </Workspace>
     </AllowOnlyView>
   );
 }

@@ -1,10 +1,11 @@
 "use client";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import CardPagination from "@/global/elements/table/CardPagination";
 import { ListedBondsResponse } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useRouter } from "nextjs-toploader/app";
 import z from "zod";
-import { BondListCard } from "./_components/BondListCard";
+import BondsTable from "./_components/BondsTable";
 import ExploreBondsHeader from "./_components/ExploreBondsHeader";
 import useBondsFilters from "./_hooks/useBondsFilters";
 
@@ -27,31 +28,36 @@ function BondsView({
     bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
 
   return (
-    <div>
-      <ExploreBondsHeader
-        manager={bondFilterManager}
-        rootUrl={pathname}
-        applyFilters={() => {
-          bondFilterManager.applyFilters(bondFilterManager.filters);
-        }}
-      />
-      <div className="flex flex-col justify-center items-center mb-5 py-14 lg:py-0 w-full">
-        <div className="gap-5 grid grid-cols-1 container">
-          {bondsListData?.data.map((bond) => (
-            <BondListCard key={bond.isin} gridMode={false
+    <Card>
+      <CardHeader >
+        <ExploreBondsHeader
+          manager={bondFilterManager}
+          rootUrl={pathname}
+          applyFilters={() => {
+            bondFilterManager.applyFilters(bondFilterManager.filters);
+          }}
+        />
+      </CardHeader>
+      <CardContent>
+        <BondsTable
+          data={bondsListData?.data || []}
+          isLoading={bondFilterManager.applyFilterMutation.isPending}
+          pageSize={100}
+        />
 
-            } data={bond} />
-          ))}
-        </div>
-      </div>
-      <CardPagination
-        onClick={(e) => {
-          router.push(`/dashboard/bonds/page/${e}`);
-        }}
-        page={bondsListData?.meta.page || 1}
-        totalPages={bondsListData?.meta.totalPages || 1}
-      />
-    </div>
+      </CardContent>
+
+      {bondsListData && bondsListData.meta.totalPages > 1 && (
+        <CardPagination
+          onClick={(e) => {
+            router.push(`/dashboard/bonds/page/${e}`);
+          }}
+          page={bondsListData.meta.page || 1}
+          totalPages={bondsListData.meta.totalPages || 1}
+        />
+      )}
+
+    </Card>
   );
 }
 
