@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
@@ -28,7 +29,8 @@ async function UpdateBondPage({
         description={`Update bond details for ISIN: ${isin}`}
         showBack
       />
-      <BondForm initialData={bondData} isin={isin} />
+
+      {bondData && <BondForm initialData={bondData as any} isin={isin} />}
     </Workspace>
   );
 }

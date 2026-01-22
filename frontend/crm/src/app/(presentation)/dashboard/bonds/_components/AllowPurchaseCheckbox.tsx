@@ -1,14 +1,13 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import apiGateway, { BondDetailsResponse } from "@root/apiGateway";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
 interface AllowPurchaseCheckboxProps {
   bond: BondDetailsResponse;
@@ -33,6 +32,7 @@ export function AllowPurchaseCheckbox({ bond }: AllowPurchaseCheckboxProps) {
       return bondsApi.updateBond(bond.isin, {
         ...current.responseData,
         allowForPurchase: newValue,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
     },
     onSuccess: (_, newValue) => {
@@ -44,8 +44,8 @@ export function AllowPurchaseCheckbox({ bond }: AllowPurchaseCheckboxProps) {
     onError: (error: AxiosError) => {
       toast.error(
         (error?.response?.data as { message?: string })?.message ||
-          error?.message ||
-          "Failed to update"
+        error?.message ||
+        "Failed to update"
       );
       setAllowForPurchase(bond.allowForPurchase ?? false);
     },
