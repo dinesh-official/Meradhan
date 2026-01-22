@@ -32,19 +32,19 @@ function IdentityValidationPanInfo() {
   useEffect(() => {
     if (data?.panRetryCount && data?.panRetryCount >= 3) {
 
-      const nextAllowedExpiresAt = localStorage.getItem("panRetryNextAllowedExpiresAt");
+      const nextAllowedExpiresAt = localStorage.getItem("TAYDF");
 
       if (nextAllowedExpiresAt) {
         // check if the next allowed expires at is in the past
         if (dateTimeUtils.isPast(new Date(nextAllowedExpiresAt))) {
           resetPanRetryCount();
           pushUserKycState();
-          localStorage.removeItem("panRetryNextAllowedExpiresAt");
+          localStorage.removeItem("TAYDF");
         }
       } else {
         // 1 hour from now
         const nextAllowed = new Date(Date.now() + 1 * 60 * 60 * 1000);
-        localStorage.setItem("panRetryNextAllowedExpiresAt", nextAllowed.toISOString());
+        localStorage.setItem("TAYDF", nextAllowed.toISOString());
       }
     }
   }, []);
