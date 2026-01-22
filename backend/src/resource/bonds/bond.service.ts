@@ -30,10 +30,12 @@ export class BondService {
       typeof options?.page === "string"
         ? parseInt(options.page, 10) || 1
         : options?.page || 1;
-    const limitNum =
-      typeof options?.limit === "string"
-        ? parseInt(options.limit, 10) || 9
-        : options?.limit || 9;
+
+
+    const limitNum = typeof options?.limit === "string"
+      ? parseInt(options.limit, 10) || 9
+      : options?.limit || 9;
+
     const paginationOptions = BondQueryBuilder.getPaginationOptions(
       pageNum,
       limitNum

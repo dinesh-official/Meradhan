@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
-export const useCustomerApiHook = ({ backOnDone=true }: { backOnDone?: boolean }) => {
+export const useCustomerApiHook = ({ backOnDone = true }: { backOnDone?: boolean }) => {
   const router = useRouter();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiClientCaller
@@ -24,6 +24,8 @@ export const useCustomerApiHook = ({ backOnDone=true }: { backOnDone?: boolean }
       toast.success("User added Successfully");
       if (backOnDone) {
         router.back();
+      } else {
+        router.refresh();
       }
     },
     onError(error) {
