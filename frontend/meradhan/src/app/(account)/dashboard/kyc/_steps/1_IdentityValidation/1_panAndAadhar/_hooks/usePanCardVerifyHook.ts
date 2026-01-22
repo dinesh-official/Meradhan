@@ -1,21 +1,20 @@
+import { addActivityLog } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { convertUTCtoIST } from "@/global/utils/datetime.utils";
+import { makeFullname } from "@/global/utils/formate";
 import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import { ZodError } from "zod";
-import { useDigioSDK } from "../../../../_providers/useDigioSDK";
+import { useKycDataProvider } from "../../../../_context/KycDataProvider";
 import {
   KycDataStorage,
   useKycDataStorage,
 } from "../../../../_store/useKycDataStorage";
-import Swal from "sweetalert2";
-import { useKycDataProvider } from "../../../../_context/KycDataProvider";
-import { addActivityLog } from "@/analytics/UserTrackingProvider";
-import { formatAmount, makeFullname } from "@/global/utils/formate";
-import { convertUTCtoIST } from "@/global/utils/datetime.utils";
 export const usePanCardVerifyHook = () => {
   const [error, setError] =
     useState<
@@ -27,7 +26,6 @@ export const usePanCardVerifyHook = () => {
   const { state, nextLocalStep, setStep1PanData, incrementPanRetryCount } = useKycDataStorage();
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
 
-  const digio = useDigioSDK();
 
   const verifyPanCardInfoMutation = useMutation({
     mutationKey: ["verifyPanCardInfo"],
