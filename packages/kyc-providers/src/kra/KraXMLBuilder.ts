@@ -345,10 +345,7 @@ export class KraXMLBuilder {
         .join("\n");
     }
 
-    const fatcaCount =
-      panInquiry.APP_FATCA_APPLICABLE_FLAG === "Y"
-        ? fatcaAdditionalDetails?.length
-        : 0;
+    // const fatcaCount = panInquiry.APP_FATCA_APPLICABLE_FLAG === "Y" ? fatcaAdditionalDetails?.length : 0;
 
     // Main PAN_INQ section
     const panInqXML = `
@@ -454,7 +451,7 @@ export class KraXMLBuilder {
   <APP_OTHKRA_CODE>${panInquiry.APP_POS_CODE || ""}</APP_OTHKRA_CODE>
   <APP_RESPONSE_DATE></APP_RESPONSE_DATE>
   <APP_TOTAL_REC>1</APP_TOTAL_REC>
-  <NO_OF_FATCA_ADDL_DTLS_RECORDS>${fatcaCount || ""}</NO_OF_FATCA_ADDL_DTLS_RECORDS>
+  <NO_OF_FATCA_ADDL_DTLS_RECORDS>${fatcaAdditionalDetails?.length.toString() || "0"}</NO_OF_FATCA_ADDL_DTLS_RECORDS>
 </APP_SUMM_REC>`;
 
     // Final XML wrapper
