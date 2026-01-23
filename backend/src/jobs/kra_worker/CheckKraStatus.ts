@@ -42,17 +42,11 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
   }
 
 
-  // FAILED (explicit) -
-  if (updtStatus?.includes("rejted") || updtStatus?.includes("rejected")) {
-    return "REJECTED";
-  }
-
-
   if (status?.includes("kyc validated")) {
     return "AVAILABLE";
   }
 
-  // FAILED (explicit) -
+  // FAILED (explicit) - Register Failed
   if (status?.includes("rejted") || status?.includes("rejected")) {
     return "AVAILABLE";
   }
