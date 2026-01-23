@@ -181,6 +181,7 @@ export class CustomerKycManager {
                 nationality: step2.nationality,
                 residentialStatus: step2.residentialStatus,
                 qualification: step2.qualification,
+                otherOccupationName: step2?.otherOccupationName,
                 dateOfBirth:
                   step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
                 SignatureUrl: step1.sign.url,
@@ -199,6 +200,7 @@ export class CustomerKycManager {
                 nationality: step2.nationality,
                 residentialStatus: step2.residentialStatus,
                 qualification: step2.qualification,
+                otherOccupationName: step2?.otherOccupationName,
                 dateOfBirth:
                   step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
                 SignatureUrl: step1.sign.url,

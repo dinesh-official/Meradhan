@@ -164,8 +164,7 @@ function SessionLogsMeradhan() {
       // Format user name
       // Format user name - handle empty/null values
       const userName = session.user
-        ? `${session.user.firstName || ""} ${session.user.middleName || ""} ${
-            session.user.lastName || ""
+        ? `${session.user.firstName || ""} ${session.user.middleName || ""} ${session.user.lastName || ""
           }`.trim() || "Unknown"
         : "Unknown";
 
@@ -179,9 +178,9 @@ function SessionLogsMeradhan() {
       );
       const endTime = session.endTime
         ? dateTimeUtils.formatDateTime(
-            session.endTime,
-            "DD MMM YYYY hh:mm:ss AA"
-          )
+          session.endTime,
+          "DD MMM YYYY hh:mm:ss AA"
+        )
         : "N/A";
 
       // Format environment in combined format (same as UI)
@@ -190,7 +189,7 @@ function SessionLogsMeradhan() {
       if (session.deviceType) {
         envParts.push(
           session.deviceType.charAt(0).toUpperCase() +
-            session.deviceType.slice(1).toLowerCase()
+          session.deviceType.slice(1).toLowerCase()
         );
       }
       if (session.operatingSystem) envParts.push(session.operatingSystem);

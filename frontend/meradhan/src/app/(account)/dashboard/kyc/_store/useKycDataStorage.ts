@@ -148,6 +148,7 @@ const initData: KycDataStorage = {
     motherName: "",
     nationality: "",
     residentialStatus: "",
+    otherOccupationName: "",
   },
   step_3: [
     {

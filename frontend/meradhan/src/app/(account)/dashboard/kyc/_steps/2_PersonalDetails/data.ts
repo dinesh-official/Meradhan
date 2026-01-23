@@ -19,16 +19,17 @@ export const qualificationOptions = [
 ];
 
 export const occupationOptions = [
-  { label: "Private Sector", value: "Private Sector" },
   { label: "Public Sector", value: "Public Sector" },
+  { label: "Private Sector", value: "Private Sector" },
   { label: "Business", value: "Business" },
-  { label: "Government Sector", value: "Government Sector" },
-  { label: "Self Employed Professional", value: "Self Employed Professional" },
   { label: "Agriculturist", value: "Agriculturist" },
   { label: "Retired", value: "Retired" },
   { label: "Housewife", value: "Housewife" },
   { label: "Student", value: "Student" },
-  { label: "Forex Dealer", value: "Forex Dealer" },
+  { label: "Government Sector", value: "Government Sector" },
+  { label: "Professional", value: "Professional" },
+  // { label: "Self Employed Professional", value: "Self Employed Professional" },
+  // { label: "Forex Dealer", value: "Forex Dealer" },
   { label: "Others", value: "Others" },
 ];
 

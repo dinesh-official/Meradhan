@@ -306,7 +306,6 @@ export class NsdlBondProcessor {
   private getRedemptionDate() {
     const dateField = this.bond.REDEMPTION;
     const redemptionDate = this.getStructuredDate(dateField);
-    console.log(dateField, redemptionDate);
     const line = `ISIN:${this.bond.ISIN} | DATE:${redemptionDate} | ${dateField}\n`;
     fs.appendFileSync("redemptions.txt", line);
 

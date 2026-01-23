@@ -22,6 +22,7 @@ import {
 } from "./CheckKraStatus";
 import { getKraCountry, getKraState, kraMobNo, occCode } from "./constent";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
+import type { AxiosError } from "axios";
 
 const cbricsManager = new ParticipantManager();
 
@@ -36,6 +37,7 @@ export class KraWorkerService {
 
     const lastTask = await cacheStorage.get(cachedKey);
     const { customerId, kycDataStoreId } = data;
+
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
@@ -148,7 +150,30 @@ export class KraWorkerService {
       }
       return res;
     } catch (err) {
-      console.error("KraWorkerService.processKra error:", err);
+      console.error("KRA PROCESS FAILED - Rescheduling the job");
+      console.error("KRA PROCESS FAILED - ", (err as AxiosError)?.response?.data);
+      if (lastTask) {
+        await cacheStorage.set(cachedKey, lastTask, TTL_28_HOURS);
+      }
+      await db.dataBase.kraDataLogs.create({
+        data: {
+          kycId: kycDataStoreId,
+          userId: customerId,
+          requestData: {
+            Date: new Date().toISOString(),
+            Message: "Request Failed - Rescheduling the job",
+          },
+          responseData: {
+            error: "KRA Process encountered an error. Rescheduling the job",
+            httpStatus: (err as AxiosError)?.response?.status,
+            message: ((err as AxiosError)?.response?.data as { message?: string, error?: string, errors?: { message?: string }[] })?.message?.toString() || ((err as AxiosError)?.response?.data as { message?: string, error?: string, errors?: { message?: string }[] })?.error?.toString() || ((err as AxiosError)?.response?.data as { message?: string, error?: string, errors?: { message?: string }[] })?.errors?.[0]?.message?.toString() || (err as Error)?.message?.toString() || "Request Failed",
+          },
+          stage: "KRA_FAILED_REQUEST ",
+          reqTime: new Date().toISOString(),
+          resTime: new Date().toISOString(),
+        },
+      });
+      await addKraWorkerJob(data);
       throw err;
     }
   }
@@ -508,9 +533,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-            data.step_1.pan.response.details.aadhaar.current_address_details
-              .state,
-          )?.code
+          data.step_1.pan.response.details.aadhaar.current_address_details
+            .state,
+        )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",

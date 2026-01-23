@@ -122,6 +122,7 @@ model CustomerPersonalInfoModel {
     dateOfBirth              String?
     signPdfUrl               String?
     confirmTimeStamp         DateTime?
+    otherOccupationName      String?
     // allowTerms               Boolean                   @default(false)
     // 1-to-1 back reference
     customerProfileDataModel CustomerProfileDataModel?
