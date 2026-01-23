@@ -62,21 +62,34 @@ export class KraWorkerService {
 
       const status = checkKraProcessCheckStatus(res as T_APP_PAN_INQ);
 
-      if (status == "REJECTED") {
+      // FAILED (explicit) - Modify Failed
+      const isRejected = status.includes("rejted") || status.includes("rejected");
+
+      if (isRejected && lastTask != null) {
+        // update customer profile data - set kyc status to under review and kra status to rejected
         await db.dataBase.customerProfileDataModel.update({
           where: { id: customerId },
           data: { kycStatus: "UNDER_REVIEW", kraStatus: "REJECTED" },
         });
+        // create kra data log for failed request - set stage to KRA_FAILED_REQUEST
         await db.dataBase.kraDataLogs.create({
           data: {
-            kycId: kycDataStoreId,
+            requestData: {
+              Date: new Date().toISOString(),
+              Message: "Request Failed - KRA Process rejected",
+              LastTask: lastTask,
+              Status: status,
+              Error: "KRA Process rejected",
+            },
+            responseData: res,
             userId: customerId,
-            stage: "KRA_REJECTED",
+            kycId: kycDataStoreId,
+            stage: "KRA_FAILED_REQUEST",
             reqTime: new Date().toISOString(),
             resTime: new Date().toISOString(),
           },
         });
-        return;
+        throw new Error("KRA Process rejected");
       }
 
       if (status == "ERROR") {
