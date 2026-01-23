@@ -3,12 +3,12 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import Client from "./client";
 
 import { SharePopupViewProvider } from "@/global/module/share/SharePopupView";
-import { headers } from "next/headers";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { headers } from "next/headers";
 import Script from "next/script";
 
-import "./styles/globals.css";
 import "./styles/datepicker.css";
+import "./styles/globals.css";
 
 import "./styles/override.css";
 
