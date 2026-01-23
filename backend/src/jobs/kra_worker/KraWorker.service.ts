@@ -470,14 +470,18 @@ export class KraProcess {
     };
 
     const report = await this.kraInstance.panModifyKraXML(dataKraPayload);
+
+
+
+    const statusDesc = report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC;
+
     if (
-      report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC?.includes(
-        "INVALID IN-PERSON VERIFICATION FLAG",
-      )
+      typeof statusDesc === "string" &&
+      statusDesc.includes("INVALID IN-PERSON VERIFICATION FLAG")
     ) {
       console.log("INVALID IN-PERSON VERIFICATION FLAG");
-      // await cacheStorage.set(FLASG_KEY, IPV_FLAG, TTL_28_HOURS);
     }
+
 
     const resTime = new Date().toISOString();
 
