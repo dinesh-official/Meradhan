@@ -471,7 +471,7 @@ export class KraProcess {
 
     const report = await this.kraInstance.panModifyKraXML(dataKraPayload);
 
-
+    console.log("KRA MODIFY REPORT", report);
 
     const statusDesc = report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC;
 
@@ -482,15 +482,9 @@ export class KraProcess {
       console.log("INVALID IN-PERSON VERIFICATION FLAG");
     }
 
-
     const resTime = new Date().toISOString();
 
-    const kraStatus =
-      "MODIFY_" +
-      (report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC ||
-        report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS ||
-        report?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR ||
-        "REQUEST");
+    const kraStatus = "MODIFY_" + (report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC || report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS || report?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR || "REQUEST");
 
     await db.dataBase.kraDataLogs.create({
       data: {
