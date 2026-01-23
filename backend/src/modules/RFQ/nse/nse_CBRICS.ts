@@ -64,7 +64,7 @@ export class NseCBRICS {
 
   constructor() {
     this.client = axios.create({
-      baseURL: "https://bricsonlinereguat.nseindia.com/bondsnew/rest/v1",
+      baseURL: env.CBRICS_ENV == "PROD" ? "https://bricsonline.nseindia.com/bondsnew/rest/v1" : "https://bricsonlinereguat.nseindia.com/bondsnew/rest/v1",
       withCredentials: true,
       headers: {
         "User-Agent":
@@ -73,7 +73,7 @@ export class NseCBRICS {
         Accept: "application/json, text/javascript, */*; q=0.01",
         "Accept-Language": "en-US,en;q=0.5",
         "X-Requested-With": "XMLHttpRequest",
-        Origin: "https://bricsonlinereguat.nseindia.com",
+        Origin: env.CBRICS_ENV == "PROD" ? "https://bricsonline.nseindia.com" : "https://bricsonlinereguat.nseindia.com",
         DNT: "1",
         Connection: "keep-alive",
         "Sec-Fetch-Dest": "empty",
@@ -108,6 +108,7 @@ export class NseCBRICS {
     }
 
     if (data.status == "F") {
+      console.log(data);
       throw new AppError("Nse Cbrics Login Failed");
     }
 
@@ -143,7 +144,7 @@ export class NseCBRICS {
 
   private async withReLoginRetry<T>(
     apiCall: (loginKey: string) => Promise<T>,
-    attempt: number = 2
+    attempt: number = 1
   ): Promise<T> {
     try {
       const key = await this.getLoginKey(attempt < 1); // force relogin only if retry
@@ -152,9 +153,9 @@ export class NseCBRICS {
       if (
         axios.isAxiosError(error) &&
         this.isLoginExpired(error) &&
-        attempt < 2 // allow only one retry
+        attempt < 1 // allow only one retry
       ) {
-        console.warn(`Login expired. Retrying... (Attempt ${attempt + 1}/2)`);
+        console.warn(`Login expired. Retrying... (Attempt ${attempt + 1}/1)`);
         return this.withReLoginRetry(apiCall, attempt + 1);
       }
 
@@ -162,17 +163,17 @@ export class NseCBRICS {
         if (error.response?.data.message) {
           throw new Error(
             error.response?.data.message?.toString() ||
-              "CBRICS Request Failed - " + error.toString()
+            "CBRICS Request Failed - " + error.toString()
           );
         } else if (error.response?.data.error) {
           throw new Error(
             error.response?.data.error?.toString() ||
-              "CBRICS Request Failed - " + error.toString()
+            "CBRICS Request Failed - " + error.toString()
           );
         } else if (error.response?.data.messages) {
           throw new Error(
             error.response?.data.messages?.[0].toString() ||
-              "CBRICS Request Failed - " + error.toString()
+            "CBRICS Request Failed - " + error.toString()
           );
         }
       }

@@ -75,6 +75,7 @@ const EnvSchema = z.object(
     // CBRICS
     CBRICS_DOMAIN: z.string().min(1, { message: "CBRICS_DOMAIN is required" }),
     CBRICS_LOGIN: z.string().min(1, { message: "CBRICS_LOGIN is required" }),
+    CBRICS_ENV: z.enum(["UAT", "PROD"]),
     CBRICS_PASSWORD: z
       .string()
       .min(1, { message: "CBRICS_PASSWORD is required" }),
@@ -84,6 +85,7 @@ const EnvSchema = z.object(
     RFQ_CBRICS_DOMAIN: z.string().optional(),
     RFQ_CBRICS_LOGIN: z.string().optional(),
     RFQ_CBRICS_PASSWORD: z.string().optional(),
+    RFQ_CBRICS_ENV: z.enum(["UAT", "PROD"]),
 
     // RAZORPAY
     RAZORPAY_KEY_ID: z

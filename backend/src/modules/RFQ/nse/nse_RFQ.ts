@@ -94,7 +94,7 @@ export class NseRfq {
 
   constructor() {
     this.client = axios.create({
-      baseURL: "https://bricsonlinereguat.nseindia.com/rfq/rest/v1",
+      baseURL: env.RFQ_CBRICS_ENV == "PROD" ? "https://bricsonline.nseindia.com/rfq" : "https://bricsonlinereguat.nseindia.com/rfq/rest/v1",
       withCredentials: true,
       headers: {
         "User-Agent":
@@ -103,7 +103,7 @@ export class NseRfq {
         Accept: "application/json, text/javascript, */*; q=0.01",
         "Accept-Language": "en-US,en;q=0.5",
         "X-Requested-With": "XMLHttpRequest",
-        Origin: "https://bricsonlinereguat.nseindia.com",
+        Origin: env.RFQ_CBRICS_ENV == "PROD" ? "https://bricsonline.nseindia.com" : "https://bricsonlinereguat.nseindia.com",
         DNT: "1",
         Connection: "keep-alive",
         "Sec-Fetch-Dest": "empty",
@@ -130,6 +130,7 @@ export class NseRfq {
       ?.split("=")[1]
       ?.split(";")[0];
     if (data.status == "F") {
+      console.log(data);
       throw new AppError("Nse Rqf Login Failed");
     }
     return {
