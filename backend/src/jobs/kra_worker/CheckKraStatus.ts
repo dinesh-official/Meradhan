@@ -41,6 +41,17 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
     return "WAITING";
   }
 
+
+  // FAILED (explicit) -
+  if (updtStatus?.includes("rejted") || updtStatus?.includes("rejected")) {
+    return "REJECTED";
+  }
+
+
+  if (status?.includes("kyc validated")) {
+    return "AVAILABLE";
+  }
+
   // FAILED (explicit) -
   if (status?.includes("rejted") || status?.includes("rejected")) {
     return "AVAILABLE";
@@ -53,6 +64,8 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
   ) {
     return "AVAILABLE";
   }
+
+
 
   // Default fallback -
   return "REGISTER";

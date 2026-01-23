@@ -139,6 +139,7 @@ function PersonalDetailsForm() {
             </Select>
           </LabelInput>
 
+
           {/* Occupation */}
           <LabelInput
             label="Occupation Type"
@@ -165,6 +166,20 @@ function PersonalDetailsForm() {
             </Select>
           </LabelInput>
 
+          {
+            data.occupationType === "Others" && (
+              <LabelInput
+                label="Other Occupation Name"
+                required
+                error={error?.otherOccupationName?.[0]}
+              >
+                <Input type="text" value={data.otherOccupationName} maxLength={30} onChange={(e) => {
+                  setStep2PersonalData("otherOccupationName", e.target.value);
+                  removeError("otherOccupationName");
+                }} />
+              </LabelInput>
+            )
+          }
           {/* Annual Income */}
           <LabelInput
             label="Annual Gross Income"

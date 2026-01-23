@@ -91,12 +91,11 @@ export const revalidateBonds = async () => {
   ];
 
   for (const e of order) {
-    console.log(`Process isin ${e.isin}`);
 
     try {
       // Exclude _index from the data before upserting
-      const { _index, ...bondData } = e;
-      console.log(_index);
+      const { ...bondData } = e;
+
 
       // Check if bond exists and has ignoreAutoUpdate enabled
       const existingBond = await db.dataBase.bonds.findUnique({
