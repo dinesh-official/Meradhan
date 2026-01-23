@@ -391,7 +391,7 @@ export class KraProcess {
         APP_COR_PINCD: p.APP_COR_PINCD,
         APP_COR_STATE: p.APP_COR_STATE,
         APP_DATE: p.APP_DATE,
-        APP_DOB_DT: p.APP_DOB_DT,
+        APP_DOB_DT: p.APP_DOB_DT + " 00:00:00",
         APP_DOC_PROOF: p.APP_DOC_PROOF,
         APP_EMAIL: p.APP_EMAIL,
         APP_EXMT: p.APP_EXMT,
@@ -413,16 +413,13 @@ export class KraProcess {
         APP_DOI_DT: p.APP_DOI_DT,
         APP_COMMENCE_DT: p.APP_COMMENCE_DT,
         APP_OTH_NATIONALITY: p.APP_OTH_NATIONALITY,
-
         APP_MOBILE_NO: env.KRA_MOB_NO,
         APP_MOB_NO: removeCountryCode(data?.user?.phoneNo || customer?.phoneNo),
-
         APP_NAME: p.APP_NAME,
         APP_NATIONALITY: p.APP_NATIONALITY,
         APP_NO: p.APP_NO,
         APP_OCC: p.APP_OCC,
         APP_OTH_OCC: p.APP_OTH_OCC,
-
         APP_PAN_COPY: p.APP_PAN_COPY,
         APP_PAN_NO: p.APP_PAN_NO,
         APP_COR_ADD_DT: p.APP_COR_ADD_DT,
@@ -463,24 +460,19 @@ export class KraProcess {
         APP_RES_STATUS_PROOF: p.APP_RES_STATUS_PROOF,
         APP_OFF_NO: p.APP_OFF_NO,
         APP_RES_NO: p.APP_RES_NO,
-
       },
 
       fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
     };
 
     const report = await this.kraInstance.panModifyKraXML(dataKraPayload);
+    if (report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS == "01") {
+      await cacheStorage.set(cachedKey, "MODIFY", TTL_28_HOURS);
+      console.log("KRA MODIFY SUBMITTED");
+    }
 
     console.log("KRA MODIFY REPORT", report);
 
-    const statusDesc = report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC;
-
-    if (
-      typeof statusDesc === "string" &&
-      statusDesc.includes("INVALID IN-PERSON VERIFICATION FLAG")
-    ) {
-      console.log("INVALID IN-PERSON VERIFICATION FLAG");
-    }
 
     const resTime = new Date().toISOString();
 
@@ -506,10 +498,6 @@ export class KraProcess {
       },
     });
 
-    if (report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS == "01") {
-      await cacheStorage.set(cachedKey, "MODIFY", TTL_28_HOURS);
-      console.log("KRA MODIFY SUBMITTED");
-    }
 
     return report;
   }
