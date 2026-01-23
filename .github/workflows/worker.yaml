@@ -27,6 +27,8 @@ jobs:
             echo "GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
             echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}"
 
+            
+
             echo "PORT=4000"
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}"
 
@@ -87,6 +89,8 @@ jobs:
             echo "AUTH_MICROSOFT_ENTRA_ID_ID=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ID }}"
             echo "AUTH_MICROSOFT_ENTRA_ID_SECRET=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_SECRET }}"
             echo "AUTH_MICROSOFT_ENTRA_ID_ISSUER=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ISSUER }}"
+            echo "RFQ_CBRICS_ENV=PROD"
+            echo "CBRICS_ENV=PROD"
 
             echo "RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}"
             echo "RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}"
