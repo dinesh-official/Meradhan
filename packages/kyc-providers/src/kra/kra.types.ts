@@ -346,7 +346,7 @@ export type T_PAN_MODIFY_RESPONSE = {
       APP_IOP_FLG: string;
       APP_NAME: string;
       APP_STATUS: string;
-      APP_STATUS_DESC: string;
+      APP_STATUS_DESC?: { ERROR?: string } | string;
       APP_MODF_ACK: string;
       APP_STATUSDT: string;
       APP_ENTRYDT: string;

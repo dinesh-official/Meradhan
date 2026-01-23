@@ -41,16 +41,14 @@ if (!payload) throw new Error("KYC payload not found or does not belong to user"
 
 const kyc = payload.data as Root;
 
-const data = new KraProcess().modify({ customer, data: kyc, kycdataId: payload.id });
+const data = new KraProcess().buildRegisterPayload(kyc, customer, true);
 
-console.log(data);
-
-// console.log(KraXMLBuilder.buildPanModifyKraXML({
-//     payload: {
-//         panInquiry: data.APP_PAN_INQ,
-//         fatcaAdditionalDetails: data.FATCA_ADDL_DTLS,
-//     },
-//     encryptedPassword: "1234567890",
-//     passKey: "1234567890",
-//     userName: "1234567890",
-// }));
+console.log(KraXMLBuilder.buildPanModifyKraXML({
+    payload: {
+        panInquiry: data,
+        fatcaAdditionalDetails: data.FATCA_ADDL_DTLS,
+    },
+    encryptedPassword: "1234567890",
+    passKey: "1234567890",
+    userName: "1234567890",
+}));

@@ -333,9 +333,9 @@ export class KraProcess {
     const payload = this.buildRegisterPayload(data, customer);
     const cachedKey = `KRA:${customer.id}-${kycdataId}`;
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
-    const kraStatus =
-      "REGISTER_" + report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS;
+    const kraStatus = "REGISTER_" + report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS;
     const resTime = new Date().toISOString();
+
     await db.dataBase.customerProfileDataModel.update({
       where: {
         id: customer.id,
@@ -344,6 +344,7 @@ export class KraProcess {
         kraStatus: kraStatus,
       },
     });
+
     await db.dataBase.kraDataLogs.create({
       data: {
         requestData: payload,
@@ -476,7 +477,7 @@ export class KraProcess {
 
     const resTime = new Date().toISOString();
 
-    const kraStatus = "MODIFY_" + (report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC || report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS || report?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR || "REQUEST");
+    const kraStatus = "MODIFY_" + ((report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC as { ERROR?: string })?.ERROR || report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC || report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS || report?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR || "REQUEST");
 
     await db.dataBase.kraDataLogs.create({
       data: {
@@ -648,8 +649,7 @@ export class KraProcess {
       NO_OF_FATCA_ADDL_DTLS_RECORDS: data.step_1?.pan?.isFatca ? "0" : "1",
     };
 
-    const fatca =
-      [] as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"]["FATCA_ADDL_DTLS"];
+    const fatca = [] as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"]["FATCA_ADDL_DTLS"];
     if (!data.step_1?.pan?.isFatca) {
       fatca.push({
         APP_FATCA_ENTITY_PAN: panNo,
