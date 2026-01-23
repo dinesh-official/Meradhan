@@ -567,12 +567,10 @@ export class KraProcess {
       APP_OTH_PER_STATE: "",
       APP_PER_CTRY: getKraCountry("india")?.code,
       APP_PER_ADD_PROOF: "31",
-      APP_PER_ADD_REF:
-        data.step_1.pan.response.details.aadhaar.id_number.replaceAll("x", ""),
+      APP_PER_ADD_REF: data.step_1.pan.response.details.aadhaar.id_number.replaceAll("x", ""),
       APP_PER_ADD_DT: "",
       APP_INCOME: "",
-      APP_OCC:
-        occCode[data.step_2.occupationType as keyof typeof occCode] || "",
+      APP_OCC: occCode[data.step_2.occupationType as keyof typeof occCode] || "",
       APP_OTH_OCC: data.step_2?.otherOccupationName || "",
       APP_POL_CONN: "NA",
       APP_DOC_PROOF: "T",
