@@ -102,7 +102,11 @@ export class KraWorkerService {
             const cbUser = await cbricsManager.registerParticipant(customerId);
             await db.dataBase.customerProfileDataModel.update({
               where: { id: customerId },
-              data: { kycStatus: "VERIFIED", kraStatus: "VERIFIED" },
+              data: {
+                kycStatus: "VERIFIED",
+                kraStatus: "VERIFIED",
+                verifyDate: new Date(),
+              },
             });
             await db.dataBase.kraDataLogs.create({
               data: {
@@ -382,6 +386,7 @@ export class KraProcess {
         APP_NATIONALITY: p.APP_NATIONALITY,
         APP_NO: p.APP_NO,
         APP_OCC: p.APP_OCC,
+
         APP_PAN_COPY: p.APP_PAN_COPY,
         APP_PAN_NO: p.APP_PAN_NO,
         APP_COR_ADD_DT: p.APP_COR_ADD_DT,
@@ -568,7 +573,7 @@ export class KraProcess {
       APP_INCOME: "",
       APP_OCC:
         occCode[data.step_2.occupationType as keyof typeof occCode] || "",
-      APP_OTH_OCC: "",
+      APP_OTH_OCC: data.step_2?.otherOccupationName || "",
       APP_POL_CONN: "NA",
       APP_DOC_PROOF: "T",
       APP_INTERNAL_REF: "",

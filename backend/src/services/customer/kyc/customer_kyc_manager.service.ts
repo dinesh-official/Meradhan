@@ -92,7 +92,7 @@ export class CustomerKycManager {
           middleName,
           gender,
           kycStatus,
-          verifyDate: new Date(),
+          // verifyDate: new Date(),
           avatar: step1.face.url,
           isAFatcaCustomer: !step1.pan.isFatca,
           allowSEBITerms: step1.pan.checkTerms2,
