@@ -107,7 +107,7 @@ jobs:
           echo "DIRECT_URL=${DEV_DIRECT_URL}" >> .env
 
           echo "RFQ_CBRICS_ENV=UAT" >> .env
-          echo "CBRICS_ENV=UAT" >>
+          echo "CBRICS_ENV=UAT" >>  .env
 
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
