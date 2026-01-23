@@ -171,11 +171,15 @@ export class KraXMLBuilder {
     userName: string;
     okraCdOrMiId: string;
   }) {
-    console.log(this.buildRegisterInnerXML({
+
+    const innerXML = this.buildRegisterInnerXML({
       APP_PAN_INQ,
       FATCA_ADDL_DTLS,
       APP_SUMM_REC,
-    }));
+    });
+
+    console.log(innerXML);
+
     // convert inner xml to buffer
     const buffer = Buffer.from(
       this.buildRegisterInnerXML({

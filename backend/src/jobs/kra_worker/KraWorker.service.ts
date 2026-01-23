@@ -542,12 +542,12 @@ export class KraProcess {
       APP_DATE: formatDateTime(new Date()),
       APP_PAN_NO: panNo,
       APP_PANEX_NO: "",
-      APP_PAN_COPY: "Y",
+      APP_PAN_COPY: "N",
       APP_EXMT: "N",
       APP_EXMT_CAT: "",
       APP_KYC_MODE: "5",
-      APP_EXMT_ID_PROOF: "01",
-      APP_IPV_FLAG: "N",
+      APP_EXMT_ID_PROOF: "02",
+      APP_IPV_FLAG: "E",
       APP_IPV_DATE: "",
       APP_GEN: data.step_1.pan.response.details.aadhaar.gender,
       APP_NAME: makeFullname({ firstName, middleName, lastName }),
@@ -599,19 +599,19 @@ export class KraProcess {
       APP_PER_ADD2: porAddress.line2,
       APP_PER_ADD3: porAddress.line3,
       APP_PER_CITY:
-        data.step_1.pan.response.details.aadhaar.permanent_address_details
-          .district_or_city,
+        data?.step_1?.pan?.response?.details?.aadhaar?.permanent_address_details
+          ?.district_or_city,
       APP_PER_PINCD:
-        data.step_1.pan.response.details.aadhaar.permanent_address_details
+        data?.step_1?.pan?.response?.details?.aadhaar?.permanent_address_details
           .pincode,
       APP_PER_STATE: getKraState(
-        data.step_1.pan.response.details.aadhaar.permanent_address_details
+        data?.step_1?.pan?.response?.details?.aadhaar?.permanent_address_details
           .state,
       )?.code,
       APP_OTH_PER_STATE: "",
       APP_PER_CTRY: getKraCountry("india")?.code,
       APP_PER_ADD_PROOF: "31",
-      APP_PER_ADD_REF: data.step_1.pan.response.details.aadhaar.id_number.replaceAll("x", ""),
+      APP_PER_ADD_REF: data?.step_1?.pan?.response?.details?.aadhaar?.id_number?.replaceAll("x", "") || "",
       APP_PER_ADD_DT: "",
       APP_INCOME: "",
       APP_OCC: occCode[data.step_2.occupationType as keyof typeof occCode] || "",
