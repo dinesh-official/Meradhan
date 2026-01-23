@@ -77,6 +77,32 @@ export const personalInfoSchema = z.object({
   nationality: z.string().min(1, "Nationality is required"),
   residentialStatus: z.string().min(1, "Residential status is required"),
   confirmPersonalInfoTimestamp: z.string().optional(),
+  otherOccupationName: z.string().optional(),
+}).superRefine((_data, _ctx) => {
+  if (_data.occupationType === "Others") {
+    if (!_data.otherOccupationName?.trim()) {
+      _ctx.addIssue({
+        code: "custom",
+        message: "Please specify your occupation",
+        path: ["otherOccupationName"],
+      });
+    }
+    if (_data.otherOccupationName?.trim().length && _data.otherOccupationName?.trim().length > 30) {
+      _ctx.addIssue({
+        code: "custom",
+        message: "Please specify your occupation in less than 30 characters",
+        path: ["otherOccupationName"],
+      });
+    }
+    // only alphabets allow not numbers or special characters
+    if (_data.otherOccupationName?.trim().length && !/^[a-zA-Z]+$/.test(_data.otherOccupationName?.trim())) {
+      _ctx.addIssue({
+        code: "custom",
+        message: "Numbers and special characters not allowed",
+        path: ["otherOccupationName"],
+      });
+    }
+  }
 });
 
 export const bankInfoSchema = z.object({

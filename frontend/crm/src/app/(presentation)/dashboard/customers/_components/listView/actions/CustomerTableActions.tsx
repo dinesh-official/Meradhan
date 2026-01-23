@@ -63,7 +63,7 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
           </DropdownMenuItem>
 
           <AllowOnlyView permissions={["delete:customer"]} condition={profile.kycStatus !== "PENDING"}>
-            <ShowOnly condition={cookies.userId == "1"}>
+            <ShowOnly condition={cookies.userId == "2"}>
               <DropdownMenuItem
                 onClick={async () => {
                   const result = await Swal.fire({
@@ -105,7 +105,7 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
           </AllowOnlyView>
 
           <AllowOnlyView permissions={["delete:customer"]} >
-            <ShowOnly condition={cookies.userId == "1"}>
+            <ShowOnly condition={cookies.userId == "2"}>
               <DropdownMenuItem
                 className="bg-red-50 mt-1 text-red-500"
                 onClick={async () => {

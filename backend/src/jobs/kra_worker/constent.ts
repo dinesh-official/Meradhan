@@ -1546,12 +1546,14 @@ export const getKraCountry = (name: string) => {
 };
 
 export const occCode = {
-  "Private Sector": "01",
   "Public Sector": "02",
+  "Private Sector": "01",
   Business: "03",
   Agriculturist: "05",
   Retired: "06",
   Housewife: "07",
   Student: "08",
+  "Government Sector": "10",
+  Professional: "04",
   Others: "99",
 };

@@ -38,37 +38,6 @@ interface SessionLogsMeradhanTableProps {
   currentPageSize: number;
 }
 
-const getDeviceBadgeColor = (device?: string | null) => {
-  if (!device) return "bg-gray-100 text-gray-800";
-  const lowerDevice = device.toLowerCase();
-  if (lowerDevice === "desktop") return "bg-blue-100 text-blue-800";
-  if (lowerDevice === "mobile") return "bg-green-100 text-green-800";
-  if (lowerDevice === "tablet") return "bg-purple-100 text-purple-800";
-  return "bg-gray-100 text-gray-800";
-};
-
-const getBrowserBadgeColor = (browser?: string | null) => {
-  if (!browser) return "bg-slate-100 text-slate-800";
-  const lowerBrowser = browser.toLowerCase();
-  if (lowerBrowser.includes("chrome")) return "bg-emerald-100 text-emerald-800";
-  if (lowerBrowser.includes("firefox")) return "bg-orange-100 text-orange-800";
-  if (lowerBrowser.includes("safari")) return "bg-cyan-100 text-cyan-800";
-  if (lowerBrowser.includes("edge")) return "bg-blue-100 text-blue-800";
-  if (lowerBrowser.includes("opera")) return "bg-red-100 text-red-800";
-  return "bg-slate-100 text-slate-800";
-};
-
-const getOSBadgeColor = (os?: string | null) => {
-  if (!os) return "bg-zinc-100 text-zinc-800";
-  const lowerOS = os.toLowerCase();
-  if (lowerOS.includes("windows")) return "bg-sky-100 text-sky-800";
-  if (lowerOS.includes("mac") || lowerOS.includes("ios"))
-    return "bg-gray-100 text-gray-800";
-  if (lowerOS.includes("linux")) return "bg-amber-100 text-amber-800";
-  if (lowerOS.includes("android")) return "bg-green-100 text-green-800";
-  return "bg-zinc-100 text-zinc-800";
-};
-
 const formatDuration = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -198,33 +167,28 @@ const SessionRow = ({
                   </div>
                 </div>
 
-                {/* Login Time */}
+                {/* Start & End Time */}
                 <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-500">Start</span>
-                    <span className="text-xs font-medium whitespace-nowrap">
-                      {format(
-                        new Date(session.startTime),
-                        "MMM dd, yyyy hh:mm a"
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Logout Time */}
-                <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-500">End</span>
-                    {session.endTime ? (
+                    <span className="text-xs text-gray-500">Start / End</span>
+                    <div className="flex flex-col gap-0.5">
                       <span className="text-xs font-medium whitespace-nowrap">
                         {format(
-                          new Date(session.endTime),
+                          new Date(session.startTime),
                           "MMM dd, yyyy hh:mm a"
                         )}
                       </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">N/A</span>
-                    )}
+                      {session.endTime ? (
+                        <span className="text-xs font-medium whitespace-nowrap">
+                          {format(
+                            new Date(session.endTime),
+                            "MMM dd, yyyy hh:mm a"
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">N/A</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -245,40 +209,23 @@ const SessionRow = ({
                   session.deviceType ||
                   session.operatingSystem) && (
                   <div className="flex-shrink-0 min-w-[180px] max-w-[220px]">
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1">
                       <span className="text-xs text-gray-500">Environment</span>
-                      <div className="flex flex-wrap items-center gap-1.5">
+                      <div className="flex flex-col gap-0.5 text-xs">
                         {session.browserName && (
-                          <Badge
-                            className={`${getBrowserBadgeColor(
-                              session.browserName
-                            )} text-xs px-2 py-0.5 whitespace-nowrap`}
-                            title={`Browser: ${session.browserName}`}
-                          >
+                          <span className="text-gray-700">
                             {session.browserName}
-                          </Badge>
+                          </span>
                         )}
                         {session.deviceType && (
-                          <Badge
-                            className={`${getDeviceBadgeColor(
-                              session.deviceType
-                            )} text-xs px-2 py-0.5 whitespace-nowrap capitalize`}
-                            title={`Device: ${session.deviceType}`}
-                          >
-                            <span className="capitalize">
-                              {session.deviceType}
-                            </span>
-                          </Badge>
+                          <span className="text-gray-700 capitalize">
+                            {session.deviceType}
+                          </span>
                         )}
                         {session.operatingSystem && (
-                          <Badge
-                            className={`${getOSBadgeColor(
-                              session.operatingSystem
-                            )} text-xs px-2 py-0.5 whitespace-nowrap`}
-                            title={`OS: ${session.operatingSystem}`}
-                          >
+                          <span className="text-gray-700">
                             {session.operatingSystem}
-                          </Badge>
+                          </span>
                         )}
                       </div>
                     </div>

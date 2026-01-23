@@ -176,6 +176,7 @@ export type KycDataStorage = {
     annualGrossIncome: string
     residentialStatus: string
     confirmPersonalInfoTimestamp: string
+    otherOccupationName?: string
   }
   step_3: Array<{
     bankName: string
