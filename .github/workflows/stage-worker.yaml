@@ -94,6 +94,9 @@ jobs:
           echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
+
+          echo "RFQ_CBRICS_ENV=UAT" >> .env
+          echo "CBRICS_ENV=UAT" >>
     
 
         
