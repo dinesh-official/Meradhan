@@ -62,6 +62,23 @@ export class KraWorkerService {
 
       const status = checkKraProcessCheckStatus(res as T_APP_PAN_INQ);
 
+      if (status == "REJECTED") {
+        await db.dataBase.customerProfileDataModel.update({
+          where: { id: customerId },
+          data: { kycStatus: "UNDER_REVIEW", kraStatus: "REJECTED" },
+        });
+        await db.dataBase.kraDataLogs.create({
+          data: {
+            kycId: kycDataStoreId,
+            userId: customerId,
+            stage: "KRA_REJECTED",
+            reqTime: new Date().toISOString(),
+            resTime: new Date().toISOString(),
+          },
+        });
+        return;
+      }
+
       if (status == "ERROR") {
         throw new Error("KRA Process encountered an error.");
       }
@@ -227,9 +244,7 @@ export class KraProcess {
       "_" +
       "ENQUIRY" +
       "_" +
-      (enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS ||
-        enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS ||
-        enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR);
+      (enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS || enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS || enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR);
 
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
@@ -381,11 +396,19 @@ export class KraProcess {
         APP_IPV_DATE: p.APP_IPV_DATE,
         APP_IPV_FLAG: "E",
         APP_KYC_MODE: p.APP_KYC_MODE,
+        APP_REGNO: p.APP_REGNO,
+        APP_DOI_DT: p.APP_DOI_DT,
+        APP_COMMENCE_DT: p.APP_COMMENCE_DT,
+        APP_OTH_NATIONALITY: p.APP_OTH_NATIONALITY,
+
         APP_MOBILE_NO: env.KRA_MOB_NO,
+        APP_MOB_NO: removeCountryCode(data?.user?.phoneNo || customer?.phoneNo),
+
         APP_NAME: p.APP_NAME,
         APP_NATIONALITY: p.APP_NATIONALITY,
         APP_NO: p.APP_NO,
         APP_OCC: p.APP_OCC,
+        APP_OTH_OCC: p.APP_OTH_OCC,
 
         APP_PAN_COPY: p.APP_PAN_COPY,
         APP_PAN_NO: p.APP_PAN_NO,
@@ -407,6 +430,27 @@ export class KraProcess {
         APP_PER_ADD_DT: p.APP_PER_ADD_DT,
         APP_PER_ADD_REF: p.APP_PER_ADD_REF,
         APP_MAR_STATUS: p.APP_MAR_STATUS,
+        APP_BRANCH_CODE: p.APP_BRANCH_CODE,
+        APP_NETWRTH: p.APP_NETWRTH,
+        APP_NETWORTH_DT: p.APP_NETWORTH_DT,
+        APP_INCORP_PLC: p.APP_INCORP_PLC,
+        APP_OTHERINFO: p.APP_OTHERINFO,
+        APP_FILLER1: p.APP_FILLER1,
+        APP_FILLER2: p.APP_FILLER2,
+        APP_FILLER3: p.APP_FILLER3,
+        APP_COMP_STATUS: p.APP_COMP_STATUS,
+        APP_DNLDDT: "",
+        APP_DUMP_TYPE: p.APP_DUMP_TYPE,
+        APP_KRA_INFO: p.APP_KRA_INFO,
+        APP_SIGNATURE: p.APP_SIGNATURE,
+        APP_FATCA_COUNTRY_RES: p.APP_FATCA_COUNTRY_RES,
+        APP_FAX_NO: p.APP_FAX_NO,
+        APP_INTERNAL_REF: p.APP_INTERNAL_REF,
+        APP_OTH_COMP_STATUS: p.APP_OTH_COMP_STATUS,
+        APP_RES_STATUS_PROOF: p.APP_RES_STATUS_PROOF,
+        APP_OFF_NO: p.APP_OFF_NO,
+        APP_RES_NO: p.APP_RES_NO,
+
       },
 
       fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
