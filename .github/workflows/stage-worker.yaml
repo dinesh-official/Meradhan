@@ -96,7 +96,7 @@ jobs:
           echo "PORT=4000" >> .env
 
           echo "RFQ_CBRICS_ENV=UAT" >> .env
-          echo "CBRICS_ENV=UAT" >>
+          echo "CBRICS_ENV=UAT" >>  .env
     
 
         
