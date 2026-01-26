@@ -3,7 +3,6 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import Client from "./client";
 
 import { SharePopupViewProvider } from "@/global/module/share/SharePopupView";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { headers } from "next/headers";
 import Script from "next/script";
 
@@ -128,14 +127,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         <NextTopLoader color="#002c59" />
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <NuqsAdapter>
-            <Client>
-              {children}
-              <SharePopupViewProvider />
-            </Client>
-          </NuqsAdapter>
-        </AppRouterCacheProvider>
+        <NuqsAdapter>
+          <Client>
+            {children}
+            <SharePopupViewProvider />
+          </Client>
+        </NuqsAdapter>
         <Script
           type="text/javascript"
           src="https://app.digio.in/sdk/v11/digio.js"

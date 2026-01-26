@@ -2,9 +2,7 @@
 
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
-import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { BondListCard } from "@/global/components/Bond/BondListCard";
-import { useIsMobile } from "@/hooks/use-mobile";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import Carousel from "react-multi-carousel";
