@@ -7,26 +7,38 @@ import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
 import { KraProcess } from "./KraWorker.service";
 
 export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
-  const status =
-    response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS?.toLowerCase().trim();
-  const updtStatus =
-    response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS?.toLowerCase().trim();
+  const status = response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS?.toLowerCase().trim();
+  const updtStatus = response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS?.toLowerCase().trim();
 
-  if (!status) {
-    if (!response?.APP_RES_ROOT?.APP_PAN_INQ.ERROR?.trim()) {
-      return "REGISTER";
-    }
+  // Fix 3: Handle "Validation Pending with CAMS, CVL, KARVY, NSE, BSE KRA" suffix
+  // This suffix is added when other KRAs' web services are down
+  if (status?.includes("validation pending with") || updtStatus?.includes("validation pending with")) {
+    return "WAITING";
   }
 
-  if (response?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR) {
+  // Check for ERROR - only treat non-empty strings as errors
+  const error = response?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR;
+  if (error && typeof error === "string" && error.trim().length > 0) {
     return "ERROR";
   }
 
+  // Fix 1: If APP_STATUS = "Validated at ..." AND APP_UPDT_STATUS = "KYC Rejted at ..."
+  // Don't trigger CBRICS Register (modification was rejected, but original KYC is validated)
   if (
-    status?.startsWith("not available") ||
-    status?.includes("not available")
+    status?.includes("validated") &&
+    (updtStatus?.includes("rejted") || updtStatus?.includes("rejected"))
   ) {
-    return "REGISTER";
+    return "AVAILABLE"; // KYC exists and is validated, but modification was rejected - don't register again
+  }
+
+  // Fix 2: Handle 3rd party validation in process
+  // If status is "underprocess at [KRA]" and KYC is validated or rejected,
+  // we need to download first, then modify. Return WAITING to trigger download workflow.
+  if (
+    status?.includes("underprocess") &&
+    (updtStatus?.includes("validated") || updtStatus?.includes("rejted") || updtStatus?.includes("rejected"))
+  ) {
+    return "WAITING"; // Need to download first before modification
   }
 
   // PENDING -
@@ -46,19 +58,36 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
     return "AVAILABLE";
   }
 
-  // FAILED (explicit) - Register Failed
-  if (status?.includes("rejted") || status?.includes("rejected")) {
+  // 7) Success
+  if (
+    status?.includes("validated at") ||
+    status?.includes("registd")
+  ) {
     return "AVAILABLE";
   }
 
   // SUCCESS -
   if (
     status?.startsWith("kyc registd") ||
-    status?.startsWith("kyc validated")
+    status?.startsWith("kyc validated") ||
+    status?.endsWith("registd") || // Handles "CVLMF Registd" and other variants
+    status?.includes(" registd ") || // Handles cases with spaces around "registd"
+    status?.includes(" registd at") // Handles "KYC Registd at [KRA]"
   ) {
     return "AVAILABLE";
   }
 
+  // FAILED (explicit) - Register Failed
+  if (status?.includes("rejted") || status?.includes("rejected")) {
+    return "AVAILABLE";
+  }
+
+  if (
+    status?.startsWith("not available") ||
+    status?.includes("not available")
+  ) {
+    return "REGISTER";
+  }
 
 
   // Default fallback -

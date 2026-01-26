@@ -43,10 +43,7 @@ export class KraSDK {
         ? "https://kra.ndml.in/okra-iop/services/OkraServiceImpl"
         : "https://pilot.kra.ndml.in/okra-iop/services/OkraServiceImpl";
 
-    this.panServiceUrl =
-      this.env === "PROD"
-        ? "https://kra.ndml.in/sms-ws/PANServiceImplService"
-        : "https://pilot.kra.ndml.in/sms-ws/PANServiceImplService";
+    this.panServiceUrl = this.env === "PROD" ? "https://kra.ndml.in/sms-ws/PANServiceImplService" : "https://pilot.kra.ndml.in/sms-ws/PANServiceImplService";
   }
 
   public async init() {

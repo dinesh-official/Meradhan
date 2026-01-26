@@ -62,7 +62,7 @@ export default function BondIsinView({
               <PiCurrencyInrBold /> {formatNumberTS(bond.faceValue)}
             </SortInfoBox>
             <SortInfoBox title="Coupon Rate">{bond.couponRate}%</SortInfoBox>
-            <SortInfoBox title="Yield">Coming Soon</SortInfoBox>
+            <SortInfoBox title="Yield">{bond.yield !== null && bond.yield !== undefined ? `${bond.yield}%` : "Coming Soon"}</SortInfoBox>
             <SortInfoBox title="Last Traded Yield">Coming Soon</SortInfoBox>
             <SortInfoBox title="Last Traded Price">Coming Soon</SortInfoBox>
             <SortInfoBox title="Allotment Date">
