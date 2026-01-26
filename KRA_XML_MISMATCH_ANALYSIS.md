@@ -52,3 +52,4 @@ All other 79 fields are present in both:
 - Template: `packages/kyc-providers/src/kra/KraXMLBuilder.ts` (lines 347-437)
 - Sample files: `packages/kyc-providers/src/kra/_docs/api/Sample Request and Response/`
 
+
