@@ -25,7 +25,7 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
   // Fix 1: If APP_STATUS = "Validated at ..." AND APP_UPDT_STATUS = "KYC Rejted at ..."
   // Don't trigger CBRICS Register (modification was rejected, but original KYC is validated)
   if (
-    status?.includes("validated at") &&
+    status?.includes("validated") &&
     (updtStatus?.includes("rejted") || updtStatus?.includes("rejected"))
   ) {
     return "AVAILABLE"; // KYC exists and is validated, but modification was rejected - don't register again
@@ -53,14 +53,16 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
     return "WAITING";
   }
 
-  if (
-    status?.startsWith("not available") ||
-    status?.includes("not available")
-  ) {
-    return "REGISTER";
-  }
 
   if (status?.includes("kyc validated")) {
+    return "AVAILABLE";
+  }
+
+  // 7) Success
+  if (
+    status?.includes("validated at") ||
+    status?.includes("registd")
+  ) {
     return "AVAILABLE";
   }
 
@@ -79,6 +81,14 @@ export const checkKraProcessCheckStatus = (response: T_APP_PAN_INQ) => {
   if (status?.includes("rejted") || status?.includes("rejected")) {
     return "AVAILABLE";
   }
+
+  if (
+    status?.startsWith("not available") ||
+    status?.includes("not available")
+  ) {
+    return "REGISTER";
+  }
+
 
   // Default fallback -
   return "REGISTER";
