@@ -130,28 +130,52 @@ export class KraWorkerService {
         if (isMatched) {
           await delay(5000);
           try {
-            const cbUser = await cbricsManager.registerParticipant(customerId);
-            await db.dataBase.customerProfileDataModel.update({
-              where: { id: customerId },
-              data: {
-                kycStatus: "VERIFIED",
-                kraStatus: "VERIFIED",
-                verifyDate: new Date(),
-              },
-            });
-            await db.dataBase.kraDataLogs.create({
-              data: {
-                requestData: {
-                  customerId: customerId,
+            try {
+              const cbUser =
+                await cbricsManager.registerParticipant(customerId);
+              await db.dataBase.customerProfileDataModel.update({
+                where: { id: customerId },
+                data: {
+                  kycStatus: "VERIFIED",
+                  kraStatus: "VERIFIED",
+                  verifyDate: new Date(),
                 },
-                responseData: cbUser,
-                userId: customer.id,
-                kycId: kycDataStoreId,
-                stage: "REGISTER",
-                reqTime: new Date().toISOString(),
-                resTime: new Date().toISOString(),
-              },
-            });
+              });
+              await db.dataBase.kraDataLogs.create({
+                data: {
+                  requestData: {
+                    customerId: customerId,
+                  },
+                  responseData: cbUser,
+                  userId: customer.id,
+                  kycId: kycDataStoreId,
+                  stage: "CBRICS_REGISTER_SUCCESS",
+                  reqTime: new Date().toISOString(),
+                  resTime: new Date().toISOString(),
+                },
+              });
+            } catch (error) {
+              const err = error as AxiosError;
+              await db.dataBase.customerProfileDataModel.update({
+                where: { id: customerId },
+                data: {
+                  kraStatus: "CBRICS PENDING",
+                },
+              });
+              await db.dataBase.kraDataLogs.create({
+                data: {
+                  requestData: {
+                    customerId: customerId,
+                  },
+                  responseData: err.response?.data || err.message,
+                  userId: customer.id,
+                  kycId: kycDataStoreId,
+                  stage: "KRA COMPLETED - ERROR_CBRICS_REGISTER",
+                  reqTime: new Date().toISOString(),
+                  resTime: new Date().toISOString(),
+                },
+              });
+            }
           } catch (error) {
             await db.dataBase.kraDataLogs.create({
               data: {
@@ -492,7 +516,6 @@ export class KraProcess {
         APP_OFF_NO: p.APP_OFF_NO,
         APP_RES_NO: p.APP_RES_NO,
       },
-
       fatcaAdditionalDetails: payload.FATCA_ADDL_DTLS,
     };
 
