@@ -143,6 +143,11 @@ const kraState = [
     code: 21,
   },
   {
+    id: 24,
+    state: "Odisha",
+    code: 21,
+  },
+  {
     // depricated this name
     id: 25,
     state: "Pondicherry",
