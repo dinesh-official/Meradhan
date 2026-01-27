@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const fetchUserSession = async (token: string) => {
   try {
-    const sessionResponse = fetch(
+    const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_HOST_URL}/api/customer/session`,
       {
         method: "GET",
@@ -13,7 +13,11 @@ const fetchUserSession = async (token: string) => {
           "Content-Type": "application/json",
         },
       },
-    ).then((res) => res.json());
+    );
+    if (res.status != 200) {
+      throw new Error("Session expired");
+    }
+    const sessionResponse = await res.json();
     return sessionResponse as Promise<UserSessionDataResponse>;
   } catch (error) {
     throw error;
@@ -61,7 +65,7 @@ export async function middleware(request: NextRequest) {
       } catch (error) {
         console.log(error);
 
-        const response = NextResponse.redirect(new URL("/login", origin), {
+        const response = NextResponse.redirect(new URL("/logout", origin), {
           headers: requestHeaders,
         });
 
@@ -69,7 +73,7 @@ export async function middleware(request: NextRequest) {
         return response;
       }
     } else {
-      const response = NextResponse.redirect(new URL("/logout", origin), {
+      const response = NextResponse.redirect(new URL("/login", origin), {
         headers: requestHeaders,
       });
       return response;
