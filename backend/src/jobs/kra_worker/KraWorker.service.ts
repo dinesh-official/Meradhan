@@ -35,7 +35,7 @@ export class KraWorkerService {
   async processKra(data: KraWorkerJobData) {
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
 
-    const lastTask = await cacheStorage.get(cachedKey);
+    const lastTask = await cacheStorage.get<string>(cachedKey);
     const { customerId, kycDataStoreId } = data;
 
     try {
@@ -60,10 +60,11 @@ export class KraWorkerService {
         customer,
       });
 
-      const status = checkKraProcessCheckStatus(res as T_APP_PAN_INQ);
+      const status = checkKraProcessCheckStatus(res as T_APP_PAN_INQ, lastTask);
 
       // FAILED (explicit) - Modify Failed
-      const isRejected = status.includes("rejted") || status.includes("rejected");
+      const isRejected =
+        status.includes("rejted") || status.includes("rejected");
 
       if (isRejected && lastTask != null) {
         // update customer profile data - set kyc status to under review and kra status to rejected
@@ -185,7 +186,10 @@ export class KraWorkerService {
       return res;
     } catch (err) {
       console.error("KRA PROCESS FAILED - Rescheduling the job");
-      console.error("KRA PROCESS FAILED - ", (err as AxiosError)?.response?.data);
+      console.error(
+        "KRA PROCESS FAILED - ",
+        (err as AxiosError)?.response?.data,
+      );
       if (lastTask) {
         await cacheStorage.set(cachedKey, lastTask, TTL_28_HOURS);
       }
@@ -200,7 +204,30 @@ export class KraWorkerService {
           responseData: {
             error: "KRA Process encountered an error. Rescheduling the job",
             httpStatus: (err as AxiosError)?.response?.status,
-            message: ((err as AxiosError)?.response?.data as { message?: string, error?: string, errors?: { message?: string }[] })?.message?.toString() || ((err as AxiosError)?.response?.data as { message?: string, error?: string, errors?: { message?: string }[] })?.error?.toString() || ((err as AxiosError)?.response?.data as { message?: string, error?: string, errors?: { message?: string }[] })?.errors?.[0]?.message?.toString() || (err as Error)?.message?.toString() || "Request Failed",
+            message:
+              (
+                (err as AxiosError)?.response?.data as {
+                  message?: string;
+                  error?: string;
+                  errors?: { message?: string }[];
+                }
+              )?.message?.toString() ||
+              (
+                (err as AxiosError)?.response?.data as {
+                  message?: string;
+                  error?: string;
+                  errors?: { message?: string }[];
+                }
+              )?.error?.toString() ||
+              (
+                (err as AxiosError)?.response?.data as {
+                  message?: string;
+                  error?: string;
+                  errors?: { message?: string }[];
+                }
+              )?.errors?.[0]?.message?.toString() ||
+              (err as Error)?.message?.toString() ||
+              "Request Failed",
           },
           stage: "KRA_FAILED_REQUEST ",
           reqTime: new Date().toISOString(),
@@ -257,7 +284,9 @@ export class KraProcess {
       "_" +
       "ENQUIRY" +
       "_" +
-      (enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS || enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS || enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR);
+      (enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS ||
+        enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS ||
+        enquiry?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR);
 
     const resTime = new Date().toISOString();
     await db.dataBase.customerProfileDataModel.update({
@@ -333,7 +362,8 @@ export class KraProcess {
     const payload = this.buildRegisterPayload(data, customer);
     const cachedKey = `KRA:${customer.id}-${kycdataId}`;
     const report = await this.kraInstance.panRegisterUploadKraXML(payload);
-    const kraStatus = "REGISTER_" + report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS;
+    const kraStatus =
+      "REGISTER_" + report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS;
     const resTime = new Date().toISOString();
 
     await db.dataBase.customerProfileDataModel.update({
@@ -474,10 +504,17 @@ export class KraProcess {
 
     console.log("KRA MODIFY REPORT", report);
 
-
     const resTime = new Date().toISOString();
 
-    const kraStatus = "MODIFY_" + ((report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC as { ERROR?: string })?.ERROR || report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC || report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS || report?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR || "REQUEST");
+    const kraStatus =
+      "MODIFY_" +
+      ((
+        report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC as { ERROR?: string }
+      )?.ERROR ||
+        report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS_DESC ||
+        report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS ||
+        report?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR ||
+        "REQUEST");
 
     await db.dataBase.kraDataLogs.create({
       data: {
@@ -498,7 +535,6 @@ export class KraProcess {
         kraStatus: kraStatus,
       },
     });
-
 
     return report;
   }
@@ -582,9 +618,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-          data.step_1.pan.response.details.aadhaar.current_address_details
-            .state,
-        )?.code
+            data.step_1.pan.response.details.aadhaar.current_address_details
+              .state,
+          )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
@@ -611,10 +647,15 @@ export class KraProcess {
       APP_OTH_PER_STATE: "",
       APP_PER_CTRY: getKraCountry("india")?.code,
       APP_PER_ADD_PROOF: "31",
-      APP_PER_ADD_REF: data?.step_1?.pan?.response?.details?.aadhaar?.id_number?.replaceAll("x", "") || "",
+      APP_PER_ADD_REF:
+        data?.step_1?.pan?.response?.details?.aadhaar?.id_number?.replaceAll(
+          "x",
+          "",
+        ) || "",
       APP_PER_ADD_DT: "",
       APP_INCOME: "",
-      APP_OCC: occCode[data.step_2.occupationType as keyof typeof occCode] || "",
+      APP_OCC:
+        occCode[data.step_2.occupationType as keyof typeof occCode] || "",
       APP_OTH_OCC: data.step_2?.otherOccupationName || "",
       APP_POL_CONN: "NA",
       APP_DOC_PROOF: "T",
@@ -649,7 +690,8 @@ export class KraProcess {
       NO_OF_FATCA_ADDL_DTLS_RECORDS: data.step_1?.pan?.isFatca ? "0" : "1",
     };
 
-    const fatca = [] as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"]["FATCA_ADDL_DTLS"];
+    const fatca =
+      [] as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"]["FATCA_ADDL_DTLS"];
     if (!data.step_1?.pan?.isFatca) {
       fatca.push({
         APP_FATCA_ENTITY_PAN: panNo,
