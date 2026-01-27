@@ -1,30 +1,27 @@
-import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper"
+import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 import { cacheStorage } from "@store/redis_store";
 
-const users = [
-    { "userId": 50, "kycId": 254 },
-    { "userId": 45, "kycId": 217 },
-    { "userId": 51, "kycId": 273 },
-]
+const user = { userId: 50, kycId: 254 };
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const main = async () => {
-
-    users.forEach(async (user) => {
-        await cacheStorage.delete(`KRA:${user.userId}-${user.kycId}`).then(async () => {
-            console.log("Processing user ${user.userId} with kycId ${user.kycId}...");
-            await addKraWorkerJob({
-                customerId: user.userId,
-                kycDataStoreId: user.kycId,
-                stage: "ENQUIRY_KRA"
-            }, 5000);
-            await delay(3000);
-            console.log(`Added job for user ${user.userId} with kycId ${user.kycId}`);
-        })
-
+  await cacheStorage
+    .delete(`KRA:${user.userId}-${user.kycId}`)
+    .then(async () => {
+      console.log("Processing user ${user.userId} with kycId ${user.kycId}...");
+      await addKraWorkerJob(
+        {
+          customerId: user.userId,
+          kycDataStoreId: user.kycId,
+          stage: "ENQUIRY_KRA",
+        },
+        5000,
+      );
+      await delay(3000);
+      console.log(`Added job for user ${user.userId} with kycId ${user.kycId}`);
     });
-    console.log("All jobs added successfully");
-}
+  console.log("All jobs added successfully");
+};
 
 main();
