@@ -7,6 +7,7 @@ import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 import fs from "fs";
 import path from "path";
 import logger from "@utils/logger/logger";
+import multer from "multer";
 
 const s3 = new S3Client({
   region: env.S3_REGION,
@@ -97,7 +98,7 @@ commonApiRoutes.get("/files-public/*path", async (req, res) => {
     const code =
       typeof err === "object" && err && "$metadata" in err
         ? (err as { $metadata?: { httpStatusCode?: number } }).$metadata
-            ?.httpStatusCode
+          ?.httpStatusCode
         : undefined;
     const name =
       typeof err === "object" && err && "name" in err
@@ -171,7 +172,7 @@ commonApiRoutes.all(
       const code =
         typeof err === "object" && err && "$metadata" in err
           ? (err as { $metadata?: { httpStatusCode?: number } }).$metadata
-              ?.httpStatusCode
+            ?.httpStatusCode
           : undefined;
       const name =
         typeof err === "object" && err && "name" in err
@@ -280,6 +281,14 @@ commonApiRoutes.get(
       res.status(500).json({ message: "File access error" });
     }
   }
+);
+
+const uploadMemory = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
+});
+commonApiRoutes.post("/api/files/upload", allowAccessMiddleware("ADMIN", "USER"), uploadMemory.single("file"), (req, res) =>
+  commonApiController.uploadFilesS3(req, res)
 );
 
 export default commonApiRoutes;

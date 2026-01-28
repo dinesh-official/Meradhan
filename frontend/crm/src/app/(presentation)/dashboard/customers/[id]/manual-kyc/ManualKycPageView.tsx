@@ -10,6 +10,9 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { Spinner } from "@/components/ui/spinner";
 import { ManualKycFormData } from "../../manual-kyc/_types/manualKycForm.types";
 import { encodeId } from "@/global/utils/url.utils";
+import { useKycDataStorage } from "./store/useKycDataStorage";
+import { mapFormDataToKycStorage, mapKycStorageToFormData } from "./store/kycStoreFormMappers";
+import { useEffect, useMemo } from "react";
 
 interface ManualKycPageViewProps {
   customerId: number;
@@ -203,6 +206,7 @@ function mapCustomerDataToKycForm(customer: CustomerByIdPayload): Partial<Manual
 export default function ManualKycPageView({ customerId }: ManualKycPageViewProps) {
   const router = useRouter();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
+  const { state: storeState, setState: setStoreState } = useKycDataStorage();
 
   const { data: customerData, isLoading } = useQuery({
     queryKey: ["customerForManualKyc", customerId],
@@ -211,6 +215,43 @@ export default function ManualKycPageView({ customerId }: ManualKycPageViewProps
       return data.responseData;
     },
   });
+
+  // Hydrate store from customer when data loads (run once per customer)
+  useEffect(() => {
+    if (!customerData) return;
+    const formFromCustomer = mapCustomerDataToKycForm(customerData);
+    console.log("formFromCustomer", formFromCustomer);
+    const current = useKycDataStorage.getState().state;
+    setStoreState(mapFormDataToKycStorage(formFromCustomer, current));
+  }, [customerData, setStoreState]);
+
+  // Initial form data: from store merged with customer; step1 auto-filled from customer (firstName, lastName, email, username)
+  const initialFormData = useMemo((): Partial<ManualKycFormData> => {
+    if (!customerData) return {};
+    const fromStore = mapKycStorageToFormData(storeState);
+    const fromCustomer = mapCustomerDataToKycForm(customerData);
+    return {
+      ...fromCustomer,
+      ...fromStore,
+      step1: {
+        ...fromStore.step1,
+        ...fromCustomer.step1,
+        firstName: fromCustomer.step1?.firstName ?? fromStore.step1?.firstName ?? "",
+        lastName: fromCustomer.step1?.lastName ?? fromStore.step1?.lastName ?? "",
+        emailAddress: fromCustomer.step1?.emailAddress ?? fromStore.step1?.emailAddress ?? "",
+        username: fromCustomer.step1?.username ?? fromStore.step1?.username ?? "",
+        gender: fromCustomer.step1?.gender ?? fromStore.step1?.gender ?? "",
+      },
+      step3: fromCustomer.step3,
+      step9: fromCustomer.step9,
+      step10: fromCustomer.step10,
+    };
+  }, [customerData, storeState]);
+
+  const handleFormDataChange = (formData: ManualKycFormData) => {
+    const current = useKycDataStorage.getState().state;
+    setStoreState(mapFormDataToKycStorage(formData, current));
+  };
 
   const handleSuccess = () => {
     toast.success("KYC data submitted successfully");
@@ -234,8 +275,6 @@ export default function ManualKycPageView({ customerId }: ManualKycPageViewProps
     );
   }
 
-  const initialFormData = mapCustomerDataToKycForm(customerData);
-
   return (
     <div className="space-y-6">
       <PageInfoBar
@@ -249,7 +288,11 @@ export default function ManualKycPageView({ customerId }: ManualKycPageViewProps
           customerId={customerId}
           initialData={initialFormData}
           onSuccess={handleSuccess}
+          onFormDataChange={handleFormDataChange}
         />
+      </div>
+      <div className="flex justify-center items-center h-96">
+        {JSON.stringify(storeState)}
       </div>
     </div>
   );

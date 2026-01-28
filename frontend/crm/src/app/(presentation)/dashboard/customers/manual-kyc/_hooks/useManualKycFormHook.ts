@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ZodError } from "zod";
 import { parseError } from "@/core/error/parseError";
@@ -138,12 +138,18 @@ const initialFormData: ManualKycFormData = {
   },
 };
 
+export interface UseManualKycFormHookOptions {
+  /** When provided, called whenever formData changes (e.g. to sync to store). */
+  onFormDataChange?: (formData: ManualKycFormData) => void;
+}
+
 export const useManualKycFormHook = (
   customerId?: number,
-  initialData?: Partial<ManualKycFormData>
+  initialData?: Partial<ManualKycFormData>,
+  options?: UseManualKycFormHookOptions
 ) => {
   const [currentStep, setCurrentStep] = useState<ManualKycStep>(1);
-  
+
   // Merge initial data with default form data
   const mergedInitialData: ManualKycFormData = {
     step1: { ...initialFormData.step1, ...initialData?.step1 },
@@ -188,6 +194,13 @@ export const useManualKycFormHook = (
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Keep latest callback in a ref so effect only depends on formData (avoids infinite loop)
+  const onFormDataChangeRef = useRef(options?.onFormDataChange);
+  onFormDataChangeRef.current = options?.onFormDataChange;
+  React.useEffect(() => {
+    onFormDataChangeRef.current?.(formData);
+  }, [formData]);
+
   // Get validation schema for a specific step
   const getStepSchema = (step: ManualKycStep) => {
     switch (step) {
@@ -224,7 +237,7 @@ export const useManualKycFormHook = (
 
       try {
         let stepData = formData[`step${step}` as keyof ManualKycFormData];
-        
+
         // Auto-set timestamps if missing for steps that require them
         if (step === 2) {
           const step2Data = stepData as ManualKycFormData["step2"];
@@ -264,7 +277,7 @@ export const useManualKycFormHook = (
             stepData = updated as typeof stepData;
           }
         }
-        
+
         schema.parse(stepData);
         setErrors((prev) => {
           const newErrors = { ...prev };
@@ -389,7 +402,7 @@ export const useManualKycFormHook = (
       // Example API call:
       // const api = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
       // await api.updateCustomer(finalData, customerId?.toString() || "");
-      
+
       // For now, just log it
       console.log("Submitting KYC data:", finalData);
 

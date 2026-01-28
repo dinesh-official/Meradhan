@@ -17,6 +17,8 @@ interface FileUploadFieldProps {
   value?: string;
   /** Callback when file is selected or URL is provided */
   onChangeAction?: (fileUrl: string) => void;
+  /** When provided, file is uploaded immediately and onChangeAction receives the returned URL */
+  onUpload?: (file: File) => Promise<string | null>;
   /** Optional container class */
   className?: string;
   error?: string;
@@ -32,25 +34,34 @@ export function FileUploadField({
   disabled = false,
   value,
   onChangeAction,
+  onUpload,
   className,
   error,
   accept = "image/*,.pdf",
 }: FileUploadFieldProps) {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  const [uploading, setUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setSelectedFile(file);
-    
-    // Create a temporary object URL for preview
-    // In production, this should be uploaded to S3 and the URL should be set
+
+    if (onUpload && onChangeAction) {
+      setUploading(true);
+      try {
+        const url = await onUpload(file);
+        if (url) onChangeAction(url);
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
+
     const objectUrl = URL.createObjectURL(file);
-    
     if (onChangeAction) {
-      // For now, use the object URL. In production, upload to S3 and use the returned URL
       onChangeAction(objectUrl);
     }
   };
@@ -110,11 +121,11 @@ export function FileUploadField({
             type="button"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled}
+            disabled={disabled || uploading}
             className="flex items-center gap-2"
           >
             <Upload className="h-4 w-4" />
-            Select File
+            {uploading ? "Uploading…" : "Select File"}
           </Button>
           {value && (
             <Button
@@ -158,9 +169,11 @@ export function FileUploadField({
                 <span className="text-muted-foreground">
                   File selected: {selectedFile?.name || "Preview"}
                 </span>
-                <span className="text-xs text-yellow-600 ml-auto">
-                  (Upload file to get permanent URL)
-                </span>
+                {!onUpload && (
+                  <span className="text-xs text-yellow-600 ml-auto">
+                    (Upload file to get permanent URL)
+                  </span>
+                )}
               </>
             ) : (
               <>

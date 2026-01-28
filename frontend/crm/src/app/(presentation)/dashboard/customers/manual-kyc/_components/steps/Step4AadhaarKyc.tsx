@@ -4,6 +4,7 @@ import { InputField } from "@/global/elements/inputs/InputField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { useManualKycFormHook } from "../../_hooks/useManualKycFormHook";
+import { useUploadFileToS3 } from "../../_hooks/useUploadFileToS3";
 import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ interface Step4AadhaarKycProps {
 
 export function Step4AadhaarKyc({ formHook }: Step4AadhaarKycProps) {
   const { formData, updateStepData, getFieldError } = formHook;
+  const { uploadFile } = useUploadFileToS3();
 
   return (
     <div className="space-y-4">
@@ -96,6 +98,7 @@ export function Step4AadhaarKyc({ formHook }: Step4AadhaarKycProps) {
         onChangeAction={(e) =>
           updateStepData("step4", { documentFileUrl: e })
         }
+        onUpload={(file) => uploadFile(file, "kyc")}
         error={getFieldError(4, "documentFileUrl")}
       />
 

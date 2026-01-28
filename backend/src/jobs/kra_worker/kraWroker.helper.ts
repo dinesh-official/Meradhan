@@ -2,6 +2,7 @@ import {
   kraWorkerQueue,
   profileSubmitSettlementQueue,
 } from "@jobs/queue/worker_queues";
+import { cacheStorage } from "@store/redis_store";
 
 export interface KraWorkerJobData<T = Record<string, unknown>> {
   customerId: number;
@@ -14,6 +15,15 @@ export const addKraWorkerJob = async <T>(
   data: KraWorkerJobData<T>,
   delay?: number,
 ) => {
+
+  const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
+  const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
+  const runner = await cacheStorage.get<string>(cachedKey);
+
+  if (!runner) {
+    await cacheStorage.set(cachedKey, new Date().toISOString(), TTL_72_HOURS); // 72 hours
+  }
+
   return await kraWorkerQueue.add(data, {
     attempts: 1,
     delay: delay ?? 1 * 60 * 60 * 1000, // initial delay, 1 hr

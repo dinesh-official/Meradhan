@@ -1,6 +1,7 @@
 "use client";
 
 import { useManualKycFormHook } from "../../_hooks/useManualKycFormHook";
+import { useUploadFileToS3 } from "../../_hooks/useUploadFileToS3";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ interface Step10FileAttachmentsProps {
 
 export function Step10FileAttachments({ formHook }: Step10FileAttachmentsProps) {
   const { formData, updateStepData, getFieldError } = formHook;
+  const { uploadFile } = useUploadFileToS3();
 
   const attachments = formData.step10?.attachments || [];
 
@@ -100,6 +102,7 @@ export function Step10FileAttachments({ formHook }: Step10FileAttachmentsProps) 
               required
               value={formData.step10?.eSignDocument || ""}
               onChangeAction={handleESignFileChange}
+              onUpload={(file) => uploadFile(file, "kyc")}
               error={getFieldError(10, "eSignDocument")}
               accept="image/*,application/pdf"
             />
@@ -151,6 +154,7 @@ export function Step10FileAttachments({ formHook }: Step10FileAttachmentsProps) 
                     required
                     value={attachment.fileUrl}
                     onChangeAction={(e) => handleFileChange(index, e)}
+                    onUpload={(file) => uploadFile(file, "kyc")}
                     error={getFieldError(10, `attachments.${index}.fileUrl`)}
                     accept="image/*,application/pdf"
                   />

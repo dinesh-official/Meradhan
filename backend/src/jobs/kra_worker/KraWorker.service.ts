@@ -27,29 +27,56 @@ import type { AxiosError } from "axios";
 const cbricsManager = new ParticipantManager();
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-const TTL_28_HOURS = 72 * 60 * 60; // seconds = 100,800
+const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
+
 
 export class KraWorkerService {
   private kraProcess = new KraProcess();
 
   async processKra(data: KraWorkerJobData) {
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
+    const runnerCachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
+
 
     const lastTask = await cacheStorage.get<string>(cachedKey);
     const { customerId, kycDataStoreId } = data;
+    const runner = await cacheStorage.get<string>(runnerCachedKey);
+
+
+    if (!runner) {
+      await db.dataBase.kraDataLogs.create({
+        data: {
+          requestData: {
+            Message: "Timeout - KRA Process not running 72 hours completed",
+          },
+          responseData: {
+            error: "KRA Process 72 hours timeout",
+            message: "Timeout - KRA Process not running 72 hours completed",
+          },
+          userId: customerId,
+          kycId: kycDataStoreId,
+          stage: "TIMEOUT_KRA_PROCESS",
+          reqTime: new Date().toISOString(),
+          resTime: new Date().toISOString(),
+        },
+      });
+      return;
+    }
 
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
       });
-      if (!customer) throw new Error("Customer not found");
+      if (!customer) {
+        return;
+      }
 
       const payload = await db.dataBase.kYC_FLOW.findFirst({
         where: { id: kycDataStoreId, userID: customerId },
       });
 
       if (!payload) {
-        throw new Error("KYC payload not found or does not belong to user");
+        return;
       }
 
       const kyc = payload.data as Root;
@@ -63,10 +90,8 @@ export class KraWorkerService {
       const status = checkKraProcessCheckStatus(res as T_APP_PAN_INQ, lastTask);
 
       // FAILED (explicit) - Modify Failed
-      const isRejected =
-        status.includes("rejted") || status.includes("rejected");
 
-      if (isRejected && lastTask != null) {
+      if (status == "REJECTED") {
         // update customer profile data - set kyc status to under review and kra status to rejected
         await db.dataBase.customerProfileDataModel.update({
           where: { id: customerId },
@@ -90,11 +115,28 @@ export class KraWorkerService {
             resTime: new Date().toISOString(),
           },
         });
-        throw new Error("KRA Process rejected");
+        return;
       }
 
       if (status == "ERROR") {
-        throw new Error("KRA Process encountered an error.");
+        await db.dataBase.kraDataLogs.create({
+          data: {
+            requestData: {
+              Date: new Date().toISOString(),
+              Message: "Request Failed - KRA Process error",
+              LastTask: lastTask,
+              Status: status,
+              Error: "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
+            },
+            responseData: res,
+            userId: customerId,
+            kycId: kycDataStoreId,
+            stage: "KRA_FAILED_REQUEST",
+            reqTime: new Date().toISOString(),
+            resTime: new Date().toISOString(),
+          },
+        });
+        return;
       }
 
       if (status == "WAITING") {
@@ -203,7 +245,6 @@ export class KraWorkerService {
             customer,
           });
           await addKraWorkerJob(data);
-
           return;
         }
       }
@@ -215,7 +256,7 @@ export class KraWorkerService {
         (err as AxiosError)?.response?.data,
       );
       if (lastTask) {
-        await cacheStorage.set(cachedKey, lastTask, TTL_28_HOURS);
+        await cacheStorage.set(cachedKey, lastTask, TTL_72_HOURS);
       }
       await db.dataBase.kraDataLogs.create({
         data: {
@@ -339,7 +380,7 @@ export class KraProcess {
 
   async downloadKraReport({ customer, data, kycdataId }: processPayload) {
     const kraCachedKey = `KRA_DOWNLOAd:${customer.id}-${kycdataId}`;
-    const TTL_28_HOURS = 72 * 60 * 60; // seconds = 100,800
+    const TTL_72_HOURS = 72 * 60 * 60; // seconds = 100,800
     const reqTime = new Date().toISOString();
 
     const payload = {
@@ -353,7 +394,7 @@ export class KraProcess {
     };
 
     const report = await this.kraInstance.panDownloadDetailsComplete(payload);
-    await cacheStorage.set(kraCachedKey, report, TTL_28_HOURS); // 28 Hr
+    await cacheStorage.set(kraCachedKey, report, TTL_72_HOURS); // 28 Hr
 
     const kraStatus = `DOWNLOAD_KRA`;
 
@@ -412,7 +453,7 @@ export class KraProcess {
     });
 
     if (report.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS == "7") {
-      await cacheStorage.set(cachedKey, "REGISTER", TTL_28_HOURS); // 28 Hr
+      await cacheStorage.set(cachedKey, "REGISTER", TTL_72_HOURS); // 28 Hr
       console.log("KRA REGISTER SUBMITTED");
     }
 
@@ -521,7 +562,7 @@ export class KraProcess {
 
     const report = await this.kraInstance.panModifyKraXML(dataKraPayload);
     if (report?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS == "01") {
-      await cacheStorage.set(cachedKey, "MODIFY", TTL_28_HOURS);
+      await cacheStorage.set(cachedKey, "MODIFY", TTL_72_HOURS);
       console.log("KRA MODIFY SUBMITTED");
     }
 
@@ -641,9 +682,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-            data.step_1.pan.response.details.aadhaar.current_address_details
-              .state,
-          )?.code
+          data.step_1.pan.response.details.aadhaar.current_address_details
+            .state,
+        )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",

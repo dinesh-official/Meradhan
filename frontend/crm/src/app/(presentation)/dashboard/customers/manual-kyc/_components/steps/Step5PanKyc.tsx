@@ -2,7 +2,6 @@
 
 import { InputField } from "@/global/elements/inputs/InputField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
-import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { useManualKycFormHook } from "../../_hooks/useManualKycFormHook";
 import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -133,19 +132,6 @@ export function Step5PanKyc({ formHook }: Step5PanKycProps) {
           error={getFieldError(5, "gender")}
         />
       </div>
-
-      <FileUploadField
-        id="panDocumentFileUrl"
-        label="PAN Document"
-        placeholder="Select PAN document file or enter file URL"
-        required
-        accept="image/*,.pdf"
-        value={formData.step5.documentFileUrl}
-        onChangeAction={(e) =>
-          updateStepData("step5", { documentFileUrl: e })
-        }
-        error={getFieldError(5, "documentFileUrl")}
-      />
 
       <div className="flex items-center space-x-2">
         <Checkbox

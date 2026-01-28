@@ -57,12 +57,12 @@ export function Step7RiskProfile({ formHook }: Step7RiskProfileProps) {
   // Get current responses or initialize with questions
   const getResponses = (): RiskQuestion[] => {
     const responses = formData.step7.riskQuestionnaireResponses;
-    
+
     // If responses is an array, use it
     if (Array.isArray(responses) && responses.length > 0) {
       return responses as RiskQuestion[];
     }
-    
+
     // If responses is an object with question keys, convert to array
     if (typeof responses === "object" && responses !== null && !Array.isArray(responses)) {
       const questionMap: Record<number, RiskQuestion> = {};
@@ -76,7 +76,7 @@ export function Step7RiskProfile({ formHook }: Step7RiskProfileProps) {
       });
       return RISK_PROFILE_QUESTIONS.map((q) => questionMap[q.index] || q);
     }
-    
+
     // Default: return questions with empty answers
     return RISK_PROFILE_QUESTIONS;
   };
@@ -87,7 +87,7 @@ export function Step7RiskProfile({ formHook }: Step7RiskProfileProps) {
     const updated = responses.map((r) =>
       r.index === index ? { ...r, ans: answer } : r
     );
-    
+
     // Update form data in the expected format (array)
     updateStepData("step7", { riskQuestionnaireResponses: updated });
   };

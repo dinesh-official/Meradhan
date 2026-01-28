@@ -6,6 +6,7 @@ import axios from "axios";
 import type { Request, Response } from "express";
 import FormData from "form-data";
 import { PartnershipManagerService } from "@resource/crm/partnership/services/partnership_manager.service";
+import { putFileS3 } from "@modules/file_upload/s3_file_uploader";
 
 export class CommonApiController {
   async contactSubmit(req: Request, res: Response) {
@@ -131,6 +132,15 @@ export class CommonApiController {
 
     const fileBuffer = await downloadFile(fileUrl);
     const result = await uploadToStrapi(fileBuffer, filename);
+    res.send(result);
+  }
+
+  async uploadFilesS3(req: Request, res: Response) {
+    const file = req.file as Express.Multer.File;
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const result = await putFileS3(file.path, "kyc");
     res.send(result);
   }
 }

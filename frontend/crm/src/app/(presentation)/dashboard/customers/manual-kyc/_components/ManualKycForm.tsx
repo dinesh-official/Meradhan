@@ -20,6 +20,8 @@ interface ManualKycFormProps {
   customerId?: number;
   initialData?: Partial<import("../_types/manualKycForm.types").ManualKycFormData>;
   onSuccess?: () => void;
+  /** When provided, form changes are synced (e.g. to store). Used for [id]/manual-kyc. */
+  onFormDataChange?: (formData: import("../_types/manualKycForm.types").ManualKycFormData) => void;
 }
 
 const stepTitles = [
@@ -35,8 +37,8 @@ const stepTitles = [
   "File Attachments",
 ];
 
-export function ManualKycForm({ customerId, initialData, onSuccess }: ManualKycFormProps) {
-  const formHook = useManualKycFormHook(customerId, initialData);
+export function ManualKycForm({ customerId, initialData, onSuccess, onFormDataChange }: ManualKycFormProps) {
+  const formHook = useManualKycFormHook(customerId, initialData, { onFormDataChange });
 
   const { currentStep, goToNextStep, goToPreviousStep, submitForm, isSubmitting } =
     formHook;
@@ -106,13 +108,12 @@ export function ManualKycForm({ customerId, initialData, onSuccess }: ManualKycF
           return (
             <div
               key={stepNum}
-              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium ${
-                isActive
+              className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium ${isActive
                   ? "bg-primary text-primary-foreground"
                   : isCompleted
                     ? "bg-muted text-muted-foreground"
                     : "bg-background border text-muted-foreground"
-              }`}
+                }`}
             >
               {stepNum}. {title}
             </div>
