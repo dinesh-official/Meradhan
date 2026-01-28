@@ -33,8 +33,6 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if Node and npm are installed
-
 # Function to install dependencies with error handling
 install_dependencies() {
     local dir=$1
