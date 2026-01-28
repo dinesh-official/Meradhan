@@ -1,14 +1,12 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { userSessionStore } from "@/core/auth/userSessionStore";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
+import AuthActions from "./AuthActions";
 import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
-import AuthActions from "./AuthActions";
-
 function NavBar({
   session,
 }: {

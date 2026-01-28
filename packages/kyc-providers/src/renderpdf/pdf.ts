@@ -3,8 +3,8 @@ import { renderToBuffer, renderToFile } from "@react-pdf/renderer";
 import fs from "fs";
 import path from "path";
 import MdPdf from "../../pdf/MdPdf";
-import { mapAllPages } from "../../pdf/dataMapper";
 import { OrderPdf } from "../../pdf/OrderPdf";
+import { mapAllPages } from "../../pdf/dataMapper";
 
 export async function generateKycPdf(userData: any) {
   try {

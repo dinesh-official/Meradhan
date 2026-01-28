@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 export interface TCustomerFilterListHook {
   state: {
@@ -25,6 +25,14 @@ export const useCustomerFilterListHook = (): TCustomerFilterListHook => {
     setAccountKycStatus("");
     setAccountStatus("");
   }
+
+  useEffect(() => {
+    if (paginationIndex != 1) {
+      setPaginationIndex(1);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, accountStatus, accountKycStatus]);
   return {
     state: {
       resetAll,
