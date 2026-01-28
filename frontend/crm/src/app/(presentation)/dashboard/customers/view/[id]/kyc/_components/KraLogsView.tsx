@@ -93,6 +93,7 @@ function KraLogsView({ id }: { id: number }) {
                   <JsonView
                     data={log.responseData || {}}
                     style={defaultStyles}
+                    compactTopLevel={true}
                   />
                 </div>
               </div>
@@ -102,6 +103,7 @@ function KraLogsView({ id }: { id: number }) {
                   <JsonView
                     data={log.responseData || {}}
                     style={defaultStyles}
+                    compactTopLevel={true}
                   />
                 </div>
               )}
