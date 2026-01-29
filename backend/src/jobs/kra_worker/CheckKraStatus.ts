@@ -6,14 +6,21 @@ import {
 import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
 import { KraProcess } from "./KraWorker.service";
 
+
+const normalizeStatus = (status: string | undefined | null) => {
+  if (typeof status === "string") {
+    return status.toLowerCase().trim();
+  }
+  return undefined;
+};
+
 export const checkKraProcessCheckStatus = (
   response: T_APP_PAN_INQ,
   lastTask: string | undefined | null,
 ) => {
-  const status =
-    response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS?.toLowerCase().trim();
-  const updtStatus =
-    response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS?.toLowerCase().trim();
+  const status = normalizeStatus(response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS);
+  const updtStatus = normalizeStatus(response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS);
+
 
   // Fix 3: Handle "Validation Pending with CAMS, CVL, KARVY, NSE, BSE KRA" suffix
   // This suffix is added when other KRAs' web services are down
@@ -26,16 +33,19 @@ export const checkKraProcessCheckStatus = (
 
   // Check for ERROR - only treat non-empty strings as errors
   const error = response?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR;
-  if (error && typeof error === "string" && error.trim().length > 0) {
+  if (
+    error &&
+    typeof error === "string" &&
+    error.trim().length > 0 &&
+    !status?.includes("validated") &&
+    !status?.includes("registd")
+  ) {
     return "ERROR";
   }
 
   // Fix 1: If APP_STATUS = "Validated at ..." AND APP_UPDT_STATUS = "KYC Rejted at ..."
   // Don't trigger CBRICS Register (modification was rejected, but original KYC is validated)
-  if (
-    status?.includes("validated") &&
-    (updtStatus?.includes("rejted") || updtStatus?.includes("rejected"))
-  ) {
+  if (status?.includes("validated") && (updtStatus?.includes("rejted") || updtStatus?.includes("rejected"))) {
     if (lastTask) {
       return "ERROR"; // KYC exists and is validated, but modification was rejected - don't register again
     } else {
@@ -76,6 +86,11 @@ export const checkKraProcessCheckStatus = (
     return "AVAILABLE";
   }
 
+  // Must be BEFORE any "registd" checks
+  if (status?.includes("incomplete") || updtStatus?.includes("incomplete")) {
+    return "WAITING"; // or a separate state like "INCOMPLETE"
+  }
+
   // SUCCESS -
   if (
     status?.startsWith("kyc registd") ||
@@ -87,20 +102,25 @@ export const checkKraProcessCheckStatus = (
     return "AVAILABLE";
   }
 
-  // FAILED (explicit) - Register Failed
+  // FAILED (explicit) - KYC rejected at KRA; service will set customer to REJECTED and stop
   if (status?.includes("rejted") || status?.includes("rejected")) {
-    return "AVAILABLE";
+    if (lastTask) {
+      return "REJECTED";
+    }
+    return "WAITING";
   }
 
   if (
     status?.startsWith("not available") ||
     status?.includes("not available")
   ) {
+    if (lastTask == "REGISTER") return "WAITING";
+    if (lastTask == "MODIFY") return "ERROR";
     return "REGISTER";
   }
 
   // Default fallback -
-  return "REGISTER";
+  return "WAITING";
 };
 
 export const checkIsKraMatched = (
@@ -140,8 +160,10 @@ export const checkIsKraMatched = (
       "APP_PER_ADD3",
     ];
 
+
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const matchers = checkKey.map((e) => (check as any)[e] == kra[e]);
+  const matchers = checkKey.map((e) => normalizeStatus((check as any)[e])?.toLocaleLowerCase() == normalizeStatus(kra[e])?.toLocaleLowerCase());
 
   return Boolean(matchers.find((e) => e == false));
 };
