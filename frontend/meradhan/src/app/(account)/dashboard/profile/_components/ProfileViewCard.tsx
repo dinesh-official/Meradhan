@@ -56,8 +56,8 @@ function ProfileViewCard({
                 profile.kycStatus == "VERIFIED"
                   ? "text-black"
                   : profile.kycStatus == "UNDER_REVIEW"
-                  ? "text-yellow-600"
-                  : "text-red-600"
+                    ? "text-yellow-600"
+                    : "text-red-600",
               )}
             >
               {profile.kycStatus == "VERIFIED" ? (
@@ -86,7 +86,7 @@ function ProfileViewCard({
               <p className="text-[#666666] text-xs">
                 {dateTimeUtils.formatDateTime(
                   profile.verifyDate,
-                  "DD MMM YYYY"
+                  "DD MMM YYYY",
                 ) +
                   " | " +
                   dateTimeUtils.formatDateTime(profile.verifyDate, "hh:mm aa")}
@@ -96,12 +96,12 @@ function ProfileViewCard({
               <p className="text-[#666666] text-xs">
                 {dateTimeUtils.formatDateTime(
                   profile?.kycSubmitDate,
-                  "DD MMM YYYY"
+                  "DD MMM YYYY",
                 ) +
                   " | " +
                   dateTimeUtils.formatDateTime(
                     profile?.kycSubmitDate,
-                    "hh:mm aa"
+                    "hh:mm aa",
                   )}
               </p>
             )}
@@ -131,6 +131,17 @@ function ProfileViewCard({
               </Button>
             </Link>
           )}
+          {profile.kycStatus == "RE_KYC" && (
+            <Link href={`/dashboard/kyc`}>
+              <Button variant={`secondary`}>
+                Submit <span className="hidden md:inline-block">Your</span> RE
+                KYC
+                <div className="w-3 text-3xl">
+                  <RiArrowRightSFill className="w-4 h-5" size={33} />
+                </div>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -144,12 +155,12 @@ function ProfileViewCard({
           {profile.utility.lastLogin
             ? dateTimeUtils.formatDateTime(
                 profile.utility.lastLogin,
-                "DD MMM YYYY"
+                "DD MMM YYYY",
               ) +
               " | " +
               dateTimeUtils.formatDateTime(
                 profile.utility.lastLogin,
-                "hh:mm aa"
+                "hh:mm aa",
               )
             : "No data available"}
         </p>

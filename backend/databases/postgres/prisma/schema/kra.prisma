@@ -1,6 +1,6 @@
 model KraDataLogs {
     id           Int       @id @default(autoincrement())
-    userId       Int
+    userId       Int?
     kycId        Int
     requestData  Json?
     responseData Json?
@@ -8,9 +8,10 @@ model KraDataLogs {
     reqTime      DateTime  @default(now())
     resTime      DateTime?
     error        Json?
+
     /// Timestamps
-    createdAt    DateTime  @default(now())
-    updatedAt    DateTime  @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@map("kra_data_logs")
 }

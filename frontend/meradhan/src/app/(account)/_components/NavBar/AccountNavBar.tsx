@@ -93,6 +93,17 @@ function AccountNavBar({
               </Link>
             )}
 
+            {session?.kycStatus == "RE_KYC" && (
+              <Link href={`/dashboard/kyc`}>
+                <Button
+                  variant="secondaryLight"
+                  className="bg-blue-100 text-blue-800 hover:bg-blue-200 gap-2"
+                >
+                  <BiSolidFileFind /> KYC: Apply Re Kyc
+                </Button>
+              </Link>
+            )}
+
             {/* Icon Buttons */}
             <div className="flex items-center gap-8 sm:gap-5 lg:gap-10">
               {/* <button
@@ -141,7 +152,7 @@ export function ShowUserBadge(
     firstName: string;
     middleName: string;
     lastName: string;
-  } | null
+  } | null,
 ) {
   return (
     <DropdownMenu>
