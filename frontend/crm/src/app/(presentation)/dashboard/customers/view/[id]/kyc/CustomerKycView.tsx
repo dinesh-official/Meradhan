@@ -1,7 +1,6 @@
 "use client";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import ViewKycDataComponent from "./_components/ViewKycDataComponent";
-import CorporateKycView, { isNonIndividual } from "./_components/CorporateKycView";
 import { useQuery } from "@tanstack/react-query";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
@@ -36,24 +35,15 @@ function CustomerKycView({ id }: { id: number }) {
     );
   }
 
-  const title =
-    data.userType && isNonIndividual(data.userType)
-      ? `Corporate KYC - ${data.firstName || data.userType}`
-      : `KYC Data - ${data.firstName}`;
-
   return (
     <div className="flex flex-col gap-5">
       <PageInfoBar
-        title={title}
+        title={"KYC Data - " + data.firstName}
         description="Comprehensive KYC information and document verification status"
         showBack
       />
 
-      {data.userType && isNonIndividual(data.userType) ? (
-        <CorporateKycView data={data} />
-      ) : (
-        <ViewKycDataComponent data={data} />
-      )}
+      <ViewKycDataComponent data={data} />
     </div>
   );
 }
