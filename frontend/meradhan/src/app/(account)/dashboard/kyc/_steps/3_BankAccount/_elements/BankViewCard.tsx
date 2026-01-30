@@ -1,23 +1,26 @@
 "use client";
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { Checkbox } from "@/components/ui/checkbox";
-import { IoMdTrash } from "react-icons/io";
+import React from "react";
 import { KycDataStorage } from "../../../_store/useKycDataStorage";
+import { dataMatcherUtils } from "@/global/utils/matcher";
+import { IoMdTrash } from "react-icons/io";
 
 function BankViewCard({
   bank,
+  name,
   onDelete,
   setDefault,
-  status,
-  statusLabel,
 }: {
   bank: KycDataStorage["step_3"][number];
-  name?: string;
+  name: string;
   onDelete?: () => void;
   setDefault: () => void;
-  status?: "SUCCESS" | "ERROR" | "WARNING";
-  statusLabel?: string;
 }) {
+  const isNameMatched = dataMatcherUtils.areNamesMatched(
+    dataMatcherUtils.splitFullName(bank.beneficiary_name),
+    dataMatcherUtils.splitFullName(name)
+  );
   return (
     <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
       <div className="gap-5 grid sm:grid-cols-2">
@@ -38,9 +41,9 @@ function BankViewCard({
         </DataInfoLabel>
         <DataInfoLabel
           title="Name as per your bank account"
-          status={status}
-          statusLabel={statusLabel}
-          showStatus={status !== undefined}
+        // status={isNameMatched ? "SUCCESS" : "ERROR"}
+        // statusLabel={isNameMatched ? "Matched" : "Not Matched"}
+        // showStatus
         >
           <p className="font-medium text-sm">{bank.beneficiary_name}</p>
         </DataInfoLabel>

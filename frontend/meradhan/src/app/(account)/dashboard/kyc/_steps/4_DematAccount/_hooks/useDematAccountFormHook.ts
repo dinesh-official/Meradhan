@@ -59,13 +59,7 @@ export const useDematAccountFormHook = () => {
           details: {
             step: "Demat Account step",
             Reason: "User failed to verify the demat account details",
-            DepositoryName: state.step_4[indexAccount].depositoryName,
-            DpId: state.step_4[indexAccount].dpId,
-            BeneficiaryClientId: state.step_4[indexAccount].beneficiaryClientId,
-            AccountHolderName: state.step_4[indexAccount].accountHolderName,
-            AccountType: state.step_4[indexAccount].accountType,
-            IsVerified: true,
-            VerifyTimestamp: state.step_4[indexAccount].verifyTimestamp,
+            ...data,
           },
           entityType: "KYC",
         });
@@ -77,16 +71,7 @@ export const useDematAccountFormHook = () => {
           details: {
             step: "Demat Account step",
             Reason: "User failed to verify the demat account details",
-            DepositoryName: state.step_4[indexAccount].depositoryName,
-            DpId: state.step_4[indexAccount].dpId,
-            BeneficiaryClientId: state.step_4[indexAccount].beneficiaryClientId,
-            AccountHolderName: state.step_4[indexAccount].accountHolderName,
-            AccountType: state.step_4[indexAccount].accountType,
-            IsVerified: false,
-            VerifyTimestamp: state.step_4[indexAccount].verifyTimestamp,
-            StatusCode: data.responseData.status,
-            StatusDescription: statusCodes?.[data.responseData.status as keyof typeof statusCodes] || "Unknown status code",
-            Message: data.responseData.message,
+            ...data,
           },
           entityType: "KYC",
         });
@@ -95,9 +80,10 @@ export const useDematAccountFormHook = () => {
           desc:
             "Demat account verification failed during KYC process. " +
             `Status Code: ${data.responseData.status}, ` +
-            `Status Description: ${statusCodes?.[
-            data.responseData.status as keyof typeof statusCodes
-            ] || "Unknown status code"
+            `Status Description: ${
+              statusCodes?.[
+                data.responseData.status as keyof typeof statusCodes
+              ] || "Unknown status code"
             }`,
         });
         Swal.fire({
@@ -106,7 +92,7 @@ export const useDematAccountFormHook = () => {
           text:
             data.responseData.message ||
             statusCodes?.[
-            data.responseData.status as keyof typeof statusCodes
+              data.responseData.status as keyof typeof statusCodes
             ] ||
             "Something went wrong",
         });
