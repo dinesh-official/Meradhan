@@ -364,7 +364,6 @@ function IdentityValidationAadharInfo() {
               <Link
                 href="/docs/self_declaration_in_name_mismatch.pdf"
                 target="_blank"
-                download
               >
                 <Button
                   variant="defaultLight"

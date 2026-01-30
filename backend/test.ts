@@ -1,26 +1,14 @@
 import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 import { cacheStorage } from "@store/redis_store";
 
-const user = {
-  "userId": 54,
-  "kycId": 294,
-};
+const user = { userId: 50, kycId: 254 };
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const main = async () => {
-
-  const cachedKey = `KRA:${user.userId}-${user.kycId}`;
-  const pastExecution = ""; // MODIFY , REGISTER
-
   await cacheStorage
-    .delete(cachedKey)
+    .delete(`KRA:${user.userId}-${user.kycId}`)
     .then(async () => {
-
-      if (pastExecution && pastExecution !== "") {
-        await cacheStorage.set(cachedKey, pastExecution, 72 * 60 * 60);
-      }
-
       console.log("Processing user ${user.userId} with kycId ${user.kycId}...");
       await addKraWorkerJob(
         {
@@ -36,6 +24,4 @@ const main = async () => {
   console.log("All jobs added successfully");
 };
 
-
 main();
-

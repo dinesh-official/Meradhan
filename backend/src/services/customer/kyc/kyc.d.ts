@@ -242,39 +242,3 @@ export type KycDataStorage = {
   }
   stepIndex: number
 }
-
-/** Corporate / non-individual KYC data (company, trust, HUF, LLP, partnership) */
-export type CorporateKycDataStorage = {
-  kycType: "CORPORATE"
-  /** Company / entity name */
-  companyName: string
-  /** Company PAN */
-  companyPan: string
-  /** Incorporation / registration number */
-  registrationNumber?: string
-  /** Date of incorporation */
-  dateOfIncorporation?: string
-  /** Business type (e.g. Private Limited, LLP) */
-  businessType?: string
-  /** Registered address */
-  registeredAddress?: {
-    line1: string
-    line2?: string
-    line3?: string
-    city: string
-    state: string
-    pincode: string
-    country: string
-  }
-  /** Directors / authorized signatories */
-  directors?: Array<{
-    name: string
-    pan: string
-    aadhaar?: string
-    designation: string
-    isAuthorizedSignatory?: boolean
-  }>
-  /** Document URLs (incorporation cert, PAN copy, board resolution, etc.) */
-  documents?: Record<string, string>
-  stepIndex?: number
-}
