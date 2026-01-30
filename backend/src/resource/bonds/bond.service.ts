@@ -228,9 +228,14 @@ export class BondService {
           ],
         },
       },
-      orderBy: {
-        dateOfAllotment: "desc",
-      },
+      orderBy: [
+        {
+          dateOfAllotment: "desc",
+        },
+        {
+          creditRating: "asc",
+        },
+      ],
       take: limit,
     });
 
