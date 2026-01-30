@@ -35,9 +35,6 @@ function RiskProfilingCard() {
       details: {
         step: "Risk Profiling step",
         Reason: "User completed the Risk Profiling step during KYC process.",
-        ...riskProfiling.map((item) => ({
-          [item.qus]: item.ans,
-        })),
       },
       entityType: "KYC",
     });

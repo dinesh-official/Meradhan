@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import xml2js from "xml2js";
+import https from "https";
+
 import type {
   PanModifyKraPayload,
   T_APP_PAN_INQ,
@@ -19,6 +21,9 @@ export interface KraConfig {
   okraCdOrMiId: string;
   env?: KraEnvironment;
 }
+const insecureAgent = new https.Agent({
+  rejectUnauthorized: false, // TEMP FIX
+});
 
 export class KraSDK {
   private userName: string;
@@ -56,6 +61,7 @@ export class KraSDK {
     const xml = KraXMLBuilder.buildPasswordRequest(this.password, this.passKey);
 
     const response = await axios.post(this.okraServiceUrl, xml, {
+        httpsAgent: insecureAgent,
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
         SOAPAction: "getPassword",
@@ -114,6 +120,8 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
+        httpsAgent: insecureAgent,
+
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
         SOAPAction: "panInquiryDetails",
@@ -151,6 +159,8 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
+        httpsAgent: insecureAgent,
+
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
         SOAPAction: "panInquiryDetailsTwo",
@@ -185,6 +195,8 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
+        httpsAgent: insecureAgent,
+
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
         SOAPAction: "panDownloadDetailsComplete",
@@ -218,6 +230,8 @@ export class KraSDK {
       userName: this.userName,
     });
     const response = await axios.post(this.okraServiceUrl, resultXmlPayload, {
+        httpsAgent: insecureAgent,
+
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
         SOAPAction: "registration",
@@ -242,6 +256,8 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
+        httpsAgent: insecureAgent,
+
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
       },

@@ -74,6 +74,9 @@ export class BondService {
       extendedQuery.categories = { has: options?.category || "" };
     }
 
+    console.log(orderBy);
+
+
     const [data, total] = await Promise.all([
       db.dataBase.bonds.findMany({
         where: whereQuery,
