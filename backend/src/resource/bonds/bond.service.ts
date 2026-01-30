@@ -129,11 +129,13 @@ export class BondService {
       where: {
         isListed: { equals: "YES" },
         dateOfAllotment: { lte: new Date() },
-        creditRating: { notIn: ["D", "C", "UnRated", ""] },
+        creditRating: { in: ["AAA", "AA", "AA+", "AAA(CE)", "AA+(CE)", "AA(CE)", "A+(CE)", "AAA", "AA+", "AA", "A+", "A", "A-", "BBB+", "BBB"] },
       },
-      orderBy: {
+      orderBy: [{
         dateOfAllotment: "desc",
-      },
+      }, {
+        creditRating: "asc",
+      }],
       take: limit,
     });
 

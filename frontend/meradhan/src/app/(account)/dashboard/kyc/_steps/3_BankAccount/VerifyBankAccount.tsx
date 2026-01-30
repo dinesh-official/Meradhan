@@ -149,6 +149,9 @@ function VerifyBankAccount() {
       return undefined;
     }
 
+    if (state.step_1.nameMismatchDeclaration.mismatch && state.nameMismatchDeclarationBank?.isConfirmed) {
+      return "SUCCESS";
+    }
 
     const countPartiallyMatched = data.filter((item) => {
       return bankNameMatches?.[item.accountNumber] === "MATCH_PARTIAL";
