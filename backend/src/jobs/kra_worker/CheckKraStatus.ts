@@ -14,6 +14,33 @@ const normalizeStatus = (status: string | undefined | null) => {
   return undefined;
 };
 
+/**
+ * Helper: APP_STATUS / APP_UPDT_STATUS → "open for new Modification" (KYC PAN can accept new MODIFY).
+ * Caller should note rejection reason (APP_STATUS / APP_UPDT_STATUS) for further action.
+ */
+const isAppStatusOpenForModify = (s: string | undefined) =>
+  s !== undefined &&
+  (s.includes("kyc rejected at") ||
+    s.includes("onhold-incomplete at") ||
+    s.includes("kyc onhold at") ||
+    s.includes("kyc registd-incomplete at"));
+
+const isUpdtStatusOpenForModify = (s: string | undefined) =>
+  s !== undefined &&
+  (s.includes("kyc rejted at") ||
+    s.includes("kyc registd-incomplete at"));
+
+/** APP_UPDT_STATUS: "Request KRA to enable KYC PAN for Modification" → wait */
+const isUpdtStatusRequestKraEnable = (s: string | undefined) =>
+  s !== undefined &&
+  (s.includes("onhold-incomplete") ||
+    s.includes("kyc onhold at") ||
+    s.includes("underprocess-incomplete"));
+
+/** APP_STATUS: "Request KRA to enable KYC PAN for Modification" */
+const isAppStatusRequestKraEnable = (s: string | undefined) =>
+  s !== undefined && s.includes("underprocess-incomplete");
+
 export const checkKraProcessCheckStatus = (
   response: T_APP_PAN_INQ,
   lastTask: string | undefined | null,
@@ -21,9 +48,9 @@ export const checkKraProcessCheckStatus = (
   const status = normalizeStatus(response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_STATUS);
   const updtStatus = normalizeStatus(response?.APP_RES_ROOT?.APP_PAN_INQ?.APP_UPDT_STATUS);
 
+  // Note: Caller should make a note of APP_STATUS / APP_UPDT_STATUS (rejection reason) for further action.
 
-  // Fix 3: Handle "Validation Pending with CAMS, CVL, KARVY, NSE, BSE KRA" suffix
-  // This suffix is added when other KRAs' web services are down
+  // Validation Pending with CAMS, CVL, KARVY, NSE, BSE KRA
   if (
     status?.includes("validation pending with") ||
     updtStatus?.includes("validation pending with")
@@ -43,29 +70,45 @@ export const checkKraProcessCheckStatus = (
     return "ERROR";
   }
 
-  // Fix 1: If APP_STATUS = "Validated at ..." AND APP_UPDT_STATUS = "KYC Rejted at ..."
-  // Don't trigger CBRICS Register (modification was rejected, but original KYC is validated)
-  if (status?.includes("validated") && (updtStatus?.includes("rejted") || updtStatus?.includes("rejected"))) {
-    if (lastTask) {
-      return "ERROR"; // KYC exists and is validated, but modification was rejected - don't register again
-    } else {
-      return "AVAILABLE";
-    }
+  // APP_UPDT_STATUS: "Request KRA to enable KYC PAN for Modification" → wait
+  if (isUpdtStatusRequestKraEnable(updtStatus)) {
+    return "WAITING";
   }
 
-  // Fix 2: Handle 3rd party validation in process
-  // If status is "underprocess at [KRA]" and KYC is validated or rejected,
-  // we need to download first, then modify. Return WAITING to trigger download workflow.
+  // APP_STATUS: "Request KRA to enable KYC PAN for Modification" (underprocess-incomplete)
+  if (isAppStatusRequestKraEnable(status)) {
+    return "WAITING";
+  }
+
+  // APP_STATUS: "KYC Rejected at / Onhold-incomplete at / KYC Onhold at / KYC Registd-incomplete at" → KYC PAN is open for new Modification
+  if (isAppStatusOpenForModify(status)) {
+    return "AVAILABLE";
+  }
+
+  // APP_UPDT_STATUS: "KYC Rejted at / KYC Registd-incomplete at" → KYC PAN is open for new Modification
+  if (isUpdtStatusOpenForModify(updtStatus)) {
+    return "AVAILABLE";
+  }
+
+  // Validated at + KYC Rejted at: don't trigger CBRICS Register; PAN is open for new Modification
+  if (status?.includes("validated") && (updtStatus?.includes("rejted") || updtStatus?.includes("rejected"))) {
+    if (lastTask) {
+      return "ERROR"; // Don't register again; use MODIFY for new modification
+    }
+    return "AVAILABLE";
+  }
+
+  // Underprocess at [KRA] with validated/rejected → download first, then modify
   if (
     status?.includes("underprocess") &&
     (updtStatus?.includes("validated") ||
       updtStatus?.includes("rejted") ||
       updtStatus?.includes("rejected"))
   ) {
-    return "WAITING"; // Need to download first before modification
+    return "WAITING";
   }
 
-  // PENDING -
+  // General underprocess / onhold / incomplete
   if (
     status?.includes("underprocess") ||
     status?.includes("onhold") ||
@@ -81,28 +124,21 @@ export const checkKraProcessCheckStatus = (
     return "AVAILABLE";
   }
 
-  // 7) Success
   if (status?.includes("validated at") || status?.includes("registd")) {
     return "AVAILABLE";
   }
 
-  // Must be BEFORE any "registd" checks
-  if (status?.includes("incomplete") || updtStatus?.includes("incomplete")) {
-    return "WAITING"; // or a separate state like "INCOMPLETE"
-  }
-
-  // SUCCESS -
   if (
     status?.startsWith("kyc registd") ||
     status?.startsWith("kyc validated") ||
-    status?.endsWith("registd") || // Handles "CVLMF Registd" and other variants
-    status?.includes(" registd ") || // Handles cases with spaces around "registd"
-    status?.includes(" registd at") // Handles "KYC Registd at [KRA]"
+    status?.endsWith("registd") ||
+    status?.includes(" registd ") ||
+    status?.includes(" registd at")
   ) {
     return "AVAILABLE";
   }
 
-  // FAILED (explicit) - KYC rejected at KRA; service will set customer to REJECTED and stop
+  // "KYC Rejected at ..." / "KYC Rejted at ..." → open for new Modification (handled above). Any other rejted/rejected:
   if (status?.includes("rejted") || status?.includes("rejected")) {
     if (lastTask) {
       return "REJECTED";
@@ -119,7 +155,6 @@ export const checkKraProcessCheckStatus = (
     return "REGISTER";
   }
 
-  // Default fallback -
   return "WAITING";
 };
 

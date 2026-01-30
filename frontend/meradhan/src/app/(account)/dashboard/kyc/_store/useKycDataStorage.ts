@@ -99,6 +99,10 @@ export interface KycDataStorage {
     terms: boolean;
     response?: any;
   };
+  nameMismatchDeclarationBank: {
+    isDownloaded: boolean,
+    isConfirmed: boolean,
+  };
 }
 
 // ==========================
@@ -215,6 +219,10 @@ const initData: KycDataStorage = {
   step_6: {
     terms: false,
   },
+  nameMismatchDeclarationBank: {
+    isDownloaded: false,
+    isConfirmed: false,
+  }
 };
 
 // ==========================
@@ -253,6 +261,7 @@ export const useKycDataStorage = create<{
   updateBankAccount: (index: number, data: Partial<BankAccountData>) => void;
   removeBankAccount: (index: number) => void;
   setDefaultBankAccount: (index: number) => void;
+  setNameMismatchDeclarationBank: (data: Partial<KycDataStorage["nameMismatchDeclarationBank"]>) => void;
 
   // depository
   addDepository: () => void;
@@ -294,6 +303,16 @@ export const useKycDataStorage = create<{
   setStepIndex(index) {
     set((prev) => ({ state: { ...prev.state, stepIndex: index } }));
   },
+  setNameMismatchDeclarationBank: (data) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        nameMismatchDeclarationBank: {
+          ...prev.state.nameMismatchDeclarationBank,
+          ...data,
+        },
+      },
+    })),
 
   setAadharData(data) {
     set((prev) => ({
