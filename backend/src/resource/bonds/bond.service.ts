@@ -74,15 +74,14 @@ export class BondService {
       extendedQuery.categories = { has: options?.category || "" };
     }
 
-    console.log(orderBy);
-
-
     const [data, total] = await Promise.all([
       db.dataBase.bonds.findMany({
         where: whereQuery,
-        orderBy: options?.all == "YES" ? {
+        orderBy: options?.all == "YES" ? [{
           allowForPurchase: "desc",
-        } : orderBy,
+        }, {
+          sortedAt: "asc",
+        }] : orderBy,
         ...paginationOptions,
       }),
       db.dataBase.bonds.count({
@@ -130,11 +129,13 @@ export class BondService {
       where: {
         isListed: { equals: "YES" },
         dateOfAllotment: { lte: new Date() },
-        creditRating: { notIn: ["D", "C", "UnRated", ""] },
+        creditRating: { in: ["AAA", "AA", "AA+", "AAA(CE)", "AA+(CE)", "AA(CE)", "A+(CE)", "AAA", "AA+", "AA", "A+", "A", "A-", "BBB+", "BBB"] },
       },
-      orderBy: {
+      orderBy: [{
         dateOfAllotment: "desc",
-      },
+      }, {
+        creditRating: "asc",
+      }],
       take: limit,
     });
 
