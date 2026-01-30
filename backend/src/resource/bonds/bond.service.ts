@@ -20,7 +20,7 @@ export class BondService {
       sortBy?: keyof ReturnType<typeof BondQueryBuilder.getSortingOptions>;
       category?: string;
       all?: string;
-    }
+    },
   ) {
     const whereQuery = BondQueryBuilder.generateFilterQuery(filters);
 
@@ -31,14 +31,14 @@ export class BondService {
         ? parseInt(options.page, 10) || 1
         : options?.page || 1;
 
-
-    const limitNum = typeof options?.limit === "string"
-      ? parseInt(options.limit, 10) || 9
-      : options?.limit || 9;
+    const limitNum =
+      typeof options?.limit === "string"
+        ? parseInt(options.limit, 10) || 9
+        : options?.limit || 9;
 
     const paginationOptions = BondQueryBuilder.getPaginationOptions(
       pageNum,
-      limitNum
+      limitNum,
     );
 
     let orderBy = options?.sortBy
@@ -77,11 +77,17 @@ export class BondService {
     const [data, total] = await Promise.all([
       db.dataBase.bonds.findMany({
         where: whereQuery,
-        orderBy: options?.all == "YES" ? [{
-          allowForPurchase: "desc",
-        }, {
-          sortedAt: "asc",
-        }] : orderBy,
+        orderBy:
+          options?.all == "YES"
+            ? [
+                {
+                  allowForPurchase: "desc",
+                },
+                {
+                  sortedAt: "asc",
+                },
+              ]
+            : orderBy,
         ...paginationOptions,
       }),
       db.dataBase.bonds.count({
@@ -129,13 +135,34 @@ export class BondService {
       where: {
         isListed: { equals: "YES" },
         dateOfAllotment: { lte: new Date() },
-        creditRating: { in: ["AAA", "AA", "AA+", "AAA(CE)", "AA+(CE)", "AA(CE)", "A+(CE)", "AAA", "AA+", "AA", "A+", "A", "A-", "BBB+", "BBB"] },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
+        },
       },
-      orderBy: [{
-        dateOfAllotment: "desc",
-      }, {
-        creditRating: "asc",
-      }],
+      orderBy: [
+        {
+          dateOfAllotment: "desc",
+        },
+        {
+          creditRating: "asc",
+        },
+      ],
       take: limit,
     });
 
@@ -147,7 +174,25 @@ export class BondService {
       where: {
         isListed: { equals: "YES" },
         dateOfAllotment: { lte: new Date() },
-        creditRating: { notIn: ["D", "C", "UnRated", ""] },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
+        },
       },
       orderBy: {
         dateOfAllotment: "desc",
@@ -175,7 +220,7 @@ export class BondService {
   }
 
   async createBond(
-    bondData: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>
+    bondData: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>,
   ) {
     const data = await db.dataBase.bonds.create({
       data: {
@@ -232,7 +277,7 @@ export class BondService {
 
   async updateBond(
     isin: string,
-    bondData: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>
+    bondData: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>,
   ) {
     // Check if bond exists
     const existingBond = await db.dataBase.bonds.findUnique({
