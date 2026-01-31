@@ -52,6 +52,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         <CustomerOverViewCard
           kraStatus={data.kraStatus}
           name={`${data.firstName} ${data.middleName} ${data.lastName}`}
+          userId={data.id}
           customerSince={dateTimeUtils.formatDateTime(
             data.createdAt,
             "DD MMM YYYY hh:mm:ss AA",
@@ -127,7 +128,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                   panNumber={data.panCard?.panCardNo || "--------"}
                   name={`${data.panCard?.firstName || "----"} ${
                     data.panCard?.middleName || ""
-                  } ${data.panCard?.lastName || "---"}`}
+                  } ${data.panCard?.lastName || ""}`}
                   gender={data.panCard?.gender || "----"}
                   dateOfBirth={
                     data.panCard?.dateOfBirth
@@ -161,7 +162,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                 <AdharaCard
                   name={`${data.aadhaarCard?.firstName || "----"} ${
                     data.aadhaarCard?.middleName || ""
-                  } ${data.aadhaarCard?.lastName || "---"}`}
+                  } ${data.aadhaarCard?.lastName || ""}`}
                   gender={data.aadhaarCard?.gender || "----"}
                   aadhaarNumberMasked={
                     data.aadhaarCard?.aadhaarNo || "----------------"
@@ -199,8 +200,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         <PanCardInfoCard
           panCardNumber={data.panCard?.panCardNo || "--------"}
           Name={`${data.panCard?.firstName || "----"} ${
-            data.panCard?.middleName || ""
-          } ${data.panCard?.lastName || "---"}`}
+            data.panCard?.middleName
+          } ${data.panCard?.lastName}`}
           gender={data.panCard?.gender || "----"}
           DateOFBirth={
             data.panCard?.dateOfBirth
@@ -244,7 +245,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         <AadhaarCardInfo
           name={`${data.aadhaarCard?.firstName || "----"} ${
             data.aadhaarCard?.middleName || ""
-          } ${data.aadhaarCard?.lastName || "---"}`}
+          } ${data.aadhaarCard?.lastName || ""}`}
           gender={data.aadhaarCard?.gender || "----"}
           aadhaarNumber={data.aadhaarCard?.aadhaarNo || "----------------"}
           dateOfBirth={
@@ -425,10 +426,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle className="text-sm">Investment Experience</CardTitle>
             <div className="flex flex-col gap-5 mt-4">
               {(data?.riskProfile?.data || riskProfileData.data)?.map((e) => (
-                <RiskProfileQuestion
-                  question="How many years of investment experience do you have?"
-                  key={e.index}
-                >
+                <RiskProfileQuestion question={e.qus} key={e.index}>
                   {e.opt.map((option, idx) => (
                     <RiskProfileAnsOption key={idx} active={e.ans === option}>
                       {option}

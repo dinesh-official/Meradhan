@@ -1,17 +1,40 @@
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import apiGateway from "@root/apiGateway";
+import { useMutation } from "@tanstack/react-query";
 import React from "react";
+import { toast } from "sonner";
 
 interface CustomerOverViewCardProps {
   name: string;
   customerSince: string;
   kycStatus: string;
   kraStatus: string;
+  userId: number;
 }
 function CustomerOverViewCard(
-  customerOverViewCardData: CustomerOverViewCardProps
+  customerOverViewCardData: CustomerOverViewCardProps,
 ) {
+  const apiGate = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
+    apiClientCaller,
+  );
+
+  const applyRekycMutate = useMutation({
+    mutationKey: ["rekyc"],
+    mutationFn: async () => {
+      return await apiGate.applyRekyc(customerOverViewCardData.userId);
+    },
+    onSuccess(data) {
+      toast.success("ReKyc apply successfully");
+    },
+    onError(error) {
+      toast.error("Failed to apply for rekyc");
+    },
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -23,7 +46,29 @@ function CustomerOverViewCard(
             <p className="text-sm">{customerOverViewCardData.name}</p>
           </LabelView>
           <LabelView title="Current KYC Status">
-            <StatusBadge value={customerOverViewCardData.kycStatus} />
+            <div className="flex justify-start items-center gap-3">
+              <StatusBadge value={customerOverViewCardData.kycStatus} />
+              {customerOverViewCardData.kycStatus == "VERIFIED" &&
+                !applyRekycMutate.data && (
+                  <p
+                    className="text-xs cursor-pointer text-primary"
+                    onClick={
+                      applyRekycMutate.isPending
+                        ? undefined
+                        : () => {
+                            const ask = prompt(
+                              "are you sure? write (confirm) too continue",
+                            );
+                            if (ask == "confirm") {
+                              applyRekycMutate.mutate();
+                            }
+                          }
+                    }
+                  >
+                    {applyRekycMutate.isPending ? "Applying" : "Request ReKyc"}
+                  </p>
+                )}
+            </div>
           </LabelView>
           <LabelView title="Current KRA Status">
             <StatusBadge
