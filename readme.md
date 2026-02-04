@@ -1,8 +1,8 @@
 ## Core Stack
 
 - Monorepo: Modular structure with shared packages (packages/) for schema, API gateway, and configuration.
-- Languages: TypeScript (Primary), Shell Scripting.
-- Runtimes: Bun (Primary for backend/scripts), Node.js (v20+).
+- Languages: TypeScript (Primary), Shell Scripting
+- Runtimes: Bun (Primary for backend/scripts), Node.js (v20+)
 
 ### Strapi Cms
 
@@ -17,7 +17,7 @@
 - Authentication: JWT (JSON Web Tokens) and Argon2 for secure password hashing.
 - Validation: Zod for schema-based validation.
 - Caching & Background Jobs: Redis via ioredis and Bull for queue management.
-- Emails: React Email with Nodemailer.
+- Emails: React Email with Nodemailer
 - Utilities:
 - Axios (HTTP Client).
 - Multer (File uploads).
