@@ -24,7 +24,7 @@ import type {
 export class CustomerKycApi {
   private schema = appSchema.kyc;
 
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   // pan
   async verifyPanInfo(
@@ -255,13 +255,6 @@ export class CustomerKycApi {
   async getKycKraDataById(customerId: number, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<KRAResponse>(
       `/crm/kyc/kra/get/${customerId}`,
-      config,
-    );
-    return data;
-  }
-  async applyRekyc(customerId: number, config?: AxiosRequestConfig) {
-    const { data } = await this.apiClient.get<KRAResponse>(
-      `/crm/kyc/rekyc/${customerId}`,
       config,
     );
     return data;

@@ -292,8 +292,8 @@ export class CustomerKycKycService {
     if (!user) {
       throw new AppError("User Not Found");
     }
-    const kycData = await db.dataBase.kYC_FLOW.findFirst({
-      where: { userID, markExpired: false },
+    const kycData = await db.dataBase.kYC_FLOW.findUnique({
+      where: { userID },
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const panData = ((kycData?.data as any)?.["step_1"] as any)?.["pan"] as any;
@@ -362,8 +362,8 @@ export class CustomerKycKycService {
       "100%",
     ];
 
-    const kycData = await db.dataBase.kYC_FLOW.findFirst({
-      where: { userID: id, markExpired: false },
+    const kycData = await db.dataBase.kYC_FLOW.findUnique({
+      where: { userID: id },
     });
 
     if (!kycData) {
