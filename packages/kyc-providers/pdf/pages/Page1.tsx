@@ -136,13 +136,13 @@ function Page1(data: Page1Props) {
           {/* line 4 */}
           <View style={tw(" flex flex-row border-b border-gray-300 py-2.5 ")}>
             <View style={tw("w-[34%] ")}>
-              <Text style={tw("text-xs mt-[-3px] pt-0 capitalize")}>
+              <Text style={tw("text-xs mt-[-3px] pt-0")}>
                 Father’s / Spouse Name:*
               </Text>
             </View>
 
             <View style={tw("w-auto")}>
-              <Text style={tw("text-xs mt-[-3px] pt-0 capitalize")}>
+              <Text style={tw("text-xs mt-[-3px] pt-0")}>
                 {data.fatherSpouseName}
               </Text>
             </View>
@@ -224,7 +224,7 @@ function Page1(data: Page1Props) {
 
         <View
           style={tw(
-            `w-48 border border-gray-300 border-t-0 flex flex-col justify-start items-start`,
+            `w-48 border border-gray-300 border-t-0 flex flex-col justify-start items-start`
           )}
         >
           {/* <Image source={data.profilePic} style={tw(`max-w-28 min-w-28 h-38 min-h-38 object-cover overflow-hidden border`)}  /> */}
@@ -249,12 +249,9 @@ function Page1(data: Page1Props) {
             />
           </view>
 
-          <Image
-            source={{
-              uri: data.signature || "",
-            }}
-            style={tw(`w-auto h-10 mx-auto`)}
-          />
+          <Image source={{
+            uri: data.signature || ""
+          }} style={tw(`w-auto h-10 mx-auto`)} />
         </View>
       </View>
 
@@ -371,10 +368,7 @@ function Page1(data: Page1Props) {
             <View style={tw("w-[28%]")}>
               <CheckBoxRow
                 label="Self Employed"
-                checked={
-                  data.occupationType === "Self Employed Professional" ||
-                  data.occupationType === "Self Employed"
-                }
+                checked={data.occupationType === "Self Employed Professional" || data.occupationType === "Self Employed"}
               />
             </View>
 
