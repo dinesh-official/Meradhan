@@ -27,14 +27,14 @@ function ProfilePage({
 }) {
   const [activeTab, setActiveTab] = React.useState(0);
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
-    apiClientCaller
+    apiClientCaller,
   );
   const { data: profile } = useQuery({
     queryKey: ["profile-page", profileData.id],
     initialData: profileData,
     queryFn: async () => {
       const userData = await customerApi.customerInfoById(
-        Number(profileData.id)
+        Number(profileData.id),
       );
       return userData.data.responseData;
     },
@@ -58,7 +58,7 @@ function ProfilePage({
         {
           [
             <PersonalDetails profile={profile} key={1} />,
-            profile.kycStatus == "VERIFIED" ? (
+            profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC" ? (
               <BankAccounts profile={profile} key={2} />
             ) : (
               <NeedKyc
@@ -67,7 +67,7 @@ function ProfilePage({
                 desc={`to add bank accounts!`}
               />
             ),
-            profile.kycStatus == "VERIFIED" ? (
+            profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC" ? (
               <DematAccounts profile={profile} key={3} />
             ) : (
               <NeedKyc
@@ -76,7 +76,7 @@ function ProfilePage({
                 desc={`to add demat accounts!`}
               />
             ),
-            profile.kycStatus == "VERIFIED" ? (
+            profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC" ? (
               <RiskProfiling profile={profile} key={4} />
             ) : (
               <NeedKyc

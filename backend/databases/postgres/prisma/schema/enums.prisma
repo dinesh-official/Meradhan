@@ -65,6 +65,7 @@ enum DematAccountType {
 /// KYC (Know Your Customer) verification status
 enum KYCStatus {
   PENDING
+  RE_KYC
   UNDER_REVIEW
   VERIFIED
   REJECTED
