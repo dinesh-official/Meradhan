@@ -10,10 +10,9 @@ export class KycStoreController {
   async getKycData(req: Request, res: Response) {
     const id = req.customer!.id;
 
-    const response = await db.dataBase.kYC_FLOW.findFirst({
+    const response = await db.dataBase.kYC_FLOW.findUnique({
       where: {
         userID: id,
-        markExpired: false,
       },
     });
 
@@ -26,10 +25,9 @@ export class KycStoreController {
   async getKycDataById(req: Request, res: Response) {
     const id = Number(req.params.customerId);
 
-    const response = await db.dataBase.kYC_FLOW.findFirst({
+    const response = await db.dataBase.kYC_FLOW.findUnique({
       where: {
         userID: id,
-        markExpired: false,
       },
     });
 
@@ -55,72 +53,28 @@ export class KycStoreController {
     });
   }
 
-  async applyRekyc(req: Request, res: Response) {
-    const id = Number(req.params.customerId);
-
-    await db.dataBase.kYC_FLOW.updateMany({
-      where: {
-        userID: id,
-        markExpired: false,
-      },
-      data: {
-        markExpired: true,
-        kycUserId: id,
-      },
-    });
-
-    await db.dataBase.customerProfileDataModel.update({
-      where: {
-        id,
-      },
-      data: {
-        kycStatus: "RE_KYC",
-        kraStatus: "PENDING",
-      },
-    });
-
-    res.send({
-      status: true,
-      message: "rekyc request send successfully",
-    });
-  }
-
   async setKycData(req: Request, res: Response) {
     const id = req.customer!.id;
     const step = req.params.step!;
     const data = req.body;
     const complete = req.query.complete === "true";
-    const exist = await db.dataBase.kYC_FLOW.findFirst({
+
+    await db.dataBase.kYC_FLOW.upsert({
       where: {
         userID: id,
-        markExpired: false,
+      },
+      create: {
+        data: data,
+        userID: id,
+        step: Number(step),
+        complete,
+      },
+      update: {
+        data: data,
+        step: Number(step),
+        complete,
       },
     });
-
-    if (!exist) {
-      await db.dataBase.kYC_FLOW.create({
-        data: {
-          data: data,
-          userID: id,
-          step: Number(step),
-          complete,
-          markExpired: false,
-          kycUserId: id,
-        },
-      });
-    } else {
-      await db.dataBase.kYC_FLOW.updateMany({
-        where: {
-          userID: id,
-          markExpired: false,
-        },
-        data: {
-          data: data,
-          step: Number(step),
-          complete,
-        },
-      });
-    }
 
     res.sendResponse({
       statusCode: HttpStatus.OK,
