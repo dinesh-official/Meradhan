@@ -16,7 +16,6 @@ export const kycStatus = [
   "PENDING",
   "REJECTED",
   "UNDER_REVIEW",
-  "RE_KYC",
 ] as const;
 
 export const findManyCustomerSchema = z.object({

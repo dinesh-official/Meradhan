@@ -259,11 +259,4 @@ export class CustomerKycApi {
     );
     return data;
   }
-  async applyRekyc(customerId: number, config?: AxiosRequestConfig) {
-    const { data } = await this.apiClient.get<KRAResponse>(
-      `/crm/kyc/rekyc/${customerId}`,
-      config,
-    );
-    return data;
-  }
 }

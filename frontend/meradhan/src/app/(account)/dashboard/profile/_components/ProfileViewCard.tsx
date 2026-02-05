@@ -131,17 +131,6 @@ function ProfileViewCard({
               </Button>
             </Link>
           )}
-          {profile.kycStatus == "RE_KYC" && (
-            <Link href={`/dashboard/kyc`}>
-              <Button variant={`secondary`}>
-                Submit <span className="hidden md:inline-block">Your</span> RE
-                KYC
-                <div className="w-3 text-3xl">
-                  <RiArrowRightSFill className="w-4 h-5" size={33} />
-                </div>
-              </Button>
-            </Link>
-          )}
         </div>
       </div>
 

@@ -27,10 +27,10 @@ function PersonalDetails({
   profile: GetCustomerResponseById["responseData"];
 }) {
   const getAddressNotes = (value?: string | null) => {
-    if (profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC") {
-      return value || "--";
+    if (profile.kycStatus != "VERIFIED") {
+      return "--";
     }
-    return "--";
+    return value || "--";
   };
 
   return (
@@ -55,7 +55,7 @@ function PersonalDetails({
         <FullKycInfo profile={profile} />
       </div>
       <div className="gap-5 grid md:grid-cols-3 mt-6 pt-6 border-gray-200 border-t">
-        {(profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC") && (
+        {profile.kycStatus == "VERIFIED" && (
           <div className="md:col-span-3">
             <h4 className="flex items-center gap-2">
               Communication Address (as per Aadhar){" "}
