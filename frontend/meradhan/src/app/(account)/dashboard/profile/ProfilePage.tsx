@@ -27,14 +27,14 @@ function ProfilePage({
 }) {
   const [activeTab, setActiveTab] = React.useState(0);
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
-    apiClientCaller,
+    apiClientCaller
   );
   const { data: profile } = useQuery({
     queryKey: ["profile-page", profileData.id],
     initialData: profileData,
     queryFn: async () => {
       const userData = await customerApi.customerInfoById(
-        Number(profileData.id),
+        Number(profileData.id)
       );
       return userData.data.responseData;
     },

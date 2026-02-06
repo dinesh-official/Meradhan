@@ -10,7 +10,7 @@ interface CustomerOverViewCardProps {
   kraStatus: string;
 }
 function CustomerOverViewCard(
-  customerOverViewCardData: CustomerOverViewCardProps,
+  customerOverViewCardData: CustomerOverViewCardProps
 ) {
   return (
     <Card>

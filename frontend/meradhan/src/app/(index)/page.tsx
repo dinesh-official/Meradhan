@@ -3,6 +3,7 @@ import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import apiGateway from "@root/apiGateway";
+import XirrCalculator from "../(tools)/ytm-calculator/_components/XirrCalculator";
 import BondsByCategories from "../../global/components/Bond/BondsByCategories";
 import HomeHeroSection from "./_components/HomeHeroSection";
 import LatestBondReleases from "./_components/LatestBondReleases";
@@ -31,11 +32,11 @@ export default async function HomePage() {
       </div>
       <LatestBondReleases bonds={responseData || []} />
       {/* <ReturnsCalculationSection /> */}
-      {/* <XirrCalculator
+      <XirrCalculator
         showTitle={true}
         showFlowChart={false}
         showChart={false}
-      /> */}
+      />
       {/* <CustomersTestimonials /> */}
       {/* <RecentBlogs /> */}
     </ViewPort>

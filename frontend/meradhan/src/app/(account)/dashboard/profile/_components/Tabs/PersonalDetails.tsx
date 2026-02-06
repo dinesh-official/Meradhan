@@ -116,7 +116,7 @@ function EmailVerification({
   profile: GetCustomerResponseById["responseData"];
 }) {
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller,
+    apiClientCaller
   );
   const verifyEmailMutation = useMutation({
     mutationKey: ["profile-email-verify", profile.id],
@@ -171,7 +171,7 @@ function MobileNoVerify({
   const [resendCount, setresendCount] = useState(0);
 
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller,
+    apiClientCaller
   );
 
   const [otp, setOtp] = useState("");
@@ -330,12 +330,12 @@ function MobileNoUpdate({
   const [mobileNumber, setMobileNumber] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [errors, setErrors] = useState<{ mobile?: string; whatsapp?: string }>(
-    {},
+    {}
   );
   const [isOpen, setIsOpen] = useState(false);
 
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller,
+    apiClientCaller
   );
 
   // Validation function
@@ -369,7 +369,7 @@ function MobileNoUpdate({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(
-        error?.response?.data?.message || "Failed to update mobile number",
+        error?.response?.data?.message || "Failed to update mobile number"
       );
     },
   });
@@ -430,9 +430,8 @@ function MobileNoUpdate({
           <div className="relative">
             <Input
               placeholder="Mobile No*"
-              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
-                errors.mobile ? "border-red-500 border" : ""
-              }`}
+              className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.mobile ? "border-red-500 border" : ""
+                }`}
               type="text"
               value={mobileNumber}
               onChange={(e) => handleMobileChange(e.target.value)}
@@ -464,9 +463,8 @@ function MobileNoUpdate({
             <div className="relative">
               <Input
                 placeholder="Whatsapp Number"
-                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${
-                  errors.whatsapp ? "border-red-500 border" : ""
-                }`}
+                className={`peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2] ${errors.whatsapp ? "border-red-500 border" : ""
+                  }`}
                 type="text"
                 value={whatsappNumber}
                 onChange={(e) => handleWhatsappChange(e.target.value)}
@@ -505,7 +503,7 @@ function AllowWhatsAppNotification({
   profile: GetCustomerResponseById["responseData"];
 }) {
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
-    apiClientCaller,
+    apiClientCaller
   );
 
   const toggleWhatsAppNotificationMutation = useMutation({
@@ -532,7 +530,7 @@ function AllowWhatsAppNotification({
           disabled={toggleWhatsAppNotificationMutation.isPending}
           onCheckedChange={() =>
             toggleWhatsAppNotificationMutation.mutate(
-              !profile.utility.whatsAppNotificationAllow,
+              !profile.utility.whatsAppNotificationAllow
             )
           }
         />{" "}
@@ -566,9 +564,9 @@ function FullKycInfo({
         <p className="font-medium text-sm">
           {profile.personalInformation?.dateOfBirth
             ? dateTimeUtils.formatDateTime(
-                profile.personalInformation?.dateOfBirth,
-                "DD MMM YYYY",
-              )
+              profile.personalInformation?.dateOfBirth,
+              "DD MMM YYYY"
+            )
             : "--"}
         </p>
       </DataInfoLabel>

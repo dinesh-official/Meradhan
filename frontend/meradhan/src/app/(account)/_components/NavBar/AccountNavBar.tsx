@@ -141,7 +141,7 @@ export function ShowUserBadge(
     firstName: string;
     middleName: string;
     lastName: string;
-  } | null,
+  } | null
 ) {
   return (
     <DropdownMenu>
