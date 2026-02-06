@@ -7,22 +7,28 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
-export const useLeadFollowUpApiHook = ({ goBackOnSuccess, onComplete }: { onComplete?: () => void, goBackOnSuccess?: boolean }) => {
+export const useLeadFollowUpApiHook = ({
+  goBackOnSuccess,
+  onComplete,
+}: {
+  onComplete?: () => void;
+  goBackOnSuccess?: boolean;
+}) => {
   const router = useRouter();
   const leadFollowUpApi = new apiGateway.crm.crmLeads.CrmLeadApi(
-    apiClientCaller
+    apiClientCaller,
   );
 
   const createLeadMutation = useMutation({
     mutationKey: ["createLeadMutation"],
     mutationFn: async (
-      data: z.infer<(typeof appSchema.crm.leads)["createNewLeadSchema"]>
+      data: z.infer<(typeof appSchema.crm.leads)["createNewLeadSchema"]>,
     ) => {
       const response = await leadFollowUpApi.createNewLead(data);
       return response.data;
     },
     onSuccess() {
-      toast.success("User added Successfully");
+      toast.success("Lead Create Successfully");
       if (goBackOnSuccess) {
         router.back();
       }
@@ -46,13 +52,13 @@ export const useLeadFollowUpApiHook = ({ goBackOnSuccess, onComplete }: { onComp
     }) => {
       const response = await leadFollowUpApi.updateNewLeadById(
         payload.leadId,
-        payload.data
+        payload.data,
       );
 
       return response.data;
     },
     onSuccess() {
-      toast.success("User added Successfully");
+      toast.success("Lead Update Successfully");
       queryClient.invalidateQueries({ queryKey: ["fetchLeadQuery"] });
       if (goBackOnSuccess) {
         router.back();
