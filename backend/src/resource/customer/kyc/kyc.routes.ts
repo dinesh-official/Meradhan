@@ -123,7 +123,7 @@ kycRoutes.get(
 kycRoutes.get(
   "/api/crm/kyc/kra/get/:customerId",
   allowAccessMiddleware("ADMIN"),
-  (req, res) => storeKyc.getKycKraDataById(req, res)
+  (req, res) => storeKyc.getKycKraDataById(req, res),
 );
 
 export default kycRoutes;
