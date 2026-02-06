@@ -7,14 +7,15 @@ export const leadFormDataSchema = z.object({
     .trim()
     .min(1, "Full name is required")
     .max(120, "Full name is too long"),
-  emailAddress: z.email("Invalid email address").min(1, "Email is required"),
+
+  emailAddress: z.email("Invalid email address").optional(),
 
   phoneNo: z
     .string()
     .trim()
     .refine(
       (v) => !v || /^\+?\d{7,15}$/.test(v),
-      "Invalid phone number format"
+      "Invalid phone number format",
     ),
   companyName: z
     .string()
@@ -29,9 +30,10 @@ export const leadFormDataSchema = z.object({
   exInvestmentAmount: z
     .preprocess(
       (v) => (typeof v === "string" ? Number(v.replace(/,/g, "")) : v),
-      z.number().min(0, { message: "Amount cannot be negative" })
+      z.number().min(0, { message: "Amount cannot be negative" }),
     )
     .optional(),
+
   note: z
     .string()
     .trim()

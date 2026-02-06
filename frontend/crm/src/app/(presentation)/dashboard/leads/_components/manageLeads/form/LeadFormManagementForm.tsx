@@ -62,8 +62,8 @@ const LeadFormManagementForm = ({
 
         <InputField
           id="companyName"
-          label="company Name"
-          placeholder="Enter Full name"
+          label="Company Name"
+          placeholder="Enter Company Name name"
           required
           value={manager.state.companyName}
           onChangeAction={(e) => {
@@ -72,7 +72,7 @@ const LeadFormManagementForm = ({
           error={manager?.errors?.companyName?.[0]}
         />
       </div>
-      
+
       <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <SelectField
           label="Lead Source"
@@ -103,7 +103,6 @@ const LeadFormManagementForm = ({
         <div className="flex flex-col gap-2">
           <Label>Assign To</Label>
           <SelectRoleUser
-
             value={manager.relationManager.relationManager}
             onSelect={(e) => {
               if (e) {
@@ -117,7 +116,10 @@ const LeadFormManagementForm = ({
         <SelectField
           label="Product Type"
           placeholder="Select Product  Type"
-          options={bonds.map((bond) => ({ label: bond.replaceAll("_"," "), value: bond }))}
+          options={bonds.map((bond) => ({
+            label: bond.replaceAll("_", " "),
+            value: bond,
+          }))}
           value={manager.state.bondType}
           onChangeAction={(e) =>
             manager.setLeadData("bondType", e as LeadFormData["bondType"])
