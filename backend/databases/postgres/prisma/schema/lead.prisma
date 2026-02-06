@@ -2,9 +2,9 @@ model LeadsModel {
     id Int @id @default(autoincrement())
 
     fullName           String
-    emailAddress       String
+    emailAddress       String?
     phoneNo            String
-    companyName        String
+    companyName        String?
     leadSource         LeadSource
     bondType           BondType
     status             LeadStatus
