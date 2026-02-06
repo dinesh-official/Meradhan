@@ -42,9 +42,9 @@ export const findManyLeadsSchema = z.object({
 // Main Lead schema
 export const createNewLeadSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
-  emailAddress: z.email("Invalid email address"),
+  emailAddress: z.string("Invalid email address").optional(),
   phoneNo: z.string().min(10, "Phone number must have at least 10 digits"),
-  companyName: z.string().min(1, "Company name is required"),
+  companyName: z.string().optional(),
   leadSource: LeadSource,
   bondType: z.enum(bonds),
   status: z.enum(status),

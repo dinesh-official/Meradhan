@@ -8,7 +8,7 @@ export const leadFormDataSchema = z.object({
     .min(1, "Full name is required")
     .max(120, "Full name is too long"),
 
-  emailAddress: z.email("Invalid email address").optional(),
+  emailAddress: z.string("Invalid email address").optional(),
 
   phoneNo: z
     .string()

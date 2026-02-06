@@ -38,7 +38,6 @@ const LeadFormManagementForm = ({
           label="Email Address"
           placeholder="Enter email address"
           type="email"
-          required
           value={manager.state.emailAddress}
           onChangeAction={(e) => {
             manager.setLeadData("emailAddress", e);
@@ -64,7 +63,6 @@ const LeadFormManagementForm = ({
           id="companyName"
           label="Company Name"
           placeholder="Enter Company Name name"
-          required
           value={manager.state.companyName}
           onChangeAction={(e) => {
             manager.setLeadData("companyName", e);
