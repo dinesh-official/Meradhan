@@ -48,9 +48,15 @@ function ToolsOfferedByMeraDhan() {
                   to Maturity (YTM) calculator to explore how bond returns are
                   measured—no login required, no complex steps.
                 </p>
-                <Link href={`/ytm-calculator`}>
-                  <Button variant={"outline"}>Calculate YTM</Button>
-                </Link>
+
+                <div className="flex justify-start">
+                  <Button variant={"outline"}>
+                    <Link href={`/ytm-calculator`}>
+                      Calculate YTM
+                    </Link>
+                  </Button>
+                </div>
+
               </div>
             </CardContent>
           </Card>

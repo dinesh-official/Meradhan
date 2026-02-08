@@ -18,8 +18,6 @@ import {
   formatToMMDDYYYY,
   FrequencyType,
   getBondCashflowJson,
-  getXirr,
-  prepareXirrValues,
 } from "../_helpers/xirr";
 import { cFrequencyMap, dayCountMap, useYtm } from "../_hooks/useYtm";
 import { FlowChart } from "./FlowChart";
@@ -204,10 +202,10 @@ function XirrCalculator({
                 <div className="relative">
                   <Input
                     className={` bg-white py-5 ps-9 border-0 font-medium text-[1rem] appearance-none ${!cleanPrice ||
-                        isNaN(Number(cleanPrice)) ||
-                        Number(cleanPrice) <= 0
-                        ? "border-red-300 focus:border-red-500"
-                        : ""
+                      isNaN(Number(cleanPrice)) ||
+                      Number(cleanPrice) <= 0
+                      ? "border-red-300 focus:border-red-500"
+                      : ""
                       }`}
                     placeholder="Amount"
                     value={cleanPrice}
@@ -228,10 +226,10 @@ function XirrCalculator({
                 <div className="relative">
                   <Input
                     className={` bg-white py-5 pe-12 border-0 font-medium text-[1rem]  appearance-none ${!annualCouponRate ||
-                        isNaN(Number(annualCouponRate)) ||
-                        Number(annualCouponRate) <= 0
-                        ? "border-red-300 focus:border-red-500"
-                        : ""
+                      isNaN(Number(annualCouponRate)) ||
+                      Number(annualCouponRate) <= 0
+                      ? "border-red-300 focus:border-red-500"
+                      : ""
                       }`}
                     placeholder="Rate"
                     value={annualCouponRate}
@@ -373,7 +371,7 @@ function XirrCalculator({
               <div className="lg:col-span-2 bg-white rounded-md">
                 <FlowChart
                   xirrData={flowData}
-                  ytm={result.answer}
+                  ytm={result.ytm}
                   yieldVal={yieldVal}
                 />
               </div>
@@ -381,16 +379,16 @@ function XirrCalculator({
               <div className=" bg-white rounded-md p-5 py-10 flex justify-center items-center flex-col">
                 <h3 className="md:text-4xl text-3xl text-center">
                   YTM:{" "}
-                  {isNaN(result.answer) ? (
+                  {isNaN(result.xirr) ? (
                     <span className="text-red-600">CHECK INPUTS</span>
                   ) : (
                     <span
                       className={cn("font-semibold", {
-                        "text-green-600": Number(result.answer) > 0,
-                        "text-red-600": Number(result.answer) < 0,
+                        "text-green-600": Number(result.xirr) > 0,
+                        "text-red-600": Number(result.xirr) < 0,
                       })}
                     >
-                      {result.answer?.toFixed(4)}%
+                      {result.xirr?.toFixed(4)}%
                     </span>
                   )}
                 </h3>
@@ -404,7 +402,7 @@ function XirrCalculator({
       </p> */}
       {showFlowChart && (
         <SectionWrapper className="pb-5">
-          <FlowTable flowData={flowData} />
+          <FlowTable cashflow={result.cashflow} />
         </SectionWrapper>
       )}
     </>
