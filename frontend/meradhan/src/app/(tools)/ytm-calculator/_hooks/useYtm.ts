@@ -51,6 +51,14 @@ const defaultDates = () => {
   };
 };
 
+export type ApiCashflowItem = {
+  period: number;
+  date: string;
+  coupon: string;
+  principal: string;
+  totalCashflow: string;
+};
+
 export const useYtm = () => {
   const { issue, settlement, maturity, lastCoupon, defaultFrequency } =
     defaultDates();
@@ -90,8 +98,15 @@ export const useYtm = () => {
   }, [couponFrequency, issueDate, settlementDate]);
 
   // RESULT
-  const [result, setResult] = useState({
-    answer: 0,
+  const [result, setResult] = useState<{
+    ytm: number;
+    xirr: number;
+    cashflow: ApiCashflowItem[];
+    status: boolean;
+  }>({
+    ytm: 0,
+    xirr: 0,
+    cashflow: [],
     status: true,
   });
 
@@ -124,19 +139,30 @@ export const useYtm = () => {
         }
 
         const data = (await res.json()) as {
-          result: number | "ERROR";
           check: string;
+          ytm: string | number;
+          xirr: string | number;
+          cashflow: ApiCashflowItem[];
+        };
+
+        const toNumeric = (value: string | number) => {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : NaN;
         };
 
         setResult({
-          answer: typeof data.result === "number" ? data.result : NaN,
+          ytm: toNumeric(data.ytm),
+          xirr: toNumeric(data.xirr),
+          cashflow: Array.isArray(data.cashflow) ? data.cashflow : [],
           status: data.check === "OK",
         });
       } catch (error) {
         if ((error as Error).name === "AbortError") return;
         console.error(error);
         setResult({
-          answer: NaN,
+          ytm: NaN,
+          xirr: NaN,
+          cashflow: [],
           status: false,
         });
       }

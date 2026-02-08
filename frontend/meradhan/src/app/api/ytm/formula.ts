@@ -5,9 +5,10 @@ import {
   RATE,
   ROUND,
   ROUNDUP,
-  YEARFRAC,
+
 } from "@formulajs/formulajs";
 import { AND, ISNUMBER, TODAY } from "@formulajs/formulajs";
+import { YEARFRAC } from "./YEARFRAC";
 
 /**
  * @param C12 Base date
@@ -25,6 +26,15 @@ export function calculateDate(C12: Date, C16: number, C10: Date): Date {
 }
 
 /**
+ * @param issueDate Bond issue date
+ * @param termYears Maturity in years (can be decimal)
+ */
+export function generateMaturityDate(issueDate: Date, termYears: number): Date {
+  const months = ROUND(termYears * 12, 0);
+  return EDATE(issueDate, months);
+}
+
+/**
  * @param C10 Start date
  * @param C11 End date
  * @param C17 Day count basis
@@ -35,10 +45,7 @@ export function calculateYearFraction(
   C17: number
 ): number {
   const res = YEARFRAC(C10, C11, C17);
-  if (res instanceof Error) {
-    throw res;
-  }
-  return res;
+  return Number(res);
 }
 
 /**
@@ -54,7 +61,7 @@ export function calculateValueNPER(
   C15: number
 ): number {
   const yer = calculateYearFraction(C18, C11, C17);
-  return ROUNDUP(yer * C15, 0) + 1;
+  return ROUNDUP(yer * C15, 0);
 }
 
 /**
@@ -69,12 +76,13 @@ export function calculateFraction(
   C18: Date,
   C17: number
 ): number {
+
   return IFERROR(
     IF(
       C10 >= C18,
       0,
       calculateYearFraction(C12, C10, C17) /
-        calculateYearFraction(C12, C18, C17)
+      calculateYearFraction(C12, C18, C17)
     ),
     0
   );
@@ -94,6 +102,7 @@ export function validateInputs(params: {
   C18: Date;
 }): "OK" | "CHECK INPUTS" {
   const { C4, C5, C6, C9, C10, C11, C12, C15, C16, C17, C18 } = params;
+  // console.log(params);
 
   const today = new Date(TODAY()); // returns Date
 
@@ -105,7 +114,7 @@ export function validateInputs(params: {
 
       C10.getTime() >= C9.getTime(),
       C10.getTime() >= today.getTime(),
-      C10.getTime() <= new Date(today.getTime() + 4 * 86400000).getTime(),
+      C10.getTime() <= new Date(today.getTime() + 3 * 86400000).getTime(),
 
       C11.getTime() > C10.getTime(),
       C11.getTime() > C9.getTime(),

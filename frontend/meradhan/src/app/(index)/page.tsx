@@ -8,6 +8,7 @@ import HomeHeroSection from "./_components/HomeHeroSection";
 import LatestBondReleases from "./_components/LatestBondReleases";
 import ToolsOfferedByMeraDhan from "./_components/ToolsOfferedbyMeraDhan";
 import WhyMeraDhanSection from "./_components/WhyMeraDhanSection";
+import XirrCalculator from "../(tools)/ytm-calculator/_components/XirrCalculator";
 
 export const revalidate = 0; // Revalidate the page every hour
 export const generateMetadata = async () => {
@@ -31,11 +32,11 @@ export default async function HomePage() {
       </div>
       <LatestBondReleases bonds={responseData || []} />
       {/* <ReturnsCalculationSection /> */}
-      {/* <XirrCalculator
+      <XirrCalculator
         showTitle={true}
         showFlowChart={false}
         showChart={false}
-      /> */}
+      />
       {/* <CustomersTestimonials /> */}
       {/* <RecentBlogs /> */}
     </ViewPort>
