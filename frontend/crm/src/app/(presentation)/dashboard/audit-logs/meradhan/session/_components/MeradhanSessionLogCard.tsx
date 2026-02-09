@@ -125,7 +125,7 @@ function MeradhanSessionLogCard({ session }: MeradhanSessionLogCardProps) {
                   <span className="text-gray-900 text-sm">
                     {dateTimeUtils.formatDateTime(
                       session.startTime,
-                      "DD MMM YYYY hh:mm AA"
+                      "DD MMM YYYY hh:mm:ss AA"
                     )}
                   </span>
                 </div>
@@ -137,7 +137,7 @@ function MeradhanSessionLogCard({ session }: MeradhanSessionLogCardProps) {
                     <span className="text-gray-900 text-sm">
                       {dateTimeUtils.formatDateTime(
                         session.endTime,
-                        "DD MMM YYYY hh:mm AA"
+                        "DD MMM YYYY hh:mm:ss AA"
                       )}
                     </span>
                   </div>

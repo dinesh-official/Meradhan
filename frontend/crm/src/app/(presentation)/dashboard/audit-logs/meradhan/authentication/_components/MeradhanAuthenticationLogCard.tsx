@@ -169,7 +169,10 @@ function MeradhanAuthenticationLogCard({
                       )}
                     </span>
                     <span className="text-muted-foreground">
-                      {dateTimeUtils.formatDateTime(log.createdAt, "hh:mm AA")}
+                      {dateTimeUtils.formatDateTime(
+                        log.createdAt,
+                        "hh:mm:ss AA"
+                      )}
                     </span>
                   </div>
                 </TableCell>
