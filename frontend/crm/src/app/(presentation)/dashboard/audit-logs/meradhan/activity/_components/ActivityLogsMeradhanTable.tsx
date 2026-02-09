@@ -82,6 +82,35 @@ const getActionBadgeColor = (action: string) => {
   return "bg-amber-100 text-amber-800 border-amber-200";
 };
 
+const renderDetailValue = (value: unknown): React.ReactNode => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
+  if (Array.isArray(value)) {
+    return value.map((item, index) => (
+      <div key={index} className="pl-3">
+        - {renderDetailValue(item)}
+      </div>
+    ));
+  }
+  if (typeof value === "object") {
+    return (
+      <div className="pl-3 space-y-1">
+        {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
+          <div key={k} className="wrap-break-word whitespace-pre-wrap">
+            <span className="font-medium">{k}:</span> {renderDetailValue(v)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return String(value);
+};
+
 function ActivityLogsMeradhanTable({
   data,
   isLoading,
@@ -133,14 +162,14 @@ function ActivityLogsMeradhanTable({
             label: "Details",
             cell(row) {
               return (
-                <div className="text-xs text-gray-600 max-w-md leading-relaxed">
+                <div className="text-xs text-gray-600 leading-relaxed">
                   <div className="mb-2">
                     {Object.keys(row.details).length > 0 ? (
                       <div className="space-y-1.5">
                         {Object.entries(row.details).map(([key, value]) => (
-                          <div key={key} className="truncate">
+                          <div key={key} className="wrap-break-word whitespace-pre-wrap">
                             <span className="font-medium">{key}:</span>{" "}
-                            {String(value)}
+                            {renderDetailValue(value)}
                           </div>
                         ))}
                       </div>

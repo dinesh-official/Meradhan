@@ -115,7 +115,7 @@ export function BondListCard({
                 </p>
               </BondInfoLabel>
               <BondInfoLabel title="Coupon">
-                <p>{data.couponRate}%</p>
+                <p>{data.couponRate.toFixed(2)}%</p>
               </BondInfoLabel>
               <BondInfoLabel title="Maturity Date">
                 <p>

@@ -133,7 +133,7 @@ function AuditLogsView({
                             <Clock className="mr-2 w-4 h-4" />
                             {dateTimeUtils.formatDateTime(
                               record.createdAt,
-                              "DD MMMM YYYY hh:mm AA"
+                              "DD MMMM YYYY hh:mm:ss AA"
                             )}
                           </div>
                         </div>

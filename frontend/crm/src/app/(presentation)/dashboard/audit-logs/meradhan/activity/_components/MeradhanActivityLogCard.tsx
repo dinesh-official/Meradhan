@@ -92,7 +92,7 @@ function MeradhanActivityLogCard({ activity }: MeradhanActivityLogCardProps) {
                   <Clock className="mr-2 w-4 h-4" />
                   {dateTimeUtils.formatDateTime(
                     activity.createdAt,
-                    "DD MMM YYYY hh:mm AA"
+                    "DD MMM YYYY hh:mm:ss AA"
                   )}
                 </div>
               </div>
