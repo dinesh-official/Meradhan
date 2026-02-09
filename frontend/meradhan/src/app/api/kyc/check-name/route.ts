@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { name1, name2, dob1, dob2, debug } = body;
+    const { name1, name2, dob1, dob2, debug, isIgnoreDob } = body;
 
     // Validate required fields
     if (!name1 || !name2) {
@@ -43,10 +43,15 @@ export async function POST(request: NextRequest) {
     const result: MatchResult = compareNames(
       name1,
       name2,
-      dob1 || null,
-      dob2 || null,
-      { debug: debug || false }
+      isIgnoreDob ? "1" : dob1 || null,
+      isIgnoreDob ? "1" : dob2 || null,
+
+      { debug: debug || false, }
     );
+
+    if (isIgnoreDob) {
+      result.breakdown.dateOfBirthMatch = false;
+    }
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
