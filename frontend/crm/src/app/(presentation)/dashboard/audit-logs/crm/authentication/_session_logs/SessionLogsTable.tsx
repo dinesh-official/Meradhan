@@ -95,10 +95,10 @@ const getSessionStatus = (
     endReasonLower === "logout" ||
     session.endReason === "logout";
 
-  // If session has end time with logout reason, show Logout
+  // If session has end time with logout reason, show Session Closed
   if (session.endTime && isLogout) {
     return {
-      status: "Logout",
+      status: "Session Closed",
       color: "bg-purple-100 text-purple-800",
     };
   }
@@ -122,7 +122,7 @@ const getSessionStatus = (
   // If session is older than 24 hours, auto expired
   if (hoursSinceStart > 24) {
     return {
-      status: "Auto Expired",
+      status: "Session Closed",
       color: "bg-orange-100 text-orange-800",
     };
   }
@@ -211,7 +211,7 @@ const SessionRow = ({
                     <span className="text-xs font-medium whitespace-nowrap">
                       {format(
                         new Date(session.startTime),
-                        "MMM dd, yyyy hh:mm a"
+                        "MMM dd, yyyy hh:mm:ss a"
                       )}
                     </span>
                   </div>
@@ -225,7 +225,7 @@ const SessionRow = ({
                       <span className="text-xs font-medium whitespace-nowrap">
                         {format(
                           new Date(session.endTime),
-                          "MMM dd, yyyy hh:mm a"
+                          "MMM dd, yyyy hh:mm:ss a"
                         )}
                       </span>
                     ) : (

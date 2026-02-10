@@ -29,7 +29,6 @@ const cbricsManager = new ParticipantManager();
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
 
-
 export class KraWorkerService {
   private kraProcess = new KraProcess();
 
@@ -37,11 +36,9 @@ export class KraWorkerService {
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
     const runnerCachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
 
-
     const lastTask = await cacheStorage.get<string>(cachedKey);
     const { customerId, kycDataStoreId } = data;
     const runner = await cacheStorage.get<string>(runnerCachedKey);
-
 
     if (!runner) {
       await db.dataBase.kraDataLogs.create({
@@ -126,7 +123,8 @@ export class KraWorkerService {
               Message: "Request Failed - KRA Process error",
               LastTask: lastTask,
               Status: status,
-              Error: "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
+              Error:
+                "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
             },
             responseData: res,
             userId: customerId,
@@ -682,9 +680,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-          data.step_1.pan.response.details.aadhaar.current_address_details
-            .state,
-        )?.code
+            data.step_1.pan.response.details.aadhaar.current_address_details
+              .state,
+          )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",

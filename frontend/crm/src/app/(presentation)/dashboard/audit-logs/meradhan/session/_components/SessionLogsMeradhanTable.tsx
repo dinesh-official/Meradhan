@@ -61,6 +61,19 @@ const getSessionStatus = (
     (now.getTime() - startTime.getTime()) / (1000 * 60 * 60);
 
   // If session has end time with a reason, show the reason
+  const endReasonLower = session.endReason?.toLowerCase() || "";
+  const isLogout =
+    endReasonLower.includes("logout") ||
+    endReasonLower === "logout" ||
+    session.endReason === "logout";
+
+  if (session.endTime && isLogout) {
+    return {
+      status: "Session Closed",
+      color: "bg-purple-100 text-purple-800",
+    };
+  }
+
   if (session.endTime && session.endReason) {
     return {
       status: session.endReason,
@@ -79,7 +92,7 @@ const getSessionStatus = (
   // If session is older than 24 hours, auto expired
   if (hoursSinceStart > 24) {
     return {
-      status: "Auto Expired",
+      status: "Session Closed",
       color: "bg-orange-100 text-orange-800",
     };
   }
@@ -175,14 +188,14 @@ const SessionRow = ({
                       <span className="text-xs font-medium whitespace-nowrap">
                         {format(
                           new Date(session.startTime),
-                          "MMM dd, yyyy hh:mm a"
+                          "MMM dd, yyyy hh:mm:ss a"
                         )}
                       </span>
                       {session.endTime ? (
                         <span className="text-xs font-medium whitespace-nowrap">
                           {format(
                             new Date(session.endTime),
-                            "MMM dd, yyyy hh:mm a"
+                            "MMM dd, yyyy hh:mm:ss a"
                           )}
                         </span>
                       ) : (
