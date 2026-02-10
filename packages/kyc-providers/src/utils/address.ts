@@ -8,7 +8,7 @@ export type Address3Lines = {
 
 // Remove the last `count` comma-separated chunks from an address string.
 export function removeLastCommaChunks(input: string, count = 3): string {
-  const parts = input.split(",");
+  const parts = input.replaceAll(":", "").split(",");
   if (parts.length <= count) return "";
   parts.splice(-count);
   return parts.join(",");
@@ -28,7 +28,7 @@ export function removeLastCommaChunks(input: string, count = 3): string {
  */
 export function splitAddressInto3BalancedLines(
   input: string,
-  maxLen = 120
+  maxLen = 120,
 ): Address3Lines {
   const normalize = (s: string) =>
     s
