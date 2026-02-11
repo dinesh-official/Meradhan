@@ -154,7 +154,7 @@ const SessionRow = ({
 
               <div className="flex items-center gap-5 flex-1 min-w-0 overflow-x-auto">
                 {/* Session ID */}
-                <div className="flex-shrink-0 min-w-[80px]">
+                <div className="flex-shrink-0 w-[80px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Session</span>
                     <span className="font-mono text-xs font-semibold text-gray-700">
@@ -164,7 +164,7 @@ const SessionRow = ({
                 </div>
 
                 {/* User Info */}
-                <div className="flex-shrink-0 min-w-[180px] max-w-[200px]">
+                <div className="flex-shrink-0 w-[150px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">User</span>
                     <span className="font-medium text-xs truncate">
@@ -177,7 +177,7 @@ const SessionRow = ({
                 </div>
 
                 {/* Login Time */}
-                <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
+                <div className="flex-shrink-0 w-[150px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Login</span>
                     <span className="text-xs font-medium whitespace-nowrap">
@@ -190,7 +190,7 @@ const SessionRow = ({
                 </div>
 
                 {/* Logout Time */}
-                <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
+                <div className="flex-shrink-0 w-[170px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Logout</span>
                     {session.endTime ? (
@@ -209,7 +209,7 @@ const SessionRow = ({
                 </div>
 
                 {/* Status */}
-                <div className="flex-shrink-0 min-w-[90px]">
+                <div className="flex-shrink-0 w-[170px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Status</span>
                     <Badge
@@ -349,14 +349,14 @@ const SessionRow = ({
                             <span className="text-xs">
                               {pageView.exitTime
                                 ? formatDuration(
-                                    Math.floor(
-                                      (new Date(pageView.exitTime).getTime() -
-                                        new Date(
-                                          pageView.entryTime
-                                        ).getTime()) /
-                                        1000
-                                    )
+                                  Math.floor(
+                                    (new Date(pageView.exitTime).getTime() -
+                                      new Date(
+                                        pageView.entryTime
+                                      ).getTime()) /
+                                    1000
                                   )
+                                )
                                 : formatDuration(pageView.duration)}
                             </span>
                           </div>
