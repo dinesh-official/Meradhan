@@ -6,6 +6,7 @@ import { genMediaUrl } from "@/global/utils/url.utils";
 import { areNamesMatched } from "@/lib/utils";
 import apiGateway, { CustomerByIdPayload } from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import StickyHeader from "./StickyHeader";
 import AadhaarCardInfo from "./cards/AadhaarCardInfo";
 import AdharaCard from "./cards/AdharaCard";
@@ -23,6 +24,9 @@ import RiskProfileQuestion, {
 import { riskProfileData } from "@/global/constants/riskProfileData";
 import KraLogsView from "./KraLogsView";
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
+  const { cookies } = useAppCookie();
+  const isSuperAdmin = cookies.role === "SUPER_ADMIN";
+
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller,
   );
@@ -73,6 +77,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         />
       </div>
 
+      {isSuperAdmin && (
+        <>
       <StickyHeader />
 
       {/* Personal Information */}
@@ -443,6 +449,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       {/* Compliance */}
       <CheckedCompances data={kycStore.data} />
       <KraLogsView id={data.id} />
+        </>
+      )}
     </div>
   );
 }

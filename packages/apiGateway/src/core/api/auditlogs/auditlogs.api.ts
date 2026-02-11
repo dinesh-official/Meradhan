@@ -91,6 +91,8 @@ export class AuditLogsApiV2 {
       pageSize?: number;
       startDate?: string | Date;
       endDate?: string | Date;
+      entityType?: string;
+      search?: string;
     },
     config?: AxiosRequestConfig
   ) {

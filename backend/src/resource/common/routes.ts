@@ -97,7 +97,7 @@ commonApiRoutes.get("/files-public/*path", async (req, res) => {
     const code =
       typeof err === "object" && err && "$metadata" in err
         ? (err as { $metadata?: { httpStatusCode?: number } }).$metadata
-            ?.httpStatusCode
+          ?.httpStatusCode
         : undefined;
     const name =
       typeof err === "object" && err && "name" in err
@@ -116,7 +116,7 @@ commonApiRoutes.get("/files-public/*path", async (req, res) => {
  */
 commonApiRoutes.all(
   "/files/*path",
-  allowAccessMiddleware("ADMIN", "USER"),
+  allowAccessMiddleware("CRM", "USER"),
   async (req, res) => {
     try {
       const key = decodeURIComponent(
@@ -171,7 +171,7 @@ commonApiRoutes.all(
       const code =
         typeof err === "object" && err && "$metadata" in err
           ? (err as { $metadata?: { httpStatusCode?: number } }).$metadata
-              ?.httpStatusCode
+            ?.httpStatusCode
           : undefined;
       const name =
         typeof err === "object" && err && "name" in err
@@ -195,7 +195,7 @@ commonApiRoutes.all(
  */
 commonApiRoutes.get(
   "/uploads/*path",
-  allowAccessMiddleware("ADMIN", "USER"),
+  allowAccessMiddleware("CRM", "USER"),
   async (req, res) => {
     try {
       const filePath = decodeURIComponent(

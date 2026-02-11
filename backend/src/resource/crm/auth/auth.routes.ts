@@ -16,7 +16,7 @@ crmAuthRoutes.post("/api/auth/verify-otp", OtpVerifyLimiter, (req, res) =>
 crmAuthRoutes.all("/api/auth/logout", (req, res) =>
   controller.logout(req, res)
 );
-crmAuthRoutes.all("/api/session", allowAccessMiddleware("ADMIN"), (req, res) =>
+crmAuthRoutes.all("/api/session", allowAccessMiddleware("CRM"), (req, res) =>
   controller.session(req, res)
 );
 

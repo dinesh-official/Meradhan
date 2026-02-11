@@ -42,6 +42,9 @@ model ActivityLogsCRM {
     createdAt       DateTime @default(now())
     updatedAt       DateTime @updatedAt
 
+    @@index([createdAt(sort: Desc)])
+    @@index([userId, createdAt(sort: Desc)])
+    @@index([entityType, createdAt(sort: Desc)])
     @@map("activity_logs_crm")
 }
 
@@ -62,6 +65,8 @@ model SessionLogsCRM {
     createdAt       DateTime  @default(now())
     updatedAt       DateTime  @updatedAt
 
+    @@index([startTime(sort: Desc)])
+    @@index([userId, startTime(sort: Desc)])
     @@map("session_logs_crm")
 }
 
@@ -80,6 +85,8 @@ model PageViewLogsCRM {
     createdAt    DateTime  @default(now())
     updatedAt    DateTime  @updatedAt
 
+    @@index([sessionId])
+    @@index([sessionId, entryTime])
     @@map("page_view_logs_crm")
 }
 
@@ -97,6 +104,8 @@ model LoginLogsCrm {
     success         Boolean
     createdAt       DateTime @default(now())
 
+    @@index([createdAt(sort: Desc)])
+    @@index([userId, createdAt(sort: Desc)])
     @@map("login_logs_crm")
 }
 

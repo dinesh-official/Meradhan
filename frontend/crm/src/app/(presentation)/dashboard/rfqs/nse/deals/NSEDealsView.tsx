@@ -178,11 +178,11 @@ function NSEDealsView() {
             <Tabs defaultValue="deal_proposer" onValueChange={setTabs}>
               <TabsList>
                 <TabsTrigger value="all">All Deals</TabsTrigger>
-                <TabsTrigger value="deal_proposer">Deal Proposer</TabsTrigger>
+                <TabsTrigger value="deal_proposer">Deal Proposer (PP/PR)</TabsTrigger>
                 <TabsTrigger value="deal_counterparty">
-                  Deal Counterparty
+                  Deal Counterparty (PC/CA/CR)
                 </TabsTrigger>
-                <TabsTrigger value="deal_confirmed">Deal Confirmed</TabsTrigger>
+                <TabsTrigger value="deal_confirmed">Deal Confirmed (CC)</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -194,13 +194,13 @@ function NSEDealsView() {
           )}
           {tabs === "deal_proposer" && (
             <DealProposerSection
-              data={data?.filter((e) => !e.confirmStatus) || []}
+              data={data?.filter((e) => e.confirmStatus == "PP" || e.confirmStatus == "PR") || []}
               loading={isLoading}
             />
           )}
           {tabs === "deal_counterparty" && (
             <DealProposerSection
-              data={data?.filter((e) => e.confirmStatus == "PC") || []}
+              data={data?.filter((e) => e.confirmStatus == "PC" || e.confirmStatus == "CA" || e.confirmStatus == "CR") || []}
               loading={isLoading}
             />
           )}

@@ -110,13 +110,18 @@ export const PageTrackingProvider: React.FC<{
     } finally {
       isEndingRef.current = false;
     }
-  }, [currentPageView]);
+  }, [currentPageView, auditApi, cookies.userId]);
+
+  // Ref to latest endPageView so pathname effect doesn't depend on it (avoids loop:
+  // startPageView -> setState -> endPageView identity changes -> effect re-runs)
+  const endPageViewRef = useRef(endPageView);
+  endPageViewRef.current = endPageView;
 
   // Start page view tracking
   useEffect(() => {
     const startPageView = async () => {
-      // End previous page view if exists
-      await endPageView();
+      // End previous page view if exists (use ref to avoid effect re-running when endPageView identity changes)
+      await endPageViewRef.current();
 
       if (!cookies.userId) return;
 
@@ -158,7 +163,7 @@ export const PageTrackingProvider: React.FC<{
     };
 
     startPageView();
-  }, [pathname]);
+  }, [pathname, auditApi, cookies.token, cookies.userId]);
 
   // Handle page unload (browser/tab close) - use sendBeacon for reliability
   // useEffect(() => {
@@ -279,7 +284,7 @@ export const PageTrackingProvider: React.FC<{
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [pathname]);
+  }, [pathname, endPageView]);
 
   const updateInteractions = () => {
     interactionsRef.current += 1;

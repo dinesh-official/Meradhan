@@ -3,6 +3,7 @@ import { CrmOrdersService } from "./orders.service";
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import { OrderStatus } from "@databases/generated/prisma/postgres";
+import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 
 export class CrmOrdersController {
   private ordersService = new CrmOrdersService();
@@ -87,6 +88,19 @@ export class CrmOrdersController {
         orderId,
         status as OrderStatus
       );
+
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "ORDER_STATUS_UPDATE",
+        details: {
+          Reason: "Order status updated",
+          OrderId: orderId,
+          OrderNumber: updatedOrder.orderNumber,
+          Status: status,
+        },
+        entityType: "rfq",
+        entityId: String(orderId),
+      });
 
       return res.sendResponse({
         statusCode: HttpStatus.OK,

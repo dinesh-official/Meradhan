@@ -33,7 +33,17 @@ export type DashboardRateMetric = DashboardMetric & {
   totalUsers: number;
 };
 
+export type DashboardOverviewCounts = {
+  totalCustomers: number;
+  kycCompleted: number;
+  kycPending: number;
+  totalRfq: number;
+  totalLeads: number;
+  bondsAllowForPurchase: number;
+};
+
 export type DashboardSummaryPayload = {
+  overview: DashboardOverviewCounts;
   activeLeads: DashboardMetric;
   completedProjects: DashboardMetric;
   userDropRate: DashboardRateMetric;
