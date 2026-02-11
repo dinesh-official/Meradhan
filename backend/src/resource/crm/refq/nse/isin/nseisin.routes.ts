@@ -7,7 +7,7 @@ const controller = new NSEIsinController();
 
 nseIsinRoute.get(
   "/api/crm/rfq/nse/isin",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.searchIsin(req, res)
 );
 

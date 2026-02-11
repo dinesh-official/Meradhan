@@ -7,8 +7,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import ShowOnly from "@/global/elements/permissions/ShowOnly";
+import { encodeId } from "@/global/utils/url.utils";
 import { CustomerProfile } from "@root/apiGateway";
 import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 import Swal from "sweetalert2";
 import { useCustomerTableActions } from "./useCustomerTableActionHook";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
@@ -17,7 +19,6 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
   const { trackActivity } = useUserTracking();
   const {
-    handleViewKyc,
     handleProfileView,
     handleProfileUpdate,
     deleteProfileMutation,
@@ -57,7 +58,13 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
             </DropdownMenuItem>
           </ShowOnly>
 
-          <DropdownMenuItem onClick={handleViewKyc}>View KYC</DropdownMenuItem>
+          <AllowOnlyView permissions={["view:customerkyc"]}>
+            <DropdownMenuItem asChild>
+              <Link href={`/dashboard/customers/view/${encodeId(profile.id)}/kyc`}>
+                View KYC
+              </Link>
+            </DropdownMenuItem>
+          </AllowOnlyView>
           <DropdownMenuItem onClick={handleProfileView}>
             View Profile
           </DropdownMenuItem>

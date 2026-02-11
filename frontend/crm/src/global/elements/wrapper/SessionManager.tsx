@@ -2,6 +2,7 @@
 import { useCurrentUserData } from "@/global/stores/useCurrentUserData.store";
 import { UserSessionDataResponse } from "@root/apiGateway";
 import { ReactNode, useEffect } from "react";
+import IdleLogoutHandler from "./IdleLogoutHandler";
 
 function SessionManager({
   children,
@@ -15,7 +16,12 @@ function SessionManager({
     setUserData(session.responseData);
   }, [session, setUserData]);
 
-  return children;
+  return (
+    <>
+      <IdleLogoutHandler />
+      {children}
+    </>
+  );
 }
 
 export default SessionManager;

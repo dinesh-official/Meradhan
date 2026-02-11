@@ -48,7 +48,7 @@ export class EmailAuthService {
         {
           email: user.email,
           id: user.id,
-          role: "ADMIN",
+          role: user.role,
         },
         "1d"
       );

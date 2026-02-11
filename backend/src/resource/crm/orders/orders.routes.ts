@@ -7,19 +7,19 @@ const crmOrdersController = new CrmOrdersController();
 
 router.get(
   "/api/crm/orders/all",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   crmOrdersController.getAllOrders
 );
 
 router.get(
   "/api/crm/orders/:id",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   crmOrdersController.getOrderById
 );
 
 router.patch(
   "/api/crm/orders/:id/status",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   crmOrdersController.updateOrderStatus
 );
 

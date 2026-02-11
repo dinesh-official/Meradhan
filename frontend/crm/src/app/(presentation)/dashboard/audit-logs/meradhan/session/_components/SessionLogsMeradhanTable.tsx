@@ -69,7 +69,7 @@ const getSessionStatus = (
 
   if (session.endTime && isLogout) {
     return {
-      status: "Session Closed",
+      status: "Closed",
       color: "bg-purple-100 text-purple-800",
     };
   }
@@ -89,7 +89,7 @@ const getSessionStatus = (
     };
   }
 
-  // If session is older than 24 hours, auto expired
+  // If session is older than 24 hours with no end time, show Session Closed
   if (hoursSinceStart > 24) {
     return {
       status: "Session Closed",

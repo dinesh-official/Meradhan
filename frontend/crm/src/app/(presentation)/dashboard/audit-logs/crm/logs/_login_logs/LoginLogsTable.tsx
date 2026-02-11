@@ -42,37 +42,6 @@ interface LoginLogsTableProps {
   };
 }
 
-const getDeviceBadgeColor = (device: string) => {
-  const colors: Record<string, string> = {
-    Desktop: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-    Mobile: "bg-green-500/10 text-green-700 dark:text-green-400",
-    Tablet: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
-  };
-  return colors[device] || "bg-gray-500/10 text-gray-700 dark:text-gray-400";
-};
-
-const getBrowserBadgeColor = (browser: string) => {
-  const colors: Record<string, string> = {
-    Chrome: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
-    Firefox: "bg-orange-500/10 text-orange-700 dark:text-orange-400",
-    Safari: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400",
-    Edge: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-    Opera: "bg-red-500/10 text-red-700 dark:text-red-400",
-  };
-  return colors[browser] || "bg-gray-500/10 text-gray-700 dark:text-gray-400";
-};
-
-const getOSBadgeColor = (os: string) => {
-  const colors: Record<string, string> = {
-    Windows: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-    macOS: "bg-gray-500/10 text-gray-700 dark:text-gray-400",
-    Linux: "bg-orange-500/10 text-orange-700 dark:text-orange-400",
-    Android: "bg-green-500/10 text-green-700 dark:text-green-400",
-    iOS: "bg-gray-500/10 text-gray-700 dark:text-gray-400",
-  };
-  return colors[os] || "bg-gray-500/10 text-gray-700 dark:text-gray-400";
-};
-
 const getSessionTypeBadgeColor = (sessionType: string) => {
   const colors: Record<string, string> = {
     login: "bg-green-500/10 text-green-700 dark:text-green-400",
@@ -114,9 +83,7 @@ export function LoginLogsTable({
               <TableHead className="w-[50px]">Status</TableHead>
               <TableHead>User</TableHead>
               <TableHead>Session Type</TableHead>
-              <TableHead>Device</TableHead>
-              <TableHead>Browser</TableHead>
-              <TableHead>OS</TableHead>
+              <TableHead>Environment</TableHead>
               <TableHead>IP Address</TableHead>
               <TableHead>Date & Time</TableHead>
             </TableRow>
@@ -147,29 +114,15 @@ export function LoginLogsTable({
                     {log.sessionType}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={getDeviceBadgeColor(log.deviceType)}
-                  >
-                    <span className="capitalize">{log.deviceType}</span>
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={getBrowserBadgeColor(log.browserName)}
-                  >
-                    {log.browserName}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={getOSBadgeColor(log.operatingSystem)}
-                  >
-                    {log.operatingSystem}
-                  </Badge>
+                <TableCell className="text-xs text-muted-foreground">
+                  <div className="space-y-0.5">
+                    <div>Browser: {log.browserName ?? "—"}</div>
+                    <div>
+                      Device:{" "}
+                      <span className="capitalize">{log.deviceType ?? "—"}</span>
+                    </div>
+                    <div>OS: {log.operatingSystem ?? "—"}</div>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <code className="text-xs bg-muted px-1.5 py-0.5 rounded">

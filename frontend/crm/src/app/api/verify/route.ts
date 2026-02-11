@@ -15,11 +15,8 @@ export const POST = async (request: Request) => {
     if (response.data.responseData.token) {
       const data = response.data.responseData;
 
-      // Set cookies with proper configuration for persistence
-      const cookieOptions = {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-      };
+      // Session cookie: no maxAge/expires so it is cleared on browser close
+      const cookieOptions = { path: "/" };
 
       cookie.set("token", data.token, cookieOptions);
       cookie.set("userId", data.id.toString(), cookieOptions);
