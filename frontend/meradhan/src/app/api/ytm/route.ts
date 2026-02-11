@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { XIRR } from "@formulajs/formulajs";
 import {
+  approximateYtm,
   calculateYtm,
   couponFrequency,
   dayCount,
@@ -138,20 +139,21 @@ export async function POST(request: Request) {
       lastCouponDate: toDate(lastCouponDate, "lastCouponDate"),
     };
 
-    console.log(payload);
-
     const ytm = calculateYtm(payload);
     const cashFlow = generateCashFlow(ytm, payload);
+    const approximateYtmValue = approximateYtm(payload, ytm);
     const xirrRaw = XIRR(
       cashFlow.map((row) => row.totalCashflow),
       cashFlow.map((row) => row.date),
     );
+
 
     const xirrPct =
       xirrRaw instanceof Error ? "ERROR" : (xirrRaw * 100).toFixed(4);
 
     return NextResponse.json({
       check: ytm.check,
+      approximateYtm: approximateYtmValue.toFixed(4),
       ytm: typeof ytm.result === "number" ? ytm.result.toFixed(4) : ytm.result,
       xirr: xirrPct,
       cashflow: cashFlow.map((row, idx) => ({

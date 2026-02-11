@@ -101,11 +101,13 @@ export const useYtm = () => {
   const [result, setResult] = useState<{
     ytm: number;
     xirr: number;
+    approximateYtm: number;
     cashflow: ApiCashflowItem[];
     status: boolean;
   }>({
     ytm: 0,
     xirr: 0,
+    approximateYtm: 0,
     cashflow: [],
     status: true,
   });
@@ -141,6 +143,7 @@ export const useYtm = () => {
         const data = (await res.json()) as {
           check: string;
           ytm: string | number;
+          approximateYtm: string | number;
           xirr: string | number;
           cashflow: ApiCashflowItem[];
         };
@@ -155,6 +158,7 @@ export const useYtm = () => {
           xirr: toNumeric(data.xirr),
           cashflow: Array.isArray(data.cashflow) ? data.cashflow : [],
           status: data.check === "OK",
+          approximateYtm: toNumeric(data.approximateYtm),
         });
       } catch (error) {
         if ((error as Error).name === "AbortError") return;
@@ -162,6 +166,7 @@ export const useYtm = () => {
         setResult({
           ytm: NaN,
           xirr: NaN,
+          approximateYtm: NaN,
           cashflow: [],
           status: false,
         });

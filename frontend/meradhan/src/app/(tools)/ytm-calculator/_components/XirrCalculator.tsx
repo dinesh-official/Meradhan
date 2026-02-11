@@ -371,7 +371,7 @@ function XirrCalculator({
               <div className="lg:col-span-2 bg-white rounded-md">
                 <FlowChart
                   xirrData={flowData}
-                  ytm={result.ytm}
+                  ytm={result.approximateYtm}
                   yieldVal={yieldVal}
                 />
               </div>
@@ -379,16 +379,16 @@ function XirrCalculator({
               <div className=" bg-white rounded-md p-5 py-10 flex justify-center items-center flex-col">
                 <h3 className="md:text-4xl text-3xl text-center">
                   YTM:{" "}
-                  {isNaN(result.xirr) ? (
+                  {isNaN(Number(result.approximateYtm)) ? (
                     <span className="text-red-600">CHECK INPUTS</span>
                   ) : (
                     <span
                       className={cn("font-semibold", {
-                        "text-green-600": Number(result.xirr) > 0,
-                        "text-red-600": Number(result.xirr) < 0,
+                        "text-green-600": Number(result.approximateYtm) > 0,
+                        "text-red-600": Number(result.approximateYtm) < 0,
                       })}
                     >
-                      {result.xirr?.toFixed(4)}%
+                      {result.approximateYtm?.toFixed(4)}%
                     </span>
                   )}
                 </h3>
