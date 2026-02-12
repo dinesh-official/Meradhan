@@ -15,16 +15,12 @@ type CardStat = {
     | "pinkGradient"
     | "greenGradient"
     | "redGradient"
-    | "grayGradient";
+    | "grayGradient"
+    | "blueGradient"
+    | "purpleGradient"
+    | "orangeGradient"
+    | "indigoGradient";
 };
-
-const formatChange = (value: number, rangeDays: number) => {
-  const fixed = Number.isFinite(value) ? value.toFixed(1) : "0.0";
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${fixed}% vs prev ${rangeDays}d`;
-};
-
-const asPercent = (value: number) => `${value.toFixed(1)}%`;
 
 type Props = { rangeDays: number };
 
@@ -44,48 +40,55 @@ export const DashboardStatsCards: FC<Props> = ({ rangeDays }) => {
 
   const data = summaryQuery.data;
   const loading = summaryQuery.isLoading;
+  const o = data?.overview;
 
   const cards: CardStat[] = [
     {
-      label: "Active Leads",
-      value: loading ? "…" : data?.activeLeads.total ?? 0,
-      changeText: loading
-        ? "Loading…"
-        : formatChange(data?.activeLeads.trendPct ?? 0, rangeDays),
-      arrowType: (data?.activeLeads.trendPct ?? 0) >= 0 ? "up" : "down",
-      variant: "pinkGradient",
+      label: "Total Customers",
+      value: loading ? "…" : (o?.totalCustomers ?? 0),
+      changeText: "",
+      arrowType: "none",
+      variant: "blueGradient",
     },
     {
-      label: "Completed Projects",
-      value: loading ? "…" : data?.completedProjects.total ?? 0,
-      changeText: loading
-        ? "Loading…"
-        : formatChange(data?.completedProjects.trendPct ?? 0, rangeDays),
-      arrowType: (data?.completedProjects.trendPct ?? 0) >= 0 ? "up" : "down",
+      label: "KYC Completed",
+      value: loading ? "…" : (o?.kycCompleted ?? 0),
+      changeText: "",
+      arrowType: "none",
       variant: "greenGradient",
     },
     {
-      label: "User Drop Rate",
-      value: loading ? "…" : asPercent(data?.userDropRate.ratePct ?? 0),
-      changeText: loading
-        ? "Loading…"
-        : formatChange(data?.userDropRate.trendPct ?? 0, rangeDays),
-      arrowType: (data?.userDropRate.trendPct ?? 0) >= 0 ? "up" : "down",
-      variant: "redGradient",
+      label: "KYC Pending",
+      value: loading ? "…" : (o?.kycPending ?? 0),
+      changeText: "",
+      arrowType: "none",
+      variant: "orangeGradient",
     },
     {
-      label: "User Gain Rate",
-      value: loading ? "…" : asPercent(data?.userGainRate.ratePct ?? 0),
-      changeText: loading
-        ? "Loading…"
-        : formatChange(data?.userGainRate.trendPct ?? 0, rangeDays),
-      arrowType: (data?.userGainRate.trendPct ?? 0) >= 0 ? "up" : "down",
-      variant: "grayGradient",
+      label: "Total RFQ",
+      value: loading ? "…" : (o?.totalRfq ?? 0),
+      changeText: "",
+      arrowType: "none",
+      variant: "purpleGradient",
+    },
+    {
+      label: "Total Leads",
+      value: loading ? "…" : (o?.totalLeads ?? 0),
+      changeText: "",
+      arrowType: "none",
+      variant: "pinkGradient",
+    },
+    {
+      label: "Bonds (Allow for Purchase)",
+      value: loading ? "…" : (o?.bondsAllowForPurchase ?? 0),
+      changeText: "",
+      arrowType: "none",
+      variant: "indigoGradient",
     },
   ];
 
   return (
-    <div className="gap-5 grid md:grid-cols-2 xl:grid-cols-4">
+    <div className="gap-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card) => (
         <StatusCountCard
           key={card.label}

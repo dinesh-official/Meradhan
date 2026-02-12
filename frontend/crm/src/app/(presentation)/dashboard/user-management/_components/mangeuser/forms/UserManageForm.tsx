@@ -5,9 +5,25 @@ import {
   SelectField,
   SelectOption,
 } from "@/global/elements/inputs/SelectField";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import { IUserDataFormHook, UserFormData } from "./hooks/userForm";
 
+const baseRoleOptions = [
+  { label: "Viewer", value: "VIEWER" as Role },
+  { label: "Sales", value: "SALES" as Role },
+  { label: "Relationship manager", value: "RELATIONSHIP_MANAGER" as Role },
+  { label: "Admin", value: "ADMIN" as Role },
+  { label: "Support", value: "SUPPORT" as Role },
+];
+
 const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
+  const { cookies } = useAppCookie();
+  const isSuperAdmin = cookies.role === "SUPER_ADMIN";
+  const roleOptions: (SelectOption & { value: Role })[] = [
+    ...baseRoleOptions,
+    ...(isSuperAdmin ? [{ label: "Super Admin", value: "SUPER_ADMIN" as Role }] : []),
+  ];
+
   return (
     <div className="relative flex flex-col gap-4">
       <InputField
@@ -48,15 +64,7 @@ const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
       <SelectField
         label="Select Role"
         placeholder="Select Role"
-        options={
-          [
-            { label: "Viewer", value: "VIEWER" },
-            { label: "Sales", value: "SALES" },
-            { label: "Relationship manager", value: "RELATIONSHIP_MANAGER" },
-            { label: "Admin", value: "ADMIN" },
-            { label: "Support", value: "SUPPORT" },
-          ] as (SelectOption & { value: Role })[]
-        }
+        options={roleOptions}
         value={manager.state.role}
         onChangeAction={(e) => {
           manager.setUserData("role", e as UserFormData["role"]);

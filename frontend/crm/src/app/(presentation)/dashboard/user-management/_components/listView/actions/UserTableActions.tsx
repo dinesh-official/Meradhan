@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import HideForMe from "@/global/elements/permissions/HideForMe";
 import { CrmUsersProfile } from "@root/apiGateway";
 import { MoreHorizontal } from "lucide-react";
@@ -35,57 +36,63 @@ function UserTableActions({ profile }: { profile: CrmUsersProfile }) {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowPopup(true)}>
-            Edit Profile
-          </DropdownMenuItem>
+          <AllowOnlyView permissions={["edit:user"]}>
+            <DropdownMenuItem onClick={() => setShowPopup(true)}>
+              Edit Profile
+            </DropdownMenuItem>
+          </AllowOnlyView>
 
           <HideForMe userId={profile.id}>
-            <DropdownMenuItem
-              onClick={async () => {
-                const result = await Swal.fire({
-                  title: "Are you sure?",
-                  text: `This action will ${status} the user.`,
-                  icon: "warning",
-                  showCancelButton: true,
-                  confirmButtonColor: "#d33",
-                  cancelButtonColor: "#3085d6",
-                  confirmButtonText: "Yes, Do it!",
-                  cancelButtonText: "Cancel",
-                });
-                if (result.isConfirmed) {
-                  manageSuspendUserMutation.mutate({
-                    id: profile.id,
-                    status:
-                      profile.accountStatus == "ACTIVE"
-                        ? "SUSPENDED"
-                        : "ACTIVE",
+            <AllowOnlyView permissions={["edit:user"]}>
+              <DropdownMenuItem
+                onClick={async () => {
+                  const result = await Swal.fire({
+                    title: "Are you sure?",
+                    text: `This action will ${status} the user.`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, Do it!",
+                    cancelButtonText: "Cancel",
                   });
-                }
-              }}
-            >
-              {status}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="bg-red-50 text-red-500"
-              onClick={async () => {
-                const result = await Swal.fire({
-                  title: "Are you sure?",
-                  text: "This action will permanently delete the user.",
-                  icon: "warning",
-                  showCancelButton: true,
-                  confirmButtonColor: "#d33",
-                  cancelButtonColor: "#3085d6",
-                  confirmButtonText: "Yes, delete it!",
-                  cancelButtonText: "Cancel",
-                });
+                  if (result.isConfirmed) {
+                    manageSuspendUserMutation.mutate({
+                      id: profile.id,
+                      status:
+                        profile.accountStatus == "ACTIVE"
+                          ? "SUSPENDED"
+                          : "ACTIVE",
+                    });
+                  }
+                }}
+              >
+                {status}
+              </DropdownMenuItem>
+            </AllowOnlyView>
+            <AllowOnlyView permissions={["delete:user"]}>
+              <DropdownMenuItem
+                className="bg-red-50 text-red-500"
+                onClick={async () => {
+                  const result = await Swal.fire({
+                    title: "Are you sure?",
+                    text: "This action will permanently delete the user.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel",
+                  });
 
-                if (result.isConfirmed) {
-                  deleteUserMutation.mutate(profile.id);
-                }
-              }}
-            >
-              Delete Account
-            </DropdownMenuItem>
+                  if (result.isConfirmed) {
+                    deleteUserMutation.mutate(profile.id);
+                  }
+                }}
+              >
+                Delete Account
+              </DropdownMenuItem>
+            </AllowOnlyView>
           </HideForMe>
         </DropdownMenuContent>
       </DropdownMenu>

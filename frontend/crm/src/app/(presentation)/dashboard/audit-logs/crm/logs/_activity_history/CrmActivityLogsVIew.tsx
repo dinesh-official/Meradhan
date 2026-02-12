@@ -63,27 +63,15 @@ function CrmActivityLogsVIew() {
         pageSize,
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
+        entityType: entityTypeFilter || undefined,
+        search: debouncedSearch || undefined,
       });
       return response.data.responseData;
     },
   });
 
-  // Client-side filtering for search and entity type
-  const filteredData =
-    activityData.data?.data?.filter((item) => {
-      const matchesSearch =
-        !debouncedSearch ||
-        item.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        item.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        item.action.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        item.ipAddress.toLowerCase().includes(debouncedSearch.toLowerCase());
-
-      const matchesEntityType =
-        !entityTypeFilter ||
-        item.entityType.toLowerCase() === entityTypeFilter.toLowerCase();
-
-      return matchesSearch && matchesEntityType;
-    }) || [];
+  // Server-side filtering: display the page returned by the API
+  const filteredData = activityData.data?.data ?? [];
 
   const handleClearFilters = () => {
     setSearchTerm("");

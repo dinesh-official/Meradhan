@@ -10,7 +10,7 @@ declare global {
         id: number;
         email: string;
         token: string;
-        role: "ADMIN";
+        role: "ADMIN" | "SUPER_ADMIN" | "VIEWER" | "SALES" | "SUPPORT" | "RELATIONSHIP_MANAGER";
       };
       customer?: {
         id: number;

@@ -27,20 +27,13 @@ export class AuditLogsService {
 
   async endPageViewLogCrm(
     pageViewId: number,
-    logData: PageView
+    logData: { exitTime: Date; duration: number; scrollDepth: number; interactions: number }
   ): Promise<void> {
-    // Implementation for ending a CRM page view log
     await this.auditLogRepo.updateCrmPageViewLog(pageViewId, {
-      pagePath: logData.pagePath,
-      sessionId: logData.sessionId,
-      pageTitle: logData.pageTitle,
-      entryTime: logData.entryTime,
+      exitTime: logData.exitTime,
+      duration: logData.duration,
       scrollDepth: logData.scrollDepth,
       interactions: logData.interactions,
-      duration: logData.duration,
-      exitTime: logData.exitTime,
-      referrer: logData.referrer,
-      userId: logData.userId,
     });
   }
 
@@ -54,11 +47,7 @@ export class AuditLogsService {
 
   /**
    * Retrieves paginated CRM login logs for a user within an optional date range.
-   * @param userId - Optional user ID to filter by
-   * @param startDate - Optional start date
-   * @param endDate - Optional end date
-   * @param page - Page number (1-based)
-   * @param pageSize - Number of records per page
+   * Uses name/email already stored on LoginLogsCrm at write time (no N+1 user lookups).
    */
   async getCrmLoginLogs(
     userId?: number,
@@ -72,18 +61,15 @@ export class AuditLogsService {
     const skip = (safePage - 1) * safePageSize;
     const take = safePageSize;
 
-    const where: Record<string, unknown> = {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    };
-
+    const where: Record<string, unknown> = {};
     if (userId !== undefined) {
       where.userId = userId;
     }
+    if (startDate != null && endDate != null) {
+      where.createdAt = { gte: startDate, lte: endDate };
+    }
 
-    const [total, logs] = await Promise.all([
+    const [total, data] = await Promise.all([
       db.dataBase.loginLogsCrm.count({ where }),
       db.dataBase.loginLogsCrm.findMany({
         where,
@@ -92,28 +78,6 @@ export class AuditLogsService {
         take,
       }),
     ]);
-
-    const data = await Promise.all(
-      logs.map(async (log) => ({
-        ...log,
-        name: log.userId
-          ? (
-              await db.dataBase.cRMUserDataModel.findUnique({
-                where: { id: log.userId },
-                select: { name: true },
-              })
-            )?.name || "N/A"
-          : "N/A",
-        email: log.userId
-          ? (
-              await db.dataBase.cRMUserDataModel.findUnique({
-                where: { id: log.userId },
-                select: { email: true },
-              })
-            )?.email || "N/A"
-          : "N/A",
-      }))
-    );
 
     const totalPages = Math.max(1, Math.ceil(total / safePageSize));
     return {
@@ -130,34 +94,41 @@ export class AuditLogsService {
   }
 
   /**
-   * Retrieves paginated CRM activity logs for a user within an optional date range.
-   * @param userId - Optional user ID to filter by
-   * @param startDate - Optional start date
-   * @param endDate - Optional end date
-   * @param page - Page number (1-based)
-   * @param pageSize - Number of records per page
+   * Retrieves paginated CRM activity logs with optional filters.
+   * Server-side filtering by date range, userId, entityType, and search (name, email, action, ipAddress).
    */
   async getCrmActivityLogs(
     userId?: number,
     startDate?: Date,
     endDate?: Date,
     page: number = 1,
-    pageSize: number = 20
+    pageSize: number = 20,
+    entityType?: string,
+    search?: string
   ) {
     const safePage = Math.max(1, Number(page) || 1);
     const safePageSize = Math.min(100, Math.max(1, Number(pageSize) || 20));
     const skip = (safePage - 1) * safePageSize;
     const take = safePageSize;
 
-    const where: Record<string, unknown> = {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    };
-
+    const where: Record<string, unknown> = {};
     if (userId !== undefined) {
       where.userId = userId;
+    }
+    if (startDate != null && endDate != null) {
+      where.createdAt = { gte: startDate, lte: endDate };
+    }
+    if (entityType != null && entityType.trim() !== "") {
+      where.entityType = { equals: entityType.trim(), mode: "insensitive" };
+    }
+    if (search != null && search.trim() !== "") {
+      const term = search.trim();
+      where.OR = [
+        { name: { contains: term, mode: "insensitive" } },
+        { email: { contains: term, mode: "insensitive" } },
+        { action: { contains: term, mode: "insensitive" } },
+        { ipAddress: { contains: term, mode: "insensitive" } },
+      ];
     }
 
     const [total, data] = await Promise.all([
@@ -185,12 +156,7 @@ export class AuditLogsService {
   }
 
   /**
-   * Retrieves paginated session logs for a user within an optional date range, including associated page views.
-   * @param userId - Optional user ID to filter by
-   * @param startDate - Optional start date
-   * @param endDate - Optional end date
-   * @param page - Page number (1-based)
-   * @param pageSize - Number of records per page
+   * Retrieves paginated session logs with optional date range. Uses batched user lookup and grouped page views (no N+1).
    */
   async getSessionLogs(
     userId?: number,
@@ -204,15 +170,12 @@ export class AuditLogsService {
     const skip = (safePage - 1) * safePageSize;
     const take = safePageSize;
 
-    const where: Record<string, unknown> = {
-      startTime: {
-        gte: startDate,
-        lte: endDate,
-      },
-    };
-
+    const where: Record<string, unknown> = {};
     if (userId !== undefined) {
       where.userId = userId;
+    }
+    if (startDate != null && endDate != null) {
+      where.startTime = { gte: startDate, lte: endDate };
     }
 
     const [total, sessions] = await Promise.all([
@@ -226,30 +189,34 @@ export class AuditLogsService {
     ]);
 
     const sessionIds = sessions.map((s) => String(s.sessionToken));
+    const userIds = [...new Set(sessions.map((s) => s.userId))];
 
-    const pageViews = await db.dataBase.pageViewLogsCRM.findMany({
-      where: {
-        sessionId: {
-          in: sessionIds,
-        },
-      },
-      orderBy: {
-        entryTime: "asc",
-      },
-    });
+    const [pageViews, users] = await Promise.all([
+      db.dataBase.pageViewLogsCRM.findMany({
+        where: { sessionId: { in: sessionIds } },
+        orderBy: { entryTime: "asc" },
+      }),
+      userIds.length > 0
+        ? db.dataBase.cRMUserDataModel.findMany({
+          where: { id: { in: userIds } },
+          select: { id: true, name: true, email: true },
+        })
+        : Promise.resolve([]),
+    ]);
 
-    const data = await Promise.all(
-      sessions.map(async (session) => ({
-        ...session,
-        user: await db.dataBase.cRMUserDataModel.findUnique({
-          where: { id: session.userId },
-          select: { name: true, email: true },
-        }),
-        pageViews: pageViews.filter(
-          (pv) => pv.sessionId == session.sessionToken
-        ),
-      }))
-    );
+    const userMap = new Map(users.map((u) => [u.id, u]));
+    const pageViewsBySession = new Map<string, typeof pageViews>();
+    for (const pv of pageViews) {
+      const list = pageViewsBySession.get(pv.sessionId) ?? [];
+      list.push(pv);
+      pageViewsBySession.set(pv.sessionId, list);
+    }
+
+    const data = sessions.map((session) => ({
+      ...session,
+      user: userMap.get(session.userId) ?? null,
+      pageViews: pageViewsBySession.get(String(session.sessionToken)) ?? [],
+    }));
 
     const totalPages = Math.max(1, Math.ceil(total / safePageSize));
     return {

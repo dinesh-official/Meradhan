@@ -17,7 +17,7 @@ auditlogsRoutes.post(
   "/api/auditlogs/crm/page-tracking/start",
   crmAuditLogLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => auditLogsController.startPageTracking(req, res)
 );
 
@@ -25,7 +25,7 @@ auditlogsRoutes.post(
   "/api/auditlogs/crm/page-tracking/end/:pageId",
   crmAuditLogLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => auditLogsController.endPageTracking(req, res)
 );
 
@@ -33,7 +33,7 @@ auditlogsRoutes.post(
   "/api/auditlogs/crm/page-tracking/update/:pageId",
   crmAuditLogLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => auditLogsController.updatePageTracking(req, res)
 );
 
@@ -41,21 +41,21 @@ auditlogsRoutes.post(
 auditlogsRoutes.get(
   "/api/auditlogs/crm/login-logs",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => auditLogsController.getLoginLogsCrm(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/auditlogs/crm/activity-logs",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => auditLogsController.getActivityLogsCrm(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/auditlogs/crm/session-logs",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => auditLogsController.getSessionLogsCrm(req, res)
 );
 
@@ -65,7 +65,7 @@ auditlogsRoutes.all(
   "/api/crm/tracking",
   crmAuditLogLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.createCrmTracking(req, res)
 );
 
@@ -78,42 +78,42 @@ auditlogsRoutes.all(
   "/api/crm/tracking/revalidate",
   crmAuditLogLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.revalidateCrmTracking(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/crm/tracking/list",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getCrmTrackingList(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/crm/tracking/group",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getCrmGroupedTracking(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/crm/tracking/group/auth",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getCrmAuthTracking(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/crm/tracking/group/unknown",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getCrmUnknownTracking(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/crm/tracking/users",
   crmAuditLogLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getCrmTrackingUsers(req, res)
 );
 

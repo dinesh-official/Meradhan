@@ -332,9 +332,9 @@ function SettleOrdersTable({
             cell(row) {
               return row.secPayinTime
                 ? dateTimeUtils.formatDateTime(
-                    row.secPayinTime,
-                    "DD MMM YYYY HH:mm"
-                  )
+                  row.secPayinTime,
+                  "DD MMM YYYY HH:mm"
+                )
                 : "--";
             },
           },
@@ -366,12 +366,7 @@ function SettleOrdersTable({
             label: "Funds Payin Time",
             sortable: true,
             cell(row) {
-              return row.fundsPayinTime
-                ? dateTimeUtils.formatDateTime(
-                    row.fundsPayinTime,
-                    "DD MMM YYYY HH:mm"
-                  )
-                : "--";
+              return row.fundsPayinTime || "--";
             },
           },
           {
@@ -388,12 +383,7 @@ function SettleOrdersTable({
             label: "Payout Time",
             sortable: true,
             cell(row) {
-              return row.payoutTime
-                ? dateTimeUtils.formatDateTime(
-                    row.payoutTime,
-                    "DD MMM YYYY HH:mm"
-                  )
-                : "--";
+              return row.payoutTime || "--";
             },
           },
           {

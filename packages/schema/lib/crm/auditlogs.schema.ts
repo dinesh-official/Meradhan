@@ -13,6 +13,14 @@ export const PageViewSchema = z.object({
   referrer: z.string(),
 });
 
+// Partial payload for ending a page view (only exit metrics)
+export const EndPageViewSchema = z.object({
+  exitTime: z.union([z.date(), z.string()]).transform((v) => (v instanceof Date ? v : new Date(v))),
+  duration: z.number(),
+  scrollDepth: z.number(),
+  interactions: z.number(),
+});
+
 // Define Zod schema for query parameters
 export const trackingListQuerySchema = z.object({
   page: z
@@ -40,5 +48,6 @@ export const trackingListQuerySchema = z.object({
 
 export default {
   PageViewSchema,
+  EndPageViewSchema,
   trackingListQuerySchema,
 };

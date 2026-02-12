@@ -6,55 +6,56 @@ const rfqMasterRouter = Router();
 const controller = new RfqMasterController();
 rfqMasterRouter.get(
   "/api/crm/rfq/nse/find",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.getAllRfq(req, res)
 );
 rfqMasterRouter.get(
   "/api/crm/rfq/nse/find/:number",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.getRfqById(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/add-isin",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.addIsinToRfq(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/negotiate/accept",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.negotiateRfqAccept(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/negotiations",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.getAllNegotiations(req, res)
 );
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/deal/propose",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.proposeDeal(req, res)
 );
 
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/negotiate/terminate",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.negotiateRfqTerminate(req, res)
 );
+
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/deal/accept-reject",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.acceptRejectDeal(req, res)
 );
 
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/dealamend/all",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.getAllDealamend(req, res)
 );
 
 rfqMasterRouter.post(
   "/api/crm/rfq/nse/settle/orders",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.getAllSettledOrders(req, res)
 );
 

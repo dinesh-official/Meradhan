@@ -7,12 +7,12 @@ const controller = new DashboardController();
 
 dashboardRoutes.get(
   "/api/crm/dashboard/summary",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN", "VIEWER", "SALES", "SUPPORT", "RELATIONSHIP_MANAGER"),
   (req, res) => controller.getSummary(req, res)
 );
 dashboardRoutes.get(
   "/api/crm/dashboard/sales-performance",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN", "VIEWER", "SALES", "SUPPORT", "RELATIONSHIP_MANAGER"),
   (req, res) => controller.getSalesPerformance(req, res)
 );
 

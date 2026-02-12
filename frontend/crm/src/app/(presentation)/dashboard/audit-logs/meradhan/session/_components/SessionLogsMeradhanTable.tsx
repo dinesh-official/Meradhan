@@ -69,7 +69,7 @@ const getSessionStatus = (
 
   if (session.endTime && isLogout) {
     return {
-      status: "Session Closed",
+      status: "Closed",
       color: "bg-purple-100 text-purple-800",
     };
   }
@@ -89,7 +89,7 @@ const getSessionStatus = (
     };
   }
 
-  // If session is older than 24 hours, auto expired
+  // If session is older than 24 hours with no end time, show Session Closed
   if (hoursSinceStart > 24) {
     return {
       status: "Session Closed",
@@ -129,12 +129,11 @@ const SessionRow = ({
 
   // Handle user data - gracefully handle missing or undefined user data
   const userName = session.user
-    ? `${session.user.firstName || ""} ${session.user.middleName || ""} ${
-        session.user.lastName || ""
+    ? `${session.user.firstName || ""} ${session.user.middleName || ""} ${session.user.lastName || ""
       }`.trim() || "Guest User"
     : session.userId
-    ? `User #${session.userId}`
-    : "Guest User";
+      ? `User #${session.userId}`
+      : "Guest User";
 
   return (
     <Collapsible
@@ -221,29 +220,29 @@ const SessionRow = ({
                 {(session.browserName ||
                   session.deviceType ||
                   session.operatingSystem) && (
-                  <div className="flex-shrink-0 min-w-[180px] max-w-[220px]">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-gray-500">Environment</span>
-                      <div className="flex flex-col gap-0.5 text-xs">
-                        {session.browserName && (
-                          <span className="text-gray-700">
-                            {session.browserName}
-                          </span>
-                        )}
-                        {session.deviceType && (
-                          <span className="text-gray-700 capitalize">
-                            {session.deviceType}
-                          </span>
-                        )}
-                        {session.operatingSystem && (
-                          <span className="text-gray-700">
-                            {session.operatingSystem}
-                          </span>
-                        )}
+                    <div className="flex-shrink-0 min-w-[180px] max-w-[220px]">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs text-gray-500">Environment</span>
+                        <div className="flex flex-col gap-0.5 text-xs">
+                          {session.browserName && (
+                            <span className="text-gray-700">
+                              {session.browserName}
+                            </span>
+                          )}
+                          {session.deviceType && (
+                            <span className="text-gray-700 capitalize">
+                              {session.deviceType}
+                            </span>
+                          )}
+                          {session.operatingSystem && (
+                            <span className="text-gray-700">
+                              {session.operatingSystem}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* IP Address */}
                 {session.ipAddress && (
@@ -359,14 +358,14 @@ const SessionRow = ({
                             <span className="text-xs">
                               {pageView.exitTime
                                 ? formatDuration(
-                                    Math.floor(
-                                      (new Date(pageView.exitTime).getTime() -
-                                        new Date(
-                                          pageView.entryTime
-                                        ).getTime()) /
-                                        1000
-                                    )
+                                  Math.floor(
+                                    (new Date(pageView.exitTime).getTime() -
+                                      new Date(
+                                        pageView.entryTime
+                                      ).getTime()) /
+                                    1000
                                   )
+                                )
                                 : formatDuration(pageView.duration)}
                             </span>
                           </div>

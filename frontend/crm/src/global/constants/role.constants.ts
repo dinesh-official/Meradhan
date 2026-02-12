@@ -5,6 +5,7 @@ export const MODULES = [
   "dashboard",
   "leads",
   "customer",
+  "customerkyc",
   "sales",
   "rfq",
   "support",
@@ -42,6 +43,7 @@ export const PERMISSIONS: Permission[] = [
   "create:customer",
   "edit:customer",
   "delete:customer",
+  "view:customerkyc",
 
   // Sales
   "view:sales",
@@ -99,7 +101,14 @@ export const PERMISSIONS: Permission[] = [
 
 // 6️ Map roles to permissions
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  ADMIN: [...PERMISSIONS], // full access
+  ADMIN: PERMISSIONS.filter(
+    (p) =>
+      p !== "delete:customer" &&
+      p !== "edit:user" &&
+      p !== "delete:user"
+  ),
+
+  SUPER_ADMIN: [...PERMISSIONS], // full access including KYC view and customer delete
 
   SALES: [
     "view:dashboard",

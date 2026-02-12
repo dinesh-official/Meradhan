@@ -96,7 +96,7 @@ kycRoutes.post(
 );
 kycRoutes.get(
   "/api/customer/kyc/level/:customerId",
-  allowAccessMiddleware("ADMIN", "USER"),
+  allowAccessMiddleware("CRM", "USER"),
   (req, res) => storeKyc.getKycLevel(req, res)
 );
 kycRoutes.post(
@@ -111,18 +111,18 @@ kycRoutes.post(
 );
 kycRoutes.get(
   "/api/customer/kyc/download-pdf/:id",
-  allowAccessMiddleware("ADMIN", "USER"),
+  allowAccessMiddleware("CRM", "USER"),
   (req, res) => controller.downloadKycPdf(req, res)
 );
-// for crm access
+// for crm access - ADMIN and SUPER_ADMIN can view customer KYC data
 kycRoutes.get(
   "/api/crm/kyc/store/get/:customerId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN"),
   (req, res) => storeKyc.getKycDataById(req, res)
 );
 kycRoutes.get(
   "/api/crm/kyc/kra/get/:customerId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN"),
   (req, res) => storeKyc.getKycKraDataById(req, res),
 );
 

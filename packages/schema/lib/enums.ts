@@ -1,6 +1,6 @@
 import z from "zod";
 
-const UserRoles = ["VIEWER", "ADMIN", "SALES", "SUPPORT", "RELATIONSHIP_MANAGER"] as const;
+const UserRoles = ["VIEWER", "ADMIN", "SUPER_ADMIN", "SALES", "SUPPORT", "RELATIONSHIP_MANAGER"] as const;
 
 export const CrmUserROLEEnum = z.enum(
    UserRoles
