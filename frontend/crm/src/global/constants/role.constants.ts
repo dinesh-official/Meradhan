@@ -104,7 +104,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ADMIN: PERMISSIONS.filter(
     (p) =>
       p !== "delete:customer" &&
-      p !== "edit:user" &&
       p !== "delete:user"
   ),
 
