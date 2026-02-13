@@ -75,7 +75,7 @@ export class ParticipantManager {
       emailList: [user.emailAddress],
       stateCode: getStateCode(user.currentAddress!.state)!,
       regAddress: user.currentAddress!.fullAddress,
-
+      dobDoi: user.panCard?.dateOfBirth?.split("-").reverse().join("-"),
       telephone: removeCountryCode(user.phoneNo),
       expiryDate: null,
       leiCode: null,
@@ -221,6 +221,7 @@ export class ParticipantManager {
       expiryDate: null,
       leiCode: null,
       custodian: null,
+      dobDoi: user.panCard?.dateOfBirth?.split("-").reverse().join("-"),
       bankAccountList: user.bankAccounts.map((e) => {
         return {
           bankAccountNo: e.accountNumber,

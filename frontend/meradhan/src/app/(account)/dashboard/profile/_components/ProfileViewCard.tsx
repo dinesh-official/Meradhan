@@ -39,7 +39,8 @@ function ProfileViewCard({
                 middleName: profile.middleName,
                 lastName: profile.lastName,
               })}
-              {profile.kycStatus == "VERIFIED" && (
+              {(profile.kycStatus == "VERIFIED" ||
+                profile.kycStatus == "RE_KYC") && (
                 <FaCheckSquare className="text-green-600" />
               )}
             </p>
@@ -53,7 +54,7 @@ function ProfileViewCard({
             <p
               className={cn(
                 "flex items-center gap-2 font-medium text-secondary md:text-lg",
-                profile.kycStatus == "VERIFIED"
+                profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC"
                   ? "text-black"
                   : profile.kycStatus == "UNDER_REVIEW"
                   ? "text-yellow-600"
@@ -65,6 +66,13 @@ function ProfileViewCard({
                   KYC: <span className="hidden sm:inline-block">Completed</span>
                   <span className="sm:hidden">Done</span>{" "}
                   <FaCheckSquare className="text-green-600" />
+                </>
+              ) : profile.kycStatus == "RE_KYC" ? (
+                <>
+                  <span className="text-black">KYC:</span>{" "}
+                  <span className="hidden sm:inline-block">Re-KYC Required</span>
+                  <span className="sm:hidden">Re-KYC</span>{" "}
+                  <BiSolidFileFind size={20} className="text-blue-600" />
                 </>
               ) : profile.kycStatus == "UNDER_REVIEW" ? (
                 <>
@@ -124,6 +132,17 @@ function ProfileViewCard({
             <Link href={`/dashboard/kyc`}>
               <Button variant={`secondary`}>
                 Complete <span className="hidden md:inline-block">Your</span>{" "}
+                KYC
+                <div className="w-3 text-3xl">
+                  <RiArrowRightSFill className="w-4 h-5" size={33} />
+                </div>
+              </Button>
+            </Link>
+          )}
+          {profile.kycStatus == "RE_KYC" && (
+            <Link href={`/dashboard/kyc`}>
+              <Button variant={`secondary`}>
+                Submit <span className="hidden md:inline-block">Your</span> RE
                 KYC
                 <div className="w-3 text-3xl">
                   <RiArrowRightSFill className="w-4 h-5" size={33} />

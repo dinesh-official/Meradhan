@@ -78,6 +78,24 @@ export const sendAdminLoginOtpEmail = async (data: {
   );
 };
 
+export const sendRekycConfirmationOtpEmail = async (data: {
+  email: string;
+  userName: string;
+  otp: string;
+}) => {
+  await emailAdminOtpSenderQueue.add(
+    {
+      ...data,
+      subject: `MeraDhan CRM - ReKYC Confirmation OTP ${getFormattedTimestamp()}`,
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
 export const sendCustomerSignupOtpEmail = async (data: {
   email: string;
   userName: string;

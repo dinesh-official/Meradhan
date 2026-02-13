@@ -21,7 +21,11 @@ export class OtpVerificationService implements IOtpVerificationService {
   private storeKey;
   private store: QueueStore;
   constructor(
-    private useOf: "AUTH_OTP" | "EMAIL_VERIFY" | "MOBILE_VERIFY" = "AUTH_OTP"
+    private useOf:
+      | "AUTH_OTP"
+      | "EMAIL_VERIFY"
+      | "MOBILE_VERIFY"
+      | "REKYC_VERIFY" = "AUTH_OTP"
   ) {
     this.store = QueueStore.getStore();
     this.storeKey = useOf;

@@ -45,7 +45,6 @@ function AccountNavBar({
         >
           <SideBarCollapseButton />
           <MobSideBar />
-
           <Link
             href="/"
             aria-label="Go to homepage"
@@ -89,6 +88,17 @@ function AccountNavBar({
                   className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 gap-2"
                 >
                   <BiSolidFileFind /> KYC: In Review
+                </Button>
+              </Link>
+            )}
+
+            {session?.kycStatus == "RE_KYC" && (
+              <Link href={`/dashboard/kyc`}>
+                <Button
+                  variant="secondaryLight"
+                  className="bg-blue-100 text-blue-800 hover:bg-blue-200 gap-2"
+                >
+                  <FaUser /> KYC: Apply Re Kyc
                 </Button>
               </Link>
             )}

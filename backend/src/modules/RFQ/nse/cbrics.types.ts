@@ -34,6 +34,7 @@ export interface UnregisteredParticipantRequest {
   address: string; // String(250), Mandatory
   address2?: string; // String(62), Optional
   address3?: string; // String(100), Optional
+  dobDoi?: string; // String(10), Optional
 
   /** Domicile / Registered State Code */
   stateCode: string; // String(2), Mandatory
@@ -64,6 +65,7 @@ interface BankAccount {
 
   /** Bank Account Number */
   bankAccountNo: string; // String(30), Optional
+
 
   /**
    * Indicates if this bank account is default for payouts
@@ -148,6 +150,7 @@ export interface UnregisteredParticipantResponse {
 
   /** List of associated bank accounts */
   bankAccountList: BankAccountResponse[];
+  dobDoi?: string;
 
   /** List of associated DP accounts */
   dpAccountList: DPAccountResponse[];

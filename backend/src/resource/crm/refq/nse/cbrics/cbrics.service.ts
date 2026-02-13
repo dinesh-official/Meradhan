@@ -29,7 +29,6 @@ export class CbricsParticipantService {
         { contactPerson: { contains: search, mode: "insensitive" } },
       ];
     }
-    console.log(whereClause);
 
     const [data, total] = await Promise.all([
       db.dataBase.nseCbricsParticipantModel.findMany({
@@ -42,7 +41,6 @@ export class CbricsParticipantService {
         },
         orderBy: { createdAt: "desc" },
       }),
-
       db.dataBase.nseCbricsParticipantModel.count({ where: whereClause }),
     ]);
 
@@ -57,5 +55,5 @@ export class CbricsParticipantService {
     };
   }
 
-  async getSettledOrders() {}
+  async getSettledOrders() { }
 }
