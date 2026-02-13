@@ -183,7 +183,7 @@ jobs:
 
       - name: Build, Tag & Push Docker Image
         env:
-          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
           REPOSITORY: 	stage-meradhan-be
           IMAGE_TAG: latest
         run: |
