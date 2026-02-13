@@ -30,11 +30,11 @@ bondRoute.get("/api/bonds/:isin", (req, res) =>
   bondController.getBondDetails(req, res)
 );
 
-bondRoute.post("/api/bonds", allowAccessMiddleware("ADMIN"), (req, res) =>
+bondRoute.post("/api/bonds", allowAccessMiddleware("CRM"), (req, res) =>
   bondController.createBond(req, res)
 );
 
-bondRoute.put("/api/bonds/:isin", allowAccessMiddleware("ADMIN"), (req, res) =>
+bondRoute.put("/api/bonds/:isin", allowAccessMiddleware("CRM"), (req, res) =>
   bondController.updateBond(req, res)
 );
 

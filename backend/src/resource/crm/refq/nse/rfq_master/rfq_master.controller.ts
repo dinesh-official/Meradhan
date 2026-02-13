@@ -3,6 +3,7 @@ import { RfqMasterService } from "./rfq_master.service";
 import { appSchema } from "@root/schema";
 import { AxiosError } from "axios";
 import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 
 export class RfqMasterController {
   private rfqMasterService: RfqMasterService;
@@ -18,6 +19,12 @@ export class RfqMasterController {
       const createdBy = req.session!.id;
       const data = appSchema.rfq.addIsinSchema.parse(req.body);
       const result = await this.rfqMasterService.createNewRfq(data, createdBy);
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "RFQ_CREATE",
+        details: { Reason: "Create new RFQ" },
+        entityType: "rfq",
+      });
       res.sendResponse({
         statusCode: 200,
         responseData: result,
@@ -49,6 +56,12 @@ export class RfqMasterController {
         data,
         userId
       );
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "RFQ_ACCEPT",
+        details: { Reason: "RFQ negotiation accepted" },
+        entityType: "rfq",
+      });
       res.sendResponse({
         statusCode: 200,
         responseData: result,
@@ -77,6 +90,12 @@ export class RfqMasterController {
       data,
       userId
     );
+    await createCrmActivityLog(req, {
+      userId: Number(req.session?.id),
+      action: "RFQ_TERMINATE",
+      details: { Reason: "RFQ negotiation terminated" },
+      entityType: "rfq",
+    });
     res.sendResponse({
       statusCode: 200,
       responseData: result,
@@ -116,6 +135,7 @@ export class RfqMasterController {
       filters,
       userId
     );
+
     res.sendResponse({
       statusCode: 200,
       responseData: result,
@@ -128,6 +148,12 @@ export class RfqMasterController {
       const userId = req.session!.id;
       const data = appSchema.rfq.proposeDealSchema.parse(req.body);
       const result = await this.rfqMasterService.proposeDeal(data, userId);
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "RFQ_PROPOSE",
+        details: { Reason: "Deal proposed" },
+        entityType: "rfq",
+      });
       res.sendResponse({
         statusCode: 200,
         responseData: result,
@@ -154,6 +180,12 @@ export class RfqMasterController {
       const userId = req.session!.id;
       const data = appSchema.rfq.acceptRejectDealSchema.parse(req.body);
       const result = await this.rfqMasterService.acceptRejectDeal(data, userId);
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "RFQ_ACCEPT_REJECT_DEAL",
+        details: { Reason: "Deal accept/reject action" },
+        entityType: "rfq",
+      });
       res.sendResponse({
         statusCode: 200,
         responseData: result,

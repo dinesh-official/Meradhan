@@ -14,7 +14,17 @@ type RateSummary = PercentSummary & {
   totalUsers: number;
 };
 
+export type DashboardOverviewCounts = {
+  totalCustomers: number;
+  kycCompleted: number;
+  kycPending: number;
+  totalRfq: number;
+  totalLeads: number;
+  bondsAllowForPurchase: number;
+};
+
 export type DashboardSummary = {
+  overview: DashboardOverviewCounts;
   activeLeads: PercentSummary;
   completedProjects: PercentSummary;
   userDropRate: RateSummary;
@@ -39,6 +49,38 @@ export class DashboardService {
   async getSummary(rangeDays = 30): Promise<DashboardSummary> {
     const { currentWindowStart, previousWindowStart } =
       this.getRange(rangeDays);
+
+    // Overview counts for dashboard cards
+    const [
+      totalCustomers,
+      kycCompleted,
+      kycPending,
+      totalRfq,
+      totalLeads,
+      bondsAllowForPurchase,
+    ] = await Promise.all([
+      db.dataBase.customerProfileDataModel.count(),
+      db.dataBase.customerProfileDataModel.count({
+        where: { kycStatus: "VERIFIED" },
+      }),
+      db.dataBase.customerProfileDataModel.count({
+        where: { kycStatus: "PENDING" },
+      }),
+      db.dataBase.rFQMasterISIN.count(),
+      db.dataBase.leadsModel.count(),
+      db.dataBase.bonds.count({
+        where: { allowForPurchase: true },
+      }),
+    ]);
+
+    const overview: DashboardOverviewCounts = {
+      totalCustomers,
+      kycCompleted,
+      kycPending,
+      totalRfq,
+      totalLeads,
+      bondsAllowForPurchase,
+    };
 
     // Active leads (NEW, CONTACTED, QUALIFIED)
     type LeadStatus = (typeof appSchema.crm.leads.status)[number];
@@ -106,6 +148,7 @@ export class DashboardService {
     const dropRatePct = totalUsers === 0 ? 0 : (dropCurrent / totalUsers) * 100;
 
     return {
+      overview,
       activeLeads: {
         total: activeTotal,
         currentWindow: activeCurrent,

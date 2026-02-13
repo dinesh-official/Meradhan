@@ -7,8 +7,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import ShowOnly from "@/global/elements/permissions/ShowOnly";
+import { encodeId } from "@/global/utils/url.utils";
 import { CustomerProfile } from "@root/apiGateway";
 import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 import Swal from "sweetalert2";
 import { useCustomerTableActions } from "./useCustomerTableActionHook";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
@@ -17,7 +19,6 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
   const { trackActivity } = useUserTracking();
   const {
-    handleViewKyc,
     handleProfileView,
     handleProfileUpdate,
     deleteProfileMutation,
@@ -57,81 +58,83 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
             </DropdownMenuItem>
           </ShowOnly>
 
-          <DropdownMenuItem onClick={handleViewKyc}>View KYC</DropdownMenuItem>
+          <AllowOnlyView permissions={["view:customerkyc"]}>
+            <DropdownMenuItem asChild>
+              <Link href={`/dashboard/customers/view/${encodeId(profile.id)}/kyc`}>
+                View KYC
+              </Link>
+            </DropdownMenuItem>
+          </AllowOnlyView>
           <DropdownMenuItem onClick={handleProfileView}>
             View Profile
           </DropdownMenuItem>
 
           <AllowOnlyView permissions={["delete:customer"]} condition={profile.kycStatus !== "PENDING"}>
-            <ShowOnly condition={cookies.userId == "2"}>
-              <DropdownMenuItem
-                onClick={async () => {
-                  const result = await Swal.fire({
-                    title: "Are you sure?",
-                    text: `Are you sure you want to ${status} ?`,
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: `Yes, do it!`,
-                    cancelButtonText: "Cancel",
-                  });
+            <DropdownMenuItem
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: "Are you sure?",
+                  text: `Are you sure you want to ${status} ?`,
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#d33",
+                  cancelButtonColor: "#3085d6",
+                  confirmButtonText: `Yes, do it!`,
+                  cancelButtonText: "Cancel",
+                });
 
-                  if (result.isConfirmed) {
-                    trackActivity("update_entry", {
-                      customerId: profile.id,
-                      reason: `update customer profile status | ID: ${profile.id
-                        } | Status: ${profile.utility.accountStatus === "ACTIVE"
+                if (result.isConfirmed) {
+                  trackActivity("update_entry", {
+                    customerId: profile.id,
+                    reason: `update customer profile status | ID: ${profile.id
+                      } | Status: ${profile.utility.accountStatus === "ACTIVE"
+                        ? "SUSPENDED"
+                        : "ACTIVE"
+                      } | Name: ${profile.firstName} ${profile.lastName}`,
+                  });
+                  // ✅ Pass correct payload
+                  manageSuspendCustomerMutation.mutate({
+                    data: {
+                      status:
+                        profile.utility.accountStatus === "ACTIVE"
                           ? "SUSPENDED"
-                          : "ACTIVE"
-                        } | Name: ${profile.firstName} ${profile.lastName}`,
-                    });
-                    // ✅ Pass correct payload
-                    manageSuspendCustomerMutation.mutate({
-                      data: {
-                        status:
-                          profile.utility.accountStatus === "ACTIVE"
-                            ? "SUSPENDED"
-                            : "ACTIVE", // toggle logic
-                      },
-                      customerId: String(profile.id), // or whatever your id variable is
-                    });
-                  }
-                }}
-              >
-                {status}
-              </DropdownMenuItem>
-            </ShowOnly>
+                          : "ACTIVE", // toggle logic
+                    },
+                    customerId: String(profile.id), // or whatever your id variable is
+                  });
+                }
+              }}
+            >
+              {status}
+            </DropdownMenuItem>
           </AllowOnlyView>
 
           <AllowOnlyView permissions={["delete:customer"]} >
-            <ShowOnly condition={cookies.userId == "2"}>
-              <DropdownMenuItem
-                className="bg-red-50 mt-1 text-red-500"
-                onClick={async () => {
-                  const result = await Swal.fire({
-                    title: "Are you sure?",
-                    text: "This action will permanently delete the customer.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Yes, delete it!",
-                    cancelButtonText: "Cancel",
-                  });
+            <DropdownMenuItem
+              className="bg-red-50 mt-1 text-red-500"
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: "Are you sure?",
+                  text: "This action will permanently delete the customer.",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#d33",
+                  cancelButtonColor: "#3085d6",
+                  confirmButtonText: "Yes, delete it!",
+                  cancelButtonText: "Cancel",
+                });
 
-                  if (result.isConfirmed) {
-                    trackActivity("delete_entry", {
-                      customerId: profile.id,
-                      reason: `Attempting to delete customer profile | ID: ${profile.id} Name: ${profile.firstName} ${profile.lastName}`,
-                    });
-                    deleteProfileMutation.mutate();
-                  }
-                }}
-              >
-                Delete Account
-              </DropdownMenuItem>
-            </ShowOnly>
+                if (result.isConfirmed) {
+                  trackActivity("delete_entry", {
+                    customerId: profile.id,
+                    reason: `Attempting to delete customer profile | ID: ${profile.id} Name: ${profile.firstName} ${profile.lastName}`,
+                  });
+                  deleteProfileMutation.mutate();
+                }
+              }}
+            >
+              Delete Account
+            </DropdownMenuItem>
           </AllowOnlyView>
         </DropdownMenuContent>
       </DropdownMenu>

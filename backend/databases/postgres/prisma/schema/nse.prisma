@@ -37,6 +37,7 @@ model NseCbricsParticipantModel {
     panVerStatus   Int?
     panVerRemarks  String?
     remarks        String?
+    dobDoi         String?
 
     bankAccountList NSEBankAccount[]
     dpAccountList   NSEDpAccount[]

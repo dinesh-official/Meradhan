@@ -8,28 +8,28 @@ const controller = new PartnershipFollowUpController();
 // Create new follow-up note for a partnership
 partnershipFollowUpRouter.post(
   "/api/crm/partnership/followup/:partnershipId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   controller.createFollowUpNote.bind(controller)
 );
 
 // Get all follow-up notes by partnership ID
 partnershipFollowUpRouter.get(
   "/api/crm/partnership/followup/:partnershipId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   controller.getFollowUpNotesByPartnershipId.bind(controller)
 );
 
 // Update a follow-up note
 partnershipFollowUpRouter.put(
   "/api/crm/partnership/followup/:id",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   controller.updateFollowUpNote.bind(controller)
 );
 
 // Delete a follow-up note
 partnershipFollowUpRouter.delete(
   "/api/crm/partnership/followup/:id",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   controller.deleteFollowUpNote.bind(controller)
 );
 

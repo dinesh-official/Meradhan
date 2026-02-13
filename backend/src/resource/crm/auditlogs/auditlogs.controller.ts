@@ -39,7 +39,7 @@ export class AuditLogsController {
     }
 
     const pageId = req.params.pageId;
-    const logData = appSchema.auditlogsSchema.PageViewSchema.parse(req.body);
+    const logData = appSchema.auditlogsSchema.EndPageViewSchema.parse(req.body);
     await this.auditLogsService.endPageViewLogCrm(Number(pageId), logData);
     res.sendResponse({
       statusCode: 200,
@@ -96,13 +96,21 @@ export class AuditLogsController {
       : undefined;
     const page = req.query.page ? Number(req.query.page) : 1;
     const pageSize = req.query.pageSize ? Number(req.query.pageSize) : 20;
+    const entityType =
+      typeof req.query.entityType === "string"
+        ? req.query.entityType
+        : undefined;
+    const search =
+      typeof req.query.search === "string" ? req.query.search : undefined;
 
     const logs = await this.auditLogsService.getCrmActivityLogs(
       userId,
       startDate,
       endDate,
       page,
-      pageSize
+      pageSize,
+      entityType,
+      search
     );
 
     res.sendResponse({
@@ -155,9 +163,14 @@ export class AuditLogsController {
   }
 
   async clearCrmTrackingSession(req: Request, res: Response): Promise<void> {
+    const body = req.body as { sessionId?: string; reason?: string } | undefined;
+    const endReason =
+      body?.reason === "inactivity"
+        ? "Auto closed - inactivity"
+        : "User closed session";
     await endAuditLogSession(req, {
       userId: Number(req.params.userId),
-      endReason: "User closed session",
+      endReason,
       success: true,
     });
     res.sendResponse({

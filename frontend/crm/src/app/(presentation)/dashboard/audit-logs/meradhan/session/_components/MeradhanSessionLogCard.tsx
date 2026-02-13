@@ -62,8 +62,7 @@ function MeradhanSessionLogCard({ session }: MeradhanSessionLogCardProps) {
   };
 
   const userName = session.user
-    ? `${session.user.firstName} ${session.user.middleName || ""} ${
-        session.user.lastName
+    ? `${session.user.firstName} ${session.user.middleName || ""} ${session.user.lastName
       }`.trim()
     : "Guest User";
 

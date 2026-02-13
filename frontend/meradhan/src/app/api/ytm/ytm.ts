@@ -267,3 +267,19 @@ export function generateCashFlow(
     return rows;
 };
 
+
+
+export function approximateYtm(params: YtmInput, result: YtmResult): number {
+
+    const { faceValue, cleanPrice } = params;
+
+    const { yearsToMaturity, annualCouponAmount } = result.drived;
+    if (result.check !== "OK") {
+        return 0;
+    }
+
+
+
+    const ans = ((annualCouponAmount + (faceValue - cleanPrice) / yearsToMaturity) / ((faceValue + cleanPrice) / 2))
+    return ans * 100;
+}

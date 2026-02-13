@@ -30,6 +30,7 @@ function ExploreBondsHeader({
   applyFilters,
   desc,
   title,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- accepted in props, not used in component
   rootUrl,
 }: {
   manager: BondsFilterHook;
