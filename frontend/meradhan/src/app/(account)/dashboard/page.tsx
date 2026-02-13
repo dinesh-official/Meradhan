@@ -7,13 +7,25 @@ import DashBoardDataViewCard from "./_components/_cards/DashBoardDataViewCard";
 import { DashBoardSatsCard } from "./_components/_cards/DashBoardSatsCard";
 import OngoingDealsCard from "./_components/_cards/OngoingDealsCard";
 import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import apiServerCaller from "@/core/connection/apiServerCaller";
+import apiGateway from "@root/apiGateway";
+import { cookies } from "next/headers";
 
 export const revalidate = 0;
 export const generateMetadata = async () => {
   return await getAccountPagesMetaData("dashboard");
 };
 
-function DashBoardPage() {
+async function DashBoardPage() {
+  const cookie = await cookies();
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
+    apiServerCaller
+  );
+  const id = cookie.get("userId")?.value || "";
+  const profileData = await customerApi.customerInfoById(Number(id));
+  const kycStatus = profileData.data.responseData.kycStatus;
   return (
     <AccountViewPort title={<NameTitleView />}>
       <div className="flex flex-col gap-5">
@@ -43,9 +55,20 @@ function DashBoardPage() {
             icon={<FaUser size={19} className="text-secondary" />}
             className="bg-accent text-secondary"
           >
-            <p className="flex items-center font-medium text-secondary text-3xl">
-              <PiCurrencyInrBold /> 0
-            </p>
+            {(kycStatus == "PENDING" || kycStatus == "RE_KYC") && <div className="flex items-end flex-row justify-between gap-2">
+              <p className="text-3xl font-medium">Not Done</p>
+              <Link href={`/dashboard/kyc`}>
+                <Button variant="secondary">
+                  Start KYC
+                </Button>
+              </Link>
+            </div>}
+            {kycStatus == "VERIFIED" && <div className="flex items-end flex-row justify-between gap-2">
+              <p className="text-3xl font-medium">Done</p>
+            </div>}
+            {kycStatus == "UNDER_REVIEW" && <div className="flex items-end flex-row justify-between gap-2">
+              <p className="text-3xl font-medium">Under Review</p>
+            </div>}
           </DashBoardSatsCard>
           <DashBoardSatsCard
             title="My Offers"

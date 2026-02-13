@@ -28,6 +28,11 @@ export const emailAdminOtpSenderQueue = new Bull(
   QueueNames.emailAdminOtpSend,
   sharedRedisOpts,
 );
+
+export const rekycOtpSenderQueue = new Bull(
+  QueueNames.rekycOtpSend,
+  sharedRedisOpts,
+);
 export const mobileOtpSenderQueue = new Bull(
   QueueNames.mobileOtpSend,
   sharedRedisOpts,

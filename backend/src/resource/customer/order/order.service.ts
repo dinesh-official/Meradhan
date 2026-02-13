@@ -1,10 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { db, PaymentStatus } from "@core/database/database";
+import { db } from "@core/database/database";
 import type {
   NseCbricsParticipantModel,
   Order,
   Prisma,
 } from "@databases/generated/prisma/postgres";
+
+// PaymentStatus enum values (matches Prisma schema orders.prisma)
+const PaymentStatus = {
+  PENDING: "PENDING",
+  COMPLETED: "COMPLETED",
+  REFUNDED: "REFUNDED",
+  CANCELLED: "CANCELLED",
+} as const;
 import { env } from "@packages/config/src/env";
 import { PaymentService } from "@resource/customer/payment/payment.service";
 import type { appSchema } from "@root/schema";

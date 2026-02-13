@@ -14,7 +14,7 @@ export type CustomerUserType =
   | "LLP"
   | "PARTNERSHIP_FIRM";
 
-export type KycStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type KycStatus = "PENDING" | "VERIFIED" | "REJECTED" | "RE_KYC";
 export type CRMRole = (typeof ROLES)[number];
 
 export type AadhaarCard = {
