@@ -8,7 +8,7 @@ export class CustomerKycManager {
    * Get KYC data for a customer
    */
   private async getKycData(customerId: number): Promise<KycDataStorage> {
-    const data = await db.dataBase.kYC_FLOW.findUnique({
+    const data = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: customerId },
     });
 
@@ -356,7 +356,7 @@ export class CustomerKycManager {
    */
   async isKycComplete(customerId: number): Promise<boolean> {
     try {
-      const kycFlow = await db.dataBase.kYC_FLOW.findUnique({
+      const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
         where: { userID: customerId },
       });
       return kycFlow?.complete || false;
@@ -397,7 +397,7 @@ export class CustomerKycManager {
       },
     });
 
-    const kycFlow = await db.dataBase.kYC_FLOW.findUnique({
+    const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: customerId },
     });
 
@@ -445,7 +445,7 @@ export class CustomerKycManager {
       whatsAppNo: user?.whatsAppNo || "------",
       userName: user?.userName || "------",
       userType: user?.userType || "INDIVIDUAL",
-      kycStatus: user?.kycStatus || "VERIFIED",
+      kycStatus: user?.kycStatus || "PENDING",
       kraStatus: user?.kraStatus,
       verifyDate: user?.verifyDate,
       VerifiedBy: user?.VerifiedBy || null,

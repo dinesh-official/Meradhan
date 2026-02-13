@@ -13,7 +13,7 @@ export class KycStoreController {
   async getKycData(req: Request, res: Response) {
     const id = req.customer!.id;
 
-    const response = await db.dataBase.kYC_FLOW.findUnique({
+    const response = await db.dataBase.kYC_FLOW.findFirst({
       where: {
         userID: id,
       },
@@ -28,7 +28,7 @@ export class KycStoreController {
   async getKycDataById(req: Request, res: Response) {
     const id = Number(req.params.customerId);
 
-    const response = await db.dataBase.kYC_FLOW.findUnique({
+    const response = await db.dataBase.kYC_FLOW.findFirst({
       where: {
         userID: id,
       },
@@ -131,9 +131,14 @@ export class KycStoreController {
   async applyRekyc(req: Request, res: Response) {
     const id = Number(req.params.customerId);
 
-    await db.dataBase.kYC_FLOW.deleteMany({
+    await db.dataBase.kYC_FLOW.updateMany({
       where: {
         userID: id,
+      },
+      data: {
+        markExpired: true,
+        kycUserId: id,
+        userID: null,
       },
     });
 
@@ -158,23 +163,22 @@ export class KycStoreController {
     const step = req.params.step!;
     const data = req.body;
     const complete = req.query.complete === "true";
-
-    await db.dataBase.kYC_FLOW.upsert({
+    const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
       where: {
         userID: id,
       },
-      create: {
-        data: data,
-        userID: id,
-        step: Number(step),
-        complete,
-      },
-      update: {
-        data: data,
-        step: Number(step),
-        complete,
-      },
     });
+    if (kycFlow) {
+      await db.dataBase.kYC_FLOW.update({
+        where: { id: kycFlow.id },
+        data: { data: data, step: Number(step), complete },
+      });
+    } else {
+      await db.dataBase.kYC_FLOW.create({
+        data: { data: data, userID: id, step: Number(step), complete },
+      });
+    }
+
 
     res.sendResponse({
       statusCode: HttpStatus.OK,

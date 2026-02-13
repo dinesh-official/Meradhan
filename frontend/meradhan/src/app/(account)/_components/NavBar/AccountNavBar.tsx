@@ -96,9 +96,9 @@ function AccountNavBar({
               <Link href={`/dashboard/kyc`}>
                 <Button
                   variant="secondaryLight"
-                  className="bg-blue-100 text-blue-800 hover:bg-blue-200 gap-2"
+                  className="gap-2"
                 >
-                  <FaUser /> KYC: Apply Re Kyc
+                  <FaUser />  KYC
                 </Button>
               </Link>
             )}
