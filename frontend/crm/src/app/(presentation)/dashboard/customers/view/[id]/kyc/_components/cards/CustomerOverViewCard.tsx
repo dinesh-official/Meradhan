@@ -100,7 +100,7 @@ function CustomerOverViewCard(
             <LabelView title="Current KYC Status">
               <div className="flex justify-start items-center gap-3">
                 <StatusBadge value={customerOverViewCardData.kycStatus} />
-                {customerOverViewCardData.kycStatus === "VERIFIED" &&
+                {customerOverViewCardData.kycStatus !== "PENDING" && customerOverViewCardData.kycStatus !== "RE_KYC" &&
                   !confirmRekycMutate.data && (
                     <p
                       className="text-xs cursor-pointer text-primary"

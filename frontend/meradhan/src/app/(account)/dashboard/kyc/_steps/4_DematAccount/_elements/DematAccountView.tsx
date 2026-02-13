@@ -9,12 +9,14 @@ function DematAccountView({
   // name,
   setDefault,
   onDelete,
+  hideBorder = false,
 }: {
   account: KycDataStorage["step_4"][number];
   name: string;
   onDelete?: () => void;
   setDefault: () => void;
   myPan: string;
+  hideBorder?: boolean;
 }) {
   // const isNameMatched = dataMatcherUtils.areNamesMatched(
   //   dataMatcherUtils.splitFullName(account.accountHolderName),
@@ -22,7 +24,7 @@ function DematAccountView({
   // );
 
   return (
-    <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
+    <div className={cn("flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b last:border-b-0", hideBorder && "border-b-0")} >
       <div className={cn("gap-5 grid sm:grid-cols-2 xl:grid-cols-4")}>
         {/* // not show dp id for cdsl */}
         {account.depositoryName != "CDSL" && (
@@ -77,9 +79,9 @@ function DematAccountView({
         <DataInfoLabel
           className="xl:col-span-2"
           title="Depository Participant Name"
-          // status={account.isVerified ? "SUCCESS" : "ERROR"}
-          // statusLabel={account.isVerified ? "Verified" : "Invalid"}
-          // showStatus
+        // status={account.isVerified ? "SUCCESS" : "ERROR"}
+        // statusLabel={account.isVerified ? "Verified" : "Invalid"}
+        // showStatus
         >
           <p className="font-medium">
             {account.depositoryParticipantName || "Not Found"}

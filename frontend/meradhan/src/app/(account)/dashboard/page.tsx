@@ -55,7 +55,7 @@ async function DashBoardPage() {
             icon={<FaUser size={19} className="text-secondary" />}
             className="bg-accent text-secondary"
           >
-            {kycStatus == "PENDING" || kycStatus == "RE_KYC" && <div className="flex items-end flex-row justify-between gap-2">
+            {(kycStatus == "PENDING" || kycStatus == "RE_KYC") && <div className="flex items-end flex-row justify-between gap-2">
               <p className="text-3xl font-medium">Not Done</p>
               <Link href={`/dashboard/kyc`}>
                 <Button variant="secondary">

@@ -127,17 +127,17 @@ kycRoutes.get(
 );
 kycRoutes.get(
   "/api/crm/kyc/rekyc/:customerId",
-  allowAccessMiddleware("SUPER_ADMIN"),
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN"),
   (req, res) => storeKyc.applyRekyc(req, res),
 );
 kycRoutes.post(
   "/api/crm/kyc/rekyc/request-otp/:customerId",
-  allowAccessMiddleware("SUPER_ADMIN"),
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN"),
   (req, res) => storeKyc.requestRekycOtp(req, res),
 );
 kycRoutes.post(
   "/api/crm/kyc/rekyc/confirm",
-  allowAccessMiddleware("SUPER_ADMIN"),
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN"),
   (req, res) => storeKyc.confirmRekyc(req, res),
 );
 

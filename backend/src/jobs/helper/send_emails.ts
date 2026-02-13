@@ -37,6 +37,7 @@ import {
   emailOtpSenderQueue,
   emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
+  rekycOtpSenderQueue,
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
 } from "@jobs/queue/worker_queues";
@@ -83,7 +84,7 @@ export const sendRekycConfirmationOtpEmail = async (data: {
   userName: string;
   otp: string;
 }) => {
-  await emailAdminOtpSenderQueue.add(
+  await rekycOtpSenderQueue.add(
     {
       ...data,
       subject: `MeraDhan CRM - ReKYC Confirmation OTP ${getFormattedTimestamp()}`,

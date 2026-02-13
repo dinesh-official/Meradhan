@@ -112,8 +112,13 @@ export class KycStoreController {
       });
     }
     const customerId = Number(match[1]);
-    await db.dataBase.kYC_FLOW.deleteMany({
+    await db.dataBase.kYC_FLOW.updateMany({
       where: { userID: customerId },
+      data: {
+        markExpired: true,
+        kycUserId: customerId,
+        userID: null,
+      },
     });
     await db.dataBase.customerProfileDataModel.update({
       where: { id: customerId },
