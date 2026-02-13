@@ -180,6 +180,13 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Debug AWS & ECR
+        run: |
+         echo "AWS Identity:"
+         aws sts get-caller-identity
+         echo "ECR Repositories:"
+         aws ecr describe-repositories --region ${{ secrets.AWS_REGION }}
+
       - name: Build, Tag & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
