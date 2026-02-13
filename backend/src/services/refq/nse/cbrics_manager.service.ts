@@ -28,6 +28,7 @@ export class ParticipantManager {
         currentAddress: true,
         bankAccounts: true,
         dematAccounts: true,
+        aadhaarCard: true,
       },
     });
 
@@ -75,7 +76,7 @@ export class ParticipantManager {
       emailList: [user.emailAddress],
       stateCode: getStateCode(user.currentAddress!.state)!,
       regAddress: user.currentAddress!.fullAddress,
-
+      dobDoi: user.aadhaarCard?.dateOfBirth?.replaceAll("/", "-") || "",
       telephone: removeCountryCode(user.phoneNo),
       expiryDate: null,
       leiCode: null,
@@ -186,6 +187,7 @@ export class ParticipantManager {
         panCard: true,
         currentAddress: true,
         bankAccounts: true,
+        aadhaarCard: true,
         dematAccounts: true,
         nseDataSet: {
           select: {
@@ -221,6 +223,7 @@ export class ParticipantManager {
       expiryDate: null,
       leiCode: null,
       custodian: null,
+      dobDoi: user.aadhaarCard?.dateOfBirth?.replaceAll("/", "-") || "",
       bankAccountList: user.bankAccounts.map((e) => {
         return {
           bankAccountNo: e.accountNumber,

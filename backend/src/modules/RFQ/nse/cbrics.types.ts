@@ -43,6 +43,7 @@ export interface UnregisteredParticipantRequest {
 
   /** LEI Code (if applicable) */
   leiCode: string | null; // String(20), Optional
+  dobDoi: string; // String(10), Optional
 
   /** LEI expiry date (if LEI is provided) */
   expiryDate: string | null; // Date (YYYY-MM-DD), Optional
