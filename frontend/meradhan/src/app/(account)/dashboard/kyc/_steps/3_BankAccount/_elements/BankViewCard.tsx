@@ -5,24 +5,27 @@ import React from "react";
 import { KycDataStorage } from "../../../_store/useKycDataStorage";
 import { dataMatcherUtils } from "@/global/utils/matcher";
 import { IoMdTrash } from "react-icons/io";
+import { cn } from "@/lib/utils";
 
 function BankViewCard({
   bank,
   name,
   onDelete,
   setDefault,
+  hideBorder = false,
 }: {
   bank: KycDataStorage["step_3"][number];
   name: string;
   onDelete?: () => void;
   setDefault: () => void;
+  hideBorder?: boolean;
 }) {
   const isNameMatched = dataMatcherUtils.areNamesMatched(
     dataMatcherUtils.splitFullName(bank.beneficiary_name),
     dataMatcherUtils.splitFullName(name)
   );
   return (
-    <div className="flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b">
+    <div className={cn("flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b", hideBorder && "border-b-0")} >
       <div className="gap-5 grid sm:grid-cols-2">
         <DataInfoLabel
           title="Bank"
@@ -64,6 +67,7 @@ function BankViewCard({
           title="Branch"
           status={bank.isVerified ? "SUCCESS" : "ERROR"}
           statusLabel={bank.isVerified ? "Verified" : "Invalid"}
+
         >
           <p className="font-medium text-sm">{bank.branchName}</p>
         </DataInfoLabel>

@@ -8,7 +8,6 @@ export const allowAccessMiddleware =
     (req: Request, res: Response, next: NextFunction) => {
 
       if (allowedRoles.includes("CRM")) {
-
         const newAllowedRoles = new Set([...allowedRoles, "ADMIN", "SUPER_ADMIN", "VIEWER", "SALES", "SUPPORT", "RELATIONSHIP_MANAGER"]);
         allowedRoles = Array.from(newAllowedRoles) as Role[];
       }

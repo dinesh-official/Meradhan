@@ -39,9 +39,10 @@ function ProfileViewCard({
                 middleName: profile.middleName,
                 lastName: profile.lastName,
               })}
-              {profile.kycStatus == "VERIFIED" && (
-                <FaCheckSquare className="text-green-600" />
-              )}
+              {(profile.kycStatus == "VERIFIED" ||
+                profile.kycStatus == "RE_KYC") && (
+                  <FaCheckSquare className="text-green-600" />
+                )}
             </p>
             <p>Client ID: {profile.userName}</p>
             <p>User Type: {profile.userType}</p>
@@ -53,11 +54,11 @@ function ProfileViewCard({
             <p
               className={cn(
                 "flex items-center gap-2 font-medium text-secondary md:text-lg",
-                profile.kycStatus == "VERIFIED"
-                  ? "text-black"
+                profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC"
+                  ? "text-orange-600"
                   : profile.kycStatus == "UNDER_REVIEW"
-                  ? "text-yellow-600"
-                  : "text-red-600"
+                    ? "text-yellow-600"
+                    : "text-red-600"
               )}
             >
               {profile.kycStatus == "VERIFIED" ? (
@@ -65,6 +66,13 @@ function ProfileViewCard({
                   KYC: <span className="hidden sm:inline-block">Completed</span>
                   <span className="sm:hidden">Done</span>{" "}
                   <FaCheckSquare className="text-green-600" />
+                </>
+              ) : profile.kycStatus == "RE_KYC" ? (
+                <>
+                  KYC: Not{" "}
+                  <span className="hidden sm:inline-block">Completed</span>
+                  <span className="sm:hidden">Done</span>
+                  <IoWarning size={18} />
                 </>
               ) : profile.kycStatus == "UNDER_REVIEW" ? (
                 <>
@@ -131,6 +139,17 @@ function ProfileViewCard({
               </Button>
             </Link>
           )}
+          {profile.kycStatus == "RE_KYC" && (
+            <Link href={`/dashboard/kyc`}>
+              <Button variant={`secondary`}>
+                Complete <span className="hidden md:inline-block">Your</span>{" "}
+                KYC
+                <div className="w-3 text-3xl">
+                  <RiArrowRightSFill className="w-4 h-5" size={33} />
+                </div>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -143,14 +162,13 @@ function ProfileViewCard({
           Last Login: <br className="md:hidden" />
           {profile.utility.lastLogin
             ? dateTimeUtils.formatDateTime(
-                profile.utility.lastLogin,
-                "DD MMM YYYY"
-              ) +
-              " | " +
-              dateTimeUtils.formatDateTime(
-                profile.utility.lastLogin,
-                "hh:mm aa"
-              )
+              profile.utility.lastLogin,
+              "DD MMM YYYY"
+            ) + " | " +
+            dateTimeUtils.formatDateTime(
+              profile.utility.lastLogin,
+              "hh:mm aa"
+            )
             : "No data available"}
         </p>
       </div>

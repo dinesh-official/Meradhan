@@ -12,6 +12,7 @@ export enum QueueNames {
   kraProcessWork = "kraProcessWorkMD",
   orderSettlement = "orderSettlementMD",
   submitProfileCompleat = "submitProfileMD",
+  rekycOtpSend = "rekycOtpSendMD",
 }
 
 // 🔹 Create a shared Redis connection using QueueStore (recommended)

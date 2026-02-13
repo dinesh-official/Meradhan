@@ -400,7 +400,7 @@ export class KycProvider extends DigioKycFileHelper {
   }
 
   async getKycPdfFile(userId: number) {
-    const userData = await db.dataBase.kYC_FLOW.findUnique({
+    const userData = await db.dataBase.kYC_FLOW.findFirst({
       where: {
         userID: userId,
       },

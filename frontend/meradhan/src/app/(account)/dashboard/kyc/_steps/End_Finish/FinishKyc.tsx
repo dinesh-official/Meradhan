@@ -39,7 +39,7 @@ function FinishKyc() {
   return (
     <Card accountMode>
       <CardContent accountMode>
-        {profileData.data?.kycStatus == "PENDING" && <div className="flex flex-col justify-center items-center gap-3 py-10 text-center">
+        {(profileData.data?.kycStatus != "VERIFIED") && <div className="flex flex-col justify-center items-center gap-3 py-10 text-center">
           <FaCheckSquare size={50} className="text-green-600" />
           <p className="font-normal text-lg">KYC Form Submitted</p>
           <p className="flex justify-center items-center gap-4" >
@@ -60,7 +60,8 @@ function FinishKyc() {
             </Button>
           </div>
         </div>}
-        {profileData.data?.kycStatus == "VERIFIED" && <div className="flex flex-col justify-center items-center gap-3 py-10 text-center">
+
+        {(profileData.data?.kycStatus == "VERIFIED") && <div className="flex flex-col justify-center items-center gap-3 py-10 text-center">
           <FaCheckSquare size={50} className="text-green-600" />
           <p className="font-normal text-lg">KYC Verified</p>
           <p className="flex justify-center items-center gap-4" >
