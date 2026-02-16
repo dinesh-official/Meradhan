@@ -1,7 +1,7 @@
 # Developer Timesheet
 
 **Developer Name:** Sourav  
-**Project Name:** MeraDhan Client Side  
+**Project Name:** MeraDhan Client Side.
 **Date:** 26 - Jan - 2026
 
 | Start Time | End Time | Task | Task Description | Challenges |
