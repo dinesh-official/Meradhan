@@ -87,7 +87,10 @@ function AccountNavBar({
                   variant="secondaryLight"
                   className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 gap-2"
                 >
-                  <BiSolidFileFind /> KYC: In Review
+                  <BiSolidFileFind />{" "}
+                  {session?.isRekycUnderReview || session?.hasRekycExpiredFlow
+                    ? "Rekyc: In Review"
+                    : "KYC: In Review"}
                 </Button>
               </Link>
             )}

@@ -157,9 +157,11 @@ function ProfileViewCard({
             )}
           </div>
 
-          {/* KYC Copy: content-width (not full width) */}
+          {/* KYC Copy / Download PDF: show when verified, rekyc, or in review (if PDF available) */}
           {(profile.kycStatus == "VERIFIED" ||
             (profile.kycStatus == "RE_KYC" &&
+              profile.personalInformation?.signPdfUrl) ||
+            (profile.kycStatus == "UNDER_REVIEW" &&
               profile.personalInformation?.signPdfUrl)) && (
             <Link
               href={genMediaUrl(profile.personalInformation?.signPdfUrl || "#")}
