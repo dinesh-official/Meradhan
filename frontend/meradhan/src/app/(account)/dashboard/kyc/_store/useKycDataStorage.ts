@@ -121,7 +121,7 @@ const initData: KycDataStorage = {
       checkTerms1: false,
       checkTerms2: false,
       isFatca: false,
-      checkKycKraConsent: true,
+      checkKycKraConsent: false,
     },
     aadhar: "",
     gender: "",

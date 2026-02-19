@@ -249,10 +249,19 @@ export class CustomerAuthController {
       },
     });
 
+    const hasRekycExpiredFlow = session
+      ? await db.dataBase.kYC_FLOW.findFirst({
+          where: { kycUserId: id, markExpired: true },
+          select: { id: true },
+        }).then((row) => !!row)
+      : false;
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "session",
-      responseData: session,
+      responseData: session
+        ? { ...session, hasRekycExpiredFlow }
+        : undefined,
     });
   }
 

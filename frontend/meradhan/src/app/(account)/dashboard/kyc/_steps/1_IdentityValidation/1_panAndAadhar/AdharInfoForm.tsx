@@ -145,7 +145,7 @@ function AdharInfoForm() {
       </CardHeader>
 
       <CardContent accountMode>
-        {isRekyc && existingAadhaar ? (
+        {/* {isRekyc && existingAadhaar ? (
           <LabelInput label="Aadhaar Number" required>
             <Input
               type="text"
@@ -159,7 +159,7 @@ function AdharInfoForm() {
               DigiLocker below to continue.
             </p>
           </LabelInput>
-        ) : null}
+        ) : null} */}
         <LabelInput label="Confirm Your Gender" required>
           <Select
             onValueChange={(e) => {
