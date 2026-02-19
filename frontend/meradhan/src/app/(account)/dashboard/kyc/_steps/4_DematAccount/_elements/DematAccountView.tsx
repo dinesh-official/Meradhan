@@ -10,6 +10,7 @@ function DematAccountView({
   setDefault,
   onDelete,
   hideBorder = false,
+  readOnly = false,
 }: {
   account: KycDataStorage["step_4"][number];
   name: string;
@@ -17,6 +18,7 @@ function DematAccountView({
   setDefault: () => void;
   myPan: string;
   hideBorder?: boolean;
+  readOnly?: boolean;
 }) {
   // const isNameMatched = dataMatcherUtils.areNamesMatched(
   //   dataMatcherUtils.splitFullName(account.accountHolderName),
@@ -24,7 +26,12 @@ function DematAccountView({
   // );
 
   return (
-    <div className={cn("flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b last:border-b-0", hideBorder && "border-b-0")} >
+    <div
+      className={cn(
+        "flex flex-col gap-5 py-5 first:pt-0 border-gray-200 border-b last:border-b-0",
+        hideBorder && "border-b-0",
+      )}
+    >
       <div className={cn("gap-5 grid sm:grid-cols-2 xl:grid-cols-4")}>
         {/* // not show dp id for cdsl */}
         {account.depositoryName != "CDSL" && (
@@ -65,11 +72,13 @@ function DematAccountView({
         <DataInfoLabel title="Depository">
           <p className="flex items-center gap-3 font-medium">
             {account.depositoryName || "--------"}{" "}
-            <IoMdTrash
-              className="text-gray-600 cursor-pointer"
-              size={16}
-              onClick={onDelete}
-            />
+            {!readOnly && (
+              <IoMdTrash
+                className="text-gray-600 cursor-pointer"
+                size={16}
+                onClick={onDelete}
+              />
+            )}
           </p>
         </DataInfoLabel>
 
@@ -89,8 +98,18 @@ function DematAccountView({
         </DataInfoLabel>
       </div>
       <DataInfoLabel title="Is Default Demat Account?" status="SUCCESS">
-        <label className="flex items-center gap-2 font-medium cursor-pointer">
-          <Checkbox checked={account.isDefault} onClick={() => setDefault()} />
+        <label
+          className={
+            readOnly
+              ? "flex items-center gap-2 font-medium cursor-default opacity-70"
+              : "flex items-center gap-2 font-medium cursor-pointer"
+          }
+        >
+          <Checkbox
+            checked={account.isDefault}
+            onClick={readOnly ? undefined : () => setDefault()}
+            disabled={readOnly}
+          />
           Yes
         </label>
       </DataInfoLabel>

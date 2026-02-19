@@ -1,6 +1,7 @@
 import { db, type DataBaseSchema } from "@core/database/database";
 import type { $Enums, KYCStatus } from "@databases/generated/prisma/postgres";
 import type { CustomerProfileService } from "@resource/crm/customers/customer.service";
+import { AppError } from "@utils/error/AppError";
 import type { KycDataStorage } from "./kyc";
 
 export class CustomerKycManager {
@@ -72,13 +73,35 @@ export class CustomerKycManager {
     const middleName = step1.pan.middleName;
     const gender = this.mapGender(aadhaarData.gender);
 
-    // Check if customer exists
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerId },
+      include: { aadhaarCard: true, panCard: true },
     });
 
     if (!customer) {
       throw new Error("Customer not found");
+    }
+
+    if (customer.kycStatus === "RE_KYC") {
+      const norm = (id: string) => (id || "").replace(/\s/g, "").replace(/x/gi, "0");
+      const existingAadhaar = customer.aadhaarCard?.aadhaarNo;
+      const existingPan = customer.panCard?.panCardNo;
+      if (existingAadhaar && aadhaarData.id_number && norm(aadhaarData.id_number) !== norm(existingAadhaar)) {
+        throw new AppError(
+          "ReKYC must use the same Aadhaar number as your last verified KYC.",
+          { code: "REKYC_AADHAAR_MISMATCH", statusCode: 400 },
+        );
+      }
+      if (existingPan && panData?.id_number) {
+        const newPan = (panData.id_number || "").trim().toUpperCase();
+        const prevPan = (existingPan || "").trim().toUpperCase();
+        if (newPan !== prevPan) {
+          throw new AppError(
+            "ReKYC must use the same PAN number as your last verified KYC.",
+            { code: "REKYC_PAN_MISMATCH", statusCode: 400 },
+          );
+        }
+      }
     }
 
     // Update customer with KYC data in a transaction

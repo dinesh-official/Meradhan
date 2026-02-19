@@ -26,10 +26,12 @@ function PersonalDetails({
 }: {
   profile: GetCustomerResponseById["responseData"];
 }) {
+  const showAddress =
+    profile.kycStatus == "VERIFIED" ||
+    profile.kycStatus == "RE_KYC" ||
+    profile.kycStatus == "UNDER_REVIEW";
   const getAddressNotes = (value?: string | null) => {
-    if (profile.kycStatus != "VERIFIED" && profile.kycStatus != "RE_KYC") {
-      return "--";
-    }
+    if (!showAddress) return "--";
     return value || "--";
   };
 
@@ -55,15 +57,17 @@ function PersonalDetails({
         <FullKycInfo profile={profile} />
       </div>
       <div className="gap-5 grid md:grid-cols-3 mt-6 pt-6 border-gray-200 border-t">
-        {(profile.kycStatus == "VERIFIED" ||
-          profile.kycStatus == "RE_KYC") && (
-            <div className="md:col-span-3">
-              <h4 className="flex items-center gap-2">
-                Communication Address (as per Aadhar){" "}
+        {showAddress && (
+          <div className="md:col-span-3">
+            <h4 className="flex items-center gap-2">
+              Communication Address (as per Aadhar){" "}
+              {(profile.kycStatus == "VERIFIED" ||
+                profile.kycStatus == "RE_KYC") && (
                 <FaCheckSquare className="text-green-600" />
-              </h4>
-            </div>
-          )}
+              )}
+            </h4>
+          </div>
+        )}
 
         <DataInfoLabel title="Line 1" className="md:col-span-3">
           <p className="font-medium text-sm">

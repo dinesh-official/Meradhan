@@ -129,13 +129,7 @@ export class CustomerAuthController {
       identifier: payload.identity,
       value: payload.value,
     });
-    await addMeradhanLoginBasedAuditLog(req, {
-      userId: response.id,
-      sessionType: "SIGNIN_REQUEST",
-      success: true,
-      entityType: "Auth",
-      email: response.email,
-    });
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,

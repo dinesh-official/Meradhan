@@ -55,14 +55,26 @@ async function DashBoardPage() {
             icon={<FaUser size={19} className="text-secondary" />}
             className="bg-accent text-secondary"
           >
-            {(kycStatus == "PENDING" || kycStatus == "RE_KYC") && <div className="flex items-end flex-row justify-between gap-2">
-              <p className="text-3xl font-medium">Not Done</p>
-              <Link href={`/dashboard/kyc`}>
-                <Button variant="secondary">
-                  Start KYC
-                </Button>
-              </Link>
-            </div>}
+            {kycStatus == "PENDING" && (
+              <div className="flex items-end flex-row justify-between gap-2">
+                <p className="text-3xl font-medium">Not Done</p>
+                <Link href={`/dashboard/kyc`}>
+                  <Button variant="secondary">
+                    Start KYC
+                  </Button>
+                </Link>
+              </div>
+            )}
+            {kycStatus == "RE_KYC" && (
+              <div className="flex items-end flex-row justify-between gap-2">
+                <p className="text-3xl font-medium">Not Done</p>
+                <Link href={`/dashboard/kyc`}>
+                  <Button variant="secondary">
+                    Re KYC
+                  </Button>
+                </Link>
+              </div>
+            )}
             {kycStatus == "VERIFIED" && <div className="flex items-end flex-row justify-between gap-2">
               <p className="text-3xl font-medium">Done</p>
             </div>}

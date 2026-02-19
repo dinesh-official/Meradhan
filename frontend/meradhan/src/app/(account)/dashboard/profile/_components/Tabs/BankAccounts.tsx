@@ -21,6 +21,7 @@ function BankAccounts({
   profile: GetCustomerResponseById["responseData"];
   allowAddNew?: boolean;
 }) {
+  const readOnly = profile.kycStatus !== "VERIFIED";
   const [showAddNew, setShowAddNew] = useState(false);
 
   const apiModel = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
@@ -79,6 +80,7 @@ function BankAccounts({
     <div className="pt-5">
       {profile.bankAccounts.map((bankAccount, index) => (
         <BankViewCard
+          readOnly={readOnly}
           hideBorder={index === profile.bankAccounts.length - 1 && !allowAddNew}
           key={bankAccount.id}
           // bank={bankAccount.bankName || "--"}

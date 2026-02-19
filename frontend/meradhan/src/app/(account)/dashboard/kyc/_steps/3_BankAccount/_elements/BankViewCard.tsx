@@ -13,12 +13,14 @@ function BankViewCard({
   onDelete,
   setDefault,
   hideBorder = false,
+  readOnly = false,
 }: {
   bank: KycDataStorage["step_3"][number];
   name: string;
   onDelete?: () => void;
   setDefault: () => void;
   hideBorder?: boolean;
+  readOnly?: boolean;
 }) {
   const isNameMatched = dataMatcherUtils.areNamesMatched(
     dataMatcherUtils.splitFullName(bank.beneficiary_name),
@@ -35,11 +37,13 @@ function BankViewCard({
         >
           <p className="flex items-center gap-2">
             {bank.bankName}{" "}
-            <IoMdTrash
-              className="text-[#AAAAAA] cursor-pointer"
-              size={16}
-              onClick={onDelete}
-            />
+            {!readOnly && (
+              <IoMdTrash
+                className="text-[#AAAAAA] cursor-pointer"
+                size={16}
+                onClick={onDelete}
+              />
+            )}
           </p>
         </DataInfoLabel>
         <DataInfoLabel
@@ -72,8 +76,17 @@ function BankViewCard({
           <p className="font-medium text-sm">{bank.branchName}</p>
         </DataInfoLabel>
       </div>
-      <label className="flex lg:items-center gap-2 mt-3 text-sm cursor-pointer">
-        <Checkbox checked={bank.isDefault} onClick={() => setDefault()} />
+      <label
+        className={cn(
+          "flex lg:items-center gap-2 mt-3 text-sm",
+          readOnly ? "cursor-default opacity-70" : "cursor-pointer"
+        )}
+      >
+        <Checkbox
+          checked={bank.isDefault}
+          onClick={readOnly ? undefined : () => setDefault()}
+          disabled={readOnly}
+        />
         <p className="text-sm">
           Set this account as default bank account for making future investments
           on MeraDhan
