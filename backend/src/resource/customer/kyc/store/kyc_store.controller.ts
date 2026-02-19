@@ -125,6 +125,7 @@ export class KycStoreController {
       data: {
         kycStatus: "RE_KYC",
         kraStatus: "PENDING",
+        isRekycUnderReview: false,
       },
     });
     res.send({
@@ -154,6 +155,7 @@ export class KycStoreController {
       data: {
         kycStatus: "RE_KYC",
         kraStatus: "PENDING",
+        isRekycUnderReview: false,
       },
     });
 
