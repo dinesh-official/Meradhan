@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Timer } from "lucide-react";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 
-const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
 const PROMPT_BEFORE_IDLE_MS = 1 * 60 * 1000; // show indicator 2 min before logout
 const PAGE_TRACKING_SESSION_KEY = "md_page_tracking_session";
 const closeSessionEndpoint = (userId: string | number) =>
