@@ -18,6 +18,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
+const REKYC_CONFIRM_WORD = "confirm";
+
 interface CustomerOverViewCardProps {
   name: string;
   customerSince: string;
@@ -32,6 +34,8 @@ function CustomerOverViewCard(
     apiClientCaller,
   );
   const queryClient = useQueryClient();
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [otpValue, setOtpValue] = useState("");
   const [rekycToken, setRekycToken] = useState<string | null>(null);
@@ -46,6 +50,8 @@ function CustomerOverViewCard(
       if (token) {
         setRekycToken(token);
         setOtpValue("");
+        setConfirmDialogOpen(false);
+        setConfirmText("");
         setOtpDialogOpen(true);
         toast.success("OTP sent to your registered email");
       }
@@ -75,6 +81,15 @@ function CustomerOverViewCard(
   });
 
   const handleRequestRekyc = () => {
+    setConfirmText("");
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmWordSubmit = () => {
+    if (confirmText.trim().toLowerCase() !== REKYC_CONFIRM_WORD) {
+      toast.error(`Type "${REKYC_CONFIRM_WORD}" to confirm`);
+      return;
+    }
     requestOtpMutate.mutate();
   };
 
@@ -129,6 +144,47 @@ function CustomerOverViewCard(
         </CardContent>
       </Card>
 
+      {/* Popup 1: Type "confirm" to proceed */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm ReKYC request</DialogTitle>
+            <DialogDescription>
+              To request ReKYC for this customer, type <strong>{REKYC_CONFIRM_WORD}</strong> below.
+              An OTP will then be sent to your registered CRM email to complete the request.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="gap-2 py-4">
+            <Input
+              placeholder={`Type "${REKYC_CONFIRM_WORD}" to continue`}
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              disabled={requestOtpMutate.isPending}
+              autoComplete="off"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialogOpen(false)}
+              disabled={requestOtpMutate.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmWordSubmit}
+              disabled={
+                confirmText.trim().toLowerCase() !== REKYC_CONFIRM_WORD ||
+                requestOtpMutate.isPending
+              }
+            >
+              {requestOtpMutate.isPending ? "Sending OTP..." : "Continue"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Popup 2: Enter OTP from email */}
       <Dialog open={otpDialogOpen} onOpenChange={setOtpDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

@@ -45,11 +45,11 @@ export class CustomerProfileRepo {
         if (!user) {
             throw new AppError("User Not Found", { code: "USER_NOT_FOUND", statusCode: 404 })
         }
-        const kycData = new CustomerKycManager()
-
-        if (user.kycStatus != "VERIFIED") {
-            return await kycData.getUserKycFlowDataWithFormattedFullProfile(user.id)
+        // RE_KYC: show last completed KYC data (saved profile); VERIFIED: same
+        if (user.kycStatus === "VERIFIED" || user.kycStatus === "RE_KYC") {
+            return user;
         }
-        return user;
+        const kycData = new CustomerKycManager();
+        return await kycData.getUserKycFlowDataWithFormattedFullProfile(user.id);
     }
 }

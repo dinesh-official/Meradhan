@@ -169,6 +169,7 @@ export const useLoginFormHook = () => {
   // -------------------------------
   const signInWithPasswordMutation = useMutation({
     mutationKey: ["signInWithPassword"],
+    retry: false,
     mutationFn: () =>
       signinApi.signInWithPassword({
         identity,
@@ -200,6 +201,7 @@ export const useLoginFormHook = () => {
   // -------------------------------
   const verifyOtpMutation = useMutation({
     mutationKey: ["verifyOtpLogin"],
+    retry: false,
     mutationFn: () =>
       signinApi.signInVerifyOtp({
         identity,
@@ -231,6 +233,7 @@ export const useLoginFormHook = () => {
   // -------------------------------
   const resendEmailVerificationMutation = useMutation({
     mutationKey: ["resendEmailVerification"],
+    retry: false,
     mutationFn: () =>
       signinApi.resendEmailVerificationForUnverifiedUser({
         identity,

@@ -98,7 +98,7 @@ function AccountNavBar({
                   variant="secondaryLight"
                   className="gap-2"
                 >
-                  <FaUser />  KYC
+                  <FaUser /> Update KYC
                 </Button>
               </Link>
             )}

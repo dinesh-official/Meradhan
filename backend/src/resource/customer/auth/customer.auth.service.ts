@@ -69,11 +69,11 @@ export class CustomerAuthService {
     const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
       data.identifier == "email"
         ? {
-            emailAddress: data.value,
-          }
+          emailAddress: data.value,
+        }
         : {
-            phoneNo: "+91" + removeCountryCode(data.value),
-          };
+          phoneNo: "+91" + removeCountryCode(data.value),
+        };
 
     const user = await db.dataBase.customerProfileDataModel.findUnique({
       where: {
@@ -97,6 +97,9 @@ export class CustomerAuthService {
     }
 
     this.checkUserSigninWith(user, data.identifier);
+    if (data.identifier == "phoneNo") {
+      return await this.sendSigninWithOtp({ identifier: data.identifier, value: data.value });
+    }
 
     return {
       id: user.id,
@@ -114,11 +117,11 @@ export class CustomerAuthService {
     const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
       data.identifier == "email"
         ? {
-            emailAddress: data.value,
-          }
+          emailAddress: data.value,
+        }
         : {
-            phoneNo: "+91" + removeCountryCode(data.value),
-          };
+          phoneNo: "+91" + removeCountryCode(data.value),
+        };
 
     const user = await db.dataBase.customerProfileDataModel.findUnique({
       where: query,
@@ -167,11 +170,11 @@ export class CustomerAuthService {
     const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
       data.identifier == "email"
         ? {
-            emailAddress: data.value,
-          }
+          emailAddress: data.value,
+        }
         : {
-            phoneNo: "+91" + removeCountryCode(data.value),
-          };
+          phoneNo: "+91" + removeCountryCode(data.value),
+        };
 
     const user = await db.dataBase.customerProfileDataModel.findUnique({
       where: query,
@@ -225,11 +228,11 @@ export class CustomerAuthService {
     const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
       data.identifier == "email"
         ? {
-            emailAddress: data.value,
-          }
+          emailAddress: data.value,
+        }
         : {
-            phoneNo: "+91" + removeCountryCode(data.value),
-          };
+          phoneNo: "+91" + removeCountryCode(data.value),
+        };
 
     const user = await db.dataBase.customerProfileDataModel.findUnique({
       where: query,
@@ -484,11 +487,11 @@ export class CustomerAuthService {
     const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
       data.identifier == "email"
         ? {
-            emailAddress: data.value,
-          }
+          emailAddress: data.value,
+        }
         : {
-            phoneNo: "+91" + removeCountryCode(data.value),
-          };
+          phoneNo: "+91" + removeCountryCode(data.value),
+        };
 
     const user = await db.dataBase.customerProfileDataModel.findUnique({
       where: {

@@ -22,6 +22,7 @@ function DematAccounts({
   allowAddNew?: boolean;
 }) {
   const [showNew, setShowNew] = useState(false);
+  const readOnly = profile.kycStatus !== "VERIFIED";
 
   const apiModel = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
     apiClientCaller
@@ -79,6 +80,7 @@ function DematAccounts({
     <div className="mt-5">
       {profile.dematAccounts.map((dematAccount, index) => (
         <DematAccountView
+          readOnly={readOnly}
           hideBorder={index === profile.dematAccounts.length - 1 && !allowAddNew}
           setDefault={() => {
             setDefaultDematAccountMutation.mutate(dematAccount.id!);
