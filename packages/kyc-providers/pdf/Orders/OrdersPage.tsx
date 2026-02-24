@@ -58,6 +58,15 @@ interface OrderData {
     settlementNumber?: string;
     interestPaymentDates?: string[];
     interestPaymentFrequencyLabel?: string;
+    settleOrder?: {
+      source?: number;
+      settleStatus?: number;
+      fundPayinRefId?: string;
+      modQuantity?: number | string;
+      modAccrInt?: number | string;
+      modConsideration?: number | string;
+      stampDutyAmount?: number | string;
+    };
   };
 }
 
@@ -95,22 +104,37 @@ export default function OrdersPage({
 
   // Calculate financials
   const faceValue = Number(bond.faceValue) || 1000;
+  const settleOrder = orderData?.metadata?.settleOrder;
+  const effectiveQun =
+    settleOrder?.modQuantity != null ? Number(settleOrder.modQuantity) : qun;
 
-  const principalAmount = faceValue * qun; // Convert to actual amount
+  const principalAmount = faceValue * effectiveQun; // Convert to actual amount
   const accruedInterest =
-    orderData?.metadata?.accruedInterest || (principalAmount * 0.01 * 9) / 365; // Rough calculation if not provided
+    Number(
+      settleOrder?.modAccrInt ??
+      orderData?.metadata?.accruedInterest ??
+      (principalAmount * 0.01 * 9) / 365
+    ); // Rough calculation if not provided
   // const stampDutyAmount = orderData?.stampDuty || principalAmount * 0.0001; // 0.01% stamp duty
-  const stampDutyAmount = orderData?.stampDuty || principalAmount * 0.0001; // 0.01% stamp duty
+  const stampDutyAmount = Number(
+    settleOrder?.stampDutyAmount ?? orderData?.stampDuty ?? 0
+  );
 
   const totalConsideration =
-    orderData?.totalAmount || principalAmount + accruedInterest;
+    Number(
+      settleOrder?.modConsideration ??
+      orderData?.totalAmount ??
+      principalAmount + accruedInterest
+    );
   const settlementAmount = totalConsideration + stampDutyAmount;
 
+
+
   // Format amounts
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, fixed = 2) => {
     return `${amount.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: fixed,
+      maximumFractionDigits: fixed,
     })}`;
   };
 
@@ -128,9 +152,9 @@ export default function OrdersPage({
 
   const getInterestPaymentDatesDisplay = () => {
     if (orderData?.metadata?.interestPaymentDates?.length) {
-      return orderData.metadata.interestPaymentDates.join(", ");
+      return Array.from(new Set(orderData.metadata.interestPaymentDates)).join(", ");
     }
-    return interestSchedule.dates.join(", ");
+    return Array.from(new Set(interestSchedule.dates)).join(", ");
   };
 
 
@@ -179,23 +203,23 @@ export default function OrdersPage({
     ["Face Value", `INR ${formatCurrency(faceValue)}`],
     [
       "Quantum",
-      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${qun})`,
-      `Price: INR ${formatCurrency(orderData?.price || 0)}`,
+      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${effectiveQun})`,
+      `Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
     ],
     [
       "Date",
-      `Deal Date: ${formatDate(dealDate.toISOString(), "DD Month YYYY")}`,
-      `Value Date: ${formatDate(valueDate.toISOString(), "DD Month YYYY")}`,
+      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
+      `Value Date: ${formatDate(valueDate.toISOString(), "DD-MMM-YYYY")}`,
     ],
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
     [
       "Order Type",
-      orderData?.metadata?.orderType ??
-      "One To One (OTO) on RFQ Platform of the Exchange",
+      orderData?.metadata?.orderType ?? "N.A",
     ],
     [
       "Interest Payment Dates",
-      `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel} ${getInterestPaymentDatesDisplay()}`,
+      `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
+${getInterestPaymentDatesDisplay()}`,
     ],
     [
       "Last Interest Payment Date",
@@ -210,13 +234,13 @@ export default function OrdersPage({
     [
       "Allotment Date",
       bond.dateOfAllotment
-        ? formatDate(bond.dateOfAllotment, "DD Month YYYY")
+        ? formatDate(bond.dateOfAllotment, "DD-MMM-YYYY")
         : "N/A",
     ],
     [
       "Maturity Date",
       bond.maturityDate
-        ? formatDate(bond.maturityDate, "DD Month YYYY") + " : 100.0000%"
+        ? formatDate(bond.maturityDate, "DD-MMM-YYYY") + " : 100.0000%"
         : "N/A",
     ],
     [
@@ -234,23 +258,32 @@ export default function OrdersPage({
     ["Principal Amount", `INR ${formatCurrency(settlementAmount)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `${formatCurrency(accruedInterest)}`} (No. of Days: ${orderData?.metadata?.accruedInterestDays ??
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} ` + `(No. of Days: (${orderData?.metadata?.accruedInterestDays ??
       Math.ceil((now.getTime() - (orderData?.metadata?.lastInterestPaymentDate ? new Date(orderData.metadata.lastInterestPaymentDate).getTime() : now.getTime() - 30 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000))
-      })`,
+      }))`,
     ],
-    ["Total Consideration", `INR ${formatCurrency(settlementAmount)}`],
+    ["Total Consideration", `INR ${formatCurrency(settlementAmount + accruedInterest)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
       `INR ${formatCurrency(
-        stampDutyAmount
+        stampDutyAmount, 0
       )} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
     ],
     ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
     [
       "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(settlementAmount)} (${numberToWords(settlementAmount)})`,
+      `INR ${formatCurrency(settlementAmount + accruedInterest + stampDutyAmount)} (${numberToWords(settlementAmount + accruedInterest + stampDutyAmount)})`,
     ],
+
   ]
+
+  const getITOMOde = () => {
+    if (orderData?.metadata?.orderType?.includes("OTO")) {
+      return `(One-to-One mode)`
+    } else {
+      return `(One-to-Many mode)`
+    }
+  }
 
   return (
     <View
@@ -284,7 +317,7 @@ export default function OrdersPage({
           This {releasedOrder ? "" : "Draft"} Order Receipt has been
           automatically generated based on your authorization to MeraDhan, a
           platform by BondNest Capital India Securities Private Limited, to
-          place a non-negotiable order (One-to-One mode) on the RFQ platform of
+          place a non-negotiable order {getITOMOde()} on the RFQ platform of
           the Stock Exchanges.
         </Text>
       </View>
@@ -300,7 +333,7 @@ export default function OrdersPage({
                     borderLeftWidth: index === 0 ? 0 : 1,
                     borderLeftColor: "#cccccc",
                     height: "100%",
-                    width: 280,
+                    width: 320,
                     paddingHorizontal: 5,
                     paddingVertical: 2,
                   }}  >
@@ -382,7 +415,7 @@ function numberToWords(amount: number): string {
   }
 
   const absAmount = Math.abs(amount);
-  if (absAmount === 0) return "Zero Only";
+  if (absAmount === 0) return "Rs. Zero Only";
 
   let rupees = Math.floor(absAmount);
   const paise = Math.round((absAmount - rupees) * 100);

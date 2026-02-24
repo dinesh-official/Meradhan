@@ -39,6 +39,17 @@ function SettleOrdersView() {
     (order) => String(order.orderNumber) === selectedOrderNumber
   );
 
+  const settleStatusLabel = (status: number) => {
+    const map: Record<number, string> = {
+      0: "Settlement Pending",
+      1: "Securities Payin Done",
+      2: "Funds Payin Done",
+      3: "Payin Completed",
+      4: "Payout Done Successfully",
+    };
+    return status != null && map[Number(status)] ? map[Number(status)] : "N.A";
+  };
+
   const handleRedirectToGenerate = () => {
     if (!selectedOrderNumber) return;
     setOpenGenerateModal(false);
@@ -73,7 +84,7 @@ function SettleOrdersView() {
       </Card>
 
       <Dialog open={openGenerateModal} onOpenChange={setOpenGenerateModal}>
-        <DialogContent>
+        <DialogContent className="max-w-[400px] sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Generate PDF</DialogTitle>
             <DialogDescription>
@@ -121,15 +132,15 @@ function SettleOrdersView() {
                 </div>
                 <div>
                   <span className="font-medium text-foreground">Price:</span>{" "}
-                  {selectedOrder.price ?? "--"}
+                  {Number(selectedOrder.price).toFixed(4) ?? "--"}
                 </div>
                 <div>
                   <span className="font-medium text-foreground">Yield:</span>{" "}
-                  {selectedOrder.yield ?? "--"}
+                  {Number(selectedOrder.yield).toFixed(4) ?? "--"}
                 </div>
                 <div>
                   <span className="font-medium text-foreground">Quantity:</span>{" "}
-                  {selectedOrder.modQuantity ?? "--"}
+                  {Number(selectedOrder.modQuantity).toLocaleString() ?? "--"}
                 </div>
                 <div>
                   <span className="font-medium text-foreground">Settlement No:</span>{" "}
@@ -143,7 +154,7 @@ function SettleOrdersView() {
                 </div>
                 <div>
                   <span className="font-medium text-foreground">Status:</span>{" "}
-                  {selectedOrder.settleStatus ?? "--"}
+                  {settleStatusLabel(Number(selectedOrder.settleStatus)) ?? "--"}
                 </div>
               </div>
             </div>

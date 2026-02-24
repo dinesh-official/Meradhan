@@ -110,6 +110,7 @@ export async function generateOrderPdfBuffer({
       user,
       releasedOrder: isReleased,
       orderData,
+      userFor: "ORDER",
     })
   );
   return Buffer.from(buffer);
@@ -135,7 +136,7 @@ export async function generateDealPdfBuffer({
     stampDuty?: number;
     totalAmount?: number;
     createdAt?: string;
-    metadata?: { dealId?: string; rfqNumber?: string; [key: string]: unknown };
+    metadata?: { dealId?: string; rfqNumber?: string;[key: string]: unknown };
   };
 }): Promise<Buffer> {
   const buffer = await renderToBuffer(

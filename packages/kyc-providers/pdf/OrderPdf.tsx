@@ -6,7 +6,7 @@ import type {
 import OrdersPage from "./Orders/OrdersPage";
 import OrdersPageTwo from "./Orders/OrdersPageTwo";
 import Footer from "./elements/Footer";
-import LogoSvg from "./images/LogoSvg";
+import { LogoSvgTop } from "./images/LogoSvg";
 
 interface OrderPdfOrderData {
   subTotal?: number;
@@ -45,6 +45,7 @@ export function OrderPdf({
   qun: number;
   releasedOrder?: boolean;
   orderData?: OrderPdfOrderData;
+  userFor?: "ORDER" | "DEAL";
 }) {
   Font.register({
     family: "Poppins",
@@ -110,7 +111,7 @@ export function OrderPdf({
   return (
     <Document >
       <Page size="A4" style={{ fontFamily: "Poppins" }}    >
-        <LogoSvg showAll={false} />
+        <LogoSvgTop showAll={true} />
         <OrdersPage
           bond={bond}
           user={user}
@@ -122,7 +123,7 @@ export function OrderPdf({
         <Footer />
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll={false} />
+        <LogoSvgTop showAll={true} />
         <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
         <Footer />
       </Page>

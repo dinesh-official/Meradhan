@@ -21,12 +21,12 @@ const FREQUENCY_CONFIG: Record<
   PaymentFrequencyKey,
   { paymentsPerYear: number; label: string; monthsBetween: number }
 > = {
-  MONTHLY: { paymentsPerYear: 12, label: "Twelve Times a Year", monthsBetween: 1 },
-  QUARTERLY: { paymentsPerYear: 4, label: "Four Times a Year", monthsBetween: 3 },
-  HALF_YEARLY: { paymentsPerYear: 2, label: "Half Yearly", monthsBetween: 6 },
-  YEARLY: { paymentsPerYear: 1, label: "Once a Year", monthsBetween: 12 },
+  MONTHLY: { paymentsPerYear: 12, label: "Monthly", monthsBetween: 1 },
+  QUARTERLY: { paymentsPerYear: 4, label: "Quarterly", monthsBetween: 3 },
+  HALF_YEARLY: { paymentsPerYear: 2, label: "Semi-Annual", monthsBetween: 6 },
+  YEARLY: { paymentsPerYear: 1, label: "Yearly", monthsBetween: 12 },
   ON_MATURITY: { paymentsPerYear: 0, label: "On Maturity", monthsBetween: 0 },
-  UNKNOWN: { paymentsPerYear: 12, label: "Twelve Times a Year", monthsBetween: 1 },
+  UNKNOWN: { paymentsPerYear: 12, label: "Monthly", monthsBetween: 1 },
 };
 
 function normalizeFrequency(frequency: string | undefined | null): PaymentFrequencyKey {

@@ -94,6 +94,7 @@ export interface RfqByOrderNumberSettleOrder {
   id: number;
   orderNumber: string;
   symbol: string;
+  buySell?: "B" | "S" | "X" | string;
   buyParticipantLoginId: string;
   sellParticipantLoginId: string;
   price: string | number;

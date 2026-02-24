@@ -58,6 +58,15 @@ interface OrderData {
     settlementNumber?: string;
     interestPaymentDates?: string[];
     interestPaymentFrequencyLabel?: string;
+    settleOrder?: {
+      source?: number;
+      settleStatus?: number;
+      fundPayinRefId?: string;
+      modQuantity?: number | string;
+      modAccrInt?: number | string;
+      modConsideration?: number | string;
+      stampDutyAmount?: number | string;
+    };
   };
 }
 
@@ -95,16 +104,32 @@ export default function DealPage({
 
   // Calculate financials
   const faceValue = Number(bond.faceValue) || 1000;
+  const settleOrder = orderData?.metadata?.settleOrder;
+  const effectiveQun =
+    settleOrder?.modQuantity != null ? Number(settleOrder.modQuantity) : qun;
 
-  const principalAmount = faceValue * qun; // Convert to actual amount
+  const principalAmount = faceValue * effectiveQun; // Convert to actual amount
   const accruedInterest =
-    orderData?.metadata?.accruedInterest || (principalAmount * 0.01 * 9) / 365; // Rough calculation if not provided
+    Number(
+      settleOrder?.modAccrInt ??
+      orderData?.metadata?.accruedInterest ??
+      (principalAmount * 0.01 * 9) / 365
+    ); // Rough calculation if not provided
   // const stampDutyAmount = orderData?.stampDuty || principalAmount * 0.0001; // 0.01% stamp duty
-  const stampDutyAmount = orderData?.stampDuty || principalAmount * 0.0001; // 0.01% stamp duty
+  const stampDutyAmount = Number(
+    settleOrder?.stampDutyAmount ??
+    orderData?.stampDuty ??
+    principalAmount * 0.0001
+  );
 
   const totalConsideration =
-    orderData?.totalAmount || principalAmount + accruedInterest;
+    Number(
+      settleOrder?.modConsideration ??
+      orderData?.totalAmount ??
+      principalAmount + accruedInterest
+    );
   const settlementAmount = totalConsideration + stampDutyAmount;
+
 
   // Format amounts
   const formatCurrency = (amount: number, fixed = 2) => {
@@ -216,7 +241,7 @@ ${getInterestPaymentDatesDisplay()}`,
     ["Face Value", `INR ${formatCurrency(faceValue)}`],
     [
       "Quantum",
-      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${qun})`,
+      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${effectiveQun})`,
       `Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
     ],
     [

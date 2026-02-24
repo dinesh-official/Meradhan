@@ -272,7 +272,8 @@ export class CrmOrdersService {
         isin: bondDetails.isin,
         bondName: bondDetails.bondName,
         orderNumber: generateOrderId({
-          // action: ,
+          prefix2: "ASSIST",
+          action: negotation.buySell === "S" ? "BUY" : negotation.buySell === "B" ? "SELL" : "BOTH",
           uniquePart: "0" + lastOrder?.id?.toString(),
         }),
         stampDuty: negotation.acceptedAccruedInterest || 0,
@@ -300,7 +301,7 @@ export class CrmOrdersService {
     });
     const dealId = generateDealId(
       new Date(),
-      "BUY",
+      negotation.buySell === "S" ? "BUY" : negotation.buySell === "B" ? "SELL" : "BOTH",
       order.id,
       bondDetails.bondName ?? ""
     );

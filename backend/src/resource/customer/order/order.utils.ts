@@ -37,7 +37,7 @@ export function bondNameToDealIdAbbrev(securityName: string): string {
  */
 export function generateDealId(
   date: Date,
-  action: "BUY" | "SELL",
+  action: "BUY" | "SELL" | "BOTH",
   orderRowId: number,
   bondName: string
 ): string {

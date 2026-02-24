@@ -95,6 +95,7 @@ export class CrmOrdersApi {
     pdfParams?: {
       accruedInterestDays?: number;
       settlementNumber?: string;
+      settlementDateTime?: string;
       lastInterestPaymentDate?: string;
     },
     config?: AxiosRequestConfig
@@ -102,6 +103,7 @@ export class CrmOrdersApi {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
+    if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/receipt-pdf/${encodeURIComponent(orderNumber)}`,
@@ -129,6 +131,7 @@ export class CrmOrdersApi {
     pdfParams?: {
       accruedInterestDays?: number;
       settlementNumber?: string;
+      settlementDateTime?: string;
       lastInterestPaymentDate?: string;
     },
     config?: AxiosRequestConfig
@@ -136,6 +139,7 @@ export class CrmOrdersApi {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
+    if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/deal-pdf/${encodeURIComponent(orderNumber)}`,
@@ -167,6 +171,7 @@ export class CrmOrdersApi {
       toEmail?: string;
       accruedInterestDays: number;
       settlementNumber?: string;
+      settlementDateTime?: string;
       lastInterestPaymentDate?: string;
     },
     config?: AxiosRequestConfig

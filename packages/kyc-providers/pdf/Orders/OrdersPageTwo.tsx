@@ -30,6 +30,8 @@ interface OrdersPageTwoOrderData {
     settlementDemat?: SettlementDemat;
     /** Settlement No. e.g. 2602020 */
     settlementNumber?: string;
+    /** Settlement Date & Time shown in confirmation line */
+    settlementDateTime?: string;
   };
 }
 
@@ -58,6 +60,9 @@ function OrdersPageTwo({
       clientId: settlementDemat.benId ?? "—",
     }
     : user.dematAccounts?.find((e) => e.isPrimary);
+  const confirmationDateTime =
+    orderData?.metadata?.settlementDateTime?.trim() ||
+    formatOrderDateForConfirmation(orderData?.createdAt);
 
   return (
     <View
@@ -82,7 +87,7 @@ function OrdersPageTwo({
         <View style={tw(`text-[9px] flex w-[20%] flex-row gap-2`)}>
           <Text>Settlement Details</Text>
         </View>
-        <View style={tw(`text-[9px] flex w-[50%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
+        <View style={tw(`text-[9px] flex w-[40%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
           <Text>
             {`Bank Name: HDFC Bank Ltd.
 Beneficiary Name: NSE Clearing Limited
@@ -91,7 +96,7 @@ Bank A/c No. CBRIC1${user.panCard?.panCardNo ?? "—"}
 Mode of Pay: RTGS / NEFT / Bank Transfer`}
           </Text>
         </View>
-        <View style={tw(`text-[9px] flex w-[30%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
+        <View style={tw(`text-[9px] flex w-[40%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
           <Text>
             {`CM Name: NSE Clearing Ltd.
 CM-BP ID: IN568177
@@ -105,12 +110,12 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
         <View style={tw(`text-[9px] flex w-[20%] flex-row gap-2`)}>
           <Text>Client Settlement Details (Buyer)</Text>
         </View>
-        <View style={tw(`text-[9px] flex w-[50%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
+        <View style={tw(`text-[9px] flex w-[40%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
           <Text>{`Bank Name: ${bank?.bankName}
 IFSC Code: ${bank?.ifscCode}
 Bank Account Number: ${bank?.accountNumber}`}</Text>
         </View>
-        <View style={tw(`text-[9px] flex w-[30%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
+        <View style={tw(`text-[9px] flex w-[40%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
           <Text>{`DP Name: ${demat?.depositoryName}
 DP ID: ${demat?.dpId}
 Client ID: ${demat?.clientId}`}</Text>
@@ -174,7 +179,7 @@ Client ID: ${demat?.clientId}`}</Text>
         <View style={tw(`flex flex-row items-center gap-2`)}>
           <CheckOnlyIcon size={8} />
           <Text style={tw(`text-[8px] leading-5`)}>
-            I hereby confirm (Date: {formatOrderDateForConfirmation(orderData?.createdAt)} IST):
+            I hereby confirm (Date: {confirmationDateTime} IST):
           </Text>
         </View>
         <Text style={tw(`text-[8px] mt-1 leading-5 ml-2`)}>a) I have read, understood, and accepted all terms & conditions provided on https://www.meradhan.co</Text>

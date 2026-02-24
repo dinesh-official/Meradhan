@@ -22,6 +22,23 @@ interface SettleOrdersTableProps {
   onRowClick?: (order: ExtendedSettleOrderData) => void;
 }
 
+const settleStatusLabel = (status: number) => {
+  const map: Record<number, string> = {
+    0: "Settlement Pending",
+    1: "Securities Payin Done",
+    2: "Funds Payin Done",
+    3: "Payin Completed",
+    4: "Payout Done Successfully",
+    5: "Payin Reversed",
+    6: "Settle Order Expired",
+    7: "Order Not Settleable",
+    8: "Settlement Cancelled",
+    9: "Document Not Received for Unregistered Participant",
+  };
+  return status != null && map[Number(status)] ? map[Number(status)] : "N.A";
+};
+
+
 function SettleOrdersTable({
   data = [],
   isLoading = false,
@@ -86,7 +103,7 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return (
-                <span className="font-mono text-sm">{row.price || "--"}</span>
+                <span className="font-mono text-sm">{Number(row.price).toFixed(4) || "--"}</span>
               );
             },
           },
@@ -95,6 +112,7 @@ function SettleOrdersTable({
             label: "Yield Type",
             cell(row) {
               return <SettlementYieldTypeBadge type={row.yieldType} />;
+              // return <span className="font-mono text-sm">{row.yieldType || "--"}</span>;
             },
           },
           {
@@ -102,17 +120,17 @@ function SettleOrdersTable({
             label: "Yield (%)",
             sortable: true,
             cell(row) {
-              return <span className="font-mono text-sm">{row.yield}%</span>;
+              return <span className="font-mono text-sm">{Number(row.yield).toFixed(4)}%</span>;
             },
           },
           {
             key: "value",
-            label: "Value (₹)",
+            label: "Value",
             sortable: true,
             cell(row) {
               return (
                 <span className="font-mono text-sm">
-                  {formatNumberTS(row.value)}
+                  ₹ {formatNumberTS(row.value)}
                 </span>
               );
             },
@@ -160,7 +178,7 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <span className="font-mono text-sm">
-                  ₹{row.modAccrInt?.toLocaleString() || "0"}
+                  ₹ {formatNumberTS(row.modAccrInt || 0)}
                 </span>
               );
             },
@@ -173,7 +191,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.modConsideration
-                    ? `₹${formatNumberTS(row.modConsideration)}`
+                    ? `₹ ${formatNumberTS(row.modConsideration)}`
                     : "--"}
                 </span>
               );
@@ -252,7 +270,7 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <span className="font-mono text-sm">
-                  ₹{row.stampDutyAmount?.toLocaleString() || "0"}
+                  ₹ {(row.stampDutyAmount || 0)}
                 </span>
               );
             },
@@ -274,7 +292,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.buyerFundPayinObligation
-                    ? `₹${formatNumberTS(row.buyerFundPayinObligation)}`
+                    ? `₹ ${formatNumberTS(row.buyerFundPayinObligation)}`
                     : "--"}
                 </span>
               );
@@ -288,7 +306,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.sellerFundPayoutObligation
-                    ? `₹${formatNumberTS(row.sellerFundPayoutObligation)}`
+                    ? `₹ ${formatNumberTS(row.sellerFundPayoutObligation)}`
                     : "--"}
                 </span>
               );
@@ -345,7 +363,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.fundsPayinAmount
-                    ? `₹${row.fundsPayinAmount.toLocaleString()}`
+                    ? `₹ ${row.fundsPayinAmount.toLocaleString()}`
                     : "--"}
                 </span>
               );

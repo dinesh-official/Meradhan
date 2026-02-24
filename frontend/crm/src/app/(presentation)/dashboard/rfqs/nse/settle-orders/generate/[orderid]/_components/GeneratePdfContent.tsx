@@ -73,6 +73,15 @@ function formatDealDateForEmail(value?: string | null): string {
   return `${String(d.getDate()).padStart(2, "0")}-${months[d.getMonth()]}-${d.getFullYear()}`;
 }
 
+function formatDateWithDayNameFromPicker(value?: string): string {
+  if (!value) return "";
+  const d = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return `${String(d.getDate()).padStart(2, "0")}-${months[d.getMonth()]}-${d.getFullYear()} (${dayNames[d.getDay()]})`;
+}
+
 function InfoRow({
   label,
   value,
@@ -122,6 +131,8 @@ function GeneratePdfContent() {
   const [emailBody, setEmailBody] = useState("");
   const [pdfAccruedInterestDays, setPdfAccruedInterestDays] = useState("");
   const [pdfSettlementNumber, setPdfSettlementNumber] = useState("");
+  const [pdfSettlementDateTime, setPdfSettlementDateTime] = useState("");
+  const [pdfLastInterestPaymentDateRaw, setPdfLastInterestPaymentDateRaw] = useState("");
   const [pdfLastInterestPaymentDate, setPdfLastInterestPaymentDate] = useState("");
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
 
@@ -250,6 +261,8 @@ MeraDhan Team`
   const buildPdfOptionPayload = (accruedInterestDaysNum: number) => {
     const settlementNumberVal =
       pdfSettlementNumber.trim() !== "" ? pdfSettlementNumber.trim() : undefined;
+    const settlementDateTimeVal =
+      pdfSettlementDateTime.trim() !== "" ? pdfSettlementDateTime.trim() : undefined;
     const lastInterestVal =
       pdfLastInterestPaymentDate.trim() !== ""
         ? pdfLastInterestPaymentDate.trim()
@@ -257,6 +270,7 @@ MeraDhan Team`
     return {
       accruedInterestDays: accruedInterestDaysNum,
       ...(settlementNumberVal && { settlementNumber: settlementNumberVal }),
+      ...(settlementDateTimeVal && { settlementDateTime: settlementDateTimeVal }),
       ...(lastInterestVal && { lastInterestPaymentDate: lastInterestVal }),
     };
   };
@@ -456,15 +470,34 @@ MeraDhan Team`
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pdf-last-interest-date">Last payment date (enter full text as in PDF)</Label>
+                <Label htmlFor="pdf-last-interest-date">Last payment date</Label>
                 <Input
                   id="pdf-last-interest-date"
-                  type="text"
-                  placeholder="e.g. 02-Mar-2001 (Sunday)"
-                  value={pdfLastInterestPaymentDate}
-                  onChange={(e) => setPdfLastInterestPaymentDate(e.target.value)}
+                  type="date"
+                  value={pdfLastInterestPaymentDateRaw}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setPdfLastInterestPaymentDateRaw(raw);
+                    setPdfLastInterestPaymentDate(formatDateWithDayNameFromPicker(raw));
+                  }}
                 />
-                <p className="text-xs text-muted-foreground">Enter exactly as it should appear: DD-MMM-YYYY (DayName)</p>
+                {pdfLastInterestPaymentDate ? (
+                  <p className="text-xs text-muted-foreground">
+                    {pdfLastInterestPaymentDate}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pdf-settlement-datetime">Settlement Date & Time</Label>
+                <Input
+                  id="pdf-settlement-datetime"
+                  type="text"
+                  placeholder="e.g. 23-Feb-2026 17:30:00"
+                  value={pdfSettlementDateTime}
+                  onChange={(e) => setPdfSettlementDateTime(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">Shown on confirmation line in PDF page 2.</p>
+                <p className="text-xs text-muted-foreground">Example: 23-Feb-2026 17:30:00</p>
               </div>
             </div>
           </Section>

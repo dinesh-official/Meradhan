@@ -253,9 +253,9 @@ export class CrmOrdersController {
 
 
       const accessType: Record<string, string> = {
-        "1": "One to Many (OTM) on RFQ Platform of the Exchange",
-        "2": "One to One (OTO) on RFQ Platform of the Exchange",
-        "3": "Inter Scheme Transfer (IST) on RFQ Platform of the Exchange",
+        "1": `One to Many (OTM) on RFQ Platform of the Exchange`,
+        "2": `One to One (OTO) on RFQ Platform of the Exchange`,
+        "3": `Inter Scheme Transfer (IST) on RFQ Platform of the Exchange`,
       };
       const accessKey = rfqDetails?.access != null ? String(rfqDetails.access) : undefined;
       const accessTypeText = accessKey ? accessType[accessKey] : undefined;
@@ -277,21 +277,37 @@ export class CrmOrdersController {
       const settlementNumberParam = typeof pdfQuery.settlementNumber === "string" && pdfQuery.settlementNumber.trim() !== ""
         ? pdfQuery.settlementNumber.trim()
         : undefined;
+      const settlementDateTimeParam = typeof pdfQuery.settlementDateTime === "string" && pdfQuery.settlementDateTime.trim() !== ""
+        ? pdfQuery.settlementDateTime.trim()
+        : undefined;
       const lastInterestPaymentDateParam = typeof pdfQuery.lastInterestPaymentDate === "string" && pdfQuery.lastInterestPaymentDate.trim() !== ""
         ? pdfQuery.lastInterestPaymentDate.trim()
         : undefined;
 
       const buffer = await generateOrderPdfBuffer({
         user,
+
         orderId: order.orderNumber,
         bond,
-        qun: order.quantity,
-        isReleased: false,
+        qun:
+          settleOrder?.modQuantity != null
+            ? Number(settleOrder.modQuantity)
+            : order.quantity,
+        isReleased: true,
         orderData: {
           createdAt: orderDateForPdf,
-          subTotal: Number(order.totalAmount),
-          stampDuty: Number(order.stampDuty),
-          totalAmount: Number(order.totalAmount),
+          subTotal:
+            settleOrder?.value != null
+              ? Number(settleOrder.value)
+              : Number(order.totalAmount),
+          stampDuty:
+            settleOrder?.stampDutyAmount != null
+              ? Number(settleOrder.stampDutyAmount)
+              : Number(order.stampDuty),
+          totalAmount:
+            settleOrder?.modConsideration != null
+              ? Number(settleOrder.modConsideration)
+              : Number(order.totalAmount),
           price: Number(settleOrder?.price ?? 0),
           metadata: {
             dealId: (metadata.dealId as string) ?? undefined,
@@ -307,6 +323,7 @@ export class CrmOrdersController {
             accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
             accruedInterestDays: accruedInterestDaysParam,
             settlementNumber: settlementNumberParam ?? (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
+            settlementDateTime: settlementDateTimeParam,
             lastInterestPaymentDate: lastInterestPaymentDateParam,
             settlementBank: settleOrder
               ? {
@@ -320,6 +337,47 @@ export class CrmOrdersController {
                 dpName: dpName ?? undefined,
                 dpId: settleOrder.dpId ?? undefined,
                 benId: settleOrder.benId ?? undefined,
+              }
+              : undefined,
+            settleOrder: settleOrder
+              ? {
+                id: settleOrder.id,
+                orderNumber: settleOrder.orderNumber,
+                symbol: settleOrder.symbol,
+                buySell: negotation?.buySell,
+                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
+                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
+                buyerRefNo: settleOrder.buyerRefNo,
+                sellerRefNo: settleOrder.sellerRefNo,
+                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
+                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
+                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
+                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
+                source: settleOrder.source,
+                modSettleDate: settleOrder.modSettleDate,
+                modQuantity: settleOrder.modQuantity,
+                modAccrInt: settleOrder.modAccrInt,
+                modConsideration: settleOrder.modConsideration,
+                settlementNo: settleOrder.settlementNo,
+                stampDutyAmount: settleOrder.stampDutyAmount,
+                stampDutyBearer: settleOrder.stampDutyBearer,
+                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
+                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
+                fundPayinRefId: settleOrder.fundPayinRefId,
+                settleStatus: settleOrder.settleStatus,
+                secPayinQuantity: settleOrder.secPayinQuantity,
+                secPayinRemarks: settleOrder.secPayinRemarks,
+                secPayinTime: settleOrder.secPayinTime,
+                fundsPayinAmount: settleOrder.fundsPayinAmount,
+                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
+                fundsPayinTime: settleOrder.fundsPayinTime,
+                payoutRemarks: settleOrder.payoutRemarks,
+                payoutTime: settleOrder.payoutTime,
+                ifscCode: settleOrder.ifscCode,
+                accountNo: settleOrder.accountNo,
+                utrNumber: settleOrder.utrNumber,
+                dpId: settleOrder.dpId,
+                benId: settleOrder.benId,
               }
               : undefined,
           },
@@ -412,7 +470,7 @@ export class CrmOrdersController {
         paymentDayOfMonth: 20,
         nextCouponDate:
           bond.nextCouponDate != null &&
-          String(bond.nextCouponDate).trim() !== ""
+            String(bond.nextCouponDate).trim() !== ""
             ? new Date(bond.nextCouponDate)
             : undefined,
       });
@@ -424,12 +482,17 @@ export class CrmOrdersController {
           : undefined;
       const settlementNumberParam =
         typeof pdfQuery.settlementNumber === "string" &&
-        pdfQuery.settlementNumber.trim() !== ""
+          pdfQuery.settlementNumber.trim() !== ""
           ? pdfQuery.settlementNumber.trim()
+          : undefined;
+      const settlementDateTimeParam =
+        typeof pdfQuery.settlementDateTime === "string" &&
+          pdfQuery.settlementDateTime.trim() !== ""
+          ? pdfQuery.settlementDateTime.trim()
           : undefined;
       const lastInterestPaymentDateParam =
         typeof pdfQuery.lastInterestPaymentDate === "string" &&
-        pdfQuery.lastInterestPaymentDate.trim() !== ""
+          pdfQuery.lastInterestPaymentDate.trim() !== ""
           ? pdfQuery.lastInterestPaymentDate.trim()
           : undefined;
 
@@ -437,13 +500,25 @@ export class CrmOrdersController {
         user,
         orderId: order.orderNumber,
         bond,
-        qun: order.quantity,
+        qun:
+          settleOrder?.modQuantity != null
+            ? Number(settleOrder.modQuantity)
+            : order.quantity,
         isReleased: false,
         orderData: {
           createdAt: orderDateForPdf,
-          subTotal: Number(order.totalAmount),
-          stampDuty: Number(order.stampDuty),
-          totalAmount: Number(order.totalAmount),
+          subTotal:
+            settleOrder?.value != null
+              ? Number(settleOrder.value)
+              : Number(order.totalAmount),
+          stampDuty:
+            settleOrder?.stampDutyAmount != null
+              ? Number(settleOrder.stampDutyAmount)
+              : Number(order.stampDuty),
+          totalAmount:
+            settleOrder?.modConsideration != null
+              ? Number(settleOrder.modConsideration)
+              : Number(order.totalAmount),
           price: Number(settleOrder?.price ?? 0),
           metadata: {
             dealId: (metadata.dealId as string) ?? undefined,
@@ -471,20 +546,62 @@ export class CrmOrdersController {
               settlementNumberParam ??
               (settleOrder as { settlementNo?: string } | undefined)
                 ?.settlementNo,
+            settlementDateTime: settlementDateTimeParam,
             lastInterestPaymentDate: lastInterestPaymentDateParam,
             settlementBank: settleOrder
               ? {
-                  bankName: bankName ?? undefined,
-                  ifscCode: settleOrder.ifscCode ?? undefined,
-                  accountNo: settleOrder.accountNo ?? undefined,
-                }
+                bankName: bankName ?? undefined,
+                ifscCode: settleOrder.ifscCode ?? undefined,
+                accountNo: settleOrder.accountNo ?? undefined,
+              }
               : undefined,
             settlementDemat: settleOrder
               ? {
-                  dpName: dpName ?? undefined,
-                  dpId: settleOrder.dpId ?? undefined,
-                  benId: settleOrder.benId ?? undefined,
-                }
+                dpName: dpName ?? undefined,
+                dpId: settleOrder.dpId ?? undefined,
+                benId: settleOrder.benId ?? undefined,
+              }
+              : undefined,
+            settleOrder: settleOrder
+              ? {
+                id: settleOrder.id,
+                orderNumber: settleOrder.orderNumber,
+                symbol: settleOrder.symbol,
+                buySell: negotation?.buySell,
+                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
+                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
+                buyerRefNo: settleOrder.buyerRefNo,
+                sellerRefNo: settleOrder.sellerRefNo,
+                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
+                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
+                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
+                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
+                source: settleOrder.source,
+                modSettleDate: settleOrder.modSettleDate,
+                modQuantity: settleOrder.modQuantity,
+                modAccrInt: settleOrder.modAccrInt,
+                modConsideration: settleOrder.modConsideration,
+                settlementNo: settleOrder.settlementNo,
+                stampDutyAmount: settleOrder.stampDutyAmount,
+                stampDutyBearer: settleOrder.stampDutyBearer,
+                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
+                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
+                fundPayinRefId: settleOrder.fundPayinRefId,
+                settleStatus: settleOrder.settleStatus,
+                secPayinQuantity: settleOrder.secPayinQuantity,
+                secPayinRemarks: settleOrder.secPayinRemarks,
+                secPayinTime: settleOrder.secPayinTime,
+                fundsPayinAmount: settleOrder.fundsPayinAmount,
+                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
+                fundsPayinTime: settleOrder.fundsPayinTime,
+                payoutRemarks: settleOrder.payoutRemarks,
+                payoutTime: settleOrder.payoutTime,
+                ifscCode: settleOrder.ifscCode,
+                accountNo: settleOrder.accountNo,
+                utrNumber: settleOrder.utrNumber,
+                dpId: settleOrder.dpId,
+                benId: settleOrder.benId,
+              }
               : undefined,
           },
         },
@@ -521,6 +638,7 @@ export class CrmOrdersController {
       toEmail?: string;
       accruedInterestDays?: number | string;
       settlementNumber?: string;
+      settlementDateTime?: string;
       lastInterestPaymentDate?: string;
     };
 
@@ -616,7 +734,7 @@ export class CrmOrdersController {
         paymentDayOfMonth: 20,
         nextCouponDate:
           bond.nextCouponDate != null &&
-          String(bond.nextCouponDate).trim() !== ""
+            String(bond.nextCouponDate).trim() !== ""
             ? new Date(bond.nextCouponDate)
             : undefined,
       });
@@ -637,12 +755,17 @@ export class CrmOrdersController {
       }
       const settlementNumberParam =
         typeof body.settlementNumber === "string" &&
-        body.settlementNumber.trim() !== ""
+          body.settlementNumber.trim() !== ""
           ? body.settlementNumber.trim()
+          : undefined;
+      const settlementDateTimeParam =
+        typeof body.settlementDateTime === "string" &&
+          body.settlementDateTime.trim() !== ""
+          ? body.settlementDateTime.trim()
           : undefined;
       const lastInterestPaymentDateParam =
         typeof body.lastInterestPaymentDate === "string" &&
-        body.lastInterestPaymentDate.trim() !== ""
+          body.lastInterestPaymentDate.trim() !== ""
           ? body.lastInterestPaymentDate.trim()
           : undefined;
 
@@ -650,13 +773,25 @@ export class CrmOrdersController {
         user,
         orderId: order.orderNumber,
         bond,
-        qun: order.quantity,
+        qun:
+          settleOrder?.modQuantity != null
+            ? Number(settleOrder.modQuantity)
+            : order.quantity,
         isReleased: false,
         orderData: {
           createdAt: orderDateForPdf,
-          subTotal: Number(order.totalAmount),
-          stampDuty: Number(order.stampDuty),
-          totalAmount: Number(order.totalAmount),
+          subTotal:
+            settleOrder?.value != null
+              ? Number(settleOrder.value)
+              : Number(order.totalAmount),
+          stampDuty:
+            settleOrder?.stampDutyAmount != null
+              ? Number(settleOrder.stampDutyAmount)
+              : Number(order.stampDuty),
+          totalAmount:
+            settleOrder?.modConsideration != null
+              ? Number(settleOrder.modConsideration)
+              : Number(order.totalAmount),
           price: Number(settleOrder?.price ?? 0),
           metadata: {
             dealId: (metadata.dealId as string) ?? undefined,
@@ -684,20 +819,62 @@ export class CrmOrdersController {
               settlementNumberParam ??
               (settleOrder as { settlementNo?: string } | undefined)
                 ?.settlementNo,
+            settlementDateTime: settlementDateTimeParam,
             lastInterestPaymentDate: lastInterestPaymentDateParam,
             settlementBank: settleOrder
               ? {
-                  bankName: bankName ?? undefined,
-                  ifscCode: settleOrder.ifscCode ?? undefined,
-                  accountNo: settleOrder.accountNo ?? undefined,
-                }
+                bankName: bankName ?? undefined,
+                ifscCode: settleOrder.ifscCode ?? undefined,
+                accountNo: settleOrder.accountNo ?? undefined,
+              }
               : undefined,
             settlementDemat: settleOrder
               ? {
-                  dpName: dpName ?? undefined,
-                  dpId: settleOrder.dpId ?? undefined,
-                  benId: settleOrder.benId ?? undefined,
-                }
+                dpName: dpName ?? undefined,
+                dpId: settleOrder.dpId ?? undefined,
+                benId: settleOrder.benId ?? undefined,
+              }
+              : undefined,
+            settleOrder: settleOrder
+              ? {
+                id: settleOrder.id,
+                orderNumber: settleOrder.orderNumber,
+                symbol: settleOrder.symbol,
+                buySell: negotation?.buySell,
+                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
+                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
+                buyerRefNo: settleOrder.buyerRefNo,
+                sellerRefNo: settleOrder.sellerRefNo,
+                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
+                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
+                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
+                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
+                source: settleOrder.source,
+                modSettleDate: settleOrder.modSettleDate,
+                modQuantity: settleOrder.modQuantity,
+                modAccrInt: settleOrder.modAccrInt,
+                modConsideration: settleOrder.modConsideration,
+                settlementNo: settleOrder.settlementNo,
+                stampDutyAmount: settleOrder.stampDutyAmount,
+                stampDutyBearer: settleOrder.stampDutyBearer,
+                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
+                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
+                fundPayinRefId: settleOrder.fundPayinRefId,
+                settleStatus: settleOrder.settleStatus,
+                secPayinQuantity: settleOrder.secPayinQuantity,
+                secPayinRemarks: settleOrder.secPayinRemarks,
+                secPayinTime: settleOrder.secPayinTime,
+                fundsPayinAmount: settleOrder.fundsPayinAmount,
+                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
+                fundsPayinTime: settleOrder.fundsPayinTime,
+                payoutRemarks: settleOrder.payoutRemarks,
+                payoutTime: settleOrder.payoutTime,
+                ifscCode: settleOrder.ifscCode,
+                accountNo: settleOrder.accountNo,
+                utrNumber: settleOrder.utrNumber,
+                dpId: settleOrder.dpId,
+                benId: settleOrder.benId,
+              }
               : undefined,
           },
         },
