@@ -33,7 +33,8 @@ model Order {
     orderLogs     OrderLogs[]
 
     // General Metadata
-    metadata Json?
+    metadata       Json?
+    reqOrderNumber String?
 
     // Timestamps
     createdAt DateTime @default(now())

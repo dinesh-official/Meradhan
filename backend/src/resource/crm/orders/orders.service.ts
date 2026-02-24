@@ -1,6 +1,7 @@
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";
-import { OrderStatus } from "@databases/generated/prisma/postgres";
+import { OrderStatus, PaymentStatus } from "@databases/generated/prisma/postgres";
+import { generateOrderId, generateDealId } from "@resource/customer/order/order.utils";
 
 export class CrmOrdersService {
   async getAllOrders(
@@ -175,4 +176,145 @@ export class CrmOrdersService {
 
     return updatedOrder;
   }
+
+
+  async getRfqByOrderNumber(orderNumber: string) {
+    const rfq = await db.dataBase.settleOrderModel.findFirst({
+      where: {
+        orderNumber: {
+          equals: orderNumber,
+        },
+      },
+    });
+    return rfq;
+  }
+
+  async getCustomerByOrderNumber(orderNumber: string) {
+    const order = await db.dataBase.order.findFirst({
+      where: {
+        reqOrderNumber: {
+          equals: orderNumber,
+        },
+      },
+      include: {
+        customerProfile: {
+          include: {
+            bankAccounts: true,
+            dematAccounts: true,
+            panCard: true,
+            aadhaarCard: true,
+          }
+        }
+      }
+    });
+    return order;
+  }
+
+
+  async createOrderFromRfq(orderNumber: string, customerId: number) {
+    const existingOrder = await this.getCustomerByOrderNumber(orderNumber);
+    if (existingOrder) {
+      throw new Error(`Customer already exists for order number ${orderNumber}`);
+    }
+
+    const customerProfile = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId },
+      select: { kycStatus: true },
+    });
+    if (!customerProfile) {
+      throw new Error("Customer not found");
+    }
+    if (customerProfile.kycStatus !== "VERIFIED") {
+      throw new Error("Only customers with verified KYC can be assigned to an order");
+    }
+
+    const rfq = await this.getRfqByOrderNumber(orderNumber);
+
+    if (!rfq) {
+      throw new Error(`Rfq not found for order number ${orderNumber}`);
+    }
+
+
+
+    const bondDetails = await db.dataBase.bonds.findFirst({
+      where: {
+        isin: rfq.symbol,
+      },
+    });
+
+    if (!bondDetails) {
+      throw new Error(`Bond details not found for symbol ${rfq.symbol}`);
+    }
+
+    const negotation = await db.dataBase.rFQNegotiation.findFirst({
+      where: {
+        tradeNumber: rfq.orderNumber,
+      },
+    });
+
+
+    if (!negotation) {
+      throw new Error(`Negotiation not found for order number ${rfq.orderNumber}`);
+    }
+
+    const lastOrder = await db.dataBase.order.findFirst({
+      orderBy: { createdAt: "desc" },
+    });
+
+
+
+    const order = await db.dataBase.order.create({
+      data: {
+        bondDetails: bondDetails,
+        faceValue: bondDetails.faceValue,
+        quantity: Number(rfq.modQuantity) || 0,
+        unitPrice: rfq.price.toNumber(),
+        isin: bondDetails.isin,
+        bondName: bondDetails.bondName,
+        orderNumber: generateOrderId({
+          // action: ,
+          uniquePart: "0" + lastOrder?.id?.toString(),
+        }),
+        stampDuty: negotation.acceptedAccruedInterest || 0,
+        subTotal: negotation.acceptedConsideration || 0,
+        totalAmount: negotation.acceptedConsideration || 0,
+        customerProfileId: customerId,
+        paymentId: rfq.orderNumber,
+        paymentOrderId: rfq.orderNumber,
+        reqOrderNumber: rfq.orderNumber,
+        metadata: { rfqNumber: rfq.orderNumber },
+        paymentStatus: PaymentStatus.PENDING,
+        paymentProvider: "CUSTOM",
+        status: OrderStatus.SETTLED,
+        customerBonds: {
+          create: {
+            customerProfileId: customerId,
+            isin: bondDetails.isin,
+            bondName: bondDetails.bondName,
+            faceValue: bondDetails.faceValue,
+            quantity: Number(rfq.modQuantity) || 0,
+            purchasePrice: rfq.price.toNumber(),
+          },
+        }
+      }
+    });
+    const dealId = generateDealId(
+      new Date(),
+      "BUY",
+      order.id,
+      bondDetails.bondName ?? ""
+    );
+    await db.dataBase.order.update({
+      where: { id: order.id },
+      data: {
+        metadata: {
+          ...((order.metadata as Record<string, unknown>) ?? {}),
+          dealId,
+          rfqNumber: rfq.orderNumber,
+        },
+      },
+    });
+    return { ...order, metadata: { dealId, rfqNumber: rfq.orderNumber } };
+  }
+
 }

@@ -20,13 +20,13 @@ const styles = StyleSheet.create({
     borderColor: "#cccccc",
   },
   leftLabel: {
-    width: "25%",
+    width: "33%",
     paddingVertical: 2,
     paddingHorizontal: 5,
     fontSize: 9,
   },
   rightValue: {
-    width: "68%",
+    width: "70%",
     textAlign: "left",
     borderLeftWidth: 1,
     paddingLeft: 5,
@@ -61,7 +61,7 @@ interface OrderData {
   };
 }
 
-export default function OrdersPage({
+export default function DealPage({
   bond,
   user,
   orderId,
@@ -107,10 +107,10 @@ export default function OrdersPage({
   const settlementAmount = totalConsideration + stampDutyAmount;
 
   // Format amounts
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, fixed = 2) => {
     return `${amount.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: fixed,
+      maximumFractionDigits: fixed,
     })}`;
   };
 
@@ -128,9 +128,9 @@ export default function OrdersPage({
 
   const getInterestPaymentDatesDisplay = () => {
     if (orderData?.metadata?.interestPaymentDates?.length) {
-      return orderData.metadata.interestPaymentDates.join(", ");
+      return Array.from(new Set(orderData.metadata.interestPaymentDates)).join(", ");
     }
-    return interestSchedule.dates.join(", ");
+    return Array.from(new Set(interestSchedule.dates)).join(", ");
   };
 
 
@@ -149,8 +149,100 @@ export default function OrdersPage({
     ).padStart(2, "0")}`;
 
 
+  const topList = [
+    [`Buyer: ${fullname.toUpperCase()}`, "Seller: BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED"],
+    [
+      `NCL Code: ${user.userName}`,
+      "NCL Code: BCISLP"
+    ],
+    [
+      `Kind Attention: ${fullname.toUpperCase()}`,
+      "Kind Attention: BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED"
+    ],
+  ]
+
+
   const list = [
+    ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
+    [
+      `Order Type - One To One (OTO) / One To Many (OTM) on RFQ Platform of the Exchange`,
+      orderData?.metadata?.orderType ??
+      "N.A",
+    ],
     ["MeraDhan Order ID", orderId],
+    ["MeraDhan Deal ID", dealId],
+    ["ISIN", bond.isin],
+    ["Security Name", bond.bondName],
+    [
+      "Security Nature",
+      ("securityNature" in bond
+        ? (bond as { securityNature?: string }).securityNature
+        : null) || "Senior Secured",
+    ],
+    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
+    [
+      "Interest Payment Date",
+      `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
+${getInterestPaymentDatesDisplay()}`,
+    ],
+    [
+      "Allotment Date",
+      bond.dateOfAllotment
+        ? formatDate(bond.dateOfAllotment, "DD-MMM-YYYY")
+        : "N/A",
+    ],
+    [
+      "Put / Call Option",
+      ("putCallOption" in bond
+        ? (bond as { putCallOption?: string }).putCallOption
+        : null) || "N.A / N.A",
+    ],
+    [
+      "Maturity Date",
+      bond.maturityDate
+        ? formatDate(bond.maturityDate, "DD-MMM-YYYY") + " : 100.0000%"
+        : "N/A",
+    ],
+    [
+      "Last Interest Payment Date",
+      (() => {
+        const raw = orderData?.metadata?.lastInterestPaymentDate?.trim();
+        if (raw) return raw;
+        const d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
+      })(),
+    ],
+    ["Face Value", `INR ${formatCurrency(faceValue)}`],
+    [
+      "Quantum",
+      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${qun})`,
+      `Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
+    ],
+    [
+      "Date",
+      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
+      `Value Date: ${formatDate(valueDate.toISOString(), "DD-MMM-YYYY")}`,
+    ],
+    ["Principal Amount", `INR ${formatCurrency(settlementAmount)}`],
+    [
+      "Accrued / Ex Interest",
+      // if its lowe then 0 show days in (days)
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `${formatCurrency(accruedInterest)}`} (No. of Days: ${orderData?.metadata?.accruedInterestDays})`,
+    ],
+    ["Total Consideration", `INR ${formatCurrency(settlementAmount)}`],
+    [
+      "Stamp Duty (To be paid by Buyer)",
+      `INR ${formatCurrency(
+        stampDutyAmount
+      )} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
+    ],
+    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
+    [
+      "Settlement Amount (inclusive of Stamp Duty)",
+      `INR ${formatCurrency(settlementAmount)}
+(${numberToWords(settlementAmount)})`,
+    ],
     [
       "Order Date & Time",
       `${formatDate(orderDate.toISOString(), "DD-MMM-YYYY")} ${String(
@@ -168,87 +260,11 @@ export default function OrdersPage({
       orderId ||
       (releasedOrder ? "N/A" : "Pending"),
     ],
-    ["MeraDhan Deal ID", dealId],
+    // ["Exchange RFQ Initiation ID", dealId],
+    ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
     [
-      "Transaction Type",
-      `Your Buy (${fullname} : ${user?.panCard?.panCardNo || "N/A"})`,
-    ],
-    ["ISIN", bond.isin],
-    ["Security Name", bond.bondName],
-    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
-    ["Face Value", `INR ${formatCurrency(faceValue)}`],
-    [
-      "Quantum",
-      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${qun})`,
-      `Price: INR ${formatCurrency(orderData?.price || 0)}`,
-    ],
-    [
-      "Date",
-      `Deal Date: ${formatDate(dealDate.toISOString(), "DD Month YYYY")}`,
-      `Value Date: ${formatDate(valueDate.toISOString(), "DD Month YYYY")}`,
-    ],
-    ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
-    [
-      "Order Type",
-      orderData?.metadata?.orderType ??
-      "One To One (OTO) on RFQ Platform of the Exchange",
-    ],
-    [
-      "Interest Payment Dates",
-      `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel} ${getInterestPaymentDatesDisplay()}`,
-    ],
-    [
-      "Last Interest Payment Date",
-      (() => {
-        const raw = orderData?.metadata?.lastInterestPaymentDate?.trim();
-        if (raw) return raw;
-        const d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
-      })(),
-    ],
-    [
-      "Allotment Date",
-      bond.dateOfAllotment
-        ? formatDate(bond.dateOfAllotment, "DD Month YYYY")
-        : "N/A",
-    ],
-    [
-      "Maturity Date",
-      bond.maturityDate
-        ? formatDate(bond.maturityDate, "DD Month YYYY") + " : 100.0000%"
-        : "N/A",
-    ],
-    [
-      "Security Nature",
-      ("securityNature" in bond
-        ? (bond as { securityNature?: string }).securityNature
-        : null) || "Senior Secured",
-    ],
-    [
-      "Put / Call Option",
-      ("putCallOption" in bond
-        ? (bond as { putCallOption?: string }).putCallOption
-        : null) || "N.A / N.A",
-    ],
-    ["Principal Amount", `INR ${formatCurrency(settlementAmount)}`],
-    [
-      "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `${formatCurrency(accruedInterest)}`} (No. of Days: ${orderData?.metadata?.accruedInterestDays ??
-      Math.ceil((now.getTime() - (orderData?.metadata?.lastInterestPaymentDate ? new Date(orderData.metadata.lastInterestPaymentDate).getTime() : now.getTime() - 30 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000))
-      })`,
-    ],
-    ["Total Consideration", `INR ${formatCurrency(settlementAmount)}`],
-    [
-      "Stamp Duty (To be paid by Buyer)",
-      `INR ${formatCurrency(
-        stampDutyAmount
-      )} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
-    ],
-    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
-    [
-      "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(settlementAmount)} (${numberToWords(settlementAmount)})`,
+      "Settlement Date & Time",
+      formatDate(dealDate.toISOString(), "DD-MMM-YYYY") + " " + String(dealDate.getHours()).padStart(2, "0") + ":" + String(dealDate.getMinutes()).padStart(2, "0") + ":" + String(dealDate.getSeconds()).padStart(2, "0")
     ],
   ]
 
@@ -263,29 +279,43 @@ export default function OrdersPage({
         marginTop: 10,
       }}
     >
-      <View style={[styles.section, { paddingTop: 10, borderTopWidth: 1, borderTopColor: "#cccccc" }]}>
-        <Text style={{ fontSize: 9, fontWeight: "semibold" }}>
-          Date: {formatDate(orderDate.toISOString(), "DD/MM/YYYY")}
-        </Text>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={{ fontSize: 9 }}>To,</Text>
-        <Text style={{ fontSize: 9, fontWeight: "semibold" }}>
-          {fullname} (PAN: {user?.panCard?.panCardNo})
-        </Text>
-      </View>
+      {topList.map(([label, ...values], i) => (
+        <View style={[styles.row, i === topList.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "#cccccc" } : {}]} key={i}>
+          <Text style={[styles.leftLabel]}>{label}</Text>
+          <View style={[{ marginLeft: 5 }, styles.rightValue]}>
+            {Array.isArray(values) ? <View style={{ display: "flex", flexDirection: "row", gap: 2 }}>
+              {
+                values.map((value, index) => (
+                  <View key={index} style={{
+                    borderLeftWidth: index === 0 ? 0 : 1,
+                    borderLeftColor: "#cccccc",
+                    height: "100%",
+                    width: 350,
+                    paddingHorizontal: 5,
+                    paddingVertical: 2,
+                  }}  >
+                    <Text style={{ fontSize: 9 }} key={index}>
+                      {value}
+                    </Text>
+                  </View>
+                ))
+              }
+            </View> : <Text style={{ fontSize: 9, paddingVertical: 2, ...(values === topList.length ? { fontWeight: "semibold" } : {}) }}>
+              {values}
+            </Text>}
+          </View>
+        </View>
+      ))
+      }
 
-      <View style={styles.section}>
+
+      <View style={[styles.section, { marginTop: 10 }]}>
         <Text style={{ fontSize: 9 }}>Dear Sir / Madam,</Text>
         <Text style={{
           fontSize: 9,
         }} >
-          This {releasedOrder ? "" : "Draft"} Order Receipt has been
-          automatically generated based on your authorization to MeraDhan, a
-          platform by BondNest Capital India Securities Private Limited, to
-          place a non-negotiable order (One-to-One mode) on the RFQ platform of
-          the Stock Exchanges.
+          Please find below the transaction details:
         </Text>
       </View>
 
@@ -300,18 +330,18 @@ export default function OrdersPage({
                     borderLeftWidth: index === 0 ? 0 : 1,
                     borderLeftColor: "#cccccc",
                     height: "100%",
-                    width: 280,
+                    width: 350,
                     paddingHorizontal: 5,
                     paddingVertical: 2,
                   }}  >
-                    <Text style={{ fontSize: 9, ...(i === list.length - 1 ? { fontWeight: "semibold" } : {}) }} key={index}>
+                    <Text style={{ fontSize: 9, ...(label?.includes("Settlement Amount") ? { fontWeight: "semibold" } : {}) }} key={index}>
                       {value}
                     </Text>
                   </View>
                 ))
               }
 
-            </View> : <Text style={{ fontSize: 9, paddingVertical: 2, ...(i === list.length - 1 ? { fontWeight: "semibold" } : {}) }}>
+            </View> : <Text style={{ fontSize: 9, paddingVertical: 2, }}>
               {values}
             </Text>}
           </View>

@@ -3,8 +3,8 @@ import type {
   BondDetailsResponse,
   CustomerByIdPayload,
 } from "@root/apiGateway";
-import OrdersPage from "./Orders/OrdersPage";
-import OrdersPageTwo from "./Orders/OrdersPageTwo";
+import DealPage from "./Orders/DealPage";
+import DealPageTwo from "./Orders/DealPageTwo";
 import Footer from "./elements/Footer";
 import LogoSvg from "./images/LogoSvg";
 
@@ -31,7 +31,7 @@ interface OrderPdfOrderData {
   };
 }
 
-export function OrderPdf({
+export function DealPdf({
   bond,
   user,
   orderId,
@@ -111,7 +111,7 @@ export function OrderPdf({
     <Document >
       <Page size="A4" style={{ fontFamily: "Poppins" }}    >
         <LogoSvg showAll={false} />
-        <OrdersPage
+        <DealPage
           bond={bond}
           user={user}
           orderId={orderId}
@@ -123,7 +123,7 @@ export function OrderPdf({
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
         <LogoSvg showAll={false} />
-        <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
+        <DealPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
         <Footer />
       </Page>
     </Document>

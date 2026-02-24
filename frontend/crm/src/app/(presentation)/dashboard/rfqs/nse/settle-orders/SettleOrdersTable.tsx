@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
@@ -331,10 +332,8 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return row.secPayinTime
-                ? dateTimeUtils.formatDateTime(
-                  row.secPayinTime,
-                  "DD MMM YYYY HH:mm"
-                )
+                ?
+                row.secPayinTime
                 : "--";
             },
           },
