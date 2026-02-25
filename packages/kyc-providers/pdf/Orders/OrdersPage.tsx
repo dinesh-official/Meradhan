@@ -227,7 +227,7 @@ export default function OrdersPage({
       (releasedOrder ? "N/A" : "Pending"),
     ],
     ["ISIN", bond.isin],
-    ["Security Name", bond.bondName],
+    ["Security Name", bond.description],
     ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
     ["Face Value", `INR ${formatCurrency(faceValue)}`],
     [

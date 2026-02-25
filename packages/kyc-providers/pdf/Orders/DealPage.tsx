@@ -202,7 +202,7 @@ export default function DealPage({
     ["MeraDhan Order ID", orderId],
     ["MeraDhan Deal ID", dealId],
     ["ISIN", bond.isin],
-    ["Security Name", bond.bondName],
+    ["Security Name", bond.description],
     [
       "Security Nature",
       ("securityNature" in bond

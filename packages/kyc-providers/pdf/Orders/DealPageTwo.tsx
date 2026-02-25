@@ -87,27 +87,27 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
         These terms and conditions (“Terms”) form an essential part of the Deal Sheet issued by BondNest Capital India Securities Private Limited (“MeraDhan”) to the Buyer for the executed transaction(s) listed above:
       </Text>
       <View style={tw(`mt-1`)}>
-        <TextList className="text-[6.5px]" count="1.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="1.">
           BondNest Capital India Securities Private Limited (MeraDhan) has issued this Deal Sheet in its capacity as an Online Bond Platform Provider for the above transaction(s). We clearly state that we are not acting as your investment advisor, financial planner, or tax consultant.
         </TextList>
-        <TextList className="text-[6.5px]" count="2.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="2.">
           All transactions carried out on are governed by the terms and conditions available on the website{" "}
           <Text style={{ color: "#1D4ED8", textDecoration: "underline" }}>https://www.meradhan.co</Text>.
         </TextList>
-        <TextList className="text-[6.5px]" count="3.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="3.">
           The information in this Deal Sheet is confidential and meant only for the buyer and/or seller to whom it has been issued. It may not be disclosed to any third party without the prior written consent of MeraDhan.
         </TextList>
-        <TextList className="text-[6.5px]" count="4.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="4.">
           The buyer acknowledges the receipt of securities, and the seller acknowledges the receipt of funds as per the terms of transactions. If the buyer receives excess securities, or the seller receives excess funds, he/she shall arrange for the re-transfer of the surplus amount/securities to the respective source account of clearing corporation.
         </TextList>
-        <TextList className="text-[6.5px]" count="5.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="5.">
           MeraDhan shall make reasonable efforts to ensure the accuracy and completeness of the information provided on the Deal Sheet. However, MeraDhan shall not be liable for any inaccuracies or omissions in the information provided. In case of any queries/discrepancies, you may write to us on{" "}
           <Text style={{ color: "#1D4ED8", textDecoration: "underline" }}>backoffice@meradhan.co</Text>.
         </TextList>
-        <TextList className="text-[6.5px]" count="6.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="6.">
           The parties irrevocably and unconditionally acknowledge and agree that they have agreed to the terms of deal/transaction (price, yield etc.) at their own will and choice without influence from MeraDhan/counterparty and are liable for risks arising from the same.
         </TextList>
-        <TextList className="text-[6.5px]" count="7.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="7.">
           The Securities/ISIN as quoted in the Deal Sheet, if is in Shut Period accordingly Deal Sheet will be Issued on Ex-Interest Basis. In that case due to change in record date if Issuer, for any reason pays Interest amount Directly to Buyer on the IP Date, Buyer Shall Refund Entire Gross Interest Amount to Seller.
         </TextList>
       </View>

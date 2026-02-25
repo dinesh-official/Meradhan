@@ -132,20 +132,20 @@ Client ID: ${demat?.clientId}`}</Text>
         These terms and conditions (“Terms”) form an essential part of the Order Receipt issued by BondNest Capital India Securities Private Limited (“MeraDhan”) to the Buyer for the {releasedOrder ? "" : "proposed"} transaction(s) listed above:
       </Text>
       <View style={tw(`mt-1`)}>
-        <TextList className="text-[6.5px]" count="1.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="1.">
           MeraDhan has issued this Order Receipt as an Online Bond Platform Provider for the above transaction(s). We clearly state that we are not acting as your investment advisor, financial planner, or tax consultant.
         </TextList>
-        <TextList className="text-[6.5px]" count="2.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="2.">
           All transactions carried out on are governed by the terms and conditions available on the website{" "}
           <Text style={{ color: "#1D4ED8", textDecoration: "underline" }}>https://www.meradhan.co</Text>.
         </TextList>
-        <TextList className="text-[6.5px]" count="3.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="3.">
           The information in this Order Receipt is confidential and meant only for the buyer and/or seller to whom it has been issued.
         </TextList>
-        <TextList className="text-[6.5px]" count="4.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="4.">
           This Order Receipt is not a deal confirmation. The deal will be settled only when the Clearing Corporation receives funds and securities within the required timelines on the settlement day. MeraDhan shall not be responsible for cancellation or non-settlement of any deal for any reason.
         </TextList>
-        <TextList className="text-[6.5px]" count="5.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="5.">
           Please refer to the regulatory guidelines on deal cancellations:
         </TextList>
         <View style={tw(`ml-6 mb-1 flex flex-col gap-1`)}>
@@ -168,16 +168,16 @@ Client ID: ${demat?.clientId}`}</Text>
             </Link>
           </Text>
         </View>
-        <TextList className="text-[6.5px]" count="6.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="6.">
           Deal cancellation and refund of funds/securities will follow SEBI guidelines, Stock Exchange policies, Clearing Corporation rules, and payment-gateway procedures. If the deal does not get settled for any reason after funds are transferred, the Buyer will receive a refund directly from the Clearing Corporation.
         </TextList>
-        <TextList className="text-[6.5px]" count="7.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="7.">
           The Buyer agrees—irrevocably and unconditionally—to transfer funds to the Clearing Corporation’s designated bank account before the cut-off time on the settlement day.
         </TextList>
-        <TextList className="text-[6.5px]" count="8.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="8.">
           MeraDhan is not responsible for any errors or missing information. For any queries or discrepancies, please write to: <Text style={tw(`text-[6.5px] underline text-[#1D4ED8]`)}>support@meradhan.co</Text>
         </TextList>
-        <TextList className="text-[6.5px]" count="9.">
+        <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="9.">
           The Buyer confirms—irrevocably and unconditionally—that he/she has accepted the terms of the transaction (price, yield, etc.) by their own choice, without any influence from MeraDhan or the counter-party, and understands the risks involved.
         </TextList>
       </View>

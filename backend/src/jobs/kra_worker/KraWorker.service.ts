@@ -484,7 +484,7 @@ export class KraProcess {
         APP_COR_CTRY: p.APP_COR_CTRY,
         APP_COR_PINCD: p.APP_COR_PINCD,
         APP_COR_STATE: p.APP_COR_STATE,
-        APP_DATE: formatDateTime10SecLate(new Date()),
+        APP_DATE: formatDateTime15SecPrev(new Date()),
         APP_DOB_DT: p.APP_DOB_DT + " 00:00:00",
         APP_DOC_PROOF: p.APP_DOC_PROOF,
         APP_EMAIL: p.APP_EMAIL,
@@ -780,43 +780,39 @@ export const formatDate = (date: Date) => {
 };
 
 export function formatDateTime(date: Date): string {
-  // Convert to UTC first
-  const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+  const istDate = new Date(
+    date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
 
-  // Add IST offset (5 hours 30 minutes)
-  const istTime = new Date(utcTime + 5.5 * 60 * 60 * 1000);
+  const dd = String(istDate.getDate()).padStart(2, "0");
+  const mm = String(istDate.getMonth() + 1).padStart(2, "0");
+  const yyyy = istDate.getFullYear();
 
-  const dd = String(istTime.getDate()).padStart(2, "0");
-  const mm = String(istTime.getMonth() + 1).padStart(2, "0");
-  const yyyy = istTime.getFullYear();
-
-  const HH = String(istTime.getHours()).padStart(2, "0");
-  const MM = String(istTime.getMinutes()).padStart(2, "0");
-  const SS = String(istTime.getSeconds()).padStart(2, "0");
+  const HH = String(istDate.getHours()).padStart(2, "0");
+  const MM = String(istDate.getMinutes()).padStart(2, "0");
+  const SS = String(istDate.getSeconds()).padStart(2, "0");
 
   return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
 }
 
-
-export function formatDateTime10SecLate(date: Date): string {
-
-  if (env.KRA_ENV == "PROD") {
+export function formatDateTime15SecPrev(date: Date): string {
+  if (env.KRA_ENV === "PROD") {
     return formatDateTime(date);
   }
+  console.log("prev date before 15 seconds", date);
 
-  // Convert to UTC first
-  const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+  const istDate = new Date(
+    date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
 
-  // Add IST offset (5 hours 30 minutes + 10 seconds)
-  const istTime = new Date(utcTime + 5.5 * 60 * 60 * 1000 + 10 * 1000);
+  istDate.setSeconds(istDate.getSeconds() - 15);
 
-  const dd = String(istTime.getDate()).padStart(2, "0");
-  const mm = String(istTime.getMonth() + 1).padStart(2, "0");
-  const yyyy = istTime.getFullYear();
-
-  const HH = String(istTime.getHours()).padStart(2, "0");
-  const MM = String(istTime.getMinutes()).padStart(2, "0");
-  const SS = String(istTime.getSeconds()).padStart(2, "0");
+  const dd = String(istDate.getDate()).padStart(2, "0");
+  const mm = String(istDate.getMonth() + 1).padStart(2, "0");
+  const yyyy = istDate.getFullYear();
+  const HH = String(istDate.getHours()).padStart(2, "0");
+  const MM = String(istDate.getMinutes()).padStart(2, "0");
+  const SS = String(istDate.getSeconds()).padStart(2, "0");
 
   return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
 }
