@@ -96,11 +96,7 @@ export default function OrdersPage({
   const dealDate = orderData?.metadata?.settlementDate
     ? new Date(orderData.metadata.settlementDate)
     : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
-  const valueDate = orderData?.metadata?.valueDate
-    ? new Date(orderData.metadata.valueDate)
-    : bond.maturityDate
-      ? new Date(bond.maturityDate)
-      : new Date(dealDate.getTime() + 24 * 60 * 60 * 1000); // Fallback: day after deal date
+
 
   // Calculate financials
   const faceValue = Number(bond.faceValue) || 1000;
@@ -126,7 +122,6 @@ export default function OrdersPage({
       orderData?.totalAmount ??
       principalAmount + accruedInterest
     );
-  const settlementAmount = totalConsideration + stampDutyAmount;
 
 
 
@@ -138,19 +133,45 @@ export default function OrdersPage({
     })}`;
   };
 
+  // Payment day from Last Interest Payment Date (e.g. "16-Feb-2026 (Monday)" → 16)
+  const lastInterestRaw = orderData?.metadata?.lastInterestPaymentDate?.trim();
+  let paymentDayOfMonth = 20;
+  if (lastInterestRaw) {
+    const withoutDayName = lastInterestRaw.replace(/\s*\([^)]*\)\s*$/, "").trim();
+    const match = withoutDayName.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+    if (match) {
+      const [, dayStr, monthStr, yearStr] = match;
+      const shortMonths: Record<string, number> = {
+        Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+        Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+      };
+      const m = shortMonths[monthStr ?? ""];
+      if (m !== undefined) {
+        const d = new Date(parseInt(yearStr ?? "0", 10), m, parseInt(dayStr ?? "1", 10));
+        if (!isNaN(d.getTime())) paymentDayOfMonth = d.getDate();
+      }
+    } else {
+      const d = new Date(withoutDayName);
+      if (!isNaN(d.getTime())) paymentDayOfMonth = d.getDate();
+    }
+  }
+
   // Interest payment schedule from order date to maturity based on bond frequency
   const interestSchedule = getInterestPaymentSchedule({
     orderDate,
     maturityDate: bond.maturityDate ?? null,
     interestPaymentFrequency: bond.interestPaymentFrequency,
-    paymentDayOfMonth: 20,
-    nextCouponDate:
-      bond.nextCouponDate != null && String(bond.nextCouponDate).trim() !== ""
+    paymentDayOfMonth,
+    // When day came from Last Interest Payment Date, don't override with bond nextCouponDate
+    nextCouponDate: lastInterestRaw
+      ? undefined
+      : bond.nextCouponDate != null && String(bond.nextCouponDate).trim() !== ""
         ? new Date(bond.nextCouponDate)
         : undefined,
   });
 
   const getInterestPaymentDatesDisplay = () => {
+    // Prefer explicit Interest Payment Dates from CRM when provided; else use schedule (from Last Interest Payment Date day)
     if (orderData?.metadata?.interestPaymentDates?.length) {
       return Array.from(new Set(orderData.metadata.interestPaymentDates)).join(", ");
     }
@@ -209,7 +230,7 @@ export default function OrdersPage({
     [
       "Date",
       `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
-      `Value Date: ${formatDate(valueDate.toISOString(), "DD-MMM-YYYY")}`,
+      `Value Date: ${formatDate(new Date(orderData?.metadata?.settlementDate ?? dealDate.toISOString()).toISOString(), "DD-MMM-YYYY")}`,
     ],
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
     [
@@ -255,14 +276,12 @@ ${getInterestPaymentDatesDisplay()}`,
         ? (bond as { putCallOption?: string }).putCallOption
         : null) || "N.A / N.A",
     ],
-    ["Principal Amount", `INR ${formatCurrency(settlementAmount)}`],
+    ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} ` + `(No. of Days: (${orderData?.metadata?.accruedInterestDays ??
-      Math.ceil((now.getTime() - (orderData?.metadata?.lastInterestPaymentDate ? new Date(orderData.metadata.lastInterestPaymentDate).getTime() : now.getTime() - 30 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000))
-      }))`,
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${orderData?.metadata?.accruedInterestDays || "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: ${orderData?.metadata?.accruedInterestDays || "N/A"})`}`,
     ],
-    ["Total Consideration", `INR ${formatCurrency(settlementAmount + accruedInterest)}`],
+    ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
       `INR ${formatCurrency(
@@ -272,7 +291,7 @@ ${getInterestPaymentDatesDisplay()}`,
     ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
     [
       "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(settlementAmount + accruedInterest + stampDutyAmount)} (${numberToWords(settlementAmount + accruedInterest + stampDutyAmount)})`,
+      `INR ${formatCurrency(totalConsideration + stampDutyAmount)} (${numberToWords(totalConsideration + stampDutyAmount)})`,
     ],
 
   ]
@@ -297,7 +316,7 @@ ${getInterestPaymentDatesDisplay()}`,
       }}
     >
       <View style={[styles.section, { paddingTop: 10, borderTopWidth: 1, borderTopColor: "#cccccc" }]}>
-        <Text style={{ fontSize: 9, fontWeight: "semibold" }}>
+        <Text style={{ fontSize: 9 }}>
           Date: {formatDate(orderDate.toISOString(), "DD/MM/YYYY")}
         </Text>
       </View>

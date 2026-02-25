@@ -283,6 +283,13 @@ export class CrmOrdersController {
       const lastInterestPaymentDateParam = typeof pdfQuery.lastInterestPaymentDate === "string" && pdfQuery.lastInterestPaymentDate.trim() !== ""
         ? pdfQuery.lastInterestPaymentDate.trim()
         : undefined;
+      const interestPaymentDatesParam =
+        typeof pdfQuery.interestPaymentDates === "string" && pdfQuery.interestPaymentDates.trim() !== ""
+          ? pdfQuery.interestPaymentDates
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : undefined;
 
       const buffer = await generateOrderPdfBuffer({
         user,
@@ -313,7 +320,12 @@ export class CrmOrdersController {
             dealId: (metadata.dealId as string) ?? undefined,
             rfqNumber: (metadata.rfqNumber as string) ?? undefined,
             orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
-            interestPaymentDates: interestSchedule.dates.length > 0 ? interestSchedule.dates : undefined,
+            interestPaymentDates:
+              interestPaymentDatesParam?.length
+                ? interestPaymentDatesParam
+                : interestSchedule.dates.length > 0
+                  ? interestSchedule.dates
+                  : undefined,
             interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
             settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
             settlementDate: orderDateForPdf,
@@ -495,6 +507,14 @@ export class CrmOrdersController {
           pdfQuery.lastInterestPaymentDate.trim() !== ""
           ? pdfQuery.lastInterestPaymentDate.trim()
           : undefined;
+      const interestPaymentDatesParamDeal =
+        typeof pdfQuery.interestPaymentDates === "string" &&
+          pdfQuery.interestPaymentDates.trim() !== ""
+          ? pdfQuery.interestPaymentDates
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : undefined;
 
       const buffer = await generateDealPdfBuffer({
         user,
@@ -527,9 +547,11 @@ export class CrmOrdersController {
               accessTypeText ??
               "One To One (OTO) on RFQ Platform of the Exchange",
             interestPaymentDates:
-              interestSchedule.dates.length > 0
-                ? interestSchedule.dates
-                : undefined,
+              interestPaymentDatesParamDeal?.length
+                ? interestPaymentDatesParamDeal
+                : interestSchedule.dates.length > 0
+                  ? interestSchedule.dates
+                  : undefined,
             interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
             settlementOrderNumber:
               negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
@@ -640,6 +662,7 @@ export class CrmOrdersController {
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
+      interestPaymentDates?: string;
     };
 
     const pdfType = body.pdfType;
@@ -768,6 +791,14 @@ export class CrmOrdersController {
           body.lastInterestPaymentDate.trim() !== ""
           ? body.lastInterestPaymentDate.trim()
           : undefined;
+      const interestPaymentDatesParamEmail =
+        typeof body.interestPaymentDates === "string" &&
+          body.interestPaymentDates.trim() !== ""
+          ? body.interestPaymentDates
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : undefined;
 
       const pdfPayload = {
         user,
@@ -800,9 +831,11 @@ export class CrmOrdersController {
               accessTypeText ??
               "One To One (OTO) on RFQ Platform of the Exchange",
             interestPaymentDates:
-              interestSchedule.dates.length > 0
-                ? interestSchedule.dates
-                : undefined,
+              interestPaymentDatesParamEmail?.length
+                ? interestPaymentDatesParamEmail
+                : interestSchedule.dates.length > 0
+                  ? interestSchedule.dates
+                  : undefined,
             interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
             settlementOrderNumber:
               negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,

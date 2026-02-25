@@ -134,6 +134,7 @@ function GeneratePdfContent() {
   const [pdfSettlementDateTime, setPdfSettlementDateTime] = useState("");
   const [pdfLastInterestPaymentDateRaw, setPdfLastInterestPaymentDateRaw] = useState("");
   const [pdfLastInterestPaymentDate, setPdfLastInterestPaymentDate] = useState("");
+  const [pdfInterestPaymentDates, setPdfInterestPaymentDates] = useState("");
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
 
   const { data, isLoading, isError, error } = useQuery({
@@ -267,11 +268,16 @@ MeraDhan Team`
       pdfLastInterestPaymentDate.trim() !== ""
         ? pdfLastInterestPaymentDate.trim()
         : undefined;
+    const interestPaymentDatesVal =
+      pdfInterestPaymentDates.trim() !== ""
+        ? pdfInterestPaymentDates.trim()
+        : undefined;
     return {
       accruedInterestDays: accruedInterestDaysNum,
       ...(settlementNumberVal && { settlementNumber: settlementNumberVal }),
       ...(settlementDateTimeVal && { settlementDateTime: settlementDateTimeVal }),
       ...(lastInterestVal && { lastInterestPaymentDate: lastInterestVal }),
+      ...(interestPaymentDatesVal && { interestPaymentDates: interestPaymentDatesVal }),
     };
   };
 
@@ -488,7 +494,18 @@ MeraDhan Team`
                 ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pdf-settlement-datetime">Settlement Date & Time</Label>
+                <Label htmlFor="pdf-interest-payment-dates">Interest Payment Dates</Label>
+                <Input
+                  id="pdf-interest-payment-dates"
+                  type="text"
+                  placeholder="e.g. 16-Feb, 16-May, 16-Aug"
+                  value={pdfInterestPaymentDates}
+                  onChange={(e) => setPdfInterestPaymentDates(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">Comma-separated (e.g. 16-Feb, 16-May, 16-Aug). Leave empty to derive from Last payment date.</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pdf-settlement-datetime">Customer confirmation Date & Time</Label>
                 <Input
                   id="pdf-settlement-datetime"
                   type="text"

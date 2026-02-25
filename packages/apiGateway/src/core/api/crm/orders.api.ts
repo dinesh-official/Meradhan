@@ -89,7 +89,7 @@ export class CrmOrdersApi {
     return data;
   }
 
-  /** Optional params for PDF: No. of Days, Settlement No., Last Interest Payment Date. Accrued/Ex Interest comes from negotiations data. */
+  /** Optional params for PDF: No. of Days, Settlement No., Last Interest Payment Date, Interest Payment Dates (comma-separated). Accrued/Ex Interest comes from negotiations data. */
   async getOrderReceiptPdf(
     orderNumber: string,
     pdfParams?: {
@@ -97,6 +97,7 @@ export class CrmOrdersApi {
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
+      interestPaymentDates?: string;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
@@ -105,6 +106,7 @@ export class CrmOrdersApi {
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
+    if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/receipt-pdf/${encodeURIComponent(orderNumber)}`,
       { ...config, params: { ...config?.params, ...params }, responseType: "blob" }
@@ -125,7 +127,7 @@ export class CrmOrdersApi {
     return response.data;
   }
 
-  /** Optional params for Deal PDF: No. of Days, Settlement No., Last Interest Payment Date. Accrued/Ex Interest comes from negotiations data. */
+  /** Optional params for Deal PDF: No. of Days, Settlement No., Last Interest Payment Date, Interest Payment Dates (comma-separated). Accrued/Ex Interest comes from negotiations data. */
   async getDealSheetPdf(
     orderNumber: string,
     pdfParams?: {
@@ -133,6 +135,7 @@ export class CrmOrdersApi {
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
+      interestPaymentDates?: string;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
@@ -141,6 +144,7 @@ export class CrmOrdersApi {
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
+    if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/deal-pdf/${encodeURIComponent(orderNumber)}`,
       { ...config, params: { ...config?.params, ...params }, responseType: "blob" }
@@ -173,6 +177,7 @@ export class CrmOrdersApi {
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
+      interestPaymentDates?: string;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {
