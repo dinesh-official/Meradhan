@@ -239,11 +239,7 @@ export class CrmOrdersController {
         },
       });
       const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-      let orderDateForPdf: string | undefined = negotation?.createdAt instanceof Date ? order.createdAt.toISOString() : String(order.createdAt);
-      if (settleOrder?.modSettleDate) {
-        const parsed = parseSettlementDateToISO(settleOrder.modSettleDate);
-        if (parsed) orderDateForPdf = parsed;
-      }
+      const orderDateForPdf: Date = new Date(`${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim());
       const [bankName, dpName] = await Promise.all([
         settleOrder?.ifscCode
           ? fetchBankNameFromIfsc(settleOrder.ifscCode)
@@ -286,9 +282,14 @@ export class CrmOrdersController {
       const interestPaymentDatesParam =
         typeof pdfQuery.interestPaymentDates === "string" && pdfQuery.interestPaymentDates.trim() !== ""
           ? pdfQuery.interestPaymentDates
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+          : undefined;
+      const nonAmortizedBondParam = pdfQuery.nonAmortizedBond === "false" ? false : true;
+      const amortizedPrincipalPaymentDatesParam =
+        typeof pdfQuery.amortizedPrincipalPaymentDates === "string" && pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
+          ? pdfQuery.amortizedPrincipalPaymentDates.trim()
           : undefined;
 
       const buffer = await generateOrderPdfBuffer({
@@ -302,7 +303,7 @@ export class CrmOrdersController {
             : order.quantity,
         isReleased: true,
         orderData: {
-          createdAt: orderDateForPdf,
+          createdAt: orderDateForPdf.toISOString(),
           subTotal:
             settleOrder?.value != null
               ? Number(settleOrder.value)
@@ -337,6 +338,8 @@ export class CrmOrdersController {
             settlementNumber: settlementNumberParam ?? (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
             settlementDateTime: settlementDateTimeParam,
             lastInterestPaymentDate: lastInterestPaymentDateParam,
+            nonAmortizedBond: nonAmortizedBondParam,
+            amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParam,
             settlementBank: settleOrder
               ? {
                 bankName: bankName ?? undefined,
@@ -446,14 +449,8 @@ export class CrmOrdersController {
         },
       });
       const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-      let orderDateForPdf: string | undefined =
-        negotation?.createdAt instanceof Date
-          ? order.createdAt.toISOString()
-          : String(order.createdAt);
-      if (settleOrder?.modSettleDate) {
-        const parsed = parseSettlementDateToISO(settleOrder.modSettleDate);
-        if (parsed) orderDateForPdf = parsed;
-      }
+      const orderDateForPdf: Date = new Date(`${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim());
+
       const [bankName, dpName] = await Promise.all([
         settleOrder?.ifscCode
           ? fetchBankNameFromIfsc(settleOrder.ifscCode)
@@ -472,11 +469,14 @@ export class CrmOrdersController {
         rfqDetails?.access != null ? String(rfqDetails.access) : undefined;
       const accessTypeText = accessKey ? accessType[accessKey] : undefined;
 
-      const orderDateForSchedule = orderDateForPdf
-        ? new Date(orderDateForPdf)
-        : new Date();
+
+      console.log(orderDateForPdf);
+
+
+      // 06-Nov-2025 12:00:00
+
       const interestSchedule = getInterestPaymentSchedule({
-        orderDate: orderDateForSchedule,
+        orderDate: new Date(`${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim()),
         maturityDate: bond.maturityDate ?? null,
         interestPaymentFrequency: bond.interestPaymentFrequency,
         paymentDayOfMonth: 20,
@@ -515,6 +515,11 @@ export class CrmOrdersController {
               .map((s) => s.trim())
               .filter(Boolean)
           : undefined;
+      const nonAmortizedBondParamDeal = pdfQuery.nonAmortizedBond === "false" ? false : true;
+      const amortizedPrincipalPaymentDatesParamDeal =
+        typeof pdfQuery.amortizedPrincipalPaymentDates === "string" && pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
+          ? pdfQuery.amortizedPrincipalPaymentDates.trim()
+          : undefined;
 
       const buffer = await generateDealPdfBuffer({
         user,
@@ -526,7 +531,7 @@ export class CrmOrdersController {
             : order.quantity,
         isReleased: false,
         orderData: {
-          createdAt: orderDateForPdf,
+          createdAt: orderDateForPdf.toISOString(),
           subTotal:
             settleOrder?.value != null
               ? Number(settleOrder.value)
@@ -570,6 +575,8 @@ export class CrmOrdersController {
                 ?.settlementNo,
             settlementDateTime: settlementDateTimeParam,
             lastInterestPaymentDate: lastInterestPaymentDateParam,
+            nonAmortizedBond: nonAmortizedBondParamDeal,
+            amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParamDeal,
             settlementBank: settleOrder
               ? {
                 bankName: bankName ?? undefined,
@@ -663,6 +670,8 @@ export class CrmOrdersController {
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
+      nonAmortizedBond?: boolean;
+      amortizedPrincipalPaymentDates?: string;
     };
 
     const pdfType = body.pdfType;
@@ -799,6 +808,11 @@ export class CrmOrdersController {
               .map((s) => s.trim())
               .filter(Boolean)
           : undefined;
+      const nonAmortizedBondParamEmail = body.nonAmortizedBond === false ? false : true;
+      const amortizedPrincipalPaymentDatesParamEmail =
+        typeof body.amortizedPrincipalPaymentDates === "string" && body.amortizedPrincipalPaymentDates.trim() !== ""
+          ? body.amortizedPrincipalPaymentDates.trim()
+          : undefined;
 
       const pdfPayload = {
         user,
@@ -854,6 +868,8 @@ export class CrmOrdersController {
                 ?.settlementNo,
             settlementDateTime: settlementDateTimeParam,
             lastInterestPaymentDate: lastInterestPaymentDateParam,
+            nonAmortizedBond: nonAmortizedBondParamEmail,
+            amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParamEmail,
             settlementBank: settleOrder
               ? {
                 bankName: bankName ?? undefined,

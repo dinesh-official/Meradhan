@@ -58,6 +58,8 @@ interface OrderData {
     settlementNumber?: string;
     interestPaymentDates?: string[];
     interestPaymentFrequencyLabel?: string;
+    nonAmortizedBond?: boolean;
+    amortizedPrincipalPaymentDates?: string;
     settleOrder?: {
       source?: number;
       settleStatus?: number;
@@ -89,6 +91,9 @@ export default function DealPage({
     user.firstName +
     `${user.middleName ? `${user.middleName} ` : " "}` +
     user.lastName;
+
+  const genderRaw = String(user?.gender ?? "").trim().toUpperCase();
+  const salutation = genderRaw === "FEMALE" ? "Ms." : "Mr.";
 
   // Calculate dates
   const now = new Date();
@@ -190,7 +195,7 @@ export default function DealPage({
   const list = [
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
     [
-      `Order Type - One To One (OTO) / One To Many (OTM) on RFQ Platform of the Exchange`,
+      `Order Type`,
       orderData?.metadata?.orderType ??
       "N.A",
     ],
@@ -204,11 +209,11 @@ export default function DealPage({
         ? (bond as { securityNature?: string }).securityNature
         : null) || "Senior Secured",
     ],
-    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
+    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"} % `],
     [
       "Interest Payment Date",
       `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
-${getInterestPaymentDatesDisplay()}`,
+${getInterestPaymentDatesDisplay()} `,
     ],
     [
       "Allotment Date",
@@ -224,9 +229,15 @@ ${getInterestPaymentDatesDisplay()}`,
     ],
     [
       "Maturity Date",
-      bond.maturityDate
-        ? formatDate(bond.maturityDate, "DD-MMM-YYYY") + " : 100.0000%"
-        : "N/A",
+      (() => {
+        if (!bond.maturityDate) return "N/A";
+        const datePart = formatDate(bond.maturityDate, "DD-MMM-YYYY");
+        const isNonAmortized = orderData?.metadata?.nonAmortizedBond !== false;
+        const valuePart = isNonAmortized
+          ? "100.0000%"
+          : (orderData?.metadata?.amortizedPrincipalPaymentDates?.trim() || "100.0000%");
+        return `${datePart} : ${valuePart} `;
+      })(),
     ],
     [
       "Last Interest Payment Date",
@@ -238,44 +249,42 @@ ${getInterestPaymentDatesDisplay()}`,
         return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
       })(),
     ],
-    ["Face Value", `INR ${formatCurrency(faceValue)}`],
+    ["Face Value", `INR ${formatCurrency(faceValue)} `],
     [
       "Quantum",
-      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${effectiveQun})`,
-      `Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
+      `INR ${formatCurrency(faceValue * effectiveQun)} (No.of Bonds: ${effectiveQun})`,
+      `Clean Price: INR ${formatCurrency(orderData?.price || 0, 4)} `,
     ],
     [
       "Date",
-      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
-      `Value Date: ${formatDate(valueDate.toISOString(), "DD-MMM-YYYY")}`,
+      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")} `,
+      `Settlement Date: ${formatDate(orderData?.metadata?.settlementDate ? new Date(orderData.metadata.settlementDate).toISOString() : valueDate.toISOString(), "DD-MMM-YYYY")} `,
     ],
-    ["Principal Amount", `INR ${formatCurrency(settlementAmount)}`],
+    ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
       "Accrued / Ex Interest",
-      // if its lowe then 0 show days in (days)
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `${formatCurrency(accruedInterest)}`} (No. of Days: ${orderData?.metadata?.accruedInterestDays})`,
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${orderData?.metadata?.accruedInterestDays || "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${orderData?.metadata?.accruedInterestDays || "N/A"}))`}`,
     ],
-    ["Total Consideration", `INR ${formatCurrency(settlementAmount)}`],
+    ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
-      `INR ${formatCurrency(
-        stampDutyAmount
-      )} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
+      `INR ${formatCurrency(stampDutyAmount, 0)} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
     ],
-    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
+    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)} `],
     [
       "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(settlementAmount)}
-(${numberToWords(settlementAmount)})`,
+      `INR ${formatCurrency(settlementAmount)} (${numberToWords(settlementAmount)})`,
     ],
     [
       "Order Date & Time",
       `${formatDate(orderDate.toISOString(), "DD-MMM-YYYY")} ${String(
         orderDate.getHours()
-      ).padStart(2, "0")}:${String(orderDate.getMinutes()).padStart(
+      ).padStart(2, "0")
+      }:${String(orderDate.getMinutes()).padStart(
         2,
         "0"
-      )}:${String(orderDate.getSeconds()).padStart(2, "0")}`,
+      )
+      }:${String(orderDate.getSeconds()).padStart(2, "0")} `,
     ],
     [
       "Exchange RFQ Initiation ID",
@@ -336,7 +345,7 @@ ${getInterestPaymentDatesDisplay()}`,
 
 
       <View style={[styles.section, { marginTop: 10 }]}>
-        <Text style={{ fontSize: 9 }}>Dear Sir / Madam,</Text>
+        <Text style={{ fontSize: 9 }}>Dear {salutation} {fullname},</Text>
         <Text style={{
           fontSize: 9,
         }} >

@@ -77,7 +77,7 @@ function LogoSvg({ showAll = false }: { showAll?: boolean }) {
 export default LogoSvg;
 
 
-export function LogoSvgTop({ }: { showAll?: boolean }) {
+export function LogoSvgTop({ title }: { showAll?: boolean, title: string }) {
   return (
     <View style={{ fontFamily: "Poppins" }}>
       <View
@@ -100,8 +100,9 @@ export function LogoSvgTop({ }: { showAll?: boolean }) {
         }} >
           <Text style={{
             fontSize: 15,
-            fontWeight: "semiBold"
-          }} >ORDER RECEIPT</Text>
+            fontWeight: "semiBold",
+            textAlign: "center"
+          }} >{title}</Text>
         </View>
         <View style={tw("w-20 bg-main h-2")} />
       </View>

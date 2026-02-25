@@ -47,6 +47,7 @@ interface OrderData {
     settlementOrderNumber?: string;
     dealId?: string;
     exchangeRfqId?: string;
+    gender?: string;
     orderType?: string;
     accruedInterest?: number;
     /** No. of days for Accrued / Ex Interest */
@@ -58,6 +59,9 @@ interface OrderData {
     settlementNumber?: string;
     interestPaymentDates?: string[];
     interestPaymentFrequencyLabel?: string;
+    /** When true (default), Maturity Date row shows 100.0000%; when false, shows amortizedPrincipalPaymentDates */
+    nonAmortizedBond?: boolean;
+    amortizedPrincipalPaymentDates?: string;
     settleOrder?: {
       source?: number;
       settleStatus?: number;
@@ -89,6 +93,9 @@ export default function OrdersPage({
     user.firstName +
     `${user.middleName ? `${user.middleName} ` : " "}` +
     user.lastName;
+
+  const genderRaw = String(user?.gender ?? "").trim().toUpperCase();
+  const salutation = genderRaw === "FEMALE" ? "Ms." : "Mr.";
 
   // Calculate dates
   const now = new Date();
@@ -195,6 +202,10 @@ export default function OrdersPage({
 
 
   const list = [
+    [
+      "Transaction Type",
+      `Your Buy (${fullname} : ${user?.panCard?.panCardNo || "N/A"})`,
+    ],
     ["MeraDhan Order ID", orderId],
     [
       "Order Date & Time",
@@ -205,6 +216,8 @@ export default function OrdersPage({
         "0"
       )}:${String(orderDate.getSeconds()).padStart(2, "0")}`,
     ],
+
+    ["MeraDhan Deal ID", dealId],
     [
       "Exchange RFQ Initiation ID",
       orderData?.metadata?.settlementOrderNumber ||
@@ -213,24 +226,19 @@ export default function OrdersPage({
       orderId ||
       (releasedOrder ? "N/A" : "Pending"),
     ],
-    ["MeraDhan Deal ID", dealId],
-    [
-      "Transaction Type",
-      `Your Buy (${fullname} : ${user?.panCard?.panCardNo || "N/A"})`,
-    ],
     ["ISIN", bond.isin],
     ["Security Name", bond.bondName],
     ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
     ["Face Value", `INR ${formatCurrency(faceValue)}`],
     [
       "Quantum",
-      `INR ${formatCurrency(faceValue)} (No. of Bonds: ${effectiveQun})`,
-      `Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
+      `INR ${formatCurrency(faceValue * effectiveQun)} (No. of Bonds: ${effectiveQun})`,
+      `Clean Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
     ],
     [
       "Date",
       `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
-      `Value Date: ${formatDate(new Date(orderData?.metadata?.settlementDate ?? dealDate.toISOString()).toISOString(), "DD-MMM-YYYY")}`,
+      `Settlement Date: ${formatDate(new Date(orderData?.metadata?.settlementDate ?? dealDate.toISOString()).toISOString(), "DD-MMM-YYYY")}`,
     ],
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
     [
@@ -260,9 +268,15 @@ ${getInterestPaymentDatesDisplay()}`,
     ],
     [
       "Maturity Date",
-      bond.maturityDate
-        ? formatDate(bond.maturityDate, "DD-MMM-YYYY") + " : 100.0000%"
-        : "N/A",
+      (() => {
+        if (!bond.maturityDate) return "N/A";
+        const datePart = formatDate(bond.maturityDate, "DD-MMM-YYYY");
+        const isNonAmortized = orderData?.metadata?.nonAmortizedBond !== false;
+        const valuePart = isNonAmortized
+          ? "100.0000%"
+          : (orderData?.metadata?.amortizedPrincipalPaymentDates?.trim() || "100.0000%");
+        return `${datePart} : ${valuePart}`;
+      })(),
     ],
     [
       "Security Nature",
@@ -279,7 +293,7 @@ ${getInterestPaymentDatesDisplay()}`,
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${orderData?.metadata?.accruedInterestDays || "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: ${orderData?.metadata?.accruedInterestDays || "N/A"})`}`,
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${orderData?.metadata?.accruedInterestDays || "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${orderData?.metadata?.accruedInterestDays || "N/A"}))`}`,
     ],
     ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [
@@ -321,15 +335,15 @@ ${getInterestPaymentDatesDisplay()}`,
         </Text>
       </View>
 
-      <View style={styles.section}>
+      {/* <View style={styles.section}>
         <Text style={{ fontSize: 9 }}>To,</Text>
         <Text style={{ fontSize: 9, fontWeight: "semibold" }}>
           {fullname} (PAN: {user?.panCard?.panCardNo})
         </Text>
-      </View>
+      </View> */}
 
       <View style={styles.section}>
-        <Text style={{ fontSize: 9 }}>Dear Sir / Madam,</Text>
+        <Text style={{ fontSize: 9 }}>Dear {salutation} {fullname},</Text>
         <Text style={{
           fontSize: 9,
         }} >

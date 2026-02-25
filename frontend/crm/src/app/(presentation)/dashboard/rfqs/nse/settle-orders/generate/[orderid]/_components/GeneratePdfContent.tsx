@@ -7,6 +7,7 @@ import { ArrowLeft, UserPlus, FileDown } from "lucide-react";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -135,6 +136,8 @@ function GeneratePdfContent() {
   const [pdfLastInterestPaymentDateRaw, setPdfLastInterestPaymentDateRaw] = useState("");
   const [pdfLastInterestPaymentDate, setPdfLastInterestPaymentDate] = useState("");
   const [pdfInterestPaymentDates, setPdfInterestPaymentDates] = useState("");
+  const [pdfNonAmortizedBond, setPdfNonAmortizedBond] = useState(true);
+  const [pdfAmortizedPrincipalPaymentDates, setPdfAmortizedPrincipalPaymentDates] = useState("");
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
 
   const { data, isLoading, isError, error } = useQuery({
@@ -174,9 +177,7 @@ function GeneratePdfContent() {
     data?.responseData ?? null;
   const customerOrder: CustomerFullOrder | null =
     customerOrderData?.responseData ?? null;
-  const customerGenderRaw = String(
-    (customerOrder?.customerProfile as { gender?: string } | undefined)?.gender ?? ""
-  )
+  const customerGenderRaw = String(customerOrder?.customerProfile?.gender ?? "")
     .trim()
     .toLowerCase();
   const salutationPrefix = customerGenderRaw === "female" ? "Ms." : "Mr.";
@@ -272,12 +273,18 @@ MeraDhan Team`
       pdfInterestPaymentDates.trim() !== ""
         ? pdfInterestPaymentDates.trim()
         : undefined;
+    const amortizedPrincipalPaymentDatesVal =
+      !pdfNonAmortizedBond && pdfAmortizedPrincipalPaymentDates.trim() !== ""
+        ? pdfAmortizedPrincipalPaymentDates.trim()
+        : undefined;
     return {
       accruedInterestDays: accruedInterestDaysNum,
       ...(settlementNumberVal && { settlementNumber: settlementNumberVal }),
       ...(settlementDateTimeVal && { settlementDateTime: settlementDateTimeVal }),
       ...(lastInterestVal && { lastInterestPaymentDate: lastInterestVal }),
       ...(interestPaymentDatesVal && { interestPaymentDates: interestPaymentDatesVal }),
+      nonAmortizedBond: pdfNonAmortizedBond,
+      ...(amortizedPrincipalPaymentDatesVal && { amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesVal }),
     };
   };
 
@@ -504,6 +511,32 @@ MeraDhan Team`
                 />
                 <p className="text-xs text-muted-foreground">Comma-separated (e.g. 16-Feb, 16-May, 16-Aug). Leave empty to derive from Last payment date.</p>
               </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="pdf-non-amortized-bond"
+                    checked={pdfNonAmortizedBond}
+                    onCheckedChange={(checked) => setPdfNonAmortizedBond(checked === true)}
+                  />
+                  <Label htmlFor="pdf-non-amortized-bond" className="cursor-pointer font-normal">
+                    Non-Amortized Bond
+                  </Label>
+                </div>
+                <p className="text-xs text-muted-foreground">When checked, Maturity Date row in PDF shows 100.0000%. When unchecked, use the value from Amortized Principal Payment Dates below.</p>
+              </div>
+              {!pdfNonAmortizedBond ? (
+                <div className="space-y-2">
+                  <Label htmlFor="pdf-amortized-principal-dates">Amortized Principal Payment Dates</Label>
+                  <Input
+                    id="pdf-amortized-principal-dates"
+                    type="text"
+                    placeholder="e.g. 20-Nov-2026 50%, 20-May-2027 50%"
+                    value={pdfAmortizedPrincipalPaymentDates}
+                    onChange={(e) => setPdfAmortizedPrincipalPaymentDates(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">Shown in PDF Maturity Date row when Non-Amortized Bond is unchecked.</p>
+                </div>
+              ) : null}
               <div className="space-y-2">
                 <Label htmlFor="pdf-settlement-datetime">Customer confirmation Date & Time</Label>
                 <Input

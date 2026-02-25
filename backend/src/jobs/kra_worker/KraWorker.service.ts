@@ -484,7 +484,7 @@ export class KraProcess {
         APP_COR_CTRY: p.APP_COR_CTRY,
         APP_COR_PINCD: p.APP_COR_PINCD,
         APP_COR_STATE: p.APP_COR_STATE,
-        APP_DATE: p.APP_DATE,
+        APP_DATE: formatDateTime10SecLate(new Date()),
         APP_DOB_DT: p.APP_DOB_DT + " 00:00:00",
         APP_DOC_PROOF: p.APP_DOC_PROOF,
         APP_EMAIL: p.APP_EMAIL,
@@ -680,9 +680,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-            data.step_1.pan.response.details.aadhaar.current_address_details
-              .state,
-          )?.code
+          data.step_1.pan.response.details.aadhaar.current_address_details
+            .state,
+        )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
@@ -785,6 +785,30 @@ export function formatDateTime(date: Date): string {
 
   // Add IST offset (5 hours 30 minutes)
   const istTime = new Date(utcTime + 5.5 * 60 * 60 * 1000);
+
+  const dd = String(istTime.getDate()).padStart(2, "0");
+  const mm = String(istTime.getMonth() + 1).padStart(2, "0");
+  const yyyy = istTime.getFullYear();
+
+  const HH = String(istTime.getHours()).padStart(2, "0");
+  const MM = String(istTime.getMinutes()).padStart(2, "0");
+  const SS = String(istTime.getSeconds()).padStart(2, "0");
+
+  return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
+}
+
+
+export function formatDateTime10SecLate(date: Date): string {
+
+  if (env.KRA_ENV == "PROD") {
+    return formatDateTime(date);
+  }
+
+  // Convert to UTC first
+  const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+
+  // Add IST offset (5 hours 30 minutes + 10 seconds)
+  const istTime = new Date(utcTime + 5.5 * 60 * 60 * 1000 + 10 * 1000);
 
   const dd = String(istTime.getDate()).padStart(2, "0");
   const mm = String(istTime.getMonth() + 1).padStart(2, "0");

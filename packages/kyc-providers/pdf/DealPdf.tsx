@@ -6,7 +6,7 @@ import type {
 import DealPage from "./Orders/DealPage";
 import DealPageTwo from "./Orders/DealPageTwo";
 import Footer from "./elements/Footer";
-import LogoSvg from "./images/LogoSvg";
+import { LogoSvgTop } from "./images/LogoSvg";
 
 interface OrderPdfOrderData {
   subTotal?: number;
@@ -110,7 +110,7 @@ export function DealPdf({
   return (
     <Document >
       <Page size="A4" style={{ fontFamily: "Poppins" }}    >
-        <LogoSvg showAll={false} />
+        <LogoSvgTop showAll={false} title="DEAL SHEET" />
         <DealPage
           bond={bond}
           user={user}
@@ -122,7 +122,7 @@ export function DealPdf({
         <Footer />
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll={false} />
+        <LogoSvgTop showAll={false} title="DEAL SHEET" />
         <DealPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
         <Footer />
       </Page>

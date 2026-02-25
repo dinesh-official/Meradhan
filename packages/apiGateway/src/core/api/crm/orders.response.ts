@@ -178,6 +178,7 @@ export interface CustomerFullOrder {
     phoneNo: string | null;
     userName?: string;
     kycStatus?: string;
+    gender?: string;
     bankAccounts?: CustomerBankAccount[];
     dematAccounts?: CustomerDematAccount[];
     panCard?: unknown;
