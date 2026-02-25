@@ -32,4 +32,8 @@ const main = async () => {
   console.log("All jobs added successfully");
 };
 
-main();
+test().then(() => {
+  console.log("done");
+}).catch((error) => {
+  console.log(error);
+});
