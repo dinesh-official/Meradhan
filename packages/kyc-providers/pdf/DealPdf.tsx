@@ -3,8 +3,8 @@ import type {
   BondDetailsResponse,
   CustomerByIdPayload,
 } from "@root/apiGateway";
-import OrdersPage from "./Orders/OrdersPage";
-import OrdersPageTwo from "./Orders/OrdersPageTwo";
+import DealPage from "./Orders/DealPage";
+import DealPageTwo from "./Orders/DealPageTwo";
 import Footer from "./elements/Footer";
 import { LogoSvgTop } from "./images/LogoSvg";
 
@@ -31,7 +31,7 @@ interface OrderPdfOrderData {
   };
 }
 
-export function OrderPdf({
+export function DealPdf({
   bond,
   user,
   orderId,
@@ -45,7 +45,6 @@ export function OrderPdf({
   qun: number;
   releasedOrder?: boolean;
   orderData?: OrderPdfOrderData;
-  userFor?: "ORDER" | "DEAL";
 }) {
   Font.register({
     family: "Poppins",
@@ -111,8 +110,8 @@ export function OrderPdf({
   return (
     <Document >
       <Page size="A4" style={{ fontFamily: "Poppins" }}    >
-        <LogoSvgTop showAll={true} title="ORDER RECEIPT" />
-        <OrdersPage
+        <LogoSvgTop showAll={false} title="DEAL SHEET" />
+        <DealPage
           bond={bond}
           user={user}
           orderId={orderId}
@@ -123,8 +122,8 @@ export function OrderPdf({
         <Footer />
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvgTop showAll={true} title="ORDER RECEIPT" />
-        <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
+        <LogoSvgTop showAll={false} title="DEAL SHEET" />
+        <DealPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
         <Footer />
       </Page>
     </Document>

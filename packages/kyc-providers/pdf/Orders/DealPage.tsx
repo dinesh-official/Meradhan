@@ -20,13 +20,13 @@ const styles = StyleSheet.create({
     borderColor: "#cccccc",
   },
   leftLabel: {
-    width: "25%",
+    width: "33%",
     paddingVertical: 2,
     paddingHorizontal: 5,
     fontSize: 9,
   },
   rightValue: {
-    width: "68%",
+    width: "70%",
     textAlign: "left",
     borderLeftWidth: 1,
     paddingLeft: 5,
@@ -47,7 +47,6 @@ interface OrderData {
     settlementOrderNumber?: string;
     dealId?: string;
     exchangeRfqId?: string;
-    gender?: string;
     orderType?: string;
     accruedInterest?: number;
     /** No. of days for Accrued / Ex Interest */
@@ -59,7 +58,6 @@ interface OrderData {
     settlementNumber?: string;
     interestPaymentDates?: string[];
     interestPaymentFrequencyLabel?: string;
-    /** When true (default), Maturity Date row shows 100.0000%; when false, shows amortizedPrincipalPaymentDates */
     nonAmortizedBond?: boolean;
     amortizedPrincipalPaymentDates?: string;
     settleOrder?: {
@@ -74,7 +72,7 @@ interface OrderData {
   };
 }
 
-export default function OrdersPage({
+export default function DealPage({
   bond,
   user,
   orderId,
@@ -103,7 +101,11 @@ export default function OrdersPage({
   const dealDate = orderData?.metadata?.settlementDate
     ? new Date(orderData.metadata.settlementDate)
     : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
-
+  const valueDate = orderData?.metadata?.valueDate
+    ? new Date(orderData.metadata.valueDate)
+    : bond.maturityDate
+      ? new Date(bond.maturityDate)
+      : new Date(dealDate.getTime() + 24 * 60 * 60 * 1000); // Fallback: day after deal date
 
   // Calculate financials
   const faceValue = Number(bond.faceValue) || 1000;
@@ -120,7 +122,9 @@ export default function OrdersPage({
     ); // Rough calculation if not provided
   // const stampDutyAmount = orderData?.stampDuty || principalAmount * 0.0001; // 0.01% stamp duty
   const stampDutyAmount = Number(
-    settleOrder?.stampDutyAmount ?? orderData?.stampDuty ?? 0
+    settleOrder?.stampDutyAmount ??
+    orderData?.stampDuty ??
+    principalAmount * 0.0001
   );
 
   const totalConsideration =
@@ -129,7 +133,7 @@ export default function OrdersPage({
       orderData?.totalAmount ??
       principalAmount + accruedInterest
     );
-
+  const settlementAmount = totalConsideration + stampDutyAmount;
 
 
   // Format amounts
@@ -140,45 +144,19 @@ export default function OrdersPage({
     })}`;
   };
 
-  // Payment day from Last Interest Payment Date (e.g. "16-Feb-2026 (Monday)" → 16)
-  const lastInterestRaw = orderData?.metadata?.lastInterestPaymentDate?.trim();
-  let paymentDayOfMonth = 20;
-  if (lastInterestRaw) {
-    const withoutDayName = lastInterestRaw.replace(/\s*\([^)]*\)\s*$/, "").trim();
-    const match = withoutDayName.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
-    if (match) {
-      const [, dayStr, monthStr, yearStr] = match;
-      const shortMonths: Record<string, number> = {
-        Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-        Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-      };
-      const m = shortMonths[monthStr ?? ""];
-      if (m !== undefined) {
-        const d = new Date(parseInt(yearStr ?? "0", 10), m, parseInt(dayStr ?? "1", 10));
-        if (!isNaN(d.getTime())) paymentDayOfMonth = d.getDate();
-      }
-    } else {
-      const d = new Date(withoutDayName);
-      if (!isNaN(d.getTime())) paymentDayOfMonth = d.getDate();
-    }
-  }
-
   // Interest payment schedule from order date to maturity based on bond frequency
   const interestSchedule = getInterestPaymentSchedule({
     orderDate,
     maturityDate: bond.maturityDate ?? null,
     interestPaymentFrequency: bond.interestPaymentFrequency,
-    paymentDayOfMonth,
-    // When day came from Last Interest Payment Date, don't override with bond nextCouponDate
-    nextCouponDate: lastInterestRaw
-      ? undefined
-      : bond.nextCouponDate != null && String(bond.nextCouponDate).trim() !== ""
+    paymentDayOfMonth: 20,
+    nextCouponDate:
+      bond.nextCouponDate != null && String(bond.nextCouponDate).trim() !== ""
         ? new Date(bond.nextCouponDate)
         : undefined,
   });
 
   const getInterestPaymentDatesDisplay = () => {
-    // Prefer explicit Interest Payment Dates from CRM when provided; else use schedule (from Last Interest Payment Date day)
     if (orderData?.metadata?.interestPaymentDates?.length) {
       return Array.from(new Set(orderData.metadata.interestPaymentDates)).join(", ");
     }
@@ -201,54 +179,65 @@ export default function OrdersPage({
     ).padStart(2, "0")}`;
 
 
-  const list = [
+  const topList = [
+    [`Buyer: ${fullname.toUpperCase()}`, "Seller: BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED"],
     [
-      "Transaction Type",
-      `Your Buy (${fullname} : ${user?.panCard?.panCardNo || "N/A"})`,
+      `NCL Code: ${user.userName}`,
+      "NCL Code: BCISLP"
     ],
-    ["MeraDhan Order ID", orderId],
     [
-      "Order Date & Time",
-      `${formatDate(orderDate.toISOString(), "DD-MMM-YYYY")} ${String(
-        orderDate.getHours()
-      ).padStart(2, "0")}:${String(orderDate.getMinutes()).padStart(
-        2,
-        "0"
-      )}:${String(orderDate.getSeconds()).padStart(2, "0")}`,
+      `Kind Attention: ${fullname.toUpperCase()}`,
+      "Kind Attention: BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED"
     ],
+  ]
 
-    ["MeraDhan Deal ID", dealId],
-    [
-      "Exchange RFQ Initiation ID",
-      orderData?.metadata?.settlementOrderNumber ||
-      orderData?.metadata?.rfqNumber ||
-      orderData?.metadata?.exchangeRfqId ||
-      orderId ||
-      (releasedOrder ? "N/A" : "Pending"),
-    ],
-    ["ISIN", bond.isin],
-    ["Security Name", bond.description],
-    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
-    ["Face Value", `INR ${formatCurrency(faceValue)}`],
-    [
-      "Quantum",
-      `INR ${formatCurrency(faceValue * effectiveQun)} (No. of Bonds: ${effectiveQun})`,
-      `Clean Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
-    ],
-    [
-      "Date",
-      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
-      `Settlement Date: ${formatDate(new Date(orderData?.metadata?.settlementDate ?? dealDate.toISOString()).toISOString(), "DD-MMM-YYYY")}`,
-    ],
+
+  const list = [
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
     [
-      "Order Type",
-      orderData?.metadata?.orderType ?? "N.A",
+      `Order Type`,
+      orderData?.metadata?.orderType ??
+      "N.A",
+    ],
+    ["MeraDhan Order ID", orderId],
+    ["MeraDhan Deal ID", dealId],
+    ["ISIN", bond.isin],
+    ["Security Name", bond.description],
+    [
+      "Security Nature",
+      ("securityNature" in bond
+        ? (bond as { securityNature?: string }).securityNature
+        : null) || "Senior Secured",
+    ],
+    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"} % `],
+    [
+      "Interest Payment Date",
+      `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
+${getInterestPaymentDatesDisplay()} `,
     ],
     [
-      "Interest Payment Dates",
-      `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
-${getInterestPaymentDatesDisplay()}`,
+      "Allotment Date",
+      bond.dateOfAllotment
+        ? formatDate(bond.dateOfAllotment, "DD-MMM-YYYY")
+        : "N/A",
+    ],
+    [
+      "Put / Call Option",
+      ("putCallOption" in bond
+        ? (bond as { putCallOption?: string }).putCallOption
+        : null) || "N.A / N.A",
+    ],
+    [
+      "Maturity Date",
+      (() => {
+        if (!bond.maturityDate) return "N/A";
+        const datePart = formatDate(bond.maturityDate, "DD-MMM-YYYY");
+        const isNonAmortized = orderData?.metadata?.nonAmortizedBond !== false;
+        const valuePart = isNonAmortized
+          ? "100.0000%"
+          : (orderData?.metadata?.amortizedPrincipalPaymentDates?.trim() || "100.0000%");
+        return `${datePart} : ${valuePart} `;
+      })(),
     ],
     [
       "Last Interest Payment Date",
@@ -260,35 +249,16 @@ ${getInterestPaymentDatesDisplay()}`,
         return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
       })(),
     ],
+    ["Face Value", `INR ${formatCurrency(faceValue)} `],
     [
-      "Allotment Date",
-      bond.dateOfAllotment
-        ? formatDate(bond.dateOfAllotment, "DD-MMM-YYYY")
-        : "N/A",
+      "Quantum",
+      `INR ${formatCurrency(faceValue * effectiveQun)} (No.of Bonds: ${effectiveQun})`,
+      `Clean Price: INR ${formatCurrency(orderData?.price || 0, 4)} `,
     ],
     [
-      "Maturity Date",
-      (() => {
-        if (!bond.maturityDate) return "N/A";
-        const datePart = formatDate(bond.maturityDate, "DD-MMM-YYYY");
-        const isNonAmortized = orderData?.metadata?.nonAmortizedBond !== false;
-        const valuePart = isNonAmortized
-          ? "100.0000%"
-          : (orderData?.metadata?.amortizedPrincipalPaymentDates?.trim() || "100.0000%");
-        return `${datePart} : ${valuePart}`;
-      })(),
-    ],
-    [
-      "Security Nature",
-      ("securityNature" in bond
-        ? (bond as { securityNature?: string }).securityNature
-        : null) || "Senior Secured",
-    ],
-    [
-      "Put / Call Option",
-      ("putCallOption" in bond
-        ? (bond as { putCallOption?: string }).putCallOption
-        : null) || "N.A / N.A",
+      "Date",
+      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")} `,
+      `Settlement Date: ${formatDate(orderData?.metadata?.settlementDate ? new Date(orderData.metadata.settlementDate).toISOString() : valueDate.toISOString(), "DD-MMM-YYYY")} `,
     ],
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
@@ -298,25 +268,39 @@ ${getInterestPaymentDatesDisplay()}`,
     ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
-      `INR ${formatCurrency(
-        stampDutyAmount, 0
-      )} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
+      `INR ${formatCurrency(stampDutyAmount, 0)} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
     ],
-    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
+    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)} `],
     [
       "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(totalConsideration + stampDutyAmount)} (${numberToWords(totalConsideration + stampDutyAmount)})`,
+      `INR ${formatCurrency(settlementAmount)} (${numberToWords(settlementAmount)})`,
     ],
-
+    [
+      "Order Date & Time",
+      `${formatDate(orderDate.toISOString(), "DD-MMM-YYYY")} ${String(
+        orderDate.getHours()
+      ).padStart(2, "0")
+      }:${String(orderDate.getMinutes()).padStart(
+        2,
+        "0"
+      )
+      }:${String(orderDate.getSeconds()).padStart(2, "0")} `,
+    ],
+    [
+      "Exchange RFQ Initiation ID",
+      orderData?.metadata?.settlementOrderNumber ||
+      orderData?.metadata?.rfqNumber ||
+      orderData?.metadata?.exchangeRfqId ||
+      orderId ||
+      (releasedOrder ? "N/A" : "Pending"),
+    ],
+    // ["Exchange RFQ Initiation ID", dealId],
+    ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
+    [
+      "Settlement Date & Time",
+      formatDate(dealDate.toISOString(), "DD-MMM-YYYY") + " " + String(dealDate.getHours()).padStart(2, "0") + ":" + String(dealDate.getMinutes()).padStart(2, "0") + ":" + String(dealDate.getSeconds()).padStart(2, "0")
+    ],
   ]
-
-  const getITOMOde = () => {
-    if (orderData?.metadata?.orderType?.includes("OTO")) {
-      return `(One-to-One mode)`
-    } else {
-      return `(One-to-Many mode)`
-    }
-  }
 
   return (
     <View
@@ -329,29 +313,43 @@ ${getInterestPaymentDatesDisplay()}`,
         marginTop: 10,
       }}
     >
-      <View style={[styles.section, { paddingTop: 10, borderTopWidth: 1, borderTopColor: "#cccccc" }]}>
-        <Text style={{ fontSize: 9 }}>
-          Date: {formatDate(orderDate.toISOString(), "DD/MM/YYYY")}
-        </Text>
-      </View>
 
-      {/* <View style={styles.section}>
-        <Text style={{ fontSize: 9 }}>To,</Text>
-        <Text style={{ fontSize: 9, fontWeight: "semibold" }}>
-          {fullname} (PAN: {user?.panCard?.panCardNo})
-        </Text>
-      </View> */}
+      {topList.map(([label, ...values], i) => (
+        <View style={[styles.row, i === topList.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "#cccccc" } : {}]} key={i}>
+          <Text style={[styles.leftLabel]}>{label}</Text>
+          <View style={[{ marginLeft: 5 }, styles.rightValue]}>
+            {Array.isArray(values) ? <View style={{ display: "flex", flexDirection: "row", gap: 2 }}>
+              {
+                values.map((value, index) => (
+                  <View key={index} style={{
+                    borderLeftWidth: index === 0 ? 0 : 1,
+                    borderLeftColor: "#cccccc",
+                    height: "100%",
+                    width: 350,
+                    paddingHorizontal: 5,
+                    paddingVertical: 2,
+                  }}  >
+                    <Text style={{ fontSize: 9 }} key={index}>
+                      {value}
+                    </Text>
+                  </View>
+                ))
+              }
+            </View> : <Text style={{ fontSize: 9, paddingVertical: 2, ...(values === topList.length ? { fontWeight: "semibold" } : {}) }}>
+              {values}
+            </Text>}
+          </View>
+        </View>
+      ))
+      }
 
-      <View style={styles.section}>
+
+      <View style={[styles.section, { marginTop: 10 }]}>
         <Text style={{ fontSize: 9 }}>Dear {salutation} {fullname},</Text>
         <Text style={{
           fontSize: 9,
         }} >
-          This {releasedOrder ? "" : "Draft"} Order Receipt has been
-          automatically generated based on your authorization to MeraDhan, a
-          platform by BondNest Capital India Securities Private Limited, to
-          place a non-negotiable order {getITOMOde()} on the RFQ platform of
-          the Stock Exchanges.
+          Please find below the transaction details:
         </Text>
       </View>
 
@@ -366,18 +364,18 @@ ${getInterestPaymentDatesDisplay()}`,
                     borderLeftWidth: index === 0 ? 0 : 1,
                     borderLeftColor: "#cccccc",
                     height: "100%",
-                    width: 320,
+                    width: 350,
                     paddingHorizontal: 5,
                     paddingVertical: 2,
                   }}  >
-                    <Text style={{ fontSize: 9, ...(i === list.length - 1 ? { fontWeight: "semibold" } : {}) }} key={index}>
+                    <Text style={{ fontSize: 9, ...(label?.includes("Settlement Amount") ? { fontWeight: "semibold" } : {}) }} key={index}>
                       {value}
                     </Text>
                   </View>
                 ))
               }
 
-            </View> : <Text style={{ fontSize: 9, paddingVertical: 2, ...(i === list.length - 1 ? { fontWeight: "semibold" } : {}) }}>
+            </View> : <Text style={{ fontSize: 9, paddingVertical: 2, }}>
               {values}
             </Text>}
           </View>
@@ -448,7 +446,7 @@ function numberToWords(amount: number): string {
   }
 
   const absAmount = Math.abs(amount);
-  if (absAmount === 0) return "Rs. Zero Only";
+  if (absAmount === 0) return "Zero Only";
 
   let rupees = Math.floor(absAmount);
   const paise = Math.round((absAmount - rupees) * 100);

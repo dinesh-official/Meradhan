@@ -238,38 +238,46 @@ export function RfqStatusBadge({ status }: RfqStatusBadgeProps) {
 interface SettlementStatusBadgeProps {
   status?: number | undefined;
 }
-
+// Settlement status
+// 0 = Settlement Pending
+// 1 = Securities Payin Done
+// 2 = Funds Payin Done
+// 3 = Payin Completed
+// 4 = Payout Done Successfully
+// 5 = Payin reversed
+// 6 = Settle order expired
+// 7 = Order not settleable
+// 8 = Settlement of order cancelled
+// 9 = Document not received for unregistered
+// participant
 export function SettlementStatusBadge({ status }: SettlementStatusBadgeProps) {
   const labels: Record<number, string> = {
-    0: "Pending",
-    1: "Sec Payin Done",
-    2: "Funds Payin Done", 
-    3: "Both Payin Done",
-    4: "Payout Processing",
-    5: "Payout Done",
-    6: "Settlement Complete",
-    7: "Partial Settlement",
-    8: "Failed",
-    9: "Cancelled",
+    0: "Settlement Pending",
+    1: "Securities Payin Done",
+    2: "Funds Payin Done",
+    3: "Payin Completed",
+    4: "Payout Done Successfully",
+    5: "Payin Reversed",
+    6: "Settle Order Expired",
+    7: "Order Not Settleable",
+    8: "Settlement Cancelled",
+    9: "Document Not Received for Unregistered Participant",
   };
+
+
 
   const getStatusColor = (statusCode?: number) => {
     switch (statusCode) {
-      case 6: // Settlement Complete
-      case 5: // Payout Done
-        return "bg-green-100 text-green-800 border-green-300";
-      case 0: // Pending
-      case 1: // Sec Payin Done
-      case 2: // Funds Payin Done
-      case 3: // Both Payin Done
-      case 4: // Payout Processing
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case 7: // Partial Settlement
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case 8: // Failed
-        return "bg-red-100 text-red-800 border-red-300";
-      case 9: // Cancelled
-        return "bg-gray-100 text-gray-800 border-gray-300";
+      case 6: return "bg-red-100 text-red-800 border-red-300";
+      case 5: return "bg-green-100 text-green-800 border-green-300";
+      case 0: return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case 1: return "bg-blue-100 text-blue-800 border-blue-300";
+      case 2: return "bg-red-100 text-red-800 border-red-300";
+      case 3: return "bg-gray-100 text-gray-800 border-gray-300";
+      case 4: return "bg-gray-100 text-gray-800 border-gray-300";
+      case 7: return "bg-gray-100 text-gray-800 border-gray-300";
+      case 8: return "bg-gray-100 text-gray-800 border-gray-300";
+      case 9: return "bg-gray-100 text-gray-800 border-gray-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
     }
@@ -294,9 +302,9 @@ interface SettlementYieldTypeBadgeProps {
 
 export function SettlementYieldTypeBadge({ type }: SettlementYieldTypeBadgeProps) {
   const labels: Record<string, string> = {
-    P: "Price",
-    C: "Clean Price", 
-    M: "Dirty Price",
+    P: "YTP",
+    C: "YTC",
+    M: "YTM",
   };
 
   return (
