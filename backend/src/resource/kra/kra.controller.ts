@@ -30,14 +30,14 @@ export class KraController {
     if (runner) {
       return res.sendResponse({
         statusCode: HttpStatus.CONFLICT,
-        message:
-          "KRA process already in progress for this customer and KYC. Cannot reschedule until the current process completes or times out (72 hours).",
+        message: "KRA process already in progress for this customer and KYC. Cannot reschedule until the current process completes or times out (72 hours).",
       });
     }
 
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerId },
     });
+
     if (!customer) {
       return res.sendResponse({
         statusCode: HttpStatus.NOT_FOUND,
