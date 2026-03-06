@@ -56,6 +56,18 @@ function CustomerKycView({ id }: { id: number }) {
   const canRetriggerKra =
     kycDataStoreId != null && data?.kycStatus !== "VERIFIED";
 
+  const handleRetriggerKra = () => {
+    if (kycDataStoreId == null) {
+      toast.error("No KYC flow found for this customer.");
+      return;
+    }
+    if (data?.kycStatus === "VERIFIED") {
+      toast.error("Cannot retrigger KRA: customer KYC is already VERIFIED.");
+      return;
+    }
+    rescheduleMutation.mutate(kycDataStoreId);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -79,21 +91,26 @@ function CustomerKycView({ id }: { id: number }) {
         description="Comprehensive KYC information and document verification status"
         showBack
         actions={
-          canRetriggerKra ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => rescheduleMutation.mutate(kycDataStoreId!)}
-              disabled={rescheduleMutation.isPending}
-            >
-              {rescheduleMutation.isPending ? (
-                <Spinner className="mr-2 h-4 w-4" />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4" />
-              )}
-              Retrigger KRA
-            </Button>
-          ) : undefined
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRetriggerKra}
+            disabled={rescheduleMutation.isPending || !canRetriggerKra}
+            title={
+              !canRetriggerKra && kycDataStoreId == null
+                ? "No KYC flow found"
+                : !canRetriggerKra && data?.kycStatus === "VERIFIED"
+                  ? "KYC already verified"
+                  : undefined
+            }
+          >
+            {rescheduleMutation.isPending ? (
+              <Spinner className="mr-2 h-4 w-4" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Retrigger KRA
+          </Button>
         }
       />
       <ViewKycDataComponent data={data} />
