@@ -54,7 +54,7 @@ function CustomerKycView({ id }: { id: number }) {
       ? (kycStore as { id: number }).id
       : null;
   const canRetriggerKra =
-    kycDataStoreId != null && data?.kycStatus !== "VERIFIED";
+    kycDataStoreId != null && data?.kycStatus !== "PENDING";
 
   const handleRetriggerKra = () => {
     if (kycDataStoreId == null) {
