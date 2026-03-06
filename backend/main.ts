@@ -26,6 +26,7 @@ import crmUsersRoutes from "@resource/crm/users/crmusers.routes";
 import auditlogsRoutes from "@resource/customer/auditlogs/auditlogs.routes";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.routes";
 import customerBondsRoutes from "@resource/customer/bonds/customer_bonds.routes";
+import kraRoutes from "@resource/kra/kra.routes";
 import kycRoutes from "@resource/customer/kyc/kyc.routes";
 import orderRoutes from "@resource/customer/order/order.routes";
 import paymentRoutes from "@resource/customer/payment/payment.routes";
@@ -63,6 +64,7 @@ server.addRoutes([
   participantsRouter,
   commonApiRoutes,
   dashboardRoutes,
+  kraRoutes,
   // rfq routes
   nseIsinRoute,
   rfqMasterRouter,

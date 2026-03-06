@@ -2,8 +2,8 @@ import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 import { cacheStorage } from "@store/redis_store";
 
 const user = {
-  userId: 44,
-  kycId: 213,
+  "userId": 3,
+  "kycId": 90,
 };
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

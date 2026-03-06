@@ -19,6 +19,7 @@ import type {
   IStoreKycGETResponse,
   IStoreKycSETResponse,
   KRAResponse,
+  RescheduleKraResponse,
 } from "./Kyc.response";
 
 export class CustomerKycApi {
@@ -255,6 +256,18 @@ export class CustomerKycApi {
   async getKycKraDataById(customerId: number, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<KRAResponse>(
       `/crm/kyc/kra/get/${customerId}`,
+      config,
+    );
+    return data;
+  }
+
+  async rescheduleKra(
+    payload: { customerId: number; kycDataStoreId: number; delayMs?: number },
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<RescheduleKraResponse>(
+      "/kra/reschedule-kra",
+      payload,
       config,
     );
     return data;
