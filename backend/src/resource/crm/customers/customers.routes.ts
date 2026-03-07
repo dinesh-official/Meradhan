@@ -38,4 +38,16 @@ crmCustomersRoutes.delete(
   (req, res) => controller.deleteCustomer(req, res)
 );
 
+crmCustomersRoutes.get(
+  "/api/crm/customer/:customerId/corporate-kyc",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.getCorporateKyc(req, res)
+);
+
+crmCustomersRoutes.put(
+  "/api/crm/customer/:customerId/corporate-kyc",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.saveCorporateKyc(req, res)
+);
+
 export default crmCustomersRoutes;
