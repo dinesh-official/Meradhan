@@ -292,7 +292,7 @@ export class CustomerKycKycService {
     if (!user) {
       throw new AppError("User Not Found");
     }
-    const kycData = await db.dataBase.kYC_FLOW.findUnique({
+    const kycData = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID },
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -362,7 +362,7 @@ export class CustomerKycKycService {
       "100%",
     ];
 
-    const kycData = await db.dataBase.kYC_FLOW.findUnique({
+    const kycData = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: id },
     });
 

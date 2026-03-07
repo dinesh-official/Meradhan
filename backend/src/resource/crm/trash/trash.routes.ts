@@ -7,7 +7,7 @@ const controller = new TrashController();
 
 trashRoutes.get(
   "/api/trash/customers",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => {
     controller.getAllTrashCustomers(req, res);
   }
@@ -15,7 +15,7 @@ trashRoutes.get(
 
 trashRoutes.post(
   "/api/trash/customers/:customerId/restore",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => {
     controller.restoreCustomer(req, res);
   }
@@ -23,7 +23,7 @@ trashRoutes.post(
 
 trashRoutes.delete(
   "/api/trash/customers/:customerId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("SUPER_ADMIN"),
   (req, res) => {
     controller.deleteCustomerPermanently(req, res);
   }

@@ -38,34 +38,6 @@ interface SessionLogsTableProps {
   currentPageSize: number;
 }
 
-const getDeviceBadgeColor = (device: string) => {
-  const lowerDevice = device.toLowerCase();
-  if (lowerDevice === "desktop") return "bg-blue-100 text-blue-800";
-  if (lowerDevice === "mobile") return "bg-green-100 text-green-800";
-  if (lowerDevice === "tablet") return "bg-purple-100 text-purple-800";
-  return "bg-gray-100 text-gray-800";
-};
-
-const getBrowserBadgeColor = (browser: string) => {
-  const lowerBrowser = browser.toLowerCase();
-  if (lowerBrowser.includes("chrome")) return "bg-emerald-100 text-emerald-800";
-  if (lowerBrowser.includes("firefox")) return "bg-orange-100 text-orange-800";
-  if (lowerBrowser.includes("safari")) return "bg-cyan-100 text-cyan-800";
-  if (lowerBrowser.includes("edge")) return "bg-blue-100 text-blue-800";
-  if (lowerBrowser.includes("opera")) return "bg-red-100 text-red-800";
-  return "bg-slate-100 text-slate-800";
-};
-
-const getOSBadgeColor = (os: string) => {
-  const lowerOS = os.toLowerCase();
-  if (lowerOS.includes("windows")) return "bg-sky-100 text-sky-800";
-  if (lowerOS.includes("mac") || lowerOS.includes("ios"))
-    return "bg-gray-100 text-gray-800";
-  if (lowerOS.includes("linux")) return "bg-amber-100 text-amber-800";
-  if (lowerOS.includes("android")) return "bg-green-100 text-green-800";
-  return "bg-zinc-100 text-zinc-800";
-};
-
 const formatDuration = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -95,10 +67,10 @@ const getSessionStatus = (
     endReasonLower === "logout" ||
     session.endReason === "logout";
 
-  // If session has end time with logout reason, show Logout
+  // If session has end time with logout reason, show Closed
   if (session.endTime && isLogout) {
     return {
-      status: "Logout",
+      status: "Closed",
       color: "bg-purple-100 text-purple-800",
     };
   }
@@ -119,10 +91,10 @@ const getSessionStatus = (
     };
   }
 
-  // If session is older than 24 hours, auto expired
+  // If session is older than 24 hours with no end time, show Session Closed
   if (hoursSinceStart > 24) {
     return {
-      status: "Auto Expired",
+      status: "Session Closed",
       color: "bg-orange-100 text-orange-800",
     };
   }
@@ -182,7 +154,7 @@ const SessionRow = ({
 
               <div className="flex items-center gap-5 flex-1 min-w-0 overflow-x-auto">
                 {/* Session ID */}
-                <div className="flex-shrink-0 min-w-[80px]">
+                <div className="flex-shrink-0 w-[80px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Session</span>
                     <span className="font-mono text-xs font-semibold text-gray-700">
@@ -192,7 +164,7 @@ const SessionRow = ({
                 </div>
 
                 {/* User Info */}
-                <div className="flex-shrink-0 min-w-[180px] max-w-[200px]">
+                <div className="flex-shrink-0 w-[150px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">User</span>
                     <span className="font-medium text-xs truncate">
@@ -205,27 +177,27 @@ const SessionRow = ({
                 </div>
 
                 {/* Login Time */}
-                <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
+                <div className="flex-shrink-0 w-[150px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Login</span>
                     <span className="text-xs font-medium whitespace-nowrap">
                       {format(
                         new Date(session.startTime),
-                        "MMM dd, yyyy hh:mm a"
+                        "MMM dd, yyyy hh:mm:ss a"
                       )}
                     </span>
                   </div>
                 </div>
 
                 {/* Logout Time */}
-                <div className="flex-shrink-0 min-w-[130px] max-w-[150px]">
+                <div className="flex-shrink-0 w-[170px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Logout</span>
                     {session.endTime ? (
                       <span className="text-xs font-medium whitespace-nowrap">
                         {format(
                           new Date(session.endTime),
-                          "MMM dd, yyyy hh:mm a"
+                          "MMM dd, yyyy hh:mm:ss a"
                         )}
                       </span>
                     ) : (
@@ -237,7 +209,7 @@ const SessionRow = ({
                 </div>
 
                 {/* Status */}
-                <div className="flex-shrink-0 min-w-[90px]">
+                <div className="flex-shrink-0 w-[170px]">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Status</span>
                     <Badge
@@ -248,35 +220,19 @@ const SessionRow = ({
                   </div>
                 </div>
 
-                {/* Environment Info - Browser, Device, OS combined */}
-                <div className="flex-shrink-0 min-w-[180px] max-w-[220px]">
-                  <div className="flex flex-col gap-1.5">
+                {/* Environment Info - Browser, Device, OS multiline */}
+                <div className="flex-shrink-0 min-w-[120px] max-w-[180px]">
+                  <div className="flex flex-col gap-1">
                     <span className="text-xs text-gray-500">Environment</span>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Badge
-                        className={`${getBrowserBadgeColor(
-                          session.browserName
-                        )} text-xs px-2 py-0.5 whitespace-nowrap`}
-                        title={`Browser: ${session.browserName}`}
-                      >
-                        {session.browserName}
-                      </Badge>
-                      <Badge
-                        className={`${getDeviceBadgeColor(
-                          session.deviceType
-                        )} text-xs px-2 py-0.5 whitespace-nowrap`}
-                        title={`Device: ${session.deviceType}`}
-                      >
-                        <span className="capitalize">{session.deviceType}</span>
-                      </Badge>
-                      <Badge
-                        className={`${getOSBadgeColor(
-                          session.operatingSystem
-                        )} text-xs px-2 py-0.5 whitespace-nowrap`}
-                        title={`OS: ${session.operatingSystem}`}
-                      >
-                        {session.operatingSystem}
-                      </Badge>
+                    <div className="text-xs text-gray-600 space-y-0.5">
+                      <div>Browser: {session.browserName ?? "—"}</div>
+                      <div>
+                        Device:{" "}
+                        <span className="capitalize">
+                          {session.deviceType ?? "—"}
+                        </span>
+                      </div>
+                      <div>OS: {session.operatingSystem ?? "—"}</div>
                     </div>
                   </div>
                 </div>
@@ -393,14 +349,14 @@ const SessionRow = ({
                             <span className="text-xs">
                               {pageView.exitTime
                                 ? formatDuration(
-                                    Math.floor(
-                                      (new Date(pageView.exitTime).getTime() -
-                                        new Date(
-                                          pageView.entryTime
-                                        ).getTime()) /
-                                        1000
-                                    )
+                                  Math.floor(
+                                    (new Date(pageView.exitTime).getTime() -
+                                      new Date(
+                                        pageView.entryTime
+                                      ).getTime()) /
+                                    1000
                                   )
+                                )
                                 : formatDuration(pageView.duration)}
                             </span>
                           </div>

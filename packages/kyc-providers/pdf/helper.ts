@@ -6,6 +6,7 @@ import { pdf } from "pdf-to-img";
 // Define allowed formats as a TypeScript type
 export type DateFormat =
   | "DD-MM-YYYY"
+  | "DD-MMM-YYYY"
   | "MM-DD-YYYY"
   | "MM/DD/YYYY"
   | "YYYY-MM-DD"
@@ -13,7 +14,7 @@ export type DateFormat =
   | "Month DD, YYYY"
   | "DD Month YYYY"
   | "DD/MM/YY"
-  | "DD/MM/YYYY"; // ✅ new format added
+  | "DD/MM/YYYY";
 
 export function formatDate(
   dateString: string,
@@ -44,10 +45,16 @@ export function formatDate(
     "November",
     "December",
   ];
+  const monthNamesShort = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
 
   switch (format) {
     case "DD-MM-YYYY":
       return `${day}-${month}-${year}`;
+    case "DD-MMM-YYYY":
+      return `${day}-${monthNamesShort[date.getMonth()]}-${year}`;
     case "MM-DD-YYYY":
       return `${month}-${day}-${year}`;
     case "MM/DD/YYYY":

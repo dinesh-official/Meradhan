@@ -6,17 +6,17 @@ const participantsRouter = Router();
 const controller = new CbricsParticipantController();
 participantsRouter.get(
   "/api/crm/rfq/nse/db/participants",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.handleGetParticipants(req, res)
 );
 participantsRouter.get(
   "/api/crm/rfq/nse/cbrics/participants",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.handleGetParticipantsCbrics(req, res)
 );
 participantsRouter.get(
   "/api/crm/rfq/nse/rfq/participants",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.handleGetParticipantsRfq(req, res)
 );
 

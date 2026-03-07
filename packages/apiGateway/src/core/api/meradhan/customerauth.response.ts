@@ -37,4 +37,7 @@ export type ISessionResponse = BaseResponseData<{
   middleName: string;
   lastName: string;
   kycStatus: string;
+  isRekycUnderReview?: boolean;
+  /** True when user has any KYC flow with markExpired (rekyc flow). */
+  hasRekycExpiredFlow?: boolean;
 }>;

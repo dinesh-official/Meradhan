@@ -136,7 +136,7 @@ const MdPdf = ({
     //   style={{ width: "100vw", height: "100vh", fontFamily: "Poppins" }}
     // >
     <Document>
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
+      <Page size="A4" style={{ fontFamily: "Poppins" }}  >
         <LogoSvg showAll={true} />
         <Page1 {...pageData.page1} />
         <Footer />

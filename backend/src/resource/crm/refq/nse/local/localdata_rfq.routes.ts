@@ -7,7 +7,7 @@ const controller = new LocaldataRfqController();
 
 localDataRfqRoutes.get(
   "/api/crm/rfq/nse/localdata",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   controller.getLocaldataRfq.bind(controller)
 );
 

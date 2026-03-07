@@ -22,6 +22,7 @@ export class EmailCommunication {
     html?: string;
     text?: string;
     from?: string;
+    attachments?: nodemailer.SendMailOptions["attachments"];
   }): Promise<string> {
     const info = await this.transporter.sendMail({
       from: data.from || env.SMTP_SENDER,
@@ -29,6 +30,7 @@ export class EmailCommunication {
       subject: data.subject,
       text: data.text,
       html: data.html,
+      attachments: data.attachments,
     });
     return info.messageId;
   }

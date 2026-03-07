@@ -37,6 +37,7 @@ import {
   emailOtpSenderQueue,
   emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
+  rekycOtpSenderQueue,
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
 } from "@jobs/queue/worker_queues";
@@ -69,6 +70,24 @@ export const sendAdminLoginOtpEmail = async (data: {
     {
       ...data,
       subject: `MeraDhan CRM - Login OTP ${getFormattedTimestamp()}`,
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendRekycConfirmationOtpEmail = async (data: {
+  email: string;
+  userName: string;
+  otp: string;
+}) => {
+  await rekycOtpSenderQueue.add(
+    {
+      ...data,
+      subject: `MeraDhan CRM - ReKYC Confirmation OTP ${getFormattedTimestamp()}`,
     },
     {
       removeOnComplete: true,

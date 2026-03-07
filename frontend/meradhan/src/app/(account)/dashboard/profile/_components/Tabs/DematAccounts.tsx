@@ -16,10 +16,13 @@ import Swal from "sweetalert2";
 
 function DematAccounts({
   profile,
+  allowAddNew = true,
 }: {
   profile: GetCustomerResponseById["responseData"];
+  allowAddNew?: boolean;
 }) {
   const [showNew, setShowNew] = useState(false);
+  const readOnly = profile.kycStatus !== "VERIFIED";
 
   const apiModel = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
     apiClientCaller
@@ -39,9 +42,8 @@ function DematAccounts({
       console.error("Error removing default demat account", error);
       if (error instanceof ApiError) {
         toast.error(
-          `${
-            error.response?.data.message ||
-            "An error occurred while removing the default demat account."
+          `${error.response?.data.message ||
+          "An error occurred while removing the default demat account."
           } `
         );
       } else {
@@ -64,9 +66,8 @@ function DematAccounts({
       console.error("Error setting default bank account", error);
       if (error instanceof ApiError) {
         toast.error(
-          `${
-            error.response?.data.message ||
-            "An error occurred while setting the default bank account."
+          `${error.response?.data.message ||
+          "An error occurred while setting the default bank account."
           } `
         );
       } else {
@@ -79,6 +80,8 @@ function DematAccounts({
     <div className="mt-5">
       {profile.dematAccounts.map((dematAccount, index) => (
         <DematAccountView
+          readOnly={readOnly}
+          hideBorder={index === profile.dematAccounts.length - 1 && !allowAddNew}
           setDefault={() => {
             setDefaultDematAccountMutation.mutate(dematAccount.id!);
           }}
@@ -124,25 +127,29 @@ function DematAccounts({
           })}
         />
       ))}
-      <div className="flex items-center mt-6">
-        {profile.bankAccounts.length < 5 && (
-          <div
-            onClick={() => {
-              setShowNew(!showNew);
-            }}
-            className="flex items-center gap-3 px-0 text-sm cursor-pointer"
-          >
-            <FaPlusSquare className="text-secondary text-lg" />
-            Add Demat Account{" "}
-            <span className="text-gray-500 text-xs">(Max 5 accounts)</span>
+      {allowAddNew && (
+        <>
+          <div className="flex items-center mt-6">
+            {profile.bankAccounts.length < 5 && (
+              <div
+                onClick={() => {
+                  setShowNew(!showNew);
+                }}
+                className="flex items-center gap-3 px-0 text-sm cursor-pointer"
+              >
+                <FaPlusSquare className="text-secondary text-lg" />
+                Add Demat Account{" "}
+                <span className="text-gray-500 text-xs">(Max 5 accounts)</span>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      {showNew && (
-        <AddNewDematAccount
-          profile={profile}
-          onCancel={() => setShowNew(false)}
-        />
+          {showNew && (
+            <AddNewDematAccount
+              profile={profile}
+              onCancel={() => setShowNew(false)}
+            />
+          )}
+        </>
       )}
     </div>
   );

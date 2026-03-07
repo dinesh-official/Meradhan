@@ -117,7 +117,7 @@ commonApiRoutes.get("/files-public/*path", async (req, res) => {
  */
 commonApiRoutes.all(
   "/files/*path",
-  allowAccessMiddleware("ADMIN", "USER"),
+  allowAccessMiddleware("CRM", "USER"),
   async (req, res) => {
     try {
       const key = decodeURIComponent(
@@ -196,7 +196,7 @@ commonApiRoutes.all(
  */
 commonApiRoutes.get(
   "/uploads/*path",
-  allowAccessMiddleware("ADMIN", "USER"),
+  allowAccessMiddleware("CRM", "USER"),
   async (req, res) => {
     try {
       const filePath = decodeURIComponent(

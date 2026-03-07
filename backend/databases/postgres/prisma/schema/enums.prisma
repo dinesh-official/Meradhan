@@ -4,6 +4,8 @@ enum CrmUserROLE {
   VIEWER
   /// Full access to all operations
   ADMIN
+  /// Super admin: KYC view, delete customer, create super admin only
+  SUPER_ADMIN
   /// Handles lead generation and conversion
   SALES
   /// Manages customer issues and support requests
@@ -68,6 +70,7 @@ enum KYCStatus {
   UNDER_REVIEW
   VERIFIED
   REJECTED
+  RE_KYC
 }
 
 // Lead Sources

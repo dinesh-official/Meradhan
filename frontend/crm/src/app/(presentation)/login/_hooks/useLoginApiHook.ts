@@ -62,7 +62,7 @@ export const useLoginApiHook = () => {
       });
       const sessionId = "ID:" + new Date().getTime();
       sessionStorage.setItem("SESSION", sessionId);
-      setCookie("SESSION", sessionId);
+      setCookie("SESSION", sessionId, { path: "/" }); // session cookie: cleared on browser close
       window.location.href = "/dashboard";
     },
     onError(error) {

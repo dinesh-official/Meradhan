@@ -106,7 +106,7 @@ export const NAV_ITEMS: NavItem[] = [
             allowOnly: ["edit:rfq"],
           },
           {
-            label: "Manage Deals",
+            label: "Deal Book",
             path: "/dashboard/rfqs/nse/deals",
             module: "rfq",
             allowOnly: ["edit:rfq"],

@@ -13,15 +13,18 @@ export class CrmUserController {
   async createNewUser(req: Request, res: Response): Promise<void> {
     const createBy = req.session!.id;
     const data = appSchema.crm.user.createCRMUserSchema.parse(req.body);
+    if (data.role === "SUPER_ADMIN" && req.session?.role !== "SUPER_ADMIN") {
+      return res.sendResponse({
+        statusCode: 403,
+        message: "Only a Super Admin can create a new Super Admin.",
+      }) as unknown as void;
+    }
     const response = await this.crmUserService.createNewUser(data, createBy);
     await createCrmActivityLog(req, {
-      action: "CREATE_FOLLOWUP",
+      action: "CREATE_USER",
       details: {
-        Reason: "CREATE_FOLLOWUP",
-        Name: `${data.name}`,
-        Email: `${data.email}`,
-        PhoneNo: `${data.phoneNo}`,
-        Role: `${data.role}`,
+        Reason: "Create New User",
+        ...data,
       },
       entityType: "USERS",
       entityId: response.id,
@@ -35,18 +38,30 @@ export class CrmUserController {
   }
 
   async updateUser(req: Request, res: Response): Promise<void> {
+    if (req.session?.role !== "SUPER_ADMIN") {
+      return res.sendResponse({
+        statusCode: 403,
+        message: "Only a Super Admin can edit users.",
+      }) as unknown as void;
+    }
     const id = req.params!.id;
     const data = appSchema.crm.user.updateUserSchema.parse(req.body);
+    if (
+      data.role === "SUPER_ADMIN" &&
+      req.session?.role !== "SUPER_ADMIN"
+    ) {
+      return res.sendResponse({
+        statusCode: 403,
+        message: "Only a Super Admin can assign the Super Admin role.",
+      }) as unknown as void;
+    }
     const response = await this.crmUserService.updateUser(Number(id), data);
 
     await createCrmActivityLog(req, {
       action: "UPDATE_USER",
       details: {
         Reason: "UPDATE_USER",
-        Name: `${data.name}`,
-        Email: `${data.email}`,
-        PhoneNo: `${data.phoneNo}`,
-        Role: `${data.role}`,
+        ...data,
       },
       entityType: "USERS",
       entityId: response.id,
@@ -70,6 +85,12 @@ export class CrmUserController {
   }
 
   async deleteUser(req: Request, res: Response): Promise<void> {
+    if (req.session?.role !== "SUPER_ADMIN") {
+      return res.sendResponse({
+        statusCode: 403,
+        message: "Only a Super Admin can delete users.",
+      }) as unknown as void;
+    }
     const id = req.params!.id;
     const data = await this.crmUserService.deleteUser(Number(id));
 

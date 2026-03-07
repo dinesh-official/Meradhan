@@ -29,7 +29,6 @@ const cbricsManager = new ParticipantManager();
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
 
-
 export class KraWorkerService {
   private kraProcess = new KraProcess();
 
@@ -37,11 +36,9 @@ export class KraWorkerService {
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
     const runnerCachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
 
-
     const lastTask = await cacheStorage.get<string>(cachedKey);
     const { customerId, kycDataStoreId } = data;
     const runner = await cacheStorage.get<string>(runnerCachedKey);
-
 
     if (!runner) {
       await db.dataBase.kraDataLogs.create({
@@ -93,10 +90,10 @@ export class KraWorkerService {
 
       if (status == "REJECTED") {
         // update customer profile data - set kyc status to under review and kra status to rejected
-        await db.dataBase.customerProfileDataModel.update({
-          where: { id: customerId },
-          data: { kycStatus: "UNDER_REVIEW", kraStatus: "REJECTED" },
-        });
+        // await db.dataBase.customerProfileDataModel.update({
+        //   where: { id: customerId },
+        //   data: { kycStatus: "UNDER_REVIEW", kraStatus: "REJECTED" },
+        // });
         // create kra data log for failed request - set stage to KRA_FAILED_REQUEST
         await db.dataBase.kraDataLogs.create({
           data: {
@@ -486,7 +483,7 @@ export class KraProcess {
         APP_COR_CTRY: p.APP_COR_CTRY,
         APP_COR_PINCD: p.APP_COR_PINCD,
         APP_COR_STATE: p.APP_COR_STATE,
-        APP_DATE: p.APP_DATE,
+        APP_DATE: formatDateTime15SecPrev(new Date()),
         APP_DOB_DT: p.APP_DOB_DT + " 00:00:00",
         APP_DOC_PROOF: p.APP_DOC_PROOF,
         APP_EMAIL: p.APP_EMAIL,
@@ -782,19 +779,39 @@ export const formatDate = (date: Date) => {
 };
 
 export function formatDateTime(date: Date): string {
-  // Convert to UTC first
-  const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+  const istDate = new Date(
+    date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
 
-  // Add IST offset (5 hours 30 minutes)
-  const istTime = new Date(utcTime + 5.5 * 60 * 60 * 1000);
+  const dd = String(istDate.getDate()).padStart(2, "0");
+  const mm = String(istDate.getMonth() + 1).padStart(2, "0");
+  const yyyy = istDate.getFullYear();
 
-  const dd = String(istTime.getDate()).padStart(2, "0");
-  const mm = String(istTime.getMonth() + 1).padStart(2, "0");
-  const yyyy = istTime.getFullYear();
+  const HH = String(istDate.getHours()).padStart(2, "0");
+  const MM = String(istDate.getMinutes()).padStart(2, "0");
+  const SS = String(istDate.getSeconds()).padStart(2, "0");
 
-  const HH = String(istTime.getHours()).padStart(2, "0");
-  const MM = String(istTime.getMinutes()).padStart(2, "0");
-  const SS = String(istTime.getSeconds()).padStart(2, "0");
+  return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
+}
+
+export function formatDateTime15SecPrev(date: Date): string {
+  if (env.KRA_ENV === "PROD") {
+    return formatDateTime(date);
+  }
+  console.log("prev date before 15 seconds", date);
+
+  const istDate = new Date(
+    date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
+
+  istDate.setSeconds(istDate.getSeconds() - 15);
+
+  const dd = String(istDate.getDate()).padStart(2, "0");
+  const mm = String(istDate.getMonth() + 1).padStart(2, "0");
+  const yyyy = istDate.getFullYear();
+  const HH = String(istDate.getHours()).padStart(2, "0");
+  const MM = String(istDate.getMinutes()).padStart(2, "0");
+  const SS = String(istDate.getSeconds()).padStart(2, "0");
 
   return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
 }

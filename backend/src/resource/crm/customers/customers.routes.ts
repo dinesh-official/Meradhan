@@ -7,34 +7,34 @@ const controller = new CustomerProfileController();
 
 crmCustomersRoutes.get(
   "/api/crm/customers",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.filterCustomer(req, res)
 );
 
 crmCustomersRoutes.get(
   "/api/crm/customer/:customerId",
-  allowAccessMiddleware("ADMIN", "USER"),
+  allowAccessMiddleware("CRM", "USER"),
   (req, res) => controller.getFullProfileCustomer(req, res)
 );
 
 crmCustomersRoutes.post(
   "/api/crm/customer",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.createCustomer(req, res)
 );
 crmCustomersRoutes.patch(
   "/api/crm/customer/:customerId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   (req, res) => controller.updateCustomer(req, res)
 );
 crmCustomersRoutes.delete(
   "/api/crm/customer/:customerId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("SUPER_ADMIN"),
   (req, res) => controller.softDeleteCustomer(req, res)
 );
 crmCustomersRoutes.delete(
   "/api/crm/customer/force/:customerId",
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("SUPER_ADMIN"),
   (req, res) => controller.deleteCustomer(req, res)
 );
 

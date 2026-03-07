@@ -28,12 +28,14 @@ export class ParticipantManager {
         currentAddress: true,
         bankAccounts: true,
         dematAccounts: true,
+        aadhaarCard: true,
       },
     });
 
     if (!user) {
       throw new AppError("No User Found");
     }
+    const dobDoi = user.aadhaarCard?.dateOfBirth?.replaceAll("/", "-") || "";
 
     const address = splitAddressInto3BalancedLines(
       removeLastCommaChunks(user.currentAddress!.fullAddress, 3),
@@ -75,7 +77,7 @@ export class ParticipantManager {
       emailList: [user.emailAddress],
       stateCode: getStateCode(user.currentAddress!.state)!,
       regAddress: user.currentAddress!.fullAddress,
-
+      dobDoi: dobDoi,
       telephone: removeCountryCode(user.phoneNo),
       expiryDate: null,
       leiCode: null,
@@ -113,6 +115,7 @@ export class ParticipantManager {
                 actualStatus: participant.actualStatus,
                 contactPerson: participant.contactPerson,
                 custodian: participant.custodian,
+                dobDoi: dobDoi,
                 userId: userId,
                 firstName: participant.firstName,
                 id: participant.id,
@@ -186,6 +189,7 @@ export class ParticipantManager {
         panCard: true,
         currentAddress: true,
         bankAccounts: true,
+        aadhaarCard: true,
         dematAccounts: true,
         nseDataSet: {
           select: {
@@ -221,6 +225,7 @@ export class ParticipantManager {
       expiryDate: null,
       leiCode: null,
       custodian: null,
+      dobDoi: user.aadhaarCard?.dateOfBirth?.replaceAll("/", "-") || "",
       bankAccountList: user.bankAccounts.map((e) => {
         return {
           bankAccountNo: e.accountNumber,

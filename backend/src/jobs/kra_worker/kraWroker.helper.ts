@@ -15,7 +15,6 @@ export const addKraWorkerJob = async <T>(
   data: KraWorkerJobData<T>,
   delay?: number,
 ) => {
-
   const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
   const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
   const runner = await cacheStorage.get<string>(cachedKey);
@@ -26,7 +25,7 @@ export const addKraWorkerJob = async <T>(
 
   return await kraWorkerQueue.add(data, {
     attempts: 1,
-    delay: delay ?? 1 * 60 * 60 * 1000, // initial delay, 1 hr
+    delay: delay ?? 4 * 60 * 60 * 1000, // initial delay, 4 hr
   });
 };
 

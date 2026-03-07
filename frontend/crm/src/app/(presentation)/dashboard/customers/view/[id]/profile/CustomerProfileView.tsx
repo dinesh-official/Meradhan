@@ -3,15 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import { hasOneOfPermission } from "@/global/utils/role.utils";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { encodeId } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import { IdCardIcon, NotebookPen } from "lucide-react";
+import Link from "next/link";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 
 function CustomerProfileView({ profileId }: { profileId: number }) {
+  const { cookies } = useAppCookie();
+  const canViewAllInfo = hasOneOfPermission(cookies.role, ["view:customerkyc"]);
   // const [useCustomerFormDataHook, setuseCustomerFormDataHook] = useState<GetCustomerResponseById>()])
   const fetchCustomer = async () => {
     const fetchCustomerProfile = new apiGateway.crm.customer.CrmCustomerApi(
@@ -47,11 +54,17 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
         description="Complete customer information and account details"
         actions={
           <div className="gap-3 flex  justify-center items-center md:w-auto w-full">
-            <Button variant={`outline`}>
-              <IdCardIcon /> View KYC Data
-            </Button>
-            <Button variant={`default`}>
-              <NotebookPen /> View RFQs
+            <AllowOnlyView permissions={["view:customerkyc"]}>
+              <Button variant="outline" asChild>
+                <Link href={`/dashboard/customers/view/${encodeId(profileId)}/kyc`}>
+                  <IdCardIcon /> View KYC Data
+                </Link>
+              </Button>
+            </AllowOnlyView>
+            <Button variant="default" asChild>
+              <Link href="/dashboard/rfqs/nse">
+                <NotebookPen /> View RFQs
+              </Link>
             </Button>
           </div>
         }
@@ -145,29 +158,31 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Timeline</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid lg:grid-cols-2 gap-5">
-              <LabelView title="Account Created">
-                <p>
-                  {customer?.createdAt
-                    ? dateTimeUtils.formatDateTime(
-                        customer.createdAt,
-                        "DD MMMM YYYY hh:mm AA"
-                      )
-                    : "—"}
-                </p>
-              </LabelView>
+        {canViewAllInfo && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Timeline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid lg:grid-cols-2 gap-5">
+                <LabelView title="Account Created">
+                  <p>
+                    {customer?.createdAt
+                      ? dateTimeUtils.formatDateTime(
+                          customer.createdAt,
+                          "DD MMMM YYYY hh:mm AA"
+                        )
+                      : "—"}
+                  </p>
+                </LabelView>
 
-              <LabelView title="Customer ID">
-                <p>{customer?.userName}</p>
-              </LabelView>
-            </div>
-          </CardContent>
-        </Card>
+                <LabelView title="Customer ID">
+                  <p>{customer?.userName}</p>
+                </LabelView>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

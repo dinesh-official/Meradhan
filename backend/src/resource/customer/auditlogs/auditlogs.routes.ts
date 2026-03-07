@@ -26,7 +26,7 @@ auditlogsRoutes.post(
   "/api/auditlogs/meradhan/tracing/init",
   auditLogCreationLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("USER", "ADMIN"),
+  allowAccessMiddleware("USER", "CRM"),
   (req, res) => auditLogsController.startMeradhanTracking(req, res)
 );
 
@@ -34,7 +34,7 @@ auditlogsRoutes.post(
   "/api/auditlogs/meradhan/page-tracking/start",
   auditLogCreationLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("USER", "ADMIN"),
+  allowAccessMiddleware("USER", "CRM"),
   (req, res) => auditLogsController.startPageTrackingMeradhan(req, res)
 );
 
@@ -42,7 +42,7 @@ auditlogsRoutes.post(
   "/api/auditlogs/meradhan/page-tracking/end/:pageId",
   auditLogCreationLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("USER", "ADMIN"),
+  allowAccessMiddleware("USER", "CRM"),
   (req, res) => auditLogsController.endPageTrackingMeradhan(req, res)
 );
 
@@ -50,7 +50,7 @@ auditlogsRoutes.post(
   "/api/auditlogs/meradhan/page-tracking/update/:pageId",
   auditLogCreationLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("USER", "ADMIN"),
+  allowAccessMiddleware("USER", "CRM"),
   (req, res) => auditLogsController.updatePageTrackingMeradhan(req, res)
 );
 
@@ -59,7 +59,7 @@ auditlogsRoutes.post(
 auditlogsRoutes.get(
   "/api/auditlogs/meradhan/activity-logs",
   auditLogReadLimiter,
-  allowAccessMiddleware("USER", "ADMIN"),
+  allowAccessMiddleware("USER", "CRM"),
   enforceUserDataAccess,
   (req, res) => auditLogsController.getActivityLogsMeradhan(req, res)
 );
@@ -67,7 +67,7 @@ auditlogsRoutes.get(
 auditlogsRoutes.get(
   "/api/auditlogs/meradhan/login-logs",
   auditLogReadLimiter,
-  allowAccessMiddleware("USER", "ADMIN"),
+  allowAccessMiddleware("USER", "CRM"),
   enforceUserDataAccess,
   (req, res) => auditLogsController.getLoginLogsMeradhan(req, res)
 );
@@ -75,7 +75,7 @@ auditlogsRoutes.get(
 auditlogsRoutes.get(
   "/api/auditlogs/meradhan/session-logs",
   auditLogReadLimiter,
-  allowAccessMiddleware("USER", "ADMIN"),
+  allowAccessMiddleware("USER", "CRM"),
   enforceUserDataAccess,
   (req, res) => auditLogsController.getSessionLogsMeradhan(req, res)
 );
@@ -97,7 +97,7 @@ auditlogsRoutes.all(
   "/api/web/tracking",
   meradhanTrackingLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN", "USER"), // Require authentication - no PUBLIC access
+  allowAccessMiddleware("CRM", "USER"), // Require authentication - no PUBLIC access
   async (req, res) => auditLogsController.createWebTracking(req, res)
 );
 
@@ -105,35 +105,35 @@ auditlogsRoutes.all(
   "/api/web/tracking/revalidate",
   meradhanTrackingLimiter,
   trackingPayloadLimit,
-  allowAccessMiddleware("ADMIN", "USER"), // Require authentication - no PUBLIC access
+  allowAccessMiddleware("CRM", "USER"), // Require authentication - no PUBLIC access
   async (req, res) => auditLogsController.revalidateWebTracking(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/web/tracking/list",
   auditLogReadLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getWebTrackingList(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/web/tracking/group",
   auditLogReadLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getWebGroupedTracking(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/web/tracking/group/auth",
   auditLogReadLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getWebAuthTracking(req, res)
 );
 
 auditlogsRoutes.get(
   "/api/web/tracking/group/unknown",
   auditLogReadLimiter,
-  allowAccessMiddleware("ADMIN"),
+  allowAccessMiddleware("CRM"),
   async (req, res) => auditLogsController.getWebUnknownTracking(req, res)
 );
 

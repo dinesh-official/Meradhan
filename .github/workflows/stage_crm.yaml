@@ -48,11 +48,11 @@ jobs:
           DEV_SMTP_PASS: ${{ secrets.SMTP_PASS }}
 
           DEV_CBRICS_DOMAIN: ${{ secrets.DEV_CBRICS_DOMAIN }}
-          DEV_CBRICS_LOGIN: ${{ secrets.DEV_CBRICS_LOGIN }}
+    
           DEV_CBRICS_PASSWORD: ${{ secrets.DEV_CBRICS_PASSWORD }}
 
           DEV_RFQ_CBRICS_DOMAIN: ${{ secrets.DEV_RFQ_CBRICS_DOMAIN }}
-          DEV_RFQ_CBRICS_LOGIN: ${{ secrets.DEV_RFQ_CBRICS_LOGIN }}
+
           DEV_RFQ_CBRICS_PASSWORD: ${{ secrets.DEV_RFQ_CBRICS_PASSWORD }}
 
           DEV_DIGIO_USERNAME_PASS: ${{ secrets.DEV_DIGIO_USERNAME_PASS }}
@@ -81,8 +81,8 @@ jobs:
           DEV_S3_ACCESS_KEY_ID: ${{ secrets.DEV_S3_ACCESS_KEY_ID }}
           DEV_S3_SECRET_ACCESS_KEY: ${{ secrets.DEV_S3_SECRET_ACCESS_KEY }}
           DEV_S3_REGION: ap-south-1
-          DEV_S3_ENDPOINT: https://meradhan-storage.s3.ap-south-1.amazonaws.com
-          DEV_S3_BUCKET_NAME: meradhan-storage
+          DEV_S3_ENDPOINT: https://staging-meradhan-storage.s3.ap-south-1.amazonaws.com
+          DEV_S3_BUCKET_NAME: staging-meradhan-storage
 
         run: |
           echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
@@ -106,6 +106,9 @@ jobs:
           echo "DATABASE_URL=${DEV_DATABASE_URL}" >> .env
           echo "DIRECT_URL=${DEV_DIRECT_URL}" >> .env
 
+          echo "RFQ_CBRICS_ENV=UAT" >> .env
+          echo "CBRICS_ENV=UAT" >>  .env
+
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
 
@@ -128,11 +131,11 @@ jobs:
           echo "SMTP_PASS=${DEV_SMTP_PASS}" >> .env
 
           echo "CBRICS_DOMAIN=${DEV_CBRICS_DOMAIN}" >> .env
-          echo "CBRICS_LOGIN=${DEV_CBRICS_LOGIN}" >> .env
+          echo "CBRICS_LOGIN=DEV" >> .env
           echo "CBRICS_PASSWORD=${DEV_CBRICS_PASSWORD}" >> .env
 
-          echo "RFQ_CBRICS_DOMAIN=${DEV_RFQ_CBRICS_DOMAIN}" >> .env
-          echo "RFQ_CBRICS_LOGIN=${DEV_RFQ_CBRICS_LOGIN}" >> .env
+          echo "RFQ_CBRICS_DOMAIN=BCISPL" >> .env
+          echo "RFQ_CBRICS_LOGIN=DEV" >> .env
           echo "RFQ_CBRICS_PASSWORD=${DEV_RFQ_CBRICS_PASSWORD}" >> .env
 
           echo "DIGIO_USERNAME_PASS=${DEV_DIGIO_USERNAME_PASS}" >> .env
@@ -166,7 +169,6 @@ jobs:
 
           echo "----------- FINAL .env -----------"
           cat .env
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -177,6 +179,13 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Debug AWS & ECR
+        run: |
+         echo "AWS Identity:"
+         aws sts get-caller-identity
+         echo "ECR Repositories:"
+         aws ecr describe-repositories --region ${{ secrets.AWS_REGION }}
 
       - name: Build, Tag & Push Docker Image
         env:

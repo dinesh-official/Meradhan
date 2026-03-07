@@ -43,6 +43,7 @@ export interface UnregisteredParticipantRequest {
 
   /** LEI Code (if applicable) */
   leiCode: string | null; // String(20), Optional
+  dobDoi: string; // String(10), Optional
 
   /** LEI expiry date (if LEI is provided) */
   expiryDate: string | null; // Date (YYYY-MM-DD), Optional
@@ -64,6 +65,7 @@ interface BankAccount {
 
   /** Bank Account Number */
   bankAccountNo: string; // String(30), Optional
+
 
   /**
    * Indicates if this bank account is default for payouts
@@ -148,6 +150,7 @@ export interface UnregisteredParticipantResponse {
 
   /** List of associated bank accounts */
   bankAccountList: BankAccountResponse[];
+  dobDoi?: string;
 
   /** List of associated DP accounts */
   dpAccountList: DPAccountResponse[];
