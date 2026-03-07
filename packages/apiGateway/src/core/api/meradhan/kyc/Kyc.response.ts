@@ -51,6 +51,8 @@ export type IStoreKycGETResponse = BaseResponseData<{
   updatedAt: string;
   complete: boolean;
 } | null>;
+
+export type RescheduleKraResponse = BaseResponseData<{ jobId: string | number }>;
 export type IStoreKycSETResponse = BaseResponseData<{
   status: boolean;
 }>;

@@ -779,39 +779,58 @@ export const formatDate = (date: Date) => {
 };
 
 export function formatDateTime(date: Date): string {
-  const istDate = new Date(
-    date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-  );
 
-  const dd = String(istDate.getDate()).padStart(2, "0");
-  const mm = String(istDate.getMonth() + 1).padStart(2, "0");
-  const yyyy = istDate.getFullYear();
+  // Format in IST using formatToParts (reliable)
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
 
-  const HH = String(istDate.getHours()).padStart(2, "0");
-  const MM = String(istDate.getMinutes()).padStart(2, "0");
-  const SS = String(istDate.getSeconds()).padStart(2, "0");
+  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+
+  const dd = get("day");
+  const mm = get("month");
+  const yyyy = get("year");
+  const HH = get("hour");
+  const MM = get("minute");
+  const SS = get("second");
 
   return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
 }
 
 export function formatDateTime15SecPrev(date: Date): string {
-  if (env.KRA_ENV === "PROD") {
-    return formatDateTime(date);
-  }
-  console.log("prev date before 15 seconds", date);
+  // If PROD should behave differently, keep this condition
+  if (env.KRA_ENV === "PROD") return formatDateTime(date);
 
-  const istDate = new Date(
-    date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-  );
+  // subtract 15 seconds from the actual instant
+  const d = new Date(date.getTime() - 15_000);
 
-  istDate.setSeconds(istDate.getSeconds() - 15);
+  // Format in IST using formatToParts (reliable)
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
 
-  const dd = String(istDate.getDate()).padStart(2, "0");
-  const mm = String(istDate.getMonth() + 1).padStart(2, "0");
-  const yyyy = istDate.getFullYear();
-  const HH = String(istDate.getHours()).padStart(2, "0");
-  const MM = String(istDate.getMinutes()).padStart(2, "0");
-  const SS = String(istDate.getSeconds()).padStart(2, "0");
+  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+
+  const dd = get("day");
+  const mm = get("month");
+  const yyyy = get("year");
+  const HH = get("hour");
+  const MM = get("minute");
+  const SS = get("second");
 
   return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
 }
