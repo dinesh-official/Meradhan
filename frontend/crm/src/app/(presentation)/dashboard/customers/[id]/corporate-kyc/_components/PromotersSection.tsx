@@ -8,8 +8,9 @@ import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
 
 export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
-  const { form, setPromoter, addPromoter, removePromoter } = hook;
+  const { form, errors, setPromoter, addPromoter, removePromoter } = hook;
   const list = form.promoters ?? [];
+  const rowErrors = (i: number) => errors.promoters?.[i] ?? {};
 
   return (
     <Card>
@@ -44,6 +45,7 @@ export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
               required
               value={p.fullName}
               onChangeAction={(v) => setPromoter(index, { fullName: v })}
+              error={rowErrors(index).fullName?.[0]}
             />
             <InputField
               label="PAN"
@@ -65,6 +67,7 @@ export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
               type="email"
               value={p.email ?? ""}
               onChangeAction={(v) => setPromoter(index, { email: v })}
+              error={rowErrors(index).email?.[0]}
             />
             <InputField
               label="Mobile"

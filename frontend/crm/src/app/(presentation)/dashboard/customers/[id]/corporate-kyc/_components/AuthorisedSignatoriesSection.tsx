@@ -14,11 +14,13 @@ export function AuthorisedSignatoriesSection({
 }) {
   const {
     form,
+    errors,
     setAuthorisedSignatory,
     addAuthorisedSignatory,
     removeAuthorisedSignatory,
   } = hook;
   const list = form.authorisedSignatories ?? [];
+  const rowErrors = (i: number) => errors.authorisedSignatories?.[i] ?? {};
 
   return (
     <Card>
@@ -62,12 +64,14 @@ export function AuthorisedSignatoriesSection({
               onChangeAction={(v) =>
                 setAuthorisedSignatory(index, { fullName: v })
               }
+              error={rowErrors(index).fullName?.[0]}
             />
             <InputField
               label="PAN"
               required
               value={s.pan}
               onChangeAction={(v) => setAuthorisedSignatory(index, { pan: v })}
+              error={rowErrors(index).pan?.[0]}
             />
             <InputField
               label="Designation"
@@ -91,6 +95,7 @@ export function AuthorisedSignatoriesSection({
               onChangeAction={(v) =>
                 setAuthorisedSignatory(index, { email: v })
               }
+              error={rowErrors(index).email?.[0]}
             />
             <InputField
               label="Mobile"

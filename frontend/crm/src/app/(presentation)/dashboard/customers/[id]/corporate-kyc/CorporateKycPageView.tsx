@@ -56,7 +56,13 @@ export default function CorporateKycPageView({
 
   const handleSave = async () => {
     if (!hook.validate()) {
-      toast.error("Please fix validation errors.");
+      const messages = hook.getAllErrorMessages();
+      const text =
+        messages.length > 0
+          ? messages.slice(0, 15).join("\n") +
+            (messages.length > 15 ? `\n… and ${messages.length - 15} more` : "")
+          : "Please fix the errors in the form.";
+      toast.error("Validation failed", { description: text });
       return;
     }
     setSaving(true);

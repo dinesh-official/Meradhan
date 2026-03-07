@@ -1,17 +1,25 @@
 import type { CorporateKycResponse } from "@root/apiGateway";
 import type { CreateCorporateKycPayload } from "@root/schema";
 
+/** Normalize API date (ISO or YYYY-MM-DD) to YYYY-MM-DD for input type="date" */
+function toDateOnly(value: string | undefined | null): string {
+  if (value == null || value === "") return "";
+  const s = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  return s;
+}
+
 export function mapCorporateKycResponseToForm(
   data: CorporateKycResponse
 ): CreateCorporateKycPayload {
   return {
     entityName: data.entityName,
-    dateOfCommencementOfBusiness: data.dateOfCommencementOfBusiness ?? "",
+    dateOfCommencementOfBusiness: toDateOnly(data.dateOfCommencementOfBusiness),
     countryOfIncorporation: data.countryOfIncorporation ?? "",
     panCopyFileUrl: data.panCopyFileUrl ?? "",
     entityConstitutionType: (data.entityConstitutionType as CreateCorporateKycPayload["entityConstitutionType"]) ?? undefined,
     otherConstitutionType: data.otherConstitutionType ?? "",
-    dateOfIncorporation: data.dateOfIncorporation ?? "",
+    dateOfIncorporation: toDateOnly(data.dateOfIncorporation),
     placeOfIncorporation: data.placeOfIncorporation ?? "",
     panNumber: data.panNumber ?? "",
     cinOrRegistrationNumber: data.cinOrRegistrationNumber ?? "",

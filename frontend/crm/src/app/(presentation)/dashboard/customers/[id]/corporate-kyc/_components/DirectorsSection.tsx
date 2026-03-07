@@ -8,8 +8,9 @@ import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
 
 export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
-  const { form, setDirector, addDirector, removeDirector } = hook;
+  const { form, errors, setDirector, addDirector, removeDirector } = hook;
   const list = form.directors ?? [];
+  const rowErrors = (i: number) => errors.directors?.[i] ?? {};
 
   return (
     <Card>
@@ -44,6 +45,7 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
               required
               value={dir.fullName}
               onChangeAction={(v) => setDirector(index, { fullName: v })}
+              error={rowErrors(index).fullName?.[0]}
             />
             <InputField
               label="PAN"
@@ -65,6 +67,7 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
               type="email"
               value={dir.email ?? ""}
               onChangeAction={(v) => setDirector(index, { email: v })}
+              error={rowErrors(index).email?.[0]}
             />
             <InputField
               label="Mobile"

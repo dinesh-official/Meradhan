@@ -27,7 +27,8 @@ export const corporateKycBankAccountSchema = z.object({
   bankName: z.string().min(1, "Bank name is required"),
   ifscCode: z
     .string()
-    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format"),
+    .min(1, "IFSC code is required")
+    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "IFSC must be 11 characters (e.g. SBIN0001234)"),
   bankProofFileUrls: z.array(z.string()).default([]),
   isPrimaryAccount: z.boolean().default(false),
 });
@@ -38,28 +39,28 @@ export const corporateKycDematAccountSchema = z.object({
   accountType: z.string().optional(),
   dpId: z.string().min(1, "DP ID is required"),
   clientId: z.string().min(1, "Client ID is required"),
-  accountHolderName: z.string().min(1, "Account holder name is required"),
+  accountHolderName: z.string().min(1, "Demat account holder name is required"),
   dematProofFileUrl: z.string().optional(),
   isPrimary: z.boolean().default(false),
 });
 
 export const corporateKycDirectorSchema = z.object({
   id: z.number().optional(),
-  fullName: z.string().min(1, "Full name is required"),
+  fullName: z.string().min(1, "Director full name is required"),
   pan: z.string().optional(),
   designation: z.string().optional(),
   din: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
+  email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
   mobile: z.string().optional(),
 });
 
 export const corporateKycPromoterSchema = z.object({
   id: z.number().optional(),
-  fullName: z.string().min(1, "Full name is required"),
+  fullName: z.string().min(1, "Promoter full name is required"),
   pan: z.string().optional(),
   designation: z.string().optional(),
   din: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
+  email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
   mobile: z.string().optional(),
 });
 
@@ -69,7 +70,7 @@ export const corporateKycAuthorisedSignatorySchema = z.object({
   pan: z.string().min(1, "PAN is required"),
   designation: z.string().optional(),
   din: z.string().optional(),
-  email: z.string().min(1, "Email is required").email("Invalid email"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
   mobile: z.string().optional(),
 });
 
@@ -84,10 +85,11 @@ export const createCorporateKycSchema = z.object({
   dateOfIncorporation: z.string().optional(),
   placeOfIncorporation: z.string().optional(),
   panNumber: z
-    .string()
-    .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN format")
-    .optional()
-    .or(z.literal("")),
+    .union([
+      z.string().length(0),
+      z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "PAN must be 10 characters (e.g. AAAAA9999A)"),
+    ])
+    .optional(),
   cinOrRegistrationNumber: z.string().optional(),
 
   // Correspondence address

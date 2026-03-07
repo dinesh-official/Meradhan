@@ -46,12 +46,6 @@ export function EntityDetailsSection({ hook }: { hook: CorporateKycFormHook }) {
           value={form.countryOfIncorporation ?? ""}
           onChangeAction={(v) => setField("countryOfIncorporation", v)}
         />
-        <InputField
-          label="PAN copy (file URL)"
-          placeholder="URL"
-          value={form.panCopyFileUrl ?? ""}
-          onChangeAction={(v) => setField("panCopyFileUrl", v)}
-        />
         <SelectField
           label="Entity constitution type"
           placeholder="Select"

@@ -84,6 +84,7 @@ export class CustomerProfileService extends CustomerProfileManager {
         phoneNo: true,
         VerifiedBy: true,
         verifyDate: true,
+        userType: true,
 
         panCard: {
           select: {

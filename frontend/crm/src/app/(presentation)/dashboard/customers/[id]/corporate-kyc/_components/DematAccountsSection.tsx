@@ -3,10 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { SelectField } from "@/global/elements/inputs/SelectField";
 import type { SelectOption } from "@/global/elements/inputs/SelectField";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import type { CorporateKycDematAccountPayload } from "@root/schema";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
@@ -17,8 +19,10 @@ const DEPOSITORY_OPTIONS: SelectOption[] = [
 ];
 
 export function DematAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
-  const { form, setDematAccount, addDematAccount, removeDematAccount } = hook;
+  const { form, errors, setDematAccount, addDematAccount, removeDematAccount } = hook;
+  const { uploadFile } = useCorporateKycFileUpload();
   const list = form.dematAccounts ?? [];
+  const rowErrors = (i: number) => errors.dematAccounts?.[i] ?? {};
 
   return (
     <Card>
@@ -58,6 +62,7 @@ export function DematAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
                 })
               }
               options={DEPOSITORY_OPTIONS}
+              error={rowErrors(index).depository?.[0]}
             />
             <InputField
               label="Account holder name"
@@ -66,30 +71,36 @@ export function DematAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
               onChangeAction={(v) =>
                 setDematAccount(index, { accountHolderName: v })
               }
+              error={rowErrors(index).accountHolderName?.[0]}
             />
             <InputField
               label="DP ID"
               required
               value={acc.dpId}
               onChangeAction={(v) => setDematAccount(index, { dpId: v })}
+              error={rowErrors(index).dpId?.[0]}
             />
             <InputField
               label="Client ID"
               required
               value={acc.clientId}
               onChangeAction={(v) => setDematAccount(index, { clientId: v })}
+              error={rowErrors(index).clientId?.[0]}
             />
             <InputField
               label="Account type"
               value={acc.accountType ?? ""}
               onChangeAction={(v) => setDematAccount(index, { accountType: v })}
             />
-            <InputField
-              label="Demat proof file URL"
+            <FileUploadField
+              label="Demat proof file"
               value={acc.dematProofFileUrl ?? ""}
               onChangeAction={(v) =>
                 setDematAccount(index, { dematProofFileUrl: v })
               }
+              onUpload={(file) => uploadFile(file, "corporate-kyc")}
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              placeholder="Select file or paste URL"
             />
             <div className="flex items-center gap-2">
               <Switch

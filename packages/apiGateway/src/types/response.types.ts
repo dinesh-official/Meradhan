@@ -186,6 +186,7 @@ export type CustomerUtility = {
 export type CustomerProfile = CustomerBase & {
   panCard: CustomerPanCard;
   utility: CustomerUtility;
+  userType?: CustomerUserType;
 };
 
 //crm/customers?page=1&accountStatus=ACTIVE&kycStatus=PENDING
