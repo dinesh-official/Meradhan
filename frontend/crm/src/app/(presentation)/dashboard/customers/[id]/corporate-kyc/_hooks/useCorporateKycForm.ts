@@ -273,7 +273,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
         const arr = val as Array<Record<string, string[]>> | undefined;
         if (Array.isArray(arr)) next[key as (typeof NESTED_ERROR_KEYS)[number]] = arr;
       } else if (Array.isArray(val)) {
-        (next as Record<string, string[] | undefined>)[key] = val;
+        (next as Record<string, string[] | undefined>)[key] = val as string[];
       }
     }
     setErrors(next);
