@@ -50,7 +50,7 @@ export default function CorporateKycPageView({
   useEffect(() => {
     if (isLoading) return;
     hook.reset(getInitialForm());
-  }, [isLoading, corporateKyc, getInitialForm]);
+  }, [isLoading, corporateKyc, getInitialForm, hook]);
 
   const [saving, setSaving] = useState(false);
 

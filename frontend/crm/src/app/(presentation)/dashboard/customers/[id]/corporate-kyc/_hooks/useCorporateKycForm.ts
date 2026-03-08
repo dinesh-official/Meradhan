@@ -10,7 +10,6 @@ import type {
   CorporateKycAuthorisedSignatoryPayload,
 } from "@root/schema";
 import { useCallback, useState } from "react";
-import type { z } from "zod";
 
 export type NestedFieldErrors = Array<Record<string, string[]>>;
 export type CorporateKycFormErrors = Partial<

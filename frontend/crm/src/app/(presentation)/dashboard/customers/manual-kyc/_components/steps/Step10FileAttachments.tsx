@@ -128,7 +128,7 @@ export function Step10FileAttachments({ formHook }: Step10FileAttachmentsProps) 
         {attachments.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              <p>No attachments added yet. Click "Add File" to upload documents.</p>
+              <p>No attachments added yet. Click &quot;Add File&quot; to upload documents.</p>
             </CardContent>
           </Card>
         ) : (
