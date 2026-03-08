@@ -3,7 +3,7 @@ name: stage crm deploy
 on:
   push:
     branches:
-      - staging
+      - staging_fix
 jobs:
   deploy:
     runs-on: ubuntu-latest
