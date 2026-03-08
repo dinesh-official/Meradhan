@@ -94,7 +94,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.bankAccounts ?? [])];
-        if (arr[index]) arr[index] = {};
+        if (arr[index]) arr[index] = {} as Record<string, string[]>;
         return { ...e, bankAccounts: arr.length ? arr : undefined };
       });
     },
@@ -126,7 +126,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.dematAccounts ?? [])];
-        if (arr[index]) arr[index] = {};
+        if (arr[index]) arr[index] = {} as Record<string, string[]>;
         return { ...e, dematAccounts: arr.length ? arr : undefined };
       });
     },
@@ -158,7 +158,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.directors ?? [])];
-        if (arr[index]) arr[index] = {};
+        if (arr[index]) arr[index] = {} as Record<string, string[]>;
         return { ...e, directors: arr.length ? arr : undefined };
       });
     },
@@ -190,7 +190,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.promoters ?? [])];
-        if (arr[index]) arr[index] = {};
+        if (arr[index]) arr[index] = {} as Record<string, string[]>;
         return { ...e, promoters: arr.length ? arr : undefined };
       });
     },
@@ -229,7 +229,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.authorisedSignatories ?? [])];
-        if (arr[index]) arr[index] = {};
+        if (arr[index]) arr[index] = {} as Record<string, string[]>;
         return { ...e, authorisedSignatories: arr.length ? arr : undefined };
       });
     },
@@ -273,8 +273,9 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       if (NESTED_ERROR_KEYS.includes(key as (typeof NESTED_ERROR_KEYS)[number])) {
         const arr = val as Array<Record<string, string[]>> | undefined;
         if (Array.isArray(arr)) next[key as (typeof NESTED_ERROR_KEYS)[number]] = arr;
-      } else if (Array.isArray(val) && (val.length === 0 || typeof val[0] === "string")) {
-        (next as Record<FlatErrorKey, string[] | undefined>)[key as FlatErrorKey] = val;
+      } else if (Array.isArray(val)) {
+        // Flat field errors from Zod are string[]; nested keys handled above
+        (next as Record<FlatErrorKey, string[] | undefined>)[key as FlatErrorKey] = val as string[];
       }
     }
     setErrors(next);
