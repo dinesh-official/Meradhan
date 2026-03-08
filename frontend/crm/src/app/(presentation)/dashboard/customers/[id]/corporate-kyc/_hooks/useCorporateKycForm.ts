@@ -12,8 +12,18 @@ import type {
 import { useCallback, useState } from "react";
 
 export type NestedFieldErrors = Array<Record<string, string[]>>;
+
+/** Keys that hold nested array-of-records errors (not string[]) */
+const NESTED_ERROR_KEYS = [
+  "bankAccounts",
+  "dematAccounts",
+  "directors",
+  "promoters",
+  "authorisedSignatories",
+] as const;
+
 export type CorporateKycFormErrors = Partial<
-  Record<keyof CreateCorporateKycPayload, string[]>
+  Record<Exclude<keyof CreateCorporateKycPayload, (typeof NESTED_ERROR_KEYS)[number]>, string[]>
 > & {
   bankAccounts?: NestedFieldErrors;
   dematAccounts?: NestedFieldErrors;
@@ -84,7 +94,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.bankAccounts ?? [])];
-        if (arr[index]) arr[index] = {} as Record<string, string[]>;
+        if (arr[index]) arr[index] = {};
         return { ...e, bankAccounts: arr.length ? arr : undefined };
       });
     },
@@ -116,7 +126,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.dematAccounts ?? [])];
-        if (arr[index]) arr[index] = {} as Record<string, string[]>;
+        if (arr[index]) arr[index] = {};
         return { ...e, dematAccounts: arr.length ? arr : undefined };
       });
     },
@@ -148,7 +158,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.directors ?? [])];
-        if (arr[index]) arr[index] = {} as Record<string, string[]>;
+        if (arr[index]) arr[index] = {};
         return { ...e, directors: arr.length ? arr : undefined };
       });
     },
@@ -180,7 +190,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.promoters ?? [])];
-        if (arr[index]) arr[index] = {} as Record<string, string[]>;
+        if (arr[index]) arr[index] = {};
         return { ...e, promoters: arr.length ? arr : undefined };
       });
     },
@@ -219,7 +229,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       });
       setErrors((e) => {
         const arr = [...(e.authorisedSignatories ?? [])];
-        if (arr[index]) arr[index] = {} as Record<string, string[]>;
+        if (arr[index]) arr[index] = {};
         return { ...e, authorisedSignatories: arr.length ? arr : undefined };
       });
     },
@@ -257,18 +267,11 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       string[] | Array<Record<string, string[]>>
     >;
     const next: CorporateKycFormErrors = {};
-    const arrayKeys = [
-      "bankAccounts",
-      "dematAccounts",
-      "directors",
-      "promoters",
-      "authorisedSignatories",
-    ] as const;
     for (const key of Object.keys(fieldErrors) as (keyof CreateCorporateKycPayload)[]) {
       const val = fieldErrors[key];
-      if (arrayKeys.includes(key as (typeof arrayKeys)[number])) {
+      if (NESTED_ERROR_KEYS.includes(key as (typeof NESTED_ERROR_KEYS)[number])) {
         const arr = val as Array<Record<string, string[]>> | undefined;
-        if (Array.isArray(arr)) next[key as (typeof arrayKeys)[number]] = arr;
+        if (Array.isArray(arr)) next[key as (typeof NESTED_ERROR_KEYS)[number]] = arr;
       } else if (Array.isArray(val)) {
         (next as Record<string, string[] | undefined>)[key] = val;
       }
@@ -291,7 +294,7 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       else if (typeof msgs === "string") add(msgs);
     };
     Object.entries(errors).forEach(([key, val]) => {
-      if (key === "bankAccounts" || key === "dematAccounts" || key === "directors" || key === "promoters" || key === "authorisedSignatories") {
+      if (NESTED_ERROR_KEYS.includes(key as (typeof NESTED_ERROR_KEYS)[number])) {
         const arr = val as NestedFieldErrors | undefined;
         arr?.forEach((row) => {
           Object.values(row || {}).forEach(addMessages);
