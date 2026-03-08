@@ -20,7 +20,8 @@ export function AuthorisedSignatoriesSection({
     removeAuthorisedSignatory,
   } = hook;
   const list = form.authorisedSignatories ?? [];
-  const rowErrors = (i: number) => errors.authorisedSignatories?.[i] ?? {};
+  const rowErrors = (i: number): Record<string, string[]> =>
+    (errors.authorisedSignatories?.[i] ?? {}) as Record<string, string[]>;
 
   return (
     <Card>

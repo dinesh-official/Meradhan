@@ -22,23 +22,6 @@ interface SettleOrdersTableProps {
   onRowClick?: (order: ExtendedSettleOrderData) => void;
 }
 
-const settleStatusLabel = (status: number) => {
-  const map: Record<number, string> = {
-    0: "Settlement Pending",
-    1: "Securities Payin Done",
-    2: "Funds Payin Done",
-    3: "Payin Completed",
-    4: "Payout Done Successfully",
-    5: "Payin Reversed",
-    6: "Settle Order Expired",
-    7: "Order Not Settleable",
-    8: "Settlement Cancelled",
-    9: "Document Not Received for Unregistered Participant",
-  };
-  return status != null && map[Number(status)] ? map[Number(status)] : "N.A";
-};
-
-
 function SettleOrdersTable({
   data = [],
   isLoading = false,

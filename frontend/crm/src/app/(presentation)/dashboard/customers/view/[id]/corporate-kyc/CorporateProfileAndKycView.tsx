@@ -69,12 +69,20 @@ export default function CorporateProfileAndKycView({
     window.print();
   };
 
+  const printDate = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   const fmt = (v: string | undefined | null) =>
     v != null && v !== "" ? String(v) : "—";
 
   return (
     <div className="flex flex-col gap-6 corporate-kyc-print-view" id="corporate-kyc-print-content">
-      {/* Clean print-only header: no logo, title + date only */}
+      {/* Clean print-only header: logo + date */}
       <div className="hidden corporate-kyc-print-header print:block print:pb-4  print:border-gray-300">
         <Image
           src="/images/pdfheader.png"
@@ -83,7 +91,7 @@ export default function CorporateProfileAndKycView({
           height={120}
           className="w-full max-w-full h-auto object-contain print:block"
         />
-
+        <p className="print:block text-sm text-muted-foreground mt-2">Printed on: {printDate}</p>
       </div>
 
       <div className="print:hidden">
