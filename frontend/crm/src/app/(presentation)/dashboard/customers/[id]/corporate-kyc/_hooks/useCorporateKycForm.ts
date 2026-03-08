@@ -267,13 +267,14 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
       string[] | Array<Record<string, string[]>>
     >;
     const next: CorporateKycFormErrors = {};
+    type FlatErrorKey = Exclude<keyof CreateCorporateKycPayload, (typeof NESTED_ERROR_KEYS)[number]>;
     for (const key of Object.keys(fieldErrors) as (keyof CreateCorporateKycPayload)[]) {
       const val = fieldErrors[key];
       if (NESTED_ERROR_KEYS.includes(key as (typeof NESTED_ERROR_KEYS)[number])) {
         const arr = val as Array<Record<string, string[]>> | undefined;
         if (Array.isArray(arr)) next[key as (typeof NESTED_ERROR_KEYS)[number]] = arr;
-      } else if (Array.isArray(val)) {
-        (next as Record<string, string[] | undefined>)[key] = val as string[];
+      } else if (Array.isArray(val) && (val.length === 0 || typeof val[0] === "string")) {
+        (next as Record<FlatErrorKey, string[] | undefined>)[key as FlatErrorKey] = val;
       }
     }
     setErrors(next);
