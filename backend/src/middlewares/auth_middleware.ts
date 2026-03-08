@@ -51,6 +51,17 @@ export const allowAccessMiddleware =
           role: Exclude<Role, "PUBLIC">;
         }>(token!);
 
+        // SUPER_ADMIN: allow all actions (bypass role check)
+        if (data.role === "SUPER_ADMIN") {
+          req.session = {
+            id: data.id,
+            email: data.email,
+            token: token!,
+            role: "SUPER_ADMIN",
+          };
+          return next();
+        }
+
         // 🛑 Role validation
         if (allowedRoles.length && !allowedRoles.includes(data.role)) {
           return res.status(403).json({

@@ -1,39 +1,49 @@
-import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
-import { cacheStorage } from "@store/redis_store";
+// import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+// import { cacheStorage } from "@store/redis_store";
 
-const user = {
-  "userId": 3,
-  "kycId": 90,
-};
+import { checkKraProcessCheckStatus } from "@jobs/kra_worker/CheckKraStatus";
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// const user = { userId: 50, kycId: 254 };
 
-const main = async () => {
-  const cachedKey = `KRA:${user.userId}-${user.kycId}`;
-  const pastExecution = ""; // MODIFY , REGISTER
+// const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  await cacheStorage.delete(cachedKey).then(async () => {
-    if (pastExecution && pastExecution !== "") {
-      await cacheStorage.set(cachedKey, pastExecution, 72 * 60 * 60);
+// const main = async () => {
+//   await cacheStorage.delete(`KRA:${user.userId}-${user.kycId}`)
+//     .then(async () => {
+//       console.log("Processing user ${user.userId} with kycId ${user.kycId}...");
+//       await addKraWorkerJob(
+//         {
+//           customerId: user.userId,
+//           kycDataStoreId: user.kycId,
+//           stage: "ENQUIRY_KRA",
+//         },
+//         5000,
+//       );
+//       await delay(3000);
+//       console.log(`Added job for user ${user.userId} with kycId ${user.kycId}`);
+//     });
+//   console.log("All jobs added successfully");
+// };
+
+// main();
+
+const test = checkKraProcessCheckStatus({
+  APP_RES_ROOT: {
+    APP_PAN_INQ: {
+      APP_NAME: "Kamal Sarin",
+      APP_PAN_NO: "APWPS0695A",
+      APP_REQ_NO: "185890001",
+      APP_RES_NO: "1362867155",
+      APP_STATUS: "KYC validated at KARVY",
+      APP_IPV_FLAG: "Y",
+      APP_KYC_MODE: "1",
+      APP_STATUSDT: "05-07-2013",
+      APP_UPDT_RMKS: "",
+      APP_UPDT_STATUS: "rejected at KARVY",
+      APP_HOLD_DEACTIVE_RMKS: ""
     }
+  }
+}, "MODIFY"); // MODIFY or REGISTER our end task
 
-    console.log("Processing user ${user.userId} with kycId ${user.kycId}...");
-    await addKraWorkerJob(
-      {
-        customerId: user.userId,
-        kycDataStoreId: user.kycId,
-        stage: "ENQUIRY_KRA",
-      },
-      5000,
-    );
-    await delay(3000);
-    console.log(`Added job for user ${user.userId} with kycId ${user.kycId}`);
-  });
-  console.log("All jobs added successfully");
-};
-
-test().then(() => {
-  console.log("done");
-}).catch((error) => {
-  console.log(error);
-});
+console.log(test);
+process.exit(0);

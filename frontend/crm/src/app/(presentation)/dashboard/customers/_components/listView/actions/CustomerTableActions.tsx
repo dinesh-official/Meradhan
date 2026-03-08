@@ -14,7 +14,6 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { useCustomerTableActions } from "./useCustomerTableActionHook";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
-import useAppCookie from "@/hooks/useAppCookie.hook";
 
 const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
   const { trackActivity } = useUserTracking();
@@ -26,9 +25,6 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
   } = useCustomerTableActions({
     profileId: profile.id,
   });
-
-  const { cookies } = useAppCookie();
-
 
   const status =
     profile.utility.accountStatus == "ACTIVE"
@@ -45,9 +41,6 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {/* <DropdownMenuLabel>Actions</DropdownMenuLabel> */}
-
-          {/* <DropdownMenuSeparator /> */}
           <ShowOnly
             condition={
               profile.createdBy != null && profile.kycStatus === "PENDING"
@@ -59,11 +52,21 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
           </ShowOnly>
 
           <AllowOnlyView permissions={["view:customerkyc"]}>
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/customers/view/${encodeId(profile.id)}/kyc`}>
-                View KYC
-              </Link>
-            </DropdownMenuItem>
+            {profile.userType === "CORPORATE" ? (
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/customers/view/${encodeId(profile.id)}/corporate-kyc`}
+                >
+                  View Corporate KYC
+                </Link>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/customers/view/${encodeId(profile.id)}/kyc`}>
+                  View KYC
+                </Link>
+              </DropdownMenuItem>
+            )}
           </AllowOnlyView>
           <DropdownMenuItem onClick={handleProfileView}>
             View Profile
@@ -72,6 +75,7 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
           <AllowOnlyView permissions={["delete:customer"]} condition={profile.kycStatus !== "PENDING"}>
             <DropdownMenuItem
               onClick={async () => {
+
                 const result = await Swal.fire({
                   title: "Are you sure?",
                   text: `Are you sure you want to ${status} ?`,

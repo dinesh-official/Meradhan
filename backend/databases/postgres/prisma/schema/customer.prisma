@@ -85,6 +85,9 @@ model CustomerProfileDataModel {
     bankAccounts  CustomersBankAccountModel[]
     dematAccounts CustomersDematAccountModel[]
 
+    /// Corporate KYC (one-to-one; only for corporate customers)
+    corporateKyc CorporateKycModel?
+
     nseDataSet NseDataSet?
 
     isAFatcaCustomer Boolean @default(false)

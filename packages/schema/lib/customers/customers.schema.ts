@@ -354,3 +354,5 @@ export const customerWhatsAppPreferenceSchema = z.object({
     error: "WhatsApp preference is required",
   }),
 });
+
+export * from "./corporateKyc.schema";

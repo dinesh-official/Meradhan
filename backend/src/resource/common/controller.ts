@@ -5,7 +5,11 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import axios from "axios";
 import type { Request, Response } from "express";
 import FormData from "form-data";
+import fs from "fs";
+import os from "os";
+import path from "path";
 import { PartnershipManagerService } from "@resource/crm/partnership/services/partnership_manager.service";
+import { putFileS3 } from "@modules/file_upload/s3_file_uploader";
 
 export class CommonApiController {
   async contactSubmit(req: Request, res: Response) {
@@ -132,5 +136,32 @@ export class CommonApiController {
     const fileBuffer = await downloadFile(fileUrl);
     const result = await uploadToStrapi(fileBuffer, filename);
     res.send(result);
+  }
+
+  async uploadFilesS3(req: Request, res: Response) {
+    const file = req.file as Express.Multer.File;
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const directory = (req.body?.directory as string) || "kyc";
+    const sanitizedName = (file.originalname || "file").replace(/[^a-zA-Z0-9.-]/g, "_");
+    const tempPath = path.join(os.tmpdir(), `upload-${Date.now()}-${sanitizedName}`);
+    try {
+      fs.writeFileSync(tempPath, file.buffer);
+      const result = await putFileS3(tempPath, directory);
+      if (!result.success || !result.location) {
+        return res.status(500).json({ message: "Upload failed", success: false });
+      }
+      return res.status(200).json({
+        success: true,
+        responseData: { location: result.location, key: result.key },
+      });
+    } finally {
+      try {
+        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+      } catch {
+        // ignore cleanup errors
+      }
+    }
   }
 }

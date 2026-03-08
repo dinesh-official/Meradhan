@@ -186,6 +186,7 @@ export type CustomerUtility = {
 export type CustomerProfile = CustomerBase & {
   panCard: CustomerPanCard;
   utility: CustomerUtility;
+  userType?: CustomerUserType;
 };
 
 //crm/customers?page=1&accountStatus=ACTIVE&kycStatus=PENDING
@@ -349,6 +350,105 @@ export type UpdateCustomerPayload = {
 };
 
 export type UpdateCustomerResponse = BaseResponseData<UpdateCustomerPayload>;
+
+// Corporate KYC (nested types for response)
+export type CorporateKycBankAccountResponse = {
+  id: number;
+  accountHolderName: string;
+  accountNumber: string;
+  branch?: string;
+  bankName: string;
+  ifscCode: string;
+  bankProofFileUrls: string[];
+  isPrimaryAccount: boolean;
+};
+
+export type CorporateKycDematAccountResponse = {
+  id: number;
+  depository: string;
+  accountType?: string;
+  dpId: string;
+  clientId: string;
+  accountHolderName: string;
+  dematProofFileUrl?: string;
+  isPrimary: boolean;
+};
+
+export type CorporateKycDirectorResponse = {
+  id: number;
+  fullName: string;
+  pan?: string;
+  designation?: string;
+  din?: string;
+  email?: string;
+  mobile?: string;
+};
+
+export type CorporateKycPromoterResponse = CorporateKycDirectorResponse;
+
+export type CorporateKycAuthorisedSignatoryResponse = {
+  id: number;
+  fullName: string;
+  pan: string;
+  designation?: string;
+  din?: string;
+  email: string;
+  mobile?: string;
+};
+
+export type CorporateKycResponse = {
+  id: number;
+  customerId: number;
+  entityName: string;
+  dateOfCommencementOfBusiness?: string;
+  countryOfIncorporation?: string;
+  panCopyFileUrl?: string;
+  entityConstitutionType?: string;
+  otherConstitutionType?: string;
+  dateOfIncorporation?: string;
+  placeOfIncorporation?: string;
+  panNumber?: string;
+  cinOrRegistrationNumber?: string;
+  correspondenceFullAddress?: string;
+  correspondenceLine1?: string;
+  correspondenceLine2?: string;
+  correspondenceCity?: string;
+  correspondenceDistrict?: string;
+  correspondencePinCode?: string;
+  correspondenceState?: string;
+  balanceSheetCopyUrl?: string;
+  certificateOfIncorporationUrl?: string;
+  memorandumCopyUrl?: string;
+  boardResolutionCopyUrl?: string;
+  gstCopyUrl?: string;
+  clientMasterHoldingCopyUrl?: string;
+  annualIncome?: string;
+  shareHoldingPatternCopyUrl?: string;
+  certificateOfCommencementOfBizUrl?: string;
+  articlesOfAssociationUrl?: string;
+  gstNumber?: string;
+  directorsListCopyUrl?: string;
+  powerOfAttorneyCopyUrl?: string;
+  documentsType?: string;
+  fatcaApplicable: boolean;
+  fatcaEntityName?: string;
+  fatcaCountryOfIncorporation?: string;
+  fatcaEntityType?: string;
+  fatcaClassification?: string;
+  giin?: string;
+  taxResidencyOfEntity?: string;
+  declarationByAuthorisedSignatory: boolean;
+  bankAccounts: CorporateKycBankAccountResponse[];
+  dematAccounts: CorporateKycDematAccountResponse[];
+  directors: CorporateKycDirectorResponse[];
+  promoters: CorporateKycPromoterResponse[];
+  authorisedSignatories: CorporateKycAuthorisedSignatoryResponse[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GetCorporateKycResponse = BaseResponseData<CorporateKycResponse | null>;
+export type SaveCorporateKycResponse = BaseResponseData<CorporateKycResponse>;
 
 //CRM LEADS TYPES
 

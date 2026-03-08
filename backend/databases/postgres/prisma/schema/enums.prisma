@@ -110,3 +110,21 @@ enum PartnershipStatus {
   CONVERTED
   REJECTED
 }
+
+/// Entity constitution type for Corporate KYC
+enum EntityConstitutionType {
+  PRIVATE_LIMITED
+  PUBLIC_LIMITED
+  OPC
+  LLP
+  PARTNERSHIP
+  TRUST
+  OTHER
+}
+
+/// FATCA entity type for Corporate KYC
+enum CorporateEntityType {
+  ACTIVE_NFE
+  PASSIVE_NFE
+  FINANCIAL_INSTITUTION
+}

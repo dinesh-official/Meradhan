@@ -123,8 +123,7 @@ export class KraWorkerService {
               Message: "Request Failed - KRA Process error",
               LastTask: lastTask,
               Status: status,
-              Error:
-                "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
+              Error: "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
             },
             responseData: res,
             userId: customerId,
