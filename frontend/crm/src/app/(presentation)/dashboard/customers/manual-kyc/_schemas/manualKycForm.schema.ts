@@ -20,7 +20,7 @@ export const step2Schema = z.object({
   occupationType: z.string().min(1, "Occupation type is required"),
   annualGrossIncome: z.string().min(1, "Annual gross income is required"),
   politicallyExposedPerson: z.enum(["yes", "no"], {
-    required_error: "PEP declaration is required",
+    message: "PEP declaration is required",
   }),
   confirmPersonalInfoTimestamp: z.string().min(1, "Confirmation timestamp is required"),
 });
@@ -38,7 +38,7 @@ export const currentAddressSchema = z.object({
 
 export const permanentAddressSchema = z.object({
   sameAsCurrent: z.enum(["yes", "no"], {
-    required_error: "Please specify if permanent address is same as current",
+    message: "Please specify if permanent address is same as current",
   }),
   addressLine1: z.string().optional(),
   postOffice: z.string().optional(),
@@ -138,10 +138,10 @@ export const step7Schema = z.object({
 // Step 8: Compliance Declarations
 export const step8Schema = z.object({
   fatcaDeclaration: z.enum(["yes", "no"], {
-    required_error: "FATCA declaration is required",
+    message: "FATCA declaration is required",
   }),
   pepDeclaration: z.enum(["yes", "no"], {
-    required_error: "PEP declaration is required",
+    message: "PEP declaration is required",
   }),
   sebiTermsAcceptance: z.boolean().refine((val) => val === true, {
     message: "SEBI terms acceptance is required",
