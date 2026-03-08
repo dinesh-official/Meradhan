@@ -16,7 +16,8 @@ export function BankAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { uploadFile, uploading } = useCorporateKycFileUpload();
   const list = form.bankAccounts ?? [];
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
-  const rowErrors = (i: number) => errors.bankAccounts?.[i] ?? {};
+  const rowErrors = (i: number): Record<string, string[]> =>
+    (errors.bankAccounts?.[i] ?? {}) as Record<string, string[]>;
 
   return (
     <Card>
