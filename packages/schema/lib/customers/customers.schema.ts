@@ -178,7 +178,7 @@ const nonIndividualUserTypes = ["TRUST", "CORPORATE", "HUF", "LLP", "PARTNERSHIP
 
 export const createNewCustomerSchema = createNewCustomerSchemaBase.refine(
   (data) => {
-    if (nonIndividualUserTypes.includes(data.userType)) {
+    if ((nonIndividualUserTypes as readonly string[]).includes(data.userType)) {
       return typeof data.legalEntityName === "string" && data.legalEntityName.trim().length > 0;
     }
     return true;
@@ -189,7 +189,7 @@ export const createNewCustomerSchema = createNewCustomerSchemaBase.refine(
 export const updateCustomerProfileSchema = createNewCustomerSchemaBase.partial().refine(
   (data) => {
     const userType = data.userType;
-    if (!userType || !nonIndividualUserTypes.includes(userType)) return true;
+    if (!userType || !(nonIndividualUserTypes as readonly string[]).includes(userType)) return true;
     return typeof data.legalEntityName === "string" && data.legalEntityName.trim().length > 0;
   },
   { message: "Legal entity name is required for Trust, Corporate, HUF, LLP, or Partnership Firm", path: ["legalEntityName"] }
