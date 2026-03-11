@@ -52,4 +52,14 @@ export class CustomerProfileRepo {
         const kycData = new CustomerKycManager();
         return await kycData.getUserKycFlowDataWithFormattedFullProfile(user.id);
     }
+
+    async getCustomerByParticipantCode(participantCode: string) {
+        const user = await db.dataBase.customerProfileDataModel.findFirst({
+            where: {
+                userName: participantCode
+            },
+            select: fullCustomerProfileSelect
+        });
+        return user;
+    }
 }

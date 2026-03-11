@@ -17,6 +17,11 @@ crmCustomersRoutes.get(
   (req, res) => controller.getFullProfileCustomer(req, res)
 );
 
+crmCustomersRoutes.get(
+  "/api/crm/customer/participant/:participantCode",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.getCustomerByParticipantCode(req, res)
+);
 crmCustomersRoutes.post(
   "/api/crm/customer",
   allowAccessMiddleware("CRM"),

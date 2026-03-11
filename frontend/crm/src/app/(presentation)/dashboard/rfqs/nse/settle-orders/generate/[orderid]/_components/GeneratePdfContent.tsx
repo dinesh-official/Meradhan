@@ -34,9 +34,12 @@ import type {
   CustomerProfile,
 } from "@root/apiGateway";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
+import { genMediaUrl } from "@/global/utils/url.utils";
 import { queryClient } from "@/core/config/reactQuery";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 function formatVal(v: string | number | null | undefined): string {
   if (v == null) return "—";
@@ -139,12 +142,46 @@ function GeneratePdfContent() {
   const [pdfNonAmortizedBond, setPdfNonAmortizedBond] = useState(true);
   const [pdfAmortizedPrincipalPaymentDates, setPdfAmortizedPrincipalPaymentDates] = useState("");
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
+  const [participantCode, setParticipantCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (participantCode) {
+      void customerApi.getCustomerByParticipantCode(participantCode!).then((response) => {
+        setSelectedCustomer(response.data.responseData ?? null);
+      });
+    }
+  }, [participantCode]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["rfq-by-order", orderNumber],
-    queryFn: () => ordersApi.getRfqByOrderNumber(orderNumber!),
+    queryFn: async () => {
+      const response = await ordersApi.getRfqByOrderNumber(orderNumber!);
+      let code;
+      if (response.responseData?.buyBrokerLoginId?.startsWith("MD")) {
+        code = response.responseData?.buyBrokerLoginId;
+      } else if (response.responseData?.sellBrokerLoginId?.startsWith("MD")) {
+        code = response.responseData?.sellBrokerLoginId;
+      } else if (response.responseData?.buyBackofficeLoginId?.startsWith("MD")) {
+        code = response.responseData?.buyBackofficeLoginId;
+      } else if (response.responseData?.sellBackofficeLoginId?.startsWith("MD")) {
+        code = response.responseData?.sellBackofficeLoginId;
+      } else if (response.responseData?.buyParticipantLoginId?.startsWith("MD")) {
+        code = response.responseData?.buyParticipantLoginId;
+      } else if (response.responseData?.sellParticipantLoginId?.startsWith("MD")) {
+        code = response.responseData?.sellParticipantLoginId;
+      } else {
+        code = null;
+      }
+
+      setParticipantCode(code);
+      return response;
+    },
     enabled: Boolean(orderNumber),
+
   });
+
+
 
   const {
     data: customerOrderData,
@@ -155,6 +192,8 @@ function GeneratePdfContent() {
     queryFn: () => ordersApi.getCustomerFullOrder(orderNumber!),
     enabled: Boolean(orderNumber),
   });
+
+
 
   const assignOrderMutation = useMutation({
     mutationFn: () =>
@@ -354,6 +393,8 @@ MeraDhan Team`
       setSendingPdfEmail(false);
     }
   };
+
+
 
   if (!orderNumber) {
     return (
@@ -643,6 +684,51 @@ MeraDhan Team`
                   {assignOrderMutation.isPending ? "Assigning..." : "Assign order to Customer"}
                 </Button>
               </div>
+              {selectedCustomer && (
+                <div className="rounded-lg border bg-muted/30 p-4 mt-2">
+                  <p className="text-xs font-medium text-muted-foreground mb-3">Selected customer</p>
+                  <div className="flex items-start gap-4">
+                    <Avatar className="h-14 w-14 shrink-0">
+                      <AvatarImage
+                        src={(selectedCustomer as { avatar?: string | null }).avatar ? genMediaUrl((selectedCustomer as { avatar?: string | null }).avatar) : undefined}
+                        alt={`${selectedCustomer.firstName} ${selectedCustomer.lastName}`.trim()}
+                      />
+                      <AvatarFallback className="text-base bg-muted">
+                        {[selectedCustomer.firstName, selectedCustomer.lastName]
+                          .map((n) => (n ?? "").charAt(0))
+                          .filter(Boolean)
+                          .join("")
+                          .toUpperCase() || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-1 min-w-0 flex-1">
+                      <p className="font-semibold">
+                        {[selectedCustomer.firstName, selectedCustomer.middleName, selectedCustomer.lastName].filter(Boolean).join(" ").trim() || "—"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{selectedCustomer.emailAddress || "—"}</p>
+                      {selectedCustomer.phoneNo && (
+                        <p className="text-sm text-muted-foreground">{selectedCustomer.phoneNo}</p>
+                      )}
+                      {selectedCustomer.kycStatus != null && (
+                        <Badge
+                          variant={
+                            String(selectedCustomer.kycStatus).toUpperCase() === "VERIFIED" || String(selectedCustomer.kycStatus).toUpperCase() === "APPROVED"
+                              ? "default"
+                              : String(selectedCustomer.kycStatus).toUpperCase() === "PENDING"
+                                ? "secondary"
+                                : String(selectedCustomer.kycStatus).toUpperCase() === "REJECTED"
+                                  ? "destructive"
+                                  : "outline"
+                          }
+                          className="mt-1 w-fit"
+                        >
+                          {selectedCustomer.kycStatus}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               {selectedCustomer && String(selectedCustomer.kycStatus) !== "VERIFIED" && (
                 <p className="text-destructive text-sm">Selected Customer KYC is not verified. Only VERIFIED Customers can be assigned.</p>
               )}
