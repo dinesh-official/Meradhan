@@ -174,4 +174,20 @@ export class CustomerProfileController {
       responseData: response,
     });
   }
+
+  async getCustomerByParticipantCode(req: Request, res: Response): Promise<void> {
+    const participantCode = req.params.participantCode;
+    if (!participantCode) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Participant code is required",
+      });
+      return;
+    }
+    const response = await this.profileService.getCustomerByParticipantCode(participantCode as string);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
 }

@@ -50,7 +50,9 @@ export default function CorporateKycPageView({
   useEffect(() => {
     if (isLoading) return;
     hook.reset(getInitialForm());
-  }, [isLoading, corporateKyc, getInitialForm]);
+    // Sync form when API data loads or changes; do not depend on hook (new ref each render → infinite loop)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, corporateKyc]);
 
   const [saving, setSaving] = useState(false);
 
@@ -60,7 +62,7 @@ export default function CorporateKycPageView({
       const text =
         messages.length > 0
           ? messages.slice(0, 15).join("\n") +
-            (messages.length > 15 ? `\n… and ${messages.length - 15} more` : "")
+          (messages.length > 15 ? `\n… and ${messages.length - 15} more` : "")
           : "Please fix the errors in the form.";
       toast.error("Validation failed", { description: text });
       return;
@@ -75,7 +77,7 @@ export default function CorporateKycPageView({
       const message =
         e && typeof e === "object" && "response" in e
           ? (e as { response?: { data?: { message?: string } } }).response?.data
-              ?.message
+            ?.message
           : "Failed to save corporate KYC.";
       toast.error(message);
     } finally {

@@ -11,6 +11,7 @@ import { encodeId } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useQueries } from "@tanstack/react-query";
 import { Building2, FileDown, IdCardIcon, NotebookPen, Pencil } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   AddressSection,
@@ -81,14 +82,16 @@ export default function CorporateProfileAndKycView({
 
   return (
     <div className="flex flex-col gap-6 corporate-kyc-print-view" id="corporate-kyc-print-content">
-      {/* Clean print-only header: no logo, title + date only */}
+      {/* Clean print-only header: logo + date */}
       <div className="hidden corporate-kyc-print-header print:block print:pb-4  print:border-gray-300">
-        <img
+        <Image
           src="/images/pdfheader.png"
           alt="MeraDhan"
+          width={800}
+          height={120}
           className="w-full max-w-full h-auto object-contain print:block"
         />
-
+        <p className="print:block text-sm text-muted-foreground mt-2">Printed on: {printDate}</p>
       </div>
 
       <div className="print:hidden">

@@ -10,7 +10,8 @@ import { Plus, Trash2 } from "lucide-react";
 export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, errors, setDirector, addDirector, removeDirector } = hook;
   const list = form.directors ?? [];
-  const rowErrors = (i: number) => errors.directors?.[i] ?? {};
+  const rowErrors = (i: number): Record<string, string[]> =>
+    (errors.directors?.[i] ?? {}) as Record<string, string[]>;
 
   return (
     <Card>

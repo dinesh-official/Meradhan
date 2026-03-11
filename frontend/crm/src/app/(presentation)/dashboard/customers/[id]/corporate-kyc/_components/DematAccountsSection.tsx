@@ -22,7 +22,8 @@ export function DematAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, errors, setDematAccount, addDematAccount, removeDematAccount } = hook;
   const { uploadFile } = useCorporateKycFileUpload();
   const list = form.dematAccounts ?? [];
-  const rowErrors = (i: number) => errors.dematAccounts?.[i] ?? {};
+  const rowErrors = (i: number): Record<string, string[]> =>
+    (errors.dematAccounts?.[i] ?? {}) as Record<string, string[]>;
 
   return (
     <Card>

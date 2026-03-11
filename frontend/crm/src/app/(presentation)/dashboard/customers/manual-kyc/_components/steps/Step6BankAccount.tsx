@@ -54,7 +54,7 @@ export function Step6BankAccount({ formHook }: Step6BankAccountProps) {
     }
   };
 
-  const updateBankAccount = (index: number, field: string, value: any) => {
+  const updateBankAccount = (index: number, field: string, value: string | boolean) => {
     const updated = [...bankAccounts];
     updated[index] = { ...updated[index], [field]: value };
     // If setting as primary, unset others

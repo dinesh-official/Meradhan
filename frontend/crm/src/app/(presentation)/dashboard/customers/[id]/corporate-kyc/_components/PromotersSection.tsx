@@ -10,7 +10,8 @@ import { Plus, Trash2 } from "lucide-react";
 export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, errors, setPromoter, addPromoter, removePromoter } = hook;
   const list = form.promoters ?? [];
-  const rowErrors = (i: number) => errors.promoters?.[i] ?? {};
+  const rowErrors = (i: number): Record<string, string[]> =>
+    (errors.promoters?.[i] ?? {}) as Record<string, string[]>;
 
   return (
     <Card>

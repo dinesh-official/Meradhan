@@ -68,10 +68,11 @@ export function Step7RiskProfile({ formHook }: Step7RiskProfileProps) {
       const questionMap: Record<number, RiskQuestion> = {};
       RISK_PROFILE_QUESTIONS.forEach((q) => {
         const key = `question_${q.index}`;
-        const response = (responses as any)[key];
+        const response = (responses as Record<string, { answer?: string } | string | undefined>)[key];
+        const ansStr = typeof response === "string" ? response : (response as { answer?: string } | undefined)?.answer ?? "";
         questionMap[q.index] = {
           ...q,
-          ans: response?.answer || response || "",
+          ans: ansStr,
         };
       });
       return RISK_PROFILE_QUESTIONS.map((q) => questionMap[q.index] || q);

@@ -3,6 +3,7 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type z from "zod";
 import type {
   CreateCustomerResponse,
+  CustomerProfile,
   DeleteCustomerResponse,
   GetCorporateKycResponse,
   GetCustomerResponse,
@@ -11,6 +12,7 @@ import type {
   UpdateCustomerResponse,
 } from "../../../types/response.types";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
+import type { BaseResponseData } from "../../../types/base";
 
 export interface TCrmCustomerInterface {
   createCustomer(
@@ -52,7 +54,7 @@ export interface TCrmCustomerInterface {
 }
 
 export class CrmCustomerApi implements TCrmCustomerInterface {
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   async createCustomer(
     data: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>,
@@ -96,6 +98,16 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     return this.apiClient.get<GetCustomerResponse>(
       `/crm/customers`,
       mergedConfig,
+    );
+  }
+
+  async getCustomerByParticipantCode(
+    participantCode: string,
+    config?: AxiosRequestConfig,
+  ) {
+    return this.apiClient.get<BaseResponseData<CustomerProfile>>(
+      `/crm/customer/participant/${participantCode}`,
+      config,
     );
   }
 
