@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import CustomerSearchFilterBar from "./_components/listView/CustomerSearchFilterBar";
 import CustomerTable from "./_components/listView/CustomerTable";
 import { useFilterListApiHook } from "./_components/listView/useCustomerListApiHook";
@@ -12,6 +13,7 @@ import { useCustomerFilterListHook } from "./_components/listView/useCustomerLis
 import NewCustomerView from "./create/NewCustomerView";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 function CustomersView() {
+  const [addCustomerOpen, setAddCustomerOpen] = useState(false);
   const filterManager = useCustomerFilterListHook();
   const filterApiManager = useFilterListApiHook(filterManager);
 
@@ -31,14 +33,17 @@ function CustomersView() {
         description="Manage customer profiles and KYC status"
         actions={
           <AllowOnlyView permissions={["create:customer"]}  >
-            <Dialog>
-              <DialogTrigger>
+            <Dialog open={addCustomerOpen} onOpenChange={setAddCustomerOpen}>
+              <DialogTrigger asChild>
                 <Button>
                   <Plus /> Add New Customer
                 </Button>
               </DialogTrigger>
               <DialogContent className="mt-0 p-0 min-w-[660px]">
-                <NewCustomerView popup />
+                <NewCustomerView
+                  popup
+                  onCustomerCreated={() => setAddCustomerOpen(false)}
+                />
               </DialogContent>
             </Dialog>
           </AllowOnlyView>

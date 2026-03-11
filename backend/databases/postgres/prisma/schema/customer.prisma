@@ -36,11 +36,12 @@ model CustomerProfileDataModel {
     id Int @id @default(autoincrement())
 
     /// Basic identity info
-    userName   String  @unique
-    firstName  String
-    middleName String
-    lastName   String
-    gender     Gender?
+    userName        String  @unique
+    firstName       String
+    middleName      String
+    lastName        String
+    gender          Gender?
+    legalEntityName String?
 
     /// Contact details
     emailAddress String  @unique

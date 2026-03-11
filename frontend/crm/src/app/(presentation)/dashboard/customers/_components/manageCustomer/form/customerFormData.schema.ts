@@ -40,6 +40,10 @@ export const customerFormDataSchema = z.object({
   // use the same enum source everywhere
   userType: z.enum(UserAccountType),
 
+  userName: z.string().optional(),
+
+  legalEntityName: z.string().optional(),
+
   termsAccepted: z
     .boolean()
     .refine((v) => v === true, { message: "You must accept terms" }),
@@ -55,8 +59,8 @@ export const customerFormDataSchema = z.object({
   // assuming AccountStatusEnum is a Zod enum schema
   status: AccountStatusEnum,
 
-  // if `gender` import is a readonly tuple, this is correct
-  gender: z.enum(GenderEnum),
+  // required only for INDIVIDUAL / INDIVIDUAL_NRI_NRO; not shown for non-individual
+  gender: z.enum(GenderEnum).optional(),
 
   relationshipManagerId: z.number().optional(),
 
@@ -74,6 +78,26 @@ export const customerFormDataSchema = z.object({
       message: "Password must contain at least one special character",
     })
     .optional(),
-});
+})
+  .refine(
+    (data) => {
+      const nonIndividual = ["TRUST", "CORPORATE", "HUF", "LLP", "PARTNERSHIP_FIRM"] as const;
+      if (nonIndividual.includes(data.userType)) {
+        return typeof data.legalEntityName === "string" && data.legalEntityName.trim().length > 0;
+      }
+      return true;
+    },
+    { message: "Legal entity name is required for Trust, Corporate, HUF, LLP, or Partnership Firm", path: ["legalEntityName"] }
+  )
+  .refine(
+    (data) => {
+      const individualTypes = ["INDIVIDUAL", "INDIVIDUAL_NRI_NRO"] as const;
+      if (individualTypes.includes(data.userType)) {
+        return data.gender != null && data.gender !== "";
+      }
+      return true;
+    },
+    { message: "Gender is required for Individual / NRI-NRO", path: ["gender"] }
+  );
 
 // Handy TypeScript type

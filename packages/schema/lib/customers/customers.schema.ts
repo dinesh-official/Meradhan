@@ -90,7 +90,7 @@ export const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token is required."),
 });
 
-export const createNewCustomerSchema = z.object({
+const createNewCustomerSchemaBase = z.object({
   firstName: z
     .string({ error: "First name is required" })
     .min(1, { message: "First name must be at least 2 characters long" })
@@ -128,6 +128,7 @@ export const createNewCustomerSchema = z.object({
   userType: z.enum(UserAccountType, {
     error: "User account type is required",
   }),
+  legalEntityName: z.string().optional(),
   termsAccepted: z.boolean({
     error: "Terms and conditions acceptance is required",
   }),
@@ -173,7 +174,26 @@ export const createNewCustomerSchema = z.object({
   // }).regex(/^\d+(\.\d{1,2})?$/, { message: "Total investment must be a valid number format" }),
 });
 
-export const updateCustomerProfileSchema = createNewCustomerSchema.partial();
+const nonIndividualUserTypes = ["TRUST", "CORPORATE", "HUF", "LLP", "PARTNERSHIP_FIRM"] as const;
+
+export const createNewCustomerSchema = createNewCustomerSchemaBase.refine(
+  (data) => {
+    if (nonIndividualUserTypes.includes(data.userType)) {
+      return typeof data.legalEntityName === "string" && data.legalEntityName.trim().length > 0;
+    }
+    return true;
+  },
+  { message: "Legal entity name is required for Trust, Corporate, HUF, LLP, or Partnership Firm", path: ["legalEntityName"] }
+);
+
+export const updateCustomerProfileSchema = createNewCustomerSchemaBase.partial().refine(
+  (data) => {
+    const userType = data.userType;
+    if (!userType || !nonIndividualUserTypes.includes(userType)) return true;
+    return typeof data.legalEntityName === "string" && data.legalEntityName.trim().length > 0;
+  },
+  { message: "Legal entity name is required for Trust, Corporate, HUF, LLP, or Partnership Firm", path: ["legalEntityName"] }
+);
 
 export const createBankAccountSchema = z.object({
   accountHolderName: z.string().min(1, "Account holder name is required"),

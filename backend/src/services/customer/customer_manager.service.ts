@@ -24,6 +24,7 @@ export class CustomerProfileManager {
           firstName: data.firstName,
           middleName: data.middleName || "",
           lastName: data.lastName,
+          legalEntityName: data.legalEntityName?.trim() ?? null,
           gender: data.gender,
           whatsAppNo:
             (data.whatsAppNo && "+91" + removeCountryCode(data.whatsAppNo)) ||
@@ -113,6 +114,7 @@ export class CustomerProfileManager {
           firstName: data.firstName?.trim(),
           middleName: data.middleName?.trim(),
           lastName: data.lastName?.trim(),
+          legalEntityName: data.legalEntityName !== undefined ? (data.legalEntityName?.trim() ?? null) : undefined,
           emailAddress: data.emailId?.trim().toLowerCase(),
           phoneNo: "+91" + removeCountryCode(data.phoneNo)?.trim(),
           whatsAppNo: "+91" + removeCountryCode(data.whatsAppNo?.trim()),
