@@ -43,7 +43,9 @@ import * as customerKycApi from "./src/core/api/meradhan/kyc/Kyc.api";
 export type * from "./src/core/api/meradhan/kyc/Kyc.response";
 
 import { CustomerOrderApi } from "./src/core/api/meradhan/order/order.api";
+import { CustomerPortfolioApi } from "./src/core/api/meradhan/portfolio/portfolio.api";
 export type * from "./src/core/api/meradhan/order/order.response";
+export type * from "./src/core/api/meradhan/portfolio/portfolio.response";
 
 import * as trash from "./src/core/api/trash/trash.api";
 import * as commonApi from "./src/core/api/meradhan/common.api";
@@ -72,6 +74,7 @@ export default {
     customerAuthApi,
     customerKycApi,
     customerOrderApi: CustomerOrderApi,
+    customerPortfolioApi: CustomerPortfolioApi,
     commonApi,
   },
   bondsApi,
