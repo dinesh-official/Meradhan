@@ -154,7 +154,6 @@
   border-top: 1px solid #e1e6e8;
 }
 
-<<<<<<< HEAD
 /* Print: hide nav, sidebar, footer; show only main content full width */
 @media print {
   .account-viewport > nav {
@@ -180,7 +179,6 @@
     position: static !important;
   }
 }
-=======
 .active-tab{
   position: relative;
 }
@@ -310,4 +308,3 @@
   
   }
 }
->>>>>>> 74193544 (created the portfolio feature)
