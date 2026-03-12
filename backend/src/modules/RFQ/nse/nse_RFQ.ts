@@ -174,6 +174,9 @@ export class NseRfq {
 
       // Log final error for debugging
       console.log((error as AxiosError<{ message?: string }>)?.response?.data);
+      if (!((error as AxiosError<{ message?: string }>)?.response?.data)) {
+        console.log("error", error);
+      }
 
       console.error("API call failed after max retries:");
       throw error;

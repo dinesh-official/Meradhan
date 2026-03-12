@@ -16,7 +16,7 @@ export class KraController {
   async rescheduleKra(req: Request, res: Response) {
     const customerId = Number(req.body?.customerId);
     const kycDataStoreId = Number(req.body?.kycDataStoreId);
-    const delayMs = req.body?.delayMs != null ? Number(req.body.delayMs) : undefined;
+    const delayMs = req.body?.delayMs != null ? Number(req.body.delayMs) : 5000;
 
     if (!Number.isFinite(customerId) || !Number.isFinite(kycDataStoreId)) {
       return res.sendResponse({

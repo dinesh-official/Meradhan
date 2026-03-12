@@ -38,7 +38,7 @@ export const NSE_CONSTANTS = {
   // Participant and client codes
   PARTICIPANT: {
     CODE: "BCISPL",
-    CLIENT_CODE: "MD123456",
+    CLIENT_CODE: "MDVZ0U0ON",
   },
 
   // Quote types
