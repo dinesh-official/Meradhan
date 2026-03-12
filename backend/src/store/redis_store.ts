@@ -10,7 +10,7 @@ export enum QueueNames {
   successResetPassword = "successResetPasswordMD",
   emailVerification = "emailVerificationMD",
   kraProcessWork = "kraProcessWorkMD",
-  orderSettlement = "orderSettlementMD",
+  orderSettlement = "orderOrderSettlementMD",
   submitProfileCompleat = "submitProfileMD",
   rekycOtpSend = "rekycOtpSendMD",
 }

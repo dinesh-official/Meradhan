@@ -161,16 +161,20 @@ export class NseRfq {
       const key = await this.getLoginKey(attempt < 1);
       return await apiCall(key);
     } catch (error) {
+
       if (
         axios.isAxiosError(error) &&
         this.isLoginExpired(error) &&
         attempt < 2 // allow only one retry
       ) {
+
         console.warn(`Login expired. Retrying... (Attempt ${attempt + 1}/2)`);
         return this.withReLoginRetry(apiCall, attempt + 1);
       }
 
       // Log final error for debugging
+      console.log((error as AxiosError<{ message?: string }>)?.response?.data);
+
       console.error("API call failed after max retries:");
       throw error;
     }
