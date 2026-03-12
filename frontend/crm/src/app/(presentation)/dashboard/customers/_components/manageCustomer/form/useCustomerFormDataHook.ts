@@ -17,6 +17,8 @@ const initData: CustomerFormData = {
   phoneNo: "",
   whatsAppNo: "",
   userType: "INDIVIDUAL",
+  userName: "",
+  legalEntityName: "",
   termsAccepted: false,
   whatsAppNotificationAllow: false,
   isEmailVerified: false,
@@ -30,7 +32,8 @@ const initData: CustomerFormData = {
 
 export const useCustomerFromDataHook = (
   state: CustomerFormData = initData,
-  backOnDone: boolean = true
+  backOnDone: boolean = true,
+  onCustomerCreated?: () => void
 ): ICustomerDataFormHook => {
   const [relationManager, setRelationManager] = useState<
     CrmUsersProfile | undefined
@@ -40,7 +43,7 @@ export const useCustomerFromDataHook = (
   const [errors, setErrors] = useState<
     Partial<Record<keyof CustomerFormData, string[]>>
   >({});
-  const customerApi = useCustomerApiHook({ backOnDone });
+  const customerApi = useCustomerApiHook({ backOnDone, onCustomerCreated });
   const { createCustomerMutation } = customerApi;
 
   /** Update any field and clear its error */

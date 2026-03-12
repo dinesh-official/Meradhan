@@ -70,12 +70,14 @@ interface ContactSelectProps {
   onSelect?: (contact: CustomerProfile | null) => void;
   value?: CustomerProfile;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function SelectCustomerUser({
   onSelect,
   value,
   placeholder,
+  disabled,
 }: ContactSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
@@ -112,6 +114,7 @@ export function SelectCustomerUser({
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between font-normal shadow-none"
+          disabled={disabled}
         >
           {selected ? (
             <span className="truncate">{customerDisplayName(selected)}</span>

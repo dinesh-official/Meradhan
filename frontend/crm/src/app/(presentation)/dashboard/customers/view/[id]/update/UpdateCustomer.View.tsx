@@ -30,6 +30,8 @@ const UpdateCustomerView = ({ id }: { id: number }) => {
         isPhoneVerified: cs.utility.isPhoneVerified,
         kycStatus: cs.kycStatus,
         lastName: cs.lastName,
+        userName: cs.userName ?? "",
+        legalEntityName: cs.legalEntityName ?? "",
         phoneNo: cs.phoneNo,
         status: cs.utility.accountStatus,
         termsAccepted: cs.utility.termsAccepted,
@@ -76,11 +78,16 @@ const UpdateCustomerView = ({ id }: { id: number }) => {
                 data: {
                   emailId: manager.state.emailId,
                   firstName: manager.state.firstName,
-                  gender: manager.state.gender,
+                  gender: ["INDIVIDUAL", "INDIVIDUAL_NRI_NRO"].includes(
+                    manager.state.userType
+                  )
+                    ? manager.state.gender
+                    : undefined,
                   isEmailVerified: manager.state.isEmailVerified,
                   isPhoneVerified: manager.state.isPhoneVerified,
                   kycStatus: manager.state.kycStatus,
                   lastName: manager.state.lastName,
+                  legalEntityName: manager.state.legalEntityName?.trim() || undefined,
                   phoneNo: manager.state.phoneNo,
                   status: manager.state.status,
                   termsAccepted: manager.state.termsAccepted,

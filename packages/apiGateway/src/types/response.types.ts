@@ -243,6 +243,7 @@ export type CustomerByIdPayload = {
   firstName: string;
   middleName: string | null;
   lastName: string;
+  legalEntityName: string | null;
   emailAddress: string;
   phoneNo: string;
   whatsAppNo: string | null;

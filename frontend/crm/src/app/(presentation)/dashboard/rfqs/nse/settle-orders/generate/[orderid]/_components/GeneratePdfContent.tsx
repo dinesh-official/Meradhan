@@ -46,6 +46,13 @@ function formatVal(v: string | number | null | undefined): string {
   return String(v);
 }
 
+function maskPanLast4(pan: string | null | undefined): string {
+  if (!pan || typeof pan !== "string") return "—";
+  const s = pan.trim();
+  if (s.length <= 4) return "—";
+  return "x".repeat(s.length - 4) + s.slice(-4);
+}
+
 function getPreferredValue(
   data: Record<string, unknown>,
   keys: string[]
@@ -144,12 +151,17 @@ function GeneratePdfContent() {
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const [participantCode, setParticipantCode] = useState<string | null>(null);
+  const [isAutoFetchedCustomer, setIsAutoFetchedCustomer] = useState(false);
 
   useEffect(() => {
     if (participantCode) {
       void customerApi.getCustomerByParticipantCode(participantCode!).then((response) => {
-        setSelectedCustomer(response.data.responseData ?? null);
+        const customer = response.data.responseData ?? null;
+        setSelectedCustomer(customer);
+        setIsAutoFetchedCustomer(!!customer);
       });
+    } else {
+      setIsAutoFetchedCustomer(false);
     }
   }, [participantCode]);
 
@@ -667,24 +679,57 @@ MeraDhan Team`
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-muted-foreground text-sm">Select a Customer and assign this settlement order to them. Only Customers with verified KYC can be assigned.</p>
+
+              {isAutoFetchedCustomer && selectedCustomer && (
+                <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Auto-fetched from participant code</p>
+                  <div className="grid gap-2 text-sm">
+                    <div className="grid grid-cols-[100px_1fr] gap-2">
+                      <span className="text-muted-foreground">Name</span>
+                      <span className="font-medium">
+                        {[selectedCustomer.firstName, selectedCustomer.middleName, selectedCustomer.lastName].filter(Boolean).join(" ").trim() || "—"}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr] gap-2">
+                      <span className="text-muted-foreground">Pan No</span>
+                      <span className="font-mono">
+                        {maskPanLast4((selectedCustomer as { panCard?: { panCardNo?: string } }).panCard?.panCardNo)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr] gap-2">
+                      <span className="text-muted-foreground">UCCNO</span>
+                      <span className="font-mono">{selectedCustomer.userName ?? "—"}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-wrap items-end gap-2">
                 <div className="min-w-[220px]">
                   <SelectCustomerUser
                     placeholder="Search and select Customer..."
                     value={selectedCustomer ?? undefined}
-                    onSelect={setSelectedCustomer}
+                    onSelect={(customer) => {
+                      setSelectedCustomer(customer);
+                      setIsAutoFetchedCustomer(false);
+                    }}
+                    disabled={isAutoFetchedCustomer}
                   />
                 </div>
                 <Button
                   size="sm"
-                  disabled={!selectedCustomer || assignOrderMutation.isPending || String(selectedCustomer?.kycStatus) !== "VERIFIED"}
+                  disabled={
+                    !selectedCustomer ||
+                    assignOrderMutation.isPending ||
+                    String(selectedCustomer?.kycStatus) !== "VERIFIED"
+                  }
                   onClick={() => assignOrderMutation.mutate()}
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
                   {assignOrderMutation.isPending ? "Assigning..." : "Assign order to Customer"}
                 </Button>
               </div>
-              {selectedCustomer && (
+              {selectedCustomer && !isAutoFetchedCustomer && (
                 <div className="rounded-lg border bg-muted/30 p-4 mt-2">
                   <p className="text-xs font-medium text-muted-foreground mb-3">Selected customer</p>
                   <div className="flex items-start gap-4">

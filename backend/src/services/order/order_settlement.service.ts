@@ -39,6 +39,8 @@ export class OrderSettlementService {
   }
 
   async initiateOrderSettlement(orderId: number): Promise<void> {
+    console.log("initiateOrderSettlement", orderId);
+
     try {
       const getOrderData = async () => {
         return await this.orderService.getOrderWithNSEData(orderId);
@@ -56,21 +58,26 @@ export class OrderSettlementService {
         });
       }
 
+      console.log("add isin to settlement");
       // Step 1: Add ISIN to settlement (addisin)
       await this.addIsinToSettlement(order);
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
+      console.log("accepted negotiation");
       // Step 2: Accept negotiation quote
       await this.acceptNegotiation(order);
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
+      console.log("propose deal");
       // Step 3: Propose deal
       await this.proposeDeal(order);
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
+      console.log("accept or reject deal");
       // Step 4: Accept/Reject deal
       await this.acceptOrRejectDeal(order);
 
+      console.log("update order status");
       await this.updateOrderStatus(orderId);
     } catch (error) {
       logger.logError(`Settlement process failed for order ${orderId}:`, error);
@@ -104,6 +111,7 @@ export class OrderSettlementService {
       );
 
       // Using fixed values from the working payload
+      console.log(NSE_CONSTANTS);
 
       // Create RFQ for the ISIN using the working payload structure
       const rfqResponse = await this.nseRfq.createRfq({
@@ -177,6 +185,7 @@ export class OrderSettlementService {
           code: "RFQ_NUMBER_MISSING",
         });
       }
+
 
       // Accept the negotiation with hardcoded values (matching RFQ creation)
       // Using direct acceptance (id: null) since no negotiations exist in test environment

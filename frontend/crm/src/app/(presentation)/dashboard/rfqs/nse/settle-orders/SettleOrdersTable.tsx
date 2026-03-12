@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import {
@@ -9,6 +10,9 @@ import {
 } from "../_components/bages/NseRfqBadges";
 import { SettleOrderData } from "@root/apiGateway";
 import { formatNumberTS } from "@/global/utils/formate";
+
+// source 5 = NSE RFQ (manual); 1 = NSE CBRICS, 4 = FTRAC (DIR/automated)
+const isManualOrder = (source?: 1 | 4 | 5) => source === 5;
 
 // Extended interface to include createdAt and updatedAt fields
 interface ExtendedSettleOrderData extends SettleOrderData {
@@ -20,12 +24,16 @@ interface SettleOrdersTableProps {
   data?: ExtendedSettleOrderData[];
   isLoading?: boolean;
   onRowClick?: (order: ExtendedSettleOrderData) => void;
+  selectedForPdf?: Set<string>;
+  onTogglePdfOrder?: (orderNumber: string, checked: boolean) => void;
 }
 
 function SettleOrdersTable({
   data = [],
   isLoading = false,
   onRowClick,
+  selectedForPdf,
+  onTogglePdfOrder,
 }: SettleOrdersTableProps) {
   return (
     <div>
@@ -42,6 +50,24 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <span className="font-mono font-medium text-sm">{row.id}</span>
+              );
+            },
+          },
+          {
+            key: "generatePdf",
+            label: "Gen PDF",
+            cell(row) {
+              if (!isManualOrder(row.source)) return <span className="text-muted-foreground">—</span>;
+              const orderNum = String(row.orderNumber);
+              return (
+                <Checkbox
+                  checked={selectedForPdf?.has(orderNum) ?? false}
+                  onCheckedChange={(checked) =>
+                    onTogglePdfOrder?.(orderNum, checked === true)
+                  }
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={`Select order ${orderNum} for PDF`}
+                />
               );
             },
           },
