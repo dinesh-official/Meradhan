@@ -371,7 +371,7 @@ export function DocumentUrlsSection({
             return (
               <LabelView key={key} title={label}>
                 <a
-                  href={url}
+                  href={"/assets/media/files" + url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary underline"

@@ -19,12 +19,19 @@ export const kycStatus = [
   "RE_KYC",
 ] as const;
 
+const MAX_EXPORT_PAGE_SIZE = 50_000;
+
 export const findManyCustomerSchema = z.object({
   page: z
     .string()
     .regex(/^\d+$/, { message: "Page must be a numeric string" })
     .default("1")
     .optional(),
+  pageSize: z
+    .string()
+    .regex(/^\d+$/, { message: "Page size must be a numeric string" })
+    .optional()
+    .transform((v) => (v ? Math.min(Number(v), MAX_EXPORT_PAGE_SIZE) : 10)),
   search: z.string().optional(),
   accountStatus: AccountStatusEnum.optional(),
   kycStatus: z.enum([...kycStatus]).optional(),

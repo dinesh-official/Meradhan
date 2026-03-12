@@ -187,6 +187,9 @@ export type CustomerProfile = CustomerBase & {
   panCard: CustomerPanCard;
   utility: CustomerUtility;
   userType?: CustomerUserType;
+  kraStatus?: string;
+  /** Current KYC step name from kyc_dump (e.g. "Identity Validation", "Personal Details", "100%", "Not Started") */
+  currentKycStepName?: string;
 };
 
 //crm/customers?page=1&accountStatus=ACTIVE&kycStatus=PENDING

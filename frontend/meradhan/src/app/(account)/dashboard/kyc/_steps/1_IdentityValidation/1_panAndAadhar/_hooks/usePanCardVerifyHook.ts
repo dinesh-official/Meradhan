@@ -147,6 +147,11 @@ export const usePanCardVerifyHook = () => {
           },
         });
         setStep1PanData("fetchedTimestamp", new Date().toISOString());
+        Swal.fire({
+
+          title: "PAN verified successfully.",
+          text: "Please proceed to the next step.",
+        });
 
         setTimeout(() => {
           // its navigate to next step view pan info

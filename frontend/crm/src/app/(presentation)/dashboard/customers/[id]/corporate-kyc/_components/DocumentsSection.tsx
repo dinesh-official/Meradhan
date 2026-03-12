@@ -11,22 +11,22 @@ const DOCUMENT_FIELDS: {
   key: keyof NonNullable<CorporateKycFormHook["form"]>;
   label: string;
 }[] = [
-  { key: "panCopyFileUrl", label: "PAN copy" },
-  { key: "balanceSheetCopyUrl", label: "Balance sheet copy" },
-  { key: "certificateOfIncorporationUrl", label: "Certificate of incorporation" },
-  { key: "memorandumCopyUrl", label: "Memorandum copy" },
-  { key: "boardResolutionCopyUrl", label: "Board resolution copy" },
-  { key: "gstCopyUrl", label: "GST copy" },
-  { key: "clientMasterHoldingCopyUrl", label: "Client master holding copy" },
-  { key: "shareHoldingPatternCopyUrl", label: "Share holding pattern copy" },
-  {
-    key: "certificateOfCommencementOfBizUrl",
-    label: "Certificate of commencement of business",
-  },
-  { key: "articlesOfAssociationUrl", label: "Articles of association" },
-  { key: "directorsListCopyUrl", label: "Directors list copy" },
-  { key: "powerOfAttorneyCopyUrl", label: "Power of attorney copy" },
-];
+    { key: "panCopyFileUrl", label: "PAN copy" },
+    { key: "balanceSheetCopyUrl", label: "Balance sheet copy" },
+    { key: "certificateOfIncorporationUrl", label: "Certificate of incorporation" },
+    { key: "memorandumCopyUrl", label: "Memorandum copy" },
+    { key: "boardResolutionCopyUrl", label: "Board resolution copy" },
+    { key: "gstCopyUrl", label: "GST copy" },
+    { key: "clientMasterHoldingCopyUrl", label: "Client master holding copy" },
+    { key: "shareHoldingPatternCopyUrl", label: "Share holding pattern copy" },
+    {
+      key: "certificateOfCommencementOfBizUrl",
+      label: "Certificate of commencement of business",
+    },
+    { key: "articlesOfAssociationUrl", label: "Articles of association" },
+    { key: "directorsListCopyUrl", label: "Directors list copy" },
+    { key: "powerOfAttorneyCopyUrl", label: "Power of attorney copy" },
+  ];
 
 export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, setField } = hook;
@@ -94,7 +94,7 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
                       {label}
                     </span>
                     <a
-                      href={url}
+                      href={"/assets/media/files" + url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="truncate text-primary hover:underline flex items-center gap-1 min-w-0"

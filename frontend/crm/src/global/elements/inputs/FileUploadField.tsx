@@ -104,7 +104,7 @@ export function FileUploadField({
       <Label htmlFor={id}>
         {label} {required && <span className="text-destructive">*</span>}
       </Label>
-      
+
       <div className="mt-2 space-y-2">
         {/* File Input Button */}
         <div className="flex gap-2 items-center">

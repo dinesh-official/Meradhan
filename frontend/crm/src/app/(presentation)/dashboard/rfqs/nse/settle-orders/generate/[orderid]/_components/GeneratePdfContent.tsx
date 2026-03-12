@@ -704,7 +704,15 @@ MeraDhan Team`
                 </div>
               )}
 
-              <div className="flex flex-wrap items-end gap-2">
+              {!participantCode && (
+                <div className="rounded-lg border bg-muted/30 p-4 mt-2">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Participant code not found.</p>
+                  <p className="text-sm text-red-500">Please verify the order and try again.</p>
+                </div>
+              )}
+
+
+              {participantCode && <div className="flex flex-wrap items-end gap-2">
                 <div className="min-w-[220px]">
                   <SelectCustomerUser
                     placeholder="Search and select Customer..."
@@ -728,7 +736,7 @@ MeraDhan Team`
                   <UserPlus className="mr-2 h-4 w-4" />
                   {assignOrderMutation.isPending ? "Assigning..." : "Assign order to Customer"}
                 </Button>
-              </div>
+              </div>}
               {selectedCustomer && !isAutoFetchedCustomer && (
                 <div className="rounded-lg border bg-muted/30 p-4 mt-2">
                   <p className="text-xs font-medium text-muted-foreground mb-3">Selected customer</p>
