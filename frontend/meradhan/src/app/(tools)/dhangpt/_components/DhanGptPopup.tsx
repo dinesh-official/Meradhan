@@ -22,12 +22,12 @@ function DhanGptPopup() {
         <div className="flex justify-start items-center gap-3">
           <Image
             src="/logo/dhangpt-border.svg"
-            alt="DhanGPT Illustration"
+            alt="MeraDhan-GPT Illustration"
             width={100}
             height={100}
             className="w-8"
           />
-          <p className="text-primary font-semibold">DhanGPT</p>
+          <p className="text-primary font-semibold">MeraDhan-GPT</p>
           <p className="text-xs text-primary">{time}</p>
         </div>
       );
@@ -53,7 +53,7 @@ function DhanGptPopup() {
       >
         <div className="bg-white md:w-[80%] w-full max-w-[1400px] md:h-[85%] h-screen md:rounded-lg overflow-hidden flex flex-col shadow-lg ">
           <div className="bg-primary p-3 text-white font-bold text-lg md:px-8 px-8 flex justify-between items-center ">
-            <p>Chat with DhanGPT</p>
+            <p>Chat with MeraDhan-GPT</p>
             <button
               className="text-2xl font-bold leading-none bg-red-500 w-9 h-9 rounded-full flex justify-center items-center cursor-pointer"
               onClick={() => setOpen(false)}
@@ -66,7 +66,7 @@ function DhanGptPopup() {
             <div className="w-full h-full flex justify-center items-center flex-col gap-2">
               <Image
                 src="/logo/dhangpt-border.svg"
-                alt="DhanGPT Illustration"
+                alt="MeraDhan-GPT Illustration"
                 width={300}
                 height={300}
                 className="w-28"
@@ -160,7 +160,7 @@ function DhanGptPopup() {
       <Image
         onClick={() => setOpen(true)}
         src="/logo/dhangpt-border.svg"
-        alt="DhanGPT Illustration"
+        alt="MeraDhan-GPT Illustration"
         width={100}
         height={100}
         id="dhanGpt-popup-trigger"
