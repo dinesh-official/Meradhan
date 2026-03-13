@@ -35,7 +35,7 @@ interface ChatInputProps {
 
 export function ChatInput({
   onSend,
-  placeholder = "Ask DhanGPT...",
+  placeholder = "Ask MeraDhan-GPT...",
   disabled = false,
   loading = false,
   value,
@@ -101,7 +101,7 @@ export function ChatInput({
           This is AI, not a financial advisor. Validate key information before
           making decisions.
         </p>
-        <p>Powered by: DhanGPT v1.2</p>
+        <p>Powered by: MeraDhan-GPT v1.2</p>
       </div>
     </div>
   );

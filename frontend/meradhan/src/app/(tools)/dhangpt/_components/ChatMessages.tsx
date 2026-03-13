@@ -43,7 +43,7 @@ export default function ChatMessages({
                   className="inline-block mr-1 align-middle"
                 />
               )}
-              {message.person === "USER" ? "You" : "DhanGPT"}
+              {message.person === "USER" ? "You" : "MeraDhan-GPT"}
             </p>
 
             {message.response.trim().length !== 0 && (

@@ -5,10 +5,10 @@ import React from "react";
 
 function DhanGptHeroInput() {
   return (
-    <div className="relative ">
+    <div className="relative w-full">
       <Input
-        className=" bg-white border-0 text-gray-950 py-5.5 px-5"
-        placeholder="Ask DhanGPT"
+        className="w-full bg-white border-0 text-gray-900 py-6 px-6 pr-16 rounded-3xl text-base placeholder:text-gray-400 shadow-sm min-h-[56px]"
+        placeholder="Ask MeraDhan-GPT"
         id="dhanGpt-hero-input"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -37,18 +37,18 @@ function DhanGptHeroInput() {
           }
         }}
       />
-      <button
-        className="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md text-muted-foreground/80 transition-[color,box-shadow] outline-none hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-        aria-label="Subscribe"
+      <span
+        className="absolute inset-y-0 end-0 flex h-full w-16 items-center justify-center pointer-events-none rounded-e-3xl"
+        aria-hidden
       >
         <Image
-          src={`/logo/dhangpt-border.svg`}
-          width={300}
-          height={300}
-          alt="dhangpt"
-          className="w-6 h-6 mr-2"
+          src="/logo/dhangpt-border.svg"
+          width={28}
+          height={28}
+          alt=""
+          className="w-7 h-7"
         />
-      </button>
+      </span>
     </div>
   );
 }

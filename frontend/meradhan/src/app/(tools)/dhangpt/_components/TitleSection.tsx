@@ -8,7 +8,7 @@ function TitleSection() {
             <>
               Talk to
               <span className="flex font-semibold text-secondary">
-                DhanGPT{" "}
+                MeraDhan-GPT{" "}
                 <Image
                   width={60}
                   height={60}

@@ -8,7 +8,7 @@ const whyChooseUs = [
   "Transparent & Low-Cost Transactions – No hidden charges, competitive pricing",
   "Expert Insights & Education – Market trends, research, and blogs",
   "Secure & User-Friendly Interface – A seamless investment experience",
-  "Advanced Tools & Calculators – DhanGPT, Return Calculator, FD Calculator & more",
+  "Advanced Tools & Calculators – MeraDhan-GPT, Return Calculator, FD Calculator & more",
 ];
 const WhyChooseUsSection = () => {
   return (

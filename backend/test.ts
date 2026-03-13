@@ -2,18 +2,18 @@ import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 import { cacheStorage } from "@store/redis_store";
 
 const user = {
-  userId: 92,
-  kycId: 617
+  "userId": 92,
+  "kycId": 617,
 };
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const main = async () => {
   const cachedKey = `KRA:${user.userId}-${user.kycId}`;
-  const pastExecution = ""; // MODIFY , REGISTER
+  const pastExecution = "MODIFY"; // MODIFY , REGISTER
 
   await cacheStorage.delete(cachedKey).then(async () => {
-    if (pastExecution && pastExecution !== "") {
+    if (pastExecution && pastExecution.length !== 0) {
       await cacheStorage.set(cachedKey, pastExecution, 72 * 60 * 60);
     }
 
