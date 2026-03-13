@@ -19,6 +19,7 @@ interface ActiveFilters {
 }
 
 interface TimelineFiltersProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timelineData?: any;
   activeFilters: ActiveFilters;
   onFilterChange: (filters: ActiveFilters) => void;

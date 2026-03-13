@@ -58,6 +58,7 @@ const YearSection = ({ yearData }: Props) => {
 export default YearSection;
 
 interface TimelineProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dateData: any;
 }
 

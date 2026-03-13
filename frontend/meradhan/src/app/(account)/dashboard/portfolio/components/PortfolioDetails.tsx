@@ -389,6 +389,7 @@ export default function PortfolioDetails() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function Detail({ label, value }: { label: string; value: any }) {
   return (
     <div>

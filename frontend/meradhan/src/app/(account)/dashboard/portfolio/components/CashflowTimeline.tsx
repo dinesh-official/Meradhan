@@ -7,7 +7,7 @@ import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { Loader2 } from "lucide-react";
 import TimelineFilters from "./TimelineFilters";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const DEBOUNCE_MS = 500;
 
@@ -86,7 +86,8 @@ export default function CashflowTimelinePage() {
           />
           <div className="min-w-[1350px] md:min-w-auto md:max-w-[900px] mx-auto">
             {timeline.years.length > 0 ? (
-              timeline.years.map((year: any, idx: any) => (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              timeline.years.map((year: any, idx: number) => (
                 <YearSection key={idx} yearData={year} />
               ))
             ) : (

@@ -89,13 +89,10 @@ export default function InvestmentByIssuerCard() {
     </g>
   );
 
-  const renderSliceLabel = ({
-    cx,
-    cy,
-    midAngle,
-    outerRadius,
-    index,
-  }: any) => {
+  const renderSliceLabel = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { cx, cy, midAngle, outerRadius, index }: any
+  ) => {
     const RADIAN = Math.PI / 180;
     const radius = outerRadius + 20;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -118,13 +115,10 @@ export default function InvestmentByIssuerCard() {
     );
   };
 
-  const renderLabelLine = ({
-    cx,
-    cy,
-    midAngle,
-    outerRadius,
-    index,
-  }: any) => {
+  const renderLabelLine = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { cx, cy, midAngle, outerRadius, index }: any
+  ) => {
     const RADIAN = Math.PI / 180;
 
     const startX = cx + outerRadius * Math.cos(-midAngle * RADIAN);
