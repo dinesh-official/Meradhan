@@ -27,7 +27,7 @@ async function AccountViewPort({
         <ActionSideBar showSideBar={showSideBar} />
         {/* Main Content */}
         <div className="mb-12 sm:mb-0 w-full transition-all duration-300">
-          <div className="p-4 sm:p-8 min-h-[50vh]">
+          <div className="p-[15px] sm:p-[24px] min-h-[50vh]">
             {title && (
               <h3 className="mb-5 font-medium text-xl sm:text-2xl">{title}</h3>
             )}

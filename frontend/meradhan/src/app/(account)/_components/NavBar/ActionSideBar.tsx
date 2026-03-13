@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, memo, ReactNode, useEffect } from "react";
-import { FaUser } from "react-icons/fa";
+import { FaChartPie, FaUser } from "react-icons/fa";
 import { HiShoppingCart } from "react-icons/hi";
 import { MdSpaceDashboard } from "react-icons/md";
 
@@ -45,11 +45,11 @@ export const accountMenuItems: MenuItem[] = [
     label: "Dashboard",
     href: "/dashboard",
   },
-  // {
-  //   icon: <FaChartPie size={18} />,
-  //   label: "Portfolio",
-  //   href: "/dashboard/portfolio",
-  // },
+  {
+    icon: <FaChartPie size={18} />,
+    label: "Portfolio",
+    href: "/dashboard/portfolio",
+  },
   {
     icon: <HiShoppingCart size={18} />,
     label: "My Orders",
