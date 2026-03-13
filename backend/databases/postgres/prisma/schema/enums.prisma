@@ -70,6 +70,7 @@ enum KYCStatus {
   UNDER_REVIEW
   VERIFIED
   REJECTED
+  RE_KYC
 }
 
 // Lead Sources
@@ -108,4 +109,22 @@ enum PartnershipStatus {
   UNQUALIFIED
   CONVERTED
   REJECTED
+}
+
+/// Entity constitution type for Corporate KYC
+enum EntityConstitutionType {
+  PRIVATE_LIMITED
+  PUBLIC_LIMITED
+  OPC
+  LLP
+  PARTNERSHIP
+  TRUST
+  OTHER
+}
+
+/// FATCA entity type for Corporate KYC
+enum CorporateEntityType {
+  ACTIVE_NFE
+  PASSIVE_NFE
+  FINANCIAL_INSTITUTION
 }

@@ -58,8 +58,14 @@ function ProfilePage({
         {
           [
             <PersonalDetails profile={profile} key={1} />,
-            profile.kycStatus == "VERIFIED" ? (
-              <BankAccounts profile={profile} key={2} />
+            profile.kycStatus == "VERIFIED" ||
+            profile.kycStatus == "RE_KYC" ||
+            profile.kycStatus == "UNDER_REVIEW" ? (
+              <BankAccounts
+                profile={profile}
+                key={2}
+                allowAddNew={profile.kycStatus == "VERIFIED"}
+              />
             ) : (
               <NeedKyc
                 key={2}
@@ -67,8 +73,14 @@ function ProfilePage({
                 desc={`to add bank accounts!`}
               />
             ),
-            profile.kycStatus == "VERIFIED" ? (
-              <DematAccounts profile={profile} key={3} />
+            profile.kycStatus == "VERIFIED" ||
+            profile.kycStatus == "RE_KYC" ||
+            profile.kycStatus == "UNDER_REVIEW" ? (
+              <DematAccounts
+                profile={profile}
+                key={3}
+                allowAddNew={profile.kycStatus == "VERIFIED"}
+              />
             ) : (
               <NeedKyc
                 key={3}
@@ -76,8 +88,14 @@ function ProfilePage({
                 desc={`to add demat accounts!`}
               />
             ),
-            profile.kycStatus == "VERIFIED" ? (
-              <RiskProfiling profile={profile} key={4} />
+            profile.kycStatus == "VERIFIED" ||
+            profile.kycStatus == "RE_KYC" ||
+            profile.kycStatus == "UNDER_REVIEW" ? (
+              <RiskProfiling
+                profile={profile}
+                key={4}
+                allowSave={profile.kycStatus == "VERIFIED"}
+              />
             ) : (
               <NeedKyc
                 key={4}

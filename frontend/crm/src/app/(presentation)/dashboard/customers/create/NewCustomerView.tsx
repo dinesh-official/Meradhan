@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import CustomerManagementForm from "../_components/manageCustomer/form/CustomerManagementForm";
 import { useCustomerFromDataHook } from "../_components/manageCustomer/form/useCustomerFormDataHook";
 
-function NewCustomerView({ popup }: { popup?: boolean }) {
-  const manager = useCustomerFromDataHook(undefined, !popup);
+function NewCustomerView({
+  popup,
+  onCustomerCreated,
+}: { popup?: boolean; onCustomerCreated?: () => void }) {
+  const manager = useCustomerFromDataHook(undefined, !popup, onCustomerCreated);
   return (
     <div className="mx-auto mt-6">
       <Card className={popup ? "border-none " : ""}>

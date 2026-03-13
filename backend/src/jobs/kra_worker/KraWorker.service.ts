@@ -123,8 +123,7 @@ export class KraWorkerService {
               Message: "Request Failed - KRA Process error",
               LastTask: lastTask,
               Status: status,
-              Error:
-                "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
+              Error: "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
             },
             responseData: res,
             userId: customerId,
@@ -484,7 +483,7 @@ export class KraProcess {
         APP_COR_CTRY: p.APP_COR_CTRY,
         APP_COR_PINCD: p.APP_COR_PINCD,
         APP_COR_STATE: p.APP_COR_STATE,
-        APP_DATE: p.APP_DATE,
+        APP_DATE: formatDateTime15SecPrev(new Date()),
         APP_DOB_DT: p.APP_DOB_DT + " 00:00:00",
         APP_DOC_PROOF: p.APP_DOC_PROOF,
         APP_EMAIL: p.APP_EMAIL,
@@ -680,9 +679,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-            data.step_1.pan.response.details.aadhaar.current_address_details
-              .state,
-          )?.code
+          data.step_1.pan.response.details.aadhaar.current_address_details
+            .state,
+        )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
@@ -780,19 +779,58 @@ export const formatDate = (date: Date) => {
 };
 
 export function formatDateTime(date: Date): string {
-  // Convert to UTC first
-  const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
 
-  // Add IST offset (5 hours 30 minutes)
-  const istTime = new Date(utcTime + 5.5 * 60 * 60 * 1000);
+  // Format in IST using formatToParts (reliable)
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
 
-  const dd = String(istTime.getDate()).padStart(2, "0");
-  const mm = String(istTime.getMonth() + 1).padStart(2, "0");
-  const yyyy = istTime.getFullYear();
+  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
 
-  const HH = String(istTime.getHours()).padStart(2, "0");
-  const MM = String(istTime.getMinutes()).padStart(2, "0");
-  const SS = String(istTime.getSeconds()).padStart(2, "0");
+  const dd = get("day");
+  const mm = get("month");
+  const yyyy = get("year");
+  const HH = get("hour");
+  const MM = get("minute");
+  const SS = get("second");
+
+  return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
+}
+
+export function formatDateTime15SecPrev(date: Date): string {
+  // If PROD should behave differently, keep this condition
+  if (env.KRA_ENV === "PROD") return formatDateTime(date);
+
+  // subtract 15 seconds from the actual instant
+  const d = new Date(date.getTime() - 15_000);
+
+  // Format in IST using formatToParts (reliable)
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+
+  const dd = get("day");
+  const mm = get("month");
+  const yyyy = get("year");
+  const HH = get("hour");
+  const MM = get("minute");
+  const SS = get("second");
 
   return `${dd}-${mm}-${yyyy} ${HH}:${MM}:${SS}`;
 }

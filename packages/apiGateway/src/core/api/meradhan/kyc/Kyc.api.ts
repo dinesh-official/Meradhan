@@ -19,6 +19,7 @@ import type {
   IStoreKycGETResponse,
   IStoreKycSETResponse,
   KRAResponse,
+  RescheduleKraResponse,
 } from "./Kyc.response";
 
 export class CustomerKycApi {
@@ -257,6 +258,44 @@ export class CustomerKycApi {
       `/crm/kyc/kra/get/${customerId}`,
       config,
     );
+    return data;
+  }
+
+  async rescheduleKra(
+    payload: { customerId: number; kycDataStoreId: number; delayMs?: number },
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<RescheduleKraResponse>(
+      "/kra/reschedule-kra",
+      payload,
+      config,
+    );
+    return data;
+  }
+
+  async applyRekyc(customerId: number, config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.get<KRAResponse>(
+      `/crm/kyc/rekyc/${customerId}`,
+      config,
+    );
+    return data;
+  }
+
+  async requestRekycOtp(customerId: number, config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ token: string }>
+    >(`/crm/kyc/rekyc/request-otp/${customerId}`, undefined, config);
+    return data;
+  }
+
+  async confirmRekyc(
+    payload: { token: string; otp: string },
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{
+      status: boolean;
+      message: string;
+    }>(`/crm/kyc/rekyc/confirm`, payload, config);
     return data;
   }
 }

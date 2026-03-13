@@ -271,3 +271,91 @@ html {
   animation: slide-out-right 0.3s ease-in forwards;
 }
 
+/* Print: when Corporate KYC print content exists, show only that; multi-page PDF */
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  /* Let layout expand so content is not clipped to one viewport height */
+  html:has(#corporate-kyc-print-content) html,
+  html:has(#corporate-kyc-print-content) body {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) .flex.h-screen {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) .flex.h-screen > .flex-1 {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) #mainpage {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) body * {
+    visibility: hidden;
+  }
+  html:has(#corporate-kyc-print-content) #corporate-kyc-print-content,
+  html:has(#corporate-kyc-print-content) #corporate-kyc-print-content * {
+    visibility: visible;
+  }
+  html:has(#corporate-kyc-print-content) #corporate-kyc-print-content {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: white !important;
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  /* Clean print-only header (no logo); keep on one page */
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-header {
+    display: block !important;
+    break-after: avoid;
+    page-break-after: avoid;
+    margin-top: -2rem !important;
+  }
+  /* Print tables: clean table layout */
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 12px;
+  }
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-table td,
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-table th {
+    border: 1px solid #d1d5db;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-label,
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-th {
+    font-weight: 600;
+    color: #374151;
+    background: #f9fafb;
+    width: 28%;
+  }
+  html:has(#corporate-kyc-print-content)
+    .corporate-kyc-print-table
+    thead
+    .corporate-kyc-print-th {
+    background: #f3f4f6;
+  }
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+}

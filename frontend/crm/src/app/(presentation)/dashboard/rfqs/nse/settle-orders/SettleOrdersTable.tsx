@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import {
@@ -8,6 +10,9 @@ import {
 } from "../_components/bages/NseRfqBadges";
 import { SettleOrderData } from "@root/apiGateway";
 import { formatNumberTS } from "@/global/utils/formate";
+
+// source 5 = NSE RFQ (manual); 1 = NSE CBRICS, 4 = FTRAC (DIR/automated)
+const isManualOrder = (source?: 1 | 4 | 5) => source === 5;
 
 // Extended interface to include createdAt and updatedAt fields
 interface ExtendedSettleOrderData extends SettleOrderData {
@@ -19,12 +24,16 @@ interface SettleOrdersTableProps {
   data?: ExtendedSettleOrderData[];
   isLoading?: boolean;
   onRowClick?: (order: ExtendedSettleOrderData) => void;
+  selectedForPdf?: Set<string>;
+  onTogglePdfOrder?: (orderNumber: string, checked: boolean) => void;
 }
 
 function SettleOrdersTable({
   data = [],
   isLoading = false,
   onRowClick,
+  selectedForPdf,
+  onTogglePdfOrder,
 }: SettleOrdersTableProps) {
   return (
     <div>
@@ -41,6 +50,24 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <span className="font-mono font-medium text-sm">{row.id}</span>
+              );
+            },
+          },
+          {
+            key: "generatePdf",
+            label: "Gen PDF",
+            cell(row) {
+              if (!isManualOrder(row.source)) return <span className="text-muted-foreground">—</span>;
+              const orderNum = String(row.orderNumber);
+              return (
+                <Checkbox
+                  checked={selectedForPdf?.has(orderNum) ?? false}
+                  onCheckedChange={(checked) =>
+                    onTogglePdfOrder?.(orderNum, checked === true)
+                  }
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={`Select order ${orderNum} for PDF`}
+                />
               );
             },
           },
@@ -85,7 +112,7 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return (
-                <span className="font-mono text-sm">{row.price || "--"}</span>
+                <span className="font-mono text-sm">{Number(row.price).toFixed(4) || "--"}</span>
               );
             },
           },
@@ -94,6 +121,7 @@ function SettleOrdersTable({
             label: "Yield Type",
             cell(row) {
               return <SettlementYieldTypeBadge type={row.yieldType} />;
+              // return <span className="font-mono text-sm">{row.yieldType || "--"}</span>;
             },
           },
           {
@@ -101,17 +129,17 @@ function SettleOrdersTable({
             label: "Yield (%)",
             sortable: true,
             cell(row) {
-              return <span className="font-mono text-sm">{row.yield}%</span>;
+              return <span className="font-mono text-sm">{Number(row.yield).toFixed(4)}%</span>;
             },
           },
           {
             key: "value",
-            label: "Value (₹)",
+            label: "Value",
             sortable: true,
             cell(row) {
               return (
                 <span className="font-mono text-sm">
-                  {formatNumberTS(row.value)}
+                  ₹ {formatNumberTS(row.value)}
                 </span>
               );
             },
@@ -159,7 +187,7 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <span className="font-mono text-sm">
-                  ₹{row.modAccrInt?.toLocaleString() || "0"}
+                  ₹ {formatNumberTS(row.modAccrInt || 0)}
                 </span>
               );
             },
@@ -172,7 +200,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.modConsideration
-                    ? `₹${formatNumberTS(row.modConsideration)}`
+                    ? `₹ ${formatNumberTS(row.modConsideration)}`
                     : "--"}
                 </span>
               );
@@ -251,7 +279,7 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <span className="font-mono text-sm">
-                  ₹{row.stampDutyAmount?.toLocaleString() || "0"}
+                  ₹ {(row.stampDutyAmount || 0)}
                 </span>
               );
             },
@@ -273,7 +301,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.buyerFundPayinObligation
-                    ? `₹${formatNumberTS(row.buyerFundPayinObligation)}`
+                    ? `₹ ${formatNumberTS(row.buyerFundPayinObligation)}`
                     : "--"}
                 </span>
               );
@@ -287,7 +315,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.sellerFundPayoutObligation
-                    ? `₹${formatNumberTS(row.sellerFundPayoutObligation)}`
+                    ? `₹ ${formatNumberTS(row.sellerFundPayoutObligation)}`
                     : "--"}
                 </span>
               );
@@ -331,10 +359,8 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return row.secPayinTime
-                ? dateTimeUtils.formatDateTime(
-                  row.secPayinTime,
-                  "DD MMM YYYY HH:mm"
-                )
+                ?
+                row.secPayinTime
                 : "--";
             },
           },
@@ -346,7 +372,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.fundsPayinAmount
-                    ? `₹${row.fundsPayinAmount.toLocaleString()}`
+                    ? `₹ ${row.fundsPayinAmount.toLocaleString()}`
                     : "--"}
                 </span>
               );

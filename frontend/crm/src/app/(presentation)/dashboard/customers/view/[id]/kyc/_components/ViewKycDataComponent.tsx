@@ -54,6 +54,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
     <div className="relative flex flex-col gap-5 mt-5">
       <div className="gap-5  flex flex-col ">
         <CustomerOverViewCard
+          userId={data.id}
           kraStatus={data.kraStatus}
           name={`${data.firstName} ${data.middleName} ${data.lastName}`}
           customerSince={dateTimeUtils.formatDateTime(
@@ -87,8 +88,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
           photoUrl={genMediaUrl(data.avatar)}
           signatureUrl={genMediaUrl(data.personalInformation?.SignatureUrl)}
           fullName={`${data.firstName} ${data.middleName} ${data.lastName}`}
-          faceTimeStamp={kycStore.data?.step_1.face?.timestamp}
-          signTimeStamp={kycStore.data?.step_1.sign?.timestamp}
+          faceTimeStamp={kycStore.data?.step_1?.face?.timestamp}
+          signTimeStamp={kycStore.data?.step_1?.sign?.timestamp}
           dateOfBirth={
             !data.personalInformation?.dateOfBirth
               ? "--"
@@ -230,18 +231,18 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             },
           )}
           verificationTimeStamp={
-            !kycStore.data?.step_1.pan.fetchedTimestamp
+            !kycStore.data?.step_1?.pan?.fetchedTimestamp
               ? "-------"
               : dateTimeUtils.formatDateTime(
-                  kycStore.data?.step_1.pan.fetchedTimestamp,
+                  kycStore.data?.step_1?.pan?.fetchedTimestamp,
                   "DD MMM YYYY hh:mm:ss AA",
                 )
           }
           confirmTimeStamp={
-            !kycStore.data?.step_1.pan.confirmPanTimestamp
+            !kycStore.data?.step_1?.pan?.confirmPanTimestamp
               ? "--/--/----"
               : dateTimeUtils.formatDateTime(
-                  kycStore.data?.step_1.pan.confirmPanTimestamp,
+                  kycStore.data?.step_1?.pan?.confirmPanTimestamp,
                   "DD MMM YYYY hh:mm:ss AA",
                 )
           }
@@ -296,17 +297,17 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             fullAddress: data.currentAddress?.fullAddress || "------",
           }}
           verificationTimeStamp={
-            kycStore.data?.step_1.pan.fetchedTimestamp
+            kycStore.data?.step_1?.pan?.fetchedTimestamp
               ? dateTimeUtils.formatDateTime(
-                  kycStore.data?.step_1.pan.fetchedTimestamp,
+                  kycStore.data?.step_1?.pan?.fetchedTimestamp,
                   "DD MMM YYYY hh:mm:ss AA",
                 )
               : "--/--/----"
           }
           confirmTimeStamp={
-            kycStore.data?.step_1.pan.confirmPanTimestamp
+            kycStore.data?.step_1?.pan?.confirmPanTimestamp
               ? dateTimeUtils.formatDateTime(
-                  kycStore.data?.step_1.pan.confirmPanTimestamp,
+                  kycStore.data?.step_1?.pan?.confirmPanTimestamp,
                   "DD MMM YYYY hh:mm:ss AA",
                 )
               : "--/--/----"

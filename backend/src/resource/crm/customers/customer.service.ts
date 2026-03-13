@@ -1,8 +1,19 @@
 import type { DataBaseSchema } from "@core/database/database";
+import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import type z from "zod";
 import type { CustomerProfileRepo } from "./customer.repo";
+
+const KYC_STEP_NAMES = [
+  "Identity Validation",
+  "Personal Details",
+  "Bank Account",
+  "Demat Account",
+  "Risk Profiling",
+  "e-Signature",
+  "100%",
+] as const;
 
 export class CustomerProfileService extends CustomerProfileManager {
   constructor(private customerRepo: CustomerProfileRepo) {
@@ -28,7 +39,7 @@ export class CustomerProfileService extends CustomerProfileManager {
     payload: z.infer<typeof appSchema.customer.findManyCustomerSchema>
   ) {
     const page = Number(payload.page) || 1;
-    const pageSize = 10; // You can make this configurable if needed
+    const pageSize = payload.pageSize ?? 10;
     const skip = (page - 1) * pageSize;
     const filters: DataBaseSchema.CustomerProfileDataModelWhereInput = {
       isDeleted: false,
@@ -67,7 +78,7 @@ export class CustomerProfileService extends CustomerProfileManager {
     const total = await this.customerRepo.countCustomers({ where: filters });
 
     // Fetch paginated users
-    const data = await this.customerRepo.findManyCustomer({
+    const rawData = await this.customerRepo.findManyCustomer({
       where: filters,
       skip,
       take: pageSize,
@@ -84,6 +95,7 @@ export class CustomerProfileService extends CustomerProfileManager {
         phoneNo: true,
         VerifiedBy: true,
         verifyDate: true,
+        userType: true,
 
         panCard: {
           select: {
@@ -91,6 +103,7 @@ export class CustomerProfileService extends CustomerProfileManager {
           },
         },
         kycStatus: true,
+        kraStatus: true,
         utility: {
           select: {
             accountStatus: true,
@@ -101,6 +114,35 @@ export class CustomerProfileService extends CustomerProfileManager {
         updatedAt: true,
         createdBy: true,
       },
+    });
+
+    const customerIds = rawData.map((c) => c.id);
+    const kycFlows =
+      customerIds.length > 0
+        ? await db.dataBase.kYC_FLOW.findMany({
+            where: { userID: { in: customerIds } },
+            select: { userID: true, step: true, currentStepName: true, complete: true },
+            orderBy: { updatedAt: "desc" },
+          })
+        : [];
+
+    const kycByUser = new Map<number, { step: number; currentStepName: string | null; complete: boolean }>();
+    for (const k of kycFlows) {
+      if (k.userID != null && !kycByUser.has(k.userID)) {
+        kycByUser.set(k.userID, {
+          step: k.step,
+          currentStepName: k.currentStepName,
+          complete: k.complete,
+        });
+      }
+    }
+
+    const data = rawData.map((row) => {
+      const kyc = kycByUser.get(row.id);
+      const currentKycStepName = kyc
+        ? (kyc.currentStepName?.trim() || KYC_STEP_NAMES[kyc.step - 1] || "Unknown")
+        : "Not Started";
+      return { ...row, currentKycStepName };
     });
 
     return {
@@ -116,5 +158,9 @@ export class CustomerProfileService extends CustomerProfileManager {
 
   async getFullCustomerProfile(customerId: number) {
     return await this.customerRepo.getFullCustomerProfile(customerId);
+  }
+
+  async getCustomerByParticipantCode(participantCode: string) {
+    return await this.customerRepo.getCustomerByParticipantCode(participantCode);
   }
 }

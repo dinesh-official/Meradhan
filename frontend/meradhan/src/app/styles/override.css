@@ -199,10 +199,10 @@ input[type="range"]::-moz-range-thumb {
   font-weight: 600 !important;
 }
 
-.swal2-icon-show {
+/* .swal2-icon-show {
   width: 50px !important;
   height: 50px !important;
-}
+} */
 
 .rpv-toolbar {
   font-size: 12px !important;

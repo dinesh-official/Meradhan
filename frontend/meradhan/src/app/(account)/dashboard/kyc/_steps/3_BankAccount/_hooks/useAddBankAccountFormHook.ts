@@ -86,6 +86,11 @@ export const useAddBankAccountFormHook = () => {
 
         // set confirm timestamp
         updateData("verifyTimestamp", new Date().toISOString());
+        Swal.fire({
+          icon: "success",
+          title: "Bank account verified successfully!",
+          text: "Your bank account has been successfully verified.",
+        });
 
         setTimeout(() => {
           nextLocalStep();

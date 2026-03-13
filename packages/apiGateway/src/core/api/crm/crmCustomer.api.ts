@@ -3,12 +3,16 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type z from "zod";
 import type {
   CreateCustomerResponse,
+  CustomerProfile,
   DeleteCustomerResponse,
+  GetCorporateKycResponse,
   GetCustomerResponse,
   GetCustomerResponseById,
+  SaveCorporateKycResponse,
   UpdateCustomerResponse,
 } from "../../../types/response.types";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
+import type { BaseResponseData } from "../../../types/base";
 
 export interface TCrmCustomerInterface {
   createCustomer(
@@ -36,10 +40,21 @@ export interface TCrmCustomerInterface {
     customerId: string,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<UpdateCustomerResponse>>;
+
+  getCorporateKyc(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<GetCorporateKycResponse>>;
+
+  saveCorporateKyc(
+    customerId: number,
+    data: z.infer<(typeof appSchema.customer)["createCorporateKycSchema"]>,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<SaveCorporateKycResponse>>;
 }
 
 export class CrmCustomerApi implements TCrmCustomerInterface {
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   async createCustomer(
     data: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>,
@@ -86,6 +101,16 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     );
   }
 
+  async getCustomerByParticipantCode(
+    participantCode: string,
+    config?: AxiosRequestConfig,
+  ) {
+    return this.apiClient.get<BaseResponseData<CustomerProfile>>(
+      `/crm/customer/participant/${participantCode}`,
+      config,
+    );
+  }
+
   async updateCustomer(
     data: z.infer<(typeof appSchema.customer)["updateCustomerProfileSchema"]>,
     customerId: string,
@@ -93,6 +118,28 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
   ): ReturnType<TCrmCustomerInterface["updateCustomer"]> {
     return this.apiClient.patch<UpdateCustomerResponse>(
       `/crm/customer/${customerId}`,
+      data,
+      config,
+    );
+  }
+
+  async getCorporateKyc(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["getCorporateKyc"]> {
+    return this.apiClient.get<GetCorporateKycResponse>(
+      `/crm/customer/${customerId}/corporate-kyc`,
+      config,
+    );
+  }
+
+  async saveCorporateKyc(
+    customerId: number,
+    data: z.infer<(typeof appSchema.customer)["createCorporateKycSchema"]>,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["saveCorporateKyc"]> {
+    return this.apiClient.put<SaveCorporateKycResponse>(
+      `/crm/customer/${customerId}/corporate-kyc`,
       data,
       config,
     );

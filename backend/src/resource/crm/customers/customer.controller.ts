@@ -3,13 +3,17 @@ import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { CustomerProfileRepo } from "./customer.repo";
 import { CustomerProfileService } from "./customer.service";
+import { CorporateKycRepo } from "./corporatekyc.repo";
+import { CorporateKycService } from "./corporatekyc.service";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;
+  private corporateKycService: CorporateKycService;
   constructor() {
     const repo = new CustomerProfileRepo();
     this.profileService = new CustomerProfileService(repo);
+    this.corporateKycService = new CorporateKycService(new CorporateKycRepo());
   }
 
   async createCustomer(req: Request, res: Response): Promise<void> {
@@ -141,6 +145,46 @@ export class CustomerProfileController {
     const response = await this.profileService.getFullCustomerProfile(
       Number(customerId)
     );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
+
+  async getCorporateKyc(req: Request, res: Response): Promise<void> {
+    const customerId = req.params.customerId;
+    const response = await this.corporateKycService.getByCustomerId(
+      Number(customerId)
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
+
+  async saveCorporateKyc(req: Request, res: Response): Promise<void> {
+    const customerId = req.params.customerId;
+    const payload = appSchema.customer.createCorporateKycSchema.parse(req.body);
+    const response = await this.corporateKycService.save(
+      Number(customerId),
+      payload
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
+
+  async getCustomerByParticipantCode(req: Request, res: Response): Promise<void> {
+    const participantCode = req.params.participantCode;
+    if (!participantCode) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Participant code is required",
+      });
+      return;
+    }
+    const response = await this.profileService.getCustomerByParticipantCode(participantCode as string);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,

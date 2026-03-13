@@ -8,7 +8,6 @@ export const allowAccessMiddleware =
     (req: Request, res: Response, next: NextFunction) => {
 
       if (allowedRoles.includes("CRM")) {
-
         const newAllowedRoles = new Set([...allowedRoles, "ADMIN", "SUPER_ADMIN", "VIEWER", "SALES", "SUPPORT", "RELATIONSHIP_MANAGER"]);
         allowedRoles = Array.from(newAllowedRoles) as Role[];
       }
@@ -51,6 +50,17 @@ export const allowAccessMiddleware =
           email: string;
           role: Exclude<Role, "PUBLIC">;
         }>(token!);
+
+        // SUPER_ADMIN: allow all actions (bypass role check)
+        if (data.role === "SUPER_ADMIN") {
+          req.session = {
+            id: data.id,
+            email: data.email,
+            token: token!,
+            role: "SUPER_ADMIN",
+          };
+          return next();
+        }
 
         // 🛑 Role validation
         if (allowedRoles.length && !allowedRoles.includes(data.role)) {

@@ -11,8 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { userSessionStore } from "@/core/auth/userSessionStore";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway from "@root/apiGateway";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
@@ -27,13 +28,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+/** Mask Aadhaar for display: XXXX XXXX last4 */
+function maskAadhaar(aadhaarNo: string): string {
+  const digits = aadhaarNo.replace(/\D/g, "");
+  if (digits.length < 4) return "**** **** ****";
+  const last4 = digits.slice(-4);
+  return "XXXX XXXX " + last4;
+}
+
 function AdharInfoForm() {
   const digio = useDigioSDK();
   const { state, setGenderData, setStep1PanData } = useKycDataStorage();
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { nextLocalStep } = useKycDataStorage();
-
+  const { cookies } = useAppCookie();
   const { session } = userSessionStore();
+
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
+  const profileQuery = useQuery({
+    queryKey: ["getProfileDataForKyc"],
+    queryFn: async () => {
+      const response = await customerApi.customerInfoById(Number(cookies.userId));
+      return response.data.responseData;
+    },
+  });
+  const profile = profileQuery.data;
+  const isRekyc = profile?.kycStatus === "RE_KYC";
+  const existingAadhaar = profile?.aadhaarCard?.aadhaarNo ?? "";
+  const displayAadhaar = existingAadhaar ? maskAadhaar(existingAadhaar) : "";
 
   const apiClient = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller,
@@ -123,6 +145,21 @@ function AdharInfoForm() {
       </CardHeader>
 
       <CardContent accountMode>
+        {/* {isRekyc && existingAadhaar ? (
+          <LabelInput label="Aadhaar Number" required>
+            <Input
+              type="text"
+              value={displayAadhaar}
+              readOnly
+              disabled
+              className="bg-muted cursor-not-allowed max-w-xs"
+            />
+            <p className="text-muted-foreground text-xs mt-1">
+              Re-KYC: Using your previously verified Aadhaar. Verify via
+              DigiLocker below to continue.
+            </p>
+          </LabelInput>
+        ) : null} */}
         <LabelInput label="Confirm Your Gender" required>
           <Select
             onValueChange={(e) => {

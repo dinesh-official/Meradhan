@@ -15,6 +15,22 @@ import {
   KycDataStorage,
   useKycDataStorage,
 } from "../../../../_store/useKycDataStorage";
+
+/** Extract user-facing message from API or unknown error so PAN failures always show a message. */
+function getPanErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError && error.response?.data) {
+    const data = error.response.data as { message?: string; responseData?: { message?: string } };
+    return (data.message ?? data.responseData?.message ?? error.message ?? fallback).trim() || fallback;
+  }
+  if (error && typeof error === "object" && "response" in error) {
+    const res = (error as { response?: { data?: { message?: string } } }).response;
+    const msg = res?.data?.message;
+    if (typeof msg === "string" && msg.trim()) return msg;
+  }
+  if (error instanceof Error && error.message?.trim()) return error.message;
+  return fallback;
+}
+
 export const usePanCardVerifyHook = () => {
   const [error, setError] =
     useState<
@@ -62,17 +78,16 @@ export const usePanCardVerifyHook = () => {
       }
     },
     onError(error) {
-      if (error instanceof ApiError) {
-        const errorMessage = error.response?.data?.message || error.message;
-        Swal.fire({
-          icon: "error",
-          title: "Kyc Failed!",
-          text: errorMessage,
-        });
-      } else {
-        console.log(error);
-        toast.error("Something went wrong");
-      }
+      const message = getPanErrorMessage(
+        error,
+        "PAN verification failed. Please check your details and try again."
+      );
+      Swal.fire({
+        icon: "error",
+        title: "KYC Failed",
+        text: message,
+      });
+      toast.error(message);
     },
   });
 
@@ -132,6 +147,11 @@ export const usePanCardVerifyHook = () => {
           },
         });
         setStep1PanData("fetchedTimestamp", new Date().toISOString());
+        Swal.fire({
+
+          title: "PAN verified successfully.",
+          text: "Please proceed to the next step.",
+        });
 
         setTimeout(() => {
           // its navigate to next step view pan info
@@ -178,22 +198,20 @@ export const usePanCardVerifyHook = () => {
       }
     },
     onError: (error) => {
-      if (error instanceof ApiError) {
-        const errorMessage = error.response?.data?.message || error.message;
-        Swal.fire({
-          imageUrl: "/images/icons/sad-emoji.svg",
-          title: "Unable to Verify PAN",
-          text: errorMessage || "We couldn’t verify the PAN details. Please check the PAN number and try again.",
-        });
-
-        addAuditLog({
-          type: "PAN_VERIFICATION_FAILED",
-          desc: `Unable to Verify PAN with error: ${errorMessage}`,
-        });
-      } else {
-        console.log(error);
-        toast.error("Something went wrong");
-      }
+      const message = getPanErrorMessage(
+        error,
+        "We couldn't verify the PAN details. Please check the PAN number and try again."
+      );
+      Swal.fire({
+        imageUrl: "/images/icons/sad-emoji.svg",
+        title: "Unable to Verify PAN",
+        text: message,
+      });
+      toast.error(message);
+      addAuditLog({
+        type: "PAN_VERIFICATION_FAILED",
+        desc: `Unable to Verify PAN: ${message}`,
+      });
     },
   });
 

@@ -12,16 +12,20 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { IoMdArrowDropright } from "react-icons/io";
-import Swal from "sweetalert2";
-import { useKycDataProvider } from "../../../_context/KycDataProvider";
-import { useKycDataStorage } from "../../../_store/useKycDataStorage";
-import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
-import { useEffect, useState } from "react";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import {
   convertUTCtoIST,
   formatDateCustom,
 } from "@/global/utils/datetime.utils";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import { IoMdArrowDropright } from "react-icons/io";
+import apiGateway from "@root/apiGateway";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { useKycDataProvider } from "../../../_context/KycDataProvider";
+import { useKycDataStorage } from "../../../_store/useKycDataStorage";
+import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 
 function IdentityValidationForm() {
   const { setStep1PanData, state } = useKycDataStorage();
@@ -29,12 +33,32 @@ function IdentityValidationForm() {
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const { handelPanVerification, isPending, error } = usePanCardVerifyHook();
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const { cookies } = useAppCookie();
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
+
+  const profileQuery = useQuery({
+    queryKey: ["getProfileDataForKyc"],
+    queryFn: async () => {
+      const response = await customerApi.customerInfoById(Number(cookies.userId));
+      return response.data.responseData;
+    },
+  });
+  const profile = profileQuery.data;
+  const isRekyc = profile?.kycStatus === "RE_KYC";
+  const existingPan = profile?.panCard?.panCardNo ?? "";
 
   useEffect(() => {
     setDateOfBirth(
       data.dateOfBirth ? new Date(formatDateCustom(data.dateOfBirth)) : null,
     );
   }, []);
+
+  // Re-KYC: prefill PAN from last verified KYC and keep it locked
+  useEffect(() => {
+    if (isRekyc && existingPan) {
+      setStep1PanData("panCardNo", existingPan);
+    }
+  }, [isRekyc, existingPan, setStep1PanData]);
 
   return (
     <Card accountMode>
@@ -53,12 +77,21 @@ function IdentityValidationForm() {
             >
               <Input
                 type="text"
-                value={data.panCardNo}
+                value={isRekyc ? (existingPan || data.panCardNo) : data.panCardNo}
                 onChange={(e) =>
+                  !isRekyc &&
                   setStep1PanData("panCardNo", e.target.value.toUpperCase())
                 }
                 placeholder="Enter your PAN number"
+                disabled={isRekyc}
+                readOnly={isRekyc}
+                className={isRekyc ? "bg-muted cursor-not-allowed" : ""}
               />
+              {isRekyc && (
+                <p className="text-muted-foreground text-xs mt-1">
+                  Re-KYC: Using your previously verified PAN.
+                </p>
+              )}
             </LabelInput>
 
             <LabelInput

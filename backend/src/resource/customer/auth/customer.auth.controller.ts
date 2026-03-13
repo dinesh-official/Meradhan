@@ -129,13 +129,7 @@ export class CustomerAuthController {
       identifier: payload.identity,
       value: payload.value,
     });
-    await addMeradhanLoginBasedAuditLog(req, {
-      userId: response.id,
-      sessionType: "SIGNIN_REQUEST",
-      success: true,
-      entityType: "Auth",
-      email: response.email,
-    });
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,
@@ -255,10 +249,19 @@ export class CustomerAuthController {
       },
     });
 
+    const hasRekycExpiredFlow = session
+      ? await db.dataBase.kYC_FLOW.findFirst({
+          where: { kycUserId: id, markExpired: true },
+          select: { id: true },
+        }).then((row) => !!row)
+      : false;
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "session",
-      responseData: session,
+      responseData: session
+        ? { ...session, hasRekycExpiredFlow }
+        : undefined,
     });
   }
 

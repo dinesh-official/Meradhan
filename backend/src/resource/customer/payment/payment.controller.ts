@@ -53,6 +53,9 @@ export class PaymentController {
       });
     }
 
+    console.log(body);
+
+
     // Log webhook attempt
     try {
       await db.dataBase.webhookLog.create({
@@ -133,14 +136,15 @@ export class PaymentController {
           await this.orderService.updateOrderStatus(order.id, "APPLIED");
           await this.orderService.updateOrderMetadata(order.id, paymentEntity);
           const job = await orderSettlementQueue.add(
-            `settle-order:${order.id}`,
             {
+              type: "orderSettlement",
               id: order.id,
               paymentOrderId,
               paymentId,
               paymentEntity,
             }
           );
+          console.log(job);
           logger.logInfo(
             `Payment captured and settlement job queued for order: ${paymentOrderId}`,
             {

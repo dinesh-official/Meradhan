@@ -7,11 +7,14 @@ import {
   emailAdminOtpSenderQueue,
   emailOtpSenderQueue,
   mobileOtpSenderQueue,
+  rekycOtpSenderQueue,
 } from "./queue/worker_queues";
 import { render } from "@react-email/components";
 import MeraDhanOtpEmail from "@emails/crm_login_otp_email";
+import RekycConfirmationOtpEmail from "@emails/rekyc_confirmation_otp_email";
 import { meraDhanOtpEmailTextLogin } from "@emails/text/meraDhanOtpEmailTextLogin";
 import { meraDhanOtpEmailTextSignup } from "@emails/text/meraDhanOtpEmailTextSignup";
+import { meraDhanRekycOtpEmailText } from "@emails/text/meraDhanRekycOtpEmailText";
 
 startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
   const emailSend = new EmailCommunication();
@@ -62,6 +65,29 @@ startQueueWorker(emailAdminOtpSenderQueue, async (job: Job) => {
     to: email,
     subject: subject,
     text: emailHtml,
+  });
+});
+
+startQueueWorker(rekycOtpSenderQueue, async (job: Job) => {
+  const emailSend = new EmailCommunication();
+  const { email, userName, subject, otp } = job.data as {
+    email: string;
+    userName: string;
+    subject: string;
+    otp: string;
+  };
+  console.log("Sending ReKYC OTP Email - " + email);
+  const emailHtml = await render(
+    RekycConfirmationOtpEmail({
+      otpCode: otp,
+      userName,
+    }),
+  );
+  await emailSend.sendEmail({
+    to: email,
+    subject: subject,
+    html: emailHtml,
+    text: meraDhanRekycOtpEmailText({ userName, otpCode: otp }),
   });
 });
 

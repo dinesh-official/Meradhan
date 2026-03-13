@@ -66,6 +66,7 @@ interface BankAccount {
   /** Bank Account Number */
   bankAccountNo: string; // String(30), Optional
 
+
   /**
    * Indicates if this bank account is default for payouts
    * Y = Yes, N = No
@@ -149,6 +150,7 @@ export interface UnregisteredParticipantResponse {
 
   /** List of associated bank accounts */
   bankAccountList: BankAccountResponse[];
+  dobDoi?: string;
 
   /** List of associated DP accounts */
   dpAccountList: DPAccountResponse[];

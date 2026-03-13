@@ -8,6 +8,28 @@ import { UserAccountType } from "../../../../../../../../../../packages/schema/l
 import { gender } from "../../../../../../../../../../packages/schema/lib/enums";
 import { CustomerFormData, ICustomerDataFormHook } from "./customerForm";
 
+const LEGAL_ENTITY_LABEL_BY_USER_TYPE: Partial<
+  Record<CustomerFormData["userType"], { label: string; placeholder: string }>
+> = {
+  CORPORATE: { label: "Company Name", placeholder: "Enter company name" },
+  TRUST: { label: "Trust Name", placeholder: "Enter trust name" },
+  HUF: { label: "HUF Name", placeholder: "Enter HUF name" },
+  LLP: { label: "LLP Name", placeholder: "Enter LLP name" },
+  PARTNERSHIP_FIRM: {
+    label: "Partnership Firm Name",
+    placeholder: "Enter partnership firm name",
+  },
+};
+
+function getLegalEntityLabel(userType: CustomerFormData["userType"]) {
+  return (
+    LEGAL_ENTITY_LABEL_BY_USER_TYPE[userType] ?? {
+      label: "Legal entity name",
+      placeholder: "Enter legal entity name",
+    }
+  );
+}
+
 function CustomerManagementForm({
   manager,
   updateMode,
@@ -113,20 +135,54 @@ function CustomerManagementForm({
           error={manager?.errors?.userType?.[0]}
         />
 
-        <SelectField
-          label="Gender"
-          placeholder="Select Gender"
-          options={gender.map((g) => ({
-            label: g.charAt(0).toUpperCase() + g.slice(1), // Capitalize first letter
-            value: g,
-          }))}
-          required
-          value={manager.state.gender}
-          onChangeAction={(e) =>
-            manager.setCustomerData("gender", e as CustomerFormData["gender"])
-          }
-          error={manager?.errors?.gender?.[0]}
+        {["INDIVIDUAL", "INDIVIDUAL_NRI_NRO"].includes(
+          manager.state.userType
+        ) ? (
+          <SelectField
+            label="Gender"
+            placeholder="Select Gender"
+            options={gender.map((g) => ({
+              label: g.charAt(0).toUpperCase() + g.slice(1),
+              value: g,
+            }))}
+            required
+            value={manager.state.gender ?? ""}
+            onChangeAction={(e) =>
+              manager.setCustomerData("gender", e as CustomerFormData["gender"])
+            }
+            error={manager?.errors?.gender?.[0]}
+          />
+        ) : (
+          null
+        )}
+
+        {["TRUST", "CORPORATE", "HUF", "LLP", "PARTNERSHIP_FIRM"].includes(
+          manager.state.userType
+        ) ? (
+          <InputField
+            id="legalEntityName"
+            {...getLegalEntityLabel(manager.state.userType)}
+            required
+            value={manager.state.legalEntityName ?? ""}
+            onChangeAction={(e) =>
+              manager.setCustomerData("legalEntityName", e)
+            }
+            error={manager?.errors?.legalEntityName?.[0]}
+          />
+        ) : (
+          <div />
+        )}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <InputField
+          id="userName"
+          label="Username"
+          placeholder={updateMode ? "" : "Auto-generated after create"}
+          disabled
+          value={manager.state.userName ?? ""}
         />
+        <div />
       </div>
 
       <div className="flex lg:flex-row gap-5 flex-col justify-between ">

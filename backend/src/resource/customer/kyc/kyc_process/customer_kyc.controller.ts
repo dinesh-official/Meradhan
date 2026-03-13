@@ -6,6 +6,48 @@ import fs from "fs";
 import path from "path";
 import { db } from "@core/database/database";
 
+/** Normalize Aadhaar for comparison (masked digits often stored as x). */
+function normalizeAadhaar(id: string): string {
+  return (id || "").replace(/\s/g, "").replace(/x/gi, "0");
+}
+
+/** For RE_KYC, ensure new PAN and Aadhaar match the last verified KYC. */
+function validateRekycIdentity(
+  kycdata: { details?: { aadhaar?: { id_number?: string }; pan?: { id_number?: string } } },
+  existing: {
+    aadhaarCard?: { aadhaarNo: string } | null;
+    panCard?: { panCardNo: string } | null;
+    kycStatus?: string;
+  } | null,
+): void {
+  if (!existing || existing.kycStatus !== "RE_KYC") return;
+
+  const newAadhaar = kycdata.details?.aadhaar?.id_number;
+  const newPan = kycdata.details?.pan?.id_number;
+  const existingAadhaar = existing.aadhaarCard?.aadhaarNo;
+  const existingPan = existing.panCard?.panCardNo;
+
+  if (existingAadhaar && newAadhaar) {
+    if (normalizeAadhaar(newAadhaar) !== normalizeAadhaar(existingAadhaar)) {
+      throw new AppError(
+        "ReKYC must use the same Aadhaar number as your last verified KYC. Please use the same Aadhaar and try again.",
+        { code: "REKYC_AADHAAR_MISMATCH", statusCode: 400 },
+      );
+    }
+  }
+
+  if (existingPan && newPan) {
+    const panNew = (newPan || "").trim().toUpperCase();
+    const panExisting = (existingPan || "").trim().toUpperCase();
+    if (panNew !== panExisting) {
+      throw new AppError(
+        "ReKYC must use the same PAN number as your last verified KYC. Please use the same PAN and try again.",
+        { code: "REKYC_PAN_MISMATCH", statusCode: 400 },
+      );
+    }
+  }
+}
+
 export class CustomerKycKycController {
   private panKycService = new CustomerKycKycService();
 
@@ -22,6 +64,22 @@ export class CustomerKycKycController {
   async createPanVerifyRequest(req: Request, res: Response) {
     const id = req.customer!.id;
     const data = appSchema.kyc.kycPanInfoDataSchema.parse(req.body);
+
+    // make sure the pan number is not already verified
+    const pan = await db.dataBase.customerProfileDataModel.findFirst({
+      where: {
+        id,
+
+      },
+      include: { panCard: true },
+    });
+    if (pan?.panCard) {
+      if (pan.panCard.panCardNo !== data.panCardNo) {
+        throw new AppError("PAN number is not the same as the one you provided", { code: "PAN_NUMBER_MISMATCH", statusCode: 400 });
+      }
+    }
+
+
     const response = await this.panKycService.createPanVerifyRequest({
       id,
       data,
@@ -37,13 +95,10 @@ export class CustomerKycKycController {
     const kid = req.params.kid!.toString();
     const id = req.customer?.id;
     const user = await db.dataBase.customerProfileDataModel.findFirst({
-      where: {
-        id,
-      },
+      where: { id },
+      include: { aadhaarCard: true, panCard: true },
     });
-    // verify pan response from digio
     const response = await this.panKycService.verifyPanResponse({ kid });
-    console.log(response.status);
 
     // check if aadhaar and pan details are present in response actions by digio KYC
     // if (
@@ -70,8 +125,9 @@ export class CustomerKycKycController {
     //   );
     // }
 
-    // fetch aadhar and pan document files
     const kycdata = response.actions?.[0];
+    validateRekycIdentity(kycdata, user);
+
     const aadharData = await this.panKycService.getPanAadharDocumentFiles(
       kycdata.execution_request_id,
       user?.userName,

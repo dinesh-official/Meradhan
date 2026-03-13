@@ -153,3 +153,29 @@
   padding: 18px;
   border-top: 1px solid #e1e6e8;
 }
+
+/* Print: hide nav, sidebar, footer; show only main content full width */
+@media print {
+  .account-viewport > nav {
+    display: none !important;
+  }
+  .account-viewport .flex > div:first-child {
+    display: none !important;
+  }
+  .account-viewport .flex > div:last-child footer {
+    display: none !important;
+  }
+  .account-viewport .flex {
+    display: block !important;
+  }
+  .account-viewport .flex > div:last-child {
+    width: 100% !important;
+    max-width: none !important;
+  }
+  .account-viewport .flex > div:last-child .min-h-\[50vh\] {
+    min-height: 0;
+  }
+  .account-viewport [class*="sticky"] {
+    position: static !important;
+  }
+}

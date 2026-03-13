@@ -1,12 +1,35 @@
 import { Document, Font, Page } from "@react-pdf/renderer";
-import Footer from "./elements/Footer";
-import LogoSvg from "./images/LogoSvg";
-import OrdersPage from "./Orders/OrdersPage";
-import OrdersPageTwo from "./Orders/OrdersPageTwo";
 import type {
   BondDetailsResponse,
   CustomerByIdPayload,
 } from "@root/apiGateway";
+import OrdersPage from "./Orders/OrdersPage";
+import OrdersPageTwo from "./Orders/OrdersPageTwo";
+import Footer from "./elements/Footer";
+import { LogoSvgTop } from "./images/LogoSvg";
+
+interface OrderPdfOrderData {
+  subTotal?: number;
+  stampDuty?: number;
+  totalAmount?: number;
+  createdAt?: string;
+  price?: number;
+  metadata?: {
+    rfqNumber?: string;
+    dealId?: string;
+    exchangeRfqId?: string;
+    accruedInterest?: number;
+    accruedInterestDays?: number;
+    settlementDate?: string;
+    valueDate?: string;
+    lastInterestPaymentDate?: string;
+    settlementNumber?: string;
+    interestPaymentDates?: string[];
+    interestPaymentFrequencyLabel?: string;
+    settlementBank?: { bankName?: string; ifscCode?: string; accountNo?: string };
+    settlementDemat?: { dpName?: string; dpId?: string; benId?: string };
+  };
+}
 
 export function OrderPdf({
   bond,
@@ -14,12 +37,15 @@ export function OrderPdf({
   orderId,
   qun,
   releasedOrder,
+  orderData,
 }: {
   user: CustomerByIdPayload;
   bond: BondDetailsResponse;
   orderId: string;
   qun: number;
   releasedOrder?: boolean;
+  orderData?: OrderPdfOrderData;
+  userFor?: "ORDER" | "DEAL";
 }) {
   Font.register({
     family: "Poppins",
@@ -83,21 +109,22 @@ export function OrderPdf({
     ],
   });
   return (
-    <Document>
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll={false} />
+    <Document >
+      <Page size="A4" style={{ fontFamily: "Poppins" }}    >
+        <LogoSvgTop showAll={true} title="ORDER RECEIPT" />
         <OrdersPage
           bond={bond}
           user={user}
           orderId={orderId}
           qun={qun}
           releasedOrder={releasedOrder}
+          orderData={orderData}
         />
         <Footer />
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg showAll={false} />
-        <OrdersPageTwo user={user} />
+        <LogoSvgTop showAll={true} title="ORDER RECEIPT" />
+        <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
         <Footer />
       </Page>
     </Document>

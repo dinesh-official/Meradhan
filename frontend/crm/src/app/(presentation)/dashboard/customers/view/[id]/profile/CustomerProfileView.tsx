@@ -12,7 +12,7 @@ import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { encodeId } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
-import { IdCardIcon, NotebookPen } from "lucide-react";
+import { Building2, IdCardIcon, NotebookPen } from "lucide-react";
 import Link from "next/link";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 
@@ -61,6 +61,17 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
                 </Link>
               </Button>
             </AllowOnlyView>
+            {customer?.userType === "CORPORATE" && (
+              <AllowOnlyView permissions={["view:customerkyc"]}>
+                <Button variant="outline" asChild>
+                  <Link
+                    href={`/dashboard/customers/view/${encodeId(profileId)}/corporate-kyc`}
+                  >
+                    <Building2 /> View profile & Corporate KYC
+                  </Link>
+                </Button>
+              </AllowOnlyView>
+            )}
             <Button variant="default" asChild>
               <Link href="/dashboard/rfqs/nse">
                 <NotebookPen /> View RFQs
@@ -169,9 +180,9 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
                   <p>
                     {customer?.createdAt
                       ? dateTimeUtils.formatDateTime(
-                          customer.createdAt,
-                          "DD MMMM YYYY hh:mm AA"
-                        )
+                        customer.createdAt,
+                        "DD MMMM YYYY hh:mm AA"
+                      )
                       : "—"}
                   </p>
                 </LabelView>

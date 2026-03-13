@@ -20,7 +20,7 @@ async function AccountViewPort({
 }) {
   const session = await getSession();
   return (
-    <div>
+    <div className="account-viewport">
       <AccountNavBar session={session} />
       <div className="flex">
         {/* Sidebar */}

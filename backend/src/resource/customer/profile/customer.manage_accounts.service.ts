@@ -5,13 +5,31 @@ import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
 
+const KYC_VERIFIED_REQUIRED_MSG =
+  "You cannot add, update, or delete bank or demat accounts until your KYC is verified.";
+
 export class CustomerManageAccountsService {
   private cbricsManager = new ParticipantManager();
+
+  /** Throws if customer KYC is not VERIFIED. Use before any bank/demat add/update/delete. */
+  private async assertKycVerified(customerId: number): Promise<void> {
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId },
+      select: { kycStatus: true },
+    });
+    if (!customer || customer.kycStatus !== "VERIFIED") {
+      throw new AppError(KYC_VERIFIED_REQUIRED_MSG, {
+        code: "KYC_NOT_VERIFIED",
+        statusCode: 403,
+      });
+    }
+  }
 
   async addBankAccount(
     customerId: number,
     bankDetails: z.infer<typeof appSchema.kyc.bankInfoSchema>
   ): Promise<boolean> {
+    await this.assertKycVerified(customerId);
     const existingAccount =
       await db.dataBase.customerProfileDataModel.findFirst({
         where: {
@@ -79,6 +97,7 @@ export class CustomerManageAccountsService {
     customerId: number,
     bankAccountId: number
   ): Promise<boolean> {
+    await this.assertKycVerified(customerId);
     const bankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
         id: bankAccountId,
@@ -111,6 +130,7 @@ export class CustomerManageAccountsService {
     customerId: number,
     bankAccountId: number
   ): Promise<boolean> {
+    await this.assertKycVerified(customerId);
     const bankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
         id: bankAccountId,
@@ -154,6 +174,7 @@ export class CustomerManageAccountsService {
     customerId: number,
     dematDetails: z.infer<typeof appSchema.customer.createDematAccountSchema>
   ): Promise<boolean> {
+    await this.assertKycVerified(customerId);
     const existingAccount =
       await db.dataBase.customerProfileDataModel.findFirst({
         where: {
@@ -208,6 +229,7 @@ export class CustomerManageAccountsService {
     customerId: number,
     dematAccountId: number
   ): Promise<boolean> {
+    await this.assertKycVerified(customerId);
     const dematAccount = await db.dataBase.customersDematAccountModel.findFirst(
       {
         where: {
@@ -245,6 +267,7 @@ export class CustomerManageAccountsService {
     customerId: number,
     dematAccountId: number
   ): Promise<boolean> {
+    await this.assertKycVerified(customerId);
     const dematAccount = await db.dataBase.customersDematAccountModel.findFirst(
       {
         where: {

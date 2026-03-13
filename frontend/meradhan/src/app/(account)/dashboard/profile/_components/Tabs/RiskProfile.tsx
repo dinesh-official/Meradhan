@@ -14,8 +14,10 @@ import { MdOutlineArrowRight } from "react-icons/md";
 
 function RiskProfiling({
   profile,
+  allowSave = true,
 }: {
   profile: GetCustomerResponseById["responseData"];
+  allowSave?: boolean;
 }) {
   const [riskProfile, setRiskProfile] = useState(profile?.riskProfile?.data);
 
@@ -42,9 +44,8 @@ function RiskProfiling({
       console.error("Error saving risk profile", error);
       if (error instanceof ApiError) {
         toast.error(
-          `${
-            error.response?.data.message ||
-            "An error occurred while saving the risk profile."
+          `${error.response?.data.message ||
+          "An error occurred while saving the risk profile."
           } `
         );
       } else {
@@ -70,7 +71,7 @@ function RiskProfiling({
                     className={cn(
                       "p-2.5 border border-gray-200 rounded-md text-center cursor-pointer",
                       option === profile.riskProfile.data[idx].ans &&
-                        "bg-secondary border-secondary text-white"
+                      "bg-secondary border-secondary text-white"
                     )}
                     onClick={() => {
                       updateAnswer(idx, option);
@@ -85,7 +86,7 @@ function RiskProfiling({
         </div>
       </CardContent>
       <div>
-        <Button
+        {allowSave && <Button
           //   disabled={!isAllowToContinue()}
           //   onClick={jumpNext}
           disabled={saveRiskProfileMutation.isPending}
@@ -93,7 +94,7 @@ function RiskProfiling({
           className="flex items-center gap-1 w-full sm:w-auto"
         >
           Save & Continue <MdOutlineArrowRight />
-        </Button>
+        </Button>}
       </div>
     </Card>
   );

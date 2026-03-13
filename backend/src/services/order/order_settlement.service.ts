@@ -15,6 +15,7 @@ import { RfqMasterDbSyncManager } from "@resource/crm/refq/nse/rfq_master/rfq_ma
 import { OrderService } from "@resource/customer/order/order.service";
 import { AppError } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
+import { db } from "@core/database/database";
 
 // Type definitions for settlement service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -39,6 +40,8 @@ export class OrderSettlementService {
   }
 
   async initiateOrderSettlement(orderId: number): Promise<void> {
+    console.log("initiateOrderSettlement", orderId);
+
     try {
       const getOrderData = async () => {
         return await this.orderService.getOrderWithNSEData(orderId);
@@ -56,21 +59,26 @@ export class OrderSettlementService {
         });
       }
 
+      console.log("add isin to settlement");
       // Step 1: Add ISIN to settlement (addisin)
-      await this.addIsinToSettlement(order);
+      const addIsinResponse = await this.addIsinToSettlement(order);
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
+      console.log("accepted negotiation");
       // Step 2: Accept negotiation quote
-      await this.acceptNegotiation(order);
+      await this.acceptNegotiation(order, addIsinResponse.inCrores);
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
+      console.log("propose deal");
       // Step 3: Propose deal
       await this.proposeDeal(order);
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
+      console.log("accept or reject deal");
       // Step 4: Accept/Reject deal
       await this.acceptOrRejectDeal(order);
 
+      console.log("update order status");
       await this.updateOrderStatus(orderId);
     } catch (error) {
       logger.logError(`Settlement process failed for order ${orderId}:`, error);
@@ -97,26 +105,47 @@ export class OrderSettlementService {
   /**
    * Step 1: Add ISIN to RFQ (addisin)
    */
-  async addIsinToSettlement(order: OrderWithNSEData): Promise<void> {
+  async addIsinToSettlement(order: OrderWithNSEData) {
     try {
       logger.logInfo(
         `Creating RFQ for ISIN ${order.isin} for order ${order.id}`
       );
 
       // Using fixed values from the working payload
+      console.log(NSE_CONSTANTS);
+      const bondData = await db.dataBase.nseIsinSecurityReceipt.findFirst({
+        where: {
+          symbol: order.isin,
+        },
+      });
+      if (!bondData) {
+        throw new AppError("Bond data not found for ISIN", {
+          code: "BOND_DATA_NOT_FOUND",
+        });
+      }
+
+      const fv = bondData?.faceValue ?? 0;
+      const quantity = order.quantity;
+      const value = fv * quantity;
+      const inCrores = value / 10000000;
+
+      console.log("inCrores", inCrores);
+
+
 
       // Create RFQ for the ISIN using the working payload structure
       const rfqResponse = await this.nseRfq.createRfq({
+
         segment: NSE_CONSTANTS.SEGMENT.RFQ,
-        isin: NSE_CONSTANTS.DEFAULT.ISIN,
+        isin: order.isin,
         participantCode: NSE_CONSTANTS.PARTICIPANT.CODE,
-        dealType: NSE_CONSTANTS.DEAL_TYPE.BUY,
+        dealType: NSE_CONSTANTS.DEAL_TYPE.DIRECT,
         clientCode: NSE_CONSTANTS.PARTICIPANT.CODE,
         buySell: NSE_CONSTANTS.DEAL_TYPE.BUY,
         quoteType: NSE_CONSTANTS.QUOTE_TYPE.PRICE,
         settlementType: NSE_CONSTANTS.DEFAULT.SETTLEMENT_TYPE,
-        value: NSE_CONSTANTS.DEFAULT.VALUE,
-        quantity: NSE_CONSTANTS.DEFAULT.QUANTITY,
+        value: inCrores,
+        quantity: order.quantity,
         yieldType: NSE_CONSTANTS.QUOTE_TYPE.YIELD,
         yield: NSE_CONSTANTS.DEFAULT.YIELD,
         calcMethod: NSE_CONSTANTS.CALC_METHOD.ORIGINAL,
@@ -148,6 +177,15 @@ export class OrderSettlementService {
       logger.logInfo(
         `RFQ created successfully for ISIN ${order.isin} with RFQ number: ${rfqDetails.number}`
       );
+      return {
+        inCrores,
+        rfqNumber: rfqDetails.number,
+        participant: order.customerProfile?.nseDataSet?.participant,
+        isin: order.isin,
+        quantity: order.quantity,
+        unitPrice: order.unitPrice,
+        value: value,
+      };
     } catch (error) {
       logger.logError(
         `Failed to create RFQ for ISIN ${order.isin} for order ${order.id}:`,
@@ -163,7 +201,8 @@ export class OrderSettlementService {
    * Step 2: Accept negotiation (real API call)
    */
   private async acceptNegotiation(
-    order: OrderWithNSEData
+    order: OrderWithNSEData,
+    inCrores: number
     // participant: NseCbricsParticipantModel
   ): Promise<void> {
     let rfqNumber: string | undefined;
@@ -178,14 +217,15 @@ export class OrderSettlementService {
         });
       }
 
+
       // Accept the negotiation with hardcoded values (matching RFQ creation)
       // Using direct acceptance (id: null) since no negotiations exist in test environment
       const negotiationResponse = await this.nseRfq.acceptNegotiationQuote({
         rfqNumber: rfqNumber,
-        acceptedValue: NSE_CONSTANTS.DEFAULT.VALUE,
-        role: NSE_CONSTANTS.ROLE.RESPONDER,
+        acceptedValue: inCrores,
+        role: NSE_CONSTANTS.ROLE.INITIATOR,
         respDealType: NSE_CONSTANTS.DEAL_TYPE.BUY,
-        respClientCode: NSE_CONSTANTS.PARTICIPANT.CLIENT_CODE,
+        respClientCode: order.customerProfile?.nseDataSet?.participant?.loginId,
       });
 
       // Store negotiation ID in logs
@@ -220,7 +260,7 @@ export class OrderSettlementService {
     try {
       logger.logInfo(`Proposing deal for order ${order.id}`);
 
-      // Use stored RFQ and negotiation IDs from logs
+      // Use stored RFQ and negotiation IDs from logs - 
       const rfqNumber = await this.getRfqNumber(order);
       const negotiationId = await this.getNegotiationId(order);
 
@@ -231,19 +271,25 @@ export class OrderSettlementService {
         );
       }
 
+
       // Calculate consideration: quantity * price / 100 + accrued interest
       const accruedInterest = await this.getAccruedInterest(order);
+      // inncr
       const unitPriceNum = Number(order.unitPrice);
-      const consideration =
-        (order.quantity * unitPriceNum) / 100 + accruedInterest;
+      console.log("unitPriceNum", unitPriceNum);
+      console.log("accruedInterest", accruedInterest);
+      console.log("order.quantity", order.quantity);
+      console.log("consideration", (order.quantity * unitPriceNum) / 100 + accruedInterest);
+      const consideration = (
+        (order.quantity * unitPriceNum) / 100 + accruedInterest) / 100;
 
       await this.nseRfq.proposeDeal({
         ngRfqNumber: rfqNumber,
         ngId: negotiationId,
         participantCode: NSE_CONSTANTS.PARTICIPANT.CODE,
         dealType: NSE_CONSTANTS.DEAL_TYPE.DIRECT,
-        clientCode: NSE_CONSTANTS.PARTICIPANT.CODE,
-        price: unitPriceNum,
+        clientCode: order.customerProfile?.nseDataSet?.participant?.loginId ?? "",
+        price: 100,
         accruedInterest: accruedInterest,
         consideration: consideration,
         calcMethod: NSE_CONSTANTS.CALC_METHOD.ORIGINAL,

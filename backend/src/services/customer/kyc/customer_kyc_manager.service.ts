@@ -1,6 +1,7 @@
 import { db, type DataBaseSchema } from "@core/database/database";
 import type { $Enums, KYCStatus } from "@databases/generated/prisma/postgres";
 import type { CustomerProfileService } from "@resource/crm/customers/customer.service";
+import { AppError } from "@utils/error/AppError";
 import type { KycDataStorage } from "./kyc";
 
 export class CustomerKycManager {
@@ -8,7 +9,7 @@ export class CustomerKycManager {
    * Get KYC data for a customer
    */
   private async getKycData(customerId: number): Promise<KycDataStorage> {
-    const data = await db.dataBase.kYC_FLOW.findUnique({
+    const data = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: customerId },
     });
 
@@ -72,13 +73,35 @@ export class CustomerKycManager {
     const middleName = step1.pan.middleName;
     const gender = this.mapGender(aadhaarData.gender);
 
-    // Check if customer exists
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerId },
+      include: { aadhaarCard: true, panCard: true },
     });
 
     if (!customer) {
       throw new Error("Customer not found");
+    }
+
+    if (customer.kycStatus === "RE_KYC") {
+      const norm = (id: string) => (id || "").replace(/\s/g, "").replace(/x/gi, "0");
+      const existingAadhaar = customer.aadhaarCard?.aadhaarNo;
+      const existingPan = customer.panCard?.panCardNo;
+      if (existingAadhaar && aadhaarData.id_number && norm(aadhaarData.id_number) !== norm(existingAadhaar)) {
+        throw new AppError(
+          "ReKYC must use the same Aadhaar number as your last verified KYC.",
+          { code: "REKYC_AADHAAR_MISMATCH", statusCode: 400 },
+        );
+      }
+      if (existingPan && panData?.id_number) {
+        const newPan = (panData.id_number || "").trim().toUpperCase();
+        const prevPan = (existingPan || "").trim().toUpperCase();
+        if (newPan !== prevPan) {
+          throw new AppError(
+            "ReKYC must use the same PAN number as your last verified KYC.",
+            { code: "REKYC_PAN_MISMATCH", statusCode: 400 },
+          );
+        }
+      }
     }
 
     // Update customer with KYC data in a transaction
@@ -99,192 +122,112 @@ export class CustomerKycManager {
           isAPep: !step1.pan.checkTerms1,
           // Create/update Aadhaar card
           aadhaarCard: {
-            upsert: {
-              create: {
-                aadhaarNo: aadhaarData.id_number,
-                dateOfBirth: aadhaarData.dob,
-                fatherName: aadhaarData.father_name,
-                firstName: aadhaarData.name,
-                lastName: "",
-                middleName: "",
-                gender,
-                image: aadhaarData.image,
-                fileUrl: aadhaarData.file_url,
-                isVerified: true,
-                verifyDate: step1.pan.fetchedTimestamp,
-                confirmTimeStamp: step1.pan.confirmAadhaarTimestamp,
-              },
-              update: {
-                aadhaarNo: aadhaarData.id_number,
-                dateOfBirth: aadhaarData.dob,
-                fatherName: aadhaarData?.father_name,
-                firstName: aadhaarData.name,
-                lastName: "",
-                middleName: "",
-                gender,
-                image: aadhaarData.image,
-                fileUrl: aadhaarData?.file_url,
-                isVerified: true,
-                verifyDate: step1.pan.fetchedTimestamp,
-                confirmTimeStamp: step1.pan.confirmAadhaarTimestamp,
-                allowTerms: step1.pan.checkTerms2,
-              },
+
+            create: {
+              aadhaarNo: aadhaarData.id_number,
+              dateOfBirth: aadhaarData.dob,
+              fatherName: aadhaarData.father_name,
+              firstName: aadhaarData.name,
+              lastName: "",
+              middleName: "",
+              gender,
+              image: aadhaarData.image,
+              fileUrl: aadhaarData.file_url,
+              isVerified: true,
+              verifyDate: step1.pan.fetchedTimestamp,
+              confirmTimeStamp: step1.pan.confirmAadhaarTimestamp,
             },
+
           },
+
 
           // Create/update PAN card
           panCard: {
-            upsert: {
-              create: {
-                panCardNo: panData.id_number,
-                firstName,
-                lastName,
-                middleName,
-                dateOfBirth:
-                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
-                gender,
-                image: aadhaarData.image,
-                fileUrl: panData.file_url,
-                isVerified: true,
-                verifyDate: step1.pan.fetchedTimestamp,
-                confirmTimeStamp: step1.pan.confirmPanTimestamp,
-                allowTerms: step1.pan.checkTerms1,
-              },
-              update: {
-                panCardNo: panData.id_number,
-                firstName,
-                lastName,
-                middleName,
-                dateOfBirth:
-                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
-                gender,
-                image: aadhaarData.image,
-                fileUrl: panData.file_url,
-                isVerified: true,
-                verifyDate: step1.pan.fetchedTimestamp,
-                confirmTimeStamp: step1.pan.confirmPanTimestamp,
-                allowTerms: step1.pan.checkTerms1,
-              },
+
+            create: {
+              panCardNo: panData.id_number,
+              firstName,
+              lastName,
+              middleName,
+              dateOfBirth:
+                step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
+              gender,
+              image: aadhaarData.image,
+              fileUrl: panData.file_url,
+              isVerified: true,
+              verifyDate: step1.pan.fetchedTimestamp,
+              confirmTimeStamp: step1.pan.confirmPanTimestamp,
+              allowTerms: step1.pan.checkTerms1,
             },
+
+
           },
 
           // Create/update personal information
           personalInformation: {
-            upsert: {
-              create: {
-                maritalStatus: step2.maritalStatus,
-                occupationType: step2.occupationType,
-                annualGrossIncome: step2.annualGrossIncome,
-                fatherOrSpouseName: step2.fatSpuName,
-                relationshipWithPerson: step2.reelWithPerson,
-                mothersName: step2.motherName,
-                nationality: step2.nationality,
-                residentialStatus: step2.residentialStatus,
-                qualification: step2.qualification,
-                otherOccupationName: step2?.otherOccupationName,
-                dateOfBirth:
-                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
-                SignatureUrl: step1.sign.url,
-                signPdfUrl: step6.response.fileUrl,
-                maidenName: null,
-                politicallyExposedPerson: step1.pan.checkTerms1 ? "No" : "Yes",
-                confirmTimeStamp: step2.confirmPersonalInfoTimestamp,
-              },
-              update: {
-                maritalStatus: step2.maritalStatus,
-                occupationType: step2.occupationType,
-                annualGrossIncome: step2.annualGrossIncome,
-                fatherOrSpouseName: step2.fatSpuName,
-                relationshipWithPerson: step2.reelWithPerson,
-                mothersName: step2.motherName,
-                nationality: step2.nationality,
-                residentialStatus: step2.residentialStatus,
-                qualification: step2.qualification,
-                otherOccupationName: step2?.otherOccupationName,
-                dateOfBirth:
-                  step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
-                SignatureUrl: step1.sign.url,
-                signPdfUrl: step6.response.fileUrl,
-                maidenName: null,
-                politicallyExposedPerson: step1.pan.checkTerms1 ? "No" : "Yes",
-                confirmTimeStamp: step2.confirmPersonalInfoTimestamp,
-              },
+
+            create: {
+              maritalStatus: step2.maritalStatus,
+              occupationType: step2.occupationType,
+              annualGrossIncome: step2.annualGrossIncome,
+              fatherOrSpouseName: step2.fatSpuName,
+              relationshipWithPerson: step2.reelWithPerson,
+              mothersName: step2.motherName,
+              nationality: step2.nationality,
+              residentialStatus: step2.residentialStatus,
+              qualification: step2.qualification,
+              otherOccupationName: step2?.otherOccupationName,
+              dateOfBirth:
+                step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
+              SignatureUrl: step1.sign.url,
+              signPdfUrl: step6.response.fileUrl,
+              maidenName: null,
+              politicallyExposedPerson: step1.pan.checkTerms1 ? "No" : "Yes",
+              confirmTimeStamp: step2.confirmPersonalInfoTimestamp,
             },
+
           },
 
           // Create/update current address
           currentAddress: {
-            upsert: {
-              create: {
-                line1: aadhaarData.current_address_details.address,
-                line2: null,
-                line3: null,
-                postOffice:
-                  aadhaarData.current_address_details.locality_or_post_office,
-                cityOrDistrict:
-                  aadhaarData.current_address_details.district_or_city,
-                state: aadhaarData.current_address_details.state,
-                pinCode: aadhaarData.current_address_details.pincode,
-                country: "India",
-                fullAddress: aadhaarData.current_address,
-              },
-              update: {
-                line1: aadhaarData.current_address_details.address,
-                line2: null,
-                line3: null,
-                postOffice:
-                  aadhaarData.current_address_details.locality_or_post_office,
-                cityOrDistrict:
-                  aadhaarData.current_address_details.district_or_city,
-                state: aadhaarData.current_address_details.state,
-                pinCode: aadhaarData.current_address_details.pincode,
-                country: "India",
-                fullAddress: aadhaarData.current_address,
-              },
+
+            create: {
+              line1: aadhaarData.current_address_details.address,
+              line2: null,
+              line3: null,
+              postOffice:
+                aadhaarData.current_address_details.locality_or_post_office,
+              cityOrDistrict:
+                aadhaarData.current_address_details.district_or_city,
+              state: aadhaarData.current_address_details.state,
+              pinCode: aadhaarData.current_address_details.pincode,
+              country: "India",
+              fullAddress: aadhaarData.current_address,
             },
+
           },
 
           // Create/update permanent address
           permanentAddress: {
-            upsert: {
-              create: {
-                line1: aadhaarData.permanent_address_details.address,
-                line2: null,
-                line3: null,
-                postOffice:
-                  aadhaarData.permanent_address_details.locality_or_post_office,
-                cityOrDistrict:
-                  aadhaarData.permanent_address_details.district_or_city,
-                state: aadhaarData.permanent_address_details.state,
-                pinCode: aadhaarData.permanent_address_details.pincode,
-                country: "India",
-                fullAddress: aadhaarData.permanent_address,
-              },
-              update: {
-                line1: aadhaarData.permanent_address_details.address,
-                line2: null,
-                line3: null,
-                postOffice:
-                  aadhaarData.permanent_address_details.locality_or_post_office,
-                cityOrDistrict:
-                  aadhaarData.permanent_address_details.district_or_city,
-                state: aadhaarData.permanent_address_details.state,
-                pinCode: aadhaarData.permanent_address_details.pincode,
-                country: "India",
-                fullAddress: aadhaarData.permanent_address,
-              },
+            create: {
+              line1: aadhaarData.permanent_address_details.address,
+              line2: null,
+              line3: null,
+              postOffice:
+                aadhaarData.permanent_address_details.locality_or_post_office,
+              cityOrDistrict:
+                aadhaarData.permanent_address_details.district_or_city,
+              state: aadhaarData.permanent_address_details.state,
+              pinCode: aadhaarData.permanent_address_details.pincode,
+              country: "India",
+              fullAddress: aadhaarData.permanent_address,
             },
           },
 
           // Create/update risk profile
           riskProfile: {
-            upsert: {
-              create: {
-                data: step5,
-              },
-              update: {
-                data: step5,
-              },
+            create: {
+              data: step5,
             },
           },
         },
@@ -356,7 +299,7 @@ export class CustomerKycManager {
    */
   async isKycComplete(customerId: number): Promise<boolean> {
     try {
-      const kycFlow = await db.dataBase.kYC_FLOW.findUnique({
+      const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
         where: { userID: customerId },
       });
       return kycFlow?.complete || false;
@@ -397,7 +340,7 @@ export class CustomerKycManager {
       },
     });
 
-    const kycFlow = await db.dataBase.kYC_FLOW.findUnique({
+    const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
       where: { userID: customerId },
     });
 
@@ -445,7 +388,7 @@ export class CustomerKycManager {
       whatsAppNo: user?.whatsAppNo || "------",
       userName: user?.userName || "------",
       userType: user?.userType || "INDIVIDUAL",
-      kycStatus: user?.kycStatus || "VERIFIED",
+      kycStatus: user?.kycStatus || "PENDING",
       kraStatus: user?.kraStatus,
       verifyDate: user?.verifyDate,
       VerifiedBy: user?.VerifiedBy || null,
