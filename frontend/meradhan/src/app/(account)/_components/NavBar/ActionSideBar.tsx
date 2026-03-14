@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, memo, ReactNode, useEffect } from "react";
-import { FaUser } from "react-icons/fa";
+import { FaChartPie, FaUser } from "react-icons/fa";
 import { HiShoppingCart } from "react-icons/hi";
 import { MdSpaceDashboard } from "react-icons/md";
 
@@ -45,11 +45,11 @@ export const accountMenuItems: MenuItem[] = [
     label: "Dashboard",
     href: "/dashboard",
   },
-  // {
-  //   icon: <FaChartPie size={18} />,
-  //   label: "Portfolio",
-  //   href: "/dashboard/portfolio",
-  // },
+  {
+    icon: <FaChartPie size={18} />,
+    label: "Portfolio",
+    href: "/dashboard/portfolio",
+  },
   {
     icon: <HiShoppingCart size={18} />,
     label: "My Orders",
@@ -129,9 +129,8 @@ const SidebarItem: FC<SidebarItemProps> = ({ icon, label, href, isActive }) => {
         >
           <span className="flex justify-center items-center w-6">{icon}</span>
           <span
-            className={`whitespace-nowrap overflow-hidden transition-all text-sm duration-300 ${
-              collapsed ? "opacity-0 max-w-0" : "opacity-100"
-            }`}
+            className={`whitespace-nowrap overflow-hidden transition-all text-sm duration-300 ${collapsed ? "opacity-0 max-w-0" : "opacity-100"
+              }`}
           >
             {label}
           </span>
@@ -159,9 +158,8 @@ const ActionSideBar = ({ showSideBar = true }: { showSideBar?: boolean }) => {
 
   return (
     <div
-      className={`lg:flex hidden flex-col bg-primary text-white border-r shadow-sm z-40 border-gray-100 md:h-[calc(100vh-72px)] h-[calc(100vh-64px)] sticky md:top-18 top-16 transition-all duration-300 ${
-        collapsed ? "w-[72px]" : "w-64"
-      }`}
+      className={`lg:flex hidden flex-col bg-primary text-white border-r shadow-sm z-40 border-gray-100 md:h-[calc(100vh-72px)] h-[calc(100vh-64px)] sticky md:top-18 top-16 transition-all duration-300 ${collapsed ? "min-w-[72px]" : "w-64"
+        }`}
     >
       <div className="flex flex-col pt-2">
         {accountMenuItems.map((item, i) => (

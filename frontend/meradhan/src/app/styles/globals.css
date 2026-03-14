@@ -179,3 +179,132 @@
     position: static !important;
   }
 }
+.active-tab{
+  position: relative;
+}
+.active-tab::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 4px;
+  background-color: #062c59; 
+  border-radius: 10px;
+}
+.common-table-wrapper table thead tr th{
+  background-color: #f7f7f7; 
+  color: #000000;
+}
+.common-table-wrapper table thead tr th:first-child{
+  border-radius: 10px 0 0 10px; 
+}
+.common-table-wrapper table thead tr th:last-child{
+  border-radius: 0 10px 10px 0; 
+}
+.active-tab{
+  position: relative;
+}
+.active-tab::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 4px;
+  background-color: #062c59; 
+  border-radius: 10px;
+}
+.common-table-wrapper table thead tr th{
+  background-color: #f7f7f7; 
+  color: #000000;
+}
+.common-table-wrapper table thead tr th:first-child{
+  border-radius: 10px 0 0 10px; 
+}
+.common-table-wrapper table thead tr th:last-child{
+  border-radius: 0 10px 10px 0; 
+}
+.recharts-legend-item-text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #000000 !important;
+}
+.recharts-legend-item .recharts-surface{
+  width: 10px !important;
+  height: 10px !important
+}
+.recharts-layer .recharts-layer text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  fill: #000000 !important;
+}
+
+.recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+.cashflow-chart-container .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+.cashflow-chart-container-left .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+.cashflow-chart .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text{
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+/* .cashflow-chart-container .recharts-surface{
+  height: 108% !important;
+} */
+@media (max-width: 640px) {
+
+  .cashflow-chart-container .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 10px !important;
+  
+}
+ .cashflow-chart-container .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 10px !important;
+  
+}
+  .recharts-layer.recharts-label-list text {
+    font-size: 10px !important;
+  }
+  .recharts-legend-item-text {
+    font-size: 12px !important;
+   
+  }
+  .cashflow-chart .recharts-responsive-container .recharts-wrapper  {
+    width: 100% !important;
+    max-width: 1350px !important;
+  }
+    .chart-content-container .recharts-wrapper{
+    width: 100% !important;
+    max-width: 350px !important;
+
+  }
+  .cashflow-chart .recharts-responsive-container{
+    width: 100% !important;
+    min-width: 1350px !important;
+  }
+
+  .recharts-layer .recharts-layer text {
+    font-size: 11px !important;
+  }
+  .cashflow-chart .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+    font-size: 11px !important;
+  }
+  .four-card-wrapper .px-0{
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  
+  }
+}
