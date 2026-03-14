@@ -50,7 +50,7 @@ export const ProfileTabs: React.FC<TabsProps> = ({
   return (
     <div ref={containerRef} className="w-full overflow-x-auto scrollbar-hide">
       <div
-        className={`relative flex justify-start items-center gap-5 border-gray-200 border-b-[3px] min-w-[710px] w-full  text-sm font-semibold text-gray-600 text-nowrap select-none ${
+        className={`relative flex justify-start items-center gap-2 md:gap-5 border-gray-200 border-b-[4px] w-full  text-sm font-semibold text-gray-600 text-nowrap select-none ${
           className || ""
         }`}
       >
@@ -61,10 +61,10 @@ export const ProfileTabs: React.FC<TabsProps> = ({
               tabRefs.current[i] = el; // ✅ fixed: no return value
             }}
             onClick={() => handleTabClick(tab, i)}
-            className={`py-2 cursor-pointer transition-all duration-200 -mb-[3px] border-b-[3px] ${
+            className={`py-2 cursor-pointer transition-all duration-200 -mb-[3px] border-b-[4px] ${
               active === tab
-                ? "text-primary border-primary"
-                : "border-transparent hover:text-primary"
+                ? "text-primary border-transparent active-tab"
+                : "border-transparent hover:text-primary text-[#666666]"
             }`}
           >
             {tab}

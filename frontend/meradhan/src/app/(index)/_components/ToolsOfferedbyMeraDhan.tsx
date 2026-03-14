@@ -22,9 +22,9 @@ function ToolsOfferedByMeraDhan() {
             <CardContent>
               <div className="flex flex-col gap-5">
                 <FaBrain size={30} className="text-secondary" />
-                <p className="text-2xl quicksand-medium">DhanGPT</p>
+                <p className="text-2xl quicksand-medium">MeraDhan-GPT</p>
                 <p>
-                  Meet DhanGPT—your friendly, AI-powered learning companion for
+                  Meet MeraDhan-GPT—your friendly, AI-powered learning companion for
                   fixed income. It explains concepts, clarifies doubts, and
                   helps you understand bonds at your own pace—in simple Indian
                   English.

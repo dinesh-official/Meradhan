@@ -26,7 +26,7 @@ const advisory = {
     "Investment Planning Assistance",
     "Bond Portfolio Building Strategies",
     "Risk & Return Analysis Tools",
-    "DhanGPT – AI-powered assistance for fixed income queries",
+    "MeraDhan-GPT – AI-powered assistance for fixed income queries",
     "Return Calculator – Evaluate potential returns on fixed income investments",
     "Fixed Deposit Calculator – Compare and analyze FD returns for informed decisions",
   ],

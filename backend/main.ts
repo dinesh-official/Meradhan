@@ -32,6 +32,7 @@ import orderRoutes from "@resource/customer/order/order.routes";
 import paymentRoutes from "@resource/customer/payment/payment.routes";
 import customerProfileRoutes from "@resource/customer/profile/customer.profile.routes";
 import watchListRoutes from "@resource/customer/watchlist/watchlist.routes";
+import portfolioRoutes from "@resource/customer/portfolio/portfolio.routes";
 import logger from "@utils/logger/logger";
 const monitoring = new PrometheusMonitorProvider();
 const response_time_monitor = new PrometheusResponseTimeMonitor();
@@ -79,6 +80,7 @@ server.addRoutes([
   orderRoutes,
   customerBondsRoutes,
   paymentRoutes,
+  portfolioRoutes,
 
   // bond routes
   bondRoute,
