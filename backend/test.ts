@@ -13,7 +13,7 @@ const main = async () => {
   const pastExecution = "MODIFY"; // MODIFY , REGISTER
 
   await cacheStorage.delete(cachedKey).then(async () => {
-    if (pastExecution && pastExecution.length !== 0) {
+    if (pastExecution && pastExecution !== "") {
       await cacheStorage.set(cachedKey, pastExecution, 72 * 60 * 60);
     }
 
