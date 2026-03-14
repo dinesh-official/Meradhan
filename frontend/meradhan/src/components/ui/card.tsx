@@ -81,7 +81,7 @@ function CardContent({
   return (
     <div
       data-slot="card-content chart-content-container"
-      className={cn("md:px-6 px-0", accountMode && "px-0 lg:px-6", className)}
+      className={cn("md:px-6 px-6 py-2", accountMode && "px-0 lg:px-6", className)}
       {...rest}
     />
   );
