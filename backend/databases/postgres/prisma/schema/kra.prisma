@@ -96,6 +96,7 @@ model KraDownloadResponse {
     isPANMatch    Boolean @default(false)
     isMobileMatch Boolean @default(false)
     isEmailMatch  Boolean @default(false)
+    rawXml        String? @map("raw_xml")
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
