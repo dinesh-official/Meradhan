@@ -92,3 +92,44 @@ export type KRAResponse = BaseResponseData<
     resTime: Date | null;
   }[]
 >;
+
+/** KRA verify request response: KraDownloadResponse from POST /customer/kyc/kra/request */
+export interface IKraDownloadResponse {
+  id: number;
+  appPanNo: string | null;
+  appName: string | null;
+  appDobDt: string | null;
+  appEmail: string | null;
+  appMobNo: string | null;
+  appGen: string | null;
+  appFName: string | null;
+  appOcc: string | null;
+  appOthOcc: string | null;
+  appIncome: string | null;
+  appMarStatus: string | null;
+  appNationality: string | null;
+  appType: string | null;
+  appCorAdd1: string | null;
+  appCorAdd2: string | null;
+  appCorAdd3: string | null;
+  appCorCity: string | null;
+  appCorPincd: string | null;
+  appCorState: string | null;
+  appCorCtry: string | null;
+  appPerAdd1: string | null;
+  appPerAdd2: string | null;
+  appPerAdd3: string | null;
+  appPerCity: string | null;
+  appPerPincd: string | null;
+  appPerState: string | null;
+  appPerCtry: string | null;
+  isNameMatch: boolean;
+  isDOBMatch: boolean;
+  isPANMatch: boolean;
+  isMobileMatch: boolean;
+  isEmailMatch: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type IKraVerifyResponse = BaseResponseData<IKraDownloadResponse>;

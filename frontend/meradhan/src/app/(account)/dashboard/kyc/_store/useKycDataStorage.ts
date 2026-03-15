@@ -6,6 +6,7 @@
 
 import { MatchResult } from "@/global/utils/match_name";
 import {
+  type IKraDownloadResponse,
   IPANKycVerifyResponse,
   ISignKycVerifyResponse,
 } from "@root/apiGateway";
@@ -33,6 +34,7 @@ export interface FileData<T> {
 
 export interface Step1Data {
   pan: PanData<IPANKycVerifyResponse["responseData"]>;
+  kraResponse: IKraDownloadResponse | null;
   aadhar: string;
   gender: string;
   face: FileData<IPANKycVerifyResponse["responseData"]>;
@@ -123,6 +125,7 @@ const initData: KycDataStorage = {
       isFatca: false,
       checkKycKraConsent: false,
     },
+    kraResponse: null,
     aadhar: "",
     gender: "",
     face: {
@@ -235,6 +238,8 @@ export const useKycDataStorage = create<{
 
   // step 1
   setStep1PanData: (Key: keyof Step1Data["pan"], data: any) => void;
+  setKraResponse: (data: IKraDownloadResponse | null) => void;
+  clearKraResponse: () => void;
   setStep1NameMismatchDeclaration: (
     data: Step1Data["nameMismatchDeclaration"],
   ) => void;
@@ -341,6 +346,28 @@ export const useKycDataStorage = create<{
         step_1: {
           ...prev.state.step_1,
           pan: { ...prev.state.step_1.pan, [key]: data },
+        },
+      },
+    })),
+
+  setKraResponse: (data) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          kraResponse: data,
+        },
+      },
+    })),
+
+  clearKraResponse: () =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          kraResponse: null,
         },
       },
     })),
