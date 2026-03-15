@@ -20,19 +20,56 @@ import {
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import { IoMdArrowDropright } from "react-icons/io";
 import apiGateway from "@root/apiGateway";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { appSchema } from "@root/schema";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import { ZodError } from "zod";
+import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 
+/** Format YYYY-MM-DD to DD-MM-YYYY for KRA API */
+function toDdMmYyyy(iso: string | undefined): string {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("T")[0].split("-");
+  return [d, m, y].filter(Boolean).join("-");
+}
+
 function IdentityValidationForm() {
-  const { setStep1PanData, state } = useKycDataStorage();
+  const { setStep1PanData, setKraResponse, nextLocalStep, state } = useKycDataStorage();
   const data = state.step_1.pan;
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
-  const { handelPanVerification, isPending, error } = usePanCardVerifyHook();
+  const [kraFailed, setKraFailed] = useState(false);
+  const { handelPanVerification, isPending, error, setError } = usePanCardVerifyHook({
+    skipKraSteps: kraFailed,
+  });
+  const handelPanVerificationRef = useRef(handelPanVerification);
+  handelPanVerificationRef.current = handelPanVerification;
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const panKycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
+    apiClientCaller
+  );
+  const kraRequestMutation = useMutation({
+    mutationKey: ["createKraVerifyRequest"],
+    mutationFn: async (payload: { pan: string; dob: string }) =>
+      panKycApi.createKraVerifyRequest(payload),
+    onSuccess: (res) => {
+      if (res.responseData) {
+        setKraResponse(res.responseData);
+        nextLocalStep();
+        pushUserKycState();
+      }
+    },
+    onError: () => {
+      setKraFailed(true);
+      toast.error("No existing KYC found. Starting normal KYC process.");
+      // Start normal PAN verification process when KRA has no data
+      handelPanVerificationRef.current?.();
+    },
+  });
   const { cookies } = useAppCookie();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
 
@@ -59,6 +96,26 @@ function IdentityValidationForm() {
       setStep1PanData("panCardNo", existingPan);
     }
   }, [isRekyc, existingPan, setStep1PanData]);
+
+  const handleContinueOrPanVerify = () => {
+    try {
+      appSchema.kyc.kycPanInfoDataSchema.parse(data);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setError(zodErrorToErrorMap(err));
+      }
+      return;
+    }
+    setError(undefined);
+    if (kraFailed) {
+      handelPanVerification();
+    } else {
+      kraRequestMutation.mutate({
+        pan: data.panCardNo,
+        dob: toDdMmYyyy(data.dateOfBirth),
+      });
+    }
+  };
 
   return (
     <Card accountMode>
@@ -267,12 +324,17 @@ function IdentityValidationForm() {
       </CardContent>
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
+        {kraFailed && (
+          <p className="text-muted-foreground text-sm w-full sm:w-auto">
+            No existing KYC found. You can proceed to PAN verification below.
+          </p>
+        )}
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
-          onClick={handelPanVerification}
-          disabled={isPending}
+          onClick={handleContinueOrPanVerify}
+          disabled={isPending || kraRequestMutation.isPending}
         >
-          Continue to Verify
+          {kraFailed ? "Proceed to PAN Verification" : "Continue to Verify"}
           <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>

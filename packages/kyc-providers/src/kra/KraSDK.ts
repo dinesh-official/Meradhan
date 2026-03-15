@@ -61,7 +61,7 @@ export class KraSDK {
     const xml = KraXMLBuilder.buildPasswordRequest(this.password, this.passKey);
 
     const response = await axios.post(this.okraServiceUrl, xml, {
-        httpsAgent: insecureAgent,
+      httpsAgent: insecureAgent,
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
         SOAPAction: "getPassword",
@@ -120,7 +120,7 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
-        httpsAgent: insecureAgent,
+      httpsAgent: insecureAgent,
 
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
@@ -159,7 +159,7 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
-        httpsAgent: insecureAgent,
+      httpsAgent: insecureAgent,
 
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
@@ -195,7 +195,7 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
-        httpsAgent: insecureAgent,
+      httpsAgent: insecureAgent,
 
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
@@ -230,7 +230,7 @@ export class KraSDK {
       userName: this.userName,
     });
     const response = await axios.post(this.okraServiceUrl, resultXmlPayload, {
-        httpsAgent: insecureAgent,
+      httpsAgent: insecureAgent,
 
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
@@ -256,7 +256,7 @@ export class KraSDK {
     });
 
     const response = await axios.post(this.panServiceUrl, xml, {
-        httpsAgent: insecureAgent,
+      httpsAgent: insecureAgent,
 
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
