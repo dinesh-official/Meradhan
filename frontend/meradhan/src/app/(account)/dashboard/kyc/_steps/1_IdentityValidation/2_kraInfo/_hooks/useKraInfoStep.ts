@@ -30,11 +30,21 @@ function splitName(full: string | null): {
   return { firstName, middleName, lastName };
 }
 
+function kraGenderToStore(gen: string | null): string {
+  if (!gen) return "";
+  const g = (gen ?? "").toUpperCase();
+  if (g === "M") return "MALE";
+  if (g === "F") return "FEMALE";
+  return gen;
+}
+
 export function useKraInfoStep() {
   const {
     state,
     setStep1PanData,
     setStep2PersonalData,
+    setGenderData,
+    setUsedExistingKra,
     clearKraResponse,
   } = useKycDataStorage();
   const { handelPanVerification, isPending } = usePanCardVerifyHook();
@@ -47,6 +57,9 @@ export function useKraInfoStep() {
     const isoDob = kraDobToIso(kra.appDobDt);
     if (isoDob) setStep1PanData("dateOfBirth", isoDob);
 
+    const gender = kraGenderToStore(kra.appGen);
+    if (gender) setGenderData(gender);
+
     if (kra.appMarStatus) setStep2PersonalData("maritalStatus", kra.appMarStatus);
     if (kra.appFName) setStep2PersonalData("fatSpuName", kra.appFName);
     if (kra.appOcc) setStep2PersonalData("occupationType", kra.appOcc);
@@ -57,6 +70,7 @@ export function useKraInfoStep() {
 
   const handleUseExisting = () => {
     const kra = state.step_1.kraResponse;
+    setUsedExistingKra(true);
     if (kra) prefillFromKra(kra);
     handelPanVerification();
   };

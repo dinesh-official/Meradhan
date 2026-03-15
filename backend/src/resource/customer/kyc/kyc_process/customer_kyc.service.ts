@@ -641,6 +641,51 @@ export class CustomerKycKycService {
     const mockMobile = (user.phoneNo ?? "").replace(/\D/g, "");
     const mockEmail = (user.emailAddress ?? "").trim().toLowerCase();
 
+    // Deterministic but varied mock data from userId for reproducible tests
+    const seed = (userId * 31 + (mockPan?.length ?? 0)) % 4;
+    const mockAddresses = [
+      {
+        cor1: "C O SURENDER PAL KUKREJA HOUSE NO 4",
+        cor2: "7 GADARPUR OPPOSITE OLD WATER TANK",
+        cor3: "SHIV MANDIR WARD GADARPUR POST OFF",
+        city: "GADARPURA",
+        state: "Uttarakhand",
+        pincd: "263152",
+        fName: "SURENDER PAL KUKREJA",
+      },
+      {
+        cor1: "FLAT 302 BLOCK B GREEN VALLEY APTS",
+        cor2: "SECTOR 18 NEAR CITY MALL",
+        cor3: "DWARKA",
+        city: "New Delhi",
+        state: "Delhi",
+        pincd: "110078",
+        fName: "RAMESH KUMAR",
+      },
+      {
+        cor1: "NO 45 2ND CROSS MG ROAD",
+        cor2: "BANGALORE URBAN",
+        cor3: "KARNATAKA",
+        city: "Bengaluru",
+        state: "Karnataka",
+        pincd: "560001",
+        fName: "SURESH REDDY",
+      },
+      {
+        cor1: "PLOT 12 SAI NAGAR ANDHERI EAST",
+        cor2: "NEAR STATION ROAD",
+        cor3: "MUMBAI",
+        city: "Mumbai",
+        state: "Maharashtra",
+        pincd: "400069",
+        fName: "VIJAY SHARMA",
+      },
+    ];
+    const addr = mockAddresses[Math.min(seed, mockAddresses.length - 1)]!;
+    const occupations = ["Private Service", "Business", "Government Service", "Professional"];
+    const incomes = ["2 Lakh - 5 Lakh", "5 Lakh - 10 Lakh", "10 Lakh - 25 Lakh", "Above 25 Lakh"];
+    const marStatuses = ["Single", "Married", "Married", "Married"];
+
     const kraRecord = await db.dataBase.kraDownloadResponse.create({
       data: {
         appPanNo: mockPan,
@@ -660,22 +705,29 @@ export class CustomerKycKycService {
         appExmt: "N",
         appIpvFlag: "Y",
         appGen: user.gender === "MALE" ? "M" : user.gender === "FEMALE" ? "F" : "O",
-        appFName: "",
+        appFName: addr.fName,
         appRegno: "",
         appDoiDt: "NA",
         appCommenceDt: "NA",
-        appNationality: "01",
+        appNationality: "Indian",
         appResStatus: "R",
-        appCorAdd1: "",
-        appCorCity: "",
-        appCorPincd: "",
-        appCorState: "",
+        appCorAdd1: addr.cor1,
+        appCorAdd2: addr.cor2,
+        appCorAdd3: addr.cor3,
+        appCorCity: addr.city,
+        appCorPincd: addr.pincd,
+        appCorState: addr.state,
         appCorCtry: "101",
-        appPerAdd1: "",
-        appPerCity: "",
-        appPerPincd: "",
-        appPerState: "",
+        appPerAdd1: addr.cor1,
+        appPerAdd2: addr.cor2,
+        appPerAdd3: addr.cor3,
+        appPerCity: addr.city,
+        appPerPincd: addr.pincd,
+        appPerState: addr.state,
         appPerCtry: "101",
+        appOcc: occupations[seed] ?? "Private Service",
+        appIncome: incomes[seed] ?? "5 Lakh - 10 Lakh",
+        appMarStatus: marStatuses[seed] ?? "Married",
         appDumpType: "MOCK",
         appDnlddt: new Date().toISOString().split("T")[0],
         isNameMatch: true,

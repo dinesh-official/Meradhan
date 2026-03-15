@@ -35,6 +35,8 @@ export interface FileData<T> {
 export interface Step1Data {
   pan: PanData<IPANKycVerifyResponse["responseData"]>;
   kraResponse: IKraDownloadResponse | null;
+  /** When true, user chose "Use Existing KYC Details" so we skip Aadhar steps */
+  usedExistingKra: boolean;
   aadhar: string;
   gender: string;
   face: FileData<IPANKycVerifyResponse["responseData"]>;
@@ -126,6 +128,7 @@ const initData: KycDataStorage = {
       checkKycKraConsent: false,
     },
     kraResponse: null,
+    usedExistingKra: false,
     aadhar: "",
     gender: "",
     face: {
@@ -240,6 +243,7 @@ export const useKycDataStorage = create<{
   setStep1PanData: (Key: keyof Step1Data["pan"], data: any) => void;
   setKraResponse: (data: IKraDownloadResponse | null) => void;
   clearKraResponse: () => void;
+  setUsedExistingKra: (value: boolean) => void;
   setStep1NameMismatchDeclaration: (
     data: Step1Data["nameMismatchDeclaration"],
   ) => void;
@@ -368,6 +372,18 @@ export const useKycDataStorage = create<{
         step_1: {
           ...prev.state.step_1,
           kraResponse: null,
+          usedExistingKra: false,
+        },
+      },
+    })),
+
+  setUsedExistingKra: (value) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        step_1: {
+          ...prev.state.step_1,
+          usedExistingKra: value,
         },
       },
     })),
