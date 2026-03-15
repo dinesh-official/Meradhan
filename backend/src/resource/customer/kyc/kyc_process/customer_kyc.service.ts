@@ -8,8 +8,18 @@ import { AppError } from "@utils/error/AppError";
 import { makeFullname } from "@utils/generate/generate_username";
 import type z from "zod";
 import { KycProvider } from "./kyc_provider";
+import { KraSDK, type T_APP_PAN_INQ_DOWNLOAD } from "@packages/kyc-providers";
+import { env } from "@packages/config/src/env";
+import { checkKraProcessCheckStatus } from "@jobs/kra_worker/CheckKraStatus";
 
 export class CustomerKycKycService {
+  private kraSdk = new KraSDK({
+    okraCdOrMiId: env.KRA_OKRA_CD_MI_ID,
+    passKey: env.KRA_PASS_KEY,
+    password: env.KRA_PASSWORD,
+    userName: env.KRA_USERNAME,
+    env: env.KRA_ENV,
+  });
   private kycProvider = new KycProvider();
 
   async verifyPanInfo(data: z.infer<typeof appSchema.kyc.panVerifyInfoSchema>) {
@@ -378,5 +388,304 @@ export class CustomerKycKycService {
 
   async downloadKycPdf(userId: number) {
     return await this.kycProvider.getKycPdfFile(userId);
+  }
+
+  async createKraVerifyRequest(userId: number, {
+    pan,
+    dob,
+  }: {
+    pan: string;
+    dob: string;
+  }) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new AppError("User Not Found", {
+        code: "USER_NOT_FOUND",
+        statusCode: 404,
+      });
+    }
+
+
+    const kraDetails = await this.kraSdk.panInquiryTwo({
+      pan: pan,
+      dob: dob,
+      mobile: env.KRA_MOB_NO,
+      reqNo: new Date().getTime().toString(),
+    });
+
+    const status = checkKraProcessCheckStatus(kraDetails, undefined);
+    if (status == "AVAILABLE") {
+      const downloadResponse = await this.kraSdk.panDownloadDetailsComplete({
+        pan: pan,
+        dob: dob,
+        mobile: env.KRA_MOB_NO,
+      }) as T_APP_PAN_INQ_DOWNLOAD;
+
+      const p = downloadResponse?.APP_RES_ROOT?.APP_PAN_INQ;
+      const summ = downloadResponse?.APP_RES_ROOT?.APP_SUMM_REC;
+      const fatcaList = downloadResponse?.APP_RES_ROOT?.FATCA_ADDL_DTLS ?? [];
+
+      const normalizeForCompare = (s: string | null | undefined) =>
+        (s ?? "").toString().trim().toUpperCase().replace(/\s+/g, " ");
+      const normalizePan = (s: string | null | undefined) =>
+        (s ?? "").toString().replace(/[- ]/g, "").toUpperCase();
+      const normalizeMobile = (s: string | null | undefined) =>
+        (s ?? "").toString().replace(/\D/g, "");
+      const normalizeDob = (s: string | null | undefined) => {
+        const raw = (s ?? "").toString().trim();
+        if (!raw) return "";
+        const d = raw.split(/[-/]/);
+        if (d.length >= 3) {
+          const day = (d[0] ?? "").padStart(2, "0");
+          const month = (d[1] ?? "").padStart(2, "0");
+          const year = (d[2] ?? "").length === 2 ? `20${d[2]}` : (d[2] ?? "");
+          return `${day}-${month}-${year}`;
+        }
+        return raw;
+      };
+
+      const userFullName = normalizeForCompare(
+        [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ")
+      );
+      const kraName = normalizeForCompare(p?.APP_NAME);
+      const isNameMatch =
+        kraName.length > 0 &&
+        userFullName.length > 0 &&
+        (kraName.includes(userFullName) ||
+          userFullName.split(" ").every((part) => part.length < 2 || kraName.includes(part)));
+
+      const kraDob = normalizeDob(p?.APP_DOB_DT);
+      const userDob = normalizeDob(dob);
+      const isDOBMatch =
+        kraDob.length > 0 && userDob.length > 0 && kraDob === userDob;
+
+      const kraPan = normalizePan(p?.APP_PAN_NO);
+      const userPan = normalizePan(pan);
+      const isPANMatch = kraPan.length > 0 && userPan.length > 0 && kraPan === userPan;
+
+      const kraMobile = normalizeMobile(p?.APP_MOB_NO);
+      const userMobile = normalizeMobile(user.phoneNo);
+      const isMobileMatch =
+        kraMobile.length > 0 && userMobile.length > 0 && kraMobile === userMobile;
+
+      const kraEmail = (p?.APP_EMAIL ?? "").trim().toLowerCase();
+      const userEmail = (user.emailAddress ?? "").trim().toLowerCase();
+      const isEmailMatch =
+        kraEmail.length > 0 && userEmail.length > 0 && kraEmail === userEmail;
+
+      let appSummRecId: number | undefined;
+      if (summ) {
+        const summRec = await db.dataBase.kraAppSummRec.create({
+          data: {
+            appReqDate: summ.APP_REQ_DATE ?? undefined,
+            appOthkraBatch: summ.APP_OTHKRA_BATCH ?? undefined,
+            appOthkraCode: summ.APP_OTHKRA_CODE ?? undefined,
+            appResponseDate: summ.APP_RESPONSE_DATE ?? undefined,
+            appTotalRec: summ.APP_TOTAL_REC != null ? parseInt(summ.APP_TOTAL_REC, 10) : undefined,
+            noOfFatcaAddlDtlsRecords: summ.NO_OF_FATCA_ADDL_DTLS_RECORDS != null ? parseInt(summ.NO_OF_FATCA_ADDL_DTLS_RECORDS, 10) : undefined,
+          },
+        });
+        appSummRecId = summRec.id;
+      }
+
+      const kraRecord = await db.dataBase.kraDownloadResponse.create({
+        data: {
+          appIopFlg: p?.APP_IOP_FLG,
+          appPosCode: p?.APP_POS_CODE,
+          appType: p?.APP_TYPE,
+          appKycMode: p?.APP_KYC_MODE,
+          appNo: p?.APP_NO,
+          appDate: p?.APP_DATE,
+          appPanNo: p?.APP_PAN_NO,
+          appPanexNo: p?.APP_PANEX_NO,
+          appPanCopy: p?.APP_PAN_COPY,
+          appExmt: p?.APP_EXMT,
+          appExmtCat: p?.APP_EXMT_CAT,
+          appExmtIdProof: p?.APP_EXMT_ID_PROOF,
+          appIpvFlag: p?.APP_IPV_FLAG,
+          appIpvDate: p?.APP_IPV_DATE,
+          appGen: p?.APP_GEN,
+          appName: p?.APP_NAME,
+          appFName: p?.APP_F_NAME,
+          appRegno: p?.APP_REGNO,
+          appDobDt: p?.APP_DOB_DT,
+          appDoiDt: p?.APP_DOI_DT,
+          appCommenceDt: p?.APP_COMMENCE_DT,
+          appNationality: p?.APP_NATIONALITY,
+          appOthNationality: p?.APP_OTH_NATIONALITY,
+          appCompStatus: p?.APP_COMP_STATUS,
+          appOthCompStatus: p?.APP_OTH_COMP_STATUS,
+          appResStatus: p?.APP_RES_STATUS,
+          appResStatusProof: p?.APP_RES_STATUS_PROOF,
+          appUidNo: p?.APP_UID_NO,
+          appCorAdd1: p?.APP_COR_ADD1,
+          appCorAdd2: p?.APP_COR_ADD2,
+          appCorAdd3: p?.APP_COR_ADD3,
+          appCorCity: p?.APP_COR_CITY,
+          appCorPincd: p?.APP_COR_PINCD,
+          appCorState: p?.APP_COR_STATE,
+          appCorCtry: p?.APP_COR_CTRY,
+          appOffNo: p?.APP_OFF_NO,
+          appResNo: p?.APP_RES_NO,
+          appMobNo: p?.APP_MOB_NO,
+          appFaxNo: p?.APP_FAX_NO,
+          appEmail: p?.APP_EMAIL,
+          appCorAddProof: p?.APP_COR_ADD_PROOF,
+          appCorAddRef: p?.APP_COR_ADD_REF,
+          appCorAddDt: p?.APP_COR_ADD_DT,
+          appPerAdd1: p?.APP_PER_ADD1,
+          appPerAdd2: p?.APP_PER_ADD2,
+          appPerAdd3: p?.APP_PER_ADD3,
+          appPerCity: p?.APP_PER_CITY,
+          appPerPincd: p?.APP_PER_PINCD,
+          appPerState: p?.APP_PER_STATE,
+          appPerCtry: p?.APP_PER_CTRY,
+          appPerAddProof: p?.APP_PER_ADD_PROOF,
+          appPerAddRef: p?.APP_PER_ADD_REF,
+          appPerAddDt: p?.APP_PER_ADD_DT,
+          appIncome: p?.APP_INCOME,
+          appOcc: p?.APP_OCC,
+          appOthOcc: p?.APP_OTH_OCC,
+          appPolConn: p?.APP_POL_CONN,
+          appDocProof: p?.APP_DOC_PROOF,
+          appInternalRef: p?.APP_INTERNAL_REF,
+          appBranchCode: p?.APP_BRANCH_CODE,
+          appMarStatus: p?.APP_MAR_STATUS,
+          appNetWrth: p?.APP_NETWRTH,
+          appNetWorthDt: p?.APP_NETWORTH_DT,
+          appIncorpPlc: p?.APP_INCORP_PLC,
+          appOtherinfo: p?.APP_OTHERINFO,
+          appFiller1: p?.APP_FILLER1,
+          appFiller2: p?.APP_FILLER2,
+          appFiller3: p?.APP_FILLER3,
+          appRemarks: p?.APP_REMARKS,
+          appStatus: p?.APP_STATUS,
+          appStatusdt: p?.APP_STATUSDT,
+          appErrorDesc: p?.APP_ERROR_DESC,
+          appDumpType: p?.APP_DUMP_TYPE,
+          appDnlddt: p?.APP_DNLDDT,
+          appKraInfo: p?.APP_KRA_INFO,
+          appSignature: p?.APP_SIGNATURE,
+          appFatcaApplicableFlag: p?.APP_FATCA_APPLICABLE_FLAG,
+          appFatcaBirthPlace: p?.APP_FATCA_BIRTH_PLACE,
+          appFatcaBirthCountry: p?.APP_FATCA_BIRTH_COUNTRY,
+          appFatcaCountryRes: p?.APP_FATCA_COUNTRY_RES,
+          appFatcaCountryCityzenship: p?.APP_FATCA_COUNTRY_CITYZENSHIP,
+          appFatcaDateDeclaration: p?.APP_FATCA_DATE_DECLARATION,
+          appSummRecId: appSummRecId ?? undefined,
+          isNameMatch,
+          isDOBMatch,
+          isPANMatch,
+          isMobileMatch,
+          isEmailMatch,
+        },
+      });
+
+      if (fatcaList.length > 0 && kraRecord.id) {
+        await db.dataBase.kraFatcaAddlDtls.createMany({
+          data: fatcaList.map((f) => ({
+            kraDownloadResponseId: kraRecord.id,
+            appFatcaEntityPan: f.APP_FATCA_ENTITY_PAN,
+            appFatcaCountryResidency: f.APP_FATCA_COUNTRY_RESIDENCY,
+            appFatcaTaxIdentificationNo: f.APP_FATCA_TAX_IDENTIFICATION_NO,
+            appFatcaTaxExemptFlag: f.APP_FATCA_TAX_EXEMPT_FLAG,
+            appFatcaTaxExemptReason: f.APP_FATCA_TAX_EXEMPT_REASON,
+          })),
+        });
+      }
+
+      const kra = await db.dataBase.kraDownloadResponse.findFirst({
+        where: {
+          appPanNo: p?.APP_PAN_NO ?? pan,
+          appDobDt: p?.APP_DOB_DT ?? dob,
+        },
+      });
+      if (kra) {
+        return kra;
+      }
+      return kraRecord;
+    }
+
+    throw new AppError(`KRA - ${status}`, {
+      code: "KRA_VERIFICATION_FAILED",
+      statusCode: 400,
+    });
+  }
+
+  /**
+   * Mock KRA verify request: creates a KraDownloadResponse with same shape as real flow,
+   * using current user data + pan/dob. No external KRA SDK calls. For testing/dev.
+   */
+  async createKraVerifyRequestMock(
+    userId: number,
+    { pan, dob }: { pan: string; dob: string }
+  ) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new AppError("User Not Found", {
+        code: "USER_NOT_FOUND",
+        statusCode: 404,
+      });
+    }
+
+    const mockName = [user.firstName, user.middleName, user.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .toUpperCase();
+    const mockPan = pan.replace(/[- ]/g, "").toUpperCase();
+    const mockDob = dob.trim();
+    const mockMobile = (user.phoneNo ?? "").replace(/\D/g, "");
+    const mockEmail = (user.emailAddress ?? "").trim().toLowerCase();
+
+    const kraRecord = await db.dataBase.kraDownloadResponse.create({
+      data: {
+        appPanNo: mockPan,
+        appDobDt: mockDob,
+        appName: mockName,
+        appEmail: user.emailAddress ?? undefined,
+        appMobNo: user.phoneNo ?? undefined,
+        appBranchCode: "MOCK",
+        appStatus: "01",
+        appStatusdt: new Date().toISOString().split("T")[0],
+        appType: "I",
+        appKycMode: "5",
+        appIopFlg: "IE",
+        appPosCode: env.KRA_OKRA_CD_MI_ID ?? "MOCK",
+        appDate: new Date().toISOString().split("T")[0],
+        appPanCopy: "Y",
+        appExmt: "N",
+        appIpvFlag: "Y",
+        appGen: user.gender === "MALE" ? "M" : user.gender === "FEMALE" ? "F" : "O",
+        appFName: "",
+        appRegno: "",
+        appDoiDt: "NA",
+        appCommenceDt: "NA",
+        appNationality: "01",
+        appResStatus: "R",
+        appCorAdd1: "",
+        appCorCity: "",
+        appCorPincd: "",
+        appCorState: "",
+        appCorCtry: "101",
+        appPerAdd1: "",
+        appPerCity: "",
+        appPerPincd: "",
+        appPerState: "",
+        appPerCtry: "101",
+        appDumpType: "MOCK",
+        appDnlddt: new Date().toISOString().split("T")[0],
+        isNameMatch: true,
+        isDOBMatch: true,
+        isPANMatch: true,
+        isMobileMatch: mockMobile.length > 0,
+        isEmailMatch: mockEmail.length > 0,
+      },
+    });
+
+    return kraRecord;
   }
 }
