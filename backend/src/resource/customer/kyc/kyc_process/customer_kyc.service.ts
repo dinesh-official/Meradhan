@@ -420,12 +420,26 @@ export class CustomerKycKycService {
     }
 
 
+    const kraRecord = await db.dataBase.kraDownloadResponse.findFirst({
+
+      include: {
+        appSummRec: true,
+        fatcaAddlDtls: true,
+      }
+    });
+
+    if (kraRecord) {
+      return kraRecord;
+    }
+
     const kraDetails = await this.kraSdk.panInquiryTwo({
       pan: pan,
       dob: formatedDob,
       mobile: env.KRA_MOB_NO,
       reqNo: new Date().getTime().toString(),
     });
+
+
 
     console.log({
       kraDetails,
