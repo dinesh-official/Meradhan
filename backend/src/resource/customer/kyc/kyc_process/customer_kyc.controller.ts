@@ -346,7 +346,7 @@ export class CustomerKycKycController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: {
-        data: JSON.stringify(responseData)
+        data: "WORKING"
       },
     });
   }
