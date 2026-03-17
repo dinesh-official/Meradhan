@@ -452,8 +452,12 @@ export class CustomerKycKycService {
         (s ?? "").toString().trim().toUpperCase().replace(/\s+/g, " ");
       const normalizePan = (s: string | null | undefined) =>
         (s ?? "").toString().replace(/[- ]/g, "").toUpperCase();
-      const normalizeMobile = (s: string | null | undefined) =>
-        (s ?? "").toString().replace(/\D/g, "");
+      const normalizeMobile = (s: string | null | undefined) => {
+        const raw = (s ?? "").toString().trim();
+        // remove +91 from the beginning
+        const cleaned = raw.replace(/^\+91/, "");
+        return cleaned.replace(/\D/g, "");
+      };
       const normalizeDob = (s: string | null | undefined) => {
         const raw = (s ?? "").toString().trim();
         if (!raw) return "";
