@@ -616,16 +616,26 @@ export class CustomerKycKycService {
         });
       }
 
-      const kra = await db.dataBase.kraDownloadResponse.findFirst({
-        where: {
-          appPanNo: p?.APP_PAN_NO ?? pan,
-          appDobDt: p?.APP_DOB_DT ?? dob,
+      console.log("KRA Record Created", kraRecord);
+
+      const kra = await db.dataBase.kraDownloadResponse.findUnique({
+        where: { id: kraRecord.id },
+        include: {
+          appSummRec: true,
+          fatcaAddlDtls: true,
         },
       });
-      if (kra) {
-        return kra;
+
+      console.log("KRA Record Found", kra);
+
+      if (!kra) {
+        throw new AppError("KRA Record Not Found", {
+          code: "KRA_RECORD_NOT_FOUND",
+          statusCode: 404,
+        });
       }
-      return kraRecord;
+      console.log("========================== Returning KRA Record ==========================", kra);
+      return kra;
     }
 
     throw new AppError(`KRA - ${status}`, {
