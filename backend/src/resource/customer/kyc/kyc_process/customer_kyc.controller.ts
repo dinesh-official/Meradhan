@@ -203,7 +203,7 @@ export class CustomerKycKycController {
       id,
       data,
     });
-    res.sendResponse({
+    res.send({
       statusCode: HttpStatus.OK,
       responseData: response,
     });
