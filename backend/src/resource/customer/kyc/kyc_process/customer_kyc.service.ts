@@ -8,7 +8,7 @@ import { AppError } from "@utils/error/AppError";
 import { makeFullname } from "@utils/generate/generate_username";
 import type z from "zod";
 import { KycProvider } from "./kyc_provider";
-import { KraSDK, type T_APP_PAN_INQ, type T_APP_PAN_INQ_DOWNLOAD } from "@packages/kyc-providers";
+import { KraSDK, type T_APP_PAN_INQ_DOWNLOAD } from "@packages/kyc-providers";
 import { env } from "@packages/config/src/env";
 import { checkKraProcessCheckStatus } from "@jobs/kra_worker/CheckKraStatus";
 
@@ -390,47 +390,6 @@ export class CustomerKycKycService {
     return await this.kycProvider.getKycPdfFile(userId);
   }
 
-  /**
-   * Normalize DOB for KRA: produce YYYY-MM-DD (for inquiry) and YYYYMMDD (for download).
-   * Accepts "YYYY-MM-DD", "DD-MM-YYYY", or "YYYYMMDD".
-   */
-  private normalizeDobForKra(dob: string): { formatedDob: string; dobDigits: string } {
-    const raw = (dob ?? "").trim().replace(/\s/g, "");
-    if (!raw) {
-      throw new AppError("Date of birth is required and must be in DD-MM-YYYY or YYYY-MM-DD format.", {
-        code: "INVALID_DOB",
-        statusCode: 400,
-      });
-    }
-    const withDashes = raw.includes("-");
-    const parts = withDashes ? raw.split("-") : [raw.slice(0, 4), raw.slice(4, 6), raw.slice(6, 8)];
-    if (parts.length < 3 || !parts[0] || !parts[1] || !parts[2]) {
-      throw new AppError("Date of birth must be in DD-MM-YYYY or YYYY-MM-DD format.", {
-        code: "INVALID_DOB",
-        statusCode: 400,
-      });
-    }
-    let year = parts[0];
-    let month = parts[1];
-    let day = parts[2];
-    if (withDashes && parts[0].length === 2) {
-      year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
-      month = parts[1];
-      day = parts[0];
-    } else if (withDashes && parts[0].length === 4 && parseInt(parts[0], 10) > 31) {
-      year = parts[0];
-      month = parts[1].padStart(2, "0");
-      day = parts[2].padStart(2, "0");
-    } else if (withDashes) {
-      day = parts[0].padStart(2, "0");
-      month = parts[1].padStart(2, "0");
-      year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
-    }
-    const formatedDob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    const dobDigits = formatedDob.replace(/-/g, "");
-    return { formatedDob, dobDigits };
-  }
-
   async createKraVerifyRequest(userId: number, {
     pan,
     dob,
@@ -438,7 +397,17 @@ export class CustomerKycKycService {
     pan: string;
     dob: string;
   }) {
-    const { formatedDob, dobDigits } = this.normalizeDobForKra(dob);
+
+
+    const [day, month, year] = dob.split("-");
+    const formatedDob = `${year}-${month}-${day}`;
+
+    console.log({
+      pan,
+      dob,
+      formatedDob
+    });
+
 
     const user = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: userId },
@@ -450,38 +419,28 @@ export class CustomerKycKycService {
       });
     }
 
-    let kraDetails: unknown;
-    try {
-      kraDetails = await this.kraSdk.panInquiryTwo({
-        pan: pan.trim(),
-        dob: formatedDob,
-        mobile: env.KRA_MOB_NO,
-        reqNo: new Date().getTime().toString(),
-      });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "KRA inquiry failed";
-      throw new AppError(`KRA verification failed: ${message}`, {
-        code: "KRA_INQUIRY_FAILED",
-        statusCode: 502,
-      });
-    }
 
-    const status = checkKraProcessCheckStatus(kraDetails as T_APP_PAN_INQ, undefined);
+    const kraDetails = await this.kraSdk.panInquiryTwo({
+      pan: pan,
+      dob: formatedDob,
+      mobile: env.KRA_MOB_NO,
+      reqNo: new Date().getTime().toString(),
+    });
+
+    console.log({
+      kraDetails,
+    });
+
+    const status = checkKraProcessCheckStatus(kraDetails, undefined);
+    console.log({
+      status,
+    });
     if (status == "AVAILABLE") {
-      let downloadResponse: T_APP_PAN_INQ_DOWNLOAD;
-      try {
-        downloadResponse = await this.kraSdk.panDownloadDetailsComplete({
-          pan: pan.trim(),
-          dob: dobDigits,
-          mobile: env.KRA_MOB_NO,
-        }) as T_APP_PAN_INQ_DOWNLOAD;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "KRA download failed";
-        throw new AppError(`KRA download failed: ${message}`, {
-          code: "KRA_DOWNLOAD_FAILED",
-          statusCode: 502,
-        });
-      }
+      const downloadResponse = await this.kraSdk.panDownloadDetailsComplete({
+        pan: pan,
+        dob: dob.replaceAll("-", ""),
+        mobile: env.KRA_MOB_NO,
+      }) as T_APP_PAN_INQ_DOWNLOAD;
 
       const p = downloadResponse?.APP_RES_ROOT?.APP_PAN_INQ;
       const summ = downloadResponse?.APP_RES_ROOT?.APP_SUMM_REC;
@@ -517,7 +476,7 @@ export class CustomerKycKycService {
           userFullName.split(" ").every((part) => part.length < 2 || kraName.includes(part)));
 
       const kraDob = normalizeDob(p?.APP_DOB_DT);
-      const userDob = normalizeDob(formatedDob);
+      const userDob = normalizeDob(dob);
       const isDOBMatch =
         kraDob.length > 0 && userDob.length > 0 && kraDob === userDob;
 
@@ -640,7 +599,7 @@ export class CustomerKycKycService {
           isPANMatch,
           isMobileMatch,
           isEmailMatch,
-          rawXml: JSON.stringify(kraDetails),
+          rawXml: JSON.stringify(downloadResponse),
         },
       });
 
@@ -657,6 +616,8 @@ export class CustomerKycKycService {
         });
       }
 
+      console.log("KRA Record Created", new Date());
+
       const kra = await db.dataBase.kraDownloadResponse.findUnique({
         where: { id: kraRecord.id },
         include: {
@@ -665,7 +626,16 @@ export class CustomerKycKycService {
         }
       });
 
-      return kra ?? kraRecord;
+      console.log("KRA Record Found", new Date());
+
+      if (!kra) {
+        throw new AppError("KRA Record Not Found", {
+          code: "KRA_RECORD_NOT_FOUND",
+          statusCode: 404,
+        });
+      }
+      console.log("========================== Returning KRA Record ==========================", new Date());
+      return kra;
     }
 
     throw new AppError(`KRA - ${status}`, {
