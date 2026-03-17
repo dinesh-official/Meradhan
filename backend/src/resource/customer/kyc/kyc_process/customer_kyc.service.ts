@@ -420,18 +420,6 @@ export class CustomerKycKycService {
     }
 
 
-    const kraRecord = await db.dataBase.kraDownloadResponse.findFirst({
-
-      include: {
-        appSummRec: true,
-        fatcaAddlDtls: true,
-      }
-    });
-
-    if (kraRecord) {
-      return kraRecord;
-    }
-
     const kraDetails = await this.kraSdk.panInquiryTwo({
       pan: pan,
       dob: formatedDob,
@@ -615,6 +603,10 @@ export class CustomerKycKycService {
           isEmailMatch,
           rawXml: JSON.stringify(downloadResponse),
         },
+        include: {
+          appSummRec: true,
+          fatcaAddlDtls: true,
+        }
       });
 
       if (fatcaList.length > 0 && kraRecord.id) {
@@ -632,24 +624,9 @@ export class CustomerKycKycService {
 
       console.log("KRA Record Created", new Date());
 
-      const kra = await db.dataBase.kraDownloadResponse.findUnique({
-        where: { id: kraRecord.id },
-        include: {
-          appSummRec: true,
-          fatcaAddlDtls: true,
-        }
-      });
 
-      console.log("KRA Record Found", new Date());
-
-      if (!kra) {
-        throw new AppError("KRA Record Not Found", {
-          code: "KRA_RECORD_NOT_FOUND",
-          statusCode: 404,
-        });
-      }
       console.log("========================== Returning KRA Record ==========================", new Date());
-      return kra;
+      return kraRecord;
     }
 
     throw new AppError(`KRA - ${status}`, {
