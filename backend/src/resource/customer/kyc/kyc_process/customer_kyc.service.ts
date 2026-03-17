@@ -616,7 +616,7 @@ export class CustomerKycKycService {
         });
       }
 
-      console.log("KRA Record Created", kraRecord);
+      console.log("KRA Record Created", new Date());
 
       const kra = await db.dataBase.kraDownloadResponse.findUnique({
         where: { id: kraRecord.id },
@@ -626,7 +626,7 @@ export class CustomerKycKycService {
         }
       });
 
-      console.log("KRA Record Found", kra);
+      console.log("KRA Record Found", new Date());
 
       if (!kra) {
         throw new AppError("KRA Record Not Found", {
@@ -634,7 +634,7 @@ export class CustomerKycKycService {
           statusCode: 404,
         });
       }
-      console.log("========================== Returning KRA Record ==========================", kra);
+      console.log("========================== Returning KRA Record ==========================", new Date());
       return kra;
     }
 
