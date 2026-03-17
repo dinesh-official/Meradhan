@@ -398,9 +398,14 @@ export class CustomerKycKycService {
     dob: string;
   }) {
 
+
+    const [day, month, year] = dob.split("-");
+    const formatedDob = `${year}-${month}-${day}`;
+
     console.log({
       pan,
       dob,
+      formatedDob
     });
 
 
@@ -417,7 +422,7 @@ export class CustomerKycKycService {
 
     const kraDetails = await this.kraSdk.panInquiryTwo({
       pan: pan,
-      dob: dob.replaceAll("-", ""),
+      dob: formatedDob,
       mobile: env.KRA_MOB_NO,
       reqNo: new Date().getTime().toString(),
     });
