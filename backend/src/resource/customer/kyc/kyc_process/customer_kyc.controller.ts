@@ -341,10 +341,11 @@ export class CustomerKycKycController {
     const id = req.customer!.id;
     const data = appSchema.kyc.kraVerifyRequestSchema.parse(req.body);
     const response = await this.panKycService.createKraVerifyRequest(id, data);
-    const responseData = response ? JSON.parse(JSON.stringify(response)) : response;
+    console.log("Response from controller", JSON.stringify(response));
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
-      responseData,
+      responseData: response,
     });
   }
 }
