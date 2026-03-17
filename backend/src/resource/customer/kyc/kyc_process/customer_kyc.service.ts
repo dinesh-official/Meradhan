@@ -623,7 +623,7 @@ export class CustomerKycKycService {
         include: {
           appSummRec: true,
           fatcaAddlDtls: true,
-        },
+        }
       });
 
       console.log("KRA Record Found", kra);
