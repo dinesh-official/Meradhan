@@ -343,7 +343,7 @@ export class CustomerKycKycController {
     const response = await this.panKycService.createKraVerifyRequest(id, data);
     console.log("Response from controller", new Date(), JSON.stringify(response));
 
-    res.sendResponse({
+    res.send({
       statusCode: HttpStatus.OK,
       responseData: response,
     });
