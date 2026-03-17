@@ -75,6 +75,148 @@ export class CustomerKycManager {
     };
   }
 
+  /** Address create payload shape used for both KRA and Aadhaar flows */
+  private static readonly ADDRESS_PAYLOAD_SHAPE = {} as {
+    line1: string;
+    line2: string | null;
+    line3: string | null;
+    postOffice: string;
+    cityOrDistrict: string;
+    state: string;
+    pinCode: string;
+    country: string;
+    fullAddress: string;
+  };
+
+  /**
+   * Resolve gender from step1 (KRA path: step1.gender or kraResponse) or Aadhaar (non-KRA).
+   * Keeps user data mapping consistent for both KRA and non-KRA flows.
+   */
+  private resolveGender(
+    step1: KycDataStorage["step_1"] & { gender?: string },
+    kraResponse: KraResponseInKyc | null | undefined,
+    aadhaarData: { gender?: string } | undefined,
+    usedExistingKra: boolean,
+  ): $Enums.Gender {
+    if (usedExistingKra && step1.gender) return this.mapGender(step1.gender);
+    if (usedExistingKra && kraResponse?.appGen) return this.mapGender(kraResponse.appGen);
+    if (aadhaarData?.gender) return this.mapGender(aadhaarData.gender);
+    return "OTHER";
+  }
+
+  /**
+   * Resolve current and permanent address payloads.
+   * With KRA: from kraResponse; without KRA: from Aadhaar details.
+   */
+  private resolveAddresses(
+    usedExistingKra: boolean,
+    kraResponse: KraResponseInKyc | null | undefined,
+    aadhaarData: {
+      current_address: string;
+      permanent_address: string;
+      current_address_details: { address: string; locality_or_post_office: string; district_or_city: string; state: string; pincode: string };
+      permanent_address_details: { address: string; locality_or_post_office: string; district_or_city: string; state: string; pincode: string };
+    } | undefined,
+  ): {
+    current: typeof CustomerKycManager.ADDRESS_PAYLOAD_SHAPE | null;
+    permanent: typeof CustomerKycManager.ADDRESS_PAYLOAD_SHAPE | null;
+  } {
+    if (usedExistingKra && kraResponse) {
+      return {
+        current: this.buildAddressFromKra(kraResponse, "correspondence"),
+        permanent: this.buildAddressFromKra(kraResponse, "permanent"),
+      };
+    }
+    if (aadhaarData) {
+      const cur = aadhaarData.current_address_details;
+      const per = aadhaarData.permanent_address_details;
+      return {
+        current: {
+          line1: cur.address,
+          line2: null,
+          line3: null,
+          postOffice: cur.locality_or_post_office,
+          cityOrDistrict: cur.district_or_city,
+          state: cur.state,
+          pinCode: cur.pincode,
+          country: "India",
+          fullAddress: aadhaarData.current_address,
+        },
+        permanent: {
+          line1: per.address,
+          line2: null,
+          line3: null,
+          postOffice: per.locality_or_post_office,
+          cityOrDistrict: per.district_or_city,
+          state: per.state,
+          pinCode: per.pincode,
+          country: "India",
+          fullAddress: aadhaarData.permanent_address,
+        },
+      };
+    }
+    return { current: null, permanent: null };
+  }
+
+  /**
+   * Build PAN card create payload. Same shape for both KRA and non-KRA; image from Aadhaar when available.
+   */
+  private buildPanCardCreatePayload(
+    step1: KycDataStorage["step_1"],
+    panData: { id_number: string; file_url?: string },
+    gender: $Enums.Gender,
+    aadhaarData: { image?: string } | undefined,
+  ): DataBaseSchema.PanCardModelCreateInput {
+    const dateOfBirth = step1.pan.dateOfBirth.split("T")[0]?.toString() || "";
+    return {
+      panCardNo: panData.id_number,
+      firstName: step1.pan.firstName,
+      lastName: step1.pan.lastName,
+      middleName: step1.pan.middleName,
+      dateOfBirth,
+      gender,
+      image: aadhaarData?.image ?? "",
+      fileUrl: panData.file_url ?? "",
+      isVerified: true,
+      verifyDate: step1.pan.fetchedTimestamp,
+      confirmTimeStamp: step1.pan.confirmPanTimestamp,
+      allowTerms: step1.pan.checkTerms1,
+    };
+  }
+
+  /**
+   * Build Aadhaar card create payload when not using KRA (Aadhaar was verified in flow). Returns null for KRA path.
+   */
+  private buildAadhaarCardCreatePayload(
+    usedExistingKra: boolean,
+    aadhaarData: {
+      id_number: string;
+      dob: string;
+      father_name: string;
+      name: string;
+      image: string;
+      file_url: string;
+    } | undefined,
+    step1: KycDataStorage["step_1"],
+    gender: $Enums.Gender,
+  ): DataBaseSchema.AADHAARCardModelCreateInput | null {
+    if (usedExistingKra || !aadhaarData) return null;
+    return {
+      aadhaarNo: aadhaarData.id_number,
+      dateOfBirth: aadhaarData.dob,
+      fatherName: aadhaarData.father_name,
+      firstName: aadhaarData.name,
+      lastName: "",
+      middleName: "",
+      gender,
+      image: aadhaarData.image,
+      fileUrl: aadhaarData.file_url,
+      isVerified: true,
+      verifyDate: step1.pan.fetchedTimestamp,
+      confirmTimeStamp: step1.pan.confirmAadhaarTimestamp,
+    };
+  }
+
   /**
    * Main method to save KYC data to customer profile
    */
@@ -96,23 +238,14 @@ export class CustomerKycManager {
     const usedExistingKra = !!(step1 as { usedExistingKra?: boolean }).usedExistingKra;
     const kraResponse = (step1 as { kraResponse?: KraResponseInKyc | null }).kraResponse;
 
-    // Get identity data
     const panData = step1.pan.response?.details?.pan;
     const aadhaarData = step1.pan.response?.details?.aadhaar;
+
+    // Identity: same source for both KRA and non-KRA (names from PAN step)
     const firstName = step1.pan.firstName;
     const lastName = step1.pan.lastName;
     const middleName = step1.pan.middleName;
-
-    let gender: $Enums.Gender;
-    if (usedExistingKra && (step1 as { gender?: string }).gender) {
-      gender = this.mapGender((step1 as { gender: string }).gender);
-    } else if (usedExistingKra && kraResponse?.appGen) {
-      gender = this.mapGender(kraResponse.appGen);
-    } else if (aadhaarData?.gender) {
-      gender = this.mapGender(aadhaarData.gender);
-    } else {
-      gender = "OTHER";
-    }
+    const gender = this.resolveGender(step1, kraResponse ?? null, aadhaarData, usedExistingKra);
 
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerId },
@@ -153,37 +286,19 @@ export class CustomerKycManager {
       }
     }
 
-    const currentAddressPayload = usedExistingKra && kraResponse
-      ? this.buildAddressFromKra(kraResponse, "correspondence")
-      : aadhaarData
-        ? {
-          line1: aadhaarData.current_address_details.address,
-          line2: null as string | null,
-          line3: null as string | null,
-          postOffice: aadhaarData.current_address_details.locality_or_post_office,
-          cityOrDistrict: aadhaarData.current_address_details.district_or_city,
-          state: aadhaarData.current_address_details.state,
-          pinCode: aadhaarData.current_address_details.pincode,
-          country: "India",
-          fullAddress: aadhaarData.current_address,
-        }
-        : null;
+    const { current: currentAddressPayload, permanent: permanentAddressPayload } = this.resolveAddresses(
+      usedExistingKra,
+      kraResponse ?? null,
+      aadhaarData,
+    );
 
-    const permanentAddressPayload = usedExistingKra && kraResponse
-      ? this.buildAddressFromKra(kraResponse, "permanent")
-      : aadhaarData
-        ? {
-          line1: aadhaarData.permanent_address_details.address,
-          line2: null as string | null,
-          line3: null as string | null,
-          postOffice: aadhaarData.permanent_address_details.locality_or_post_office,
-          cityOrDistrict: aadhaarData.permanent_address_details.district_or_city,
-          state: aadhaarData.permanent_address_details.state,
-          pinCode: aadhaarData.permanent_address_details.pincode,
-          country: "India",
-          fullAddress: aadhaarData.permanent_address,
-        }
-        : null;
+    const panCardCreate = this.buildPanCardCreatePayload(step1, panData, gender, aadhaarData);
+    const aadhaarCardCreate = this.buildAadhaarCardCreatePayload(
+      usedExistingKra,
+      aadhaarData,
+      step1,
+      gender,
+    );
 
     const baseUpdateData: DataBaseSchema.CustomerProfileDataModelUpdateInput = {
       firstName,
@@ -196,20 +311,7 @@ export class CustomerKycManager {
       allowSEBITerms: step1.pan.checkTerms2,
       isAPep: !step1.pan.checkTerms1,
       panCard: {
-        create: {
-          panCardNo: panData.id_number,
-          firstName,
-          lastName,
-          middleName,
-          dateOfBirth: step1.pan.dateOfBirth.split("T")[0]?.toString() || "",
-          gender,
-          image: aadhaarData?.image ?? "",
-          fileUrl: panData.file_url ?? "",
-          isVerified: true,
-          verifyDate: step1.pan.fetchedTimestamp,
-          confirmTimeStamp: step1.pan.confirmPanTimestamp,
-          allowTerms: step1.pan.checkTerms1,
-        },
+        create: panCardCreate,
       },
       personalInformation: {
         create: {
@@ -240,23 +342,8 @@ export class CustomerKycManager {
       },
     };
 
-    if (!usedExistingKra && aadhaarData) {
-      (baseUpdateData as Record<string, unknown>).aadhaarCard = {
-        create: {
-          aadhaarNo: aadhaarData.id_number,
-          dateOfBirth: aadhaarData.dob,
-          fatherName: aadhaarData.father_name,
-          firstName: aadhaarData.name,
-          lastName: "",
-          middleName: "",
-          gender,
-          image: aadhaarData.image,
-          fileUrl: aadhaarData.file_url,
-          isVerified: true,
-          verifyDate: step1.pan.fetchedTimestamp,
-          confirmTimeStamp: step1.pan.confirmAadhaarTimestamp,
-        },
-      };
+    if (aadhaarCardCreate) {
+      (baseUpdateData as Record<string, unknown>).aadhaarCard = { create: aadhaarCardCreate };
     }
 
     // Update customer with KYC data in a transaction

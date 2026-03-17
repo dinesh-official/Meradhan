@@ -96,6 +96,8 @@ export type KRAResponse = BaseResponseData<
 /** KRA verify request response: KraDownloadResponse from POST /customer/kyc/kra/request */
 export interface IKraDownloadResponse {
   id: number;
+  /** KRA record status (e.g. "KYC Validated at CVL", "01") */
+  appStatus?: string | null;
   appPanNo: string | null;
   appName: string | null;
   appDobDt: string | null;

@@ -18,6 +18,7 @@ import {
 import { IoMdArrowDropright } from "react-icons/io";
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import Swal from "sweetalert2";
 import type { IKraDownloadResponse } from "@root/apiGateway";
 
 function formatGender(gen: string | null): string {
@@ -32,6 +33,64 @@ function formatCountry(code: string | null): string {
   if (!code) return "";
   if (code === "101") return "India";
   return code;
+}
+
+/** KRA marital status: Code 01 = Married, 02 = Unmarried (per KRA spec) */
+function formatMaritalStatus(code: string | null): string {
+  if (!code) return "-";
+  const c = String(code).trim();
+  if (c === "01") return "Married";
+  if (c === "02") return "Unmarried";
+  return code;
+}
+
+/** KRA status code → display label (per KRA spec) */
+const KRA_STATUS_LABELS: Record<string, string> = {
+  "01": "Under Process",
+  "02": "KYC Registered",
+  "03": "On Hold",
+  "04": "KYC Rejected",
+  "05": "Not Available",
+  "06": "Deactivate",
+  "07": "KYC Validated",
+  "12": "KYC Registered",
+  "13": "Under Process",
+  "14": "On Hold",
+  "21": "Mutual Fund Under Process",
+  "22": "Mutual Fund Verified",
+};
+
+function formatKraStatus(code: string | null): string {
+  if (!code) return "-";
+  const c = String(code).trim();
+  return KRA_STATUS_LABELS[c] ?? code;
+}
+
+/** KRA income code → display label (per KRA spec) */
+const KRA_INCOME_LABELS: Record<string, string> = {
+  "01": "Below 1 Lac",
+  "02": "1 - 5 Lakhs",
+  "03": "5 - 10 Lakhs",
+  "04": "10 - 25 Lakhs",
+  "05": "25 Lakhs +",
+};
+
+function formatIncomeRange(code: string | null): string {
+  if (!code) return "-";
+  const c = String(code).trim();
+  return KRA_INCOME_LABELS[c] ?? code;
+}
+
+/** KRA nationality code → display label (per KRA spec) */
+const KRA_NATIONALITY_LABELS: Record<string, string> = {
+  "01": "Indian",
+  "02": "Other",
+};
+
+function formatNationality(code: string | null): string {
+  if (!code) return "-";
+  const c = String(code).trim();
+  return KRA_NATIONALITY_LABELS[c] ?? code;
 }
 
 export interface KraInfoViewProps {
@@ -56,6 +115,12 @@ export function KraInfoView({
   isPending = false,
 }: KraInfoViewProps) {
   const [showJson, setShowJson] = useState(false);
+  const canProceedWithExistingKyc =
+    kra.isNameMatch &&
+    kra.isDOBMatch &&
+    kra.isPANMatch &&
+    kra.isMobileMatch &&
+    kra.isEmailMatch;
 
   return (
     <Card accountMode>
@@ -66,11 +131,17 @@ export function KraInfoView({
         </CardTitle>
       </CardHeader>
       <CardContent accountMode className="space-y-6">
+        {kra.appStatus && (
+          <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
+            <span className="font-medium text-muted-foreground">KRA Status: </span>
+            <span className="font-medium">{formatKraStatus(kra.appStatus)}</span>
+          </div>
+        )}
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Personal Information
           </h3>
-          <div className="gap-4 grid md:grid-cols-2">
+          <div className="gap-4 grid md:grid-cols-3">
             <DataInfoLabel
               title="PAN Number"
               status={kra.isPANMatch ? "SUCCESS" : "ERROR"}
@@ -97,10 +168,20 @@ export function KraInfoView({
                 {kra.appDobDt?.replace(/\//g, "-") ?? "-"}
               </p>
             </DataInfoLabel>
-            <DataInfoLabel title="Email ID">
+            <DataInfoLabel
+              title="Email ID"
+              status={kra.isEmailMatch ? "SUCCESS" : "ERROR"}
+              statusLabel={kra.isEmailMatch ? "Matched" : "Not Matched"}
+              showStatus
+            >
               <p className="font-medium">{kra.appEmail ?? "-"}</p>
             </DataInfoLabel>
-            <DataInfoLabel title="Mobile Number">
+            <DataInfoLabel
+              title="Mobile Number"
+              status={kra.isMobileMatch ? "SUCCESS" : "ERROR"}
+              statusLabel={kra.isMobileMatch ? "Matched" : "Not Matched"}
+              showStatus
+            >
               <p className="font-medium">
                 {kra.appMobNo ? `+91 ${kra.appMobNo}` : "-"}
               </p>
@@ -115,13 +196,13 @@ export function KraInfoView({
               <p className="font-medium">{kra.appOcc ?? kra.appOthOcc ?? "-"}</p>
             </DataInfoLabel>
             <DataInfoLabel title="Income Range">
-              <p className="font-medium">{kra.appIncome ?? "-"}</p>
+              <p className="font-medium">{formatIncomeRange(kra.appIncome)}</p>
             </DataInfoLabel>
             <DataInfoLabel title="Marital Status">
-              <p className="font-medium">{kra.appMarStatus ?? "-"}</p>
+              <p className="font-medium">{formatMaritalStatus(kra.appMarStatus)}</p>
             </DataInfoLabel>
             <DataInfoLabel title="Nationality">
-              <p className="font-medium">{kra.appNationality ?? "-"}</p>
+              <p className="font-medium">{formatNationality(kra.appNationality)}</p>
             </DataInfoLabel>
             <DataInfoLabel title="Applicant Type">
               <p className="font-medium">
@@ -135,7 +216,7 @@ export function KraInfoView({
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Correspondence Address
           </h3>
-          <div className="gap-4 grid md:grid-cols-2">
+          <div className="gap-4 grid md:grid-cols-3">
             <DataInfoLabel title="Line 1">
               <p className="font-medium">{kra.appCorAdd1 ?? "-"}</p>
             </DataInfoLabel>
@@ -167,7 +248,7 @@ export function KraInfoView({
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Permanent Address
           </h3>
-          <div className="gap-4 grid md:grid-cols-2">
+          <div className="gap-4 grid md:grid-cols-3">
             <DataInfoLabel title="Line 1">
               <p className="font-medium">{kra.appPerAdd1 ?? "-"}</p>
             </DataInfoLabel>
@@ -213,43 +294,46 @@ export function KraInfoView({
           </div>
         )}
 
-        <Collapsible open={showJson} onOpenChange={setShowJson}>
-          <CollapsibleTrigger className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
-            {showJson ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-            KRA response (test / debug)
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <pre className="mt-2 p-3 bg-muted rounded-md text-xs overflow-auto max-h-48">
-              {JSON.stringify(kra, null, 2)}
-            </pre>
-          </CollapsibleContent>
-        </Collapsible>
       </CardContent>
       {!preview && (
-        <CardFooter accountMode className="flex flex-col sm:flex-row gap-3">
-          <Button
-            className="flex items-center gap-1 w-full sm:w-auto"
-            disabled={!confirmed || isPending}
-            onClick={onUseExisting}
-            id="use-existing-kyc-btn"
-          >
-            Use Existing KYC Details
-            <IoMdArrowDropright className="text-xl" />
-          </Button>
-          <Button
-            variant="secondary"
-            className="flex items-center gap-1 w-full sm:w-auto border-orange-400 hover:bg-orange-50"
-            disabled={!confirmed || isPending}
-            onClick={onStartFresh}
-            id="start-fresh-kyc-btn"
-          >
-            Start Fresh KYC
-            <IoMdArrowDropright className="text-xl" />
-          </Button>
+        <CardFooter accountMode className="flex flex-col gap-3 items-start text-left">
+          {!canProceedWithExistingKyc && (
+            <p className="text-sm text-amber-600 dark:text-amber-500 text-left">
+              All verifications (PAN, Name, DOB, Mobile, Email) must match your
+              profile to use existing KYC. Please choose Start Fresh KYC.
+            </p>
+          )}
+          <div className="flex flex-col sm:flex-row gap-3 items-start">
+            <Button
+              className="flex items-center gap-1 w-full sm:w-auto"
+              disabled={!confirmed || isPending || !canProceedWithExistingKyc}
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: "Confirm Use of Existing KYC",
+                  text: "You have chosen to proceed using the KYC details available in the KRA records. By continuing, you confirm that these details belong to you and are correct.",
+                  showCancelButton: true,
+                  confirmButtonText: "Continue",
+                  cancelButtonText: "Go Back",
+                  icon: "question",
+                });
+                if (result.isConfirmed) onUseExisting?.();
+              }}
+              id="use-existing-kyc-btn"
+            >
+              Use Existing KYC Details
+              <IoMdArrowDropright className="text-xl" />
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex items-center gap-1 w-full sm:w-auto "
+              disabled={!confirmed || isPending}
+              onClick={onStartFresh}
+              id="start-fresh-kyc-btn"
+            >
+              Start Fresh KYC
+              <IoMdArrowDropright className="text-xl" />
+            </Button>
+          </div>
         </CardFooter>
       )}
       {preview && (

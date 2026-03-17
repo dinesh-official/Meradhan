@@ -72,11 +72,40 @@ export class KraWorkerService {
         where: { id: kycDataStoreId, userID: customerId },
       });
 
+
+
       if (!payload) {
         return;
       }
 
       const kyc = payload.data as Root;
+
+      const isUsedKra = kyc.step_1.usedExistingKra;
+
+      if (isUsedKra) {
+        try {
+          await this.registerOnCbrics(customerId, kycDataStoreId);
+          return;
+        } catch (error) {
+          await db.dataBase.kraDataLogs.create({
+            data: {
+              requestData: {
+                customerId: customerId,
+              },
+              responseData: {
+                error: "CBRICS Registration Failed",
+                message: error?.toString(),
+              },
+              userId: customer.id,
+              kycId: kycDataStoreId,
+              stage: "FAILED_CBRICS_REGISTRATION",
+              reqTime: new Date().toISOString(),
+              resTime: new Date().toISOString(),
+            },
+          });
+          return;
+        }
+      }
 
       const res = await this.kraProcess.enquiry({
         kycdataId: kycDataStoreId,
@@ -169,52 +198,26 @@ export class KraWorkerService {
         if (isMatched) {
           await delay(5000);
           try {
-            try {
-              const cbUser =
-                await cbricsManager.registerParticipant(customerId);
-              await db.dataBase.customerProfileDataModel.update({
-                where: { id: customerId },
-                data: {
-                  kycStatus: "VERIFIED",
-                  kraStatus: "VERIFIED",
-                  verifyDate: new Date(),
+            await this.registerOnCbrics(customerId, kycDataStoreId);
+          } catch (error) {
+            await db.dataBase.kraDataLogs.create({
+              data: {
+                requestData: {
+                  customerId: customerId,
                 },
-              });
-              await db.dataBase.kraDataLogs.create({
-                data: {
-                  requestData: {
-                    customerId: customerId,
-                  },
-                  responseData: cbUser,
-                  userId: customer.id,
-                  kycId: kycDataStoreId,
-                  stage: "CBRICS_REGISTER_SUCCESS",
-                  reqTime: new Date().toISOString(),
-                  resTime: new Date().toISOString(),
+                responseData: {
+                  error: "CBRICS Registration Failed",
+                  message: error?.toString(),
                 },
-              });
-            } catch (error) {
-              const err = error as AxiosError;
-              await db.dataBase.customerProfileDataModel.update({
-                where: { id: customerId },
-                data: {
-                  kraStatus: "CBRICS PENDING",
-                },
-              });
-              await db.dataBase.kraDataLogs.create({
-                data: {
-                  requestData: {
-                    customerId: customerId,
-                  },
-                  responseData: err.response?.data || err.message,
-                  userId: customer.id,
-                  kycId: kycDataStoreId,
-                  stage: "KRA COMPLETED - ERROR_CBRICS_REGISTER",
-                  reqTime: new Date().toISOString(),
-                  resTime: new Date().toISOString(),
-                },
-              });
-            }
+                userId: customer.id,
+                kycId: kycDataStoreId,
+                stage: "FAILED_CBRICS_REGISTRATION",
+                reqTime: new Date().toISOString(),
+                resTime: new Date().toISOString(),
+              },
+            });
+          } try {
+            await this.registerOnCbrics(customerId, kycDataStoreId);
           } catch (error) {
             await db.dataBase.kraDataLogs.create({
               data: {
@@ -300,7 +303,56 @@ export class KraWorkerService {
       throw err;
     }
   }
+  async registerOnCbrics(customerId: number, kycDataStoreId: number) {
+    try {
+      const cbUser =
+        await cbricsManager.registerParticipant(customerId);
+      await db.dataBase.customerProfileDataModel.update({
+        where: { id: customerId },
+        data: {
+          kycStatus: "VERIFIED",
+          kraStatus: "VERIFIED",
+          verifyDate: new Date(),
+        },
+      });
+      await db.dataBase.kraDataLogs.create({
+        data: {
+          requestData: {
+            customerId: customerId,
+          },
+          responseData: cbUser,
+          userId: customerId,
+          kycId: kycDataStoreId,
+          stage: "CBRICS_REGISTER_SUCCESS",
+          reqTime: new Date().toISOString(),
+          resTime: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      const err = error as AxiosError;
+      await db.dataBase.customerProfileDataModel.update({
+        where: { id: customerId },
+        data: {
+          kraStatus: "CBRICS PENDING",
+        },
+      });
+      await db.dataBase.kraDataLogs.create({
+        data: {
+          requestData: {
+            customerId: customerId,
+          },
+          responseData: err.response?.data || err.message,
+          userId: customerId,
+          kycId: kycDataStoreId,
+          stage: "KRA COMPLETED - ERROR_CBRICS_REGISTER",
+          reqTime: new Date().toISOString(),
+          resTime: new Date().toISOString(),
+        },
+      });
+    }
+  }
 }
+
 
 type processPayload = {
   kycdataId: number;

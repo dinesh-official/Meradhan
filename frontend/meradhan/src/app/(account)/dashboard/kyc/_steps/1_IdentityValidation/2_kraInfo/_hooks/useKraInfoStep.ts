@@ -38,6 +38,35 @@ function kraGenderToStore(gen: string | null): string {
   return gen;
 }
 
+/** KRA occupation code → Personal Details form value (occupationType) */
+const KRA_OCC_TO_FORM: Record<string, string> = {
+  "01": "Public Sector",
+  "02": "Private Sector",
+  "03": "Business",
+  "04": "Agriculturist",
+  "05": "Retired",
+  "06": "Housewife",
+  "07": "Student",
+  "08": "Professional",
+  "09": "Government Sector",
+  "10": "Others",
+};
+
+/** KRA income code → Personal Details form value (annualGrossIncome) */
+const KRA_INCOME_TO_FORM: Record<string, string> = {
+  "01": "0-1L",
+  "02": "1-5L",
+  "03": "5-10L",
+  "04": "10-25L",
+  "05": "25L+",
+};
+
+/** KRA nationality code → Personal Details form value (nationality) */
+const KRA_NATIONALITY_TO_FORM: Record<string, string> = {
+  "01": "IN - Indian",
+  "02": "OTHER",
+};
+
 export function useKraInfoStep() {
   const {
     state,
@@ -60,12 +89,37 @@ export function useKraInfoStep() {
     const gender = kraGenderToStore(kra.appGen);
     if (gender) setGenderData(gender);
 
-    if (kra.appMarStatus) setStep2PersonalData("maritalStatus", kra.appMarStatus);
+    // KRA marital status: 01 = Married, 02 = Unmarried (per KRA spec)
+    if (kra.appMarStatus) {
+      const code = String(kra.appMarStatus).trim();
+      const maritalForForm =
+        code === "01" ? "MARRIED" : code === "02" ? "SINGLE" : kra.appMarStatus;
+      setStep2PersonalData("maritalStatus", maritalForForm);
+    }
     if (kra.appFName) setStep2PersonalData("fatSpuName", kra.appFName);
-    if (kra.appOcc) setStep2PersonalData("occupationType", kra.appOcc);
-    if (kra.appOthOcc) setStep2PersonalData("otherOccupationName", kra.appOthOcc ?? "");
-    if (kra.appIncome) setStep2PersonalData("annualGrossIncome", kra.appIncome);
-    if (kra.appNationality) setStep2PersonalData("nationality", kra.appNationality);
+    // Occupation: map KRA code to form value; fallback to "Others" with raw in otherOccupationName
+    if (kra.appOcc) {
+      const code = String(kra.appOcc).trim();
+      const formOcc = KRA_OCC_TO_FORM[code] ?? "Others";
+      setStep2PersonalData("occupationType", formOcc);
+      if (formOcc === "Others" && (kra.appOthOcc || code)) {
+        setStep2PersonalData("otherOccupationName", kra.appOthOcc?.trim() || code);
+      } else if (kra.appOthOcc) {
+        setStep2PersonalData("otherOccupationName", kra.appOthOcc.trim());
+      }
+    }
+    // Annual Gross Income: map KRA code to form value (0-1L, 1-5L, etc.)
+    if (kra.appIncome) {
+      const code = String(kra.appIncome).trim();
+      const formIncome = KRA_INCOME_TO_FORM[code] ?? kra.appIncome;
+      setStep2PersonalData("annualGrossIncome", formIncome);
+    }
+    // Nationality: map KRA code to form value (IN - Indian, OTHER)
+    if (kra.appNationality) {
+      const code = String(kra.appNationality).trim();
+      const formNationality = KRA_NATIONALITY_TO_FORM[code] ?? kra.appNationality;
+      setStep2PersonalData("nationality", formNationality);
+    }
   };
 
   const handleUseExisting = () => {

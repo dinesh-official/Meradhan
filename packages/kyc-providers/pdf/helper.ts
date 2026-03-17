@@ -147,24 +147,19 @@ export async function getFileUrlToBuffer(file: string) {
 
 export async function getFileDataUri(
   file: string,
-  mimeType: string = "image/png"
+  mimeType?: string
 ) {
   if (!file) return "";
 
-  const token = "meradhan24873284sadsrFAD";
-  const url =
-    env.NEXT_PUBLIC_BACKEND_HOST_URL +
-    "/files-public" +
-    file +
-    `?token=${token}`;
+  const url = getFileUrl(file);
 
   const response = await axios.get<ArrayBuffer>(url, {
     responseType: "arraybuffer",
   });
 
-  const detectedMime =
-    response.headers["content-type"]?.split(";")?.[0] || mimeType;
+  const detectedMime = mimeType || response.headers["content-type"]?.split(";")?.[0] || "image/png";
   const buffer = Buffer.from(response.data);
+
 
   return `data:${detectedMime};base64,${buffer.toString("base64")}`;
 }

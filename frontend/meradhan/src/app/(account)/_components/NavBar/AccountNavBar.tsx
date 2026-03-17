@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { userSessionStore } from "@/core/auth/userSessionStore";
+import { useMounted } from "@/hooks/useMounted";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
@@ -156,24 +157,30 @@ export function ShowUserBadge(
     lastName: string;
   } | null
 ) {
+  const mounted = useMounted();
+
+  const triggerButton = (
+    <button
+      className="flex items-center gap-1 bg-white rounded-full focus:outline-none cursor-pointer"
+      aria-label="Open user menu"
+    >
+      <Avatar>
+        <AvatarFallback aria-hidden="true">
+          {session?.firstName?.charAt(0)}
+          {session?.lastName?.charAt(0)}
+        </AvatarFallback>
+      </Avatar>
+      <IoIosArrowDown />
+    </button>
+  );
+
+  if (!mounted) {
+    return triggerButton;
+  }
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          className="flex items-center gap-1 bg-white rounded-full focus:outline-none cursor-pointer"
-          aria-label="Open user menu"
-        >
-          <Avatar>
-            {/* Add avatar image here if needed */}
-            {/* <AvatarImage src="https://github.com/shadcn.png" alt="User profile picture" /> */}
-            <AvatarFallback aria-hidden="true">
-              {session?.firstName.charAt(0)}
-              {session?.lastName.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <IoIosArrowDown />
-        </button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
 
       <DropdownMenuContent
         side="bottom"

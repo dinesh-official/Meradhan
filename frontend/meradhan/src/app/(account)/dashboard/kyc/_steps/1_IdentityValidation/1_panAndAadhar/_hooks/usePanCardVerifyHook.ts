@@ -39,7 +39,7 @@ export const usePanCardVerifyHook = (options?: { skipKraSteps?: boolean }) => {
   const panKycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
   );
-  const { state, nextLocalStep, setStep1PanData, incrementPanRetryCount } = useKycDataStorage();
+  const { state, nextLocalStep, setStepIndex, setStep1PanData, incrementPanRetryCount } = useKycDataStorage();
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
   const skipKraSteps = options?.skipKraSteps ?? false;
   const skipKraStepsRef = useRef(skipKraSteps);
@@ -74,9 +74,12 @@ export const usePanCardVerifyHook = (options?: { skipKraSteps?: boolean }) => {
           },
           entityType: "KYC",
         });
-        // its navigate to next step view pan info
-        nextLocalStep();
-        // update step
+        // Used Existing KRA: skip PAN info and Aadhaar steps, go to selfie (step 5)
+        if (state.step_1.usedExistingKra) {
+          setStepIndex(5);
+        } else {
+          nextLocalStep();
+        }
         pushUserKycState();
       }
     },
@@ -150,15 +153,21 @@ export const usePanCardVerifyHook = (options?: { skipKraSteps?: boolean }) => {
           },
         });
         setStep1PanData("fetchedTimestamp", new Date().toISOString());
-        Swal.fire({
-
-          title: "PAN verified successfully.",
-          text: "Please proceed to the next step.",
-        });
+        if (!state.step_1.usedExistingKra) {
+          Swal.fire({
+            icon: "success",
+            title: "PAN verified successfully.",
+            text: "Please proceed to the next step.",
+          });
+        }
 
         setTimeout(() => {
-          nextLocalStep();
-          if (skipKraStepsRef.current) nextLocalStep();
+          if (state.step_1.usedExistingKra) {
+            setStepIndex(5);
+          } else {
+            nextLocalStep();
+            if (skipKraStepsRef.current) nextLocalStep();
+          }
           pushUserKycState();
         }, 500);
 

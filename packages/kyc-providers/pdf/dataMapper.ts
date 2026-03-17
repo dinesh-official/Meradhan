@@ -15,6 +15,7 @@ import {
 
 export type Root = {
   step_1: {
+    usedExistingKra: boolean;
     pan: {
       isFatca: boolean;
       lastName: string;
@@ -247,11 +248,11 @@ export type Page5Props = {
 };
 
 export type Page6Props = {
-  eAaDhar: string;
+  eAaDhar?: string;
 };
 
 export type Page7Props = {
-  ePan: string;
+  ePan?: string;
 };
 
 export type Page8Props = {
@@ -544,7 +545,7 @@ export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => {
     const g = data.step_1.pan.response.details.aadhaar.gender;
     gender = g === "M" ? "MALE" : g === "F" ? "FEMALE" : "OTHER";
   }
-  const aadhaarNo = usedKra ? "KRA" : (data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "");
+  const aadhaarNo = usedKra ? "" : (data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "");
 
   return {
     applicationType: "NEW",
@@ -562,7 +563,7 @@ export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => {
     nationality: "INDIAN",
     residentialStatus: data.step_2?.residentialStatus || "",
     occupationType: data.step_2?.occupationType || "",
-    verifyWith: usedKra ? "AADHAAR" : "AADHAAR",
+    verifyWith: usedKra ? "OTHERS" : "AADHAAR",
     profilePic: await getFileDataUri(data.step_1?.face?.url || ""),
     signature: await getFileDataUri(data.step_1?.sign?.url || ""),
     kycNo: "MD" + (100 + (data?.user?.id || 0)),
@@ -617,8 +618,8 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
         sameAsPermanentAddress: isSameAddress,
         data: isSameAddress ? permanentAddress : currentAddressData,
       },
-      proofWith: "AADHAAR",
-      aadharNo: "KRA",
+      proofWith: usedKra ? "OTHERS" : "AADHAAR",
+      aadharNo: data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "",
     };
   }
 
@@ -676,7 +677,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
       sameAsPermanentAddress: isSameAddresss,
       data: isSameAddresss ? permanentAddress : currentAddress,
     },
-    proofWith: "AADHAAR",
+    proofWith: usedKra ? "OTHERS" : "AADHAAR",
     aadharNo: data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "",
   };
 };

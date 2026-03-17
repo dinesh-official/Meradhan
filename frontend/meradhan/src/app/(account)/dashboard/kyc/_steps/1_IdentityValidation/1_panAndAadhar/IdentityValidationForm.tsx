@@ -65,7 +65,6 @@ function IdentityValidationForm() {
     },
     onError: () => {
       setKraFailed(true);
-      toast.error("No existing KYC found. Starting normal KYC process.");
       // Start normal PAN verification process when KRA has no data
       handelPanVerificationRef.current?.();
     },
@@ -107,6 +106,12 @@ function IdentityValidationForm() {
       return;
     }
     setError(undefined);
+    // User already used KRA: do not trigger KRA again, use existing data and proceed
+    if (state.step_1.usedExistingKra && state.step_1.kraResponse) {
+      nextLocalStep();
+      pushUserKycState();
+      return;
+    }
     if (kraFailed) {
       handelPanVerification();
     } else {
@@ -237,7 +242,7 @@ function IdentityValidationForm() {
                 checked={data.checkTerms1}
                 onCheckedChange={(val) => setStep1PanData("checkTerms1", val)}
                 checkClass="text-white"
-                className="mt-0.5 border border-gray-200"
+                className="mt-0.5 border "
               />
               I hereby confirm that I am not a Politically Exposed Person (PEP)
               nor related to any PEP
@@ -252,7 +257,7 @@ function IdentityValidationForm() {
                 checked={data.checkTerms2}
                 onCheckedChange={(val) => setStep1PanData("checkTerms2", val)}
                 checkClass="text-white"
-                className="mt-0.5 border border-gray-200"
+                className="mt-0.5 border "
               />
               I hereby confirm that I am not a person and/or entity debarred
               from accessing the securities market or dealing in securities, as
@@ -271,7 +276,7 @@ function IdentityValidationForm() {
                 checked={data.isFatca}
                 onCheckedChange={(val) => setStep1PanData("isFatca", val)}
                 checkClass="text-white"
-                className="mt-0.5 border border-gray-200"
+                className="mt-0.5 border "
               />
               I confirm that I am an Indian citizen and solely a tax resident of
               India, not of any other country (FATCA)
@@ -324,11 +329,11 @@ function IdentityValidationForm() {
       </CardContent>
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
-        {kraFailed && (
+        {/* {kraFailed && (
           <p className="text-muted-foreground text-sm w-full sm:w-auto">
             No existing KYC found. You can proceed to PAN verification below.
           </p>
-        )}
+        )} */}
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handleContinueOrPanVerify}

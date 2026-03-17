@@ -15,6 +15,7 @@ export type ISignInRequestResponse = BaseResponseData<{
   id: number;
   firstName: string;
   lastName: string;
+  token: string;
 }>;
 
 export type ISignInSendOtpResponse = BaseResponseData<{
@@ -37,6 +38,8 @@ export type ISessionResponse = BaseResponseData<{
   middleName: string;
   lastName: string;
   kycStatus: string;
+  /** KRA verification status when KRA exists for the user (e.g. VERIFIED, PENDING, DOWNLOAD_KRA). */
+  kraStatus?: string | null;
   isRekycUnderReview?: boolean;
   /** True when user has any KYC flow with markExpired (rekyc flow). */
   hasRekycExpiredFlow?: boolean;

@@ -580,6 +580,7 @@ export class CustomerKycKycService {
           isPANMatch,
           isMobileMatch,
           isEmailMatch,
+          rawXml: JSON.stringify(kraDetails),
         },
       });
 
@@ -615,8 +616,8 @@ export class CustomerKycKycService {
   }
 
   /**
-   * Mock KRA verify request: creates a KraDownloadResponse with same shape as real flow,
-   * using current user data + pan/dob. No external KRA SDK calls. For testing/dev.
+   * Mock KRA verify request: creates KraDownloadResponse + KraAppSummRec + KraFatcaAddlDtls
+   * using sample APP_RES_ROOT structure so DB matches real API response (same codes/values).
    */
   async createKraVerifyRequestMock(
     userId: number,
@@ -632,111 +633,298 @@ export class CustomerKycKycService {
       });
     }
 
-    const mockName = [user.firstName, user.middleName, user.lastName]
-      .filter(Boolean)
-      .join(" ")
-      .toUpperCase();
-    const mockPan = pan.replace(/[- ]/g, "").toUpperCase();
-    const mockDob = dob.trim();
-    const mockMobile = (user.phoneNo ?? "").replace(/\D/g, "");
-    const mockEmail = (user.emailAddress ?? "").trim().toLowerCase();
+    const mockPan = pan.replace(/[- ]/g, "").toUpperCase() || "DUMPA0032D";
+    const mockDob = dob.trim() || "29/10/1999";
+    const mockMobile = (user.phoneNo ?? "").replace(/\D/g, "") || "7038984595";
+    const mockEmail = (user.emailAddress ?? "").trim().toLowerCase() || "ganeshvijayavchar8793@gmail.com";
 
-    // Deterministic but varied mock data from userId for reproducible tests
-    const seed = (userId * 31 + (mockPan?.length ?? 0)) % 4;
-    const mockAddresses = [
-      {
-        cor1: "C O SURENDER PAL KUKREJA HOUSE NO 4",
-        cor2: "7 GADARPUR OPPOSITE OLD WATER TANK",
-        cor3: "SHIV MANDIR WARD GADARPUR POST OFF",
-        city: "GADARPURA",
-        state: "Uttarakhand",
-        pincd: "263152",
-        fName: "SURENDER PAL KUKREJA",
+    // APP_PAN_INQ – same structure and codes as real KRA response (DB stores response as-is)
+    const p = {
+      APP_NO: "FV7321",
+      APP_GEN: user.gender === "MALE" ? "M" : user.gender === "FEMALE" ? "F" : "M",
+      APP_OCC: "08",
+      APP_DATE: "13/11/2020",
+      APP_EXMT: "N",
+      APP_NAME: "SOURAV BAPARI",
+      APP_TYPE: "I",
+      APP_EMAIL: mockEmail,
+      APP_REGNO: "",
+      APP_DNLDDT: "14/03/2026 01:19:58",
+      APP_DOB_DT: mockDob,
+      APP_DOI_DT: "",
+      APP_FAX_NO: "",
+      APP_F_NAME: "VIJAY AVACHAR",
+      APP_INCOME: "01",
+      APP_MOB_NO: mockMobile,
+      APP_OFF_NO: "",
+      APP_PAN_NO: mockPan,
+      APP_RES_NO: "",
+      APP_STATUS: "07",
+      APP_UID_NO: "N",
+      APP_FILLER1: "",
+      APP_FILLER2: "",
+      APP_FILLER3: "",
+      APP_IOP_FLG: "II",
+      APP_NETWRTH: "",
+      APP_OTH_OCC: "",
+      APP_REMARKS: "",
+      APP_COR_ADD1: "N 41 A F 3 4 1 4TH SCHEME",
+      APP_COR_ADD2: "CIDCO NASHIK",
+      APP_COR_ADD3: "",
+      APP_COR_CITY: "NASHIK",
+      APP_COR_CTRY: "101",
+      APP_EXMT_CAT: "",
+      APP_IPV_DATE: "13/11/2020",
+      APP_IPV_FLAG: "Y",
+      APP_KRA_INFO: "CVLKRA",
+      APP_KYC_MODE: "0",
+      APP_PANEX_NO: "",
+      APP_PAN_COPY: "Y",
+      APP_PER_ADD1: "N 41 A F 3 4 1 4TH SCHEME",
+      APP_PER_ADD2: "CIDCO NASHIK",
+      APP_PER_ADD3: "",
+      APP_PER_CITY: "NASHIK",
+      APP_PER_CTRY: "101",
+      APP_POL_CONN: "NA",
+      APP_POS_CODE: env.KRA_OKRA_CD_MI_ID ?? "B0954",
+      APP_STATUSDT: "13/09/2023 17:42:03",
+      APP_COR_PINCD: "422009",
+      APP_COR_STATE: "027",
+      APP_DOC_PROOF: "S",
+      APP_DUMP_TYPE: "S",
+      APP_OTHERINFO: "FATCA DETAILS RECEIVED - BATCH",
+      APP_PER_PINCD: "422009",
+      APP_PER_STATE: "027",
+      APP_SIGNATURE: "",
+      APP_COR_ADD_DT: "01/01/1900",
+      APP_ERROR_DESC: "ERR-00000",
+      APP_INCORP_PLC: "",
+      APP_MAR_STATUS: "02",
+      APP_PER_ADD_DT: "01/01/1900",
+      APP_RES_STATUS: "R",
+      APP_BRANCH_CODE: "HEADOFFICE",
+      APP_COMMENCE_DT: "01/01/1900",
+      APP_COMP_STATUS: "",
+      APP_COR_ADD_REF: "",
+      APP_NATIONALITY: "01",
+      APP_NETWORTH_DT: "01/01/1900",
+      APP_PER_ADD_REF: "",
+      APP_INTERNAL_REF: "WEBSOLICIT",
+      APP_COR_ADD_PROOF: "31",
+      APP_EXMT_ID_PROOF: "01",
+      APP_PER_ADD_PROOF: "31",
+      APP_OTH_COMP_STATUS: "",
+      APP_OTH_NATIONALITY: "",
+      APP_RES_STATUS_PROOF: "",
+      APP_FATCA_BIRTH_PLACE: "",
+      APP_FATCA_COUNTRY_RES: "",
+      APP_FATCA_BIRTH_COUNTRY: "",
+      APP_FATCA_APPLICABLE_FLAG: "N",
+      APP_FATCA_DATE_DECLARATION: "13/09/2021",
+      APP_FATCA_COUNTRY_CITYZENSHIP: "",
+    };
+
+    const normalizeForCompare = (s: string | null | undefined) =>
+      (s ?? "").toString().trim().toUpperCase().replace(/\s+/g, " ");
+    const normalizePan = (s: string | null | undefined) =>
+      (s ?? "").toString().replace(/[- ]/g, "").toUpperCase();
+    const normalizeMobile = (s: string | null | undefined) =>
+      (s ?? "").toString().replace(/\D/g, "");
+    const normalizeDob = (raw: string | null | undefined) => {
+      const s = (raw ?? "").toString().trim();
+      if (!s) return "";
+      const d = s.split(/[-/]/);
+      if (d.length >= 3) {
+        const day = (d[0] ?? "").padStart(2, "0");
+        const month = (d[1] ?? "").padStart(2, "0");
+        const year = (d[2] ?? "").length === 2 ? `20${d[2]}` : (d[2] ?? "");
+        return `${day}-${month}-${year}`;
+      }
+      return s;
+    };
+    const userFullName = normalizeForCompare(
+      [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ")
+    );
+    const kraName = normalizeForCompare(p.APP_NAME);
+    const isNameMatch =
+      kraName.length > 0 &&
+      userFullName.length > 0 &&
+      (kraName.includes(userFullName) ||
+        userFullName.split(" ").every((part) => part.length < 2 || kraName.includes(part)));
+    const kraDob = normalizeDob(p.APP_DOB_DT);
+    const userDob = normalizeDob(dob);
+    const isDOBMatch = kraDob.length > 0 && userDob.length > 0 && kraDob === userDob;
+    const kraPan = normalizePan(p.APP_PAN_NO);
+    const userPan = normalizePan(pan);
+    const isPANMatch = kraPan.length > 0 && userPan.length > 0 && kraPan === userPan;
+    const kraMobile = normalizeMobile(p.APP_MOB_NO);
+    const userMobile = normalizeMobile(user.phoneNo);
+    const isMobileMatch =
+      kraMobile.length > 0 && userMobile.length > 0 && kraMobile === userMobile;
+    const kraEmail = (p.APP_EMAIL ?? "").trim().toLowerCase();
+    const userEmail = (user.emailAddress ?? "").trim().toLowerCase();
+    console.log(kraEmail, userEmail);
+    const isEmailMatch = kraEmail.length > 0 && userEmail.length > 0 && kraEmail === userEmail;
+
+    // APP_SUMM_REC – same as response
+    const summ = {
+      APP_REQ_DATE: "14-03-2026 01:19:58",
+      APP_TOTAL_REC: "1",
+      APP_OTHKRA_CODE: "B0954",
+      APP_OTHKRA_BATCH: "423118902",
+      APP_RESPONSE_DATE: "14-03-2026 01:19:58",
+      NO_OF_FATCA_ADDL_DTLS_RECORDS: "0",
+    };
+    const summRec = await db.dataBase.kraAppSummRec.create({
+      data: {
+        appReqDate: summ.APP_REQ_DATE ?? undefined,
+        appOthkraBatch: summ.APP_OTHKRA_BATCH ?? undefined,
+        appOthkraCode: summ.APP_OTHKRA_CODE ?? undefined,
+        appResponseDate: summ.APP_RESPONSE_DATE ?? undefined,
+        appTotalRec: summ.APP_TOTAL_REC != null ? parseInt(summ.APP_TOTAL_REC, 10) : undefined,
+        noOfFatcaAddlDtlsRecords:
+          summ.NO_OF_FATCA_ADDL_DTLS_RECORDS != null
+            ? parseInt(summ.NO_OF_FATCA_ADDL_DTLS_RECORDS, 10)
+            : undefined,
       },
-      {
-        cor1: "FLAT 302 BLOCK B GREEN VALLEY APTS",
-        cor2: "SECTOR 18 NEAR CITY MALL",
-        cor3: "DWARKA",
-        city: "New Delhi",
-        state: "Delhi",
-        pincd: "110078",
-        fName: "RAMESH KUMAR",
-      },
-      {
-        cor1: "NO 45 2ND CROSS MG ROAD",
-        cor2: "BANGALORE URBAN",
-        cor3: "KARNATAKA",
-        city: "Bengaluru",
-        state: "Karnataka",
-        pincd: "560001",
-        fName: "SURESH REDDY",
-      },
-      {
-        cor1: "PLOT 12 SAI NAGAR ANDHERI EAST",
-        cor2: "NEAR STATION ROAD",
-        cor3: "MUMBAI",
-        city: "Mumbai",
-        state: "Maharashtra",
-        pincd: "400069",
-        fName: "VIJAY SHARMA",
-      },
-    ];
-    const addr = mockAddresses[Math.min(seed, mockAddresses.length - 1)]!;
-    const occupations = ["Private Service", "Business", "Government Service", "Professional"];
-    const incomes = ["2 Lakh - 5 Lakh", "5 Lakh - 10 Lakh", "10 Lakh - 25 Lakh", "Above 25 Lakh"];
-    const marStatuses = ["Single", "Married", "Married", "Married"];
+    });
 
     const kraRecord = await db.dataBase.kraDownloadResponse.create({
       data: {
-        appPanNo: mockPan,
-        appDobDt: mockDob,
-        appName: mockName,
-        appEmail: user.emailAddress ?? undefined,
-        appMobNo: user.phoneNo ?? undefined,
-        appBranchCode: "MOCK",
-        appStatus: "01",
-        appStatusdt: new Date().toISOString().split("T")[0],
-        appType: "I",
-        appKycMode: "5",
-        appIopFlg: "IE",
-        appPosCode: env.KRA_OKRA_CD_MI_ID ?? "MOCK",
-        appDate: new Date().toISOString().split("T")[0],
-        appPanCopy: "Y",
-        appExmt: "N",
-        appIpvFlag: "Y",
-        appGen: user.gender === "MALE" ? "M" : user.gender === "FEMALE" ? "F" : "O",
-        appFName: addr.fName,
-        appRegno: "",
-        appDoiDt: "NA",
-        appCommenceDt: "NA",
-        appNationality: "Indian",
-        appResStatus: "R",
-        appCorAdd1: addr.cor1,
-        appCorAdd2: addr.cor2,
-        appCorAdd3: addr.cor3,
-        appCorCity: addr.city,
-        appCorPincd: addr.pincd,
-        appCorState: addr.state,
-        appCorCtry: "101",
-        appPerAdd1: addr.cor1,
-        appPerAdd2: addr.cor2,
-        appPerAdd3: addr.cor3,
-        appPerCity: addr.city,
-        appPerPincd: addr.pincd,
-        appPerState: addr.state,
-        appPerCtry: "101",
-        appOcc: occupations[seed] ?? "Private Service",
-        appIncome: incomes[seed] ?? "5 Lakh - 10 Lakh",
-        appMarStatus: marStatuses[seed] ?? "Married",
-        appDumpType: "MOCK",
-        appDnlddt: new Date().toISOString().split("T")[0],
-        isNameMatch: true,
-        isDOBMatch: true,
-        isPANMatch: true,
-        isMobileMatch: mockMobile.length > 0,
-        isEmailMatch: mockEmail.length > 0,
+        appIopFlg: p.APP_IOP_FLG,
+        appPosCode: p.APP_POS_CODE,
+        appType: p.APP_TYPE,
+        appKycMode: p.APP_KYC_MODE,
+        appNo: p.APP_NO,
+        appDate: p.APP_DATE,
+        appPanNo: p.APP_PAN_NO,
+        appPanexNo: p.APP_PANEX_NO,
+        appPanCopy: p.APP_PAN_COPY,
+        appExmt: p.APP_EXMT,
+        appExmtCat: p.APP_EXMT_CAT,
+        appExmtIdProof: p.APP_EXMT_ID_PROOF,
+        appIpvFlag: p.APP_IPV_FLAG,
+        appIpvDate: p.APP_IPV_DATE,
+        appGen: p.APP_GEN,
+        appName: p.APP_NAME,
+        appFName: p.APP_F_NAME,
+        appRegno: p.APP_REGNO,
+        appDobDt: p.APP_DOB_DT,
+        appDoiDt: p.APP_DOI_DT,
+        appCommenceDt: p.APP_COMMENCE_DT,
+        appNationality: p.APP_NATIONALITY,
+        appOthNationality: p.APP_OTH_NATIONALITY,
+        appCompStatus: p.APP_COMP_STATUS,
+        appOthCompStatus: p.APP_OTH_COMP_STATUS,
+        appResStatus: p.APP_RES_STATUS,
+        appResStatusProof: p.APP_RES_STATUS_PROOF,
+        appUidNo: p.APP_UID_NO,
+        appCorAdd1: p.APP_COR_ADD1,
+        appCorAdd2: p.APP_COR_ADD2,
+        appCorAdd3: p.APP_COR_ADD3,
+        appCorCity: p.APP_COR_CITY,
+        appCorPincd: p.APP_COR_PINCD,
+        appCorState: p.APP_COR_STATE,
+        appCorCtry: p.APP_COR_CTRY,
+        appOffNo: p.APP_OFF_NO,
+        appResNo: p.APP_RES_NO,
+        appMobNo: p.APP_MOB_NO,
+        appFaxNo: p.APP_FAX_NO,
+        appEmail: p.APP_EMAIL,
+        appCorAddProof: p.APP_COR_ADD_PROOF,
+        appCorAddRef: p.APP_COR_ADD_REF,
+        appCorAddDt: p.APP_COR_ADD_DT,
+        appPerAdd1: p.APP_PER_ADD1,
+        appPerAdd2: p.APP_PER_ADD2,
+        appPerAdd3: p.APP_PER_ADD3,
+        appPerCity: p.APP_PER_CITY,
+        appPerPincd: p.APP_PER_PINCD,
+        appPerState: p.APP_PER_STATE,
+        appPerCtry: p.APP_PER_CTRY,
+        appPerAddProof: p.APP_PER_ADD_PROOF,
+        appPerAddRef: p.APP_PER_ADD_REF,
+        appPerAddDt: p.APP_PER_ADD_DT,
+        appIncome: p.APP_INCOME,
+        appOcc: p.APP_OCC,
+        appOthOcc: p.APP_OTH_OCC,
+        appPolConn: p.APP_POL_CONN,
+        appDocProof: p.APP_DOC_PROOF,
+        appInternalRef: p.APP_INTERNAL_REF,
+        appBranchCode: p.APP_BRANCH_CODE,
+        appMarStatus: p.APP_MAR_STATUS,
+        appNetWrth: p.APP_NETWRTH,
+        appNetWorthDt: p.APP_NETWORTH_DT,
+        appIncorpPlc: p.APP_INCORP_PLC,
+        appOtherinfo: p.APP_OTHERINFO,
+        appFiller1: p.APP_FILLER1,
+        appFiller2: p.APP_FILLER2,
+        appFiller3: p.APP_FILLER3,
+        appRemarks: p.APP_REMARKS,
+        appStatus: p.APP_STATUS,
+        appStatusdt: p.APP_STATUSDT,
+        appErrorDesc: p.APP_ERROR_DESC,
+        appDumpType: p.APP_DUMP_TYPE,
+        appDnlddt: p.APP_DNLDDT,
+        appKraInfo: p.APP_KRA_INFO,
+        appSignature: p.APP_SIGNATURE,
+        appFatcaApplicableFlag: p.APP_FATCA_APPLICABLE_FLAG,
+        appFatcaBirthPlace: p.APP_FATCA_BIRTH_PLACE,
+        appFatcaBirthCountry: p.APP_FATCA_BIRTH_COUNTRY,
+        appFatcaCountryRes: p.APP_FATCA_COUNTRY_RES,
+        appFatcaCountryCityzenship: p.APP_FATCA_COUNTRY_CITYZENSHIP,
+        appFatcaDateDeclaration: p.APP_FATCA_DATE_DECLARATION,
+        appSummRecId: summRec.id,
+        isNameMatch,
+        isDOBMatch,
+        isPANMatch,
+        isMobileMatch,
+        isEmailMatch,
+        rawXml: JSON.stringify(p),
       },
     });
+
+    const fatcaList = [
+      {
+        APP_FATCA_ENTITY_PAN: "",
+        APP_FATCA_TAX_EXEMPT_FLAG: "",
+        APP_FATCA_COUNTRY_RESIDENCY: "",
+        APP_FATCA_TAX_EXEMPT_REASON: "",
+        APP_FATCA_TAX_IDENTIFICATION_NO: "",
+      },
+      {
+        APP_FATCA_ENTITY_PAN: "",
+        APP_FATCA_TAX_EXEMPT_FLAG: "",
+        APP_FATCA_COUNTRY_RESIDENCY: "",
+        APP_FATCA_TAX_EXEMPT_REASON: "",
+        APP_FATCA_TAX_IDENTIFICATION_NO: "",
+      },
+      {
+        APP_FATCA_ENTITY_PAN: "",
+        APP_FATCA_TAX_EXEMPT_FLAG: "",
+        APP_FATCA_COUNTRY_RESIDENCY: "",
+        APP_FATCA_TAX_EXEMPT_REASON: "",
+        APP_FATCA_TAX_IDENTIFICATION_NO: "",
+      },
+      {
+        APP_FATCA_ENTITY_PAN: "",
+        APP_FATCA_TAX_EXEMPT_FLAG: "",
+        APP_FATCA_COUNTRY_RESIDENCY: "",
+        APP_FATCA_TAX_EXEMPT_REASON: "",
+        APP_FATCA_TAX_IDENTIFICATION_NO: "",
+      },
+    ];
+    if (fatcaList.length > 0 && kraRecord.id) {
+      await db.dataBase.kraFatcaAddlDtls.createMany({
+        data: fatcaList.map((f) => ({
+          kraDownloadResponseId: kraRecord.id,
+          appFatcaEntityPan: f.APP_FATCA_ENTITY_PAN,
+          appFatcaCountryResidency: f.APP_FATCA_COUNTRY_RESIDENCY,
+          appFatcaTaxIdentificationNo: f.APP_FATCA_TAX_IDENTIFICATION_NO,
+          appFatcaTaxExemptFlag: f.APP_FATCA_TAX_EXEMPT_FLAG,
+          appFatcaTaxExemptReason: f.APP_FATCA_TAX_EXEMPT_REASON,
+        })),
+      });
+    }
 
     return kraRecord;
   }
