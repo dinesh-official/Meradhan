@@ -6,7 +6,7 @@ import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import { ZodError } from "zod";
@@ -31,7 +31,7 @@ function getPanErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-export const usePanCardVerifyHook = () => {
+export const usePanCardVerifyHook = (options?: { skipKraSteps?: boolean }) => {
   const [error, setError] =
     useState<
       Partial<Record<keyof KycDataStorage["step_1"]["pan"], string[]>>
@@ -39,8 +39,11 @@ export const usePanCardVerifyHook = () => {
   const panKycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller
   );
-  const { state, nextLocalStep, setStep1PanData, incrementPanRetryCount } = useKycDataStorage();
+  const { state, nextLocalStep, setStepIndex, setStep1PanData, incrementPanRetryCount } = useKycDataStorage();
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
+  const skipKraSteps = options?.skipKraSteps ?? false;
+  const skipKraStepsRef = useRef(skipKraSteps);
+  skipKraStepsRef.current = skipKraSteps;
 
 
   const verifyPanCardInfoMutation = useMutation({
@@ -71,9 +74,12 @@ export const usePanCardVerifyHook = () => {
           },
           entityType: "KYC",
         });
-        // its navigate to next step view pan info
-        nextLocalStep();
-        // update step
+        // Used Existing KRA: skip PAN info and Aadhaar steps, go to selfie (step 5)
+        if (state.step_1.usedExistingKra) {
+          setStepIndex(5);
+        } else {
+          nextLocalStep();
+        }
         pushUserKycState();
       }
     },
@@ -147,16 +153,21 @@ export const usePanCardVerifyHook = () => {
           },
         });
         setStep1PanData("fetchedTimestamp", new Date().toISOString());
-        Swal.fire({
-
-          title: "PAN verified successfully.",
-          text: "Please proceed to the next step.",
-        });
+        if (!state.step_1.usedExistingKra) {
+          Swal.fire({
+            icon: "success",
+            title: "PAN verified successfully.",
+            text: "Please proceed to the next step.",
+          });
+        }
 
         setTimeout(() => {
-          // its navigate to next step view pan info
-          nextLocalStep();
-          // update step
+          if (state.step_1.usedExistingKra) {
+            setStepIndex(5);
+          } else {
+            nextLocalStep();
+            if (skipKraStepsRef.current) nextLocalStep();
+          }
           pushUserKycState();
         }, 500);
 
@@ -249,5 +260,6 @@ export const usePanCardVerifyHook = () => {
       verifyPanCardInfoMutation.isPending,
     handelPanVerification,
     error,
+    setError,
   };
 };

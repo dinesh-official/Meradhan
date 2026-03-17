@@ -6,6 +6,7 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useMounted } from "@/hooks/useMounted";
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import { accountMenuItems } from "./ActionSideBar";
@@ -14,6 +15,19 @@ import Link from "next/link";
 import { memo } from "react";
 
 function MobSideBar() {
+  const mounted = useMounted();
+
+  if (!mounted) {
+    return (
+      <div
+        className="lg:hidden hover:bg-gray-100 p-2 rounded-md transition cursor-pointer inline-flex items-center justify-center"
+        aria-hidden
+      >
+        <Menu className="" />
+      </div>
+    );
+  }
+
   return (
     <Sheet>
       {/* Trigger Button (Visible only on Mobile) */}

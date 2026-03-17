@@ -15,6 +15,7 @@ import {
 
 export type Root = {
   step_1: {
+    usedExistingKra: boolean;
     pan: {
       isFatca: boolean;
       lastName: string;
@@ -247,11 +248,11 @@ export type Page5Props = {
 };
 
 export type Page6Props = {
-  eAaDhar: string;
+  eAaDhar?: string;
 };
 
 export type Page7Props = {
-  ePan: string;
+  ePan?: string;
 };
 
 export type Page8Props = {
@@ -444,7 +445,39 @@ const getFirstLastName = (data: Root) => ({
   lastName: data.step_1?.pan?.lastName || "",
 });
 
+/** KRA response shape when user chose Use Existing KYC (optional on step_1) */
+type KraResponseInData = {
+  appGen?: string | null;
+  appCorAdd1?: string | null;
+  appCorAdd2?: string | null;
+  appCorAdd3?: string | null;
+  appCorCity?: string | null;
+  appCorState?: string | null;
+  appCorPincd?: string | null;
+  appPerAdd1?: string | null;
+  appPerAdd2?: string | null;
+  appPerAdd3?: string | null;
+  appPerCity?: string | null;
+  appPerState?: string | null;
+  appPerPincd?: string | null;
+};
+
 const getAddress = (data: Root) => {
+  const step1 = data.step_1 as { usedExistingKra?: boolean; kraResponse?: KraResponseInData } | undefined;
+  const usedKra = step1?.usedExistingKra && step1?.kraResponse;
+
+  if (usedKra && step1.kraResponse) {
+    const k = step1.kraResponse;
+    const full = [k.appCorAdd1, k.appCorAdd2, k.appCorAdd3, k.appCorCity, k.appCorState, k.appCorPincd].filter(Boolean).join(", ");
+    return {
+      full: full || "",
+      city: k.appCorCity || "",
+      state: k.appCorState || "",
+      pincode: k.appCorPincd || "",
+      combined: `${k.appCorCity || ""} ${k.appCorState || ""} ${k.appCorPincd || ""}`.trim(),
+    };
+  }
+
   const address =
     data.step_1?.pan?.response?.details?.aadhaar?.current_address_details;
   return {
@@ -502,35 +535,94 @@ const getPrimaryDemat = (data: Root) => {
 // PAGE MAPPERS
 // ============================================
 
-export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => ({
-  applicationType: "NEW",
-  kycType: "NORMAL",
-  kycMode: "ONLINE",
-  panNo: data.step_1?.pan?.panCardNo || "",
-  name: getFullName(data),
-  maidanName: data.step_1?.pan?.middleName || "",
-  fatherSpouseName: data.step_2?.fatSpuName || "",
-  motherName: data.step_2?.motherName || "",
-  dateOfBirth: data.step_1?.pan?.dateOfBirth || "",
-  gender:
-    data.step_1?.pan?.response?.details?.aadhaar.gender === "M"
-      ? "MALE"
-      : data.step_1?.pan?.response?.details?.aadhaar.gender === "F"
-        ? "FEMALE"
-        : "OTHER",
-  maritalStatus:
-    (data.step_2?.maritalStatus as "SINGLE" | "MARRIED" | "OTHERS") || "SINGLE",
-  nationality: "INDIAN",
-  residentialStatus: data.step_2?.residentialStatus || "",
-  occupationType: data.step_2?.occupationType || "",
-  verifyWith: "AADHAAR",
-  profilePic: await getFileDataUri(data.step_1?.face?.url || ""),
-  signature: await getFileDataUri(data.step_1?.sign?.url || ""),
-  kycNo: "MD" + (100 + (data?.user?.id || 0)),
-  aadhaarNo: data.step_1.pan.response.details.aadhaar.id_number,
-});
+export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => {
+  const step1 = data.step_1 as { usedExistingKra?: boolean; kraResponse?: KraResponseInData } | undefined;
+  const usedKra = step1?.usedExistingKra && step1?.kraResponse;
+  let gender: "MALE" | "FEMALE" | "OTHER" = "OTHER";
+  if (usedKra && step1.kraResponse?.appGen) {
+    gender = step1.kraResponse.appGen === "M" ? "MALE" : step1.kraResponse.appGen === "F" ? "FEMALE" : "OTHER";
+  } else if (data.step_1?.pan?.response?.details?.aadhaar?.gender) {
+    const g = data.step_1.pan.response.details.aadhaar.gender;
+    gender = g === "M" ? "MALE" : g === "F" ? "FEMALE" : "OTHER";
+  }
+  const aadhaarNo = usedKra ? "" : (data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "");
+
+  return {
+    applicationType: "NEW",
+    kycType: "NORMAL",
+    kycMode: "ONLINE",
+    panNo: data.step_1?.pan?.panCardNo || "",
+    name: getFullName(data),
+    maidanName: data.step_1?.pan?.middleName || "",
+    fatherSpouseName: data.step_2?.fatSpuName || "",
+    motherName: data.step_2?.motherName || "",
+    dateOfBirth: data.step_1?.pan?.dateOfBirth || "",
+    gender,
+    maritalStatus:
+      (data.step_2?.maritalStatus as "SINGLE" | "MARRIED" | "OTHERS") || "SINGLE",
+    nationality: "INDIAN",
+    residentialStatus: data.step_2?.residentialStatus || "",
+    occupationType: data.step_2?.occupationType || "",
+    verifyWith: usedKra ? "OTHERS" : "AADHAAR",
+    profilePic: await getFileDataUri(data.step_1?.face?.url || ""),
+    signature: await getFileDataUri(data.step_1?.sign?.url || ""),
+    kycNo: "MD" + (100 + (data?.user?.id || 0)),
+    aadhaarNo,
+  };
+};
 
 export const mapDataForPage2 = (data: Root): Page2Props => {
+  const step1 = data.step_1 as { usedExistingKra?: boolean; kraResponse?: KraResponseInData } | undefined;
+  const usedKra = step1?.usedExistingKra && step1?.kraResponse;
+
+  if (usedKra && step1.kraResponse) {
+    const k = step1.kraResponse;
+    const perLine1 = k.appPerAdd1 || "";
+    const perLine2 = k.appPerAdd2 || "";
+    const perLine3 = k.appPerAdd3 || "";
+    const corLine1 = k.appCorAdd1 || "";
+    const corLine2 = k.appCorAdd2 || "";
+    const corLine3 = k.appCorAdd3 || "";
+    const permanentAddress: AddressType = {
+      addressType: "RESIDENTIAL",
+      addressLine1: perLine1,
+      addressLine2: perLine2,
+      addressLine3: perLine3,
+      city: k.appPerCity || "",
+      state: k.appPerState || "",
+      district: k.appPerCity || "",
+      pincode: k.appPerPincd || "",
+      country: "India",
+      postOffice: k.appPerCity || "",
+      stateUTCode: getStateSortCode(k.appPerState || "") || "N/A",
+    };
+    const isSameAddress =
+      perLine1 === corLine1 && perLine2 === corLine2 && perLine3 === corLine3 &&
+      k.appPerCity === k.appCorCity && k.appPerPincd === k.appCorPincd && k.appPerState === k.appCorState;
+    const currentAddressData: AddressType = {
+      addressType: "RESIDENTIAL",
+      addressLine1: corLine1,
+      addressLine2: corLine2,
+      addressLine3: corLine3,
+      city: k.appCorCity || "",
+      state: k.appCorState || "",
+      district: k.appCorCity || "",
+      pincode: k.appCorPincd || "",
+      country: "India",
+      postOffice: k.appCorCity || "",
+      stateUTCode: getStateSortCode(k.appCorState || "") || "N/A",
+    };
+    return {
+      permanentAddress,
+      currentAddress: {
+        sameAsPermanentAddress: isSameAddress,
+        data: isSameAddress ? permanentAddress : currentAddressData,
+      },
+      proofWith: usedKra ? "OTHERS" : "AADHAAR",
+      aadharNo: data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "",
+    };
+  }
+
   const current_address =
     data.step_1?.pan?.response?.details?.aadhaar?.current_address_details;
 
@@ -538,13 +630,13 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
     data.step_1?.pan?.response?.details?.aadhaar?.permanent_address_details;
 
   const perAddress = splitAddressInto3BalancedLines(
-    removeLastCommaChunks(permanent_address.address, 3),
+    removeLastCommaChunks(permanent_address?.address ?? "", 3),
   );
 
-  const perAddresBrake = permanent_address.address?.split(",") || [];
+  const perAddresBrake = permanent_address?.address?.split(",") || [];
   const perCityName = perAddresBrake?.[perAddresBrake.length - 5];
 
-  const isSameAddresss = current_address.address == permanent_address.address;
+  const isSameAddresss = current_address?.address === permanent_address?.address;
 
   const permanentAddress: AddressType = {
     addressType: "RESIDENTIAL",
@@ -557,13 +649,13 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
     pincode: permanent_address?.pincode || "",
     country: "India",
     postOffice: permanent_address?.locality_or_post_office || "",
-    stateUTCode: getStateSortCode(permanent_address.state) || "N/A",
+    stateUTCode: getStateSortCode(permanent_address?.state ?? "") || "N/A",
   };
 
   const curAddress = splitAddressInto3BalancedLines(
-    removeLastCommaChunks(current_address.address, 3),
+    removeLastCommaChunks(current_address?.address ?? "", 3),
   );
-  const curAddresBrake = current_address.address?.split(",") || [];
+  const curAddresBrake = current_address?.address?.split(",") || [];
   const curCityName = curAddresBrake?.[curAddresBrake.length - 5];
   const currentAddress: AddressType = {
     addressType: "RESIDENTIAL",
@@ -576,7 +668,7 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
     pincode: current_address?.pincode || "",
     country: "India",
     postOffice: current_address?.locality_or_post_office || "",
-    stateUTCode: getStateSortCode(current_address.state) || "N/A",
+    stateUTCode: getStateSortCode(current_address?.state ?? "") || "N/A",
   };
 
   return {
@@ -585,8 +677,8 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
       sameAsPermanentAddress: isSameAddresss,
       data: isSameAddresss ? permanentAddress : currentAddress,
     },
-    proofWith: "AADHAAR",
-    aadharNo: data.step_1.pan.response.details.aadhaar.id_number,
+    proofWith: usedKra ? "OTHERS" : "AADHAAR",
+    aadharNo: data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "",
   };
 };
 

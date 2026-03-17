@@ -20,19 +20,55 @@ import {
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import { IoMdArrowDropright } from "react-icons/io";
 import apiGateway from "@root/apiGateway";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { appSchema } from "@root/schema";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import { ZodError } from "zod";
+import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
 
+/** Format YYYY-MM-DD to DD-MM-YYYY for KRA API */
+function toDdMmYyyy(iso: string | undefined): string {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("T")[0].split("-");
+  return [d, m, y].filter(Boolean).join("-");
+}
+
 function IdentityValidationForm() {
-  const { setStep1PanData, state } = useKycDataStorage();
+  const { setStep1PanData, setKraResponse, nextLocalStep, state } = useKycDataStorage();
   const data = state.step_1.pan;
   const { pushUserKycState, addAuditLog } = useKycDataProvider();
-  const { handelPanVerification, isPending, error } = usePanCardVerifyHook();
+  const [kraFailed, setKraFailed] = useState(false);
+  const { handelPanVerification, isPending, error, setError } = usePanCardVerifyHook({
+    skipKraSteps: kraFailed,
+  });
+  const handelPanVerificationRef = useRef(handelPanVerification);
+  handelPanVerificationRef.current = handelPanVerification;
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const panKycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
+    apiClientCaller
+  );
+  const kraRequestMutation = useMutation({
+    mutationKey: ["createKraVerifyRequest"],
+    mutationFn: async (payload: { pan: string; dob: string }) =>
+      panKycApi.createKraVerifyRequest(payload),
+    onSuccess: (res) => {
+      if (res.responseData) {
+        setKraResponse(res.responseData);
+        nextLocalStep();
+        pushUserKycState();
+      }
+    },
+    onError: () => {
+      setKraFailed(true);
+      // Start normal PAN verification process when KRA has no data
+      handelPanVerificationRef.current?.();
+    },
+  });
   const { cookies } = useAppCookie();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
 
@@ -59,6 +95,32 @@ function IdentityValidationForm() {
       setStep1PanData("panCardNo", existingPan);
     }
   }, [isRekyc, existingPan, setStep1PanData]);
+
+  const handleContinueOrPanVerify = () => {
+    try {
+      appSchema.kyc.kycPanInfoDataSchema.parse(data);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setError(zodErrorToErrorMap(err));
+      }
+      return;
+    }
+    setError(undefined);
+    // User already used KRA: do not trigger KRA again, use existing data and proceed
+    if (state.step_1.usedExistingKra && state.step_1.kraResponse) {
+      nextLocalStep();
+      pushUserKycState();
+      return;
+    }
+    if (kraFailed) {
+      handelPanVerification();
+    } else {
+      kraRequestMutation.mutate({
+        pan: data.panCardNo,
+        dob: toDdMmYyyy(data.dateOfBirth),
+      });
+    }
+  };
 
   return (
     <Card accountMode>
@@ -180,7 +242,7 @@ function IdentityValidationForm() {
                 checked={data.checkTerms1}
                 onCheckedChange={(val) => setStep1PanData("checkTerms1", val)}
                 checkClass="text-white"
-                className="mt-0.5 border border-gray-200"
+                className="mt-0.5 border "
               />
               I hereby confirm that I am not a Politically Exposed Person (PEP)
               nor related to any PEP
@@ -195,7 +257,7 @@ function IdentityValidationForm() {
                 checked={data.checkTerms2}
                 onCheckedChange={(val) => setStep1PanData("checkTerms2", val)}
                 checkClass="text-white"
-                className="mt-0.5 border border-gray-200"
+                className="mt-0.5 border "
               />
               I hereby confirm that I am not a person and/or entity debarred
               from accessing the securities market or dealing in securities, as
@@ -214,7 +276,7 @@ function IdentityValidationForm() {
                 checked={data.isFatca}
                 onCheckedChange={(val) => setStep1PanData("isFatca", val)}
                 checkClass="text-white"
-                className="mt-0.5 border border-gray-200"
+                className="mt-0.5 border "
               />
               I confirm that I am an Indian citizen and solely a tax resident of
               India, not of any other country (FATCA)
@@ -267,12 +329,17 @@ function IdentityValidationForm() {
       </CardContent>
 
       <CardFooter accountMode className="sm:flex-row flex-col gap-5">
+        {/* {kraFailed && (
+          <p className="text-muted-foreground text-sm w-full sm:w-auto">
+            No existing KYC found. You can proceed to PAN verification below.
+          </p>
+        )} */}
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
-          onClick={handelPanVerification}
-          disabled={isPending}
+          onClick={handleContinueOrPanVerify}
+          disabled={isPending || kraRequestMutation.isPending}
         >
-          Continue to Verify
+          {kraFailed ? "Proceed to PAN Verification" : "Continue to Verify"}
           <div className="flex justify-center items-center p-0 h-full">
             <IoMdArrowDropright className="p-0 text-4xl" />
           </div>

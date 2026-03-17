@@ -104,7 +104,7 @@ export const useLoginFormHook = () => {
         dataStore.setType("password");
       } else {
         dataStore.setType("otp");
-        handleSendOtp();
+        // handleSendOtp();
       }
       trackActivity("login", { reason: "Create login request" });
     },
@@ -206,7 +206,7 @@ export const useLoginFormHook = () => {
       signinApi.signInVerifyOtp({
         identity,
         otp: state.otp,
-        token: sendOtpMutation.data?.responseData?.token || "",
+        token: sendOtpMutation.data?.responseData?.token || requestLoginMutation.data?.responseData.token || "",
         value: state.emailOrPhoneNo,
       }),
     onSuccess: (data) => {
@@ -270,9 +270,10 @@ export const useLoginFormHook = () => {
   // ---------------------------------
 
   /**
-   * Handle Login Request (Check user)
+   * Handle Login Request (Check user) — guarded to prevent double submit
    */
   const handleSignInRequest = () => {
+    if (requestLoginMutation.isPending) return;
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
     dataStore.setErrorMessage("");
@@ -281,9 +282,10 @@ export const useLoginFormHook = () => {
   };
 
   /**
-   * Handle OTP Send
+   * Handle OTP Send (guarded to prevent double send)
    */
   const handleSendOtp = () => {
+    if (sendOtpMutation.isPending) return;
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
     dataStore.setErrorMessage("");

@@ -1,0 +1,142 @@
+import type { IKraDownloadResponse } from "@root/apiGateway";
+import { useKycDataStorage } from "../../../../_store/useKycDataStorage";
+import { usePanCardVerifyHook } from "../../1_panAndAadhar/_hooks/usePanCardVerifyHook";
+
+/** Convert KRA DOB (DD-MM-YYYY or DD/MM/YYYY) to YYYY-MM-DD for store */
+function kraDobToIso(dob: string | null): string {
+  if (!dob || !dob.trim()) return "";
+  const parts = dob.trim().split(/[-/]/);
+  if (parts.length >= 3) {
+    const [d, m, y] = parts;
+    const year = (y ?? "").length === 2 ? `20${y}` : (y ?? "");
+    return `${year}-${(m ?? "").padStart(2, "0")}-${(d ?? "").padStart(2, "0")}`;
+  }
+  return dob;
+}
+
+/** Split full name into first, middle, last */
+function splitName(full: string | null): {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+} {
+  if (!full || !full.trim()) return { firstName: "", middleName: "", lastName: "" };
+  const parts = full.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "", middleName: "", lastName: "" };
+  if (parts.length === 1) return { firstName: parts[0] ?? "", middleName: "", lastName: "" };
+  const firstName = parts[0] ?? "";
+  const lastName = parts[parts.length - 1] ?? "";
+  const middleName = parts.slice(1, -1).join(" ") ?? "";
+  return { firstName, middleName, lastName };
+}
+
+function kraGenderToStore(gen: string | null): string {
+  if (!gen) return "";
+  const g = (gen ?? "").toUpperCase();
+  if (g === "M") return "MALE";
+  if (g === "F") return "FEMALE";
+  return gen;
+}
+
+/** KRA occupation code → Personal Details form value (occupationType) */
+const KRA_OCC_TO_FORM: Record<string, string> = {
+  "01": "Public Sector",
+  "02": "Private Sector",
+  "03": "Business",
+  "04": "Agriculturist",
+  "05": "Retired",
+  "06": "Housewife",
+  "07": "Student",
+  "08": "Professional",
+  "09": "Government Sector",
+  "10": "Others",
+};
+
+/** KRA income code → Personal Details form value (annualGrossIncome) */
+const KRA_INCOME_TO_FORM: Record<string, string> = {
+  "01": "0-1L",
+  "02": "1-5L",
+  "03": "5-10L",
+  "04": "10-25L",
+  "05": "25L+",
+};
+
+/** KRA nationality code → Personal Details form value (nationality) */
+const KRA_NATIONALITY_TO_FORM: Record<string, string> = {
+  "01": "IN - Indian",
+  "02": "OTHER",
+};
+
+export function useKraInfoStep() {
+  const {
+    state,
+    setStep1PanData,
+    setStep2PersonalData,
+    setGenderData,
+    setUsedExistingKra,
+    clearKraResponse,
+  } = useKycDataStorage();
+  const { handelPanVerification, isPending } = usePanCardVerifyHook();
+
+  const prefillFromKra = (kra: IKraDownloadResponse) => {
+    const { firstName, middleName, lastName } = splitName(kra.appName);
+    setStep1PanData("firstName", firstName);
+    setStep1PanData("middleName", middleName);
+    setStep1PanData("lastName", lastName);
+    const isoDob = kraDobToIso(kra.appDobDt);
+    if (isoDob) setStep1PanData("dateOfBirth", isoDob);
+
+    const gender = kraGenderToStore(kra.appGen);
+    if (gender) setGenderData(gender);
+
+    // KRA marital status: 01 = Married, 02 = Unmarried (per KRA spec)
+    if (kra.appMarStatus) {
+      const code = String(kra.appMarStatus).trim();
+      const maritalForForm =
+        code === "01" ? "MARRIED" : code === "02" ? "SINGLE" : kra.appMarStatus;
+      setStep2PersonalData("maritalStatus", maritalForForm);
+    }
+    if (kra.appFName) setStep2PersonalData("fatSpuName", kra.appFName);
+    // Occupation: map KRA code to form value; fallback to "Others" with raw in otherOccupationName
+    if (kra.appOcc) {
+      const code = String(kra.appOcc).trim();
+      const formOcc = KRA_OCC_TO_FORM[code] ?? "Others";
+      setStep2PersonalData("occupationType", formOcc);
+      if (formOcc === "Others" && (kra.appOthOcc || code)) {
+        setStep2PersonalData("otherOccupationName", kra.appOthOcc?.trim() || code);
+      } else if (kra.appOthOcc) {
+        setStep2PersonalData("otherOccupationName", kra.appOthOcc.trim());
+      }
+    }
+    // Annual Gross Income: map KRA code to form value (0-1L, 1-5L, etc.)
+    if (kra.appIncome) {
+      const code = String(kra.appIncome).trim();
+      const formIncome = KRA_INCOME_TO_FORM[code] ?? kra.appIncome;
+      setStep2PersonalData("annualGrossIncome", formIncome);
+    }
+    // Nationality: map KRA code to form value (IN - Indian, OTHER)
+    if (kra.appNationality) {
+      const code = String(kra.appNationality).trim();
+      const formNationality = KRA_NATIONALITY_TO_FORM[code] ?? kra.appNationality;
+      setStep2PersonalData("nationality", formNationality);
+    }
+  };
+
+  const handleUseExisting = () => {
+    const kra = state.step_1.kraResponse;
+    setUsedExistingKra(true);
+    if (kra) prefillFromKra(kra);
+    handelPanVerification();
+  };
+
+  const handleStartFresh = () => {
+    clearKraResponse();
+    handelPanVerification();
+  };
+
+  return {
+    handleUseExisting,
+    handleStartFresh,
+    isPending,
+  };
+}

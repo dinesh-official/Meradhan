@@ -36,6 +36,7 @@ function PersonalDetailsForm() {
     usePersonalDetailsFormHook();
 
   const data = state.step_2;
+  const isFromKra = state.step_1.usedExistingKra;
 
   return (
     <Card accountMode>
@@ -45,7 +46,7 @@ function PersonalDetailsForm() {
 
       <CardContent accountMode>
         <div className="gap-3 md:gap-5 grid sm:grid-cols-2 lg:grid-cols-3">
-          {/* Marital Status */}
+          {/* Marital Status – disabled when pre-filled from KRA */}
           <LabelInput
             label="Marital Status"
             required
@@ -58,7 +59,7 @@ function PersonalDetailsForm() {
               }}
               value={data.maritalStatus}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" disabled={isFromKra}>
                 <SelectValue placeholder="Select Marital Status" />
               </SelectTrigger>
               <SelectContent>
@@ -71,7 +72,7 @@ function PersonalDetailsForm() {
             </Select>
           </LabelInput>
 
-          {/* Father/Spouse Name */}
+          {/* Father/Spouse Name – disabled when pre-filled from KRA */}
           <LabelInput
             label="Father’s / Spouse Name"
             required
@@ -84,6 +85,7 @@ function PersonalDetailsForm() {
                 setStep2PersonalData("fatSpuName", e.target.value);
                 removeError("fatSpuName");
               }}
+              disabled={isFromKra}
             />
           </LabelInput>
 
@@ -140,7 +142,7 @@ function PersonalDetailsForm() {
           </LabelInput>
 
 
-          {/* Occupation */}
+          {/* Occupation – disabled when pre-filled from KRA */}
           <LabelInput
             label="Occupation Type"
             required
@@ -153,7 +155,7 @@ function PersonalDetailsForm() {
               }}
               value={data.occupationType}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" disabled={isFromKra}>
                 <SelectValue placeholder="Select Occupation" />
               </SelectTrigger>
               <SelectContent>
@@ -173,14 +175,20 @@ function PersonalDetailsForm() {
                 required
                 error={error?.otherOccupationName?.[0]}
               >
-                <Input type="text" value={data.otherOccupationName} maxLength={30} onChange={(e) => {
-                  setStep2PersonalData("otherOccupationName", e.target.value);
-                  removeError("otherOccupationName");
-                }} />
+                <Input
+                  type="text"
+                  value={data.otherOccupationName}
+                  maxLength={30}
+                  onChange={(e) => {
+                    setStep2PersonalData("otherOccupationName", e.target.value);
+                    removeError("otherOccupationName");
+                  }}
+                  disabled={isFromKra}
+                />
               </LabelInput>
             )
           }
-          {/* Annual Income */}
+          {/* Annual Gross Income – disabled when pre-filled from KRA */}
           <LabelInput
             label="Annual Gross Income"
             required
@@ -193,7 +201,7 @@ function PersonalDetailsForm() {
               }}
               value={data.annualGrossIncome}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" disabled={isFromKra}>
                 <SelectValue placeholder="Select Income Range" />
               </SelectTrigger>
               <SelectContent>
@@ -222,7 +230,7 @@ function PersonalDetailsForm() {
             />
           </LabelInput>
 
-          {/* Nationality */}
+          {/* Nationality – disabled when pre-filled from KRA */}
           <LabelInput
             label="Nationality"
             required
@@ -235,7 +243,7 @@ function PersonalDetailsForm() {
               }}
               value={data.nationality}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" disabled={isFromKra}>
                 <SelectValue placeholder="Select Nationality" />
               </SelectTrigger>
               <SelectContent>

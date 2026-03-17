@@ -18,6 +18,7 @@ import type {
   ISignKycVerifyResponse,
   IStoreKycGETResponse,
   IStoreKycSETResponse,
+  IKraVerifyResponse,
   KRAResponse,
   RescheduleKraResponse,
 } from "./Kyc.response";
@@ -58,6 +59,18 @@ export class CustomerKycApi {
   ) {
     const { data } = await this.apiClient.get<IPANKycVerifyResponse>(
       "/customer/kyc/pan/response/" + payload.kid,
+      config,
+    );
+    return data;
+  }
+
+  async createKraVerifyRequest(
+    body: { pan: string; dob: string },
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<IKraVerifyResponse>(
+      "/customer/kyc/kra/request",
+      body,
       config,
     );
     return data;

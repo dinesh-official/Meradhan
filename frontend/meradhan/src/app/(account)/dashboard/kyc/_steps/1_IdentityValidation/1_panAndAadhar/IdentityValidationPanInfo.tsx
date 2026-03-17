@@ -153,7 +153,13 @@ function IdentityValidationPanInfo() {
               entityType: "KYC",
             });
 
-            nextLocalStep();
+            if (state.step_1.usedExistingKra === true) {
+              nextLocalStep();
+              nextLocalStep();
+              nextLocalStep();
+            } else {
+              nextLocalStep();
+            }
             pushUserKycState();
           }}
         >

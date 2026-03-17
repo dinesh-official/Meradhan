@@ -176,3 +176,13 @@ model NseWebhookNotification {
 
     @@map("nse_webhook_notification")
 }
+
+model NseCbricsNotification {
+    id        Int      @id @default(autoincrement())
+    payload   Json?
+    type      String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("nse_cbrics_notification")
+}

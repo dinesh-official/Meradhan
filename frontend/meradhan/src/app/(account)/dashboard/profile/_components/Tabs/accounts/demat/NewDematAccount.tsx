@@ -171,8 +171,8 @@ function NewDematAccount({
                     ...data.panNumber?.slice(1),
                   ])
                 }
-                // disabled
-                // adminMode
+              // disabled
+              // adminMode
               />
             </LabelInput>
 
@@ -293,6 +293,7 @@ function ManageDematPanInputs({
               type="text"
               maxLength={10}
               value={item}
+              disabled={false}
               onChange={(e) =>
                 updateData("panNumber", [
                   data.panNumber[0],

@@ -30,6 +30,13 @@ kycRoutes.post(
   allowAccessMiddleware("USER"),
   (req, res) => controller.createAadhaarVerifyRequest(req, res)
 );
+
+kycRoutes.post(
+  "/api/customer/kyc/kra/request",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.createKraVerifyRequest(req, res)
+);
+
 // selfie verify request
 kycRoutes.post(
   "/api/customer/kyc/selfie/request",
