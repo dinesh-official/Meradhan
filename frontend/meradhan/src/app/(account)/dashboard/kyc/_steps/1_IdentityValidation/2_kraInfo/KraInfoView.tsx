@@ -114,7 +114,6 @@ export function KraInfoView({
   onStartFresh,
   isPending = false,
 }: KraInfoViewProps) {
-  const [showJson, setShowJson] = useState(false);
   const canProceedWithExistingKyc =
     kra.isNameMatch &&
     kra.isDOBMatch &&
