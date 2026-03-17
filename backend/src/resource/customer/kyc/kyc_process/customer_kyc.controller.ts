@@ -345,9 +345,7 @@ export class CustomerKycKycController {
     delete responseData?.rawXml;
     res.sendResponse({
       statusCode: HttpStatus.OK,
-      responseData: {
-        data: "WORKING"
-      },
+      responseData
     });
   }
 }
