@@ -397,6 +397,13 @@ export class CustomerKycKycService {
     pan: string;
     dob: string;
   }) {
+
+    console.log({
+      pan,
+      dob,
+    });
+
+
     const user = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: userId },
     });
@@ -410,16 +417,23 @@ export class CustomerKycKycService {
 
     const kraDetails = await this.kraSdk.panInquiryTwo({
       pan: pan,
-      dob: dob,
+      dob: dob.replaceAll("-", ""),
       mobile: env.KRA_MOB_NO,
       reqNo: new Date().getTime().toString(),
     });
 
+    console.log({
+      kraDetails,
+    });
+
     const status = checkKraProcessCheckStatus(kraDetails, undefined);
+    console.log({
+      status,
+    });
     if (status == "AVAILABLE") {
       const downloadResponse = await this.kraSdk.panDownloadDetailsComplete({
         pan: pan,
-        dob: dob,
+        dob: dob.replaceAll("-", ""),
         mobile: env.KRA_MOB_NO,
       }) as T_APP_PAN_INQ_DOWNLOAD;
 
