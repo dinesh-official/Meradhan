@@ -344,7 +344,9 @@ export class CustomerKycKycController {
     const responseData = response ? JSON.parse(JSON.stringify(response)) : response;
     res.sendResponse({
       statusCode: HttpStatus.OK,
-      responseData,
+      responseData: {
+        data: JSON.stringify(responseData)
+      },
     });
   }
 }
