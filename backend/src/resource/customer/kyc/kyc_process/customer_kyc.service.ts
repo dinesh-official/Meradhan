@@ -606,6 +606,7 @@ export class CustomerKycKycService {
           isMobileMatch,
           isEmailMatch,
           rawXml: JSON.stringify(downloadResponse),
+
         },
         include: {
           appSummRec: true,
