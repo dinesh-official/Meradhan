@@ -26,6 +26,7 @@ interface CustomerOverViewCardProps {
   kycStatus: string;
   kraStatus: string;
   userId: number;
+  usedExistingKra?: boolean;
 }
 function CustomerOverViewCard(
   customerOverViewCardData: CustomerOverViewCardProps
@@ -137,6 +138,11 @@ function CustomerOverViewCard(
                 value={customerOverViewCardData?.kraStatus || "Not Started"}
               />
             </LabelView>
+            {customerOverViewCardData.usedExistingKra && (
+              <LabelView title="KYC Source">
+                <StatusBadge value="Used Existing KRA" />
+              </LabelView>
+            )}
             <LabelView title="Customer Since">
               <p className="text-sm">{customerOverViewCardData.customerSince}</p>
             </LabelView>

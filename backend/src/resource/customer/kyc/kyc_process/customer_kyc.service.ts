@@ -429,9 +429,7 @@ export class CustomerKycKycService {
 
 
 
-    console.log({
-      kraDetails,
-    });
+    console.log("KRA Details", JSON.stringify(kraDetails, null, 2));
 
     const status = checkKraProcessCheckStatus(kraDetails, undefined);
     console.log({

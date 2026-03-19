@@ -8,6 +8,7 @@ import {
   pdfUrlToBase64,
 } from "./helper";
 import { getStateSortCode } from "./states/getStateSortCode";
+import { kraStateCodeToName } from "./states/kraStateFromCode";
 import {
   removeLastCommaChunks,
   splitAddressInto3BalancedLines,
@@ -583,18 +584,20 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
     const corLine1 = k.appCorAdd1 || "";
     const corLine2 = k.appCorAdd2 || "";
     const corLine3 = k.appCorAdd3 || "";
+    const perStateDisplay = kraStateCodeToName(k.appPerState) || k.appPerState || "";
+    const corStateDisplay = kraStateCodeToName(k.appCorState) || k.appCorState || "";
     const permanentAddress: AddressType = {
       addressType: "RESIDENTIAL",
       addressLine1: perLine1,
       addressLine2: perLine2,
       addressLine3: perLine3,
       city: k.appPerCity || "",
-      state: k.appPerState || "",
+      state: perStateDisplay,
       district: k.appPerCity || "",
       pincode: k.appPerPincd || "",
       country: "India",
       postOffice: k.appPerCity || "",
-      stateUTCode: getStateSortCode(k.appPerState || "") || "N/A",
+      stateUTCode: getStateSortCode(perStateDisplay) || "N/A",
     };
     const isSameAddress =
       perLine1 === corLine1 && perLine2 === corLine2 && perLine3 === corLine3 &&
@@ -605,12 +608,12 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
       addressLine2: corLine2,
       addressLine3: corLine3,
       city: k.appCorCity || "",
-      state: k.appCorState || "",
+      state: corStateDisplay,
       district: k.appCorCity || "",
       pincode: k.appCorPincd || "",
       country: "India",
       postOffice: k.appCorCity || "",
-      stateUTCode: getStateSortCode(k.appCorState || "") || "N/A",
+      stateUTCode: getStateSortCode(corStateDisplay) || "N/A",
     };
     return {
       permanentAddress,

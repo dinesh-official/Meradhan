@@ -38,19 +38,40 @@ function kraGenderToStore(gen: string | null): string {
   return gen;
 }
 
-/** KRA occupation code → Personal Details form value (occupationType) */
+/**
+ * KRA occupation code → Personal Details form value (occupationType).
+ * Aligned with KRA API Download file format May 2025 (numeric 01–10).
+ */
 const KRA_OCC_TO_FORM: Record<string, string> = {
-  "01": "Public Sector",
-  "02": "Private Sector",
-  "03": "Business",
-  "04": "Agriculturist",
-  "05": "Retired",
-  "06": "Housewife",
-  "07": "Student",
-  "08": "Professional",
-  "09": "Government Sector",
+  "01": "Private Sector",
+  "02": "Public Sector",
+  "03": "Government Sector",
+  "04": "Business",
+  "05": "Professional",
+  "06": "Agriculturist",
+  "07": "Retired",
+  "08": "Housewife",
+  "09": "Student",
   "10": "Others",
+  // Single-letter occupation type (same spec)
+  S: "Private Sector",
+  B: "Business",
+  O: "Others",
+  P: "Professional",
+  A: "Agriculturist",
+  R: "Retired",
+  H: "Housewife",
+  T: "Student",
 };
+
+function kraOccupationCodeToMapKey(code: string): string {
+  const c = code.trim();
+  if (/^\d+$/.test(c)) {
+    return String(parseInt(c, 10)).padStart(2, "0");
+  }
+  if (c.length === 1) return c.toUpperCase();
+  return c;
+}
 
 /** KRA income code → Personal Details form value (annualGrossIncome) */
 const KRA_INCOME_TO_FORM: Record<string, string> = {
@@ -100,7 +121,8 @@ export function useKraInfoStep() {
     // Occupation: map KRA code to form value; fallback to "Others" with raw in otherOccupationName
     if (kra.appOcc) {
       const code = String(kra.appOcc).trim();
-      const formOcc = KRA_OCC_TO_FORM[code] ?? "Others";
+      const mapKey = kraOccupationCodeToMapKey(code);
+      const formOcc = KRA_OCC_TO_FORM[mapKey] ?? KRA_OCC_TO_FORM[code] ?? "Others";
       setStep2PersonalData("occupationType", formOcc);
       if (formOcc === "Others" && (kra.appOthOcc || code)) {
         setStep2PersonalData("otherOccupationName", kra.appOthOcc?.trim() || code);
