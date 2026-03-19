@@ -208,10 +208,10 @@ jobs:
           docker build -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      # - name: Deploy to Amazon ECS
-      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      #   with:
-      #     task-definition: stage-meradhan-be-revision.json
-      #     cluster: stage-cluster
-      #     service: meradhan-be
-      #     force-new-deployment: true
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: pre-prod-be-revision.json
+          cluster: prod-cluster
+          service: pre-prod-be-service
+          force-new-deployment: true
