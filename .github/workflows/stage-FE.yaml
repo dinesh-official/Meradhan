@@ -86,7 +86,7 @@ jobs:
           DEV_S3_BUCKET_NAME: staging-meradhan-storage
 
         run: |
-          echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
+          echo "NEXT_PUBLIC_HOST_URL=https://preprodfe.meradhan.co/" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co/" >> .env
           echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
