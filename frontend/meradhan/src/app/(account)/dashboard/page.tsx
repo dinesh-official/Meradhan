@@ -20,6 +20,7 @@ export const generateMetadata = async () => {
 
 async function DashBoardPage() {
   const cookie = await cookies();
+  console.log("cookie", cookie);
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiServerCaller
   );

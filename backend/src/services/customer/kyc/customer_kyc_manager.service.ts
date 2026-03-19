@@ -4,6 +4,62 @@ import type { CustomerProfileService } from "@resource/crm/customers/customer.se
 import { AppError } from "@utils/error/AppError";
 import type { KycDataStorage, KraResponseInKyc } from "./kyc";
 
+/**
+ * KRA numeric state / UT codes (API Download file format May 2025)
+ * → state name strings that match `@modules/RFQ/nse/values.ts` lookups.
+ */
+const KRA_STATE_CODE_TO_NAME: Record<string, string> = {
+  "01": "Andhra Pradesh",
+  "02": "Arunachal Pradesh",
+  "03": "Assam",
+  "04": "Bihar",
+  "05": "Chhattisgarh",
+  "06": "Goa",
+  "07": "Gujarat",
+  "08": "Haryana",
+  "09": "Himachal Pradesh",
+  "10": "Jammu and Kashmir",
+  "11": "Jharkhand",
+  "12": "Karnataka",
+  "13": "Kerala",
+  "14": "Madhya Pradesh",
+  "15": "Maharashtra",
+  "16": "Manipur",
+  "17": "Meghalaya",
+  "18": "Mizoram",
+  "19": "Nagaland",
+  "20": "Odisha",
+  "21": "Punjab",
+  "22": "Rajasthan",
+  "23": "Sikkim",
+  "24": "Tamil Nadu",
+  "25": "Telangana",
+  "26": "Tripura",
+  "27": "Uttar Pradesh",
+  "28": "Uttarakhand",
+  "29": "West Bengal",
+  // UTs: map to the names used in `stateNameToCode` in values.ts
+  "30": "Andaman & Nicobar Islands",
+  "31": "Chandigarh",
+  "32": "Dadra and Nagar Haveli",
+  "33": "Delhi",
+  "34": "Lakshadweep",
+  "35": "Puducherry",
+  "36": "Ladakh",
+  "37": "IMPORT (Not Registered in India)",
+  "99": "IMPORT (Not Registered in India)",
+};
+
+function kraStateCodeToName(code: string | null | undefined): string {
+  const raw = code == null ? "" : String(code).trim();
+  if (!raw) return raw;
+  if (/^\d+$/.test(raw)) {
+    const key = String(parseInt(raw, 10)).padStart(2, "0");
+    return KRA_STATE_CODE_TO_NAME[key] ?? raw;
+  }
+  return raw;
+}
+
 export class CustomerKycManager {
   /**
    * Get KYC data for a customer
@@ -59,7 +115,8 @@ export class CustomerKycManager {
     const line3 = type === "correspondence" ? kra.appCorAdd3 : kra.appPerAdd3;
     const city = type === "correspondence" ? (kra.appCorCity ?? "") : (kra.appPerCity ?? "");
     const pincode = type === "correspondence" ? (kra.appCorPincd ?? "") : (kra.appPerPincd ?? "");
-    const state = type === "correspondence" ? (kra.appCorState ?? "") : (kra.appPerState ?? "");
+    const stateCodeOrName = type === "correspondence" ? (kra.appCorState ?? "") : (kra.appPerState ?? "");
+    const state = kraStateCodeToName(stateCodeOrName);
     const country = (type === "correspondence" ? kra.appCorCtry : kra.appPerCtry) === "101" ? "India" : "India";
     const fullAddress = [line1, line2, line3, city, state, pincode].filter(Boolean).join(", ");
     return {
@@ -101,7 +158,7 @@ export class CustomerKycManager {
     if (usedExistingKra && step1.gender) return this.mapGender(step1.gender);
     if (usedExistingKra && kraResponse?.appGen) return this.mapGender(kraResponse.appGen);
     if (aadhaarData?.gender) return this.mapGender(aadhaarData.gender);
-    return "OTHER";
+    return "NA";
   }
 
   /**
@@ -122,6 +179,7 @@ export class CustomerKycManager {
     permanent: typeof CustomerKycManager.ADDRESS_PAYLOAD_SHAPE | null;
   } {
     if (usedExistingKra && kraResponse) {
+
       return {
         current: this.buildAddressFromKra(kraResponse, "correspondence"),
         permanent: this.buildAddressFromKra(kraResponse, "permanent"),
@@ -164,7 +222,7 @@ export class CustomerKycManager {
   private buildPanCardCreatePayload(
     step1: KycDataStorage["step_1"],
     panData: { id_number: string; file_url?: string },
-    gender: $Enums.Gender,
+    gender: string,
     aadhaarData: { image?: string } | undefined,
   ): DataBaseSchema.PanCardModelCreateInput {
     const dateOfBirth = step1.pan.dateOfBirth.split("T")[0]?.toString() || "";
@@ -174,7 +232,7 @@ export class CustomerKycManager {
       lastName: step1.pan.lastName,
       middleName: step1.pan.middleName,
       dateOfBirth,
-      gender,
+      gender: gender as $Enums.Gender,
       image: aadhaarData?.image ?? "",
       fileUrl: panData.file_url ?? "",
       isVerified: true,
@@ -266,7 +324,7 @@ export class CustomerKycManager {
 
     if (customer.kycStatus === "RE_KYC") {
       const norm = (id: string) => (id || "").replace(/\s/g, "").replace(/x/gi, "0");
-      const existingAadhaar = customer.aadhaarCard?.aadhaarNo;
+      const existingAadhaar = usedExistingKra ? "xxxxxxxxxxxx" : customer.aadhaarCard?.aadhaarNo;
       const existingPan = customer.panCard?.panCardNo;
       if (!usedExistingKra && existingAadhaar && aadhaarData?.id_number && norm(aadhaarData.id_number) !== norm(existingAadhaar)) {
         throw new AppError(
@@ -304,8 +362,9 @@ export class CustomerKycManager {
       firstName,
       lastName,
       middleName,
-      gender,
+      gender: gender as $Enums.Gender,
       kycStatus,
+      useKraKyc: usedExistingKra,
       avatar: step1.face?.url,
       isAFatcaCustomer: !step1.pan.isFatca,
       allowSEBITerms: step1.pan.checkTerms2,
@@ -520,6 +579,7 @@ export class CustomerKycManager {
       createdAt: user?.createdAt,
       updatedAt: user?.updatedAt,
       createdBy: user?.createdBy || null,
+      useKraKyc: user?.useKraKyc || false,
 
       // Aadhaar Card data - prioritize KYC data, fallback to existing user data
       aadhaarCard:

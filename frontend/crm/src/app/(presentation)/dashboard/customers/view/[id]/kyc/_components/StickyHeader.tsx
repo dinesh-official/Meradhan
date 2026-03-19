@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const navItems = [
+const allNavItems = [
   { id: "personal-info", label: "Personal Information" },
   { id: "identity-docs", label: "Identity Documents" },
   { id: "pan-details", label: "PAN Details" },
@@ -12,8 +12,21 @@ const navItems = [
   { id: "compliance", label: "Compliance" },
 ];
 
-export default function StickyHeader() {
+export default function StickyHeader({
+  hideAadhaarSection = false,
+}: {
+  /** When KYC used existing KRA, Aadhaar UI is hidden — skip nav anchor */
+  hideAadhaarSection?: boolean;
+}) {
   const [activeId, setActiveId] = useState("");
+
+  const navItems = useMemo(
+    () =>
+      hideAadhaarSection
+        ? allNavItems.filter((i) => i.id !== "aadhaar-address")
+        : allNavItems,
+    [hideAadhaarSection],
+  );
 
   useEffect(() => {
     // Ensure we're on the client side
@@ -41,7 +54,7 @@ export default function StickyHeader() {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [navItems]);
 
   return (
     <div className="-top-8 z-40 sticky flex flex-row justify-start items-center gap-7 bg-white px-7 pt-4 lg:pt-0 border border-gray-100 rounded-lg w-full h-11 overflow-auto text-gray-700 text-nowrap select-none">

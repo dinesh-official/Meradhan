@@ -12,6 +12,63 @@ import {
 import { AppError } from "@utils/error/AppError";
 import { removeCountryCode } from "@utils/filters/convert";
 
+/**
+ * KRA numeric state / UT codes (API Download file format May 2025)
+ * → state names used by `getStateCode()` (values.ts).
+ * This is required because some existing DB records store state as numeric KRA codes.
+ */
+
+
+const NSDL_STATE_CODE_TO_NAME: Record<string, string> = {
+  "035": "01",
+  "028": "02",
+  "012": "03",
+  "013": "04",
+  "010": "05",
+  "004": "06",
+  "026": "07",
+  "025": "08",
+  "007": "09",
+  "030": "10",
+  "024": "11",
+  "006": "12",
+  "002": "13",
+  "001": "14",
+  "029": "15",
+  "032": "16",
+  "031": "17",
+  "023": "18",
+  "027": "19",
+  "014": "20",
+  "017": "21",
+  "015": "22",
+  "018": "23",
+  "021": "24",
+  "034": "25",
+  "003": "26",
+  "008": "27",
+  "011": "28",
+  "033": "29",
+  "016": "30",
+  "009": "31",
+  "019": "32",
+  "022": "33",
+  "005": "34",
+  "020": "35",
+  "037": "36",
+  "099": "99"
+}
+
+function kraStateCodeToName(code: string | null | undefined): string {
+  const raw = code == null ? "" : String(code).trim();
+  if (!raw) return raw;
+  if (/^\d+$/.test(raw)) {
+    const key = String(parseInt(raw, 10)).padStart(2, "0");
+    return NSDL_STATE_CODE_TO_NAME[key] ?? raw;
+  }
+  return raw;
+}
+
 export class ParticipantManager {
   private cbrics: NseCBRICS;
 
@@ -40,6 +97,18 @@ export class ParticipantManager {
     const address = splitAddressInto3BalancedLines(
       removeLastCommaChunks(user.currentAddress!.fullAddress, 3),
     );
+
+    const stateNameForCb = kraStateCodeToName(user.currentAddress!.state);
+    const stateCode =
+      getStateCode(stateNameForCb) ??
+      getStateCode("IMPORT (Not Registered in India)");
+
+    if (!stateCode) {
+      throw new AppError("State Code cannot be empty.", {
+        code: "CBRICS_STATE_CODE_EMPTY",
+        statusCode: 400,
+      });
+    }
 
     console.log(
       user.dematAccounts.map((e) => {
@@ -75,7 +144,7 @@ export class ParticipantManager {
       mobileList: [removeCountryCode(user.phoneNo)],
       panNo: user.panCard!.panCardNo,
       emailList: [user.emailAddress],
-      stateCode: getStateCode(user.currentAddress!.state)!,
+      stateCode: stateCode,
       regAddress: user.currentAddress!.fullAddress,
       dobDoi: dobDoi,
       telephone: removeCountryCode(user.phoneNo),
@@ -208,6 +277,18 @@ export class ParticipantManager {
       throw new AppError("No User Found");
     }
 
+    const stateNameForCb = kraStateCodeToName(user.currentAddress!.state);
+    const stateCode =
+      getStateCode(stateNameForCb) ??
+      getStateCode("IMPORT (Not Registered in India)");
+
+    if (!stateCode) {
+      throw new AppError("State Code cannot be empty.", {
+        code: "CBRICS_STATE_CODE_EMPTY",
+        statusCode: 400,
+      });
+    }
+
     // send to cbrics
     const participant = await this.cbrics.updateUnregisteredParticipant({
       id: user.nseDataSet!.participant.id,
@@ -219,7 +300,7 @@ export class ParticipantManager {
       mobileList: [removeCountryCode(user.phoneNo)],
       panNo: user.panCard!.panCardNo,
       emailList: [user.emailAddress],
-      stateCode: getStateCode(user.currentAddress!.state)!,
+      stateCode: stateCode,
       regAddress: user.currentAddress!.fullAddress,
       telephone: removeCountryCode(user.phoneNo),
       expiryDate: null,
