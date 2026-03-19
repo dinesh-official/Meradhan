@@ -1,10 +1,10 @@
-import type { Request, Response } from "express";
-import { CustomerKycKycService } from "./customer_kyc.service";
+import { db } from "@core/database/database";
 import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import type { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-import { db } from "@core/database/database";
+import { CustomerKycKycService } from "./customer_kyc.service";
 
 /** Normalize Aadhaar for comparison (masked digits often stored as x). */
 function normalizeAadhaar(id: string): string {
@@ -334,5 +334,18 @@ export class CustomerKycKycController {
         message: error.message || "Failed to serve KYC PDF",
       });
     }
+  }
+
+  // create kra verify request
+  async createKraVerifyRequest(req: Request, res: Response) {
+    const id = req.customer!.id;
+    const data = appSchema.kyc.kraVerifyRequestSchema.parse(req.body);
+    const response = await this.panKycService.createKraVerifyRequest(id, data);
+    const responseData = response ? JSON.parse(JSON.stringify(response)) : response;
+    delete responseData?.rawXml;
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData
+    });
   }
 }

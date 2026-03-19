@@ -72,6 +72,8 @@ export type Root = {
       fetchedTimestamp: string;
       confirmPanTimestamp: string;
       confirmAadhaarTimestamp: string;
+      /** When true, identity/address came from KRA — not DigiLocker Aadhaar */
+      usedExistingKra?: boolean;
     };
     face: {
       url: string;
