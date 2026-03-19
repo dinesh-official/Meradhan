@@ -19,52 +19,53 @@ import { removeCountryCode } from "@utils/filters/convert";
  */
 
 
-const NSDL_STATE_CODE_TO_NAME: Record<string, string> = {
-  "035": "01",
-  "028": "02",
-  "012": "03",
-  "013": "04",
-  "010": "05",
-  "004": "06",
-  "026": "07",
-  "025": "08",
-  "007": "09",
-  "030": "10",
-  "024": "11",
-  "006": "12",
-  "002": "13",
-  "001": "14",
-  "029": "15",
-  "032": "16",
-  "031": "17",
-  "023": "18",
-  "027": "19",
-  "014": "20",
-  "017": "21",
-  "015": "22",
-  "018": "23",
-  "021": "24",
-  "034": "25",
-  "003": "26",
-  "008": "27",
-  "011": "28",
-  "033": "29",
-  "016": "30",
-  "009": "31",
-  "019": "32",
-  "022": "33",
-  "005": "34",
-  "020": "35",
-  "037": "36",
-  "099": "99"
-}
+const KRA_STATE_CODE_TO_NAME: Record<string, string> = {
+  "001": "Jammu and Kashmir",
+  "002": "Himachal Pradesh",
+  "003": "Punjab",
+  "004": "Chandigarh",
+  "005": "Uttarakhand",
+  "006": "Haryana",
+  "007": "Delhi",
+  "008": "Rajasthan",
+  "009": "Uttar Pradesh",
+  "010": "Bihar",
+  "011": "Sikkim",
+  "012": "Arunachal Pradesh",
+  "013": "Assam",
+  "014": "Manipur",
+  "015": "Mizoram",
+  "016": "Tripura",
+  "017": "Meghalaya",
+  "018": "Nagaland",
+  "019": "West Bengal",
+  "020": "Jharkhand",
+  "021": "Odisha",
+  "022": "Chhattisgarh",
+  "023": "Madhya Pradesh",
+  "024": "Gujarat",
+  "025": "Daman & Diu",
+  "026": "Dadra and Nagar Haveli",
+  "027": "Maharashtra",
+  "028": "Andhra Pradesh",
+  "029": "Karnataka",
+  "030": "Goa",
+  "031": "Lakshadweep",
+  "032": "Kerala",
+  "033": "Tamil Nadu",
+  "034": "Puducherry",
+  "035": "Andaman & Nicobar Islands",
+  "036": "Ladakh",
+  "037": "Telangana",
+  "099": "IMPORT (Not Registered in India)",
+};
 
 function kraStateCodeToName(code: string | null | undefined): string {
   const raw = code == null ? "" : String(code).trim();
   if (!raw) return raw;
   if (/^\d+$/.test(raw)) {
-    const key = String(parseInt(raw, 10)).padStart(2, "0");
-    return NSDL_STATE_CODE_TO_NAME[key] ?? raw;
+    const key = String(parseInt(raw, 10)).padStart(3, "0");
+    return KRA_STATE_CODE_TO_NAME[key] ?? raw;
   }
   return raw;
 }

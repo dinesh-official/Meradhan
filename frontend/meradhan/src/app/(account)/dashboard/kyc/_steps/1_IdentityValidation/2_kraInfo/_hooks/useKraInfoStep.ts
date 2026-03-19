@@ -40,19 +40,23 @@ function kraGenderToStore(gen: string | null): string {
 
 /**
  * KRA occupation code → Personal Details form value (occupationType).
- * Aligned with KRA API Download file format May 2025 (numeric 01–10).
+ * Aligned with KRA API Download file format May 2025.
+ * Mapping (per KRA screen):
+ * 01 Private Sector, 02 Public Sector, 03 Business, 04 Professional,
+ * 05 Agriculturist, 06 Retired, 07 Housewife, 08 Student,
+ * 10 Government Service, 99 Others.
  */
 const KRA_OCC_TO_FORM: Record<string, string> = {
   "01": "Private Sector",
   "02": "Public Sector",
-  "03": "Government Sector",
-  "04": "Business",
-  "05": "Professional",
-  "06": "Agriculturist",
-  "07": "Retired",
-  "08": "Housewife",
-  "09": "Student",
-  "10": "Others",
+  "03": "Business",
+  "04": "Professional",
+  "05": "Agriculturist",
+  "06": "Retired",
+  "07": "Housewife",
+  "08": "Student",
+  "10": "Government Sector",
+  "99": "Others",
   // Single-letter occupation type (same spec)
   S: "Private Sector",
   B: "Business",

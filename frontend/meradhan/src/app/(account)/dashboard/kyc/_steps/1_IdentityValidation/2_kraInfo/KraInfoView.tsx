@@ -10,14 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { IoMdArrowDropright } from "react-icons/io";
-import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import Swal from "sweetalert2";
 import type { IKraDownloadResponse } from "@root/apiGateway";
 
@@ -68,11 +61,11 @@ function formatKraStatus(code: string | null): string {
 
 /** KRA income code → display label (per KRA spec) */
 const KRA_INCOME_LABELS: Record<string, string> = {
-  "01": "Below 1 Lac",
-  "02": "1 - 5 Lakhs",
-  "03": "5 - 10 Lakhs",
-  "04": "10 - 25 Lakhs",
-  "05": "25 Lakhs +",
+  "01": "Below Rs. 1 Lac",
+  "02": "Btw Rs. 1 to 5 Lacs",
+  "03": "Btw Rs. 5 to Rs. 10 Lacs",
+  "04": "Btw Rs. 10 to Rs. 25 Lacs",
+  "05": "More than Rs. 25 Lacs",
 };
 
 function formatIncomeRange(code: string | null): string {
@@ -95,21 +88,21 @@ function formatNationality(code: string | null): string {
 
 /** KRA occupation (numeric) — API Download file format May 2025 */
 const KRA_OCCUPATION_CODE_LABELS: Record<string, string> = {
-  "01": "Private Sector Service",
+  "01": "Private Sector",
   "02": "Public Sector",
-  "03": "Government Service",
-  "04": "Business",
-  "05": "Professional",
-  "06": "Agriculturist",
-  "07": "Retired",
-  "08": "Housewife",
-  "09": "Student",
-  "10": "Others (Please specify)",
+  "03": "Business",
+  "04": "Professional",
+  "05": "Agriculturist",
+  "06": "Retired",
+  "07": "Housewife",
+  "08": "Student",
+  "10": "Government Service",
+  "99": "Others (please specify)",
 };
 
 /** KRA occupation type (single letter) — same spec */
 const KRA_OCCUPATION_TYPE_LETTER: Record<string, string> = {
-  S: "Service",
+  S: "Private Sector",
   B: "Business",
   O: "Others",
   P: "Professional",
@@ -129,7 +122,7 @@ function formatOccupation(occ: string | null, othOcc: string | null): string {
     const key = String(parseInt(c, 10)).padStart(2, "0");
     const label = KRA_OCCUPATION_CODE_LABELS[key];
     if (label) {
-      if (key === "10" && oth) return `${label}: ${oth}`;
+      if (key === "99" && oth) return `${label}: ${oth}`;
       return label;
     }
   }
@@ -144,46 +137,50 @@ function formatOccupation(occ: string | null, othOcc: string | null): string {
   return oth ? `${c} (${oth})` : c;
 }
 
-/** KRA state / UT code — API Download file format May 2025 */
+/**
+ * KRA state / UT codes (API Download file format May 2025)
+ * Use the numeric value as key (3 digits), and the state name as value.
+ * Example: "027" -> "Maharashtra"
+ */
 const KRA_STATE_LABELS: Record<string, string> = {
-  "01": "Andhra Pradesh",
-  "02": "Arunachal Pradesh",
-  "03": "Assam",
-  "04": "Bihar",
-  "05": "Chhattisgarh",
-  "06": "Goa",
-  "07": "Gujarat",
-  "08": "Haryana",
-  "09": "Himachal Pradesh",
-  "10": "Jammu and Kashmir",
-  "11": "Jharkhand",
-  "12": "Karnataka",
-  "13": "Kerala",
-  "14": "Madhya Pradesh",
-  "15": "Maharashtra",
-  "16": "Manipur",
-  "17": "Meghalaya",
-  "18": "Mizoram",
-  "19": "Nagaland",
-  "20": "Odisha",
-  "21": "Punjab",
-  "22": "Rajasthan",
-  "23": "Sikkim",
-  "24": "Tamil Nadu",
-  "25": "Telangana",
-  "26": "Tripura",
-  "27": "Uttar Pradesh",
-  "28": "Uttarakhand",
-  "29": "West Bengal",
-  "30": "Andaman and Nicobar Islands",
-  "31": "Chandigarh",
-  "32": "Dadra and Nagar Haveli and Daman and Diu",
-  "33": "Delhi",
-  "34": "Lakshadweep",
-  "35": "Puducherry",
-  "36": "Ladakh",
-  "37": "Other",
-  "99": "Others",
+  "001": "Jammu & Kashmir",
+  "002": "Himachal Pradesh",
+  "003": "Punjab",
+  "004": "Chandigarh",
+  "005": "Uttarakhand",
+  "006": "Haryana",
+  "007": "Delhi",
+  "008": "Rajasthan",
+  "009": "Uttar Pradesh",
+  "010": "Bihar",
+  "011": "Sikkim",
+  "012": "Arunachal Pradesh",
+  "013": "Assam",
+  "014": "Manipur",
+  "015": "Mizoram",
+  "016": "Tripura",
+  "017": "Meghalaya",
+  "018": "Nagaland",
+  "019": "West Bengal",
+  "020": "Jharkhand",
+  "021": "Odisha",
+  "022": "Chhattisgarh",
+  "023": "Madhya Pradesh",
+  "024": "Gujarat",
+  "025": "Daman & Diu",
+  "026": "Dadra & Nagar Haveli",
+  "027": "Maharashtra",
+  "028": "Andhra Pradesh",
+  "029": "Karnataka",
+  "030": "Goa",
+  "031": "Lakshadweep",
+  "032": "Kerala",
+  "033": "Tamil Nadu",
+  "034": "Puducherry",
+  "035": "Andaman & Nicobar Islands",
+  "036": "Ladakh",
+  "037": "Telangana",
+  "099": "Others (please specify)",
 };
 
 /** State name + KRA code, e.g. "Maharashtra (15)" */
@@ -191,7 +188,7 @@ function formatKraState(code: string | null): string {
   if (!code?.trim()) return "-";
   const c = code.trim();
   if (/^\d+$/.test(c)) {
-    const key = String(parseInt(c, 10)).padStart(2, "0");
+    const key = String(parseInt(c, 10)).padStart(3, "0");
     const label = KRA_STATE_LABELS[key];
     if (label) return `${label} (${key})`;
     return c;
@@ -288,7 +285,7 @@ export function KraInfoView({
               showStatus
             >
               <p className="font-medium">
-                {kra.appMobNo ? `+91 ${kra.appMobNo}` : "-"}
+                {kra.appMobNo ? `${kra.appMobNo}` : "-"}
               </p>
             </DataInfoLabel>
             <DataInfoLabel title="Gender">
@@ -396,7 +393,7 @@ export function KraInfoView({
               className="text-sm leading-relaxed cursor-pointer"
             >
               I confirm that I have reviewed the above details obtained from KRA
-              records and wish to proceed with my KYC using the same information.
+              records and i agree to proceed with my KYC using the same information.
             </label>
           </div>
         )}
@@ -431,7 +428,7 @@ export function KraInfoView({
               <IoMdArrowDropright className="text-xl" />
             </Button>
             <Button
-              variant="secondary"
+              variant="outlineSecondary"
               className="flex items-center gap-1 w-full sm:w-auto "
               disabled={!confirmed || isPending}
               onClick={onStartFresh}

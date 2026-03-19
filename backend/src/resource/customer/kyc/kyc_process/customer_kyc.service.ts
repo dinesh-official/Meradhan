@@ -451,10 +451,13 @@ export class CustomerKycKycService {
       const normalizePan = (s: string | null | undefined) =>
         (s ?? "").toString().replace(/[- ]/g, "").toUpperCase();
       const normalizeMobile = (s: string | null | undefined) => {
-        const raw = (s ?? "").toString().trim();
-        // remove +91 from the beginning
-        const cleaned = raw.replace(/^\+91/, "");
-        return cleaned.replace(/\D/g, "");
+        const raw = (s ?? "").toString().trim().replaceAll(" ", "");
+
+        // remove +91, 91 if number more then 10 digits from the beginning
+        if (raw.length > 10) {
+          return raw.slice(-10).replace(/\D/g, "");
+        }
+        return raw;
       };
       const normalizeDob = (s: string | null | undefined) => {
         const raw = (s ?? "").toString().trim();
