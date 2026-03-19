@@ -88,8 +88,8 @@ jobs:
         run: |
           echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000" >> .env
+          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co/" >> .env
+          echo "NEXT_PUBLIC_BACKEND_IP_URL=https://preprod.meradhan.co/" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
           echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
