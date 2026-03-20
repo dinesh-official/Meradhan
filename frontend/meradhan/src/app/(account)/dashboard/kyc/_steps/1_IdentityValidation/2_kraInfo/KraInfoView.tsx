@@ -239,10 +239,10 @@ export function KraInfoView({
         </CardTitle>
       </CardHeader>
       <CardContent accountMode className="space-y-6">
-        {kra.status && (
+        {kra?.appStatus && (
           <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
             <span className="font-medium text-muted-foreground">KRA Status: </span>
-            <span className="font-medium">{formatKraStatus(kra.appStatus)}</span>
+            <span className="font-medium">{formatKraStatus(kra.appStatus)} (as per KRA records)</span>
           </div>
         )}
         <div>
