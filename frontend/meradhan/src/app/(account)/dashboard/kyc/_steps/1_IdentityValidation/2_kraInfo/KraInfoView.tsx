@@ -53,7 +53,11 @@ const KRA_STATUS_LABELS: Record<string, string> = {
   "22": "Mutual Fund Verified",
 };
 
-function formatKraStatus(code: string | null): string {
+export const isAllowedKraStatus = (status: string): boolean => {
+  return ["02", "07", "12"].includes(status); // 02: KYC Registered, 07: KYC Validated, 12: KYC Registered
+};
+
+function formatKraStatus(code: string | null | undefined): string {
   if (!code) return "-";
   const c = String(code).trim();
   return KRA_STATUS_LABELS[c] ?? code;
@@ -61,6 +65,7 @@ function formatKraStatus(code: string | null): string {
 
 /** KRA income code → display label (per KRA spec) */
 const KRA_INCOME_LABELS: Record<string, string> = {
+  "00": "--",
   "01": "Below Rs. 1 Lac",
   "02": "Btw Rs. 1 to 5 Lacs",
   "03": "Btw Rs. 5 to Rs. 10 Lacs",
@@ -88,6 +93,7 @@ function formatNationality(code: string | null): string {
 
 /** KRA occupation (numeric) — API Download file format May 2025 */
 const KRA_OCCUPATION_CODE_LABELS: Record<string, string> = {
+  "00": "--",
   "01": "Private Sector",
   "02": "Public Sector",
   "03": "Business",
@@ -211,7 +217,7 @@ export interface KraInfoViewProps {
 export function KraInfoView({
   kra,
   preview = false,
-  confirmed = false,
+  confirmed = true,
   onConfirmedChange,
   onUseExisting,
   onStartFresh,
@@ -233,7 +239,7 @@ export function KraInfoView({
         </CardTitle>
       </CardHeader>
       <CardContent accountMode className="space-y-6">
-        {kra.appStatus && (
+        {kra.status && (
           <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
             <span className="font-medium text-muted-foreground">KRA Status: </span>
             <span className="font-medium">{formatKraStatus(kra.appStatus)}</span>
@@ -410,7 +416,7 @@ export function KraInfoView({
           <div className="flex flex-col sm:flex-row gap-3 items-start">
             <Button
               className="flex items-center gap-1 w-full sm:w-auto"
-              disabled={!confirmed || isPending || !canProceedWithExistingKyc}
+              disabled={!confirmed || isPending || !canProceedWithExistingKyc || isAllowedKraStatus(kra.status)}
               onClick={async () => {
                 const result = await Swal.fire({
                   title: "Confirm Use of Existing KYC",

@@ -17,16 +17,16 @@ import {
   convertUTCtoIST,
   formatDateCustom,
 } from "@/global/utils/datetime.utils";
+import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import useAppCookie from "@/hooks/useAppCookie.hook";
-import { IoMdArrowDropright } from "react-icons/io";
 import apiGateway from "@root/apiGateway";
 import { appSchema } from "@root/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import { ZodError } from "zod";
-import { zodErrorToErrorMap } from "@/global/utils/validation.utils";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
 import { useKycDataStorage } from "../../../_store/useKycDataStorage";
 import { usePanCardVerifyHook } from "./_hooks/usePanCardVerifyHook";
@@ -54,8 +54,9 @@ function IdentityValidationForm() {
   );
   const kraRequestMutation = useMutation({
     mutationKey: ["createKraVerifyRequest"],
-    mutationFn: async (payload: { pan: string; dob: string }) =>
-      panKycApi.createKraVerifyRequest(payload),
+    mutationFn: async (payload: { pan: string; dob: string }) => {
+      return await panKycApi.createKraVerifyRequest(payload);
+    },
     onSuccess: (res) => {
       if (res.responseData) {
         setKraResponse(res.responseData);
@@ -82,6 +83,7 @@ function IdentityValidationForm() {
   const profile = profileQuery.data;
   const isRekyc = profile?.kycStatus === "RE_KYC";
   const existingPan = profile?.panCard?.panCardNo ?? "";
+  const isVerifying = isPending || kraRequestMutation.isPending;
 
   useEffect(() => {
     setDateOfBirth(
@@ -123,7 +125,17 @@ function IdentityValidationForm() {
   };
 
   return (
-    <Card accountMode>
+    <Card accountMode className="relative">
+      {isVerifying && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-[1px]">
+          <div className="mx-4 flex max-w-md items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-lg">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <p className="text-sm font-medium">
+              Please wait while we check your KYC details.
+            </p>
+          </div>
+        </div>
+      )}
       <CardHeader accountMode>
         <CardTitle className="font-normal">Enter PAN Details</CardTitle>
       </CardHeader>
@@ -337,7 +349,7 @@ function IdentityValidationForm() {
         <Button
           className="flex items-center gap-1 w-full sm:w-auto"
           onClick={handleContinueOrPanVerify}
-          disabled={isPending || kraRequestMutation.isPending}
+          disabled={isVerifying}
         >
           {kraFailed ? "Proceed to PAN Verification" : "Continue to Verify"}
           <div className="flex justify-center items-center p-0 h-full">

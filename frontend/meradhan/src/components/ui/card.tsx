@@ -12,8 +12,8 @@ function Card({
     <div
       data-slot="card"
       className={cn(
-        "flex flex-col gap-3 md:gap-0 bg-card py-2 md:py-4 border rounded-lg border-[#E1E6E8]",
-        accountMode && "px-0 py-0 lg:py-6 border-0 border-gray-200 lg:border-1",
+        "flex flex-col gap-3 bg-card py-2 md:py-4 border rounded-lg border-[#E1E6E8]",
+        accountMode && "px-0 py-0 lg:py-6 border-0 border-gray-200 lg:border",
         className
       )}
       {...rest}

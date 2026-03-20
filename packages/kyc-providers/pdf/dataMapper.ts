@@ -147,6 +147,11 @@ export type Root = {
     terms: boolean;
   };
   stepIndex: number;
+  /**
+   * Set by Meradhan KYC flow: RE-KYC submission → "UPDATE", first-time KYC → "NEW".
+   * When absent, PDF falls back to `user.kycStatus === "RE_KYC"` for Application Type checkboxes.
+   */
+  kycApplicationType?: "NEW" | "UPDATE";
   user: {
     emailAddress: string;
     firstName: string;
@@ -161,6 +166,13 @@ export type Root = {
 // ============================================
 // PAGE PROP TYPES
 // ============================================
+
+/** Data for the “KYC DETAILS AS PER KRA RECORDS” box on PDF pages 1–2 */
+export type KraPdfCalloutData = {
+  name: string;
+  pan: string;
+  retrievedAt: string;
+};
 
 export type Page1Props = {
   applicationType: "NEW" | "UPDATE";
@@ -187,8 +199,12 @@ export type Page1Props = {
   | "OTHERS";
   profilePic?: string;
   signature?: string;
+  /** When true (existing KRA path), Page1 omits photo & wet signature — not captured in that flow */
+  omitPage1PhotoAndSignature?: boolean;
   kycNo: string;
   aadhaarNo: string;
+  /** Present when user used existing KRA — rendered as callout above footer on PDF pages 1–2 */
+  kraCallout?: KraPdfCalloutData;
 };
 
 export type AddressType = {
@@ -220,6 +236,7 @@ export type Page2Props = {
   | "NPR"
   | "OTHERS";
   aadharNo: string;
+  kraCallout?: KraPdfCalloutData;
 };
 
 export type Page3Props = {
@@ -441,6 +458,91 @@ const getFullName = (data: Root): string => {
     } ${data.step_1?.pan?.lastName || ""}`.trim();
 };
 
+/**
+ * Parse KRA/CVL timestamps and ISO strings into a local Date.
+ * KRA often sends `DD/MM/YYYY HH:mm:ss` (e.g. 14/03/2026 01:19:58) — not reliably parsed by `new Date()`.
+ */
+function parseKraTimestampToDate(raw: string): Date | null {
+  const s = raw.trim();
+  if (!s) return null;
+
+  // DD/MM/YYYY HH:mm:ss
+  const slash = s.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}):(\d{2}))?/,
+  );
+  if (slash) {
+    const day = Number(slash[1]);
+    const month = Number(slash[2]) - 1;
+    const year = Number(slash[3]);
+    const h = slash[4] != null ? Number(slash[4]) : 0;
+    const min = slash[5] != null ? Number(slash[5]) : 0;
+    const sec = slash[6] != null ? Number(slash[6]) : 0;
+    const d = new Date(year, month, day, h, min, sec);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  // DD-MM-YYYY HH:mm:ss
+  const dash = s.match(
+    /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s+(\d{1,2}):(\d{2}):(\d{2}))?/,
+  );
+  if (dash) {
+    const day = Number(dash[1]);
+    const month = Number(dash[2]) - 1;
+    const year = Number(dash[3]);
+    const h = dash[4] != null ? Number(dash[4]) : 0;
+    const min = dash[5] != null ? Number(dash[5]) : 0;
+    const sec = dash[6] != null ? Number(dash[6]) : 0;
+    const d = new Date(year, month, day, h, min, sec);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** PDF callout line: `20-Mar-2026 17:10:20` */
+function formatKraPdfTimestamp(iso?: string | null): string {
+  const raw = iso != null && String(iso).trim() !== "" ? String(iso).trim() : "";
+  let d: Date | null = raw ? parseKraTimestampToDate(raw) : null;
+  if (!d) d = new Date();
+  if (Number.isNaN(d.getTime())) d = new Date();
+
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mon = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ][d.getMonth()];
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  return `${dd}-${mon}-${yyyy} ${hh}:${mm}:${ss}`;
+}
+
+function buildKraCalloutData(data: Root): KraPdfCalloutData | undefined {
+  const step1 = data.step_1 as
+    | { usedExistingKra?: boolean; kraResponse?: KraResponseInData }
+    | undefined;
+  if (!step1?.usedExistingKra || !step1.kraResponse) return undefined;
+  const k = step1.kraResponse;
+  const name = (k.appName?.trim() || getFullName(data)).trim();
+  const pan = (k.appPanNo?.trim() || data.step_1?.pan?.panCardNo || "").trim();
+  const retrievedAt = formatKraPdfTimestamp(
+    k?.appDnlddt ?? k?.updatedAt ?? k?.createdAt ?? undefined,
+  );
+  return { name, pan, retrievedAt };
+}
+
 const getFirstLastName = (data: Root) => ({
   firstName: data.step_1?.pan?.firstName || "",
   lastName: data.step_1?.pan?.lastName || "",
@@ -448,6 +550,10 @@ const getFirstLastName = (data: Root) => ({
 
 /** KRA response shape when user chose Use Existing KYC (optional on step_1) */
 type KraResponseInData = {
+  appName?: string | null;
+  appPanNo?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   appGen?: string | null;
   appCorAdd1?: string | null;
   appCorAdd2?: string | null;
@@ -461,6 +567,7 @@ type KraResponseInData = {
   appPerCity?: string | null;
   appPerState?: string | null;
   appPerPincd?: string | null;
+  appDnlddt?: string | null;
 };
 
 const getAddress = (data: Root) => {
@@ -536,20 +643,68 @@ const getPrimaryDemat = (data: Root) => {
 // PAGE MAPPERS
 // ============================================
 
+/** PDF “Application Type”: New vs Update (Re-KYC). */
+function resolveApplicationType(data: Root): "NEW" | "UPDATE" {
+  if (data.kycApplicationType === "NEW" || data.kycApplicationType === "UPDATE") {
+    return data.kycApplicationType;
+  }
+  return data.user?.kycStatus === "RE_KYC" ? "UPDATE" : "NEW";
+}
+
+/** Map source gender to PDF checkboxes; omit/undefined = do not tick any option when unknown */
+function resolveGenderForPdf(
+  data: Root,
+  usedKra: boolean,
+  step1: { usedExistingKra?: boolean; kraResponse?: KraResponseInData } | undefined,
+): "MALE" | "FEMALE" | "OTHER" | undefined {
+  if (usedKra && step1?.kraResponse?.appGen) {
+    const raw = String(step1.kraResponse.appGen).trim().toUpperCase();
+    if (raw === "M") return "MALE";
+    if (raw === "F") return "FEMALE";
+    return undefined;
+  }
+  const aadhaarG = data.step_1?.pan?.response?.details?.aadhaar?.gender;
+  if (aadhaarG) {
+    const g = String(aadhaarG).trim().toUpperCase();
+    if (g === "M") return "MALE";
+    if (g === "F") return "FEMALE";
+    if (g === "T" || g === "TRANSGENDER" || g === "O" || g === "OTHER") {
+      return "OTHER";
+    }
+    return undefined;
+  }
+  const stepGender = (data.step_1 as { gender?: string }).gender;
+  if (stepGender) {
+    const g = String(stepGender).trim().toUpperCase();
+    if (g === "MALE" || g === "M") return "MALE";
+    if (g === "FEMALE" || g === "F") return "FEMALE";
+    if (
+      g === "OTHER" ||
+      g === "TRANSGENDER" ||
+      g === "T" ||
+      g === "NON_BINARY"
+    ) {
+      return "OTHER";
+    }
+  }
+  return undefined;
+}
+
 export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => {
   const step1 = data.step_1 as { usedExistingKra?: boolean; kraResponse?: KraResponseInData } | undefined;
   const usedKra = step1?.usedExistingKra && step1?.kraResponse;
-  let gender: "MALE" | "FEMALE" | "OTHER" = "OTHER";
-  if (usedKra && step1.kraResponse?.appGen) {
-    gender = step1.kraResponse.appGen === "M" ? "MALE" : step1.kraResponse.appGen === "F" ? "FEMALE" : "OTHER";
-  } else if (data.step_1?.pan?.response?.details?.aadhaar?.gender) {
-    const g = data.step_1.pan.response.details.aadhaar.gender;
-    gender = g === "M" ? "MALE" : g === "F" ? "FEMALE" : "OTHER";
-  }
+  const gender = resolveGenderForPdf(data, Boolean(usedKra), step1);
   const aadhaarNo = usedKra ? "" : (data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "");
 
+  const profilePic = usedKra
+    ? ""
+    : await getFileDataUri(data.step_1?.face?.url || "");
+  const signature = usedKra
+    ? ""
+    : await getFileDataUri(data.step_1?.sign?.url || "");
+
   return {
-    applicationType: "NEW",
+    applicationType: resolveApplicationType(data),
     kycType: "NORMAL",
     kycMode: "ONLINE",
     panNo: data.step_1?.pan?.panCardNo || "",
@@ -564,11 +719,14 @@ export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => {
     nationality: "INDIAN",
     residentialStatus: data.step_2?.residentialStatus || "",
     occupationType: data.step_2?.occupationType || "",
-    verifyWith: usedKra ? "OTHERS" : "AADHAAR",
-    profilePic: await getFileDataUri(data.step_1?.face?.url || ""),
-    signature: await getFileDataUri(data.step_1?.sign?.url || ""),
+    /** KRA flow: leave unset so no PoI checkbox is ticked */
+    verifyWith: usedKra ? undefined : "AADHAAR",
+    profilePic,
+    signature,
+    omitPage1PhotoAndSignature: Boolean(usedKra),
     kycNo: "MD" + (100 + (data?.user?.id || 0)),
     aadhaarNo,
+    kraCallout: buildKraCalloutData(data),
   };
 };
 
@@ -621,8 +779,10 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
         sameAsPermanentAddress: isSameAddress,
         data: isSameAddress ? permanentAddress : currentAddressData,
       },
-      proofWith: usedKra ? "OTHERS" : "AADHAAR",
+      /** KRA flow: leave unset so no PoA checkbox is ticked */
+      proofWith: undefined,
       aadharNo: data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "",
+      kraCallout: buildKraCalloutData(data),
     };
   }
 
@@ -680,8 +840,9 @@ export const mapDataForPage2 = (data: Root): Page2Props => {
       sameAsPermanentAddress: isSameAddresss,
       data: isSameAddresss ? permanentAddress : currentAddress,
     },
-    proofWith: usedKra ? "OTHERS" : "AADHAAR",
+    proofWith: usedKra ? undefined : "AADHAAR",
     aadharNo: data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "",
+    kraCallout: buildKraCalloutData(data),
   };
 };
 
@@ -1002,56 +1163,67 @@ export type AllPagesData = {
   page48: Page48Props;
 };
 
-export const mapAllPages = async (data: Root): Promise<AllPagesData> => ({
-  page1: await mapDataForPage1(data),
-  page2: mapDataForPage2(data),
-  page3: mapDataForPage3(data),
-  page4: await mapDataForPage4(data),
-  page5: mapDataForPage5(data),
-  page6: await mapDataForPage6(data),
-  page7: await mapDataForPage7(data),
-  page8: await mapDataForPage8(data),
-  page9: await mapDataForPage9(data),
-  page10: mapDataForPage10(data),
-  page11: await mapDataForPage11(data),
-  page12: await mapDataForPage12(data),
-  page13: await mapDataForPage13(data),
-  page14: await mapDataForPage14(data),
-  page15: await mapDataForPage15(data),
-  page16: await mapDataForPage16(data),
-  page17: await mapDataForPage17(data),
-  page18: mapDataForPage18(data),
-  page19: mapDataForPage19(data),
-  page20: mapDataForPage20(data),
-  page21: mapDataForPage21(data),
-  page22: mapDataForPage22(data),
-  page23: mapDataForPage23(data),
-  page24: mapDataForPage24(data),
-  page25: mapDataForPage25(data),
-  page26: mapDataForPage26(data),
-  page27: mapDataForPage27(data),
-  page28: mapDataForPage28(data),
-  page29: mapDataForPage29(data),
-  page30: mapDataForPage30(data),
-  page31: mapDataForPage31(data),
-  page32: mapDataForPage32(data),
-  page33: mapDataForPage33(data),
-  page34: mapDataForPage34(data),
-  page35: mapDataForPage35(data),
-  page36: mapDataForPage36(data),
-  page36_1: mapDataForPage36_1(data),
-  page36_2: mapDataForPage36_2(data),
-  page36_3: mapDataForPage36_3(data),
-  page37: mapDataForPage37(data),
-  page38: mapDataForPage38(data),
-  page39: await mapDataForPage39(data),
-  page40: mapDataForPage40(data),
-  page41: mapDataForPage41(data),
-  page42: await mapDataForPage42(data),
-  page43: mapDataForPage43(data),
-  page44: mapDataForPage44(data),
-  page45: mapDataForPage45(data),
-  page46: mapDataForPage46(data),
-  page47: await mapDataForPage47(data),
-  page48: await mapDataForPage48(data),
-});
+export const mapAllPages = async (data: Root): Promise<AllPagesData> => {
+  const page1 = await mapDataForPage1(data);
+  const omitAadhaarPanAttachmentPages = Boolean(page1.omitPage1PhotoAndSignature);
+  const page6 = omitAadhaarPanAttachmentPages
+    ? { eAaDhar: "" }
+    : await mapDataForPage6(data);
+  const page7 = omitAadhaarPanAttachmentPages
+    ? { ePan: "" }
+    : await mapDataForPage7(data);
+
+  return {
+    page1,
+    page2: mapDataForPage2(data),
+    page3: mapDataForPage3(data),
+    page4: await mapDataForPage4(data),
+    page5: mapDataForPage5(data),
+    page6,
+    page7,
+    page8: await mapDataForPage8(data),
+    page9: await mapDataForPage9(data),
+    page10: mapDataForPage10(data),
+    page11: await mapDataForPage11(data),
+    page12: await mapDataForPage12(data),
+    page13: await mapDataForPage13(data),
+    page14: await mapDataForPage14(data),
+    page15: await mapDataForPage15(data),
+    page16: await mapDataForPage16(data),
+    page17: await mapDataForPage17(data),
+    page18: mapDataForPage18(data),
+    page19: mapDataForPage19(data),
+    page20: mapDataForPage20(data),
+    page21: mapDataForPage21(data),
+    page22: mapDataForPage22(data),
+    page23: mapDataForPage23(data),
+    page24: mapDataForPage24(data),
+    page25: mapDataForPage25(data),
+    page26: mapDataForPage26(data),
+    page27: mapDataForPage27(data),
+    page28: mapDataForPage28(data),
+    page29: mapDataForPage29(data),
+    page30: mapDataForPage30(data),
+    page31: mapDataForPage31(data),
+    page32: mapDataForPage32(data),
+    page33: mapDataForPage33(data),
+    page34: mapDataForPage34(data),
+    page35: mapDataForPage35(data),
+    page36: mapDataForPage36(data),
+    page36_1: mapDataForPage36_1(data),
+    page36_2: mapDataForPage36_2(data),
+    page36_3: mapDataForPage36_3(data),
+    page37: mapDataForPage37(data),
+    page38: mapDataForPage38(data),
+    page39: await mapDataForPage39(data),
+    page40: mapDataForPage40(data),
+    page41: mapDataForPage41(data),
+    page42: await mapDataForPage42(data),
+    page43: mapDataForPage43(data),
+    page44: mapDataForPage44(data),
+    page45: mapDataForPage45(data),
+    page46: mapDataForPage46(data),
+    page47: await mapDataForPage47(data),
+    page48: await mapDataForPage48(data),
+  };
+};
