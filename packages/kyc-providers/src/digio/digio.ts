@@ -129,13 +129,24 @@ export class DigioSDK {
     }
   }
 
+  /** KRA path PDF has 2 fewer pages (no e-Aadhaar / e-PAN attachment pages) → fewer sign slots. */
+  static readonly ESIGN_PAGE_COUNT_DEFAULT = 46;
+  static readonly ESIGN_PAGE_COUNT_KRA = 44;
+
   async esignRequest(
     filePath: string,
-    { email, name }: { email: string; name: string },
+    {
+      email,
+      name,
+      useKraKyc,
+    }: { email: string; name: string; useKraKyc?: boolean },
   ) {
     try {
       const form = new FormData();
       const time = new Date().getTime();
+      const signPageCount = useKraKyc
+        ? DigioSDK.ESIGN_PAGE_COUNT_KRA
+        : DigioSDK.ESIGN_PAGE_COUNT_DEFAULT;
 
       // Attach the PDF as binary
       // Attach the PDF file as binary stream
@@ -154,7 +165,7 @@ export class DigioSDK {
           display_on_page: "custom",
           sign_coordinates: {
             [email]: Object.fromEntries(
-              Array.from({ length: 46 }, (_, i) => [
+              Array.from({ length: signPageCount }, (_, i) => [
                 (i + 1).toString(),
                 [{ llx: 420, lly: 50, urx: 555, ury: 100 }],
               ]),

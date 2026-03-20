@@ -4,6 +4,7 @@ import LogoSvg from "./images/LogoSvg";
 
 import { mapAllPages } from "./dataMapper";
 import Footer from "./elements/Footer";
+import KraRecordsCallout from "./elements/KraRecordsCallout";
 import Page1 from "./pages/Page1";
 import Page10 from "./pages/Page10";
 import Page11 from "./pages/Page11";
@@ -138,13 +139,20 @@ const MdPdf = ({
     <Document>
       <Page size="A4" style={{ fontFamily: "Poppins" }}  >
         <LogoSvg showAll={true} />
+        {/* Page1: photo/signature omitted when mapDataForPage1 sets omitPage1PhotoAndSignature (existing KRA flow) */}
         <Page1 {...pageData.page1} />
+        {pageData.page1.kraCallout ? (
+          <KraRecordsCallout {...pageData.page1.kraCallout} />
+        ) : null}
         <Footer />
       </Page>
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
         <LogoSvg />
         <Page2 {...pageData.page2} />
+        {pageData.page2.kraCallout ? (
+          <KraRecordsCallout {...pageData.page2.kraCallout} />
+        ) : null}
         <Footer />
       </Page>
 
@@ -166,17 +174,22 @@ const MdPdf = ({
         <Footer />
       </Page>
 
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg />
-        <Page6 {...pageData.page6} />
-        <Footer />
-      </Page>
+      {/* e-Aadhaar / e-PAN attachment pages omitted when existing KRA flow (no Digio Aadhaar/PAN PDFs) */}
+      {!pageData.page1.omitPage1PhotoAndSignature ? (
+        <Page size="A4" style={{ fontFamily: "Poppins" }}>
+          <LogoSvg />
+          <Page6 {...pageData.page6} />
+          <Footer />
+        </Page>
+      ) : null}
 
-      <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvg />
-        <Page7 {...pageData.page7} />
-        <Footer />
-      </Page>
+      {!pageData.page1.omitPage1PhotoAndSignature ? (
+        <Page size="A4" style={{ fontFamily: "Poppins" }}>
+          <LogoSvg />
+          <Page7 {...pageData.page7} />
+          <Footer />
+        </Page>
+      ) : null}
 
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
         <LogoSvg />

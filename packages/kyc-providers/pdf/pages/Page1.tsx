@@ -7,6 +7,8 @@ import { formatDate } from "../helper";
 import type { Page1Props } from "../dataMapper";
 
 function Page1(data: Page1Props) {
+  const hidePhotoSign = Boolean(data.omitPage1PhotoAndSignature);
+
   return (
     <View style={tw("px-4")}>
       <View style={tw(" border-b border-gray-200 pb-4 w-[90%] mx-auto")}>
@@ -227,31 +229,84 @@ function Page1(data: Page1Props) {
             `w-48 border border-gray-300 border-t-0 flex flex-col justify-start items-start`
           )}
         >
-          {/* <Image source={data.profilePic} style={tw(`max-w-28 min-w-28 h-38 min-h-38 object-cover overflow-hidden border`)}  /> */}
-          <view
-            style={{
-              width: 110,
-              height: 120,
-              overflow: "hidden",
-            }}
-          >
-            <Image
-              source={{
-                uri: data.profilePic || "",
-              }}
+          {!hidePhotoSign && data.profilePic ? (
+            <View
               style={{
                 width: 110,
                 height: 120,
-                objectFit: "cover",
                 overflow: "hidden",
-                marginTop: -6,
+              }}
+            >
+              <Image
+                source={{
+                  uri: data.profilePic,
+                }}
+                style={{
+                  width: 110,
+                  height: 120,
+                  objectFit: "cover",
+                  overflow: "hidden",
+                  marginTop: -6,
+                }}
+              />
+            </View>
+          ) : hidePhotoSign ? (
+            <View
+              style={{
+                width: 110,
+                height: 120,
+                paddingHorizontal: 4,
+                paddingVertical: 6,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 8,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  marginBottom: 4,
+                  color: "#374151",
+                }}
+              >
+                PHOTOGRAPH
+              </Text>
+              <Text
+                style={{
+                  fontSize: 7,
+                  textAlign: "center",
+                  lineHeight: 1.35,
+                  color: "#000000",
+                }}
+              >
+                Please affix your recent <br /> passport size photograph <br /> and sign
+                across it.
+              </Text>
+            </View>
+          ) : (
+            <View
+              style={{
+                width: 110,
+                height: 120,
+                borderWidth: 1,
+                borderStyle: "solid",
+                borderColor: "#d1d5db",
               }}
             />
-          </view>
+          )}
 
-          <Image source={{
-            uri: data.signature || ""
-          }} style={tw(`w-auto h-10 mx-auto`)} />
+          {!hidePhotoSign && data.signature ? (
+            <Image
+              source={{
+                uri: data.signature,
+              }}
+              style={tw(`w-auto h-10 mx-auto`)}
+            />
+          ) : (
+            <View style={{ height: 40 }} />
+          )}
         </View>
       </View>
 

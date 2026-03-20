@@ -266,4 +266,6 @@ export type KycDataStorage = {
     }
   }
   stepIndex: number
+  /** PDF Application Type: Re-KYC → UPDATE, first-time → NEW */
+  kycApplicationType?: "NEW" | "UPDATE"
 }

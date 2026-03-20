@@ -13,7 +13,7 @@ export default function KraInfoStep() {
   const { state } = useKycDataStorage();
   const kra = state.step_1.kraResponse;
   const { handleUseExisting, handleStartFresh, isPending } = useKraInfoStep();
-  const [kraConfirmed, setKraConfirmed] = useState(false);
+  const [kraConfirmed, setKraConfirmed] = useState(true);
 
   if (!kra) {
     return (
