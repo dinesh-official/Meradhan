@@ -102,8 +102,7 @@ export class LeadController {
         id: currentUserId,
       },
     });
-    const isAdmin = user?.role === "ADMIN";
-
+    const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role ?? "");
     const response = await this.manager.filterLead(
       payload,
       isAdmin ? undefined : user?.id

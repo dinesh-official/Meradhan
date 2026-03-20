@@ -57,7 +57,7 @@ export const isAllowedKraStatus = (status: string): boolean => {
   return ["02", "07", "12"].includes(status); // 02: KYC Registered, 07: KYC Validated, 12: KYC Registered
 };
 
-function formatKraStatus(code: string | null): string {
+function formatKraStatus(code: string | null | undefined): string {
   if (!code) return "-";
   const c = String(code).trim();
   return KRA_STATUS_LABELS[c] ?? code;
@@ -239,12 +239,12 @@ export function KraInfoView({
         </CardTitle>
       </CardHeader>
       <CardContent accountMode className="space-y-6">
-        {/* {kra.status && (
+        {kra.status && (
           <div className="rounded-md bg-muted/60 px-3 py-2 text-sm">
             <span className="font-medium text-muted-foreground">KRA Status: </span>
-            <span className="font-medium">{formatKraStatus(kra.status)}</span>
+            <span className="font-medium">{formatKraStatus(kra.appStatus)}</span>
           </div>
-        )} */}
+        )}
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Personal Information
