@@ -79,7 +79,7 @@ function MobSideBar() {
 
         {/* Footer */}
         <div className="px-6 py-3 border-gray-200 border-t text-gray-500 text-xs">
-          © {new Date().getFullYear()} MeraDhan LLP. All Rights Reserved
+          © {new Date().getFullYear()} MeraDhan LLP. All Rights Reserved  <small className="text-gray-400">V 1.0.0</small>
         </div>
       </SheetContent>
     </Sheet>
