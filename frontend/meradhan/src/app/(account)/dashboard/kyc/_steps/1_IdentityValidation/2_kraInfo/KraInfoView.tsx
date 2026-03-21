@@ -131,7 +131,7 @@ function formatKraState(code: string | null): string {
   if (/^\d+$/.test(c)) {
     const key = String(parseInt(c, 10)).padStart(3, "0");
     const label = KRA_STATE_LABELS[key];
-    if (label) return `${label} (${key})`;
+    if (label) return `${label}`;
     return c;
   }
   return c;
