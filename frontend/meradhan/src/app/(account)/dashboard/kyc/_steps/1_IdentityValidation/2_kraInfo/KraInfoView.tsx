@@ -56,7 +56,7 @@ const KRA_STATUS_LABELS: Record<string, string> = {
 
 /** True when APP_STATUS allows proceeding with existing KRA (not blocked). */
 export const isAllowedKraStatus = (status: string): boolean => {
-  return ["00", "02", "07", "12"].includes(String(status ?? "").trim());
+  return ["02", "07", "12"].includes(String(status ?? "").trim());
   // 00: not specified / placeholder, 02/12: KYC Registered, 07: KYC Validated
 };
 
@@ -347,7 +347,7 @@ export function KraInfoView({
                 !confirmed ||
                 isPending ||
                 !canProceedWithExistingKyc ||
-                !isAllowedKraStatus(kra.status)
+                !isAllowedKraStatus(kra.appStatus ?? "")
               }
               onClick={async () => {
                 const result = await Swal.fire({
