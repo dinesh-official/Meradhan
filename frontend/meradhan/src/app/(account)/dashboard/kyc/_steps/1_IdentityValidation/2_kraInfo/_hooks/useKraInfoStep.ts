@@ -92,6 +92,13 @@ const KRA_NATIONALITY_TO_FORM: Record<string, string> = {
   "02": "OTHER",
 };
 
+/** KRA "00" / "0" = not specified — must not prefill selects with invalid values */
+function isKraUnspecifiedCode(code: string | null | undefined): boolean {
+  if (code == null || String(code).trim() === "") return true;
+  const c = String(code).trim();
+  return c === "00" || c === "0";
+}
+
 export function useKraInfoStep() {
   const {
     state,
@@ -123,7 +130,8 @@ export function useKraInfoStep() {
     }
     if (kra.appFName) setStep2PersonalData("fatSpuName", kra.appFName);
     // Occupation: map KRA code to form value; fallback to "Others" with raw in otherOccupationName
-    if (kra.appOcc) {
+    // Skip "00" — not a valid option; user chooses on Personal Details
+    if (kra.appOcc && !isKraUnspecifiedCode(kra.appOcc)) {
       const code = String(kra.appOcc).trim();
       const mapKey = kraOccupationCodeToMapKey(code);
       const formOcc = KRA_OCC_TO_FORM[mapKey] ?? KRA_OCC_TO_FORM[code] ?? "Others";
@@ -135,9 +143,14 @@ export function useKraInfoStep() {
       }
     }
     // Annual Gross Income: map KRA code to form value (0-1L, 1-5L, etc.)
-    if (kra.appIncome) {
+    // Skip "00" — would set invalid select value "00"
+    if (kra.appIncome && !isKraUnspecifiedCode(kra.appIncome)) {
       const code = String(kra.appIncome).trim();
-      const formIncome = KRA_INCOME_TO_FORM[code] ?? kra.appIncome;
+      const normalized = /^\d+$/.test(code)
+        ? String(parseInt(code, 10)).padStart(2, "0")
+        : code;
+      const formIncome =
+        KRA_INCOME_TO_FORM[normalized] ?? KRA_INCOME_TO_FORM[code] ?? kra.appIncome;
       setStep2PersonalData("annualGrossIncome", formIncome);
     }
     // Nationality: map KRA code to form value (IN - Indian, OTHER)
