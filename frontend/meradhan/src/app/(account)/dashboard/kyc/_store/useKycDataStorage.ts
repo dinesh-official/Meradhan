@@ -88,6 +88,8 @@ export type QuestionnaireData = z.infer<schema["riskProfileDataSchema"]>;
 // 🗂️ Root Type: KYC Data Storage
 // ==========================
 export interface KycDataStorage {
+  /** PDF Application Type: Re-KYC → UPDATE, first-time KYC → NEW (persisted with KYC progress) */
+  kycApplicationType?: "NEW" | "UPDATE";
   stepIndex: number;
   names: {
     fullNameAsPerPan: string;
@@ -109,6 +111,7 @@ export interface KycDataStorage {
 // 🧩 Initial Default Data
 // ==========================
 const initData: KycDataStorage = {
+  kycApplicationType: undefined,
   stepIndex: 0,
   names: {
     fullNameAsPerPan: "",
@@ -229,6 +232,7 @@ const initData: KycDataStorage = {
 export const useKycDataStorage = create<{
   state: KycDataStorage;
   setState: (state: KycDataStorage) => void;
+  setKycApplicationType: (type: "NEW" | "UPDATE") => void;
   updateStep: <K extends keyof KycDataStorage>(
     step: K,
     data: KycDataStorage[K],
@@ -278,6 +282,10 @@ export const useKycDataStorage = create<{
   setStep6Data: (Key: keyof KycDataStorage["step_6"], data: any) => void;
 }>((set) => ({
   state: initData,
+  setKycApplicationType: (type) =>
+    set((prev) => ({
+      state: { ...prev.state, kycApplicationType: type },
+    })),
   setNames: (key: keyof KycDataStorage["names"], data: string) =>
     set({
       state: {

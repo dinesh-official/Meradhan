@@ -317,10 +317,15 @@ export class CustomerKycKycService {
       lastName: panData?.["lastName"],
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const step1 = (kycData?.data as any)?.step_1 as any;
+    const useKraKyc = Boolean(step1?.usedExistingKra && step1?.kraResponse);
+
     return await this.kycProvider.esignRequest({
       email: user.emailAddress,
       name: fullName,
       userId: userID,
+      useKraKyc,
     });
   }
 
@@ -484,8 +489,7 @@ export class CustomerKycKycService {
 
       const kraDob = normalizeDob(p?.APP_DOB_DT);
       const userDob = normalizeDob(dob);
-      const isDOBMatch =
-        kraDob.length > 0 && userDob.length > 0 && kraDob === userDob;
+      const isDOBMatch = kraDob.length > 0 && userDob.length > 0 && kraDob === userDob;
 
       const kraPan = normalizePan(p?.APP_PAN_NO);
       const userPan = normalizePan(pan);
@@ -493,13 +497,11 @@ export class CustomerKycKycService {
 
       const kraMobile = normalizeMobile(p?.APP_MOB_NO);
       const userMobile = normalizeMobile(user.phoneNo);
-      const isMobileMatch =
-        kraMobile.length > 0 && userMobile.length > 0 && kraMobile === userMobile;
+      const isMobileMatch = kraMobile.length > 0 && userMobile.length > 0 && kraMobile === userMobile;
 
       const kraEmail = (p?.APP_EMAIL ?? "").trim().toLowerCase();
       const userEmail = (user.emailAddress ?? "").trim().toLowerCase();
-      const isEmailMatch =
-        kraEmail.length > 0 && userEmail.length > 0 && kraEmail === userEmail;
+      const isEmailMatch = kraEmail.length > 0 && userEmail.length > 0 && kraEmail === userEmail;
 
       let appSummRecId: number | undefined;
       if (summ) {
@@ -632,10 +634,13 @@ export class CustomerKycKycService {
 
 
       console.log("========================== Returning KRA Record ==========================", new Date());
-      return kraRecord;
+      return {
+        ...kraRecord,
+        status: kraDetails.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS,
+      };
     }
 
-    throw new AppError(`KRA - ${status}`, {
+    throw new AppError(`${kraDetails.APP_RES_ROOT.APP_PAN_INQ.APP_STATUS}`, {
       code: "KRA_VERIFICATION_FAILED",
       statusCode: 400,
     });
@@ -675,7 +680,7 @@ export class CustomerKycKycService {
       APP_TYPE: "I",
       APP_EMAIL: mockEmail,
       APP_REGNO: "",
-      APP_DNLDDT: "14/03/2026 01:19:58",
+      APP_DNLDDT: "18/03/2026 01:19:58",
       APP_DOB_DT: mockDob,
       APP_DOI_DT: "",
       APP_FAX_NO: "",

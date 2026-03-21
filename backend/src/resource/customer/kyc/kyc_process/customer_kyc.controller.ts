@@ -296,7 +296,13 @@ export class CustomerKycKycController {
   // download kyc pdf
   async downloadKycPdf(req: Request, res: Response) {
     try {
-      const id = Number(req.params.id!);
+      const id = Number(req.customer?.id);
+      if (!Number.isInteger(id) || id <= 0) {
+        throw new AppError("Invalid user id for KYC PDF", {
+          code: "INVALID_USER_ID",
+          statusCode: 400,
+        });
+      }
 
       // Generate PDF and get file path
       const filePath = await this.panKycService.downloadKycPdf(id);

@@ -376,15 +376,19 @@ export class KycProvider extends DigioKycFileHelper {
     email,
     name,
     userId,
+    useKraKyc,
   }: {
     name: string;
     email: string;
     userId: number;
+    /** Matches KYC PDF page count for Digio sign_coordinates (2 fewer pages than full flow). */
+    useKraKyc?: boolean;
   }) {
     const file = await this.getKycPdfFile(userId); // pass user id here to get kyc pdf file
     const reqData = await this.digio.esignRequest(file, {
       email,
       name,
+      useKraKyc,
     });
     return reqData;
   }
