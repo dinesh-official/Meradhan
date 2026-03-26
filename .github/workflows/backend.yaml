@@ -14,9 +14,10 @@ jobs:
         uses: actions/checkout@v4
 
       # ✅ Load ALL secrets safely
-      - name: Create .env from GitHub Secrets
+      - name: Create .env file
         shell: bash
         env:
+          # 🔐 ALL YOUR SECRETS
           NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}
           STRAPI_API_TOKEN: ${{ secrets.STRAPI_API_TOKEN }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -83,10 +84,10 @@ jobs:
         run: |
           set -e
 
-          # Create fresh .env
+          # Fresh file
           > .env
 
-          # ✅ Static values
+          # 🌐 STATIC VALUES
           printf "NEXT_PUBLIC_HOST_URL=%s\n" "https://www.meradhan.co" >> .env
           printf "NEXT_PUBLIC_CRM_HOST_URL=%s\n" "https://crm.meradhan.co" >> .env
           printf "NEXT_PUBLIC_BACKEND_HOST_URL=%s\n" "https://api.meradhan.co" >> .env
@@ -95,32 +96,25 @@ jobs:
           printf "NEXT_PUBLIC_DIGIO=%s\n" "production" >> .env
           printf "STRAPI_API_URL=%s\n" "https://spyder.meradhan.co/api" >> .env
           printf "PORT=%s\n" "4000" >> .env
-
           printf "RFQ_CBRICS_ENV=%s\n" "PROD" >> .env
           printf "CBRICS_ENV=%s\n" "PROD" >> .env
 
-          # ✅ AUTO LOAD ALL ENV VARIABLES
+          # 🔐 ALL SECRETS (AUTO WRITE)
           for var in $(compgen -e); do
             case "$var" in
-              PATH|HOME|PWD|SHELL|GITHUB_*|RUNNER_* ) continue ;;
+              NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*|KRA_*|MSG91_*|SMTP_*|CBRICS_*|RFQ_*|DIGIO_*|NDSL_*|NSDL_*|CDSL_*|ENTITY_*|AUTH_*|RAZORPAY_*|S3_*)
+                printf "%s=%s\n" "$var" "${!var}" >> .env
+                ;;
             esac
-
-            value="${!var}"
-
-            if [ -n "$value" ]; then
-              printf "%s=%s\n" "$var" "$value" >> .env
-            fi
           done
 
-      # ✅ Optional safe verification (no secret leak)
-      - name: Verify env count
+      # ✅ Show ONLY your .env (clean)
+      - name: Show .env
         run: |
-          echo "Total env vars loaded: $(wc -l < .env)"
-      - name: Print all env values (DEBUG - REMOVE LATER)
-        run: |
-          echo "===== .env CONTENT ====="
-          cat .env   
+          echo "===== FINAL .env ====="
+          cat .env
 
+      # ✅ AWS Setup
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -128,10 +122,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # ✅ Login ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, Tag & Push Docker Image
+      # ✅ Build & Push
+      - name: Build and Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
           REPOSITORY: meradhan-backend
@@ -140,7 +136,8 @@ jobs:
           docker build -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: Deploy to Amazon ECS
+      # ✅ Deploy ECS
+      - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: meradhan-be-task.json
