@@ -116,6 +116,10 @@ jobs:
       - name: Verify env count
         run: |
           echo "Total env vars loaded: $(wc -l < .env)"
+      - name: Print all env values (DEBUG - REMOVE LATER)
+        run: |
+          echo "===== .env CONTENT ====="
+          cat .env   
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
