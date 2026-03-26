@@ -10,15 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # =========================
-      # Checkout repository
-      # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # =========================
-      # Create .env file safely
-      # =========================
       - name: Generate .env from GitHub Secrets
         shell: bash
         env:
@@ -29,14 +23,9 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          # Add all other secrets here
         run: |
           set -e
           > .env
-          
-          # -------------------------
-          # Static values
-          # -------------------------
           cat <<EOF >> .env
           NEXT_PUBLIC_HOST_URL=https://www.meradhan.co
           NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co
@@ -49,10 +38,6 @@ jobs:
           RFQ_CBRICS_ENV=PROD
           CBRICS_ENV=PROD
           EOF
-
-          # -------------------------
-          # Add secrets dynamically
-          # -------------------------
           for var in $(env | cut -d= -f1); do
             case "$var" in
               NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*|KRA_*|MSG91_*|SMTP_*|CBRICS_*|RFQ_*|DIGIO_*|NDSL_*|NSDL_*|CDSL_*|ENTITY_*|AUTH_*|RAZORPAY_*|S3_*)
@@ -63,22 +48,6 @@ jobs:
             esac
           done
 
-      # =========================
-      # Show .env safely
-      # =========================
-      - name: Show .env (masked for prod)
-        shell: bash
-        run: |
-          echo "===== MASKED .env ====="
-          while IFS='=' read -r key value; do
-            [ -z "$key" ] && continue
-            preview=$(echo "$value" | cut -c1-4)
-            echo "$key=${preview}**** (len:${#value})"
-          done < .env
-
-      # =========================
-      # AWS Configuration
-      # =========================
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -86,27 +55,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # =========================
-      # ECR Login
-      # =========================
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # =========================
-      # Build, Tag & Push Docker
-      # =========================
       - name: Build & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
           REPOSITORY: prod-meradhan-be
           IMAGE_TAG: latest
         run: |
-          docker build -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build --pull -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      # =========================
-      # Deploy ECS Service
-      # =========================
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
