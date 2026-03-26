@@ -14,13 +14,11 @@ jobs:
         uses: actions/checkout@v4
 
       # =========================
-      
       # CREATE .env FILE
       # =========================
       - name: Create .env file
         shell: bash
         env:
-          # 🔐 ALL YOUR SECRETS
           NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}
           STRAPI_API_TOKEN: ${{ secrets.STRAPI_API_TOKEN }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -34,7 +32,6 @@ jobs:
           KRA_PASS_KEY: ${{ secrets.KRA_PASS_KEY }}
           KRA_MOB_NO: ${{ secrets.KRA_MOB_NO }}
           KRA_OKRA_CD_MI_ID: ${{ secrets.KRA_OKRA_CD_MI_ID }}
-          KRA_ENV: ${{ secrets.KRA_ENV }}
 
           MSG91_AUTH_KEY: ${{ secrets.MSG91_AUTH_KEY }}
           MSG91_SIGNUP_TEMPLATE: ${{ secrets.MSG91_SIGNUP_TEMPLATE }}
@@ -90,7 +87,7 @@ jobs:
           # fresh file
           > .env
 
-          # 🌐 STATIC VALUES
+          # STATIC VALUES
           printf "NEXT_PUBLIC_HOST_URL=%s\n" "https://www.meradhan.co" >> .env
           printf "NEXT_PUBLIC_CRM_HOST_URL=%s\n" "https://crm.meradhan.co" >> .env
           printf "NEXT_PUBLIC_BACKEND_HOST_URL=%s\n" "https://api.meradhan.co" >> .env
@@ -102,39 +99,47 @@ jobs:
           printf "RFQ_CBRICS_ENV=%s\n" "PROD" >> .env
           printf "CBRICS_ENV=%s\n" "PROD" >> .env
 
-          # 🔐 WRITE ONLY YOUR VARIABLES (SAFE FILTER)
-          for var in $(env | cut -d= -f1); do
+          # SAFE LOOP (FIXED)
+          while IFS='=' read -r var _; do
             case "$var" in
               NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*|KRA_*|MSG91_*|SMTP_*|CBRICS_*|RFQ_*|DIGIO_*|NDSL_*|NSDL_*|CDSL_*|ENTITY_*|AUTH_*|RAZORPAY_*|S3_*)
                 value="${!var}"
-                value="$(echo "$value" | tr -d '\r')"   # remove hidden chars
+                value="$(echo "$value" | tr -d '\r')"
                 printf "%s=%s\n" "$var" "$value" >> .env
                 ;;
             esac
-          done
+          done < <(env)
 
       # =========================
-      # DEBUG (SAFE)
+      # SAFE DEBUG
       # =========================
-      - name: Debug ENV (length + preview)
+      - name: Debug ENV (masked)
         run: |
           echo "===== DEBUG ENV ====="
-          for var in $(env | cut -d= -f1); do
+          while IFS='=' read -r var _; do
             case "$var" in
               AWS_*|NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*)
                 val="${!var}"
                 echo "$var = len:${#val} preview:${val:0:4}****"
                 ;;
             esac
-          done
+          done < <(env)
 
       # =========================
-      # SHOW .env (CLEAN ONLY)
+      # SAFE .env PREVIEW
       # =========================
-      - name: Show .env
+      - name: Show .env (masked)
         run: |
           echo "===== FINAL .env ====="
-          cat .env
+          if [ -f .env ]; then
+            while IFS='=' read -r key value; do
+              [ -z "$key" ] && continue
+              preview=$(echo "$value" | cut -c1-4)
+              echo "$key=${preview}**** (len:${#value})"
+            done < .env
+          else
+            echo ".env file not found"
+          fi
 
       # =========================
       # AWS LOGIN
