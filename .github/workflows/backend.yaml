@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ SAFE: Load secrets via env (no inline parsing issues)
+      # ✅ Load ALL secrets safely
       - name: Create .env from GitHub Secrets
         shell: bash
         env:
@@ -83,10 +83,10 @@ jobs:
         run: |
           set -e
 
-          # Create fresh env file
+          # Create fresh .env
           > .env
 
-          # Static values
+          # ✅ Static values
           printf "NEXT_PUBLIC_HOST_URL=%s\n" "https://www.meradhan.co" >> .env
           printf "NEXT_PUBLIC_CRM_HOST_URL=%s\n" "https://crm.meradhan.co" >> .env
           printf "NEXT_PUBLIC_BACKEND_HOST_URL=%s\n" "https://api.meradhan.co" >> .env
@@ -99,20 +99,23 @@ jobs:
           printf "RFQ_CBRICS_ENV=%s\n" "PROD" >> .env
           printf "CBRICS_ENV=%s\n" "PROD" >> .env
 
-          # Secrets (SAFE)
-          printf "GRAPHQL_KEY=%s\n" "$NEXT_PUBLIC_GRAPHQL_KEY" >> .env
-          printf "STRAPI_API_TOKEN=%s\n" "$STRAPI_API_TOKEN" >> .env
-          printf "JWT_SECRET=%s\n" "$JWT_SECRET" >> .env
-          printf "DATABASE_URL=%s\n" "$DATABASE_URL" >> .env
-          printf "DIRECT_URL=%s\n" "$DIRECT_URL" >> .env
+          # ✅ AUTO LOAD ALL ENV VARIABLES
+          for var in $(compgen -e); do
+            case "$var" in
+              PATH|HOME|PWD|SHELL|GITHUB_*|RUNNER_* ) continue ;;
+            esac
 
-          printf "REDIS_HOST=%s\n" "$REDIS_HOST" >> .env
-          printf "REDIS_PORT=%s\n" "$REDIS_PORT" >> .env
+            value="${!var}"
 
-          printf "SMTP_SENDER=%s\n" "$SMTP_SENDER" >> .env
-          printf "SMTP_PASS=%s\n" "$SMTP_PASS" >> .env
+            if [ -n "$value" ]; then
+              printf "%s=%s\n" "$var" "$value" >> .env
+            fi
+          done
 
-          printf "RAZORPAY_KEY_SECRET=%s\n" "$RAZORPAY_KEY_SECRET" >> .env
+      # ✅ Optional safe verification (no secret leak)
+      - name: Verify env count
+        run: |
+          echo "Total env vars loaded: $(wc -l < .env)"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -120,9 +123,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Show .env (debug)
-        run: cat .env
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
