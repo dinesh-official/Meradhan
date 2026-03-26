@@ -27,119 +27,32 @@ jobs:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
 
-          KRA_USERNAME: ${{ secrets.KRA_USERNAME }}
-          KRA_PASSWORD: ${{ secrets.KRA_PASSWORD }}
-          KRA_PASS_KEY: ${{ secrets.KRA_PASS_KEY }}
-          KRA_MOB_NO: ${{ secrets.KRA_MOB_NO }}
-          KRA_OKRA_CD_MI_ID: ${{ secrets.KRA_OKRA_CD_MI_ID }}
-
-          MSG91_AUTH_KEY: ${{ secrets.MSG91_AUTH_KEY }}
-          MSG91_SIGNUP_TEMPLATE: ${{ secrets.MSG91_SIGNUP_TEMPLATE }}
-          MSG91_LOGIN_TEMPLATE: ${{ secrets.MSG91_LOGIN_TEMPLATE }}
-          MSG91_VERIFY_TEMPLATE: ${{ secrets.MSG91_VERIFY_TEMPLATE }}
-
-          SMTP_SENDER: ${{ secrets.SMTP_SENDER }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-
-          CBRICS_DOMAIN: ${{ secrets.CBRICS_DOMAIN }}
-          CBRICS_LOGIN: ${{ secrets.CBRICS_LOGIN }}
-          CBRICS_PASSWORD: ${{ secrets.CBRICS_PASSWORD }}
-
-          RFQ_CBRICS_DOMAIN: ${{ secrets.RFQ_CBRICS_DOMAIN }}
-          RFQ_CBRICS_LOGIN: ${{ secrets.RFQ_CBRICS_LOGIN }}
-          RFQ_CBRICS_PASSWORD: ${{ secrets.RFQ_CBRICS_PASSWORD }}
-
-          DIGIO_USERNAME_PASS: ${{ secrets.DIGIO_USERNAME_PASS }}
-          NDSL_REQUESTOR_ID: ${{ secrets.NDSL_REQUESTOR_ID }}
-          NSDL_SECRET_KEY: ${{ secrets.NSDL_SECRET_KEY }}
-          CDSL_AES_KEY: ${{ secrets.CDSL_AES_KEY }}
-          ENTITY_ID: ${{ secrets.ENTITY_ID }}
-
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID }}
-          AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
-          AUTH_FACEBOOK_ID: ${{ secrets.AUTH_FACEBOOK_ID }}
-          AUTH_FACEBOOK_SECRET: ${{ secrets.AUTH_FACEBOOK_SECRET }}
-
-          AUTH_MICROSOFT_ENTRA_ID_ID: ${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ID }}
-          AUTH_MICROSOFT_ENTRA_ID_SECRET: ${{ secrets.AUTH_MICROSOFT_ENTRA_ID_SECRET }}
-          AUTH_MICROSOFT_ENTRA_ID_ISSUER: ${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ISSUER }}
-
-          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
-          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
-          RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
-
-          CDSL_MODE: ${{ secrets.CDSL_MODE }}
-          NSDL_MODE: ${{ secrets.NSDL_MODE }}
-
-          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
-          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-          S3_REGION: ${{ secrets.S3_REGION }}
-          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-
         run: |
           set -e
-
-          # fresh file
           > .env
 
-          # STATIC VALUES
-          printf "NEXT_PUBLIC_HOST_URL=%s\n" "https://www.meradhan.co" >> .env
-          printf "NEXT_PUBLIC_CRM_HOST_URL=%s\n" "https://crm.meradhan.co" >> .env
-          printf "NEXT_PUBLIC_BACKEND_HOST_URL=%s\n" "https://api.meradhan.co" >> .env
-          printf "NEXT_PUBLIC_BACKEND_IP_URL=%s\n" "http://prod-meradhan-be.prod-namespace:4000" >> .env
-          printf "NEXT_PUBLIC_STRAPI_HOST_URL=%s\n" "https://spyder.meradhan.co" >> .env
-          printf "NEXT_PUBLIC_DIGIO=%s\n" "production" >> .env
-          printf "STRAPI_API_URL=%s\n" "https://spyder.meradhan.co/api" >> .env
           printf "PORT=%s\n" "4000" >> .env
-          printf "RFQ_CBRICS_ENV=%s\n" "PROD" >> .env
-          printf "CBRICS_ENV=%s\n" "PROD" >> .env
 
-          # SAFE LOOP (FIXED)
+          # SAFE LOOP
           while IFS='=' read -r var _; do
             case "$var" in
-              NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*|KRA_*|MSG91_*|SMTP_*|CBRICS_*|RFQ_*|DIGIO_*|NDSL_*|NSDL_*|CDSL_*|ENTITY_*|AUTH_*|RAZORPAY_*|S3_*)
+              NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*)
                 value="${!var}"
-                value="$(echo "$value" | tr -d '\r')"
+                value="$(echo "$value" | tr -d '\r')"   # 🔥 remove hidden chars
                 printf "%s=%s\n" "$var" "$value" >> .env
                 ;;
             esac
           done < <(env)
 
       # =========================
-      # SAFE DEBUG
+      # FIX AWS SECRETS (CRITICAL)
       # =========================
-      - name: Debug ENV (masked)
+      - name: Clean AWS credentials
+        id: awscreds
         run: |
-          echo "===== DEBUG ENV ====="
-          while IFS='=' read -r var _; do
-            case "$var" in
-              AWS_*|NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*)
-                val="${!var}"
-                echo "$var = len:${#val} preview:${val:0:4}****"
-                ;;
-            esac
-          done < <(env)
-
-      # =========================
-      # SAFE .env PREVIEW
-      # =========================
-      - name: Show .env (masked)
-        run: |
-          echo "===== FINAL .env ====="
-          if [ -f .env ]; then
-            while IFS='=' read -r key value; do
-              [ -z "$key" ] && continue
-              preview=$(echo "$value" | cut -c1-4)
-              echo "$key=${preview}**** (len:${#value})"
-            done < .env
-          else
-            echo ".env file not found"
-          fi
+          echo "AWS_ACCESS_KEY_ID_CLEAN=$(echo '${{ secrets.AWS_ACCESS_KEY_ID }}' | tr -d '\r\n')" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY_CLEAN=$(echo '${{ secrets.AWS_SECRET_ACCESS_KEY }}' | tr -d '\r\n')" >> $GITHUB_ENV
+          echo "AWS_REGION_CLEAN=$(echo '${{ secrets.AWS_REGION }}' | tr -d '\r\n')" >> $GITHUB_ENV
 
       # =========================
       # AWS LOGIN
@@ -147,9 +60,9 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID_CLEAN }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY_CLEAN }}
+          aws-region: ${{ env.AWS_REGION_CLEAN }}
 
       # =========================
       # ECR LOGIN
