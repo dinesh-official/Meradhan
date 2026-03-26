@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =========================
+      # CHECKOUT REPO
+      # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -26,29 +29,46 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
-
+          # ... add all other secrets as needed ...
         run: |
           set -e
           > .env
-
+          # STATIC VALUES
+          printf "NEXT_PUBLIC_HOST_URL=%s\n" "https://www.meradhan.co" >> .env
+          printf "NEXT_PUBLIC_CRM_HOST_URL=%s\n" "https://crm.meradhan.co" >> .env
+          printf "NEXT_PUBLIC_BACKEND_HOST_URL=%s\n" "https://api.meradhan.co" >> .env
           printf "PORT=%s\n" "4000" >> .env
 
-          # SAFE LOOP
-          while IFS='=' read -r var _; do
+          # SAFE LOOP: only include relevant variables
+          for var in $(env | cut -d= -f1); do
             case "$var" in
-              NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*)
+              NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*|KRA_*|MSG91_*|SMTP_*|CBRICS_*|RFQ_*|DIGIO_*|NDSL_*|NSDL_*|CDSL_*|ENTITY_*|AUTH_*|RAZORPAY_*|S3_*)
                 value="${!var}"
-                value="$(echo "$value" | tr -d '\r')"   # 🔥 remove hidden chars
+                value="$(echo "$value" | tr -d '\r\n')"   # 🔥 remove hidden chars
                 printf "%s=%s\n" "$var" "$value" >> .env
                 ;;
             esac
-          done < <(env)
+          done
 
       # =========================
-      # FIX AWS SECRETS (CRITICAL)
+      # DEBUG (SAFE)
+      # =========================
+      - name: Debug ENV (masked)
+        run: |
+          echo "===== DEBUG ENV ====="
+          for var in $(env | cut -d= -f1); do
+            case "$var" in
+              NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*)
+                val="${!var}"
+                echo "$var = len:${#val} preview:${val:0:4}****"
+                ;;
+            esac
+          done
+
+      # =========================
+      # CLEAN AWS SECRETS
       # =========================
       - name: Clean AWS credentials
-        id: awscreds
         run: |
           echo "AWS_ACCESS_KEY_ID_CLEAN=$(echo '${{ secrets.AWS_ACCESS_KEY_ID }}' | tr -d '\r\n')" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY_CLEAN=$(echo '${{ secrets.AWS_SECRET_ACCESS_KEY }}' | tr -d '\r\n')" >> $GITHUB_ENV
@@ -71,7 +91,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       # =========================
-      # BUILD + PUSH
+      # BUILD + PUSH DOCKER IMAGE
       # =========================
       - name: Build and Push Docker Image
         env:
@@ -83,7 +103,7 @@ jobs:
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       # =========================
-      # DEPLOY ECS
+      # DEPLOY TO ECS
       # =========================
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
