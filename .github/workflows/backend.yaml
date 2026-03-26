@@ -62,7 +62,7 @@ jobs:
       - name: Build & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          REPOSITORY: prod-meradhan-be
+          REPOSITORY: meradhan-backend
           IMAGE_TAG: latest
         run: |
           docker build --pull -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
@@ -71,7 +71,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: meradhan-be-task.json
-          cluster: prod-cluster
-          service: prod-meredha-be
+          task-definition: Backend-TS-revision1.json
+          cluster: production-cluster
+          service: Backend-TS-service-vnkvset0
           force-new-deployment: true
