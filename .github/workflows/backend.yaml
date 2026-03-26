@@ -13,10 +13,36 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        
 
       - name: Create .env from GitHub Secrets
         shell: bash
         run: |
+          cat <<EOF > .env
+          DIGIO_USERNAME_PASS=$DIGIO_USERNAME_PASS
+          NDSL_REQUESTOR_ID=$NDSL_REQUESTOR_ID
+          NSDL_SECRET_KEY=$NSDL_SECRET_KEY
+          CDSL_AES_KEY=$CDSL_AES_KEY
+          ENTITY_ID=$ENTITY_ID
+          AUTH_SECRET=$AUTH_SECRET
+          AUTH_GOOGLE_ID=$AUTH_GOOGLE_ID
+          AUTH_GOOGLE_SECRET=$AUTH_GOOGLE_SECRET
+          AUTH_FACEBOOK_ID=$AUTH_FACEBOOK_ID
+          AUTH_FACEBOOK_SECRET=$AUTH_FACEBOOK_SECRET
+          AUTH_MICROSOFT_ENTRA_ID_ID=$AUTH_MICROSOFT_ENTRA_ID_ID
+          AUTH_MICROSOFT_ENTRA_ID_SECRET=$AUTH_MICROSOFT_ENTRA_ID_SECRET
+          AUTH_MICROSOFT_ENTRA_ID_ISSUER=$AUTH_MICROSOFT_ENTRA_ID_ISSUER
+          RAZORPAY_KEY_ID=$RAZORPAY_KEY_ID
+          RAZORPAY_KEY_SECRET=$RAZORPAY_KEY_SECRET
+          RAZORPAY_WEBHOOK_SECRET=$RAZORPAY_WEBHOOK_SECRET
+          CDSL_MODE=$CDSL_MODE
+          NSDL_MODE=$NSDL_MODE
+          S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
+          S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
+          S3_REGION=$S3_REGION
+          S3_ENDPOINT=$S3_ENDPOINT
+          S3_BUCKET_NAME=$S3_BUCKET_NAME
+          EOF
           # Static Public values
           echo "NEXT_PUBLIC_HOST_URL=https://www.meradhan.co" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co" >> .env
