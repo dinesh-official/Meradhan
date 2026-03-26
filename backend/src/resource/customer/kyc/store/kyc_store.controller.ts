@@ -6,6 +6,7 @@ import { OtpVerificationService } from "@services/otp_verification.service";
 import { tokenUtils } from "@utils/token/JwtToken_utils";
 import { CustomerKycKycService } from "../kyc_process/customer_kyc.service";
 import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
+import { KraProcess } from "@jobs/kra_worker/KraWorker.service";
 
 // KYC store controller class to get and set kyc data in kyc_flow table to track kyc progress for customer to resume later
 export class KycStoreController {
@@ -40,6 +41,33 @@ export class KycStoreController {
     });
   }
 
+  async isKraRunning(req: Request, res: Response) {
+    const kraManager = new KraProcess();
+    const customerId = Number(req.params.customerId);
+    // check if kra process is running for the customer by checking if there is a kyc flow and then checking kra status with kyc flow id
+
+    const response = await db.dataBase.kYC_FLOW.findFirst({
+      where: {
+        userID: customerId,
+      },
+    });
+    if (!response) {
+      res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        responseData: { isRunning: false },
+      });
+      return;
+    }
+    const isRunning = await kraManager.isKraProcessRunning(
+      customerId,
+      response?.id,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { isRunning },
+    });
+  }
+
   async getKycKraDataById(req: Request, res: Response) {
     const id = Number(req.params.customerId);
 
@@ -63,7 +91,9 @@ export class KycStoreController {
     const customerId = Number(req.params.customerId);
     const adminId = req.session?.id;
     if (!adminId) {
-      throw new AppError("Unauthorized", { statusCode: HttpStatus.UNAUTHORIZED });
+      throw new AppError("Unauthorized", {
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     }
     const admin = await db.dataBase.cRMUserDataModel.findUnique({
       where: { id: adminId },
@@ -77,7 +107,7 @@ export class KycStoreController {
     const { token, otp } = await this.rekycOtpService.generateOtp(
       identifier,
       6,
-      300
+      300,
     );
     await sendRekycConfirmationOtpEmail({
       email: admin.email,
@@ -100,7 +130,9 @@ export class KycStoreController {
     }
     const adminId = req.session?.id;
     if (!adminId) {
-      throw new AppError("Unauthorized", { statusCode: HttpStatus.UNAUTHORIZED });
+      throw new AppError("Unauthorized", {
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     }
     await this.rekycOtpService.verifyOtp(token, otp.trim());
     // Get customerId from token payload (identifier = "REKYC:customerId:adminId")
@@ -183,7 +215,6 @@ export class KycStoreController {
         data: { data: data, userID: id, step: Number(step), complete },
       });
     }
-
 
     res.sendResponse({
       statusCode: HttpStatus.OK,
