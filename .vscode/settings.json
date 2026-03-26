@@ -1,0 +1,121 @@
+{
+  "workbench.colorCustomizations": {
+    "minimap.background": "#00000000",
+    "scrollbar.shadow": "#00000000"
+  },
+  "cSpell.words": [
+    "Aadhaar",
+    "aadhar",
+    "AADPM",
+    "acceptreject",
+    "accountnumber",
+    "activeissues",
+    "ADDL",
+    "auditlogs",
+    "autoincrement",
+    "autorestart",
+    "bankacc",
+    "BCISPL",
+    "beneficiaryid",
+    "boid",
+    "bullmq",
+    "buyinstructions",
+    "calcprice",
+    "CBRICS",
+    "CDSL",
+    "changeclient",
+    "ciphertext",
+    "crmusers",
+    "datetimes",
+    "dealamend",
+    "Demate",
+    "DIGILOCKER",
+    "Digio",
+    "Divh",
+    "Dmate",
+    "dpacc",
+    "dpaccount",
+    "dpid",
+    "dptype",
+    "esign",
+    "expirydate",
+    "FATCA",
+    "filt",
+    "fvxc",
+    "Gautam",
+    "gtdg",
+    "Gurugram",
+    "Haryana",
+    "IFSC",
+    "Isins",
+    "kycdata",
+    "Kycget",
+    "leicode",
+    "markdefault",
+    "marketwatch",
+    "Meradhan",
+    "modifycancel",
+    "NSDL",
+    "NSEDATASET",
+    "partgrp",
+    "Particempt",
+    "partlimit",
+    "paytxn",
+    "Pinterest",
+    "portfoliolimit",
+    "Prepass",
+    "Rahul",
+    "Rajesh",
+    "reqdatetime",
+    "rfqmaster",
+    "SEDATASET",
+    "SELFIEDATA",
+    "sellreportings",
+    "supabase",
+    "Swal",
+    "sweetalert",
+    "toploader",
+    "unreg",
+    "updatebank",
+    "updatecontact",
+    "updatedp",
+    "updatestatus",
+    "withdrawquote"
+  ],
+  "material-icon-theme.folders.associations": {
+    "apiGateway": "api", // uses an existing icon type (here: src)
+    "workers": "job", // or reuse another icon style
+    "bootstrap": "base",
+    "gateway": "functions",
+    "emailSender": "mail",
+    "hash": "coverage",
+    "logger": "review",
+    "monitoring": "atom",
+    "fileUpload": "examples",
+    "postgress": "database"
+  },
+  "auto-correct.dictionary": [
+    {
+      "languages": ["*"],
+      "words": {
+        "hte": "the",
+        "mispell": "misspell",
+        "mispelled": "misspelled",
+        "{despa,sepe}rat{e,es,ed,ing,ely,ion,ions,or}": "{despe,sepa}rat{}"
+      },
+      "useLargeList": false
+    },
+    {
+      "languages": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+      ],
+      "words": {
+        "cosnt": "const",
+        "functoin": "function"
+      }
+    }
+  ]
+}

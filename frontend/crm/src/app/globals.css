@@ -1,0 +1,361 @@
+@import "tailwindcss";
+@import "sweetalert2/dist/sweetalert2.min.css";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.3308 0.1042 253.69);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.3308 0.1042 253.69);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.3308 0.1042 253.69);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(55.659% 0.15745 253.123);
+  --chart-2: oklch(66.839% 0.21757 141.774);
+  --chart-3: oklch(62.703% 0.25867 316.869);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.3308 0.1042 253.69);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.3308 0.1042 253.69);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.3308 0.1042 253.69);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.3308 0.1042 253.69);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.3308 0.1042 253.69);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.3308 0.1042 253.69);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Global custom scrollbar for entire site */
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 8px; /* width of scrollbar */
+  height: 8px; /* height for horizontal scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent; /* track color */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.5); /* thumb color */
+  border-radius: 9999px; /* fully rounded corners */
+  border: 0px solid transparent;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.7); /* darker on hover */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin; /* makes scrollbar thinner */
+  scrollbar-color: rgba(100, 116, 139, 0.5) transparent; /* thumb & track */
+}
+
+/* Optional: smooth scrolling for entire site */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base popup styling */
+.swal2-popup {
+  border-radius: 1.5rem !important;
+  padding: 2rem 2.5rem !important;
+  padding-bottom: 70px !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1) !important;
+  font-family: "Inter", system-ui, sans-serif !important;
+  transition: all 0.25s ease-in-out !important;
+}
+
+/* Title */
+.swal2-title {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #111827 !important; /* gray-900 */
+  margin-bottom: 0rem !important;
+}
+
+/* Text */
+.swal2-html-container {
+  font-size: 0.95rem !important;
+  color: #4b5563 !important; /* gray-600 */
+  line-height: 1.5 !important;
+}
+
+/* Warning icon */
+.swal2-icon.swal2-warning {
+  border-color: #f59e0b !important; /* amber-500 */
+  color: #f59e0b !important;
+  animation: pulseIcon 1.5s infinite;
+}
+
+/* Confirm button */
+.swal2-confirm {
+  background-color: oklch(0.3308 0.1042 253.69) !important; /* blue-600 */
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1.25rem !important;
+  transition: background-color 0.2s ease !important;
+}
+.swal2-confirm:hover {
+  background-color: oklch(0.3308 0.1042 253.69) !important; /* blue-800 */
+}
+
+/* Cancel button */
+.swal2-cancel {
+  background-color: #f3f4f6 !important; /* gray-100 */
+  color: #374151 !important; /* gray-700 */
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1.25rem !important;
+  margin-left: 0.5rem !important;
+  transition: background-color 0.2s ease !important;
+}
+.swal2-cancel:hover {
+  background-color: #e5e7eb !important; /* gray-200 */
+}
+
+/* Animation for popup appearance */
+.swal2-show {
+  animation: scaleIn 0.25s ease forwards !important;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Subtle pulse effect for warning icon */
+@keyframes pulseIcon {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in forwards;
+}
+
+/* Print: when Corporate KYC print content exists, show only that; multi-page PDF */
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  /* Let layout expand so content is not clipped to one viewport height */
+  html:has(#corporate-kyc-print-content) html,
+  html:has(#corporate-kyc-print-content) body {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) .flex.h-screen {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) .flex.h-screen > .flex-1 {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) #mainpage {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html:has(#corporate-kyc-print-content) body * {
+    visibility: hidden;
+  }
+  html:has(#corporate-kyc-print-content) #corporate-kyc-print-content,
+  html:has(#corporate-kyc-print-content) #corporate-kyc-print-content * {
+    visibility: visible;
+  }
+  html:has(#corporate-kyc-print-content) #corporate-kyc-print-content {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: white !important;
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  /* Clean print-only header (no logo); keep on one page */
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-header {
+    display: block !important;
+    break-after: avoid;
+    page-break-after: avoid;
+    margin-top: -2rem !important;
+  }
+  /* Print tables: clean table layout */
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 12px;
+  }
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-table td,
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-table th {
+    border: 1px solid #d1d5db;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-label,
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-th {
+    font-weight: 600;
+    color: #374151;
+    background: #f9fafb;
+    width: 28%;
+  }
+  html:has(#corporate-kyc-print-content)
+    .corporate-kyc-print-table
+    thead
+    .corporate-kyc-print-th {
+    background: #f3f4f6;
+  }
+  html:has(#corporate-kyc-print-content) .corporate-kyc-print-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+}

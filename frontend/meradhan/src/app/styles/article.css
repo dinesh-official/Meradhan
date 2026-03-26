@@ -1,0 +1,232 @@
+/* Base font utilities already defined above for Poppins & Quicksand */
+
+/* -------------------------------
+   Article Typography System
+   ------------------------------- */
+.article {
+  font-family: "Poppins", sans-serif; /* Body font */
+  font-size: 16px; /* Body: 16px */
+  line-height: 1.7;
+  color: #111827;
+}
+
+.article p,
+.article ul,
+.article ol,
+.article blockquote {
+  margin: 0 0 1rem 0;
+}
+
+.article h1,
+.article h2,
+.article h3,
+.article h4,
+.article h5,
+.article h6 {
+  font-family: "Quicksand", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1.25;
+  margin: 1.25rem 0 0.75rem;
+}
+
+.article h1 span,
+.article h2 span,
+.article h3 span,
+.article h4 span,
+.article h5 span,
+.article h6 span {
+  @apply text-secondary;
+}
+
+/* Mobile-first (add !important) */
+.article h1 {
+  font-size: 28px !important;
+  font-weight: 500 !important;
+}
+.article h2 {
+  font-size: 26px !important;
+  font-weight: 500 !important;
+}
+.article h3 {
+  font-size: 26px !important;
+  font-weight: 500 !important;
+}
+.article h4 {
+  font-size: 24px !important;
+  font-weight: 500 !important;
+}
+.article h5 {
+  font-size: 22px !important;
+  font-weight: 500 !important;
+}
+.article h6 {
+  font-size: 20px !important;
+  font-weight: 500 !important;
+}
+
+/* If heading is accent/red, bump to 600 */
+.article h1.is-accent,
+.article h2.is-accent,
+.article h3.is-accent {
+  font-weight: 600 !important;
+}
+
+.article h1 .span,
+.article h2 .span,
+.article h3 .span {
+  @apply text-primary;
+}
+
+.article a {
+  @apply text-primary underline;
+}
+
+.article ul {
+  @apply list-disc;
+}
+
+/* Tablet ≥768px
+   ------------- */
+@media (min-width: 768px) {
+  .article h1 {
+    font-size: 36px;
+    font-weight: 500;
+  }
+  .article h2 {
+    font-size: 28px;
+    font-weight: 500;
+  }
+  .article h3 {
+    font-size: 28px;
+    font-weight: 500;
+  }
+  .article h4 {
+    font-size: 24px;
+    font-weight: 500;
+  }
+  .article h5 {
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .article h6 {
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .article h1.is-accent,
+  .article h2.is-accent,
+  .article h3.is-accent {
+    font-weight: 600;
+  }
+}
+
+/* Desktop ≥1024px
+
+   --------------- */
+@media (min-width: 1024px) {
+  .article h1 {
+    font-size: 44px;
+    font-weight: 500;
+  }
+  .article h2 {
+    font-size: 32px;
+    font-weight: 500;
+  }
+  .article h3 {
+    font-size: 32px;
+    font-weight: 500;
+  }
+  .article h4 {
+    font-size: 28px;
+    font-weight: 500;
+  }
+  .article h5 {
+    font-size: 24px;
+    font-weight: 500;
+  }
+  .article h6 {
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .article h1.is-accent,
+  .article h2.is-accent,
+  .article h3.is-accent {
+    font-weight: 600;
+  }
+}
+
+/* Optional: tighter spacing for lists inside article */
+.article ul {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.article ol {
+  padding-left: 1.25rem;
+  list-style: decimal;
+}
+.article li {
+  margin: 0.25rem 0;
+}
+
+.article pre {
+  white-space: pre-wrap !important; /* Wrap long lines */
+  word-wrap: break-word !important; /* Break long words if needed */
+  overflow-x: auto; /* Scroll if really long content */
+  font-family: monospace;
+  font-size: 0.95rem;
+  background: #f8fafc; /* Optional subtle background */
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  word-break: break-all !important; /* optional: breaks anywhere if needed */
+}
+
+/* -------------------------------
+   Default Table Styling
+   ------------------------------- */
+
+.article table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto; /* Horizontal scroll on mobile */
+}
+
+/* Default table cells */
+.article th,
+.article td {
+  border: 1px solid #e5e7eb; /* Light gray border */
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+/* Header styling */
+.article th {
+  background-color: #f3f4f6; /* Light gray */
+  font-weight: 600;
+  font-family: "Quicksand", sans-serif;
+  color: #111827;
+}
+
+/* Zebra striping */
+.article tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Hover highlight (optional but nice) */
+.article tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Larger font for desktop */
+@media (min-width: 1024px) {
+  .article table {
+    font-size: 1rem;
+  }
+}
