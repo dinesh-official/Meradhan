@@ -3,8 +3,7 @@ name: backend deploy
 on:
   push:
     branches:
-      - main
-      - dev  # add your dev branches here
+      - master
 
 jobs:
   deploy:
@@ -12,15 +11,15 @@ jobs:
 
     steps:
       # =========================
-      # CHECKOUT REPO
+      # Checkout repository
       # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
 
       # =========================
-      # CREATE .env FILE
+      # Create .env file safely
       # =========================
-      - name: Create .env file
+      - name: Generate .env from GitHub Secrets
         shell: bash
         env:
           NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}
@@ -30,91 +29,85 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          # ... add all other secrets as needed ...
+          # Add all other secrets here
         run: |
           set -e
           > .env
-          # STATIC VALUES
-          printf "NEXT_PUBLIC_HOST_URL=%s\n" "https://www.meradhan.co" >> .env
-          printf "NEXT_PUBLIC_CRM_HOST_URL=%s\n" "https://crm.meradhan.co" >> .env
-          printf "NEXT_PUBLIC_BACKEND_HOST_URL=%s\n" "https://api.meradhan.co" >> .env
-          printf "PORT=%s\n" "4000" >> .env
+          
+          # -------------------------
+          # Static values
+          # -------------------------
+          cat <<EOF >> .env
+          NEXT_PUBLIC_HOST_URL=https://www.meradhan.co
+          NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co
+          NEXT_PUBLIC_BACKEND_HOST_URL=https://api.meradhan.co
+          NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000
+          NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co
+          NEXT_PUBLIC_DIGIO=production
+          STRAPI_API_URL=https://spyder.meradhan.co/api
+          PORT=4000
+          RFQ_CBRICS_ENV=PROD
+          CBRICS_ENV=PROD
+          EOF
 
-          # CLEANED LOOP: include relevant variables and remove hidden chars
+          # -------------------------
+          # Add secrets dynamically
+          # -------------------------
           for var in $(env | cut -d= -f1); do
             case "$var" in
               NEXT_PUBLIC_*|STRAPI_*|JWT_*|DATABASE_*|DIRECT_*|REDIS_*|KRA_*|MSG91_*|SMTP_*|CBRICS_*|RFQ_*|DIGIO_*|NDSL_*|NSDL_*|CDSL_*|ENTITY_*|AUTH_*|RAZORPAY_*|S3_*)
-                value="${!var}"
-                value="$(echo "$value" | tr -d '\r\n')"   # remove hidden chars
-                printf "%s=%s\n" "$var" "$value" >> .env
+                val="${!var}"
+                val_clean=$(echo "$val" | tr -d '\r\n')
+                printf "%s=%s\n" "$var" "$val_clean" >> .env
                 ;;
             esac
           done
 
       # =========================
-      # SHOW .env (masked for main, unmasked for dev)
+      # Show .env safely
       # =========================
-      - name: Show .env
+      - name: Show .env (masked for prod)
         shell: bash
         run: |
-          echo "===== .env OUTPUT ====="
-          if [ -f .env ]; then
-            if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-              # Masked output for production
-              while IFS='=' read -r key value; do
-                [ -z "$key" ] && continue
-                preview=$(echo "$value" | cut -c1-4)
-                echo "$key=${preview}**** (len:${#value})"
-              done < .env
-            else
-              # Full output for dev branches
-              cat .env
-            fi
-          else
-            echo ".env file not found"
-          fi
+          echo "===== MASKED .env ====="
+          while IFS='=' read -r key value; do
+            [ -z "$key" ] && continue
+            preview=$(echo "$value" | cut -c1-4)
+            echo "$key=${preview}**** (len:${#value})"
+          done < .env
 
       # =========================
-      # CLEAN AWS SECRETS
-      # =========================
-      - name: Clean AWS credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID_CLEAN=$(echo '${{ secrets.AWS_ACCESS_KEY_ID }}' | tr -d '\r\n')" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY_CLEAN=$(echo '${{ secrets.AWS_SECRET_ACCESS_KEY }}' | tr -d '\r\n')" >> $GITHUB_ENV
-          echo "AWS_REGION_CLEAN=$(echo '${{ secrets.AWS_REGION }}' | tr -d '\r\n')" >> $GITHUB_ENV
-
-      # =========================
-      # AWS LOGIN
+      # AWS Configuration
       # =========================
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID_CLEAN }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY_CLEAN }}
-          aws-region: ${{ env.AWS_REGION_CLEAN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       # =========================
-      # ECR LOGIN
+      # ECR Login
       # =========================
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
       # =========================
-      # BUILD + PUSH DOCKER IMAGE
+      # Build, Tag & Push Docker
       # =========================
-      - name: Build and Push Docker Image
+      - name: Build & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          REPOSITORY: meradhan-backend
+          REPOSITORY: prod-meradhan-be
           IMAGE_TAG: latest
         run: |
           docker build -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       # =========================
-      # DEPLOY TO ECS
+      # Deploy ECS Service
       # =========================
-      - name: Deploy to ECS
+      - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: meradhan-be-task.json
