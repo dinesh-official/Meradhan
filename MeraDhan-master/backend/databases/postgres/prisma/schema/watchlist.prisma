@@ -1,0 +1,15 @@
+model BondsWatchList {
+    id        Int      @id @default(autoincrement())
+    userId    Int      @unique
+    items     String[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model IssueNotesWatchList {
+    id        Int      @id @default(autoincrement())
+    userId    Int      @unique
+    items     String[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

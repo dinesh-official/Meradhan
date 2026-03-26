@@ -1,0 +1,310 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Quicksand:wght@300..700&display=swap");
+@import "./fonts.css";
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "react-multi-carousel/lib/styles.css";
+@import "./article.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.3211 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.2948 0.0929 253.68);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.6374 0.2094 33.87);
+  --secondary-foreground: oklch(100% 0.00011 271.152);
+  --muted: oklch(0.9675 0.0168 242.42);
+  --muted-foreground: oklch(0.2948 0.0929 253.68);
+  --accent: oklch(0.9744 0.0111 31.07);
+  --accent-foreground: oklch(0.2948 0.0929 253.68);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.8776 0.0371 244.45);
+  --input: oklch(100% 0.00011 271.152);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(90.314% 0.03176 243.814);
+  --chart-2: oklch(0.9675 0.0168 242.42);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.2948 0.0929 253.68);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.6374 0.2094 33.87);
+  --sidebar-accent-foreground: oklch(0.2948 0.0929 253.68);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --text-3xl: 32px;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.2948 0.0929 253.68);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.2948 0.0929 253.68);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.2948 0.0929 253.68);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.2948 0.0929 253.68);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  .title {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    @apply text-2xl md:text-[44px];
+  }
+  .title span {
+    @apply text-secondary;
+  }
+}
+
+.regularCircularBox {
+  height: 250px;
+  border-radius: 10px;
+  border-width: 1px;
+  border: 1px solid #e1e6e8;
+  padding: 1.8rem;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.regularCircularBox .shareBox {
+  padding: 18px;
+  border-top: 1px solid #e1e6e8;
+}
+
+/* Print: hide nav, sidebar, footer; show only main content full width */
+@media print {
+  .account-viewport > nav {
+    display: none !important;
+  }
+  .account-viewport .flex > div:first-child {
+    display: none !important;
+  }
+  .account-viewport .flex > div:last-child footer {
+    display: none !important;
+  }
+  .account-viewport .flex {
+    display: block !important;
+  }
+  .account-viewport .flex > div:last-child {
+    width: 100% !important;
+    max-width: none !important;
+  }
+  .account-viewport .flex > div:last-child .min-h-\[50vh\] {
+    min-height: 0;
+  }
+  .account-viewport [class*="sticky"] {
+    position: static !important;
+  }
+}
+.active-tab{
+  position: relative;
+}
+.active-tab::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 4px;
+  background-color: #062c59; 
+  border-radius: 10px;
+}
+.common-table-wrapper table thead tr th{
+  background-color: #f7f7f7; 
+  color: #000000;
+}
+.common-table-wrapper table thead tr th:first-child{
+  border-radius: 10px 0 0 10px; 
+}
+.common-table-wrapper table thead tr th:last-child{
+  border-radius: 0 10px 10px 0; 
+}
+.active-tab{
+  position: relative;
+}
+.active-tab::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 4px;
+  background-color: #062c59; 
+  border-radius: 10px;
+}
+.common-table-wrapper table thead tr th{
+  background-color: #f7f7f7; 
+  color: #000000;
+}
+.common-table-wrapper table thead tr th:first-child{
+  border-radius: 10px 0 0 10px; 
+}
+.common-table-wrapper table thead tr th:last-child{
+  border-radius: 0 10px 10px 0; 
+}
+.recharts-legend-item-text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #000000 !important;
+}
+.recharts-legend-item .recharts-surface{
+  width: 10px !important;
+  height: 10px !important
+}
+.recharts-layer .recharts-layer text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  fill: #000000 !important;
+}
+
+.recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+.cashflow-chart-container .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+.cashflow-chart-container-left .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+.cashflow-chart .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text{
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  fill: #000000B2 !important;
+}
+/* .cashflow-chart-container .recharts-surface{
+  height: 108% !important;
+} */
+@media (max-width: 640px) {
+
+  .cashflow-chart-container .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 10px !important;
+  
+}
+ .cashflow-chart-container .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+  font-size: 10px !important;
+  
+}
+  .recharts-layer.recharts-label-list text {
+    font-size: 10px !important;
+  }
+  .recharts-legend-item-text {
+    font-size: 12px !important;
+   
+  }
+  .cashflow-chart .recharts-responsive-container .recharts-wrapper  {
+    width: 100% !important;
+    max-width: 1350px !important;
+  }
+    .chart-content-container .recharts-wrapper{
+    width: 100% !important;
+    max-width: 350px !important;
+
+  }
+  .cashflow-chart .recharts-responsive-container{
+    width: 100% !important;
+    min-width: 1350px !important;
+  }
+
+  .recharts-layer .recharts-layer text {
+    font-size: 11px !important;
+  }
+  .cashflow-chart .recharts-layer .recharts-layer.recharts-cartesian-axis-tick text {
+    font-size: 11px !important;
+  }
+  .four-card-wrapper .px-0{
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  
+  }
+}

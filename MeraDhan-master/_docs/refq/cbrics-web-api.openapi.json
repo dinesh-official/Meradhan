@@ -1,0 +1,2227 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CBRICS – Protocol for Web API",
+    "description": "Web APIs to programmatically access and exchange data with CBRICS Platform (HOST system). National Stock Exchange of India Ltd. Version 1.15.",
+    "version": "1.15",
+    "contact": {
+      "name": "NSE",
+      "url": "https://www.nseindia.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://bricsonlinereguat.nseindia.com/bondsnew",
+      "description": "Testing Environment"
+    },
+    {
+      "url": "https://bricsonline.nseindia.com/bondsnew",
+      "description": "Live Environment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Common",
+      "description": "Login and session"
+    },
+    {
+      "name": "Order",
+      "description": "Deal reporting and buyer instructions"
+    },
+    {
+      "name": "Unregistered Participants",
+      "description": "Unregistered participant management"
+    },
+    {
+      "name": "Settlement",
+      "description": "Settlement orders"
+    },
+    {
+      "name": "Payment Gateway",
+      "description": "Payment and paytxn"
+    },
+    {
+      "name": "Callback",
+      "description": "Notification callback (client-implemented)"
+    }
+  ],
+  "security": [
+    {
+      "loginKey": []
+    }
+  ],
+  "paths": {
+    "/rest/v1/login": {
+      "post": {
+        "tags": [
+          "Common"
+        ],
+        "summary": "Login",
+        "description": "Authenticates the user and creates a session. Returns loginKey for subsequent requests.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/logout": {
+      "get": {
+        "tags": [
+          "Common"
+        ],
+        "summary": "Logout",
+        "description": "Closes the current session.",
+        "responses": {
+          "200": {
+            "description": "Session closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "C"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/order": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Add order",
+        "description": "Adds a new deal reporting (seller) or buyer standing instruction.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/order/update": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Update order",
+        "description": "Updates an existing deal reporting or buyer standing instruction. Requires id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/order/sellreportings": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Get sell reportings",
+        "description": "Returns all sell reportings for the day where logged-in user is buyer/seller/broker.",
+        "responses": {
+          "200": {
+            "description": "List of sell reportings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Get sell reportings (filtered)",
+        "description": "Returns sell reportings with filters: orderNumber, symbol, filtEntryDate, buyParticipantLoginId, sellParticipantLoginId.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderNumber": {
+                    "type": "string",
+                    "maxLength": 15
+                  },
+                  "symbol": {
+                    "type": "string",
+                    "maxLength": 30
+                  },
+                  "filtEntryDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "dd-MM-yyyy"
+                  },
+                  "buyParticipantLoginId": {
+                    "type": "string",
+                    "maxLength": 30
+                  },
+                  "sellParticipantLoginId": {
+                    "type": "string",
+                    "maxLength": 30
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of sell reportings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/order/buyinstructions": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Get buy instructions",
+        "description": "Returns all buyer instructions entered by the participant as buyer.",
+        "responses": {
+          "200": {
+            "description": "List of buy instructions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/order/status": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Update order status",
+        "description": "Used by buyer to accept (7) or reject (2) sell order reporting.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "enum": [
+                      2,
+                      7
+                    ],
+                    "description": "2=Rejected by Buyer, 7=Trade Confirmed"
+                  },
+                  "buyerYieldViolationReason": {
+                    "type": "string",
+                    "maxLength": 2,
+                    "enum": [
+                      "1",
+                      "2"
+                    ],
+                    "description": "1=Credit, 2=Liquidity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/marketwatch/activeissues": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Active issues",
+        "description": "Market-wide summary of trading data for issues that have traded today.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "maxLength": 30
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of active issues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActiveIssue"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/participant/find": {
+      "post": {
+        "tags": [
+          "Order"
+        ],
+        "summary": "Find participants",
+        "description": "Returns participants/custodians for given filter: loginId, type (2=Participant, 13=Custodian), custodian, panNo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "loginId": {
+                    "type": "string",
+                    "maxLength": 30
+                  },
+                  "type": {
+                    "type": "integer",
+                    "enum": [
+                      2,
+                      13
+                    ]
+                  },
+                  "custodian": {
+                    "type": "string",
+                    "maxLength": 10
+                  },
+                  "panNo": {
+                    "type": "string",
+                    "maxLength": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of participants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "loginId": {
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "panNo": {
+                        "type": "string"
+                      },
+                      "custodian": {
+                        "type": "string"
+                      },
+                      "actualStatus": {
+                        "type": "integer"
+                      },
+                      "type": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Add unregistered participant",
+        "description": "Submits request for addition of a new unregistered participant. Subject to approval.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnregRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Unregistered participant created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnregResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/update": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Update unregistered participant",
+        "description": "Only for workflowStatus 16 (returned by checker) or 6 (returned by exchange).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnregUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnregResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/all": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "List unregistered participants",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "loginId": {
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "panNo": {
+                    "type": "string"
+                  },
+                  "workflowStatus": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of unregistered participants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UnregResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/{id}": {
+      "get": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Get unregistered participant by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unregistered participant details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnregResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/final/updatecontact": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Update contact of approved unregistered participant",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "contactPerson",
+                  "mobileList",
+                  "emailList",
+                  "telephone",
+                  "address"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "contactPerson": {
+                    "type": "string"
+                  },
+                  "mobileList": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "emailList": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "telephone": {
+                    "type": "string"
+                  },
+                  "fax": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "address2": {
+                    "type": "string"
+                  },
+                  "address3": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/final/delete": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Delete approved unregistered participant",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/bankacc": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Add bank account for unregistered participant",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnregBankAccRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bank account added"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/bankacc/all": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "List bank accounts with filters (participantCode, workflowStatus)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of bank accounts"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/bankacc/final/markdefault": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Set bank account as default for payout",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "participantCode",
+                  "bankIFSC"
+                ],
+                "properties": {
+                  "participantCode": {
+                    "type": "string"
+                  },
+                  "bankIFSC": {
+                    "type": "string"
+                  },
+                  "bankAccountNo": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/bankacc/final/updatestatus": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Update bank account status (A/S/D)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "participantCode",
+                  "bankIFSC",
+                  "status"
+                ],
+                "properties": {
+                  "participantCode": {
+                    "type": "string"
+                  },
+                  "bankIFSC": {
+                    "type": "string"
+                  },
+                  "bankAccountNo": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "A",
+                      "S",
+                      "D"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/dpacc": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Add DP account for unregistered participant",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnregDpAccRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DP account added"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/dpacc/all": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "List DP accounts with filters",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of DP accounts"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/dpacc/final/markdefault": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Set DP account as default",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "participantCode",
+                  "dpType",
+                  "benId"
+                ],
+                "properties": {
+                  "participantCode": {
+                    "type": "string"
+                  },
+                  "dpType": {
+                    "type": "string",
+                    "enum": [
+                      "NSDL",
+                      "CDSL"
+                    ]
+                  },
+                  "dpId": {
+                    "type": "string"
+                  },
+                  "benId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/rest/v1/unreg/dpacc/final/updatestatus": {
+      "post": {
+        "tags": [
+          "Unregistered Participants"
+        ],
+        "summary": "Update DP account status (A/S/D)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "participantCode",
+                  "dpType",
+                  "benId",
+                  "status"
+                ],
+                "properties": {
+                  "participantCode": {
+                    "type": "string"
+                  },
+                  "dpType": {
+                    "type": "string"
+                  },
+                  "dpId": {
+                    "type": "string"
+                  },
+                  "benId": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "A",
+                      "S",
+                      "D"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/rest/v1/settle/order/all": {
+      "post": {
+        "tags": [
+          "Settlement"
+        ],
+        "summary": "Get settlement orders",
+        "description": "Returns orders for settlement in the given date range (max 30 days).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "filtFromModSettleDate",
+                  "filtToModSettleDate"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "orderNumber": {
+                    "type": "string"
+                  },
+                  "filtFromModSettleDate": {
+                    "type": "string",
+                    "description": "dd-MM-yyyy"
+                  },
+                  "filtToModSettleDate": {
+                    "type": "string",
+                    "description": "dd-MM-yyyy"
+                  },
+                  "filtCounterParty": {
+                    "type": "string",
+                    "description": "Buy/Sell participant code"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of settlement orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SettleOrder"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/settle/order/update": {
+      "post": {
+        "tags": [
+          "Settlement"
+        ],
+        "summary": "Update settlement order (quantity, consideration, custodians, date)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "buyBackofficeLoginId": {
+                    "type": "string"
+                  },
+                  "sellBackofficeLoginId": {
+                    "type": "string"
+                  },
+                  "modSettleDate": {
+                    "type": "string"
+                  },
+                  "modQuantity": {
+                    "type": "number"
+                  },
+                  "modAccrInt": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/rest/v1/settle/order/updatebank": {
+      "post": {
+        "tags": [
+          "Settlement"
+        ],
+        "summary": "Update seller payout bank account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "ifscCode"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "ifscCode": {
+                    "type": "string"
+                  },
+                  "accountNo": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/rest/v1/settle/order/updatedp": {
+      "post": {
+        "tags": [
+          "Settlement"
+        ],
+        "summary": "Update buyer DP details",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "benId"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "dpId": {
+                    "type": "string"
+                  },
+                  "benId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/rest/pg": {
+      "get": {
+        "tags": [
+          "Payment Gateway"
+        ],
+        "summary": "Payment page",
+        "description": "Opens the payment page URL. Access in browser. Query: fundPayinRefId.",
+        "parameters": [
+          {
+            "name": "fundPayinRefId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "HTML payment page"
+          }
+        }
+      }
+    },
+    "/rest/v1/paytxn": {
+      "post": {
+        "tags": [
+          "Payment Gateway"
+        ],
+        "summary": "Query payment transaction status",
+        "description": "Filter date range max 30 days. Min 1 field required: id, fundPayinRefId, orderNumber, filtFromDate, filtToDate.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "fundPayinRefId": {
+                    "type": "string"
+                  },
+                  "orderNumber": {
+                    "type": "string"
+                  },
+                  "filtFromDate": {
+                    "type": "string"
+                  },
+                  "filtToDate": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of payment transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PayTxn"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v1/paytxn/upi": {
+      "post": {
+        "tags": [
+          "Payment Gateway"
+        ],
+        "summary": "Initiate UPI transaction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fundPayinRefId",
+                  "amount",
+                  "bankIFSC",
+                  "bankAcccountNo"
+                ],
+                "properties": {
+                  "fundPayinRefId": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  },
+                  "upiId": {
+                    "type": "string"
+                  },
+                  "bankIFSC": {
+                    "type": "string"
+                  },
+                  "bankAcccountNo": {
+                    "type": "string"
+                  },
+                  "customerReferenceNo": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment transaction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayTxn"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notification": {
+      "post": {
+        "tags": [
+          "Callback"
+        ],
+        "summary": "Notification callback",
+        "description": "Client-implemented. Exchange POSTs notifications (order status, settle order, unreg, bank/dp, paytxn). Auth: HmacSHA256 of body in header 'token' (HEX).",
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderList": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrderResponse"
+                    }
+                  },
+                  "settleOrderList": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SettleOrder"
+                    }
+                  },
+                  "unregList": {
+                    "type": "array"
+                  },
+                  "bankList": {
+                    "type": "array"
+                  },
+                  "dpList": {
+                    "type": "array"
+                  },
+                  "payTxnList": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PayTxn"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "loginKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "loginKey",
+        "description": "Token from login response. Required for all APIs except login."
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Validation or business logic error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Session not established or expired",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Resource does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "description": "HTTP status code"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "string"
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "domain",
+          "login",
+          "password"
+        ],
+        "properties": {
+          "domain": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Participant Code"
+          },
+          "login": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "newPassword1": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "When password expired"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "S",
+              "F",
+              "P"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "loginKey": {
+            "type": "string"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "login": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "lastLogin": {
+            "type": "number"
+          },
+          "serverTime": {
+            "type": "number"
+          }
+        }
+      },
+      "OrderRequest": {
+        "type": "object",
+        "required": [
+          "dealType",
+          "symbol",
+          "buyParticipantLoginId",
+          "sellParticipantLoginId",
+          "price",
+          "value",
+          "accrInt",
+          "settle",
+          "sendFor",
+          "yieldType",
+          "yield",
+          "tradeDate",
+          "tradeTime"
+        ],
+        "properties": {
+          "standingInstFlag": {
+            "type": "string",
+            "enum": [
+              "Y",
+              "N"
+            ],
+            "default": "N"
+          },
+          "dealType": {
+            "type": "string",
+            "enum": [
+              "D",
+              "B",
+              "I"
+            ]
+          },
+          "buyerDealType": {
+            "type": "string",
+            "enum": [
+              "D",
+              "B",
+              "I"
+            ]
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "buyParticipantLoginId": {
+            "type": "string"
+          },
+          "sellParticipantLoginId": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "value": {
+            "type": "number"
+          },
+          "accrInt": {
+            "type": "number"
+          },
+          "settle": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2
+            ]
+          },
+          "sendFor": {
+            "type": "string",
+            "enum": [
+              "C",
+              "M"
+            ]
+          },
+          "yieldType": {
+            "type": "string",
+            "enum": [
+              "P",
+              "C",
+              "M"
+            ]
+          },
+          "yield": {
+            "type": "number"
+          },
+          "tradeDate": {
+            "type": "string",
+            "description": "dd-MM-yyyy"
+          },
+          "tradeTime": {
+            "type": "string",
+            "description": "HH:mm"
+          },
+          "sellerRefNo": {
+            "type": "string"
+          },
+          "buyerRefNo": {
+            "type": "string"
+          },
+          "putCallDate": {
+            "type": "string"
+          },
+          "sellerYieldViolationReason": {
+            "type": "string",
+            "enum": [
+              "1",
+              "2"
+            ]
+          },
+          "buyerYieldViolationReason": {
+            "type": "string",
+            "enum": [
+              "1",
+              "2"
+            ]
+          }
+        }
+      },
+      "OrderUpdateRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/OrderRequest"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      },
+      "OrderResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "standingInstFlag": {
+            "type": "string"
+          },
+          "dealType": {
+            "type": "string"
+          },
+          "buyerDealType": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "buyParticipantLoginId": {
+            "type": "string"
+          },
+          "sellParticipantLoginId": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "value": {
+            "type": "number"
+          },
+          "accrInt": {
+            "type": "number"
+          },
+          "settle": {
+            "type": "integer"
+          },
+          "sendFor": {
+            "type": "string"
+          },
+          "yieldType": {
+            "type": "string"
+          },
+          "yield": {
+            "type": "number"
+          },
+          "tradeDate": {
+            "type": "string"
+          },
+          "tradeTime": {
+            "type": "string"
+          },
+          "sellerRefNo": {
+            "type": "string"
+          },
+          "buyerRefNo": {
+            "type": "string"
+          },
+          "putCallDate": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "consideration": {
+            "type": "number"
+          },
+          "buyBackofficeLoginId": {
+            "type": "string"
+          },
+          "sellBackofficeLoginId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          }
+        }
+      },
+      "ActiveIssue": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "issueDate": {
+            "type": "string"
+          },
+          "maturityDate": {
+            "type": "string"
+          },
+          "couponRate": {
+            "type": "number"
+          },
+          "creditRating": {
+            "type": "string"
+          },
+          "lastTradePrice": {
+            "type": "number"
+          },
+          "lastTradeValue": {
+            "type": "number"
+          },
+          "lastTradeTime": {
+            "type": "string"
+          },
+          "totTradeValue": {
+            "type": "number"
+          },
+          "totNoOfTrades": {
+            "type": "integer"
+          },
+          "avgYield": {
+            "type": "number"
+          },
+          "avgTradePrice": {
+            "type": "number"
+          }
+        }
+      },
+      "UnregRequest": {
+        "type": "object",
+        "required": [
+          "loginId",
+          "firstName",
+          "panNo",
+          "contactPerson",
+          "mobileList",
+          "emailList",
+          "telephone",
+          "address",
+          "stateCode",
+          "regAddress",
+          "bankAccountList",
+          "dpAccountList"
+        ],
+        "properties": {
+          "loginId": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "panNo": {
+            "type": "string"
+          },
+          "custodian": {
+            "type": "string"
+          },
+          "contactPerson": {
+            "type": "string"
+          },
+          "mobileList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 3
+          },
+          "emailList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 3
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "fax": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "address2": {
+            "type": "string"
+          },
+          "address3": {
+            "type": "string"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "regAddress": {
+            "type": "string"
+          },
+          "leiCode": {
+            "type": "string"
+          },
+          "expiryDate": {
+            "type": "string"
+          },
+          "bankAccountList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "bankName": {
+                  "type": "string"
+                },
+                "bankIFSC": {
+                  "type": "string"
+                },
+                "bankAccountNo": {
+                  "type": "string"
+                },
+                "isDefault": {
+                  "type": "string",
+                  "enum": [
+                    "Y",
+                    "N"
+                  ]
+                }
+              }
+            }
+          },
+          "dpAccountList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dpType": {
+                  "type": "string",
+                  "enum": [
+                    "NSDL",
+                    "CDSL"
+                  ]
+                },
+                "dpId": {
+                  "type": "string"
+                },
+                "benId": {
+                  "type": "string"
+                },
+                "isDefault": {
+                  "type": "string",
+                  "enum": [
+                    "Y",
+                    "N"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnregUpdateRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UnregRequest"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "actualStatus"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "actualStatus": {
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      },
+      "UnregResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "loginId": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "panNo": {
+            "type": "string"
+          },
+          "workflowStatus": {
+            "type": "integer"
+          },
+          "actualStatus": {
+            "type": "integer"
+          },
+          "contactPerson": {
+            "type": "string"
+          },
+          "mobileList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "emailList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "address": {
+            "type": "string"
+          },
+          "stateCode": {
+            "type": "string"
+          },
+          "regAddress": {
+            "type": "string"
+          },
+          "bankAccountList": {
+            "type": "array"
+          },
+          "dpAccountList": {
+            "type": "array"
+          },
+          "panVerStatus": {
+            "type": "integer"
+          },
+          "panVerRemarks": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        }
+      },
+      "UnregBankAccRequest": {
+        "type": "object",
+        "required": [
+          "bankName",
+          "bankIFSC",
+          "isDefault",
+          "participantCode"
+        ],
+        "properties": {
+          "bankName": {
+            "type": "string"
+          },
+          "bankIFSC": {
+            "type": "string"
+          },
+          "bankAccountNo": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "string",
+            "enum": [
+              "Y",
+              "N"
+            ]
+          },
+          "participantCode": {
+            "type": "string"
+          }
+        }
+      },
+      "UnregDpAccRequest": {
+        "type": "object",
+        "required": [
+          "dpType",
+          "benId",
+          "isDefault",
+          "participantCode"
+        ],
+        "properties": {
+          "dpType": {
+            "type": "string",
+            "enum": [
+              "NSDL",
+              "CDSL"
+            ]
+          },
+          "dpId": {
+            "type": "string"
+          },
+          "benId": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "string",
+            "enum": [
+              "Y",
+              "N"
+            ]
+          },
+          "participantCode": {
+            "type": "string"
+          }
+        }
+      },
+      "SettleOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "buyParticipantLoginId": {
+            "type": "string"
+          },
+          "sellParticipantLoginId": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "yieldType": {
+            "type": "string"
+          },
+          "yield": {
+            "type": "number"
+          },
+          "value": {
+            "type": "number"
+          },
+          "modSettleDate": {
+            "type": "string"
+          },
+          "modQuantity": {
+            "type": "number"
+          },
+          "modAccrInt": {
+            "type": "number"
+          },
+          "modConsideration": {
+            "type": "number"
+          },
+          "settlementNo": {
+            "type": "string"
+          },
+          "stampDutyAmount": {
+            "type": "number"
+          },
+          "stampDutyBearer": {
+            "type": "string"
+          },
+          "buyerFundPayinObligation": {
+            "type": "number"
+          },
+          "sellerFundPayoutObligation": {
+            "type": "number"
+          },
+          "fundPayinRefId": {
+            "type": "string"
+          },
+          "settleStatus": {
+            "type": "integer"
+          },
+          "ifscCode": {
+            "type": "string"
+          },
+          "accountNo": {
+            "type": "string"
+          },
+          "dpId": {
+            "type": "string"
+          },
+          "benId": {
+            "type": "string"
+          }
+        }
+      },
+      "PayTxn": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fundPayinRefId": {
+            "type": "string"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "partCode": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "netbanking",
+              "upi"
+            ]
+          },
+          "amount": {
+            "type": "number"
+          },
+          "upiId": {
+            "type": "string"
+          },
+          "bankIFSC": {
+            "type": "string"
+          },
+          "bankAcccountNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "P",
+              "XS",
+              "XF",
+              "S",
+              "F"
+            ]
+          },
+          "statusRemarks": {
+            "type": "string"
+          },
+          "debitAmount": {
+            "type": "number"
+          },
+          "debitBankIFSC": {
+            "type": "string"
+          },
+          "debitBankAcccountNo": {
+            "type": "string"
+          },
+          "bankRefNo": {
+            "type": "string"
+          },
+          "customerReferenceNo": {
+            "type": "string"
+          },
+          "initiateTime": {
+            "type": "string"
+          },
+          "lastResponseTime": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

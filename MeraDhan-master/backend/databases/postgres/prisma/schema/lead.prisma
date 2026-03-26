@@ -1,0 +1,38 @@
+model LeadsModel {
+    id Int @id @default(autoincrement())
+
+    fullName           String
+    emailAddress       String?
+    phoneNo            String
+    companyName        String?
+    leadSource         LeadSource
+    bondType           BondType
+    status             LeadStatus
+    exInvestmentAmount Int?
+    note               String?
+    assignTo           CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
+    createdBy          Int
+
+    /// Timestamps
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+    cRMUserDataModelId Int?
+
+    @@map("leads")
+}
+
+model LeadFollowUpNotesModel {
+    id     Int @id @default(autoincrement())
+    leadId Int
+
+    createdByName String
+    createdByID   Int
+    text          String
+    nextDate      DateTime?
+
+    /// Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("leads_follow_up_notes")
+}

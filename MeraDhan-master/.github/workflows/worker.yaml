@@ -1,0 +1,133 @@
+
+name: Build, Push & Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env from GitHub Secrets
+        shell: bash
+        run: |
+          {
+            echo "NEXT_PUBLIC_HOST_URL=https://www.meradhan.co"
+            echo "NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co"
+            echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://api.meradhan.co"
+            echo "NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000"
+            echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co"
+            echo "NEXT_PUBLIC_DIGIO=production"
+            echo "STRAPI_API_URL=https://spyder.meradhan.co/api"
+
+            echo "GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
+            echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}"
+
+            
+
+            echo "PORT=4000"
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}"
+
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}"
+            echo "DIRECT_URL=${{ secrets.DIRECT_URL }}"
+
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}"
+            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}"
+
+            echo "KRA_USERNAME=${{ secrets.KRA_USERNAME }}"
+            echo "KRA_PASSWORD=${{ secrets.KRA_PASSWORD }}"
+            echo "KRA_PASS_KEY=${{ secrets.KRA_PASS_KEY }}"
+            echo "KRA_OKRA_CD_MI_ID=${{ secrets.KRA_OKRA_CD_MI_ID }}"
+            KRA_MOB_NO="${{ secrets.KRA_MOB_NO }}"
+            echo "KRA_MOB_NO=$KRA_MOB_NO" >> .env
+            echo "KRA_ENV=${{ secrets.KRA_ENV }}"
+
+            echo "MSG91_AUTH_KEY=${{ secrets.MSG91_AUTH_KEY }}"
+            echo "MSG91_SIGNUP_TEMPLATE=${{ secrets.MSG91_SIGNUP_TEMPLATE }}"
+            echo "MSG91_LOGIN_TEMPLATE=${{ secrets.MSG91_LOGIN_TEMPLATE }}"
+            echo "MSG91_VERIFY_TEMPLATE=${{ secrets.MSG91_VERIFY_TEMPLATE }}"
+
+            echo "SMTP_SENDER=${{ secrets.SMTP_SENDER }}"
+            echo "SMTP_HOST=${{ secrets.SMTP_HOST }}"
+            echo "SMTP_PORT=${{ secrets.SMTP_PORT }}"
+            echo "SMTP_USER=${{ secrets.SMTP_USER }}"
+            echo "SMTP_PASS=${{ secrets.SMTP_PASS }}"
+
+            echo "CBRICS_DOMAIN=${{ secrets.CBRICS_DOMAIN }}"
+            echo "CBRICS_LOGIN=${{ secrets.CBRICS_LOGIN }}"
+            echo "CBRICS_PASSWORD=${{ secrets.CBRICS_PASSWORD }}"
+
+            echo "RFQ_CBRICS_DOMAIN=${{ secrets.RFQ_CBRICS_DOMAIN }}"
+            echo "RFQ_CBRICS_LOGIN=${{ secrets.RFQ_CBRICS_LOGIN }}"
+            echo "RFQ_CBRICS_PASSWORD=${{ secrets.RFQ_CBRICS_PASSWORD }}"
+
+            echo "DIGIO_USERNAME_PASS=${{ secrets.DIGIO_USERNAME_PASS }}"
+
+            echo "NDSL_REQUESTOR_ID=${{ secrets.NDSL_REQUESTOR_ID }}"
+            echo "NSDL_SECRET_KEY=${{ secrets.NSDL_SECRET_KEY }}"
+
+            echo "CDSL_AES_KEY=${{ secrets.CDSL_AES_KEY }}"
+            echo "ENTITY_ID=${{ secrets.ENTITY_ID }}"
+
+            CDSL_MODE="${{ secrets.CDSL_MODE }}"
+            echo "CDSL_MODE=$CDSL_MODE" >> .env
+
+            
+
+            NSDL_MODE="${{ secrets.NSDL_MODE }}"
+            echo "NSDL_MODE=$NSDL_MODE" >> .env
+
+            echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}"
+            echo "AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }}"
+            echo "AUTH_GOOGLE_SECRET=${{ secrets.AUTH_GOOGLE_SECRET }}"
+            echo "AUTH_FACEBOOK_ID=${{ secrets.AUTH_FACEBOOK_ID }}"
+            echo "AUTH_FACEBOOK_SECRET=${{ secrets.AUTH_FACEBOOK_SECRET }}"
+            echo "AUTH_MICROSOFT_ENTRA_ID_ID=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ID }}"
+            echo "AUTH_MICROSOFT_ENTRA_ID_SECRET=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_SECRET }}"
+            echo "AUTH_MICROSOFT_ENTRA_ID_ISSUER=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ISSUER }}"
+            echo "RFQ_CBRICS_ENV=PROD"
+            echo "CBRICS_ENV=PROD"
+
+            echo "RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}"
+            echo "RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}"
+            echo "RAZORPAY_WEBHOOK_SECRET=${{ secrets.RAZORPAY_WEBHOOK_SECRET }}"
+
+            echo "S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}"
+            echo "S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}"
+            echo "S3_REGION=${{ secrets.S3_REGION }}"
+            echo "S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}"
+            echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}"
+          } >> .env
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag & Push Docker Image
+        env:
+          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REPOSITORY: prod-meradhan-worker
+
+          IMAGE_TAG: latest
+        run: |
+          docker build -f workerDocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: meradhan-worker-task.json
+          cluster: prod-cluster
+          service: prod-worker
+          force-new-deployment: true

@@ -1,0 +1,188 @@
+model CrmAuditLogs {
+    id        Int      @id @default(autoincrement())
+    userId    Int?
+    type      String
+    token     String?
+    trackId   String?
+    url       String?
+    data      Json
+    createdAt DateTime @default(now())
+
+    @@map("crm_audit_logs")
+}
+
+model WebAuditLogs {
+    id        Int      @id @default(autoincrement())
+    userId    Int?
+    type      String
+    token     String?
+    trackId   String?
+    url       String?
+    data      Json
+    createdAt DateTime @default(now())
+
+    @@map("web_audit_logs")
+}
+
+model ActivityLogsCRM {
+    id              Int      @id @default(autoincrement())
+    userId          Int
+    name            String?
+    email           String?
+    entityType      String
+    action          String?
+    entityId        String?
+    ipAddress       String?
+    details         Json
+    userAgent       String?
+    browserName     String?
+    deviceType      String?
+    operatingSystem String?
+    url             String?
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    @@index([createdAt(sort: Desc)])
+    @@index([userId, createdAt(sort: Desc)])
+    @@index([entityType, createdAt(sort: Desc)])
+    @@map("activity_logs_crm")
+}
+
+model SessionLogsCRM {
+    id              Int       @id @default(autoincrement())
+    userId          Int
+    sessionToken    String
+    ipAddress       String?
+    userAgent       String?
+    browserName     String?
+    deviceType      String?
+    operatingSystem String?
+    endReason       String?
+    startTime       DateTime  @default(now())
+    endTime         DateTime?
+    duration        Int       @default(0)
+    totalPages      Int       @default(0)
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    @@index([startTime(sort: Desc)])
+    @@index([userId, startTime(sort: Desc)])
+    @@map("session_logs_crm")
+}
+
+model PageViewLogsCRM {
+    id           Int       @id @default(autoincrement())
+    sessionId    String
+    userId       Int?
+    pagePath     String
+    pageTitle    String?
+    entryTime    DateTime  @default(now())
+    exitTime     DateTime?
+    duration     Int       @default(0)
+    scrollDepth  Int       @default(0)
+    interactions Int       @default(0)
+    referrer     String?
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+
+    @@index([sessionId])
+    @@index([sessionId, entryTime])
+    @@map("page_view_logs_crm")
+}
+
+model LoginLogsCrm {
+    id              Int      @id @default(autoincrement())
+    userId          Int?
+    name            String?
+    email           String
+    ipAddress       String?
+    userAgent       String?
+    browserName     String?
+    deviceType      String? // desktop, mobile, tablet
+    operatingSystem String?
+    sessionType     String   @default("login") // login, logout, timeout, browser_close
+    success         Boolean
+    createdAt       DateTime @default(now())
+
+    @@index([createdAt(sort: Desc)])
+    @@index([userId, createdAt(sort: Desc)])
+    @@map("login_logs_crm")
+}
+
+/// Front end Audit Logs Models
+
+model SessionLogsMeradhan {
+    id              Int       @id @default(autoincrement())
+    userId          Int?
+    sessionToken    String
+    ipAddress       String?
+    userAgent       String?
+    browserName     String?
+    deviceType      String?
+    operatingSystem String?
+    endReason       String?
+    startTime       DateTime  @default(now())
+    endTime         DateTime?
+    duration        Int       @default(0)
+    totalPages      Int       @default(0)
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    @@map("session_logs_meradhan")
+}
+
+model PageViewLogsMeradhan {
+    id           Int       @id @default(autoincrement())
+    userId       Int?
+    sessionId    String
+    pagePath     String
+    pageTitle    String?
+    entryTime    DateTime  @default(now())
+    exitTime     DateTime?
+    duration     Int       @default(0)
+    scrollDepth  Int       @default(0)
+    interactions Int       @default(0)
+    referrer     String?
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+
+    @@map("page_view_logs_meradhan")
+}
+
+model LoginLogsMeradhan {
+    id              Int      @id @default(autoincrement())
+    userId          Int?
+    name            String?
+    email           String
+    ipAddress       String?
+    userAgent       String?
+    browserName     String?
+    deviceType      String? // desktop, mobile, tablet
+    operatingSystem String?
+    sessionType     String   @default("login") // login, logout, timeout, browser_close
+    success         Boolean
+    createdAt       DateTime @default(now())
+
+    @@map("login_logs_meradhan")
+}
+
+model ActivityLogsMeradhan {
+    id              Int      @id @default(autoincrement())
+    userId          Int
+    name            String?
+    email           String?
+    entityType      String
+    action          String?
+    entityId        String?
+    ipAddress       String?
+    details         Json
+    userAgent       String?
+    browserName     String?
+    deviceType      String?
+    operatingSystem String?
+    url             String?
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    @@map("activity_logs_meradhan")
+}

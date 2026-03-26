@@ -1,0 +1,90 @@
+model Bonds {
+    id Int @id @default(autoincrement())
+
+    isin           String @unique
+    bondName       String
+    instrumentName String
+    description    String
+    issuePrice     Float
+    faceValue      Float
+
+    stampDutyPercentage Float?   @default(0)
+    allowForPurchase    Boolean? @default(false)
+
+    couponRate               Float
+    interestPaymentFrequency String
+    putCallOptionDetails     String?
+    certificateNumbers       String?
+    totalIssueSize           Float?  @default(0)
+    registrarDetails         String?
+
+    physicalSecurityAddress String?
+    defaultedInRedemption   String?
+    debentureTrustee        String?
+    creditRatingInfo        String?
+    remarks                 String?
+
+    taxStatus           TAX_TYPE
+    creditRating        String        @default("UnRated")
+    interestPaymentMode INTEREST_MODE @default(UNKNOWN)
+    isListed            IS_LISTED     @default(UNKNOWN)
+
+    ratingAgencyName String?
+    ratingDate       DateTime?
+
+    categories String[]
+    sectorName String?
+
+    // Additional fields for bond details
+    yield                Float?
+    lastTradePrice       Float?
+    lastTradeYield       Float?
+    nextCouponDate       DateTime?
+    modeOfIssuance       String?
+    couponType           String?
+    buyYield             Float?
+    providerName         String?
+    providerInterestDate DateTime?
+    providerQuantity     Int?
+    isOngoingDeal        Boolean?  @default(false)
+    providerPrice        Float?
+    ignoreAutoUpdate     Boolean?  @default(false)
+
+    /// Timestamps
+    dateOfAllotment DateTime?
+    redemptionDate  DateTime?
+    maturityDate    DateTime?
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    sortedAt Int @default(0)
+
+    isConvertedDeal Boolean?
+
+    @@index([isin])
+    @@index([sortedAt])
+    @@map("bonds")
+}
+
+enum TAX_TYPE {
+    TAX_FREE
+    TAXABLE
+    TAX_SAVING
+    TAX_EXEMPTION
+    UNKNOWN
+}
+
+enum IS_LISTED {
+    YES
+    NO
+    UNKNOWN
+}
+
+enum INTEREST_MODE {
+    MONTHLY
+    QUARTERLY
+    HALF_YEARLY
+    YEARLY
+    ON_MATURITY
+    UNKNOWN
+}

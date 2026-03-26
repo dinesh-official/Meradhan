@@ -1,0 +1,8 @@
+@layer components {
+  .section-wrapper {
+    @apply py-10 md:py-16 lg:py-20;
+  }
+  .section-title {
+    @apply mb-4 font-semibold text-3xl md:text-4xl section-wrapper;
+  }
+}
