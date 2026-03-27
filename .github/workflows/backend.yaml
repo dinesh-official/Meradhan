@@ -23,7 +23,6 @@ jobs:
           E_DIRECT_URL: ${{ secrets.DIRECT_URL }}
           E_REDIS_HOST: ${{ secrets.REDIS_HOST }}
           E_REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          E_REDIS_TLS: ${{secrets.REDIS_TLS }}
           E_KRA_USERNAME: ${{ secrets.KRA_USERNAME }}
           E_KRA_PASSWORD: ${{ secrets.KRA_PASSWORD }}
           E_KRA_PASS_KEY: ${{ secrets.KRA_PASS_KEY }}
@@ -87,7 +86,6 @@ jobs:
           printf 'DIRECT_URL=%s\n'                     "$E_DIRECT_URL"                     >> .env
           printf 'REDIS_HOST=%s\n'                     "$E_REDIS_HOST"                     >> .env
           printf 'REDIS_PORT=%s\n'                     "$E_REDIS_PORT"                     >> .env
-          printf 'REDIS_TLS=%s\n'                      "E_REDIS_TLS"                     >> .env
           printf 'KRA_USERNAME=%s\n'                   "$E_KRA_USERNAME"                   >> .env
           printf 'KRA_PASSWORD=%s\n'                   "$E_KRA_PASSWORD"                   >> .env
           printf 'KRA_PASS_KEY=%s\n'                   "$E_KRA_PASS_KEY"                   >> .env
