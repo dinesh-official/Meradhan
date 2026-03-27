@@ -25,6 +25,6 @@ export const useOrderState = create<{
     set({ step });
   },
   // settlement date for the order
-  settlementDate: "0",
+  settlementDate: "1",
   setSettlementDate: (settlementDate: string) => set({ settlementDate }),
 }));

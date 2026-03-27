@@ -8,15 +8,40 @@ import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
+import React from "react";
 
 function CustomerKycView({ id }: { id: number }) {
-  const queryClient = useQueryClient();
   const profileApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiClientCaller,
   );
   const kycApi = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller,
   );
+
+  const [kraRunning, setKraRunning] = React.useState<boolean>(false);
+  const [kraRunningLoading, setKraRunningLoading] =
+    React.useState<boolean>(true);
+
+  React.useEffect(() => {
+    let ignore = false;
+    async function checkKraStatus() {
+      setKraRunningLoading(true);
+      try {
+        const resp = await kycApi.customerKraStatus(id);
+        const data = resp.data.responseData;
+        if (!ignore) setKraRunning(data?.isRunning);
+      } catch (e) {
+        if (!ignore) setKraRunning(false);
+      } finally {
+        if (!ignore) setKraRunningLoading(false);
+      }
+    }
+    checkKraStatus();
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["KycView", id],
@@ -54,7 +79,10 @@ function CustomerKycView({ id }: { id: number }) {
       ? (kycStore as { id: number }).id
       : null;
   const canRetriggerKra =
-    kycDataStoreId != null && data?.kycStatus !== "PENDING";
+    kycDataStoreId != null &&
+    data?.kycStatus !== "PENDING" &&
+    !kraRunning &&
+    !kraRunningLoading;
 
   const handleRetriggerKra = () => {
     if (kycDataStoreId == null) {
@@ -63,6 +91,10 @@ function CustomerKycView({ id }: { id: number }) {
     }
     if (data?.kycStatus === "VERIFIED") {
       toast.error("Cannot retrigger KRA: customer KYC is already VERIFIED.");
+      return;
+    }
+    if (kraRunning) {
+      toast.error("KRA process is already running for this customer.");
       return;
     }
     rescheduleMutation.mutate(kycDataStoreId);
@@ -97,11 +129,15 @@ function CustomerKycView({ id }: { id: number }) {
             onClick={handleRetriggerKra}
             disabled={rescheduleMutation.isPending || !canRetriggerKra}
             title={
-              !canRetriggerKra && kycDataStoreId == null
-                ? "No KYC flow found"
-                : !canRetriggerKra && data?.kycStatus === "VERIFIED"
-                  ? "KYC already verified"
-                  : undefined
+              kraRunningLoading
+                ? "Checking KRA status..."
+                : kraRunning
+                  ? "KRA process is already running"
+                  : !canRetriggerKra && kycDataStoreId == null
+                    ? "No KYC flow found"
+                    : !canRetriggerKra && data?.kycStatus === "VERIFIED"
+                      ? "KYC already verified"
+                      : undefined
             }
           >
             {rescheduleMutation.isPending ? (

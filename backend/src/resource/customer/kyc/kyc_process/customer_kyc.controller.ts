@@ -13,7 +13,12 @@ function normalizeAadhaar(id: string): string {
 
 /** For RE_KYC, ensure new PAN and Aadhaar match the last verified KYC. */
 function validateRekycIdentity(
-  kycdata: { details?: { aadhaar?: { id_number?: string }; pan?: { id_number?: string } } },
+  kycdata: {
+    details?: {
+      aadhaar?: { id_number?: string };
+      pan?: { id_number?: string };
+    };
+  },
   existing: {
     aadhaarCard?: { aadhaarNo: string } | null;
     panCard?: { panCardNo: string } | null;
@@ -69,16 +74,17 @@ export class CustomerKycKycController {
     const pan = await db.dataBase.customerProfileDataModel.findFirst({
       where: {
         id,
-
       },
       include: { panCard: true },
     });
     if (pan?.panCard) {
       if (pan.panCard.panCardNo !== data.panCardNo) {
-        throw new AppError("PAN number is not the same as the one you provided", { code: "PAN_NUMBER_MISMATCH", statusCode: 400 });
+        throw new AppError(
+          "PAN number is not the same as the one you provided",
+          { code: "PAN_NUMBER_MISMATCH", statusCode: 400 },
+        );
       }
     }
-
 
     const response = await this.panKycService.createPanVerifyRequest({
       id,
@@ -347,11 +353,13 @@ export class CustomerKycKycController {
     const id = req.customer!.id;
     const data = appSchema.kyc.kraVerifyRequestSchema.parse(req.body);
     const response = await this.panKycService.createKraVerifyRequest(id, data);
-    const responseData = response ? JSON.parse(JSON.stringify(response)) : response;
+    const responseData = response
+      ? JSON.parse(JSON.stringify(response))
+      : response;
     delete responseData?.rawXml;
     res.sendResponse({
       statusCode: HttpStatus.OK,
-      responseData
+      responseData,
     });
   }
 }

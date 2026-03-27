@@ -54,7 +54,7 @@ export interface TCrmCustomerInterface {
 }
 
 export class CrmCustomerApi implements TCrmCustomerInterface {
-  constructor(private apiClient: IApiCaller) { }
+  constructor(private apiClient: IApiCaller) {}
 
   async createCustomer(
     data: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>,

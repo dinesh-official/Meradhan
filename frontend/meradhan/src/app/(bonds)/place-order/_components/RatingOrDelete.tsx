@@ -5,7 +5,7 @@ export function RatingOrDelete({ rating }: { rating?: string }) {
   return (
     <div className="flex md:flex-row flex-col md:items-center items-end gap-3">
       <div
-        className="text-white flex items-center gap-2 w-[79px] text-sm h-7 rounded-md justify-center"
+        className="text-white flex items-center gap-2 min-w-[79px] px-3 text-sm h-7 rounded-md justify-center"
         style={{
           backgroundColor: getRatingColor(rating || "AAA"),
         }}
