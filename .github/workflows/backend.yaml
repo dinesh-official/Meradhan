@@ -139,7 +139,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr
+        id: login-ecr 
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, Tag & Push Docker Image
@@ -154,7 +154,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: meradhan-be-task.json
-          cluster: prod-cluster
+          task-definition: backend-revision1.json
+          cluster: production-cluster
           service: prod-meredha-be
           force-new-deployment: true
