@@ -142,6 +142,7 @@ jobs:
         id: login-ecr 
         uses: aws-actions/amazon-ecr-login@v2
 
+
       - name: Build, Tag & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
