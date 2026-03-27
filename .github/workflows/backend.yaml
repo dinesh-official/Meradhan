@@ -16,19 +16,17 @@ jobs:
       - name: Create .env from GitHub Secrets
         shell: bash
         run: |
-          # Static Public values
-          cat > .env << 'ENVEOF'
-          NEXT_PUBLIC_HOST_URL=https://www.meradhan.co
-          NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co
-          NEXT_PUBLIC_BACKEND_HOST_URL=https://api.meradhan.co
-          NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000
-          NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co
-          NEXT_PUBLIC_DIGIO=production
-          STRAPI_API_URL=https://spyder.meradhan.co/api
-          PORT=4000
-          RFQ_CBRICS_ENV=PROD
-          CBRICS_ENV=PROD
-          ENVEOF
+          # Static values
+          printf 'NEXT_PUBLIC_HOST_URL=%s\n'         "https://www.meradhan.co"                      > .env
+          printf 'NEXT_PUBLIC_CRM_HOST_URL=%s\n'     "https://crm.meradhan.co"                      >> .env
+          printf 'NEXT_PUBLIC_BACKEND_HOST_URL=%s\n' "https://api.meradhan.co"                      >> .env
+          printf 'NEXT_PUBLIC_BACKEND_IP_URL=%s\n'   "http://prod-meradhan-be.prod-namespace:4000"  >> .env
+          printf 'NEXT_PUBLIC_STRAPI_HOST_URL=%s\n'  "https://spyder.meradhan.co"                   >> .env
+          printf 'NEXT_PUBLIC_DIGIO=%s\n'            "production"                                   >> .env
+          printf 'STRAPI_API_URL=%s\n'               "https://spyder.meradhan.co/api"               >> .env
+          printf 'PORT=%s\n'                         "4000"                                         >> .env
+          printf 'RFQ_CBRICS_ENV=%s\n'               "PROD"                                         >> .env
+          printf 'CBRICS_ENV=%s\n'                   "PROD"                                         >> .env
 
           # Secrets
           printf 'GRAPHQL_KEY=%s\n'                    "${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"        >> .env
