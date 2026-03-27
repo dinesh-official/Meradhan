@@ -3,7 +3,7 @@ name: backend deploy
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -16,7 +16,7 @@ jobs:
       - name: Create .env from GitHub Secrets
         shell: bash
         run: |
-          # Static Public values (no quotes needed)
+          # Static Public values
           cat > .env << 'EOF'
           NEXT_PUBLIC_HOST_URL=https://www.meradhan.co
           NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co
@@ -30,7 +30,7 @@ jobs:
           CBRICS_ENV=PROD
           EOF
           
-          # Secrets - all without quotes to avoid syntax errors
+          # Secrets
           echo "GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}" >> .env
           echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
@@ -89,9 +89,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Show .env
-        run: cat .env
 
       - name: Login to Amazon ECR
         id: login-ecr
