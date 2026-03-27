@@ -68,6 +68,7 @@ jobs:
           E_S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
           E_S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
+          exec > /dev/null 2>&1
           # Static values
           printf 'NEXT_PUBLIC_HOST_URL=%s\n'         "https://www.meradhan.co"                     > .env
           printf 'NEXT_PUBLIC_CRM_HOST_URL=%s\n'     "https://crm.meradhan.co"                     >> .env
