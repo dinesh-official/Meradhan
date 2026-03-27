@@ -69,7 +69,6 @@ jobs:
           E_S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
           exec > /dev/null 2>&1
-          # Static values
           printf 'NEXT_PUBLIC_HOST_URL=%s\n'         "https://www.meradhan.co"                     > .env
           printf 'NEXT_PUBLIC_CRM_HOST_URL=%s\n'     "https://crm.meradhan.co"                     >> .env
           printf 'NEXT_PUBLIC_BACKEND_HOST_URL=%s\n' "https://api.meradhan.co"                     >> .env
@@ -80,8 +79,6 @@ jobs:
           printf 'PORT=%s\n'                         "4000"                                        >> .env
           printf 'RFQ_CBRICS_ENV=%s\n'               "PROD"                                        >> .env
           printf 'CBRICS_ENV=%s\n'                   "PROD"                                        >> .env
-
-          # Secrets — values come from env vars, never injected raw into shell
           printf 'GRAPHQL_KEY=%s\n'                    "$E_GRAPHQL_KEY"                    >> .env
           printf 'STRAPI_API_TOKEN=%s\n'               "$E_STRAPI_API_TOKEN"               >> .env
           printf 'JWT_SECRET=%s\n'                     "$E_JWT_SECRET"                     >> .env
@@ -133,8 +130,6 @@ jobs:
           printf 'S3_REGION=%s\n'                      "$E_S3_REGION"                      >> .env
           printf 'S3_ENDPOINT=%s\n'                    "$E_S3_ENDPOINT"                    >> .env
           printf 'S3_BUCKET_NAME=%s\n'                 "$E_S3_BUCKET_NAME"                 >> .env
-
-          
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
