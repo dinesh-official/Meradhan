@@ -16,7 +16,7 @@ const steps = [
   },
   {
     step: 2,
-    title: "Order Receipt",
+    title: "Order Receipt (Draft)",
   },
   {
     step: 3,
@@ -38,7 +38,7 @@ export default function StepperOrder() {
             <StepperTrigger className="flex-col gap-3 rounded text-center">
               <StepperIndicator />
               <div className="space-y-0.5 px-2 text-center">
-                <StepperTitle className="text-xs font-normal max-w-10 text-center flex-col justify-center items-center">
+                <StepperTitle className="text-sm font-normal max-w-14 text-center flex-col justify-center items-center">
                   {title}
                 </StepperTitle>
               </div>

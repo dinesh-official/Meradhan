@@ -1,5 +1,5 @@
 import { appSchema } from "@root/schema";
-import type { AxiosRequestConfig } from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type { IApiCaller } from "../../../connection/apiCaller.interface";
 
 import type z from "zod";
@@ -26,7 +26,7 @@ import type {
 export class CustomerKycApi {
   private schema = appSchema.kyc;
 
-  constructor(private apiClient: IApiCaller) { }
+  constructor(private apiClient: IApiCaller) {}
 
   // pan
   async verifyPanInfo(
@@ -266,6 +266,16 @@ export class CustomerKycApi {
     return data;
   }
 
+  async customerKraStatus(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isRunning: boolean }>>> {
+    return this.apiClient.post(
+      `/customer/kra/status/${customerId}`,
+      null,
+      config,
+    );
+  }
   async getKycKraDataById(customerId: number, config?: AxiosRequestConfig) {
     const { data } = await this.apiClient.get<KRAResponse>(
       `/crm/kyc/kra/get/${customerId}`,
@@ -276,7 +286,7 @@ export class CustomerKycApi {
 
   async rescheduleKra(
     payload: { customerId: number; kycDataStoreId: number; delayMs?: number },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<RescheduleKraResponse>(
       "/kra/reschedule-kra",
@@ -303,7 +313,7 @@ export class CustomerKycApi {
 
   async confirmRekyc(
     payload: { token: string; otp: string },
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<{
       status: boolean;

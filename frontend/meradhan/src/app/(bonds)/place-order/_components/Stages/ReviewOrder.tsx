@@ -17,18 +17,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
-import { formatDateCustom } from "@/global/utils/datetime.utils";
+import { dateTimeUtils, formatDateCustom } from "@/global/utils/datetime.utils";
 import { formatNumberTS } from "@/global/utils/formate";
 import { BondDetailsResponse, CustomerByIdPayload } from "@root/apiGateway";
 import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { calculateSettlementAmount } from "../../_utils/calcAmount";
+import { getPlaceOrderBusinessDates } from "../../_utils/businessDates";
 import { useOrderState } from "../../store/useOrderState";
 import BondInfoData from "../BondInfoData";
 import { RatingOrDelete } from "../RatingOrDelete";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
+
+const WEEKEND_ONLY_HOLIDAYS = new Set<string>();
 function ReviewOrder({
   bond,
   customer,
@@ -44,21 +47,24 @@ function ReviewOrder({
   const {
     quantity,
     setQuantity,
+    settlementDate,
     setSettlementDate,
     setStep,
-    settlementDate,
     step,
   } = useOrderState();
 
   const {
     trackQuantityChange,
-    trackSettlementDateChange,
     trackCheckboxInteraction,
     trackButtonClick,
   } = useOrderActivityTracking();
+  const maxQuantity = 120;
 
   const previousQuantity = useRef(quantity);
-  const previousSettlementDate = useRef(settlementDate);
+  const { dealDate, settlementDate: computedSettlementDate } = useMemo(
+    () => getPlaceOrderBusinessDates(WEEKEND_ONLY_HOLIDAYS, "1"),
+    []
+  );
 
   // Track quantity changes
   useEffect(() => {
@@ -68,14 +74,6 @@ function ReviewOrder({
     }
   }, [quantity, orderId, trackQuantityChange]);
 
-  // Track settlement date changes
-  useEffect(() => {
-    if (previousSettlementDate.current !== settlementDate) {
-      trackSettlementDateChange(orderId, settlementDate);
-      previousSettlementDate.current = settlementDate;
-    }
-  }, [settlementDate, orderId, trackSettlementDateChange]);
-
   const demateAccount = customer.dematAccounts.find(
     (account) => account.isPrimary
   );
@@ -83,6 +81,11 @@ function ReviewOrder({
   const bankAccount = customer.bankAccounts.find(
     (account) => account.isPrimary
   );
+  const totalConsideration = bond.issuePrice * quantity;
+  const stampDutyRate = 0.0001; // 0.01%
+  const stampDutyAmount = totalConsideration * stampDutyRate;
+  const otherCharges = 0;
+  const settlementAmount = calculateSettlementAmount(bond.issuePrice, quantity);
 
   return (
     <div className="container">
@@ -112,7 +115,7 @@ function ReviewOrder({
           </BondInfoLabel>
 
           <BondInfoLabel title="Coupon Rate">
-            <p className="text-black">{bond.couponRate}%</p>
+            <p className="text-black">{Number(bond.couponRate).toFixed(2)}%</p>
           </BondInfoLabel>
 
           <BondInfoLabel title="Face Value">
@@ -135,29 +138,27 @@ function ReviewOrder({
 
           <BondInfoLabel title="Deal Date (Trade Date)">
             <p className="text-black flex items-center gap-1">
-              25 Nov 2025 (Wednesday)
+              {dateTimeUtils.formatDateTime(dealDate, "DD MMMM YYYY")}
             </p>
           </BondInfoLabel>
 
           <BondInfoLabel title="Settlement Date">
-            <Select
-              value={settlementDate}
-              onValueChange={(value) => {
-                setSettlementDate(value);
-                // Tracking is handled by useEffect
-              }}
-            >
+            <Select value={settlementDate} onValueChange={setSettlementDate}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="26 Nov 2025 (T + 1)" />
+                <SelectValue
+                  placeholder={`${dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")} (T + 1)`}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">26 Nov 2025 (T + 1)</SelectItem>
-                <SelectItem value="0">Today (T + 0)</SelectItem>
+                <SelectItem value="1">
+                  {dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")}{" "}
+                  (T + 1)
+                </SelectItem>
               </SelectContent>
             </Select>
           </BondInfoLabel>
 
-          <BondInfoLabel title="Quantity of Bonds">
+          <BondInfoLabel title={`Quantity of Bonds (Max. ${maxQuantity} Qty.)`}>
             <div className="flex items-center w-full border border-[#E1E6E8] rounded-md ">
               <Button
                 className="bg-[#E1E6E8] text-black font-semibold  text-lg  rounded-r-none"
@@ -173,10 +174,15 @@ function ReviewOrder({
               </Button>
               <input
                 type="number"
-                className="w-full text-center border-0 border-none"
+                className="w-full text-center border-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={quantity}
                 min={1}
-                onChange={(e) => setQuantity(Number(e.target.value))}
+                max={maxQuantity}
+                onChange={(e) =>
+                  setQuantity(
+                    Math.min(maxQuantity, Math.max(1, Number(e.target.value) || 1))
+                  )
+                }
               />
               <Button
                 className="bg-[#E1E6E8] text-black  text-lg font-semibold rounded-l-none"
@@ -185,8 +191,9 @@ function ReviewOrder({
                     previousQuantity: quantity,
                     newQuantity: quantity + 1,
                   });
-                  setQuantity(quantity + 1);
+                  setQuantity(Math.min(maxQuantity, quantity + 1));
                 }}
+                disabled={quantity >= maxQuantity}
               >
                 +
               </Button>
@@ -194,7 +201,7 @@ function ReviewOrder({
           </BondInfoLabel>
         </div>
 
-        <p className="font-semibold mt-4">Demate Account Details</p>
+        <p className="font-semibold mt-4">Demat Account Details</p>
         <div className="grid md:grid-cols-4 grid-cols-2 mt-4 gap-5">
           {demateAccount?.depositoryName == "NSDL" && (
             <DataInfoLabel
@@ -269,11 +276,55 @@ function ReviewOrder({
           <div>
             <p className="text-lg text-black flex items-center gap-1 font-medium">
               <PiCurrencyInrBold />{" "}
-              {formatNumberTS(
-                calculateSettlementAmount(bond.issuePrice, quantity)
-              )}
+              {formatNumberTS(settlementAmount)}
             </p>
-            <p className="text-sm text-primary text-nowrap">Amount Breakup</p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  type="button"
+                  className="text-sm text-primary text-nowrap underline"
+                >
+                  Amount Breakup
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Amount Breakup</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>Unit Price</span>
+                    <span className="font-medium">Rs. {formatNumberTS(bond.issuePrice)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Quantity</span>
+                    <span className="font-medium">{quantity}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Consideration</span>
+                    <span className="font-medium">
+                      Rs. {formatNumberTS(totalConsideration)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Stamp Duty (0.01%)</span>
+                    <span className="font-medium">
+                      Rs. {formatNumberTS(stampDutyAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Other Charges</span>
+                    <span className="font-medium">Rs. {formatNumberTS(otherCharges)}</span>
+                  </div>
+                  <div className="border-t pt-3 flex justify-between text-base">
+                    <span className="font-semibold">Settlement Amount</span>
+                    <span className="font-semibold">
+                      Rs. {formatNumberTS(settlementAmount)}
+                    </span>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <label className="flex justify-start mt-5 gap-3">

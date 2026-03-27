@@ -96,6 +96,7 @@ function PlaceOrderPage() {
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const { toast } = useToast();
+  const maxQuantity = 120;
 
   // Cleanup on unmount
   useEffect(() => {
@@ -209,7 +210,7 @@ function PlaceOrderPage() {
   }, [quantity, isin, bondData]); // Include bondData to trigger when bond loads
 
   const handleQuantityChange = (delta: number) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
+    setQuantity((prev) => Math.min(maxQuantity, Math.max(1, prev + delta)));
   };
 
   const handlePayment = async () => {
@@ -269,9 +270,8 @@ function PlaceOrderPage() {
         currency: currency,
         order_id: paymentOrderId,
         name: "MeraDhan",
-        description: `Purchase ${quantity} ${
-          isBondDataValid(bondData) ? bondData.bondName : "Bonds"
-        }`,
+        description: `Purchase ${quantity} ${isBondDataValid(bondData) ? bondData.bondName : "Bonds"
+          }`,
         handler: async (response: RazorpayPaymentResponse) => {
           // Payment successful - webhook will handle the rest
           console.log("Payment response:", response);
@@ -301,10 +301,10 @@ function PlaceOrderPage() {
         prefill: {
           name: session
             ? makeFullname({
-                firstName: session.firstName,
-                middleName: session.middleName,
-                lastName: session.lastName,
-              })
+              firstName: session.firstName,
+              middleName: session.middleName,
+              lastName: session.lastName,
+            })
             : "Customer",
           email: session?.emailAddress || "",
           contact: "", // Phone number not available in session
@@ -441,7 +441,9 @@ function PlaceOrderPage() {
           <div className="mt-5 border-t md:border md:p-8 pt-5 border-gray-200 md:rounded-[10px]">
             <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-y-10 gap-y-5 gap-x-6">
               <BondInfoLabel title="Coupon Rate">
-                <p className="text-black">{validBondData.couponRate}%</p>
+                <p className="text-black">
+                  {Number(validBondData.couponRate).toFixed(2)}%
+                </p>
               </BondInfoLabel>
 
               <BondInfoLabel title="Face Value">
@@ -486,31 +488,37 @@ function PlaceOrderPage() {
                 </Select>
               </BondInfoLabel>
 
-              <BondInfoLabel title="Quantity of Bonds">
+              <BondInfoLabel title={`Quantity of Bonds (Max. ${maxQuantity} Qty.)`}>
                 <div className="flex items-center w-full border border-[#E1E6E8] rounded-md">
                   <Button
                     variant="outline"
                     size="sm"
                     className="rounded-r-none border-0 bg-gray-300 text-black font-bold"
                     onClick={() => handleQuantityChange(-1)}
-                    disabled={quantity <= 1}
                   >
                     -
                   </Button>
                   <input
                     type="number"
-                    className="w-full text-center border-0 focus:outline-none"
+                    className="w-full text-center border-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     value={quantity}
                     onChange={(e) =>
-                      setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                      setQuantity(
+                        Math.min(
+                          maxQuantity,
+                          Math.max(1, Number.parseInt(e.target.value, 10) || 1)
+                        )
+                      )
                     }
                     min="1"
+                    max={maxQuantity}
                   />
                   <Button
                     variant="outline"
                     size="sm"
                     className="rounded-l-none border-0 bg-gray-300 text-black font-bold"
                     onClick={() => handleQuantityChange(1)}
+                    disabled={quantity >= maxQuantity}
                   >
                     +
                   </Button>
@@ -576,12 +584,12 @@ function PlaceOrderPage() {
                   !acceptedTerms
                     ? "Please accept the terms and conditions"
                     : isPreviewLoading
-                    ? "Loading order preview..."
-                    : !orderPreview
-                    ? "Waiting for order preview"
-                    : isLoading
-                    ? "Processing payment..."
-                    : ""
+                      ? "Loading order preview..."
+                      : !orderPreview
+                        ? "Waiting for order preview"
+                        : isLoading
+                          ? "Processing payment..."
+                          : ""
                 }
               >
                 {isLoading ? (
@@ -601,10 +609,10 @@ function PlaceOrderPage() {
                     {!acceptedTerms
                       ? "Please accept the terms and conditions to proceed"
                       : isPreviewLoading
-                      ? "Calculating order preview..."
-                      : !orderPreview
-                      ? "Please wait for order preview to load"
-                      : ""}
+                        ? "Calculating order preview..."
+                        : !orderPreview
+                          ? "Please wait for order preview to load"
+                          : ""}
                   </p>
                 )}
             </div>

@@ -72,8 +72,6 @@ export class KraWorkerService {
         where: { id: kycDataStoreId, userID: customerId },
       });
 
-
-
       if (!payload) {
         return;
       }
@@ -152,7 +150,8 @@ export class KraWorkerService {
               Message: "Request Failed - KRA Process error",
               LastTask: lastTask,
               Status: status,
-              Error: "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
+              Error:
+                "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
             },
             responseData: res,
             userId: customerId,
@@ -216,7 +215,8 @@ export class KraWorkerService {
                 resTime: new Date().toISOString(),
               },
             });
-          } try {
+          }
+          try {
             await this.registerOnCbrics(customerId, kycDataStoreId);
           } catch (error) {
             await db.dataBase.kraDataLogs.create({
@@ -305,8 +305,7 @@ export class KraWorkerService {
   }
   async registerOnCbrics(customerId: number, kycDataStoreId: number) {
     try {
-      const cbUser =
-        await cbricsManager.registerParticipant(customerId);
+      const cbUser = await cbricsManager.registerParticipant(customerId);
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
@@ -352,7 +351,6 @@ export class KraWorkerService {
     }
   }
 }
-
 
 type processPayload = {
   kycdataId: number;
@@ -731,9 +729,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-          data.step_1.pan.response.details.aadhaar.current_address_details
-            .state,
-        )?.code
+            data.step_1.pan.response.details.aadhaar.current_address_details
+              .state,
+          )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
@@ -821,6 +819,15 @@ export class KraProcess {
       APP_SUMM_REC: appSummRec,
     } as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"];
   }
+
+  async isKraProcessRunning(
+    customerId: number,
+    kycDataStoreId: number,
+  ): Promise<boolean> {
+    const runnerCachedKey = `KRA:${customerId}-${kycDataStoreId}-RUNNER`;
+    const runner = await cacheStorage.get<string>(runnerCachedKey);
+    return !!runner;
+  }
 }
 
 export const formatDate = (date: Date) => {
@@ -831,7 +838,6 @@ export const formatDate = (date: Date) => {
 };
 
 export function formatDateTime(date: Date): string {
-
   // Format in IST using formatToParts (reliable)
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Kolkata",
@@ -844,7 +850,7 @@ export function formatDateTime(date: Date): string {
     hour12: false,
   }).formatToParts(date);
 
-  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
 
   const dd = get("day");
   const mm = get("month");
@@ -875,7 +881,7 @@ export function formatDateTime15SecPrev(date: Date): string {
     hour12: false,
   }).formatToParts(d);
 
-  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
 
   const dd = get("day");
   const mm = get("month");
