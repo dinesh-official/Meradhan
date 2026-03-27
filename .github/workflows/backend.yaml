@@ -136,9 +136,7 @@ jobs:
 
           
       - name: Show .env
-        run: |
-           exec > /dev/null 2>&1
-           cat .env
+        run: cat .env
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
