@@ -156,5 +156,5 @@ jobs:
         with:
           task-definition: backend-revision1.json
           cluster: production-cluster
-          service: prod-meredha-be
+          service: backend-service-urbuyx6t
           force-new-deployment: true
