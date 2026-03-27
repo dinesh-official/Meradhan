@@ -64,6 +64,31 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
     );
   }
 
+  if (!responseData) {
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Bond Not Found"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">Bond Not Found</h2>
+              <p className="text-gray-600">The bond you are looking for does not exist.</p>
+
+              <Link href="/bonds" className="mt-6 inline-block">
+                <Button>Back to Bonds</Button>
+              </Link>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
   return (
     <ViewPort>
       <OrderStep

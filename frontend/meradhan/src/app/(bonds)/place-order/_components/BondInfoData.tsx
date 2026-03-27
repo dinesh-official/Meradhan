@@ -1,5 +1,6 @@
 import React from "react";
 import { BsArrowUpRightSquareFill } from "react-icons/bs";
+import Link from "next/link";
 
 interface BondInfoDataProps {
   bondData?: {
@@ -18,9 +19,20 @@ function BondInfoData({ bondData }: BondInfoDataProps) {
       </h6>
       <p className="flex ">
         ISIN:{" "}
-        <span className="text-primary flex items-center ml-1 gap-2">
-          {bondData?.isin || "Loading..."} <BsArrowUpRightSquareFill />
-        </span>
+        {bondData?.isin ? (
+          <Link
+            href={`/bonds/${bondData.isin}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary flex items-center ml-1 gap-2"
+          >
+            {bondData.isin} <BsArrowUpRightSquareFill />
+          </Link>
+        ) : (
+          <span className="text-primary flex items-center ml-1 gap-2">
+            Loading... <BsArrowUpRightSquareFill />
+          </span>
+        )}
       </p>
     </div>
   );
