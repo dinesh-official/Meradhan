@@ -13,94 +13,76 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ FIXED: Clean .env creation
       - name: Create .env from GitHub Secrets
         shell: bash
         run: |
-          # Clear existing .env file
-          > .env
+          # Static Public values (no quotes needed)
+          cat > .env << 'EOF'
+          NEXT_PUBLIC_HOST_URL=https://www.meradhan.co
+          NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co
+          NEXT_PUBLIC_BACKEND_HOST_URL=https://api.meradhan.co
+          NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000
+          NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co
+          NEXT_PUBLIC_DIGIO=production
+          STRAPI_API_URL=https://spyder.meradhan.co/api
+          PORT=4000
+          RFQ_CBRICS_ENV=PROD
+          CBRICS_ENV=PROD
+          EOF
           
-          # Function to add environment variables safely
-          add_env() {
-            echo "$1=$2" >> .env
-          }
-          
-          # Static values
-          add_env "NEXT_PUBLIC_HOST_URL" "https://www.meradhan.co"
-          add_env "NEXT_PUBLIC_CRM_HOST_URL" "https://crm.meradhan.co"
-          add_env "NEXT_PUBLIC_BACKEND_HOST_URL" "https://api.meradhan.co"
-          add_env "NEXT_PUBLIC_BACKEND_IP_URL" "http://prod-meradhan-be.prod-namespace:4000"
-          add_env "NEXT_PUBLIC_STRAPI_HOST_URL" "https://spyder.meradhan.co"
-          add_env "NEXT_PUBLIC_DIGIO" "production"
-          add_env "STRAPI_API_URL" "https://spyder.meradhan.co/api"
-          add_env "PORT" "4000"
-          add_env "RFQ_CBRICS_ENV" "PROD"
-          add_env "CBRICS_ENV" "PROD"
-          
-          # Secrets from GitHub
-          add_env "GRAPHQL_KEY" "${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
-          add_env "STRAPI_API_TOKEN" "${{ secrets.STRAPI_API_TOKEN }}"
-          add_env "JWT_SECRET" "${{ secrets.JWT_SECRET }}"
-          add_env "DATABASE_URL" "${{ secrets.DATABASE_URL }}"
-          add_env "DIRECT_URL" "${{ secrets.DIRECT_URL }}"
-          add_env "REDIS_HOST" "${{ secrets.REDIS_HOST }}"
-          add_env "REDIS_PORT" "${{ secrets.REDIS_PORT }}"
-          add_env "KRA_USERNAME" "${{ secrets.KRA_USERNAME }}"
-          add_env "KRA_PASSWORD" "${{ secrets.KRA_PASSWORD }}"
-          add_env "KRA_PASS_KEY" "${{ secrets.KRA_PASS_KEY }}"
-          add_env "KRA_MOB_NO" "${{ secrets.KRA_MOB_NO }}"
-          add_env "KRA_OKRA_CD_MI_ID" "${{ secrets.KRA_OKRA_CD_MI_ID }}"
-          add_env "KRA_ENV" "${{ secrets.KRA_ENV }}"
-          add_env "MSG91_AUTH_KEY" "${{ secrets.MSG91_AUTH_KEY }}"
-          add_env "MSG91_SIGNUP_TEMPLATE" "${{ secrets.MSG91_SIGNUP_TEMPLATE }}"
-          add_env "MSG91_LOGIN_TEMPLATE" "${{ secrets.MSG91_LOGIN_TEMPLATE }}"
-          add_env "MSG91_VERIFY_TEMPLATE" "${{ secrets.MSG91_VERIFY_TEMPLATE }}"
-          add_env "SMTP_SENDER" "${{ secrets.SMTP_SENDER }}"
-          add_env "SMTP_HOST" "${{ secrets.SMTP_HOST }}"
-          add_env "SMTP_PORT" "${{ secrets.SMTP_PORT }}"
-          add_env "SMTP_USER" "${{ secrets.SMTP_USER }}"
-          add_env "SMTP_PASS" "${{ secrets.SMTP_PASS }}"
-          add_env "CBRICS_DOMAIN" "${{ secrets.CBRICS_DOMAIN }}"
-          add_env "CBRICS_LOGIN" "${{ secrets.CBRICS_LOGIN }}"
-          add_env "CBRICS_PASSWORD" "${{ secrets.CBRICS_PASSWORD }}"
-          add_env "RFQ_CBRICS_DOMAIN" "${{ secrets.RFQ_CBRICS_DOMAIN }}"
-          add_env "RFQ_CBRICS_LOGIN" "${{ secrets.RFQ_CBRICS_LOGIN }}"
-          add_env "RFQ_CBRICS_PASSWORD" "${{ secrets.RFQ_CBRICS_PASSWORD }}"
-          add_env "DIGIO_USERNAME_PASS" "${{ secrets.DIGIO_USERNAME_PASS }}"
-          add_env "NDSL_REQUESTOR_ID" "${{ secrets.NDSL_REQUESTOR_ID }}"
-          add_env "NSDL_SECRET_KEY" "${{ secrets.NSDL_SECRET_KEY }}"
-          add_env "CDSL_AES_KEY" "${{ secrets.CDSL_AES_KEY }}"
-          add_env "ENTITY_ID" "${{ secrets.ENTITY_ID }}"
-          add_env "AUTH_SECRET" "${{ secrets.AUTH_SECRET }}"
-          add_env "AUTH_GOOGLE_ID" "${{ secrets.AUTH_GOOGLE_ID }}"
-          add_env "AUTH_GOOGLE_SECRET" "${{ secrets.AUTH_GOOGLE_SECRET }}"
-          add_env "AUTH_FACEBOOK_ID" "${{ secrets.AUTH_FACEBOOK_ID }}"
-          add_env "AUTH_FACEBOOK_SECRET" "${{ secrets.AUTH_FACEBOOK_SECRET }}"
-          add_env "AUTH_MICROSOFT_ENTRA_ID_ID" "${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ID }}"
-          add_env "AUTH_MICROSOFT_ENTRA_ID_SECRET" "${{ secrets.AUTH_MICROSOFT_ENTRA_ID_SECRET }}"
-          add_env "AUTH_MICROSOFT_ENTRA_ID_ISSUER" "${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ISSUER }}"
-          add_env "RAZORPAY_KEY_ID" "${{ secrets.RAZORPAY_KEY_ID }}"
-          add_env "RAZORPAY_KEY_SECRET" "${{ secrets.RAZORPAY_KEY_SECRET }}"
-          add_env "RAZORPAY_WEBHOOK_SECRET" "${{ secrets.RAZORPAY_WEBHOOK_SECRET }}"
-          add_env "CDSL_MODE" "${{ secrets.CDSL_MODE }}"
-          add_env "NSDL_MODE" "${{ secrets.NSDL_MODE }}"
-          add_env "S3_ACCESS_KEY_ID" "${{ secrets.S3_ACCESS_KEY_ID }}"
-          add_env "S3_SECRET_ACCESS_KEY" "${{ secrets.S3_SECRET_ACCESS_KEY }}"
-          add_env "S3_REGION" "${{ secrets.S3_REGION }}"
-          add_env "S3_ENDPOINT" "${{ secrets.S3_ENDPOINT }}"
-          add_env "S3_BUCKET_NAME" "${{ secrets.S3_BUCKET_NAME }}"
-          
-          echo "✅ .env file created successfully"
-          
-          # Verify .env was created
-          if [ ! -f .env ]; then
-            echo "❌ .env file was not created!"
-            exit 1
-          fi
-          
-          echo "📄 .env file created with $(wc -l < .env) lines"
+          # Secrets - all without quotes to avoid syntax errors
+          echo "GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}" >> .env
+          echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "DIRECT_URL=${{ secrets.DIRECT_URL }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+          echo "KRA_USERNAME=${{ secrets.KRA_USERNAME }}" >> .env
+          echo "KRA_PASSWORD=${{ secrets.KRA_PASSWORD }}" >> .env
+          echo "KRA_PASS_KEY=${{ secrets.KRA_PASS_KEY }}" >> .env
+          echo "KRA_MOB_NO=${{ secrets.KRA_MOB_NO }}" >> .env
+          echo "KRA_OKRA_CD_MI_ID=${{ secrets.KRA_OKRA_CD_MI_ID }}" >> .env
+          echo "KRA_ENV=${{ secrets.KRA_ENV }}" >> .env
+          echo "MSG91_AUTH_KEY=${{ secrets.MSG91_AUTH_KEY }}" >> .env
+          echo "MSG91_SIGNUP_TEMPLATE=${{ secrets.MSG91_SIGNUP_TEMPLATE }}" >> .env
+          echo "MSG91_LOGIN_TEMPLATE=${{ secrets.MSG91_LOGIN_TEMPLATE }}" >> .env
+          echo "MSG91_VERIFY_TEMPLATE=${{ secrets.MSG91_VERIFY_TEMPLATE }}" >> .env
+          echo "SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
+          echo "CBRICS_DOMAIN=${{ secrets.CBRICS_DOMAIN }}" >> .env
+          echo "CBRICS_LOGIN=${{ secrets.CBRICS_LOGIN }}" >> .env
+          echo "CBRICS_PASSWORD=${{ secrets.CBRICS_PASSWORD }}" >> .env
+          echo "RFQ_CBRICS_DOMAIN=${{ secrets.RFQ_CBRICS_DOMAIN }}" >> .env
+          echo "RFQ_CBRICS_LOGIN=${{ secrets.RFQ_CBRICS_LOGIN }}" >> .env
+          echo "RFQ_CBRICS_PASSWORD=${{ secrets.RFQ_CBRICS_PASSWORD }}" >> .env
+          echo "DIGIO_USERNAME_PASS=${{ secrets.DIGIO_USERNAME_PASS }}" >> .env
+          echo "NDSL_REQUESTOR_ID=${{ secrets.NDSL_REQUESTOR_ID }}" >> .env
+          echo "NSDL_SECRET_KEY=${{ secrets.NSDL_SECRET_KEY }}" >> .env
+          echo "CDSL_AES_KEY=${{ secrets.CDSL_AES_KEY }}" >> .env
+          echo "ENTITY_ID=${{ secrets.ENTITY_ID }}" >> .env
+          echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
+          echo "AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }}" >> .env
+          echo "AUTH_GOOGLE_SECRET=${{ secrets.AUTH_GOOGLE_SECRET }}" >> .env
+          echo "AUTH_FACEBOOK_ID=${{ secrets.AUTH_FACEBOOK_ID }}" >> .env
+          echo "AUTH_FACEBOOK_SECRET=${{ secrets.AUTH_FACEBOOK_SECRET }}" >> .env
+          echo "AUTH_MICROSOFT_ENTRA_ID_ID=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ID }}" >> .env
+          echo "AUTH_MICROSOFT_ENTRA_ID_SECRET=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_SECRET }}" >> .env
+          echo "AUTH_MICROSOFT_ENTRA_ID_ISSUER=${{ secrets.AUTH_MICROSOFT_ENTRA_ID_ISSUER }}" >> .env
+          echo "RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}" >> .env
+          echo "RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}" >> .env
+          echo "RAZORPAY_WEBHOOK_SECRET=${{ secrets.RAZORPAY_WEBHOOK_SECRET }}" >> .env
+          echo "CDSL_MODE=${{ secrets.CDSL_MODE }}" >> .env
+          echo "NSDL_MODE=${{ secrets.NSDL_MODE }}" >> .env
+          echo "S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}" >> .env
+          echo "S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}" >> .env
+          echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
+          echo "S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}" >> .env
+          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
 
-      # AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -108,18 +90,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Optional: Show .env structure (without exposing values)
-      - name: Show .env structure
-        run: |
-          echo "=== .env file keys ==="
-          cut -d'=' -f1 .env
-          echo "======================"
+      - name: Show .env
+        run: cat .env
 
-      # Login to ECR
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build & Push
       - name: Build, Tag & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
@@ -129,7 +106,6 @@ jobs:
           docker build -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      # Deploy ECS
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
