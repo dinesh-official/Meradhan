@@ -124,6 +124,7 @@ export class KraWorkerService {
         //   data: { kycStatus: "UNDER_REVIEW", kraStatus: "REJECTED" },
         // });
         // create kra data log for failed request - set stage to KRA_FAILED_REQUEST
+        await cacheStorage.delete(runnerCachedKey);
         await db.dataBase.kraDataLogs.create({
           data: {
             requestData: {
@@ -145,6 +146,7 @@ export class KraWorkerService {
       }
 
       if (status == "ERROR") {
+        await cacheStorage.delete(runnerCachedKey);
         await db.dataBase.kraDataLogs.create({
           data: {
             requestData: {
@@ -309,7 +311,56 @@ export class KraWorkerService {
   }
   async registerOnCbrics(customerId: number, kycDataStoreId: number) {
     try {
+      // check if user is already registered
+      const user = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id: customerId },
+        select: {
+          nseDataSet: {
+            select: {
+              participant: {
+                select: {
+                  id: true,
+                  loginId: true,
+                  userId: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (user?.nseDataSet?.participant.loginId && user?.nseDataSet?.participant.userId === customerId) {
+        await db.dataBase.customerProfileDataModel.update({
+          where: { id: customerId },
+          data: {
+            kycStatus: "VERIFIED",
+            kraStatus: "VERIFIED",
+            verifyDate: new Date(),
+          },
+        });
+        await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
+        await db.dataBase.kraDataLogs.create({
+          data: {
+            requestData: {
+              customerId: customerId,
+              kycDataStoreId: kycDataStoreId,
+            },
+            responseData: {
+              message: "User already registered on CBRICS",
+              error: "User already registered on CBRICS",
+              statusCode: 200,
+              status: "success",
+            },
+            userId: customerId,
+            kycId: kycDataStoreId,
+            stage: "CBRICS_REGISTER_SUCCESS",
+            reqTime: new Date().toISOString(),
+            resTime: new Date().toISOString(),
+          },
+        });
+        return;
+      }
       const cbUser = await cbricsManager.registerParticipant(customerId);
+
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
