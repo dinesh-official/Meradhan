@@ -57,6 +57,8 @@ export class KraWorkerService {
           resTime: new Date().toISOString(),
         },
       });
+      await cacheStorage.delete(runnerCachedKey);
+
       return;
     }
 
@@ -199,6 +201,7 @@ export class KraWorkerService {
           try {
             await this.registerOnCbrics(customerId, kycDataStoreId);
           } catch (error) {
+            await cacheStorage.delete(runnerCachedKey);
             await db.dataBase.kraDataLogs.create({
               data: {
                 requestData: {
@@ -250,6 +253,7 @@ export class KraWorkerService {
       }
       return res;
     } catch (err) {
+      // remove runner key
       console.error("KRA PROCESS FAILED - Rescheduling the job");
       console.error(
         "KRA PROCESS FAILED - ",
@@ -314,6 +318,7 @@ export class KraWorkerService {
           verifyDate: new Date(),
         },
       });
+      await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
       await db.dataBase.kraDataLogs.create({
         data: {
           requestData: {
@@ -329,6 +334,7 @@ export class KraWorkerService {
       });
     } catch (error) {
       const err = error as AxiosError;
+      await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
