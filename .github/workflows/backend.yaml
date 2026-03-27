@@ -135,8 +135,6 @@ jobs:
           printf 'S3_BUCKET_NAME=%s\n'                 "$E_S3_BUCKET_NAME"                 >> .env
 
           
-      - name: Debug .env
-        run: cat .env 2>&1 | sed 's/=.*/=****/' 
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
