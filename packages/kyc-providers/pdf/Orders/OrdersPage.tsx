@@ -71,6 +71,8 @@ interface OrderData {
       modConsideration?: number | string;
       stampDutyAmount?: number | string;
     };
+    /** CRM / RFQ: customer buy vs sell for wording */
+    clientOrderSide?: "BUY" | "SELL";
   };
 }
 
@@ -187,24 +189,17 @@ export default function OrdersPage({
 
 
 
-  // Get deal ID from metadata or generate from order
   const dealId =
-    orderData?.metadata?.dealId ||
-    `MD-${orderId.split("-").pop() || "XXXXX"}-${formatDate(
-      orderDate.toISOString(),
-      "DD/MM/YYYY"
-    ).replace(/\//g, "")}-BUY-${String(orderDate.getHours()).padStart(
-      2,
-      "0"
-    )}${String(orderDate.getMinutes()).padStart(2, "0")}${String(
-      orderDate.getSeconds()
-    ).padStart(2, "0")}`;
+    orderData?.metadata?.dealId ??
+    (releasedOrder ? "—" : "Pending assignment");
 
+  const txVerb =
+    orderData?.metadata?.clientOrderSide === "SELL" ? "Sell" : "Buy";
 
   const list = [
     [
       "Transaction Type",
-      `Your Buy (${fullname} : ${user?.panCard?.panCardNo || "N/A"})`,
+      `Your ${txVerb} (${fullname} : ${user?.panCard?.panCardNo || "N/A"})`,
     ],
     ["MeraDhan Order ID", orderId],
     [

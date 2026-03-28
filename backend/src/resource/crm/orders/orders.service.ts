@@ -1,7 +1,11 @@
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";
 import { OrderStatus, PaymentStatus } from "@databases/generated/prisma/postgres";
-import { generateOrderId, generateDealId } from "@resource/customer/order/order.utils";
+import {
+  generateDealId,
+  generateOrderId,
+} from "@resource/customer/order/order.utils";
+import crypto from "crypto";
 
 export class CrmOrdersService {
   async getAllOrders(
@@ -211,7 +215,11 @@ export class CrmOrdersService {
   }
 
 
-  async createOrderFromRfq(orderNumber: string, customerId: number) {
+  async createOrderFromRfq(
+    orderNumber: string,
+    customerId: number,
+    options?: { orderSide?: "BUY" | "SELL" },
+  ) {
     const existingOrder = await this.getCustomerByOrderNumber(orderNumber);
     if (existingOrder) {
       throw new Error(`Customer already exists for order number ${orderNumber}`);
@@ -257,11 +265,21 @@ export class CrmOrdersService {
       throw new Error(`Negotiation not found for order number ${rfq.orderNumber}`);
     }
 
-    const lastOrder = await db.dataBase.order.findFirst({
-      orderBy: { createdAt: "desc" },
-    });
+    const dealDate =
+      rfq.createdAt instanceof Date ? rfq.createdAt : new Date(rfq.createdAt);
 
+    const resolveAction = (): "BUY" | "SELL" | "BOTH" => {
+      if (options?.orderSide === "BUY" || options?.orderSide === "SELL") {
+        return options.orderSide;
+      }
+      if (negotation.buySell === "B") return "BUY";
+      if (negotation.buySell === "S") return "SELL";
+      return "BOTH";
+    };
+    const action = resolveAction();
+    const idAction = action === "BOTH" ? "BUY" : action;
 
+    const tempOrderNumber = `MD-ASSIST-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
 
     const order = await db.dataBase.order.create({
       data: {
@@ -271,11 +289,7 @@ export class CrmOrdersService {
         unitPrice: rfq.price.toNumber(),
         isin: bondDetails.isin,
         bondName: bondDetails.bondName,
-        orderNumber: generateOrderId({
-          prefix2: "ASSIST",
-          action: negotation.buySell === "S" ? "BUY" : negotation.buySell === "B" ? "SELL" : "BOTH",
-          uniquePart: "0" + lastOrder?.id?.toString(),
-        }),
+        orderNumber: tempOrderNumber,
         stampDuty: negotation.acceptedAccruedInterest || 0,
         subTotal: negotation.acceptedConsideration || 0,
         totalAmount: negotation.acceptedConsideration || 0,
@@ -283,7 +297,7 @@ export class CrmOrdersService {
         paymentId: rfq.orderNumber,
         paymentOrderId: rfq.orderNumber,
         reqOrderNumber: rfq.orderNumber,
-        metadata: { rfqNumber: rfq.orderNumber },
+        metadata: { rfqNumber: rfq.orderNumber } as Prisma.InputJsonValue,
         paymentStatus: PaymentStatus.PENDING,
         paymentProvider: "CUSTOM",
         status: OrderStatus.SETTLED,
@@ -296,26 +310,40 @@ export class CrmOrdersService {
             quantity: Number(rfq.modQuantity) || 0,
             purchasePrice: rfq.price.toNumber(),
           },
-        }
-      }
+        },
+      },
     });
-    const dealId = generateDealId(
-      new Date(),
-      negotation.buySell === "S" ? "BUY" : negotation.buySell === "B" ? "SELL" : "BOTH",
-      order.id,
-      bondDetails.bondName ?? ""
-    );
-    await db.dataBase.order.update({
+
+    const issuerName =
+      bondDetails.instrumentName || bondDetails.bondName || "";
+
+    const finalOrderNumber = generateOrderId({
+      channel: "ASSIST",
+      action: idAction,
+      date: dealDate,
+      orderSequence: order.id,
+    });
+    const dealId = generateDealId({
+      issuerName,
+      channel: "ASSIST",
+      action: idAction,
+      date: dealDate,
+      orderSequence: order.id,
+    });
+
+    const updated = await db.dataBase.order.update({
       where: { id: order.id },
       data: {
+        orderNumber: finalOrderNumber,
         metadata: {
           ...((order.metadata as Record<string, unknown>) ?? {}),
           dealId,
           rfqNumber: rfq.orderNumber,
-        },
+          clientOrderSide: idAction,
+        } as Prisma.InputJsonValue,
       },
     });
-    return { ...order, metadata: { dealId, rfqNumber: rfq.orderNumber } };
+    return updated;
   }
 
 }

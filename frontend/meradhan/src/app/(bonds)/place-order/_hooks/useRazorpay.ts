@@ -52,6 +52,7 @@ interface RazorpayOptions {
 interface PayApiResponse {
   responseData: {
     orderId: number;
+    orderNumber?: string;
     paymentOrderId: string;
     amount: number;
     currency: string;
@@ -79,7 +80,7 @@ interface PaymentParams {
 ----------------------------------------------------- */
 
 export function useRazorpay() {
-  const { setStep } = useOrderState();
+  const { setStep, setMeradhanOrderNumber } = useOrderState();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [orderReqData, setOrderReqData] = useState<PayApiResponse | undefined>(
@@ -127,7 +128,12 @@ export function useRazorpay() {
         currency,
         key,
         orderId: responseOrderId,
+        orderNumber: responseOrderNumber,
       } = response.data.responseData;
+
+      if (responseOrderNumber) {
+        setMeradhanOrderNumber(responseOrderNumber);
+      }
 
       // Use orderId from parameter or response, ensuring it's always a string
       const finalOrderId = orderId ?? String(responseOrderId);
