@@ -194,6 +194,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: preprod_fe-revision.json
-          cluster: stage-cluster
-          service: preprod_fe
+          cluster: prod-cluster
+          service: preprod_fe_svc
           force-new-deployment: true
