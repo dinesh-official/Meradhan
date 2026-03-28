@@ -1,4 +1,4 @@
-name: stage fe deploy
+name: pre-prod fe deploy
 
 on:
   push:
