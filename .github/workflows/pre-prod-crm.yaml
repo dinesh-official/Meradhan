@@ -86,9 +86,9 @@ jobs:
 
         run: |
           # Static Public values
-          echo "NEXT_PUBLIC_HOST_URL=https://www.meradhan.co" > .env
-          echo "NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://api.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_HOST_URL=https://www.preprodfe.meradhan.co" > .env
+          echo "NEXT_PUBLIC_CRM_HOST_URL=https://preprod-crm.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co" >> .env
           echo "NEXT_PUBLIC_DIGIO=production" >> .env
