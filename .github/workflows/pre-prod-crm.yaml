@@ -85,13 +85,14 @@ jobs:
           DEV_S3_BUCKET_NAME: staging-meradhan-storage
 
         run: |
-          echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
-          echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000" >> .env
-          echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
-          echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
+          # Static Public values
+          echo "NEXT_PUBLIC_HOST_URL=https://www.meradhan.co" > .env
+          echo "NEXT_PUBLIC_CRM_HOST_URL=https://crm.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://api.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
+          echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_DIGIO=production" >> .env
+          echo "STRAPI_API_URL=https://spyder.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
     
 
@@ -199,7 +200,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: stage-crm-ui-revision.json
+          task-definition: pre-prod-crm-revision.json
           cluster: prod-cluster
-          service: stage-crm-ui-service-2drpd2xj
+          service: pre=prod-crm-service
           force-new-deployment: true
