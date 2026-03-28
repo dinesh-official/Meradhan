@@ -55,7 +55,7 @@ export class KraController {
       });
     }
 
-    if (customer.kycStatus === "VERIFIED") {
+    if (customer.kraStatus === "VERIFIED") {
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
         message: "Cannot reschedule KRA: customer KYC is already VERIFIED",
