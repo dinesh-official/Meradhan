@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import React from "react";
 
-function CustomerKycView({ id }: { id: number }) {
+function CustomerKycView({ id }: { id: number}) {
   const profileApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiClientCaller,
   );
@@ -21,6 +21,7 @@ function CustomerKycView({ id }: { id: number }) {
   const [kraRunning, setKraRunning] = React.useState<boolean>(false);
   const [kraRunningLoading, setKraRunningLoading] =
     React.useState<boolean>(true);
+  const [kycDataStoreId, setKycDataStoreId] = React.useState<number | null>(null);
 
   React.useEffect(() => {
     let ignore = false;
@@ -30,6 +31,7 @@ function CustomerKycView({ id }: { id: number }) {
         const resp = await kycApi.customerKraStatus(id);
         const data = resp.data.responseData;
         if (!ignore) setKraRunning(data?.isRunning);
+        if (!ignore) setKycDataStoreId(data?.kycDataStoreId);
       } catch (e) {
         if (!ignore) setKraRunning(false);
       } finally {
@@ -74,10 +76,6 @@ function CustomerKycView({ id }: { id: number }) {
     },
   });
 
-  const kycDataStoreId =
-    kycStore && typeof kycStore === "object" && "id" in kycStore
-      ? (kycStore as { id: number }).id
-      : null;
   const canRetriggerKra =
     kycDataStoreId != null &&
     data?.kycStatus !== "PENDING" &&
@@ -89,10 +87,7 @@ function CustomerKycView({ id }: { id: number }) {
       toast.error("No KYC flow found for this customer.");
       return;
     }
-    if (data?.kycStatus === "VERIFIED") {
-      toast.error("Cannot retrigger KRA: customer KYC is already VERIFIED.");
-      return;
-    }
+   
     if (kraRunning) {
       toast.error("KRA process is already running for this customer.");
       return;
@@ -127,13 +122,13 @@ function CustomerKycView({ id }: { id: number }) {
             variant="outline"
             size="sm"
             onClick={handleRetriggerKra}
-            disabled={rescheduleMutation.isPending || !canRetriggerKra}
+            disabled={rescheduleMutation.isPending}
             title={
               kraRunningLoading
                 ? "Checking KRA status..."
                 : kraRunning
                   ? "KRA process is already running"
-                  : !canRetriggerKra && kycDataStoreId == null
+                  : canRetriggerKra && kycDataStoreId == null
                     ? "No KYC flow found"
                     : !canRetriggerKra && data?.kycStatus === "VERIFIED"
                       ? "KYC already verified"

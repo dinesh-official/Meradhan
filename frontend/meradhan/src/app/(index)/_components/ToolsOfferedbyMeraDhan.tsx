@@ -51,7 +51,7 @@ function ToolsOfferedByMeraDhan() {
 
                 <div className="flex justify-start">
                   <Button variant={"outline"}>
-                    <Link href={`/ytm-calculator`}>
+                    <Link href={`https://calc.meradhan.co`}>
                       Calculate YTM
                     </Link>
                   </Button>

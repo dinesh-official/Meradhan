@@ -8,6 +8,7 @@ import { maskEmail } from "@/global/utils/formate";
 import Link from "next/link";
 import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
 import { getPlaceOrderBusinessDates } from "../../_utils/businessDates";
+import { useOrderState } from "../../store/useOrderState";
 
 const WEEKEND_ONLY_HOLIDAYS = new Set<string>();
 
@@ -21,6 +22,7 @@ function Payment({
   orderId: string;
 }) {
   const { trackButtonClick } = useOrderActivityTracking();
+  const meradhanOrderNumber = useOrderState((s) => s.meradhanOrderNumber);
   const { settlementDate: computedSettlementDate } = getPlaceOrderBusinessDates(
     WEEKEND_ONLY_HOLIDAYS,
     "1"
@@ -29,7 +31,8 @@ function Payment({
     <div className="container">
       <h1 className="title text-center">Payment Completed</h1>
       <p className="mt-4 text-center">
-        Order Number: <span className="text-primary">{orderId}</span>
+        Order Number:{" "}
+        <span className="text-primary">{meradhanOrderNumber ?? orderId}</span>
       </p>
 
       <div className="flex justify-center items-center flex-col gap-4 mt-10">

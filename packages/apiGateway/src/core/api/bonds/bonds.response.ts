@@ -49,6 +49,22 @@ export interface BondDetailsResponse {
   updatedAt: string
   sortedAt: number
   isConvertedDeal: string | number | undefined | null
+  allCouponDates?: string[]
+  dayConvention?: string | null
+  recordDate?: string | null
+  recordDays?: number | null
+  imDocumentLink?: string | null
+  exchangeListedOn?: string | null
+  lastCouponDate?: string | null
+  isPerpetual?: boolean | null
+  bondType?: string | null
+  seniority?: string | null
+  natureOfInstrument?: string | null
+  buyPrice?: number | null
+  sellPrice?: number | null
+  redemptionType?: string | null
+  startDate?: string | null
+  endDate?: string | null
 }
 export type ListedBondsResponse = BaseResponseData<{
   data: BondDetailsResponse[];

@@ -57,6 +57,30 @@ export const INTEREST_MODE_ENUM = z.enum([
   "UNKNOWN",
 ]);
 
+export const BOND_TYPE_ENUM = z.enum([
+  "GOVERNMENT",
+  "CORPORATE",
+  "TAX_FREE",
+  "SOVEREIGN_GOLD_BOND",
+  "PSU",
+  "OTHER",
+]);
+
+export const BOND_SENIORITY_ENUM = z.enum([
+  "SENIOR",
+  "TIER_2_SUBORDINATED",
+  "LOWER_TIER_II_SUBORDINATED",
+  "UNKNOWN",
+]);
+
+export const INSTRUMENT_SECURITY_ENUM = z.enum([
+  "SECURED",
+  "UNSECURED",
+  "UNKNOWN",
+]);
+
+export const STOCK_EXCHANGE_ENUM = z.enum(["BSE", "NSE", "BOTH", "UNKNOWN"]);
+
 export const bondCreateUpdateSchema = z.object({
   isin: z.string().trim().min(1, "ISIN is required"),
   bondName: z.string().trim().min(1, "Bond name is required"),
@@ -112,4 +136,21 @@ export const bondCreateUpdateSchema = z.object({
   isOngoingDeal: z.boolean().default(false).optional().nullable(),
   providerPrice: z.number().nonnegative().optional().nullable(),
   ignoreAutoUpdate: z.boolean().default(false).optional().nullable(),
+
+  allCouponDates: z.array(z.coerce.date()).default([]),
+  dayConvention: z.string().trim().optional().nullable(),
+  recordDate: z.coerce.date().optional().nullable(),
+  recordDays: z.number().int().nonnegative().optional().nullable(),
+  imDocumentLink: z.string().trim().optional().nullable(),
+  exchangeListedOn: STOCK_EXCHANGE_ENUM.optional().nullable(),
+  lastCouponDate: z.coerce.date().optional().nullable(),
+  isPerpetual: z.boolean().optional().nullable(),
+  bondType: BOND_TYPE_ENUM.optional().nullable(),
+  seniority: BOND_SENIORITY_ENUM.optional().nullable(),
+  natureOfInstrument: INSTRUMENT_SECURITY_ENUM.optional().nullable(),
+  buyPrice: z.number().nonnegative().optional().nullable(),
+  sellPrice: z.number().nonnegative().optional().nullable(),
+  redemptionType: z.string().trim().optional().nullable(),
+  startDate: z.coerce.date().optional().nullable(),
+  endDate: z.coerce.date().optional().nullable(),
 });

@@ -54,7 +54,7 @@ export class KycStoreController {
     if (!response) {
       res.sendResponse({
         statusCode: HttpStatus.NOT_FOUND,
-        responseData: { isRunning: false },
+        responseData: { isRunning: false , kycDataStoreId: null},
       });
       return;
     }
@@ -64,7 +64,7 @@ export class KycStoreController {
     );
     res.sendResponse({
       statusCode: HttpStatus.OK,
-      responseData: { isRunning },
+      responseData: { isRunning, kycDataStoreId: response?.id },
     });
   }
 

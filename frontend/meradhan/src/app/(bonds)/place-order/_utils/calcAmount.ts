@@ -1,4 +1,3 @@
-import crypto from "crypto";
 export function calculateSettlementAmount(
   issuePrice: number,
   quantity: number
@@ -9,25 +8,13 @@ export function calculateSettlementAmount(
   return issuePrice * quantity + stampDuty;
 }
 
-export function generateOrderId({
-  prefix1 = "MD",
-  prefix2 = "DIR",
-  action = "BUY",
-  date = new Date(),
-}: {
-  prefix1?: string;
-  prefix2?: string;
-  action?: string;
-  date?: Date;
-}) {
+/**
+ * Label shown before payment is initiated. Final Order ID is assigned by the server
+ * when you proceed to pay (format MD-DIR-DDMMYYYY-BUY-XXX with auto-increment XXX).
+ */
+export function generateDraftPlaceOrderLabel(date = new Date()): string {
   const dd = String(date.getDate()).padStart(2, "0");
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const yyyy = date.getFullYear();
-
-  const formattedDate = `${dd}${mm}${yyyy}`;
-
-  // 3 bytes → 6 hex chars → extremely low collision probability
-  const uniquePart = crypto.randomBytes(3).toString("hex").toUpperCase();
-
-  return `${prefix1}-${prefix2}-${formattedDate}-${action}-${uniquePart}`;
+  return `MD-DIR-${dd}${mm}${yyyy}-BUY-DRAFT`;
 }

@@ -37,9 +37,9 @@ export const MENU_ITEMS: MenuItem[] = [
     title: "Tools",
 
     children: [
+      { title: "YTM Calculator", href: "https://calc.meradhan.co" },
       { title: "MeraDhan-GPT", href: "/dhangpt" },
       // { title: "FD Calculator", href: "/fd-calculator" },
-      // { title: "YTM Calculator", href: "/ytm-calculator" },
     ],
   },
   // {
