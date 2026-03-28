@@ -88,7 +88,7 @@ function SettleOrdersTable({
           },
           {
             key: "buyParticipantLoginId",
-            label: "Buy Participant",
+            label: "Buyer Client",
             sortable: true,
             cell(row) {
               return (
@@ -98,7 +98,7 @@ function SettleOrdersTable({
           },
           {
             key: "sellParticipantLoginId",
-            label: "Sell Participant",
+            label: "Seller Client",
             sortable: true,
             cell(row) {
               return (

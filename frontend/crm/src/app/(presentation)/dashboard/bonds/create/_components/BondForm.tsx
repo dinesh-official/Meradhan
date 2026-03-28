@@ -37,6 +37,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
+import { format } from "date-fns";
+
+const OPTIONAL_ENUM_NONE = "__none__" as const;
 
 type BondFormData = z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>;
 const bondSchema = appSchema.bonds
@@ -91,6 +94,22 @@ type BondDetailsResponse = {
   isOngoingDeal: boolean | null;
   providerPrice: number | null;
   ignoreAutoUpdate: boolean | null;
+  allCouponDates?: string[] | Date[];
+  dayConvention?: string | null;
+  recordDate?: string | null;
+  recordDays?: number | null;
+  imDocumentLink?: string | null;
+  exchangeListedOn?: string | null;
+  lastCouponDate?: string | null;
+  isPerpetual?: boolean | null;
+  bondType?: string | null;
+  seniority?: string | null;
+  natureOfInstrument?: string | null;
+  buyPrice?: number | null;
+  sellPrice?: number | null;
+  redemptionType?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
 };
 
 interface BondFormProps {
@@ -118,6 +137,38 @@ const INTEREST_MODE_OPTIONS = [
   { value: "HALF_YEARLY", label: "Half Yearly" },
   { value: "YEARLY", label: "Yearly" },
   { value: "ON_MATURITY", label: "On Maturity" },
+  { value: "UNKNOWN", label: "Unknown" },
+];
+
+const BOND_TYPE_OPTIONS = [
+  { value: "GOVERNMENT", label: "Government" },
+  { value: "CORPORATE", label: "Corporate" },
+  { value: "TAX_FREE", label: "Tax Free" },
+  { value: "SOVEREIGN_GOLD_BOND", label: "Sovereign Gold Bond" },
+  { value: "PSU", label: "PSU" },
+  { value: "OTHER", label: "Other" },
+];
+
+const BOND_SENIORITY_OPTIONS = [
+  { value: "SENIOR", label: "Senior" },
+  { value: "TIER_2_SUBORDINATED", label: "Tier 2 Subordinated" },
+  {
+    value: "LOWER_TIER_II_SUBORDINATED",
+    label: "Lower Tier II Subordinated",
+  },
+  { value: "UNKNOWN", label: "Unknown" },
+];
+
+const NATURE_OF_INSTRUMENT_OPTIONS = [
+  { value: "SECURED", label: "Secured" },
+  { value: "UNSECURED", label: "Unsecured" },
+  { value: "UNKNOWN", label: "Unknown" },
+];
+
+const STOCK_EXCHANGE_OPTIONS = [
+  { value: "BSE", label: "BSE" },
+  { value: "NSE", label: "NSE" },
+  { value: "BOTH", label: "BSE & NSE" },
   { value: "UNKNOWN", label: "Unknown" },
 ];
 
@@ -200,6 +251,36 @@ function BondForm({ initialData, isin }: BondFormProps) {
         isOngoingDeal: initialData.isOngoingDeal ?? false,
         providerPrice: initialData.providerPrice || undefined,
         ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
+        allCouponDates: (initialData.allCouponDates ?? []).map((d) =>
+          typeof d === "string" ? new Date(d) : new Date(d),
+        ),
+        dayConvention: initialData.dayConvention || undefined,
+        recordDate: initialData.recordDate
+          ? new Date(initialData.recordDate)
+          : undefined,
+        recordDays: initialData.recordDays ?? undefined,
+        imDocumentLink: initialData.imDocumentLink || undefined,
+        exchangeListedOn:
+          (initialData.exchangeListedOn as BondFormData["exchangeListedOn"]) ||
+          undefined,
+        lastCouponDate: initialData.lastCouponDate
+          ? new Date(initialData.lastCouponDate)
+          : undefined,
+        isPerpetual: initialData.isPerpetual ?? undefined,
+        bondType:
+          (initialData.bondType as BondFormData["bondType"]) || undefined,
+        seniority:
+          (initialData.seniority as BondFormData["seniority"]) || undefined,
+        natureOfInstrument:
+          (initialData.natureOfInstrument as BondFormData["natureOfInstrument"]) ||
+          undefined,
+        buyPrice: initialData.buyPrice ?? undefined,
+        sellPrice: initialData.sellPrice ?? undefined,
+        redemptionType: initialData.redemptionType || undefined,
+        startDate: initialData.startDate
+          ? new Date(initialData.startDate)
+          : undefined,
+        endDate: initialData.endDate ? new Date(initialData.endDate) : undefined,
       }
       : {
         isin: "",
@@ -220,6 +301,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         sortedAt: 0,
         isOngoingDeal: false,
         ignoreAutoUpdate: false,
+        allCouponDates: [],
       },
   });
 
@@ -750,6 +832,488 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           onChange={(e) =>
                             field.onChange(
                               e.target.value ? new Date(e.target.value) : null
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Coupon schedule & instrument */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Coupon schedule &amp; instrument</CardTitle>
+              <CardDescription>
+                Coupon dates, listing, pricing, and instrument classification
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="allCouponDates"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>All coupon dates</FormLabel>
+                      <FormDescription>
+                        One date per line (YYYY-MM-DD), or comma-separated
+                      </FormDescription>
+                      <FormControl>
+                        <Textarea
+                          rows={4}
+                          placeholder={"2026-06-15\n2026-12-15"}
+                          value={(field.value ?? [])
+                            .filter(
+                              (d) => !Number.isNaN(new Date(d).getTime()),
+                            )
+                            .map((d) => format(new Date(d), "yyyy-MM-dd"))
+                            .join("\n")}
+                          onChange={(e) => {
+                            const lines = e.target.value
+                              .split(/[\n,]+/)
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                            const dates: Date[] = [];
+                            for (const line of lines) {
+                              const dt = new Date(line);
+                              if (!Number.isNaN(dt.getTime())) dates.push(dt);
+                            }
+                            field.onChange(dates);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dayConvention"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Day convention</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="e.g. 30/360, ACT/365"
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="recordDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Record date (shut period)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? new Date(field.value as unknown as string)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? new Date(e.target.value)
+                                : null,
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="recordDays"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Record days</FormLabel>
+                      <FormDescription>
+                        e.g. 7, 15, 20 (days before record date)
+                      </FormDescription>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          step={1}
+                          placeholder="0"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : parseInt(e.target.value, 10),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="imDocumentLink"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>IM document link</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="https://…"
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="exchangeListedOn"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exchange listed on</FormLabel>
+                      <Select
+                        onValueChange={(v) =>
+                          field.onChange(
+                            v === OPTIONAL_ENUM_NONE ? null : v,
+                          )
+                        }
+                        value={field.value ?? OPTIONAL_ENUM_NONE}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select exchange" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={OPTIONAL_ENUM_NONE}>
+                            Not set
+                          </SelectItem>
+                          {STOCK_EXCHANGE_OPTIONS.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lastCouponDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last coupon date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? new Date(field.value as unknown as string)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? new Date(e.target.value)
+                                : null,
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isPerpetual"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 md:col-span-2">
+                      <div className="space-y-0.5">
+                        <FormLabel>Is perpetual</FormLabel>
+                        <FormDescription>
+                          Yes if the bond has no fixed maturity
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          className="h-5 w-5 rounded border-2 cursor-pointer"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="bondType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bond type</FormLabel>
+                      <Select
+                        onValueChange={(v) =>
+                          field.onChange(
+                            v === OPTIONAL_ENUM_NONE ? null : v,
+                          )
+                        }
+                        value={field.value ?? OPTIONAL_ENUM_NONE}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select bond type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={OPTIONAL_ENUM_NONE}>
+                            Not set
+                          </SelectItem>
+                          {BOND_TYPE_OPTIONS.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="seniority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Seniority</FormLabel>
+                      <Select
+                        onValueChange={(v) =>
+                          field.onChange(
+                            v === OPTIONAL_ENUM_NONE ? null : v,
+                          )
+                        }
+                        value={field.value ?? OPTIONAL_ENUM_NONE}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select seniority" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={OPTIONAL_ENUM_NONE}>
+                            Not set
+                          </SelectItem>
+                          {BOND_SENIORITY_OPTIONS.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="natureOfInstrument"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nature of instrument</FormLabel>
+                      <Select
+                        onValueChange={(v) =>
+                          field.onChange(
+                            v === OPTIONAL_ENUM_NONE ? null : v,
+                          )
+                        }
+                        value={field.value ?? OPTIONAL_ENUM_NONE}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Secured / Unsecured" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={OPTIONAL_ENUM_NONE}>
+                            Not set
+                          </SelectItem>
+                          {NATURE_OF_INSTRUMENT_OPTIONS.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="buyPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Buy price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : parseFloat(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sellPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sell price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : parseFloat(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="redemptionType"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Redemption type</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="e.g. Call, Put, Bullet"
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? new Date(field.value as unknown as string)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? new Date(e.target.value)
+                                : null,
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          value={
+                            field.value
+                              ? new Date(field.value as unknown as string)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? new Date(e.target.value)
+                                : null,
                             )
                           }
                         />

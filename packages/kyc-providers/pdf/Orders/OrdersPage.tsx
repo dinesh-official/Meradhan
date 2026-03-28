@@ -275,9 +275,9 @@ ${getInterestPaymentDatesDisplay()}`,
     ],
     [
       "Security Nature",
-      ("securityNature" in bond
-        ? (bond as { securityNature?: string }).securityNature
-        : null) || "Senior Secured",
+      ("natureOfInstrument" in bond
+        ? (bond as { natureOfInstrument?: string }).natureOfInstrument
+        : null) || "N.A",
     ],
     [
       "Put / Call Option",

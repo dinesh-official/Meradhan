@@ -61,6 +61,38 @@ model Bonds {
 
     isConvertedDeal Boolean?
 
+    /// All scheduled coupon payment dates for this ISIN
+    allCouponDates DateTime[]
+
+    dayConvention String?
+
+    /// Record date (shut period)
+    recordDate DateTime?
+    /// Business days before record date for shut period (e.g. 7, 15, 20)
+    recordDays Int?
+
+    imDocumentLink String?
+
+    exchangeListedOn STOCK_EXCHANGE?
+
+    lastCouponDate DateTime?
+
+    isPerpetual Boolean?
+
+    bondType BondType?
+
+    seniority BOND_SENIORITY?
+
+    natureOfInstrument INSTRUMENT_SECURITY?
+
+    buyPrice  Float?
+    sellPrice Float?
+
+    redemptionType String?
+
+    startDate DateTime?
+    endDate   DateTime?
+
     @@index([isin])
     @@index([sortedAt])
     @@map("bonds")
@@ -86,5 +118,25 @@ enum INTEREST_MODE {
     HALF_YEARLY
     YEARLY
     ON_MATURITY
+    UNKNOWN
+}
+
+enum BOND_SENIORITY {
+    SENIOR
+    TIER_2_SUBORDINATED
+    LOWER_TIER_II_SUBORDINATED
+    UNKNOWN
+}
+
+enum INSTRUMENT_SECURITY {
+    SECURED
+    UNSECURED
+    UNKNOWN
+}
+
+enum STOCK_EXCHANGE {
+    BSE
+    NSE
+    BOTH
     UNKNOWN
 }

@@ -315,7 +315,7 @@ export class CrmOrdersService {
     });
 
     const issuerName =
-      bondDetails.instrumentName || bondDetails.bondName || "";
+      bondDetails.bondName || bondDetails.instrumentName || "";
 
     const finalOrderNumber = generateOrderId({
       channel: "ASSIST",

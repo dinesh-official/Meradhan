@@ -116,9 +116,8 @@ IFSC Code: ${bank?.ifscCode}
 Bank Account Number: ${bank?.accountNumber}`}</Text>
         </View>
         <View style={tw(`text-[9px] flex w-[40%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
-          <Text>{`DP Name: ${demat?.depositoryName}
-DP ID: ${demat?.dpId}
-Client ID: ${demat?.clientId}`}</Text>
+          // min dp id length is 5
+          <Text>{`DP Name: ${demat?.depositoryName}${demat?.dpId?.length && demat?.dpId?.length >= 5 ? `\nDP ID: ${demat?.dpId}` : ""}\nClient ID: ${demat?.clientId}`}</Text>
         </View>
       </View>
 

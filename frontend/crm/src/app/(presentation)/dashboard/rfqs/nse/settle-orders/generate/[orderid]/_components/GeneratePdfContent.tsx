@@ -805,22 +805,13 @@ BSE Member ID: 6963`
 
 
               {participantCode && <div className="flex flex-wrap items-end gap-4">
-                <div className="space-y-2 min-w-[180px]">
-                  <Label>Client order side</Label>
-                  <Select
-                    value={orderSide}
-                    onValueChange={(v) => setOrderSide(v as "BUY" | "SELL")}
-                    disabled={Boolean(customerOrder?.customerProfile)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Buy or Sell" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BUY">Buy (client buys)</SelectItem>
-                      <SelectItem value="SELL">Sell (client sells)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <p className="text-sm text-muted-foreground pb-2">
+                  Order side:{" "}
+                  <span className="font-medium text-foreground">
+                    {orderSide === "SELL" ? "Sell" : "Buy"}
+                  </span>
+                  <span className="text-muted-foreground"> (from RFQ)</span>
+                </p>
                 <div className="min-w-[220px]">
                   <SelectCustomerUser
                     placeholder="Search and select Customer..."
@@ -905,8 +896,8 @@ BSE Member ID: 6963`
           </Section>
 
           <Section title="Counterparties">
-            <InfoRow label="Buy Participant Login ID" value={rfq.buyParticipantLoginId} />
-            <InfoRow label="Sell Participant Login ID" value={rfq.sellParticipantLoginId} />
+            <InfoRow label="Buyer Client" value={rfq.buyParticipantLoginId} />
+            <InfoRow label="Seller Client" value={rfq.sellParticipantLoginId} />
             <InfoRow label="Buyer Ref No" value={rfq.buyerRefNo} />
             <InfoRow label="Seller Ref No" value={rfq.sellerRefNo} />
             <InfoRow label="Buy Backoffice Login ID" value={rfq.buyBackofficeLoginId} />

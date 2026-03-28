@@ -197,9 +197,9 @@ export default function DealPage({
     ["Security Name", bond.description],
     [
       "Security Nature",
-      ("securityNature" in bond
-        ? (bond as { securityNature?: string }).securityNature
-        : null) || "Senior Secured",
+      ("natureOfInstrument" in bond
+        ? (bond as { natureOfInstrument?: string }).natureOfInstrument
+        : null) || "N.A",
     ],
     ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"} % `],
     [

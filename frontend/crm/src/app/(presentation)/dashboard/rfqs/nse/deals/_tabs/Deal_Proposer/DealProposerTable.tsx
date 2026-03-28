@@ -62,7 +62,7 @@ function DealProposerTable({
           {
             key: "buyerClient",
             label: "Buyer Client",
-            cell: (row) => row.initClientCode,
+            cell: (row) => row.buySell === "S" ? row.initClientCode : row.respClientCode,
             // row.buySell === "B" ? row.initClientCode : row.respClientCode,
           },
           {
@@ -74,7 +74,7 @@ function DealProposerTable({
           {
             key: "sellerClient",
             label: "Seller Client",
-            cell: (row) => row.respClientCode,
+            cell: (row) => row.buySell === "B" ? row.initClientCode : row.respClientCode,
             // row.buySell === "S" ? row.initClientCode : row.respClientCode,
           },
           { key: "acceptedValue", label: "Value (Crores)" },
