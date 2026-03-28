@@ -202,5 +202,5 @@ jobs:
         with:
           task-definition: pre-prod-crm-revision.json
           cluster: prod-cluster
-          service: pre=prod-crm-service
+          service: pre-prod-crm-service
           force-new-deployment: true
