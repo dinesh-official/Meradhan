@@ -1,4 +1,4 @@
-name: stage crm deploy
+name: pre-prod crm deploy
 
 on:
   push:
