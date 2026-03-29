@@ -3,7 +3,7 @@ name: pre-prod fe deploy
 on:
   push:
     branches:
-      - staging
+      - staging-fix-28-march
 
 jobs:
   deploy:
@@ -89,7 +89,7 @@ jobs:
           echo "NEXT_PUBLIC_HOST_URL=https://preprodfe.meradhan.co" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
+          echo "NEXT_PUBLIC_BACKEND_IP_URL=https://preprod.meradhan.co" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
           echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
