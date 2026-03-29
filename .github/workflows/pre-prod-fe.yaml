@@ -3,7 +3,7 @@ name: pre-prod fe deploy
 on:
   push:
     branches:
-      - staging-fix-28-march
+      - preprod
 
 jobs:
   deploy:
