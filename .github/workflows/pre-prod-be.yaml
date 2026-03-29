@@ -1,4 +1,4 @@
-name: pre-prod-be-stage
+name: pre-prod-be-depoy
 
 on:
   push:
