@@ -68,7 +68,7 @@ function ReviewOrder({
     setQuantity(paramsQuantity);
   }, [paramsQuantity, setQuantity]);
 
-  let [isFirstRender, setIsFirstRender] = useState(true);
+  const [isFirstRender, setIsFirstRender] = useState(true);
   useEffect(() => {
     if (isFirstRender) {
       setIsFirstRender(false);
