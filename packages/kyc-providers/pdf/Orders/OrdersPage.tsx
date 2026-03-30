@@ -102,8 +102,9 @@ export default function OrdersPage({
   // Calculate dates
   const now = new Date();
   const orderDate = orderData?.createdAt ? new Date(orderData.createdAt) : now;
-  const dealDate = orderData?.metadata?.settlementDate
-    ? new Date(orderData.metadata.settlementDate)
+  
+  const dealDate = orderData?.metadata?.valueDate
+    ? new Date(orderData.metadata.valueDate)
     : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
 
 
@@ -191,7 +192,7 @@ export default function OrdersPage({
 
   const dealId =
     orderData?.metadata?.dealId ??
-    (releasedOrder ? "—" : "Pending assignment");
+    (releasedOrder ? "—" : "XXXXXXXX");
 
   const txVerb =
     orderData?.metadata?.clientOrderSide === "SELL" ? "Sell" : "Buy";
@@ -201,10 +202,9 @@ export default function OrdersPage({
       "Transaction Type",
       `Your ${txVerb} (${fullname} : ${user?.panCard?.panCardNo || "N/A"})`,
     ],
-    ["MeraDhan Order ID", orderId],
+    ["MeraDhan Order ID", !releasedOrder? "XXXXXXXX" : orderId],
     [
-      "Order Date & Time",
-      `${formatDate(orderDate.toISOString(), "DD-MMM-YYYY")} ${String(
+      "Order Date & Time",   !releasedOrder? "XXXXXXXX" : `${formatDate(orderDate.toISOString(), "DD-MMM-YYYY")} ${String(
         orderDate.getHours()
       ).padStart(2, "0")}:${String(orderDate.getMinutes()).padStart(
         2,
@@ -212,14 +212,14 @@ export default function OrdersPage({
       )}:${String(orderDate.getSeconds()).padStart(2, "0")}`,
     ],
 
-    ["MeraDhan Deal ID", dealId],
+    ["MeraDhan Deal ID", !releasedOrder? "XXXXXXXX" : dealId],
     [
       "Exchange RFQ Initiation ID",
-      orderData?.metadata?.settlementOrderNumber ||
+      !releasedOrder? "XXXXXXXX" : (orderData?.metadata?.settlementOrderNumber ||
       orderData?.metadata?.rfqNumber ||
       orderData?.metadata?.exchangeRfqId ||
       orderId ||
-      (releasedOrder ? "N/A" : "Pending"),
+      (!releasedOrder ? "N/A" : "XXXXXXXX")),
     ],
     ["ISIN", bond.isin],
     ["Security Name", bond.description],
@@ -281,8 +281,8 @@ ${getInterestPaymentDatesDisplay()}`,
     ],
     [
       "Put / Call Option",
-      ("putCallOption" in bond
-        ? (bond as { putCallOption?: string }).putCallOption
+      ("putCallOptionDetails" in bond
+        ? (bond as { putCallOptionDetails?: string }).putCallOptionDetails
         : null) || "N.A / N.A",
     ],
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],

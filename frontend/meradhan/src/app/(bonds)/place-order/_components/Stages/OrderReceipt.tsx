@@ -26,7 +26,7 @@ function OrderReceipt({
   orderId: string;
 }) {
   const { quantity } = useOrderState();
-  const { makePayment, cancelPayment, isLoading } = useRazorpay();
+  const { makePayment, cancelPayment, isLoading, meradhanOrderNumber } = useRazorpay();
   const [checkTaC, setCheckTaC] = useState(false);
   const [checkOrderCerTaC, setCheckOrderCerTaC] = useState(false);
   const {
@@ -39,7 +39,7 @@ function OrderReceipt({
     <div className="container">
       <h1 className="title">Order Receipt (Draft)</h1>
       <p className="mt-5">
-        Order Number: <span className="text-primary">{orderId}</span>
+        Order Number: <span className="text-primary">{`XXXXXXXX`}</span>
       </p>
       <div className="flex mt-3">
         <div className="flex items-center md:justify-start justify-between w-full gap-4">
@@ -148,7 +148,7 @@ function OrderReceipt({
             trackButtonClick(orderId, "CANCEL_ORDER", {
               step: 2,
             });
-            cancelPayment(orderId);
+            cancelPayment(meradhanOrderNumber ?? orderId);
           }}
         >
           Cancel Order <IoMdArrowDropright />

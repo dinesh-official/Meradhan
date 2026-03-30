@@ -16,10 +16,12 @@ function Payment({
   bond,
   customer,
   orderId,
+  settlementDate
 }: {
   bond: BondDetailsResponse;
   customer: CustomerByIdPayload;
   orderId: string;
+  settlementDate: string;
 }) {
   const { trackButtonClick } = useOrderActivityTracking();
   const meradhanOrderNumber = useOrderState((s) => s.meradhanOrderNumber);
@@ -46,8 +48,8 @@ function Payment({
         <div className="lg:w-[600px] mx-auto text-center flex flex-col gap-4 mt-5">
           <p>
             Your deal will be settled on{" "}
-            {dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")}{" "}
-            (T + 1) after ICCL receives your
+            {dateTimeUtils.formatDateTime(settlementDate, "DD MMMM YYYY")}{" "}
+            (T + 1) after NCL receives your
             payment through the payment gateway.
           </p>
           <p>

@@ -155,7 +155,7 @@ function OrderDetailsView() {
           </Button>
           <h1 className="text-3xl font-bold">Order Details</h1>
           <p className="text-muted-foreground mt-1">
-            Order Number: {order.orderNumber}
+            Order Number: XXXXXXXX
           </p>
         </div>
         <div className="flex items-center gap-4">

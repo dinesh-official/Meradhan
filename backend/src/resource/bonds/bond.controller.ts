@@ -4,7 +4,6 @@ import { BondService } from "./bond.service";
 import { HttpStatus } from "@utils/error/AppError";
 import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
-import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 
 export class BondController {
   private bondService = new BondService();
@@ -21,29 +20,16 @@ export class BondController {
   async getBondOrderPricing(req: Request, res: Response) {
     const isin = req.params.isin!.toString();
     const quantity = req.query.quantity ? Number(req.query.quantity) : 1;
-    const bond = await this.bondService.getBondDetails(isin);
-    if (!bond) {
-      return res.sendResponse({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: "Bond not found",
-        success: false,
-      });
-    }
+    const result = await this.bondService.getBondOrderPricing(isin, quantity);
 
-    const cleanPriceFallback = Number(
-      bond.buyPrice ??
-        bond.lastTradePrice ??
-        bond.issuePrice ??
-        100,
-    );
-
-    const cleanPrice = bond.sellPrice
-
-    const lastCouponDateStr = bond.lastCouponDate;
-
-    const nextCouponDateStr = bond.nextCouponDate;
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
+    if (!result.ok) {
+      if (result.reason === "not_found") {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: "Bond not found",
+          success: false,
+        });
+      }
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
         message:
@@ -52,24 +38,9 @@ export class BondController {
       });
     }
 
-    const recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-
-    const pricing = computeBondOrderPricingData({
-      faceValue: bond.faceValue,
-      quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
-      cleanPrice: cleanPrice ?? 0,
-      couponRate: Number(bond.couponRate),
-      lastCouponDate: lastCouponDateStr?.toISOString() ?? "",
-      recordDays,
-      nextCouponDate: nextCouponDateStr?.toISOString() ?? "",
-    });
-
     return res.sendResponse({
       statusCode: HttpStatus.OK,
-      responseData: pricing,
+      responseData: result.pricing,
     });
   }
 

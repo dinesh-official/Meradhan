@@ -16,6 +16,7 @@ import crypto from "crypto";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
+import { BondService } from "@resource/bonds/bond.service";
 
 // PaymentStatus enum values (matches Prisma schema orders.prisma)
 const PaymentStatus = {
@@ -62,25 +63,26 @@ export class OrderService {
   }
 
   async previewOrder(item: OrderPreviewItem) {
-    const bond = await this.getBondDetails(item.isin);
+    const bondService = new BondService();
+    const bondDetails = await bondService.getBondDetails(item.isin);
+    const bond = await bondService.getBondOrderPricing(item.isin, item.quantity);
 
-    const stampDutyRate = 0.0001;
-    const price = Number(bond.faceValue) || 1000;
-    const totalPrice = price * item.quantity;
-    const subTotal = totalPrice;
-    const stampDuty = price * item.quantity * stampDutyRate;
-    const totalAmount = price * item.quantity + stampDuty;
-
+    if (!bond.ok) {
+      throw new AppError("Failed to get bond order pricing", {
+        code: "BOND_ORDER_PRICING_FAILED",
+      });
+    }
+    
     return {
-      subTotal,
-      stampDuty,
-      totalAmount,
-      isin: bond.isin,
-      bondName: bond.bondName,
+      subTotal: bond.ok ? bond.pricing.principalAmount : 0,
+      stampDuty: bond.ok ? bond.pricing.stampDuty : 0,
+      totalAmount: bond.ok ? bond.pricing.settlementAmount : 0,
+      isin: item.isin,
+      bondName: bondDetails?.bondName ?? "",
       quantity: item.quantity,
-      unitPrice: price,
-      faceValue: Number(bond.faceValue),
-      bondDetails: bond,
+      unitPrice: bondDetails?.sellPrice ?? 0,
+      faceValue: bondDetails?.faceValue ?? 0,
+      bondDetails: bondDetails,
     };
   }
 

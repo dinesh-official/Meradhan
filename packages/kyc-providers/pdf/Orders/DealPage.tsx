@@ -215,8 +215,8 @@ ${getInterestPaymentDatesDisplay()} `,
     ],
     [
       "Put / Call Option",
-      ("putCallOption" in bond
-        ? (bond as { putCallOption?: string }).putCallOption
+      ("putCallOptionDetails" in bond
+        ? (bond as { putCallOptionDetails?: string }).putCallOptionDetails
         : null) || "N.A / N.A",
     ],
     [
