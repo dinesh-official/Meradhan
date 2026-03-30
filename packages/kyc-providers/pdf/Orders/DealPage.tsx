@@ -260,7 +260,7 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
-      `INR ${formatCurrency(stampDutyAmount, 0)} (${numberToWords(stampDutyAmount)}) | To be Retained by Exchange`,
+      `INR ${formatCurrency(stampDutyAmount, 0)} (${numberToWords(stampDutyAmount)}) To be Retained by Exchange`,
     ],
     ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)} `],
     [
