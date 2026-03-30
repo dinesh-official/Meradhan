@@ -94,7 +94,7 @@ export class NseRfq {
 
   constructor() {
     this.client = axios.create({
-      baseURL: env.RFQ_CBRICS_ENV == "PROD" ? "https://bricsonline.nseindia.com/rfq" : "https://bricsonlinereguat.nseindia.com/rfq/rest/v1",
+      baseURL: env.RFQ_CBRICS_ENV == "PROD" ? "https://bricsonline.nseindia.com/rfq/rest/v1" : "https://bricsonlinereguat.nseindia.com/rfq/rest/v1",
       withCredentials: true,
       headers: {
         "User-Agent":
