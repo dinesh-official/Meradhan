@@ -1,4 +1,4 @@
-name: pre-prod-be-depoy
+name: pre-prod crm deploy
 
 on:
   push:
@@ -8,14 +8,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    steps:
+
+    steps: 
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Create .env from GitHub Secrets
         shell: bash
         env:
-
           DEV_STRAPI_API_TOKEN: ${{ secrets.DEV_STRAPI_API_TOKEN }}
           DEV_NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.DEV_NEXT_PUBLIC_GRAPHQL_KEY }}
 
@@ -113,23 +113,12 @@ jobs:
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
 
-          KRA_USERNAME="${{ secrets.KRA_USERNAME }}"
-          echo "KRA_USERNAME=$KRA_USERNAME" >> .env
-
-          KRA_PASSWORD="${{ secrets.KRA_PASSWORD }}"
-          echo "KRA_PASSWORD=$KRA_PASSWORD" >> .env
-
-          KRA_PASS_KEY="${{ secrets.KRA_PASS_KEY }}"
-          echo "KRA_PASS_KEY=$KRA_PASS_KEY" >> .env
-
-          KRA_MOB_NO="${{ secrets.KRA_MOB_NO }}"
-          echo "KRA_MOB_NO=$KRA_MOB_NO" >> .env
-
-          KRA_OKRA_CD_MI_ID="${{ secrets.KRA_OKRA_CD_MI_ID }}"
-          echo "KRA_OKRA_CD_MI_ID=$KRA_OKRA_CD_MI_ID" >> .env
-
-          KRA_ENV="${{ secrets.KRA_ENV }}"
-          echo "KRA_ENV=$KRA_ENV" >> .env
+          echo "KRA_USERNAME=${DEV_KRA_USERNAME}" >> .env
+          echo "KRA_PASSWORD=${DEV_KRA_PASSWORD}" >> .env
+          echo "KRA_PASS_KEY=${DEV_KRA_PASS_KEY}" >> .env
+          echo "KRA_OKRA_CD_MI_ID=${DEV_KRA_OKRA_CD_MI_ID}" >> .env
+          echo "KRA_MOB_NO=${DEV_KRA_MOB_NO}" >> .env
+          echo "KRA_ENV=${DEV_KRA_ENV}" >> .env
 
           echo "MSG91_AUTH_KEY=${DEV_MSG91_AUTH_KEY}" >> .env
           echo "MSG91_SIGNUP_TEMPLATE=${DEV_MSG91_SIGNUP_TEMPLATE}" >> .env
@@ -181,38 +170,37 @@ jobs:
 
           echo "----------- FINAL .env -----------"
           cat .env
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
       - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Debug AWS & ECR
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-          | docker login \
-            --username AWS \
-            --password-stdin 450321244603.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
-      
-
-      
+         echo "AWS Identity:"
+         aws sts get-caller-identity
+         echo "ECR Repositories:"
+         aws ecr describe-repositories --region ${{ secrets.AWS_REGION }}
 
       - name: Build, Tag & Push Docker Image
         env:
-          REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
-          REPOSITORY: 	pre-prod-be
+          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REPOSITORY: pre-prod-crm
           IMAGE_TAG: latest
         run: |
-          docker build -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build --no-cache -f crmdockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: pre-prod-be-revision.json
+          task-definition: pre-prod-crm-revision.json
           cluster: prod-cluster
-          service: pre-prod-be-service
+          service: pre-prod-crm-service
           force-new-deployment: true

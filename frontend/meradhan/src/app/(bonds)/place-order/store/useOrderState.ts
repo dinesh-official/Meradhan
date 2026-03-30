@@ -9,6 +9,9 @@ export const useOrderState = create<{
   // settlement date for the order
   settlementDate: string;
   setSettlementDate: (settlementDate: string) => void;
+  /** Set when payment order is created (final MeraDhan Order ID from server). */
+  meradhanOrderNumber: string | null;
+  setMeradhanOrderNumber: (v: string | null) => void;
 }>((set) => ({
   quantity: 1,
   setQuantity: (quantity: number) => {
@@ -25,6 +28,9 @@ export const useOrderState = create<{
     set({ step });
   },
   // settlement date for the order
-  settlementDate: "0",
+  settlementDate: "1",
   setSettlementDate: (settlementDate: string) => set({ settlementDate }),
+  meradhanOrderNumber: null,
+  setMeradhanOrderNumber: (meradhanOrderNumber: string | null) =>
+    set({ meradhanOrderNumber }),
 }));

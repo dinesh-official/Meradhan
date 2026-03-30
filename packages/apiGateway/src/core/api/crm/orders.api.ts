@@ -78,7 +78,7 @@ export class CrmOrdersApi {
   }
 
   async createOrderFromRfq(
-    payload: { orderNumber: string; customerId: number },
+    payload: { orderNumber: string; customerId: number; orderSide?: "BUY" | "SELL" },
     config?: AxiosRequestConfig
   ): Promise<CreateOrderFromRfqResponse> {
     const { data } = await this.apiClient.post<CreateOrderFromRfqResponse>(

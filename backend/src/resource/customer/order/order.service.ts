@@ -7,7 +7,12 @@ import type {
   Prisma,
 } from "@databases/generated/prisma/postgres";
 import { env } from "@packages/config/src/env";
+import {
+  generateDealId,
+  generateOrderId,
+} from "@resource/customer/order/order.utils";
 import { PaymentService } from "@resource/customer/payment/payment.service";
+import crypto from "crypto";
 import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
@@ -82,7 +87,7 @@ export class OrderService {
   async createOrder(
     customerId: number,
     item: OrderPreviewItem,
-    orderId?: string,
+    _legacyClientOrderId?: string,
   ) {
     const preview = await this.previewOrder(item);
     const customerBank = await db.dataBase.customersBankAccountModel.findFirst({
@@ -96,23 +101,15 @@ export class OrderService {
       throw new AppError("No Default Bank Account Found");
     }
 
-    const orderNumber =
-      orderId || `MD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const issuerName =
+      (preview.bondDetails as { instrumentName?: string }).instrumentName ||
+      preview.bondName;
+    const tempOrderNumber = `MD-DIR-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
 
-    const razorpayOrder = await this.payment.createOrder(
-      preview.totalAmount,
-      "INR",
-      orderNumber,
-      {
-        account_number: customerBank.accountNumber,
-        ifsc: customerBank.ifscCode,
-        name: customerBank.accountHolderName,
-      },
-    );
     const order = await db.dataBase.order.create({
       data: {
         customerProfileId: customerId,
-        orderNumber,
+        orderNumber: tempOrderNumber,
         subTotal: preview.subTotal,
         stampDuty: preview.stampDuty,
         totalAmount: preview.totalAmount,
@@ -125,8 +122,43 @@ export class OrderService {
         quantity: preview.quantity,
         unitPrice: preview.unitPrice,
         bondDetails: preview.bondDetails as Prisma.InputJsonValue,
+        metadata: {} as Prisma.InputJsonValue,
       },
     });
+
+    const dealDate = new Date();
+    const orderNumber = generateOrderId({
+      channel: "DIR",
+      action: "BUY",
+      date: dealDate,
+      orderSequence: order.id,
+    });
+    const dealId = generateDealId({
+      issuerName,
+      channel: "DIR",
+      action: "BUY",
+      date: dealDate,
+      orderSequence: order.id,
+    });
+
+    await db.dataBase.order.update({
+      where: { id: order.id },
+      data: {
+        orderNumber,
+        metadata: { dealId } as Prisma.InputJsonValue,
+      },
+    });
+
+    const razorpayOrder = await this.payment.createOrder(
+      preview.totalAmount,
+      "INR",
+      orderNumber,
+      {
+        account_number: customerBank.accountNumber,
+        ifsc: customerBank.ifscCode,
+        name: customerBank.accountHolderName,
+      },
+    );
     await db.dataBase.order.update({
       where: { id: order.id },
       data: {
@@ -136,6 +168,7 @@ export class OrderService {
 
     return {
       orderId: order.id,
+      orderNumber,
       paymentOrderId: razorpayOrder.id,
       amount: preview.totalAmount,
       currency: "INR",

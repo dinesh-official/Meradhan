@@ -4,7 +4,16 @@
 # This script installs all dependencies for the project components using npm only
 
 set -e  # Exit on any error
-source ~/.bashrc
+
+# Load Bash profile files if present.
+# Do not source zsh files here; Oh My Zsh errors when loaded from Bash.
+for profile in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile"; do
+    if [ -f "$profile" ]; then
+        # shellcheck source=/dev/null
+        source "$profile"
+    fi
+done
+
 echo "🚀 Starting MeraDhan setup (npm version)..."
 echo "========================================"
 

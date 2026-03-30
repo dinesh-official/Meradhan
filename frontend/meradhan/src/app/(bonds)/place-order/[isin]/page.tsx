@@ -7,7 +7,7 @@ import apiGateway from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
 import OrderStep from "../_components/OrderStep";
-import { generateOrderId } from "../_utils/calcAmount";
+import { generateDraftPlaceOrderLabel } from "../_utils/calcAmount";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import { redirect } from "next/navigation";
 export const revalidate = 0;
@@ -24,7 +24,7 @@ export const generateMetadata = async ({
 async function page({ params }: { params: Promise<{ isin: string }> }) {
   const { isin } = await params;
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
-  const orderId = generateOrderId({});
+  const orderId = generateDraftPlaceOrderLabel();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiServerCaller
   );
@@ -56,6 +56,31 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
               </p>
               <Link href="/dashboard/kyc" className="mt-6 inline-block">
                 <Button>Process KYC Now</Button>
+              </Link>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
+  if (!responseData) {
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Bond Not Found"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">Bond Not Found</h2>
+              <p className="text-gray-600">The bond you are looking for does not exist.</p>
+
+              <Link href="/bonds" className="mt-6 inline-block">
+                <Button>Back to Bonds</Button>
               </Link>
             </div>
           </SectionWrapper>

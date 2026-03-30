@@ -121,8 +121,8 @@ function StepperItem({
     completed || step < activeStep
       ? "completed"
       : activeStep === step
-      ? "active"
-      : "inactive";
+        ? "active"
+        : "inactive";
 
   const isLoading = loading && step === activeStep;
 
@@ -203,7 +203,7 @@ function StepperIndicator({
   return (
     <span
       className={cn(
-        "relative flex size-6 shrink-0 items-center justify-center rounded border-green-600/30 data-[state=active]:border-none border-2 font-medium text-black text-xs data-[state=active]:bg-green-600 data-[state=completed]:bg-green-600 data-[state=active]:text-primary-foreground data-[state=completed]:text-primary-foreground",
+        "relative flex w-[28px] h-[28px] shrink-0 items-center justify-center rounded border-gray-100  font-bold text-black text-sm border-2 data-[state=active]:border-green-600 data-[state=completed]:bg-green-600 data-[state=completed]:border-green-600  data-[state=completed]:text-primary-foreground",
         className
       )}
       data-slot="stepper-indicator"
@@ -273,7 +273,7 @@ function StepperSeparator({
   return (
     <div
       className={cn(
-        "m-0.5 bg-green-100 group-data-[orientation=horizontal]/stepper:h-0.5 group-data-[orientation=vertical]/stepper:h-12 group-data-[orientation=horizontal]/stepper:w-full group-data-[orientation=vertical]/stepper:w-0.5 group-data-[orientation=horizontal]/stepper:flex-1 group-data-[state=completed]/step:bg-green-600",
+        "m-0.5 bg-gray-100 group-data-[orientation=horizontal]/stepper:h-0.5 group-data-[orientation=vertical]/stepper:h-12 group-data-[orientation=horizontal]/stepper:w-full group-data-[orientation=vertical]/stepper:w-0.5 group-data-[orientation=horizontal]/stepper:flex-1 group-data-[state=completed]/step:bg-green-600",
         className
       )}
       data-slot="stepper-separator"

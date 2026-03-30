@@ -130,6 +130,16 @@ export const dateTimeUtils = {
     return result;
   },
 
+  /** Format local date to YYYY-MM-DD (no timezone surprises) */
+  toIsoDate(dateInput: DateInput): string {
+    const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  },
+
   isPast(date: Date) {
     return date < new Date();
   },
@@ -138,6 +148,69 @@ export const dateTimeUtils = {
     return addYears(date, years);
   },
 };
+
+export type ExchangeHolidaySet = ReadonlySet<string>; // YYYY-MM-DD
+
+function normalizeToLocalMidnight(dateInput: DateInput): Date {
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+export function isWeekend(dateInput: DateInput): boolean {
+  const d = normalizeToLocalMidnight(dateInput);
+  const day = d.getDay(); // 0 Sun, 6 Sat
+  return day === 0 || day === 6;
+}
+
+export function isExchangeHoliday(
+  dateInput: DateInput,
+  holidays: ExchangeHolidaySet
+): boolean {
+  const iso = dateTimeUtils.toIsoDate(dateInput);
+  return !!iso && holidays.has(iso);
+}
+
+export function isNonWorkingDay(
+  dateInput: DateInput,
+  holidays: ExchangeHolidaySet
+): boolean {
+  return isWeekend(dateInput) || isExchangeHoliday(dateInput, holidays);
+}
+
+/**
+ * Returns the same day if it is a working day; otherwise advances to the next working day.
+ * Working day = not weekend and not in `holidays` (YYYY-MM-DD).
+ */
+export function nextWorkingDay(
+  dateInput: DateInput,
+  holidays: ExchangeHolidaySet
+): Date {
+  let d = normalizeToLocalMidnight(dateInput);
+  while (isNonWorkingDay(d, holidays)) {
+    d = dateTimeUtils.addDays(d, 1);
+  }
+  return d;
+}
+
+/**
+ * Adds N working days (N>=0). If start date is non-working, first moves to next working day.
+ * Example: addWorkingDays(Fri, 1) => next working day (Mon, unless holiday).
+ */
+export function addWorkingDays(
+  dateInput: DateInput,
+  workingDaysToAdd: number,
+  holidays: ExchangeHolidaySet
+): Date {
+  let d = nextWorkingDay(dateInput, holidays);
+  let remaining = Math.max(0, Math.floor(workingDaysToAdd));
+  while (remaining > 0) {
+    d = dateTimeUtils.addDays(d, 1);
+    if (!isNonWorkingDay(d, holidays)) {
+      remaining -= 1;
+    }
+  }
+  return d;
+}
 
 export function calculateReadTime(html: string) {
   // 1. Remove all HTML tags

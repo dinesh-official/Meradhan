@@ -39,6 +39,7 @@ function formatMaritalStatus(code: string | null): string {
 
 /** KRA status code → display label (per KRA spec) */
 const KRA_STATUS_LABELS: Record<string, string> = {
+  "00": "Not specified",
   "01": "Under Process",
   "02": "KYC Registered",
   "03": "On Hold",
@@ -53,30 +54,16 @@ const KRA_STATUS_LABELS: Record<string, string> = {
   "22": "Mutual Fund Verified",
 };
 
+/** True when APP_STATUS allows proceeding with existing KRA (not blocked). */
 export const isAllowedKraStatus = (status: string): boolean => {
-  return ["02", "07", "12"].includes(status); // 02: KYC Registered, 07: KYC Validated, 12: KYC Registered
+  return ["02", "07", "12"].includes(String(status ?? "").trim());
+  // 00: not specified / placeholder, 02/12: KYC Registered, 07: KYC Validated
 };
 
 function formatKraStatus(code: string | null | undefined): string {
   if (!code) return "-";
   const c = String(code).trim();
   return KRA_STATUS_LABELS[c] ?? code;
-}
-
-/** KRA income code → display label (per KRA spec) */
-const KRA_INCOME_LABELS: Record<string, string> = {
-  "00": "--",
-  "01": "Below Rs. 1 Lac",
-  "02": "Btw Rs. 1 to 5 Lacs",
-  "03": "Btw Rs. 5 to Rs. 10 Lacs",
-  "04": "Btw Rs. 10 to Rs. 25 Lacs",
-  "05": "More than Rs. 25 Lacs",
-};
-
-function formatIncomeRange(code: string | null): string {
-  if (!code) return "-";
-  const c = String(code).trim();
-  return KRA_INCOME_LABELS[c] ?? code;
 }
 
 /** KRA nationality code → display label (per KRA spec) */
@@ -89,58 +76,6 @@ function formatNationality(code: string | null): string {
   if (!code) return "-";
   const c = String(code).trim();
   return KRA_NATIONALITY_LABELS[c] ?? code;
-}
-
-/** KRA occupation (numeric) — API Download file format May 2025 */
-const KRA_OCCUPATION_CODE_LABELS: Record<string, string> = {
-  "00": "--",
-  "01": "Private Sector",
-  "02": "Public Sector",
-  "03": "Business",
-  "04": "Professional",
-  "05": "Agriculturist",
-  "06": "Retired",
-  "07": "Housewife",
-  "08": "Student",
-  "10": "Government Service",
-  "99": "Others (please specify)",
-};
-
-/** KRA occupation type (single letter) — same spec */
-const KRA_OCCUPATION_TYPE_LETTER: Record<string, string> = {
-  S: "Private Sector",
-  B: "Business",
-  O: "Others",
-  P: "Professional",
-  A: "Agriculturist",
-  R: "Retired",
-  H: "Housewife",
-  T: "Student",
-};
-
-function formatOccupation(occ: string | null, othOcc: string | null): string {
-  const oth = othOcc?.trim() ?? "";
-  if (!occ?.trim() && !oth) return "-";
-  const c = (occ ?? "").trim();
-  if (!c) return oth;
-
-  if (/^\d+$/.test(c)) {
-    const key = String(parseInt(c, 10)).padStart(2, "0");
-    const label = KRA_OCCUPATION_CODE_LABELS[key];
-    if (label) {
-      if (key === "99" && oth) return `${label}: ${oth}`;
-      return label;
-    }
-  }
-  if (c.length === 1) {
-    const letter = c.toUpperCase();
-    if (KRA_OCCUPATION_TYPE_LETTER[letter]) {
-      const base = KRA_OCCUPATION_TYPE_LETTER[letter];
-      if (letter === "O" && oth) return `${base}: ${oth}`;
-      return base;
-    }
-  }
-  return oth ? `${c} (${oth})` : c;
 }
 
 /**
@@ -196,7 +131,7 @@ function formatKraState(code: string | null): string {
   if (/^\d+$/.test(c)) {
     const key = String(parseInt(c, 10)).padStart(3, "0");
     const label = KRA_STATE_LABELS[key];
-    if (label) return `${label} (${key})`;
+    if (label) return `${label}`;
     return c;
   }
   return c;
@@ -299,14 +234,6 @@ export function KraInfoView({
             </DataInfoLabel>
             <DataInfoLabel title="Father's / Spouse Name">
               <p className="font-medium">{kra.appFName ?? "-"}</p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Occupation Type">
-              <p className="font-medium">
-                {formatOccupation(kra.appOcc, kra.appOthOcc)}
-              </p>
-            </DataInfoLabel>
-            <DataInfoLabel title="Income Range">
-              <p className="font-medium">{formatIncomeRange(kra.appIncome)}</p>
             </DataInfoLabel>
             <DataInfoLabel title="Marital Status">
               <p className="font-medium">{formatMaritalStatus(kra.appMarStatus)}</p>
@@ -416,7 +343,12 @@ export function KraInfoView({
           <div className="flex flex-col sm:flex-row gap-3 items-start">
             <Button
               className="flex items-center gap-1 w-full sm:w-auto"
-              disabled={!confirmed || isPending || !canProceedWithExistingKyc || isAllowedKraStatus(kra.status)}
+              disabled={
+                !confirmed ||
+                isPending ||
+                !canProceedWithExistingKyc ||
+                !isAllowedKraStatus(kra.appStatus ?? "")
+              }
               onClick={async () => {
                 const result = await Swal.fire({
                   title: "Confirm Use of Existing KYC",

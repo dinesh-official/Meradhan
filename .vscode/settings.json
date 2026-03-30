@@ -28,6 +28,7 @@
     "crmusers",
     "datetimes",
     "dealamend",
+    "Demat",
     "Demate",
     "DIGILOCKER",
     "Digio",
@@ -96,7 +97,9 @@
   },
   "auto-correct.dictionary": [
     {
-      "languages": ["*"],
+      "languages": [
+        "*"
+      ],
       "words": {
         "hte": "the",
         "mispell": "misspell",

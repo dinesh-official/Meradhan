@@ -57,6 +57,8 @@ export class KraWorkerService {
           resTime: new Date().toISOString(),
         },
       });
+      await cacheStorage.delete(runnerCachedKey);
+
       return;
     }
 
@@ -71,8 +73,6 @@ export class KraWorkerService {
       const payload = await db.dataBase.kYC_FLOW.findFirst({
         where: { id: kycDataStoreId, userID: customerId },
       });
-
-
 
       if (!payload) {
         return;
@@ -124,6 +124,7 @@ export class KraWorkerService {
         //   data: { kycStatus: "UNDER_REVIEW", kraStatus: "REJECTED" },
         // });
         // create kra data log for failed request - set stage to KRA_FAILED_REQUEST
+        await cacheStorage.delete(runnerCachedKey);
         await db.dataBase.kraDataLogs.create({
           data: {
             requestData: {
@@ -145,6 +146,7 @@ export class KraWorkerService {
       }
 
       if (status == "ERROR") {
+        await cacheStorage.delete(runnerCachedKey);
         await db.dataBase.kraDataLogs.create({
           data: {
             requestData: {
@@ -152,7 +154,8 @@ export class KraWorkerService {
               Message: "Request Failed - KRA Process error",
               LastTask: lastTask,
               Status: status,
-              Error: "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
+              Error:
+                "KRA Process error - " + res?.APP_RES_ROOT?.APP_PAN_INQ?.ERROR,
             },
             responseData: res,
             userId: customerId,
@@ -200,6 +203,7 @@ export class KraWorkerService {
           try {
             await this.registerOnCbrics(customerId, kycDataStoreId);
           } catch (error) {
+            await cacheStorage.delete(runnerCachedKey);
             await db.dataBase.kraDataLogs.create({
               data: {
                 requestData: {
@@ -216,7 +220,8 @@ export class KraWorkerService {
                 resTime: new Date().toISOString(),
               },
             });
-          } try {
+          }
+          try {
             await this.registerOnCbrics(customerId, kycDataStoreId);
           } catch (error) {
             await db.dataBase.kraDataLogs.create({
@@ -250,6 +255,7 @@ export class KraWorkerService {
       }
       return res;
     } catch (err) {
+      // remove runner key
       console.error("KRA PROCESS FAILED - Rescheduling the job");
       console.error(
         "KRA PROCESS FAILED - ",
@@ -305,8 +311,56 @@ export class KraWorkerService {
   }
   async registerOnCbrics(customerId: number, kycDataStoreId: number) {
     try {
-      const cbUser =
-        await cbricsManager.registerParticipant(customerId);
+      // check if user is already registered
+      const user = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id: customerId },
+        select: {
+          nseDataSet: {
+            select: {
+              participant: {
+                select: {
+                  id: true,
+                  loginId: true,
+                  userId: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (user?.nseDataSet?.participant.loginId && user?.nseDataSet?.participant.userId === customerId) {
+        await db.dataBase.customerProfileDataModel.update({
+          where: { id: customerId },
+          data: {
+            kycStatus: "VERIFIED",
+            kraStatus: "VERIFIED",
+            verifyDate: new Date(),
+          },
+        });
+        await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
+        await db.dataBase.kraDataLogs.create({
+          data: {
+            requestData: {
+              customerId: customerId,
+              kycDataStoreId: kycDataStoreId,
+            },
+            responseData: {
+              message: "User already registered on CBRICS",
+              error: "User already registered on CBRICS",
+              statusCode: 200,
+              status: "success",
+            },
+            userId: customerId,
+            kycId: kycDataStoreId,
+            stage: "CBRICS_REGISTER_SUCCESS",
+            reqTime: new Date().toISOString(),
+            resTime: new Date().toISOString(),
+          },
+        });
+        return;
+      }
+      const cbUser = await cbricsManager.registerParticipant(customerId);
+
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
@@ -315,6 +369,7 @@ export class KraWorkerService {
           verifyDate: new Date(),
         },
       });
+      await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
       await db.dataBase.kraDataLogs.create({
         data: {
           requestData: {
@@ -330,6 +385,7 @@ export class KraWorkerService {
       });
     } catch (error) {
       const err = error as AxiosError;
+      await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
@@ -352,7 +408,6 @@ export class KraWorkerService {
     }
   }
 }
-
 
 type processPayload = {
   kycdataId: number;
@@ -731,9 +786,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-          data.step_1.pan.response.details.aadhaar.current_address_details
-            .state,
-        )?.code
+            data.step_1.pan.response.details.aadhaar.current_address_details
+              .state,
+          )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",
@@ -821,6 +876,15 @@ export class KraProcess {
       APP_SUMM_REC: appSummRec,
     } as T_APP_PAN_REGISTER_REQUEST_PAYLOAD["APP_REQ_ROOT"];
   }
+
+  async isKraProcessRunning(
+    customerId: number,
+    kycDataStoreId: number,
+  ): Promise<boolean> {
+    const runnerCachedKey = `KRA:${customerId}-${kycDataStoreId}-RUNNER`;
+    const runner = await cacheStorage.get<string>(runnerCachedKey);
+    return !!runner;
+  }
 }
 
 export const formatDate = (date: Date) => {
@@ -831,7 +895,6 @@ export const formatDate = (date: Date) => {
 };
 
 export function formatDateTime(date: Date): string {
-
   // Format in IST using formatToParts (reliable)
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Kolkata",
@@ -844,7 +907,7 @@ export function formatDateTime(date: Date): string {
     hour12: false,
   }).formatToParts(date);
 
-  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
 
   const dd = get("day");
   const mm = get("month");
@@ -875,7 +938,7 @@ export function formatDateTime15SecPrev(date: Date): string {
     hour12: false,
   }).formatToParts(d);
 
-  const get = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
 
   const dd = get("day");
   const mm = get("month");

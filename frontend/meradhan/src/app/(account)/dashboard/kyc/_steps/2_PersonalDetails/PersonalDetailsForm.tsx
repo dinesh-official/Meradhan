@@ -142,7 +142,7 @@ function PersonalDetailsForm() {
           </LabelInput>
 
 
-          {/* Occupation – disabled when pre-filled from KRA */}
+          {/* Occupation – always editable (KRA users may change selection) */}
           <LabelInput
             label="Occupation Type"
             required
@@ -155,7 +155,7 @@ function PersonalDetailsForm() {
               }}
               value={data.occupationType}
             >
-              <SelectTrigger className="w-full" disabled={isFromKra}>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Occupation" />
               </SelectTrigger>
               <SelectContent>
@@ -183,14 +183,13 @@ function PersonalDetailsForm() {
                     setStep2PersonalData("otherOccupationName", e.target.value);
                     removeError("otherOccupationName");
                   }}
-                  disabled={isFromKra}
                 />
               </LabelInput>
             )
           }
-          {/* Annual Gross Income – disabled when pre-filled from KRA */}
+          {/* Income range – always editable (KRA users may change selection) */}
           <LabelInput
-            label="Annual Gross Income"
+            label="Income Range"
             required
             error={error?.annualGrossIncome?.[0]}
           >
@@ -201,7 +200,7 @@ function PersonalDetailsForm() {
               }}
               value={data.annualGrossIncome}
             >
-              <SelectTrigger className="w-full" disabled={isFromKra}>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Income Range" />
               </SelectTrigger>
               <SelectContent>

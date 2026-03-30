@@ -15,6 +15,12 @@ import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
 import { getDpName } from "dp-id-lookup";
 import { db } from "@core/database/database";
 import { EmailCommunication } from "@communication/email_communication";
+import { env } from "@packages/config/src/env";
+import {
+  dateOfBirthToPdfPassword,
+  getCustomerDobRawForPdf,
+} from "@utils/dobPdfPassword";
+import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 
 /** Parse modSettleDate (e.g. DDMMYYYY or ISO) to ISO string for PDF Order Date & Time */
 function parseSettlementDateToISO(modSettleDate: string): string | null {
@@ -166,6 +172,9 @@ export class CrmOrdersController {
   createOrderFromRfq = async (req: Request, res: Response) => {
     const orderNumber = req.body.orderNumber;
     const customerId = req.body.customerId != null ? Number(req.body.customerId) : undefined;
+    const orderSideRaw = req.body.orderSide;
+    const orderSide =
+      orderSideRaw === "BUY" || orderSideRaw === "SELL" ? orderSideRaw : undefined;
     if (!orderNumber || customerId == null || isNaN(customerId)) {
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
@@ -173,15 +182,27 @@ export class CrmOrdersController {
       });
     }
     try {
-      const order = await this.ordersService.createOrderFromRfq(orderNumber as string, customerId);
+      const order = await this.ordersService.createOrderFromRfq(
+        orderNumber as string,
+        customerId,
+        { orderSide },
+      );
       return res.sendResponse({
         statusCode: HttpStatus.OK,
         responseData: order,
       });
     } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create order";
+      const clientError =
+        message.includes("not found") ||
+        message.includes("already exists") ||
+        message.includes("Only customers with verified KYC");
       return res.sendResponse({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: error instanceof Error ? error.message : "Failed to create order",
+        statusCode: clientError
+          ? HttpStatus.BAD_REQUEST
+          : HttpStatus.INTERNAL_SERVER_ERROR,
+        message,
       });
     }
   };
@@ -319,6 +340,7 @@ export class CrmOrdersController {
           price: Number(settleOrder?.price ?? 0),
           metadata: {
             dealId: (metadata.dealId as string) ?? undefined,
+            clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
             rfqNumber: (metadata.rfqNumber as string) ?? undefined,
             orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
             interestPaymentDates:
@@ -547,6 +569,7 @@ export class CrmOrdersController {
           price: Number(settleOrder?.price ?? 0),
           metadata: {
             dealId: (metadata.dealId as string) ?? undefined,
+            clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
             rfqNumber: (metadata.rfqNumber as string) ?? undefined,
             orderType:
               accessTypeText ??
@@ -684,7 +707,7 @@ export class CrmOrdersController {
 
     const subject = String(body.subject ?? "").trim();
     const messageBody = String(body.messageBody ?? "").trim();
-    const fromEmail = "noreply@meradhan.co";
+    const fromEmail = env.SMTP_SENDER;
 
     if (!subject) {
       return res.sendResponse({
@@ -840,6 +863,7 @@ export class CrmOrdersController {
           price: Number(settleOrder?.price ?? 0),
           metadata: {
             dealId: (metadata.dealId as string) ?? undefined,
+            clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
             rfqNumber: (metadata.rfqNumber as string) ?? undefined,
             orderType:
               accessTypeText ??
@@ -929,7 +953,7 @@ export class CrmOrdersController {
         },
       };
 
-      const buffer =
+      let buffer: Buffer =
         pdfType === "deal"
           ? await generateDealPdfBuffer(pdfPayload)
           : await generateOrderPdfBuffer(pdfPayload);
@@ -944,6 +968,28 @@ export class CrmOrdersController {
         return res.sendResponse({
           statusCode: HttpStatus.BAD_REQUEST,
           message: "Recipient email is missing or invalid",
+        });
+      }
+
+      const dobRaw = getCustomerDobRawForPdf(user);
+      const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
+      if (!pdfPassword) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message:
+            "Customer date of birth is required to password-protect the PDF. Ensure PAN/Aadhaar or personal info DOB is on file.",
+        });
+      }
+      try {
+        buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
+      } catch (encErr) {
+        console.error("PDF encryption failed:", encErr);
+        return res.sendResponse({
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message:
+            encErr instanceof Error
+              ? encErr.message
+              : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
         });
       }
 
