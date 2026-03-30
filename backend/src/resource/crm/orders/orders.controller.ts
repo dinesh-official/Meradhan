@@ -14,7 +14,7 @@ import {
 import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
 import { getDpName } from "dp-id-lookup";
 import { db } from "@core/database/database";
-import { EmailCommunication } from "@communication/email_communication";
+import { EmailCommunication, sendBackOfficeEmail } from "@communication/email_communication";
 import { env } from "@packages/config/src/env";
 import {
   dateOfBirthToPdfPassword,
@@ -993,12 +993,12 @@ export class CrmOrdersController {
         });
       }
 
-      const emailer = new EmailCommunication();
+      
       const htmlBody = messageBody
         .split("\n")
         .map((line) => line.trim())
         .join("<br/>");
-      const messageId = await emailer.sendEmail({
+      const messageId = await sendBackOfficeEmail({
         to: recipientEmail,
         from: fromEmail,
         subject,
