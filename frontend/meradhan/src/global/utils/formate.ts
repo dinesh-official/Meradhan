@@ -7,6 +7,16 @@ export function formatNumberTS(value: number | string): string {
   }).format(n);
 }
 
+/** Clean price as % of face — 4 decimal places (bond order pricing). */
+export function formatCleanPricePercent(value: number | string): string {
+  const n = Number(value);
+  if (!isFinite(n)) return String(value);
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 4,
+  }).format(n);
+}
+
 export const makeFullname = ({
   firstName,
   middleName,

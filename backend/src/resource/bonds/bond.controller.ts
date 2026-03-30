@@ -4,6 +4,7 @@ import { BondService } from "./bond.service";
 import { HttpStatus } from "@utils/error/AppError";
 import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
+import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 
 export class BondController {
   private bondService = new BondService();
@@ -14,6 +15,68 @@ export class BondController {
     return res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,
+    });
+  }
+
+  async getBondOrderPricing(req: Request, res: Response) {
+    const isin = req.params.isin!.toString();
+    const bond = await this.bondService.getBondDetails(isin);
+    if (!bond) {
+      return res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Bond not found",
+        success: false,
+      });
+    }
+
+    const quantityRaw = req.query.quantity;
+    const quantity =
+      quantityRaw != null && quantityRaw !== ""
+        ? Number(quantityRaw)
+        : 1;
+
+ 
+
+    const cleanPriceFallback = Number(
+      bond.buyPrice ??
+        bond.lastTradePrice ??
+        bond.issuePrice ??
+        100,
+    );
+
+    const cleanPrice = bond.sellPrice
+
+    const lastCouponDateStr = bond.lastCouponDate;
+
+    const nextCouponDateStr = bond.nextCouponDate;
+
+    if (!lastCouponDateStr || !nextCouponDateStr) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message:
+          "Bond is missing lastCouponDate or nextCouponDate required for order pricing",
+        success: false,
+      });
+    }
+
+    const recordDays =
+      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
+        ? bond.recordDays
+        : 7;
+
+    const pricing = computeBondOrderPricingData({
+      faceValue: bond.faceValue,
+      quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+      cleanPrice: cleanPrice ?? 0,
+      couponRate: Number(bond.couponRate),
+      lastCouponDate: lastCouponDateStr?.toISOString() ?? "",
+      recordDays,
+      nextCouponDate: nextCouponDateStr?.toISOString() ?? "",
+    });
+
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: pricing,
     });
   }
 

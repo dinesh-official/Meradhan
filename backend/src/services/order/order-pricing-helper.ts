@@ -24,6 +24,8 @@ type BondSettlementResult = {
     dealDay: string;
     /** Weekday name of `settlementDate` in IST. */
     settlementDay: string;
+    allowSettlement: ("T+0" | "T+1")[];
+
 };
 
 type BondSettlementOptions = {
@@ -225,6 +227,7 @@ function computeBondSettlement(
         dealDay: dealDay ?? "",
         settlementOrder: "T+1",
         settlementDay: settlementDay ?? "",
+        allowSettlement: originalOrderCycle ==="T+0" ? ["T+0","T+1"] : ["T+1"],
     };
 }
 
@@ -350,8 +353,8 @@ export const computeBondOrderPricingData = (params: BondOrderPricingData) => {
     const stampDuty = calculateStampDuty(params.faceValue, params.quantity);
     const accruedIntr = accruedInterest({ faceValue: params.faceValue, quantity: params.quantity, couponRate: params.couponRate, lastCouponDate: new Date(params.lastCouponDate), nextCouponDate: new Date(params.nextCouponDate), settlementDate: new Date(settlementDate.settlementDate), recordDays: params.recordDays });
     const payAmount = (principal + accruedIntr.accruedInterest + stampDuty.stampDuty);
-    return ({
 
+    return ({
         couponRate: params.couponRate,
         faceValue: params.faceValue,
         quantity: params.quantity,
@@ -371,5 +374,6 @@ export const computeBondOrderPricingData = (params: BondOrderPricingData) => {
         isUnderShutPeriod: accruedIntr.isUnderShutPeriod,
         recordDate: accruedIntr.recordDate,
         settlementAmount: payAmount,
+
     });
 }

@@ -18,8 +18,12 @@ import {
 } from "@/components/ui/select";
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { dateTimeUtils, formatDateCustom } from "@/global/utils/datetime.utils";
-import { formatNumberTS } from "@/global/utils/formate";
-import { BondDetailsResponse, CustomerByIdPayload } from "@root/apiGateway";
+import { formatCleanPricePercent, formatNumberTS } from "@/global/utils/formate";
+import {
+  BondDetailsResponse,
+  BondOrderPricingData,
+  CustomerByIdPayload,
+} from "@root/apiGateway";
 import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
 import { PiCurrencyInrBold } from "react-icons/pi";
@@ -36,10 +40,12 @@ function ReviewOrder({
   bond,
   customer,
   orderId,
+  orderPricing,
 }: {
   bond: BondDetailsResponse;
   customer: CustomerByIdPayload;
   orderId: string;
+  orderPricing: BondOrderPricingData | null;
 }) {
   const [isChecked, setIsChecked] = useState(false);
   const [isCheckedRisk, setIsCheckedRisk] = useState(false);
@@ -85,7 +91,20 @@ function ReviewOrder({
   const stampDutyRate = 0.0001; // 0.01%
   const stampDutyAmount = totalConsideration * stampDutyRate;
   const otherCharges = 0;
-  const settlementAmount = calculateSettlementAmount(bond.issuePrice, quantity);
+  const fallbackSettlement = calculateSettlementAmount(bond.issuePrice, quantity);
+
+  const principalScaled = orderPricing
+    ? orderPricing.principalAmount * quantity
+    : totalConsideration;
+  const accruedScaled = orderPricing
+    ? orderPricing.accruedInterest * quantity
+    : 0;
+  const stampScaled = orderPricing
+    ? orderPricing.stampDuty * quantity
+    : stampDutyAmount;
+  const settlementAmount = orderPricing
+    ? orderPricing.settlementAmount * quantity
+    : fallbackSettlement;
 
   return (
     <div className="container">
@@ -111,7 +130,11 @@ function ReviewOrder({
       <div className="mt-5 border-t md:border md:p-8 pt-5 border-gray-200 md:rounded-[10px]">
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2  md:gap-y-10 gap-y-5 gap-x-6">
           <BondInfoLabel title="Yield to Maturity">
-            <p className="text-black">{`Coming Soon`}</p>
+            <p className="text-black">
+              {bond.yield != null && bond.yield !== ""
+                ? `${Number(bond.yield).toFixed(2)}%`
+                : "—"}
+            </p>
           </BondInfoLabel>
 
           <BondInfoLabel title="Coupon Rate">
@@ -138,25 +161,37 @@ function ReviewOrder({
 
           <BondInfoLabel title="Deal Date (Trade Date)">
             <p className="text-black flex items-center gap-1">
-              {dateTimeUtils.formatDateTime(dealDate, "DD MMMM YYYY")}
+              {orderPricing
+                ? `${formatDateCustom(orderPricing.dealDate)} (${orderPricing.dealDay})`
+                : dateTimeUtils.formatDateTime(dealDate, "DD MMMM YYYY")}
             </p>
           </BondInfoLabel>
 
           <BondInfoLabel title="Settlement Date">
-            <Select value={settlementDate} onValueChange={setSettlementDate}>
-              <SelectTrigger className="w-full">
-                <SelectValue
-                  placeholder={`${dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")} (T + 1)`}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">
-                  {dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")}{" "}
-                  (T + 1)
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            {orderPricing ? (
+              <p className="text-black">
+                {formatDateCustom(orderPricing.settlementDate)} (
+                {orderPricing.settlementDay}) · {orderPricing.settlementOrder}
+              </p>
+            ) : (
+              <Select value={settlementDate} onValueChange={setSettlementDate}>
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={`${dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")} (T + 1)`}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">
+                    {dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")}{" "}
+                    (T + 1)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </BondInfoLabel>
+
+   
+
 
           <BondInfoLabel title={`Quantity of Bonds (Max. ${maxQuantity} Qty.)`}>
             <div className="flex items-center w-full border border-[#E1E6E8] rounded-md ">
@@ -270,7 +305,9 @@ function ReviewOrder({
           <div>
             <p className="text-lg text-black">Settlement Amount</p>
             <p className="text-sm">
-              (Total Consideration + Stamp Duty + Other Charges)
+              {orderPricing
+                ? "(Principal + accrued interest + stamp duty · scaled by quantity)"
+                : "(Total Consideration + Stamp Duty + Other Charges)"}
             </p>
           </div>
           <div>
@@ -292,29 +329,70 @@ function ReviewOrder({
                   <DialogTitle>Amount Breakup</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>Unit Price</span>
-                    <span className="font-medium">Rs. {formatNumberTS(bond.issuePrice)}</span>
-                  </div>
+                  {orderPricing ? (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Clean Price </span>
+                        <span className="font-medium">
+                          {formatCleanPricePercent(orderPricing.cleanPrice)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Principal Amount</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(principalScaled)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Accrued interest</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(accruedScaled)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Consideration w/o Stamp Duty</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(principalScaled + accruedScaled)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Stamp duty</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(stampScaled)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground text-xs">
+                        <span>Accrual days (per unit)</span>
+                        <span>{orderPricing.noOfAccrualDays}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Unit Price</span>
+                        <span className="font-medium">Rs. {formatNumberTS(bond.issuePrice)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Consideration</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(totalConsideration)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Stamp Duty (0.01%)</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(stampDutyAmount)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Other Charges</span>
+                        <span className="font-medium">Rs. {formatNumberTS(otherCharges)}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between">
                     <span>Quantity</span>
                     <span className="font-medium">{quantity}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Consideration</span>
-                    <span className="font-medium">
-                      Rs. {formatNumberTS(totalConsideration)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Stamp Duty (0.01%)</span>
-                    <span className="font-medium">
-                      Rs. {formatNumberTS(stampDutyAmount)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Other Charges</span>
-                    <span className="font-medium">Rs. {formatNumberTS(otherCharges)}</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between text-base">
                     <span className="font-semibold">Settlement Amount</span>
