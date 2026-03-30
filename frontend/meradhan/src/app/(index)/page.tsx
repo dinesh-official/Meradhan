@@ -32,11 +32,11 @@ export default async function HomePage() {
       </div>
       <LatestBondReleases bonds={responseData || []} />
       {/* <ReturnsCalculationSection /> */}
-      <XirrCalculator
+      {/* <XirrCalculator
         showTitle={true}
         showFlowChart={false}
         showChart={false}
-      />
+      /> */}
       {/* <CustomersTestimonials /> */}
       {/* <RecentBlogs /> */}
     </ViewPort>

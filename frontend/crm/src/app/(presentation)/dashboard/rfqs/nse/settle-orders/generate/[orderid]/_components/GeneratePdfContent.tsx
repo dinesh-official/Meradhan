@@ -27,11 +27,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import apiGateway from "@root/apiGateway";
-import type {
-  RfqByOrderNumberSettleOrder,
-  CustomerFullOrder,
-  CustomerProfile,
+import apiGateway, {
+  ApiError,
+  type RfqByOrderNumberSettleOrder,
+  type CustomerFullOrder,
+  type CustomerProfile,
 } from "@root/apiGateway";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
 import { genMediaUrl } from "@/global/utils/url.utils";
@@ -40,6 +40,19 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+
+/** Backend `sendResponse` errors expose `message` on the JSON body; axios default `Error.message` is generic. */
+function getApiErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) {
+    const data = err.response?.data as { message?: string } | undefined;
+    const apiMsg = data?.message?.trim();
+    if (apiMsg) return apiMsg;
+  }
+  if (err instanceof Error && err.message.trim() !== "") {
+    return err.message;
+  }
+  return fallback;
+}
 
 function formatVal(v: string | number | null | undefined): string {
   if (v == null) return "—";
@@ -130,7 +143,7 @@ function Section({
 function GeneratePdfContent() {
   const params = useParams();
   const orderNumber = params?.orderid as string | undefined;
-  const senderEmail = "noreply@meradhan.co";
+  const senderEmail = "backoffice@meradhan.co";
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
   const [downloadingOrderPdf, setDownloadingOrderPdf] = useState(false);
   const [downloadingDealPdf, setDownloadingDealPdf] = useState(false);
@@ -152,6 +165,7 @@ function GeneratePdfContent() {
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const [participantCode, setParticipantCode] = useState<string | null>(null);
   const [isAutoFetchedCustomer, setIsAutoFetchedCustomer] = useState(false);
+  const [orderSide, setOrderSide] = useState<"BUY" | "SELL">("BUY");
 
   useEffect(() => {
     if (participantCode) {
@@ -212,6 +226,7 @@ function GeneratePdfContent() {
       ordersApi.createOrderFromRfq({
         orderNumber: orderNumber!,
         customerId: selectedCustomer!.id,
+        orderSide,
       }),
     onSuccess: () => {
       toast.success("Order assigned to Customer.");
@@ -220,7 +235,7 @@ function GeneratePdfContent() {
       queryClient.invalidateQueries({ queryKey: ["customer-full-order", orderNumber] });
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to assign order");
+      toast.error(getApiErrorMessage(err, "Failed to assign order"));
     },
   });
 
@@ -238,11 +253,27 @@ function GeneratePdfContent() {
   const securityName = customerOrder?.bondName ?? "—";
   const customerOrderId = customerOrder?.orderNumber ?? orderNumber ?? "—";
   const isin = rfq?.symbol ?? "—";
-  const rfqBuySell = String((rfq as { buySell?: string } | null)?.buySell ?? "")
-    .trim()
-    .toUpperCase();
-  const transactionLabel = rfqBuySell === "S" ? "sell" : "buy";
+  const metaSide = (customerOrder?.metadata as { clientOrderSide?: string } | undefined)
+    ?.clientOrderSide;
+  const effectiveOrderSide: "BUY" | "SELL" =
+    metaSide === "BUY" || metaSide === "SELL" ? metaSide : orderSide;
+  const transactionLabel = effectiveOrderSide === "SELL" ? "sell" : "buy";
   const dealDateText = formatDealDateForEmail(rfq?.modSettleDate ?? rfq?.createdAt ?? null);
+
+  useEffect(() => {
+    const bs = String((rfq as { buySell?: string } | null)?.buySell ?? "")
+      .trim()
+      .toUpperCase();
+    if (bs === "S") setOrderSide("SELL");
+    else setOrderSide("BUY");
+  }, [rfq?.buySell]);
+
+  useEffect(() => {
+    const m = customerOrder?.metadata as { clientOrderSide?: string } | undefined;
+    if (m?.clientOrderSide === "BUY" || m?.clientOrderSide === "SELL") {
+      setOrderSide(m.clientOrderSide);
+    }
+  }, [customerOrder?.metadata]);
 
   useEffect(() => {
     if (rfq?.settlementNo != null && pdfSettlementNumber === "") {
@@ -278,22 +309,58 @@ MeraDhan Team`
       );
       return;
     }
-    setEmailSubject(
-      `Buy Order Receipt - ${securityName} - Order ID ${customerOrderId}`
-    );
+    const orderIdTpl = customerOrderId;
+    const dealIdTpl =
+      (customerOrder?.metadata as { dealId?: string } | undefined)?.dealId ?? "—";
+    const buySellLower = effectiveOrderSide === "SELL" ? "sell" : "buy";
+    const buySellYour = effectiveOrderSide === "SELL" ? "Sell" : "Buy";
+    const displayName =
+      `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`.trim() ||
+      "CUSTOMER";
+
+    setEmailSubject(`Order Confirmation & Receipt – Order ID ${orderIdTpl}`);
     setEmailBody(
-      `Dear ${salutationPrefix} ${clientFullName || "CUSTOMER"},
+      `Dear Mr. / Ms. ${displayName},
 
-Thank you for placing your ${transactionLabel} order through MeraDhan. As per your authorization, we have initiated the non-negotiable order (One-to-One Mode) on the RFQ platform of the stock exchanges.
+Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
 
-Please find the Order Receipt attached for your records. You are requested to fulfil the pay-in obligation (funds) within the stipulated timeline. Kindly disregard this message if the payment has already been completed.
+Bond Name: ${securityName}
 
-Please note that the Order Receipt reflects the intention of the parties to enter into the transaction and should not be considered a Deal Confirmation. The Deal Sheet will be issued upon successful settlement of the transaction.
+ISIN: ${isin}
 
-Additionally, please ensure that the Demat account mentioned in the Order Receipt is active and capable of receiving the bonds/securities.
+Deal ID: ${dealIdTpl}
 
-Regards,
-MeraDhan Team`
+Order Type: Your ${buySellYour}
+
+Please find the Order Receipt attached for your reference. The order receipt is password protected. You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.
+
+To proceed with settlement, please transfer the required amount from your bank account verified on MeraDhan to the designated NCL account, maintained with HDFC Bank or RBI as applicable, via NEFT / RTGS, in accordance with the instructions provided at the time of placing your order.
+
+Kindly ensure that the payment is completed within the stipulated time to avoid cancellation of the order.
+
+Important Notes:
+
+This Order Receipt indicates the intention to transact and is not a Deal Confirmation.
+
+A Deal Sheet will be shared with you once the transaction is settled.
+
+Please ensure that the Demat Account listed in the receipt is active and ready to receive the bonds/securities.
+
+If you require any assistance, please contact us at backoffice@meradhan.co.
+
+Warm regards,
+
+MeraDhan Team
+
+Disclaimer: Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully.
+
+BondNest Capital India Securities Private Limited operates the MeraDhan platform as an Online Bond Platform Provider (OBPP).
+
+SEBI Registration No.: INZ00033023
+
+NSE Member ID: 90480
+
+BSE Member ID: 6963`
     );
   };
 
@@ -362,7 +429,7 @@ MeraDhan Team`
       URL.revokeObjectURL(url);
       toast.success(type === "deal" ? "Deal sheet PDF downloaded." : "Order receipt PDF downloaded.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to download PDF");
+      toast.error(getApiErrorMessage(err, "Failed to download PDF"));
     } finally {
       if (type === "order") setDownloadingOrderPdf(false);
       if (type === "deal") setDownloadingDealPdf(false);
@@ -400,7 +467,7 @@ MeraDhan Team`
       toast.success("Email sent to client with PDF attachment.");
       setSendEmailOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send email");
+      toast.error(getApiErrorMessage(err, "Failed to send email"));
     } finally {
       setSendingPdfEmail(false);
     }
@@ -499,12 +566,24 @@ MeraDhan Team`
                 variant="outline"
                 disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
                 onClick={() => {
+                  setEmailPdfType("order");
+                  applyEmailTemplate("order");
+                  setSendEmailOpen(true);
+                }}
+              >
+                Email order receipt
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
+                onClick={() => {
                   setEmailPdfType("deal");
                   applyEmailTemplate("deal");
                   setSendEmailOpen(true);
                 }}
               >
-                Send email to client
+                Email deal sheet
               </Button>
             </>
           )}
@@ -614,6 +693,7 @@ MeraDhan Team`
             </CardContent>
           </Card>
         ) : customerOrder?.customerProfile ? (
+          <>
           <Section title="Customer (assigned order)">
             <InfoRow label="Name" value={`${customerOrder.customerProfile.firstName ?? ""} ${customerOrder.customerProfile.middleName ?? ""} ${customerOrder.customerProfile.lastName ?? ""}`.trim() || "—"} />
             <InfoRow label="Email" value={customerOrder.customerProfile.emailAddress} />
@@ -672,6 +752,18 @@ MeraDhan Team`
               </>
             ) : null}
           </Section>
+          {customerOrder?.orderNumber ? (
+            <Section title="MeraDhan identifiers">
+              <InfoRow label="MeraDhan Order ID" value={customerOrder.orderNumber} />
+              <InfoRow
+                label="MeraDhan Deal ID"
+                value={
+                  (customerOrder.metadata as { dealId?: string } | undefined)?.dealId ?? "—"
+                }
+              />
+            </Section>
+          ) : null}
+          </>
         ) : (
           <Card>
             <CardHeader className="pb-2">
@@ -712,7 +804,14 @@ MeraDhan Team`
               )}
 
 
-              {participantCode && <div className="flex flex-wrap items-end gap-2">
+              {participantCode && <div className="flex flex-wrap items-end gap-4">
+                <p className="text-sm text-muted-foreground pb-2">
+                  Order side:{" "}
+                  <span className="font-medium text-foreground">
+                    {orderSide === "SELL" ? "Sell" : "Buy"}
+                  </span>
+                  <span className="text-muted-foreground"> (from RFQ)</span>
+                </p>
                 <div className="min-w-[220px]">
                   <SelectCustomerUser
                     placeholder="Search and select Customer..."
@@ -797,8 +896,8 @@ MeraDhan Team`
           </Section>
 
           <Section title="Counterparties">
-            <InfoRow label="Buy Participant Login ID" value={rfq.buyParticipantLoginId} />
-            <InfoRow label="Sell Participant Login ID" value={rfq.sellParticipantLoginId} />
+            <InfoRow label="Buyer Client" value={rfq.buyParticipantLoginId} />
+            <InfoRow label="Seller Client" value={rfq.sellParticipantLoginId} />
             <InfoRow label="Buyer Ref No" value={rfq.buyerRefNo} />
             <InfoRow label="Seller Ref No" value={rfq.sellerRefNo} />
             <InfoRow label="Buy Backoffice Login ID" value={rfq.buyBackofficeLoginId} />

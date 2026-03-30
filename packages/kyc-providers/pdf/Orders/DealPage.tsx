@@ -69,6 +69,7 @@ interface OrderData {
       modConsideration?: number | string;
       stampDutyAmount?: number | string;
     };
+    clientOrderSide?: "BUY" | "SELL";
   };
 }
 
@@ -165,18 +166,9 @@ export default function DealPage({
 
 
 
-  // Get deal ID from metadata or generate from order
   const dealId =
-    orderData?.metadata?.dealId ||
-    `MD-${orderId.split("-").pop() || "XXXXX"}-${formatDate(
-      orderDate.toISOString(),
-      "DD/MM/YYYY"
-    ).replace(/\//g, "")}-BUY-${String(orderDate.getHours()).padStart(
-      2,
-      "0"
-    )}${String(orderDate.getMinutes()).padStart(2, "0")}${String(
-      orderDate.getSeconds()
-    ).padStart(2, "0")}`;
+    orderData?.metadata?.dealId ??
+    (releasedOrder ? "—" : "Pending assignment");
 
 
   const topList = [
@@ -205,9 +197,9 @@ export default function DealPage({
     ["Security Name", bond.description],
     [
       "Security Nature",
-      ("securityNature" in bond
-        ? (bond as { securityNature?: string }).securityNature
-        : null) || "Senior Secured",
+      ("natureOfInstrument" in bond
+        ? (bond as { natureOfInstrument?: string }).natureOfInstrument
+        : null) || "N.A",
     ],
     ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"} % `],
     [

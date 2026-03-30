@@ -269,7 +269,7 @@ export class CustomerKycApi {
   async customerKraStatus(
     customerId: number,
     config?: AxiosRequestConfig,
-  ): Promise<AxiosResponse<BaseResponseData<{ isRunning: boolean }>>> {
+  ): Promise<AxiosResponse<BaseResponseData<{ isRunning: boolean,kycDataStoreId: number | null }>>> {
     return this.apiClient.post(
       `/customer/kra/status/${customerId}`,
       null,

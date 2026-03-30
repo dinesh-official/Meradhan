@@ -7,7 +7,7 @@ import apiGateway from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
 import OrderStep from "../_components/OrderStep";
-import { generateOrderId } from "../_utils/calcAmount";
+import { generateDraftPlaceOrderLabel } from "../_utils/calcAmount";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import { redirect } from "next/navigation";
 export const revalidate = 0;
@@ -24,7 +24,7 @@ export const generateMetadata = async ({
 async function page({ params }: { params: Promise<{ isin: string }> }) {
   const { isin } = await params;
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
-  const orderId = generateOrderId({});
+  const orderId = generateDraftPlaceOrderLabel();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiServerCaller
   );
