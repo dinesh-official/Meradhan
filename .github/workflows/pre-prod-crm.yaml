@@ -15,7 +15,6 @@ jobs:
       - name: Create .env from GitHub Secrets
         shell: bash
         env:
-
           DEV_STRAPI_API_TOKEN: ${{ secrets.DEV_STRAPI_API_TOKEN }}
           DEV_NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.DEV_NEXT_PUBLIC_GRAPHQL_KEY }}
 
