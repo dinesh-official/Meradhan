@@ -36,13 +36,13 @@ function Payment({
       </p>
 
       <div className="flex justify-center items-center flex-col gap-4 mt-10">
-        <Image
+        {/* <Image
           src={`/images/icons/payment.svg`}
           width={100}
           height={100}
           className="w-40 h-auto"
           alt="payment"
-        />
+        /> */}
         <div className="lg:w-[600px] mx-auto text-center flex flex-col gap-4 mt-5">
           <p>
             Your deal will be settled on{" "}

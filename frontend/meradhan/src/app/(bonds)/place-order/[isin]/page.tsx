@@ -14,15 +14,19 @@ export const revalidate = 0;
 
 export const generateMetadata = async ({
   params,
+  searchParams,
 }: {
   params: Promise<{ isin: string }>;
+  searchParams: Promise<{ quantity: string }>;
 }) => {
   const { isin } = await params;
   return await generateBondInfoPageMetaData(isin, "place-order/[isin]");
 };
 
-async function page({ params }: { params: Promise<{ isin: string }> }) {
+async function page({ params, searchParams }: { params: Promise<{ isin: string }>, searchParams: Promise<{ quantity: string }> }) {
   const { isin } = await params;
+  const { quantity } = await searchParams;
+
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const orderId = generateDraftPlaceOrderLabel();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
@@ -33,7 +37,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
 
   let orderPricing: BondOrderPricingData | null = null;
   try {
-    const pricingEnvelope = await apiCaller.getBondOrderPricing(isin);
+    const pricingEnvelope = await apiCaller.getBondOrderPricing(isin, Number(quantity ?? 1));
     if (pricingEnvelope.responseData) {
       orderPricing = pricingEnvelope.responseData;
     }

@@ -34,6 +34,7 @@ import BondInfoData from "../BondInfoData";
 import { RatingOrDelete } from "../RatingOrDelete";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 const WEEKEND_ONLY_HOLIDAYS = new Set<string>();
 function ReviewOrder({
@@ -50,6 +51,10 @@ function ReviewOrder({
   const [isChecked, setIsChecked] = useState(false);
   const [isCheckedRisk, setIsCheckedRisk] = useState(false);
 
+
+  const [paramsQuantity, setParamsQuantity] = useQueryState('quantity', parseAsInteger.withDefault(1))
+
+
   const {
     quantity,
     setQuantity,
@@ -58,6 +63,22 @@ function ReviewOrder({
     setStep,
     step,
   } = useOrderState();
+
+  useEffect(() => {
+    setQuantity(paramsQuantity);
+  }, [paramsQuantity, setQuantity]);
+
+  let [isFirstRender, setIsFirstRender] = useState(true);
+  useEffect(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
+    const timmer  = setTimeout(() => {  
+      window.location.reload();
+    }, 1000);
+    return () => clearTimeout(timmer);
+  }, [paramsQuantity]);
 
   const {
     trackQuantityChange,
@@ -91,33 +112,26 @@ function ReviewOrder({
   const stampDutyRate = 0.0001; // 0.01%
   const stampDutyAmount = totalConsideration * stampDutyRate;
   const otherCharges = 0;
-  const fallbackSettlement = calculateSettlementAmount(bond.issuePrice, quantity);
 
-  const principalScaled = orderPricing
-    ? orderPricing.principalAmount * quantity
-    : totalConsideration;
-  const accruedScaled = orderPricing
+  const principalScaled = orderPricing?.principalAmount
+  const accruedScaled = orderPricing?.accruedInterest
     ? orderPricing.accruedInterest * quantity
     : 0;
-  const stampScaled = orderPricing
-    ? orderPricing.stampDuty * quantity
-    : stampDutyAmount;
-  const settlementAmount = orderPricing
-    ? orderPricing.settlementAmount * quantity
-    : fallbackSettlement;
+  const stampScaled = orderPricing?.stampDuty
+  const settlementAmount = orderPricing?.settlementAmount ?? 0
 
   return (
     <div className="container">
       <h1 className="title">Review & Confirm Order</h1>
       <div className="flex mt-5">
         <div className="flex items-center md:justify-start justify-between w-full gap-4">
-          <div className="border-2 items-center flex justify-center bg-white min-h-16 px-4 py-5.5  rounded-md border-gray-200">
+          {/* <div className="border-2 items-center flex justify-center bg-white min-h-16 px-4 py-5.5  rounded-md border-gray-200">
             <img
               src="https://media.licdn.com/dms/image/v2/D5616AQHCSw6TFvHuWg/profile-displaybackgroundimage-shrink_200_800/profile-displaybackgroundimage-shrink_200_800/0/1712728211011?e=2147483647&v=beta&t=U-lbDGIHBKOPGjuB5Om5qHUUJc_RqyTypV4PW_dq6dM"
               alt="logo"
               className="w-24 rounded-md "
             />
-          </div>
+          </div> */}
           <div className="md:block hidden">
             <BondInfoData bondData={bond} />
           </div>
@@ -202,7 +216,7 @@ function ReviewOrder({
                     previousQuantity: quantity,
                     newQuantity: quantity - 1,
                   });
-                  setQuantity(quantity - 1);
+                  setParamsQuantity(quantity - 1);
                 }}
               >
                 -
@@ -214,7 +228,7 @@ function ReviewOrder({
                 min={1}
                 max={maxQuantity}
                 onChange={(e) =>
-                  setQuantity(
+                  setParamsQuantity(
                     Math.min(maxQuantity, Math.max(1, Number(e.target.value) || 1))
                   )
                 }
@@ -226,7 +240,7 @@ function ReviewOrder({
                     previousQuantity: quantity,
                     newQuantity: quantity + 1,
                   });
-                  setQuantity(Math.min(maxQuantity, quantity + 1));
+                  setParamsQuantity(Math.min(maxQuantity, quantity + 1));
                 }}
                 disabled={quantity >= maxQuantity}
               >
@@ -340,29 +354,29 @@ function ReviewOrder({
                       <div className="flex justify-between">
                         <span>Principal Amount</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(principalScaled)}
+                          Rs. {formatNumberTS(principalScaled ?? 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Accrued interest</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(accruedScaled)}
+                          Rs. {formatNumberTS(accruedScaled ?? 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Total Consideration w/o Stamp Duty</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(principalScaled + accruedScaled)}
+                          Rs. {formatNumberTS((principalScaled ?? 0) + (accruedScaled ?? 0))}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Stamp duty</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(stampScaled)}
+                          Rs. {formatNumberTS(stampScaled ?? 0)}
                         </span>
                       </div>
-                      <div className="flex justify-between text-muted-foreground text-xs">
-                        <span>Accrual days (per unit)</span>
+                      <div className="flex justify-between ">
+                        <span>Accrued Interest Days</span>
                         <span>{orderPricing.noOfAccrualDays}</span>
                       </div>
                     </>

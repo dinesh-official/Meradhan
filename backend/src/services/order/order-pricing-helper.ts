@@ -227,7 +227,7 @@ function computeBondSettlement(
         dealDay: dealDay ?? "",
         settlementOrder: "T+1",
         settlementDay: settlementDay ?? "",
-        allowSettlement: originalOrderCycle ==="T+0" ? ["T+0","T+1"] : ["T+1"],
+        allowSettlement: originalOrderCycle === "T+0" ? ["T+0", "T+1"] : ["T+1"],
     };
 }
 
@@ -250,14 +250,12 @@ const daysBetween = (startYmd: string, endYmd: string): number => {
 };
 
 
-const calculateStampDuty = (faceValue: number, quantity: number) => {
-    const rawStampDuty = faceValue * quantity * 0.000001;
+const calculateStampDuty = (principal: number) => {
+    const rawStampDuty = principal * 0.000001;
     const stampDuty =
         rawStampDuty < 0.5 ? 0 : rawStampDuty < 1.5 ? 1 : rawStampDuty;
-    const totalAmount = faceValue * quantity + stampDuty;
     return {
         stampDuty: stampDuty,
-        totalAmount: totalAmount,
     };
 }
 
@@ -350,9 +348,10 @@ export const computeBondOrderPricingData = (params: BondOrderPricingData) => {
     const settlementDate = computeBondSettlement(new Date());
 
     const principal = principalAmount(params.faceValue, params.quantity, params.cleanPrice);
-    const stampDuty = calculateStampDuty(params.faceValue, params.quantity);
     const accruedIntr = accruedInterest({ faceValue: params.faceValue, quantity: params.quantity, couponRate: params.couponRate, lastCouponDate: new Date(params.lastCouponDate), nextCouponDate: new Date(params.nextCouponDate), settlementDate: new Date(settlementDate.settlementDate), recordDays: params.recordDays });
+    const stampDuty = calculateStampDuty(principal);
     const payAmount = (principal + accruedIntr.accruedInterest + stampDuty.stampDuty);
+
 
     return ({
         couponRate: params.couponRate,
@@ -370,10 +369,20 @@ export const computeBondOrderPricingData = (params: BondOrderPricingData) => {
         principalAmount: principal,
         accruedInterest: accruedIntr.accruedInterest,
         stampDuty: stampDuty.stampDuty,
-        noOfAccrualDays: accruedIntr.noOfAccrualDays,
+        noOfAccrualDays: accruedIntr.isUnderShutPeriod ? -accruedIntr.noOfAccrualDays : accruedIntr.noOfAccrualDays,
         isUnderShutPeriod: accruedIntr.isUnderShutPeriod,
         recordDate: accruedIntr.recordDate,
         settlementAmount: payAmount,
-
     });
 }
+
+console.log(computeBondOrderPricingData({ 
+    faceValue: 100000,
+    quantity: 1,
+    cleanPrice: 98.1368,
+    couponRate: 9.10,
+    lastCouponDate: "2026-01-08",
+    nextCouponDate: "2026-04-08",
+    recordDays: 7,
+}));
+

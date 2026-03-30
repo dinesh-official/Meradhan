@@ -99,7 +99,7 @@ export class OrderController {
       orderId: req.query.orderId as string,
       isReleased: req.query?.isReleased === "true",
       bond: await bond.getBondDetails(req.query.isin as string),
-      qun: 1,
+      qun: req.query.qun ? Number(req.query.qun) : 1,
       user: await repo.getFullCustomerProfile(req.customer!.id),
     });
     // send the file as response

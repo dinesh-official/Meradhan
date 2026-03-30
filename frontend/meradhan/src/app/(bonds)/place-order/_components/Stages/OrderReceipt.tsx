@@ -43,13 +43,13 @@ function OrderReceipt({
       </p>
       <div className="flex mt-3">
         <div className="flex items-center md:justify-start justify-between w-full gap-4">
-          <div className="border-2 items-center flex justify-center bg-white min-h-16 px-4 py-5.5  rounded-md border-gray-200">
+          {/* <div className="border-2 items-center flex justify-center bg-white min-h-16 px-4 py-5.5  rounded-md border-gray-200">
             <img
               src="https://media.licdn.com/dms/image/v2/D5616AQHCSw6TFvHuWg/profile-displaybackgroundimage-shrink_200_800/profile-displaybackgroundimage-shrink_200_800/0/1712728211011?e=2147483647&v=beta&t=U-lbDGIHBKOPGjuB5Om5qHUUJc_RqyTypV4PW_dq6dM"
               alt="logo"
               className="w-24 rounded-md "
             />
-          </div>
+          </div> */}
           <div className="md:block hidden">
             <BondInfoData bondData={bond} />
           </div>

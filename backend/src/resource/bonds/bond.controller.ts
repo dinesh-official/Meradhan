@@ -20,6 +20,7 @@ export class BondController {
 
   async getBondOrderPricing(req: Request, res: Response) {
     const isin = req.params.isin!.toString();
+    const quantity = req.query.quantity ? Number(req.query.quantity) : 1;
     const bond = await this.bondService.getBondDetails(isin);
     if (!bond) {
       return res.sendResponse({
@@ -28,14 +29,6 @@ export class BondController {
         success: false,
       });
     }
-
-    const quantityRaw = req.query.quantity;
-    const quantity =
-      quantityRaw != null && quantityRaw !== ""
-        ? Number(quantityRaw)
-        : 1;
-
- 
 
     const cleanPriceFallback = Number(
       bond.buyPrice ??

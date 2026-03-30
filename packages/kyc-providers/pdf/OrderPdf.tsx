@@ -111,7 +111,7 @@ export function OrderPdf({
   return (
     <Document >
       <Page size="A4" style={{ fontFamily: "Poppins" }}    >
-        <LogoSvgTop showAll={true} title="ORDER RECEIPT" />
+        <LogoSvgTop showAll={true} title={ releasedOrder? "ORDER RECEIPT" : "ORDER RECEIPT (DRAFT)"} />
         <OrdersPage
           bond={bond}
           user={user}
@@ -123,7 +123,7 @@ export function OrderPdf({
         <Footer />
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvgTop showAll={true} title="ORDER RECEIPT" />
+        <LogoSvgTop showAll={true} title={ releasedOrder? "ORDER RECEIPT" : "ORDER RECEIPT (DRAFT)"} />
         <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
         <Footer />
       </Page>
