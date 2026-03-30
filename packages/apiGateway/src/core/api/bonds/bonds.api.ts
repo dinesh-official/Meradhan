@@ -4,6 +4,7 @@ import type { appSchema } from "@root/schema";
 import type { AxiosRequestConfig } from "axios";
 import type {
   BondDetailResponse,
+  BondOrderPricingResponse,
   LatestBondsResponse,
   ListedBondsResponse,
 } from "./bonds.response";
@@ -35,6 +36,15 @@ export class BondsApi {
     const response = await this.apiClient.get<BondDetailResponse>(
       `/bonds/${isin}`,
       config
+    );
+    return response.data;
+  }
+
+  public async getBondOrderPricing(isin: string, quantity: number, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.get<BondOrderPricingResponse>(
+      `/bonds/${isin}/order-pricing`,
+      { ...config, params: { quantity } },
+      
     );
     return response.data;
   }

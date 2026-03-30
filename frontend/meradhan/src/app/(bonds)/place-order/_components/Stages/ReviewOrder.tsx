@@ -18,8 +18,12 @@ import {
 } from "@/components/ui/select";
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { dateTimeUtils, formatDateCustom } from "@/global/utils/datetime.utils";
-import { formatNumberTS } from "@/global/utils/formate";
-import { BondDetailsResponse, CustomerByIdPayload } from "@root/apiGateway";
+import { formatCleanPricePercent, formatNumberTS } from "@/global/utils/formate";
+import {
+  BondDetailsResponse,
+  BondOrderPricingData,
+  CustomerByIdPayload,
+} from "@root/apiGateway";
 import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
 import { PiCurrencyInrBold } from "react-icons/pi";
@@ -30,19 +34,26 @@ import BondInfoData from "../BondInfoData";
 import { RatingOrDelete } from "../RatingOrDelete";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 const WEEKEND_ONLY_HOLIDAYS = new Set<string>();
 function ReviewOrder({
   bond,
   customer,
   orderId,
+  orderPricing,
 }: {
   bond: BondDetailsResponse;
   customer: CustomerByIdPayload;
   orderId: string;
+  orderPricing: BondOrderPricingData | null;
 }) {
   const [isChecked, setIsChecked] = useState(false);
   const [isCheckedRisk, setIsCheckedRisk] = useState(false);
+
+
+  const [paramsQuantity, setParamsQuantity] = useQueryState('quantity', parseAsInteger.withDefault(1))
+
 
   const {
     quantity,
@@ -52,6 +63,22 @@ function ReviewOrder({
     setStep,
     step,
   } = useOrderState();
+
+  useEffect(() => {
+    setQuantity(paramsQuantity);
+  }, [paramsQuantity, setQuantity]);
+
+  let [isFirstRender, setIsFirstRender] = useState(true);
+  useEffect(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
+    const timmer  = setTimeout(() => {  
+      window.location.reload();
+    }, 1000);
+    return () => clearTimeout(timmer);
+  }, [paramsQuantity]);
 
   const {
     trackQuantityChange,
@@ -85,20 +112,26 @@ function ReviewOrder({
   const stampDutyRate = 0.0001; // 0.01%
   const stampDutyAmount = totalConsideration * stampDutyRate;
   const otherCharges = 0;
-  const settlementAmount = calculateSettlementAmount(bond.issuePrice, quantity);
+
+  const principalScaled = orderPricing?.principalAmount
+  const accruedScaled = orderPricing?.accruedInterest
+    ? orderPricing.accruedInterest * quantity
+    : 0;
+  const stampScaled = orderPricing?.stampDuty
+  const settlementAmount = orderPricing?.settlementAmount ?? 0
 
   return (
     <div className="container">
       <h1 className="title">Review & Confirm Order</h1>
       <div className="flex mt-5">
         <div className="flex items-center md:justify-start justify-between w-full gap-4">
-          <div className="border-2 items-center flex justify-center bg-white min-h-16 px-4 py-5.5  rounded-md border-gray-200">
+          {/* <div className="border-2 items-center flex justify-center bg-white min-h-16 px-4 py-5.5  rounded-md border-gray-200">
             <img
               src="https://media.licdn.com/dms/image/v2/D5616AQHCSw6TFvHuWg/profile-displaybackgroundimage-shrink_200_800/profile-displaybackgroundimage-shrink_200_800/0/1712728211011?e=2147483647&v=beta&t=U-lbDGIHBKOPGjuB5Om5qHUUJc_RqyTypV4PW_dq6dM"
               alt="logo"
               className="w-24 rounded-md "
             />
-          </div>
+          </div> */}
           <div className="md:block hidden">
             <BondInfoData bondData={bond} />
           </div>
@@ -111,7 +144,11 @@ function ReviewOrder({
       <div className="mt-5 border-t md:border md:p-8 pt-5 border-gray-200 md:rounded-[10px]">
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2  md:gap-y-10 gap-y-5 gap-x-6">
           <BondInfoLabel title="Yield to Maturity">
-            <p className="text-black">{`Coming Soon`}</p>
+            <p className="text-black">
+              {bond.yield != null && bond.yield !== ""
+                ? `${Number(bond.yield).toFixed(2)}%`
+                : "—"}
+            </p>
           </BondInfoLabel>
 
           <BondInfoLabel title="Coupon Rate">
@@ -138,25 +175,37 @@ function ReviewOrder({
 
           <BondInfoLabel title="Deal Date (Trade Date)">
             <p className="text-black flex items-center gap-1">
-              {dateTimeUtils.formatDateTime(dealDate, "DD MMMM YYYY")}
+              {orderPricing
+                ? `${formatDateCustom(orderPricing.dealDate)} (${orderPricing.dealDay})`
+                : dateTimeUtils.formatDateTime(dealDate, "DD MMMM YYYY")}
             </p>
           </BondInfoLabel>
 
           <BondInfoLabel title="Settlement Date">
-            <Select value={settlementDate} onValueChange={setSettlementDate}>
-              <SelectTrigger className="w-full">
-                <SelectValue
-                  placeholder={`${dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")} (T + 1)`}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">
-                  {dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")}{" "}
-                  (T + 1)
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            {orderPricing ? (
+              <p className="text-black">
+                {formatDateCustom(orderPricing.settlementDate)} (
+                {orderPricing.settlementDay}) · {orderPricing.settlementOrder}
+              </p>
+            ) : (
+              <Select value={settlementDate} onValueChange={setSettlementDate}>
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={`${dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")} (T + 1)`}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">
+                    {dateTimeUtils.formatDateTime(computedSettlementDate, "DD MMMM YYYY")}{" "}
+                    (T + 1)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </BondInfoLabel>
+
+   
+
 
           <BondInfoLabel title={`Quantity of Bonds (Max. ${maxQuantity} Qty.)`}>
             <div className="flex items-center w-full border border-[#E1E6E8] rounded-md ">
@@ -167,7 +216,7 @@ function ReviewOrder({
                     previousQuantity: quantity,
                     newQuantity: quantity - 1,
                   });
-                  setQuantity(quantity - 1);
+                  setParamsQuantity(quantity - 1);
                 }}
               >
                 -
@@ -179,7 +228,7 @@ function ReviewOrder({
                 min={1}
                 max={maxQuantity}
                 onChange={(e) =>
-                  setQuantity(
+                  setParamsQuantity(
                     Math.min(maxQuantity, Math.max(1, Number(e.target.value) || 1))
                   )
                 }
@@ -191,7 +240,7 @@ function ReviewOrder({
                     previousQuantity: quantity,
                     newQuantity: quantity + 1,
                   });
-                  setQuantity(Math.min(maxQuantity, quantity + 1));
+                  setParamsQuantity(Math.min(maxQuantity, quantity + 1));
                 }}
                 disabled={quantity >= maxQuantity}
               >
@@ -270,7 +319,9 @@ function ReviewOrder({
           <div>
             <p className="text-lg text-black">Settlement Amount</p>
             <p className="text-sm">
-              (Total Consideration + Stamp Duty + Other Charges)
+              {orderPricing
+                ? "(Principal + accrued interest + stamp duty · scaled by quantity)"
+                : "(Total Consideration + Stamp Duty + Other Charges)"}
             </p>
           </div>
           <div>
@@ -292,29 +343,70 @@ function ReviewOrder({
                   <DialogTitle>Amount Breakup</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>Unit Price</span>
-                    <span className="font-medium">Rs. {formatNumberTS(bond.issuePrice)}</span>
-                  </div>
+                  {orderPricing ? (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Clean Price </span>
+                        <span className="font-medium">
+                          {formatCleanPricePercent(orderPricing.cleanPrice)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Principal Amount</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(principalScaled ?? 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Accrued interest</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(accruedScaled ?? 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Consideration w/o Stamp Duty</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS((principalScaled ?? 0) + (accruedScaled ?? 0))}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Stamp duty</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(stampScaled ?? 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between ">
+                        <span>Accrued Interest Days</span>
+                        <span>{orderPricing.noOfAccrualDays}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Unit Price</span>
+                        <span className="font-medium">Rs. {formatNumberTS(bond.issuePrice)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Consideration</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(totalConsideration)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Stamp Duty (0.01%)</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(stampDutyAmount)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Other Charges</span>
+                        <span className="font-medium">Rs. {formatNumberTS(otherCharges)}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between">
                     <span>Quantity</span>
                     <span className="font-medium">{quantity}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Consideration</span>
-                    <span className="font-medium">
-                      Rs. {formatNumberTS(totalConsideration)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Stamp Duty (0.01%)</span>
-                    <span className="font-medium">
-                      Rs. {formatNumberTS(stampDutyAmount)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Other Charges</span>
-                    <span className="font-medium">Rs. {formatNumberTS(otherCharges)}</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between text-base">
                     <span className="font-semibold">Settlement Amount</span>

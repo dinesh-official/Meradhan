@@ -10,7 +10,11 @@ import {
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import ReviewOrder from "../_components/Stages/ReviewOrder";
 import StepperOrder from "../_components/StepperOrder";
-import { BondDetailsResponse, CustomerByIdPayload } from "@root/apiGateway";
+import {
+  BondDetailsResponse,
+  BondOrderPricingData,
+  CustomerByIdPayload,
+} from "@root/apiGateway";
 import OrderReceipt from "./Stages/OrderReceipt";
 import Payment from "./Stages/Payment";
 import { useOrderState } from "../store/useOrderState";
@@ -23,10 +27,12 @@ function OrderStep({
   bond,
   customer,
   orderId,
+  orderPricing,
 }: {
   bond: BondDetailsResponse;
   customer: CustomerByIdPayload;
   orderId: string;
+  orderPricing: BondOrderPricingData | null;
 }) {
   const { step } = useOrderState();
   const { trackPageView, trackStepChange } = useOrderActivityTracking();
@@ -79,6 +85,7 @@ function OrderStep({
               bond={bond}
               customer={customer}
               orderId={orderId}
+              orderPricing={orderPricing}
               key={"Review-Order"}
             />,
             <OrderReceipt
@@ -92,6 +99,7 @@ function OrderStep({
               customer={customer}
               orderId={orderId}
               key={"Payment"}
+              settlementDate={orderPricing?.settlementDate ?? ""}
             />,
           ]?.[step - 1]
         }
