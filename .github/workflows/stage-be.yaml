@@ -3,7 +3,7 @@ name: stage be deploy
 on:
   push:
     branches:
-      - staging
+      - staging-fix-28-march
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -184,9 +184,22 @@ jobs:
             --username AWS \
             --password-stdin 450321244603.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-      
+      - name: Check if Prisma schema changed
+        id: schema-check
+        run: |
+          git diff --name-only HEAD~1 HEAD 2>/dev/null \
+          | grep "app/backend/databases/postgres/schema.prisma" \
+          && echo "changed=true" >> $GITHUB_OUTPUT \
+          || echo "changed=false" >> $GITHUB_OUTPUT
 
-      
+      - name: Run Prisma DB Push
+        if: steps.schema-check.outputs.changed == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+        run: |
+          cd app/backend/databases/postgres
+          npm install -g bun
+          bunx prisma db push      
 
       - name: Build, Tag & Push Docker Image
         env:
