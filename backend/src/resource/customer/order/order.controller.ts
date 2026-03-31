@@ -2,6 +2,7 @@ import { generateTempOrderPdf } from "@packages/kyc-providers";
 import { BondService } from "@resource/bonds/bond.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { appSchema } from "@root/schema";
+import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { type Request, type Response } from "express";
 import { OrderService } from "./order.service";
@@ -93,14 +94,69 @@ export class OrderController {
 
   getOrderPdf = async (req: Request, res: Response) => {
     const repo = new CustomerProfileRepo();
-    const bond = new BondService();
+    const bondService = new BondService();
+
+    const isin = req.query.isin as string;
+    const orderId = req.query.orderId as string || "XXXXXXXX";
+    const rawQun = req.query.qun ? Number(req.query.qun) : 1;
+    const quantity =
+      Number.isFinite(rawQun) && rawQun > 0 ? rawQun : 1;
+
+    const bond = await bondService.getBondDetails(isin);
+    if (!bond) {
+      throw new AppError("Bond not found", {
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    const lastCouponDateStr = bond.lastCouponDate;
+    const nextCouponDateStr = bond.nextCouponDate;
+
+    if (!lastCouponDateStr || !nextCouponDateStr) {
+      throw new AppError(
+        "Bond is missing lastCouponDate or nextCouponDate required for order pricing",
+        { statusCode: HttpStatus.BAD_REQUEST }
+      );
+    }
+
+    const cleanPrice = bond.sellPrice;
+
+    const recordDays =
+      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
+        ? bond.recordDays
+        : 7;
+
+    const pricing = computeBondOrderPricingData({
+      faceValue: bond.faceValue,
+      quantity,
+      cleanPrice: cleanPrice ?? 0,
+      couponRate: Number(bond.couponRate),
+      lastCouponDate: lastCouponDateStr.toISOString(),
+      recordDays,
+      nextCouponDate: nextCouponDateStr.toISOString(),
+    });
+
+    const orderData = {
+      price: pricing.cleanPrice,
+      subTotal: pricing.principalAmount,
+      stampDuty: pricing.stampDuty,
+      totalAmount: pricing.principalAmount + pricing.accruedInterest,
+      metadata: {
+        valueDate: pricing.dealDate,
+        accruedInterest: pricing.accruedInterest,
+        accruedInterestDays: pricing.noOfAccrualDays,
+        settlementDate: pricing.settlementDate,
+        orderType: "One to One (OTO) on RFQ Platform of the Exchange",
+      },
+    };
 
     const pdfFile = await generateTempOrderPdf({
-      orderId: req.query.orderId as string,
+      orderId,
       isReleased: req.query?.isReleased === "true",
-      bond: await bond.getBondDetails(req.query.isin as string),
-      qun: 1,
+      bond,
+      qun: quantity,
       user: await repo.getFullCustomerProfile(req.customer!.id),
+      orderData,
     });
     // send the file as response
     res.sendFile(pdfFile, (err) => {

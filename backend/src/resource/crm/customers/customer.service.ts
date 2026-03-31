@@ -140,9 +140,9 @@ export class CustomerProfileService extends CustomerProfileManager {
     const data = rawData.map((row) => {
       const kyc = kycByUser.get(row.id);
       const currentKycStepName = kyc
-        ? (kyc.currentStepName?.trim() || KYC_STEP_NAMES[kyc.step - 1] || "Unknown")
-        : "Not Started";
-      return { ...row, currentKycStepName };
+        ? (KYC_STEP_NAMES[kyc.step - 1] || "Unknown")
+        : "Not Started" ;
+      return { ...row, currentKycStepName: currentKycStepName.trim() + ` - Step [${kyc?.step ?? 0}]`  };
     });
 
     return {

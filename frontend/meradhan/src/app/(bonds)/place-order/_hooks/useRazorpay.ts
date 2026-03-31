@@ -80,7 +80,7 @@ interface PaymentParams {
 ----------------------------------------------------- */
 
 export function useRazorpay() {
-  const { setStep, setMeradhanOrderNumber } = useOrderState();
+  const { setStep, setMeradhanOrderNumber, meradhanOrderNumber } = useOrderState();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [orderReqData, setOrderReqData] = useState<PayApiResponse | undefined>(
@@ -261,5 +261,5 @@ export function useRazorpay() {
     }
   };
 
-  return { makePayment, cancelPayment, isLoading };
+  return { makePayment, cancelPayment, isLoading ,meradhanOrderNumber};
 }

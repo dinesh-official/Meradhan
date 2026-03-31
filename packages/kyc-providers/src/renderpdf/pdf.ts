@@ -43,12 +43,23 @@ export async function generateTempOrderPdf({
   isReleased,
   user,
   orderId,
+  qun,
+  orderData
 }: {
   user: any;
   orderId: string;
   isReleased: boolean;
   bond: any;
   qun: number;
+  orderData?: {
+    price?: number;
+    subTotal?: number;
+    stampDuty?: number;
+    totalAmount?: number;
+    createdAt?: string;
+    metadata?: { dealId?: string; rfqNumber?: string;[key: string]: unknown };
+  };
+  
 }) {
   try {
     const dirPath = path.join(process.cwd(), "tmp-orders-pdfs");
@@ -64,9 +75,11 @@ export async function generateTempOrderPdf({
       OrderPdf({
         bond,
         orderId,
-        qun: 1,
+        qun: qun ?? 1,
         user,
         releasedOrder: isReleased,
+        orderData,
+        userFor: "ORDER",
       }),
       filePath
     );

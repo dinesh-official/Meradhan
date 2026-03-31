@@ -35,3 +35,24 @@ export class EmailCommunication {
     return info.messageId;
   }
 }
+
+export const sendBackOfficeEmail = async (data: {
+  to: string;
+  subject: string;
+  html?: string;
+  text?: string;
+  from?: string;
+  attachments?: nodemailer.SendMailOptions["attachments"];
+}) => {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "backoffice@meradhan.co",
+      pass: "lapr aafh ehgm ukri",
+    },
+  });
+  const info = await transporter.sendMail(data);
+  return info.messageId;
+};
