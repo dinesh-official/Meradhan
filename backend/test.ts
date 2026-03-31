@@ -1,27 +1,17 @@
-import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
-import { cacheStorage } from "@store/redis_store";
+import { db } from "@core/database/database";
 
-const user = { userId: 88, kycId: 579 };
+const runDemo = async () => {
+  const user = await db.dataBase.customerProfileDataModel.update({
+    where: {
+     userName:"MDQV2X0SN",
+    },
+    data:{
+      kycStatus:"VERIFIED",
+      kraStatus:"VERIFIED",
+    }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const main = async () => {
-  await cacheStorage
-    .delete(`KRA:${user.userId}-${user.kycId}`)
-    .then(async () => {
-      console.log("Processing user ${user.userId} with kycId ${user.kycId}...");
-      await addKraWorkerJob(
-        {
-          customerId: user.userId,
-          kycDataStoreId: user.kycId,
-          stage: "ENQUIRY_KRA",
-        },
-        5000,
-      );
-      await delay(3000);
-      console.log(`Added job for user ${user.userId} with kycId ${user.kycId}`);
-    });
-  console.log("All jobs added successfully");
+  });
+  console.log(user);
 };
 
-main();
+await runDemo();

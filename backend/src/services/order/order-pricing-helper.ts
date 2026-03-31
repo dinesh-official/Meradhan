@@ -232,7 +232,6 @@ function computeBondSettlement(
 }
 
 // eslint-disable-next-line no-console
-console.log(computeBondSettlement(new Date("2026-04-06T16:40:00")));
 
 /** Truncates toward zero to 2 decimal places (e.g. 0.09999999 → 0.09, not 0.10). */
 
@@ -375,14 +374,3 @@ export const computeBondOrderPricingData = (params: BondOrderPricingData) => {
         settlementAmount: payAmount,
     });
 }
-
-console.log(computeBondOrderPricingData({ 
-    faceValue: 100000,
-    quantity: 1,
-    cleanPrice: 98.1368,
-    couponRate: 9.10,
-    lastCouponDate: "2026-01-08",
-    nextCouponDate: "2026-04-08",
-    recordDays: 7,
-}));
-

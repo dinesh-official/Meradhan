@@ -241,6 +241,18 @@ export class CrmOrdersController {
       const customerRepo = new CustomerProfileRepo();
       const bondService = new BondService();
       const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+      const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
+        where: {
+          customerProfileDataModelId: order.customerProfileId,
+          isPrimary: true,
+        },
+      });
+      const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
+        where: {
+          customerProfileDataModelId: order.customerProfileId,
+          isPrimary: true,
+        },
+      });
       const bond = await bondService.getBondDetails(order.isin);
       if (!bond) {
         return res.sendResponse({
@@ -364,16 +376,16 @@ export class CrmOrdersController {
             amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParam,
             settlementBank: settleOrder
               ? {
-                bankName: bankName ?? undefined,
-                ifscCode: settleOrder.ifscCode ?? undefined,
-                accountNo: settleOrder.accountNo ?? undefined,
+                bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
+                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
               }
               : undefined,
             settlementDemat: settleOrder
               ? {
-                dpName: dpName ?? undefined,
-                dpId: settleOrder.dpId ?? undefined,
-                benId: settleOrder.benId ?? undefined,
+                dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
+                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
               }
               : undefined,
             settleOrder: settleOrder
@@ -410,11 +422,11 @@ export class CrmOrdersController {
                 fundsPayinTime: settleOrder.fundsPayinTime,
                 payoutRemarks: settleOrder.payoutRemarks,
                 payoutTime: settleOrder.payoutTime,
-                ifscCode: settleOrder.ifscCode,
-                accountNo: settleOrder.accountNo,
+                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
                 utrNumber: settleOrder.utrNumber,
-                dpId: settleOrder.dpId,
-                benId: settleOrder.benId,
+                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
               }
               : undefined,
           },
@@ -460,6 +472,18 @@ export class CrmOrdersController {
         });
       }
       const settleOrder = await this.ordersService.getRfqByOrderNumber(orderNumber);
+      const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
+        where: {
+          customerProfileDataModelId: order.customerProfileId,
+          isPrimary: true,
+        },
+      });
+      const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
+        where: {
+          customerProfileDataModelId: order.customerProfileId,
+          isPrimary: true,
+        },
+      });
       const negotation = await db.dataBase.rFQNegotiation.findFirst({
         where: {
           tradeNumber: settleOrder?.orderNumber,
@@ -475,10 +499,10 @@ export class CrmOrdersController {
 
       const [bankName, dpName] = await Promise.all([
         settleOrder?.ifscCode
-          ? fetchBankNameFromIfsc(settleOrder.ifscCode)
+          ? fetchBankNameFromIfsc(getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined)
           : Promise.resolve(null),
         settleOrder?.dpId
-          ? Promise.resolve(getDpName(settleOrder.dpId))
+          ? Promise.resolve(getDpName(primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined))
           : Promise.resolve(undefined),
       ]);
 
@@ -602,16 +626,16 @@ export class CrmOrdersController {
             amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParamDeal,
             settlementBank: settleOrder
               ? {
-                bankName: bankName ?? undefined,
-                ifscCode: settleOrder.ifscCode ?? undefined,
-                accountNo: settleOrder.accountNo ?? undefined,
+                bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
+                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
               }
               : undefined,
             settlementDemat: settleOrder
               ? {
-                dpName: dpName ?? undefined,
-                dpId: settleOrder.dpId ?? undefined,
-                benId: settleOrder.benId ?? undefined,
+                dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
+                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
               }
               : undefined,
             settleOrder: settleOrder
@@ -648,11 +672,11 @@ export class CrmOrdersController {
                 fundsPayinTime: settleOrder.fundsPayinTime,
                 payoutRemarks: settleOrder.payoutRemarks,
                 payoutTime: settleOrder.payoutTime,
-                ifscCode: settleOrder.ifscCode,
-                accountNo: settleOrder.accountNo,
+                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
                 utrNumber: settleOrder.utrNumber,
-                dpId: settleOrder.dpId,
-                benId: settleOrder.benId,
+                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
               }
               : undefined,
           },

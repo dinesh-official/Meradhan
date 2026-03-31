@@ -183,10 +183,7 @@ jobs:
           | docker login \
             --username AWS \
             --password-stdin 450321244603.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
-      
-
-      
+        
 
       - name: Build, Tag & Push Docker Image
         env:
