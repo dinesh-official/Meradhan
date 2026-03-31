@@ -1,7 +1,9 @@
 // ---------------------------------------------------------------------------
 // Corporate KYC – entity details, correspondence address, documents, FATCA,
-// bank accounts, demat accounts, directors, promoters, authorised signatories
+// bank accounts, demat accounts, directors, promoters, authorised signatories test
 // ---------------------------------------------------------------------------
+
+
 
 model CorporateKycModel {
   id Int @id @default(autoincrement())
