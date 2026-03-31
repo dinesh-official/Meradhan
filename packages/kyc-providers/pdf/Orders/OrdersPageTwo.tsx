@@ -182,7 +182,7 @@ Bank Account Number: ${bank?.accountNumber}`}</Text>
       </View>
       <Text style={tw(`text-[6.5px] mt-3 font-semibold`)}>Disclaimer</Text>
       <Text style={tw(`text-[6.5px] mt-1 leading-6`)}>
-        Investments in debt securities/ municipal debt securities/ securitised debt instruments are subject to risks including delay and/ or default in payment. You are solely responsible for your investment decisions, and no claims of any kind can be made against any third party, including intermediaries or counterparties. MeraDhan shall not be responsible for any losses, liabilities, damages, costs, or expenses arising from such transactions or investments.
+        Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully. You are solely responsible for your investment decisions, and no claims of any kind can be made against any third party, including intermediaries or counterparties. MeraDhan shall not be responsible for any losses, liabilities, damages, costs, or expenses arising from such transactions or investments.
       </Text>
       <Text style={tw(`text-[6.5px] mt-3 font-semibold`)}>Important Note:</Text>
       <View style={tw(`mt-1 flex flex-col gap-2`)}>

@@ -114,7 +114,8 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
 
       <Text style={tw(`text-[6.5px] mt-3 font-semibold`)}>Disclaimer</Text>
       <Text style={tw(`text-[6.5px] mt-1 leading-6`)}>
-        Investments in debt securities/ municipal debt securities/ securitised debt instruments are subject to risks including delay and/ or default in payment. You shall be solely responsible for your investment decisions without any recourse or claims of whatsoever nature, against any third party(ies) including but not limited to the intermediary/counterparty to the transaction etc.. MeraDhan shall not be responsible for losses, liabilities, damages, cost, and expenses suffered/accrued as a result of the transactions/investments.
+        Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully.
+        You shall be solely responsible for your investment decisions without any recourse or claims of whatsoever nature, against any third party(ies) including but not limited to the intermediary/counterparty to the transaction etc.. MeraDhan shall not be responsible for losses, liabilities, damages, cost, and expenses suffered/accrued as a result of the transactions/investments.
       </Text>
 
       <Text style={tw(`text-[6.5px] mt-3 font-semibold`)}>Important Note:</Text>
