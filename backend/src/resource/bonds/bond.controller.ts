@@ -17,6 +17,33 @@ export class BondController {
     });
   }
 
+  async getBondOrderPricing(req: Request, res: Response) {
+    const isin = req.params.isin!.toString();
+    const quantity = req.query.quantity ? Number(req.query.quantity) : 1;
+    const result = await this.bondService.getBondOrderPricing(isin, quantity);
+
+    if (!result.ok) {
+      if (result.reason === "not_found") {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: "Bond not found",
+          success: false,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message:
+          "Bond is missing lastCouponDate or nextCouponDate required for order pricing",
+        success: false,
+      });
+    }
+
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result.pricing,
+    });
+  }
+
   async filterListedBonds(req: Request, res: Response) {
     const filters = appSchema.bonds.bondsFilterSchema.parse(req.body);
 

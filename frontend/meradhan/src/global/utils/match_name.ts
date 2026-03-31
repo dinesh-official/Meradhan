@@ -1,5 +1,5 @@
 import stringSimilarity from "string-similarity";
-import natural from "natural";
+import Metaphone from "natural/lib/natural/phonetics/metaphone";
 import unidecode from "unidecode";
 
 /**
@@ -135,7 +135,7 @@ function tokenOverlapScore(a: string, b: string): number {
  * Calculate phonetic similarity using token-level metaphone
  */
 function phoneticScore(a: string, b: string): number {
-  const metaphone = new natural.Metaphone();
+  const metaphone = new Metaphone();
   const ta = a.split(" ");
   const tb = b.split(" ");
 

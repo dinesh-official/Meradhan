@@ -7,11 +7,16 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-left",
   },
-  webpack: (config) => {
+  webpack: (config, { webpack }) => {
     // Prevent canvas.node from being bundled
     config.externals.push({
       canvas: "commonjs canvas",
     });
+
+    // Optional native dep of `natural` classifiers — not installable in Next.js; ignore if traced
+    config.plugins.push(
+      new webpack.IgnorePlugin({ resourceRegExp: /^webworker-threads$/ }),
+    );
 
     return config;
   },
