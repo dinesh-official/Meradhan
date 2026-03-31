@@ -187,19 +187,48 @@ jobs:
       - name: Check if Prisma schema changed
         id: schema-check
         run: |
-          git diff --name-only HEAD~1 HEAD 2>/dev/null \
-          | grep "app/backend/databases/postgres/schema.prisma" \
-          && echo "changed=true" >> $GITHUB_OUTPUT \
-          || echo "changed=false" >> $GITHUB_OUTPUT
+          echo "=========================================="
+          echo "🔍 Checking Prisma schema changes..."
+          echo "=========================================="
 
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null)
+
+          echo "📋 All files changed in this commit:"
+          echo "$CHANGED_FILES"
+          echo "=========================================="
+
+          if echo "$CHANGED_FILES" | grep -q "app/backend/databases/postgres/schema.prisma"; then
+            echo "✅ schema.prisma WAS CHANGED"
+            echo "🚀 DB Push WILL RUN"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "⏭️ schema.prisma NOT CHANGED"
+            echo "🚫 DB Push WILL BE SKIPPED"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+          echo "=========================================="
+
+      # ✅ DB Push with full logs
       - name: Run Prisma DB Push
         if: steps.schema-check.outputs.changed == 'true'
         env:
           DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
         run: |
+          echo "=========================================="
+          echo "🗄️ Starting Prisma DB Push..."
+          echo "=========================================="
+          echo "📂 Moving to postgres directory..."
           cd app/backend/databases/postgres
+
+          echo "📦 Installing bun..."
           npm install -g bun
-          bunx prisma db push      
+
+          echo "🚀 Running prisma db push..."
+          bunx prisma db push
+
+          echo "=========================================="
+          echo "✅ DB Push Completed Successfully!"
+          echo "=========================================="
 
       - name: Build, Tag & Push Docker Image
         env:
