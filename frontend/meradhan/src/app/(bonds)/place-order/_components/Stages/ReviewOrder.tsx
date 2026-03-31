@@ -486,9 +486,12 @@ function ReviewOrder({
                   suggestion, or recommendation from MeraDhan.
                 </p>
               </label>
+              {
+                !orderPricing?.allowTrade  && <p className="text-sm text-red-500">Trade is not allowed now market is closed. Please contact the support team. </p>
+              }
               <div className="mt-4 flex justify-center gap-4">
                 <Button
-                  disabled={!isCheckedRisk}
+                  disabled={!isCheckedRisk && !orderPricing?.allowTrade}
                   onClick={() => {
                     trackButtonClick(orderId, "CONFIRM_CONTINUE_DIALOG", {
                       step: 1,

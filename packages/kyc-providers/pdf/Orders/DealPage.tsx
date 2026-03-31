@@ -290,7 +290,7 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
     [
       "Settlement Date & Time",
-      formatDate(dealDate.toISOString(), "DD-MMM-YYYY") + " " + String(dealDate.getHours()).padStart(2, "0") + ":" + String(dealDate.getMinutes()).padStart(2, "0") + ":" + String(dealDate.getSeconds()).padStart(2, "0")
+      formatDate(orderData?.metadata?.settlementDate ? (orderData.metadata.settlementDate)?.toString() : valueDate.toISOString(), "DD-MMM-YYYY") + " " + String(dealDate.getHours()).padStart(2, "0") + ":" + String(dealDate.getMinutes()).padStart(2, "0") + ":" + String(dealDate.getSeconds()).padStart(2, "0")
     ],
   ]
 
