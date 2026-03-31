@@ -1,9 +1,9 @@
-name: stage fe deploy
+name: stage frontend deploy
 
 on:
   push:
     branches:
-      - staging
+      - staging-fix-28-march
 
 jobs:
   deploy:
@@ -49,11 +49,8 @@ jobs:
           DEV_SMTP_PASS: ${{ secrets.SMTP_PASS }}
 
           DEV_CBRICS_DOMAIN: ${{ secrets.DEV_CBRICS_DOMAIN }}
-    
           DEV_CBRICS_PASSWORD: ${{ secrets.DEV_CBRICS_PASSWORD }}
-
           DEV_RFQ_CBRICS_DOMAIN: ${{ secrets.DEV_RFQ_CBRICS_DOMAIN }}
-
           DEV_RFQ_CBRICS_PASSWORD: ${{ secrets.DEV_RFQ_CBRICS_PASSWORD }}
 
           DEV_DIGIO_USERNAME_PASS: ${{ secrets.DEV_DIGIO_USERNAME_PASS }}
@@ -86,21 +83,18 @@ jobs:
           DEV_S3_BUCKET_NAME: staging-meradhan-storage
 
         run: |
-          echo "NEXT_PUBLIC_HOST_URL=https://preprodfe.meradhan.co" > .env
+          echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
+          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
           echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
-    
 
-        
           echo "GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}" >> .env
           echo "STRAPI_API_TOKEN=${DEV_STRAPI_API_TOKEN}" >> .env
 
-          
           echo "JWT_SECRET=${DEV_JWT_SECRET}" >> .env
           echo "PASSWORD_PEPPER=${DEV_PASSWORD_PEPPER}" >> .env
 
@@ -108,7 +102,7 @@ jobs:
           echo "DIRECT_URL=${DEV_DIRECT_URL}" >> .env
 
           echo "RFQ_CBRICS_ENV=UAT" >> .env
-          echo "CBRICS_ENV=UAT" >>  .env
+          echo "CBRICS_ENV=UAT" >> .env
 
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
@@ -170,6 +164,7 @@ jobs:
 
           echo "----------- FINAL .env -----------"
           cat .env
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -190,10 +185,18 @@ jobs:
           docker build -f frontendDockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+      - name: Render ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: stage-fe-revision.json
+          container-name: stage-fe
+          image: ${{ secrets.ECR_REGISTRY }}/stage-meradhan-fe:latest
+
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: stage-fe-revision.json
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
           cluster: stage-cluster
           service: meradhan-fe
           force-new-deployment: true
