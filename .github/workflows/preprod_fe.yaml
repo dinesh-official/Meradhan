@@ -1,4 +1,4 @@
-name: pre-prod fe deploy
+name: stage fe deploy
 
 on:
   push:
@@ -193,7 +193,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: preprod_fe-revision.json
+          task-definition: preprod_fe-revision1.json
           cluster: prod-cluster
-          service: preprod_fe_svc
+          service: pre-prod-fe-servic
           force-new-deployment: true

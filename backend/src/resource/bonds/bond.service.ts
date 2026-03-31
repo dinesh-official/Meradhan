@@ -3,6 +3,12 @@ import type { appSchema } from "@root/schema";
 import type z from "zod";
 import { BondQueryBuilder } from "./bond_query_builder";
 import { isISIN } from "@utils/filters/convert";
+import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
+
+export type GetBondOrderPricingResult =
+  | { ok: true; pricing: ReturnType<typeof computeBondOrderPricingData> }
+  | { ok: false; reason: "not_found" }
+  | { ok: false; reason: "missing_coupon_dates" };
 
 export class BondService {
   async getBondDetails(isin: string) {
@@ -10,6 +16,46 @@ export class BondService {
       where: { isin },
     });
     return data;
+  }
+
+  async getBondOrderPricing(
+    isin: string,
+    quantityInput?: number,
+  ): Promise<GetBondOrderPricingResult> {
+    const bond = await this.getBondDetails(isin);
+    if (!bond) {
+      return { ok: false, reason: "not_found" };
+    }
+
+    const cleanPrice = bond.sellPrice;
+
+    const lastCouponDateStr = bond.lastCouponDate;
+    const nextCouponDateStr = bond.nextCouponDate;
+
+    if (!lastCouponDateStr || !nextCouponDateStr) {
+      return { ok: false, reason: "missing_coupon_dates" };
+    }
+
+    const recordDays =
+      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
+        ? bond.recordDays
+        : 7;
+
+    const rawQuantity = quantityInput ?? 1;
+    const quantity =
+      Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
+
+    const pricing = computeBondOrderPricingData({
+      faceValue: bond.faceValue,
+      quantity,
+      cleanPrice: cleanPrice ?? 0,
+      couponRate: Number(bond.couponRate),
+      lastCouponDate: lastCouponDateStr?.toISOString() ?? "",
+      recordDays,
+      nextCouponDate: nextCouponDateStr?.toISOString() ?? "",
+    });
+
+    return { ok: true, pricing };
   }
 
   async filterBonds(

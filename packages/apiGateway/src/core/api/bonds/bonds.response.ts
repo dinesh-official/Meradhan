@@ -73,3 +73,28 @@ export type ListedBondsResponse = BaseResponseData<{
 
 export type BondDetailResponse = BaseResponseData<BondDetailsResponse>;
 export type LatestBondsResponse = BaseResponseData<BondDetailsResponse[]>;
+
+/** Server-side bond order pricing (settlement, principal, accrued, stamp duty). */
+export interface BondOrderPricingData {
+  couponRate: number;
+  faceValue: number;
+  quantity: number;
+  cleanPrice: number;
+  dealDate: string;
+  dealOrder: "T+0" | "T+1";
+  allowTrade: boolean;
+  dealDay: string;
+  settlementDate: string;
+  lastCouponDate: string;
+  settlementOrder: "T+0" | "T+1";
+  settlementDay: string;
+  principalAmount: number;
+  accruedInterest: number;
+  stampDuty: number;
+  noOfAccrualDays: number;
+  isUnderShutPeriod: boolean;
+  recordDate: string;
+  settlementAmount: number;
+}
+
+export type BondOrderPricingResponse = BaseResponseData<BondOrderPricingData>;

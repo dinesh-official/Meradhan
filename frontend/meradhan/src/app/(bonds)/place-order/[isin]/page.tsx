@@ -3,7 +3,7 @@ import { getSession } from "@/core/auth/_server/getSession";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import apiGateway from "@root/apiGateway";
+import apiGateway, { BondOrderPricingData } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
 import OrderStep from "../_components/OrderStep";
@@ -14,15 +14,19 @@ export const revalidate = 0;
 
 export const generateMetadata = async ({
   params,
+  searchParams,
 }: {
   params: Promise<{ isin: string }>;
+  searchParams: Promise<{ quantity: string }>;
 }) => {
   const { isin } = await params;
   return await generateBondInfoPageMetaData(isin, "place-order/[isin]");
 };
 
-async function page({ params }: { params: Promise<{ isin: string }> }) {
+async function page({ params, searchParams }: { params: Promise<{ isin: string }>, searchParams: Promise<{ quantity: string }> }) {
   const { isin } = await params;
+  const { quantity } = await searchParams;
+
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const orderId = generateDraftPlaceOrderLabel();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
@@ -30,6 +34,17 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
   );
 
   const { responseData } = await apiCaller.getBondDetailsByIsin(isin);
+
+  let orderPricing: BondOrderPricingData | null = null;
+  try {
+    const pricingEnvelope = await apiCaller.getBondOrderPricing(isin, Number(quantity ?? 1));
+    if (pricingEnvelope.responseData) {
+      orderPricing = pricingEnvelope.responseData;
+    }
+  } catch {
+    orderPricing = null;
+  }
+
   const session = await getSession();
   if (!session?.id) {
     redirect("/logout");
@@ -95,6 +110,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
         bond={responseData}
         customer={userData.data.responseData}
         orderId={orderId}
+        orderPricing={orderPricing}
       />
     </ViewPort>
   );
