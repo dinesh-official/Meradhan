@@ -3,7 +3,7 @@ name: stage be deploy
 on:
   push:
     branches:
-      - staging-fix-28-march
+      - staging
 jobs:
   deploy:
     runs-on: ubuntu-latest
