@@ -157,5 +157,5 @@ jobs:
         with:
           task-definition: backend-revision1.json
           cluster: production-cluster
-          service: backend-service-urbuyx6t
+          service: meradhan-backend-service
           force-new-deployment: true
