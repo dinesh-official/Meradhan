@@ -1,10 +1,9 @@
-name: stage frontend deploy
+name: stage crm deploy
 
 on:
   push:
     branches:
-      - staging-fix-28-march
-
+      - staging
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -49,8 +48,11 @@ jobs:
           DEV_SMTP_PASS: ${{ secrets.SMTP_PASS }}
 
           DEV_CBRICS_DOMAIN: ${{ secrets.DEV_CBRICS_DOMAIN }}
+    
           DEV_CBRICS_PASSWORD: ${{ secrets.DEV_CBRICS_PASSWORD }}
+
           DEV_RFQ_CBRICS_DOMAIN: ${{ secrets.DEV_RFQ_CBRICS_DOMAIN }}
+
           DEV_RFQ_CBRICS_PASSWORD: ${{ secrets.DEV_RFQ_CBRICS_PASSWORD }}
 
           DEV_DIGIO_USERNAME_PASS: ${{ secrets.DEV_DIGIO_USERNAME_PASS }}
@@ -91,10 +93,13 @@ jobs:
           echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
+    
 
+        
           echo "GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}" >> .env
           echo "STRAPI_API_TOKEN=${DEV_STRAPI_API_TOKEN}" >> .env
 
+          
           echo "JWT_SECRET=${DEV_JWT_SECRET}" >> .env
           echo "PASSWORD_PEPPER=${DEV_PASSWORD_PEPPER}" >> .env
 
@@ -102,7 +107,7 @@ jobs:
           echo "DIRECT_URL=${DEV_DIRECT_URL}" >> .env
 
           echo "RFQ_CBRICS_ENV=UAT" >> .env
-          echo "CBRICS_ENV=UAT" >> .env
+          echo "CBRICS_ENV=UAT" >>  .env
 
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
@@ -164,7 +169,6 @@ jobs:
 
           echo "----------- FINAL .env -----------"
           cat .env
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -176,27 +180,26 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Debug AWS & ECR
+        run: |
+         echo "AWS Identity:"
+         aws sts get-caller-identity
+         echo "ECR Repositories:"
+         aws ecr describe-repositories --region ${{ secrets.AWS_REGION }}
+
       - name: Build, Tag & Push Docker Image
         env:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          REPOSITORY: stage-meradhan-fe
+          REPOSITORY: stage-crm-ui
           IMAGE_TAG: latest
         run: |
-          docker build -f frontendDockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build --no-cache -f crmdockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-
-      - name: Render ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: stage-fe-revision.json
-          container-name: stage-fe
-          image: ${{ secrets.ECR_REGISTRY }}/stage-meradhan-fe:latest
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: stage-crm-ui-revision.json
           cluster: stage-cluster
-          service: meradhan-fe
+          service: stage-crm-ui-service-2drpd2xj
           force-new-deployment: true
