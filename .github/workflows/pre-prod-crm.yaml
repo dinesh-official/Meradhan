@@ -1,21 +1,21 @@
-name: stage be deploy
+name: pre-prod crm deploy
 
 on:
   push:
     branches:
-      - staging
+      - preprod
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    steps:
+
+    steps: 
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Create .env from GitHub Secrets
         shell: bash
         env:
-
           DEV_STRAPI_API_TOKEN: ${{ secrets.DEV_STRAPI_API_TOKEN }}
           DEV_NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.DEV_NEXT_PUBLIC_GRAPHQL_KEY }}
 
@@ -85,13 +85,14 @@ jobs:
           DEV_S3_BUCKET_NAME: staging-meradhan-storage
 
         run: |
-          echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
-          echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://awsapi.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000" >> .env
-          echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
-          echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
+          # Static Public values
+          echo "NEXT_PUBLIC_HOST_URL=https://www.preprodfe.meradhan.co" > .env
+          echo "NEXT_PUBLIC_CRM_HOST_URL=https://preprod-crm.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
+          echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_DIGIO=production" >> .env
+          echo "STRAPI_API_URL=https://spyder.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
     
 
@@ -169,35 +170,37 @@ jobs:
 
           echo "----------- FINAL .env -----------"
           cat .env
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
       - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Debug AWS & ECR
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-          | docker login \
-            --username AWS \
-            --password-stdin 450321244603.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        
+         echo "AWS Identity:"
+         aws sts get-caller-identity
+         echo "ECR Repositories:"
+         aws ecr describe-repositories --region ${{ secrets.AWS_REGION }}
 
       - name: Build, Tag & Push Docker Image
         env:
-          REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
-          REPOSITORY: 	stage-meradhan-be
+          REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          REPOSITORY: pre-prod-crm
           IMAGE_TAG: latest
         run: |
-          docker build -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build --no-cache -f crmdockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: stage-meradhan-be-revision.json
-          cluster: stage-cluster
-          service: meradhan-be
+          task-definition: pre-prod-crm-revision.json
+          cluster: prod-cluster
+          service: pre-prod-crm-service
           force-new-deployment: true
