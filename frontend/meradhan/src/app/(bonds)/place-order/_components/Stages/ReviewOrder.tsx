@@ -35,6 +35,7 @@ import { RatingOrDelete } from "../RatingOrDelete";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
 import { parseAsInteger, useQueryState } from "nuqs";
+import { useSearchParams } from "next/navigation";
 
 const WEEKEND_ONLY_HOLIDAYS = new Set<string>();
 function ReviewOrder({
@@ -50,8 +51,10 @@ function ReviewOrder({
 }) {
   const [isChecked, setIsChecked] = useState(false);
   const [isCheckedRisk, setIsCheckedRisk] = useState(false);
-
-
+  // set search params
+  const params = useSearchParams();
+  const searchParams = params.get('allowTrade')
+  const allowTrade = searchParams === 'true'
   const [paramsQuantity, setParamsQuantity] = useQueryState('quantity', parseAsInteger.withDefault(1))
 
 
@@ -135,7 +138,7 @@ function ReviewOrder({
           <div className="md:block hidden">
             <BondInfoData bondData={bond} />
           </div>
-          <RatingOrDelete rating={bond.creditRating} />
+          <RatingOrDelete rating={bond.creditRating}  />
         </div>
       </div>
       <div className="md:hidden mt-5">
@@ -419,7 +422,12 @@ function ReviewOrder({
             </Dialog>
           </div>
         </div>
-        <label className="flex justify-start mt-5 gap-3">
+        {
+          !orderPricing?.allowTrade && <p className="text-sm text-red-500 mt-8">Trading is currently unavailable as the market is closed. Please try again during market hours or contact support for assistance.</p>
+        }
+      {
+        (orderPricing?.allowTrade  || allowTrade) && <>
+          <label className="flex justify-start mt-5 gap-3">
           <Checkbox
             className="mt-[2px]"
             checked={isChecked}
@@ -486,12 +494,10 @@ function ReviewOrder({
                   suggestion, or recommendation from MeraDhan.
                 </p>
               </label>
-              {
-                !orderPricing?.allowTrade  && <p className="text-sm text-red-500">Trade is not allowed now market is closed. Please contact the support team. </p>
-              }
+             
               <div className="mt-4 flex justify-center gap-4">
                 <Button
-                  disabled={!isCheckedRisk && !orderPricing?.allowTrade}
+                  disabled={!isCheckedRisk}
                   onClick={() => {
                     trackButtonClick(orderId, "CONFIRM_CONTINUE_DIALOG", {
                       step: 1,
@@ -518,6 +524,8 @@ function ReviewOrder({
             </DialogContent>
           </Dialog>
         </div>
+        </>
+      }
       </div>
       <div className="flex gap-2 flex-col">
         <p className="font-semibold mt-10">Note:</p>

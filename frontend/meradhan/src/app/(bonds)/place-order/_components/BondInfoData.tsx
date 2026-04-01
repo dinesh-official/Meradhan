@@ -21,7 +21,7 @@ function BondInfoData({ bondData }: BondInfoDataProps) {
         ISIN:{" "}
         {bondData?.isin ? (
           <Link
-            href={`/bonds/${bondData.isin}`}
+            href={`/bonds/detail/${bondData.isin}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary flex items-center ml-1 gap-2"
