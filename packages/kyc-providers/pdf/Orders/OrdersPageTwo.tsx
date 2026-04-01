@@ -5,10 +5,43 @@ import { CheckOnlyIcon } from "../elements/CheckIcon";
 import TextList from "../elements/TextList";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function formatDateTimeIST(value?: string | Date): string {
+  const d = value instanceof Date ? value : value ? new Date(value) : new Date();
+  if (Number.isNaN(d.getTime())) {
+    return "";
+  }
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+
+  const day = get("day");
+  const month = get("month");
+  const year = get("year");
+  const hour = get("hour");
+  const minute = get("minute");
+  const second = get("second");
+
+  const monthIndex = Number(month) - 1;
+  const monthLabel =
+    monthIndex >= 0 && monthIndex < MONTHS.length ? MONTHS[monthIndex] : month;
+
+  return `${day}-${monthLabel}-${year} ${hour}:${minute}:${second}`;
+}
+
 function formatOrderDateForConfirmation(createdAt?: string): string {
-  const d = createdAt ? new Date(createdAt) : new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}-${MONTHS[d.getMonth()]}-${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  return formatDateTimeIST(createdAt) || formatDateTimeIST(new Date());
 }
 
 interface SettlementBank {
@@ -61,6 +94,7 @@ function OrdersPageTwo({
     }
     : user.dematAccounts?.find((e) => e.isPrimary);
   const confirmationDateTime =
+    formatDateTimeIST(orderData?.metadata?.settlementDateTime) ||
     orderData?.metadata?.settlementDateTime?.trim() ||
     formatOrderDateForConfirmation(orderData?.createdAt);
 

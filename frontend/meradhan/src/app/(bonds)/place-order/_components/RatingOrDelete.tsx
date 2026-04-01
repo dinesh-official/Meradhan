@@ -1,7 +1,11 @@
 import { TiStarFullOutline } from "react-icons/ti";
 import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
 import { MdDelete } from "react-icons/md";
+import { useRouter } from "nextjs-toploader/app";
+import { useRazorpay } from "../_hooks/useRazorpay";
 export function RatingOrDelete({ rating }: { rating?: string }) {
+  const router = useRouter();
+  const {cancelPayment,meradhanOrderNumber} = useRazorpay()
   return (
     <div className="flex md:flex-row flex-col md:items-center items-end gap-3">
       <div
@@ -13,7 +17,12 @@ export function RatingOrDelete({ rating }: { rating?: string }) {
         <TiStarFullOutline />
         <span>{rating || "AAA"}</span>
       </div>
-      <MdDelete className="text-gray-400 cursor-pointer " size={22} />
+      <MdDelete className="text-gray-400 cursor-pointer " size={22} onClick={() => {
+        if (meradhanOrderNumber) {
+          cancelPayment(meradhanOrderNumber, false)
+        }
+        router.push(`/bonds`);
+      }} />
     </div>
   );
 }

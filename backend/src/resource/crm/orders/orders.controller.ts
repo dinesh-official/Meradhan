@@ -1,42 +1,17 @@
 import { type Request, type Response } from "express";
 import { CrmOrdersService } from "./orders.service";
 import { appSchema } from "@root/schema";
-import { HttpStatus } from "@utils/error/AppError";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import { OrderStatus } from "@databases/generated/prisma/postgres";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
-import { BondService } from "@resource/bonds/bond.service";
-import {
-  generateDealPdfBuffer,
-  generateOrderPdfBuffer,
-  getInterestPaymentSchedule,
-} from "kyc-providers";
-import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
-import { getDpName } from "dp-id-lookup";
-import { db } from "@core/database/database";
-import { EmailCommunication, sendBackOfficeEmail } from "@communication/email_communication";
+import { sendBackOfficeEmail } from "@communication/email_communication";
 import { env } from "@packages/config/src/env";
 import {
   dateOfBirthToPdfPassword,
   getCustomerDobRawForPdf,
 } from "@utils/dobPdfPassword";
 import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
-
-/** Parse modSettleDate (e.g. DDMMYYYY or ISO) to ISO string for PDF Order Date & Time */
-function parseSettlementDateToISO(modSettleDate: string): string | null {
-  const s = String(modSettleDate).trim();
-  if (!s) return null;
-  const digitsOnly = s.replace(/\D/g, "");
-  if (digitsOnly.length === 8) {
-    const dd = digitsOnly.slice(0, 2);
-    const mm = digitsOnly.slice(2, 4);
-    const yyyy = digitsOnly.slice(4, 8);
-    const d = new Date(`${yyyy}-${mm}-${dd}T12:00:00.000Z`);
-    return isNaN(d.getTime()) ? null : d.toISOString();
-  }
-  const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d.toISOString();
-}
 
 export class CrmOrdersController {
   private ordersService = new CrmOrdersService();
@@ -222,6 +197,74 @@ export class CrmOrdersController {
     });
   };
 
+  /** Saved CRM “Receipt PDF options” for auto-fill on next visit. */
+  getReceiptPdfOptions = async (req: Request, res: Response) => {
+    const orderNumber = req.params.orderNumber;
+    if (!orderNumber || typeof orderNumber !== "string") {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order number is required",
+      });
+    }
+    const row = await this.ordersService.getReceiptPdfOptions(orderNumber);
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: row,
+    });
+  };
+
+  upsertReceiptPdfOptions = async (req: Request, res: Response) => {
+    const orderNumber = req.params.orderNumber;
+    if (!orderNumber || typeof orderNumber !== "string") {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order number is required",
+      });
+    }
+    const b = req.body as Record<string, unknown>;
+    const str = (v: unknown) =>
+      typeof v === "string" ? v.trim() : v != null ? String(v).trim() : "";
+    const accruedRaw = b.accruedInterestDays;
+    let accruedInterestDays: number | null | undefined;
+    if (accruedRaw === null || accruedRaw === undefined || accruedRaw === "") {
+      accruedInterestDays = undefined;
+    } else {
+      const n = Number(accruedRaw);
+      if (!Number.isFinite(n) || n < 0) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: "accruedInterestDays must be a non-negative number when provided",
+        });
+      }
+      accruedInterestDays = Math.floor(n);
+    }
+    try {
+      const row = await this.ordersService.upsertReceiptPdfOptions(orderNumber, {
+        accruedInterestDays,
+        settlementNumber: str(b.settlementNumber) || null,
+        settlementDateTime: str(b.settlementDateTime) || null,
+        lastInterestPaymentDateRaw: str(b.lastInterestPaymentDateRaw) || null,
+        lastInterestPaymentDate: str(b.lastInterestPaymentDate) || null,
+        interestPaymentDates: str(b.interestPaymentDates) || null,
+        nonAmortizedBond:
+          typeof b.nonAmortizedBond === "boolean" ? b.nonAmortizedBond : undefined,
+        amortizedPrincipalPaymentDates:
+          str(b.amortizedPrincipalPaymentDates) || null,
+      });
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: row,
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save PDF options";
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message,
+      });
+    }
+  };
+
   getOrderReceiptPdf = async (req: Request, res: Response) => {
     const orderNumber = req.params.orderNumber as string;
     if (!orderNumber) {
@@ -231,213 +274,20 @@ export class CrmOrdersController {
       });
     }
     try {
-      const order = await this.ordersService.getCustomerByOrderNumber(orderNumber);
-      if (!order) {
-        return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: "No order found for this settlement. Assign a customer first.",
-        });
-      }
-      const customerRepo = new CustomerProfileRepo();
-      const bondService = new BondService();
-      const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
-      const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
-        where: {
-          customerProfileDataModelId: order.customerProfileId,
-          isPrimary: true,
-        },
-      });
-      const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
-        where: {
-          customerProfileDataModelId: order.customerProfileId,
-          isPrimary: true,
-        },
-      });
-      const bond = await bondService.getBondDetails(order.isin);
-      if (!bond) {
-        return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: `Bond not found for ISIN: ${order.isin}`,
-        });
-      }
-      const settleOrder = await this.ordersService.getRfqByOrderNumber(orderNumber);
-      const negotation = await db.dataBase.rFQNegotiation.findFirst({
-        where: {
-          tradeNumber: settleOrder?.orderNumber,
-        },
-      });
-      const rfqDetails = await db.dataBase.rFQMasterISIN.findFirst({
-        where: {
-          number: negotation?.rfqNumber
-        },
-      });
-      const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-      const orderDateForPdf: Date = new Date(`${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim());
-      const [bankName, dpName] = await Promise.all([
-        settleOrder?.ifscCode
-          ? fetchBankNameFromIfsc(settleOrder.ifscCode)
-          : Promise.resolve(null),
-        settleOrder?.dpId ? Promise.resolve(getDpName(settleOrder.dpId)) : Promise.resolve(undefined),
-      ]);
-
-
-      const accessType: Record<string, string> = {
-        "1": `One to Many (OTM) on RFQ Platform of the Exchange`,
-        "2": `One to One (OTO) on RFQ Platform of the Exchange`,
-        "3": `Inter Scheme Transfer (IST) on RFQ Platform of the Exchange`,
-      };
-      const accessKey = rfqDetails?.access != null ? String(rfqDetails.access) : undefined;
-      const accessTypeText = accessKey ? accessType[accessKey] : undefined;
-
-      const orderDateForSchedule = orderDateForPdf ? new Date(orderDateForPdf) : new Date();
-      const interestSchedule = getInterestPaymentSchedule({
-        orderDate: orderDateForSchedule,
-        maturityDate: bond.maturityDate ?? null,
-        interestPaymentFrequency: bond.interestPaymentFrequency,
-        paymentDayOfMonth: 20,
-        nextCouponDate:
-          bond.nextCouponDate != null && String(bond.nextCouponDate).trim() !== ""
-            ? new Date(bond.nextCouponDate)
-            : undefined,
-      });
-
       const pdfQuery = req.query as Record<string, string | undefined>;
-      const accruedInterestDaysParam = pdfQuery.accruedInterestDays != null ? Number(pdfQuery.accruedInterestDays) : undefined;
-      const settlementNumberParam = typeof pdfQuery.settlementNumber === "string" && pdfQuery.settlementNumber.trim() !== ""
-        ? pdfQuery.settlementNumber.trim()
-        : undefined;
-      const settlementDateTimeParam = typeof pdfQuery.settlementDateTime === "string" && pdfQuery.settlementDateTime.trim() !== ""
-        ? pdfQuery.settlementDateTime.trim()
-        : undefined;
-      const lastInterestPaymentDateParam = typeof pdfQuery.lastInterestPaymentDate === "string" && pdfQuery.lastInterestPaymentDate.trim() !== ""
-        ? pdfQuery.lastInterestPaymentDate.trim()
-        : undefined;
-      const interestPaymentDatesParam =
-        typeof pdfQuery.interestPaymentDates === "string" && pdfQuery.interestPaymentDates.trim() !== ""
-          ? pdfQuery.interestPaymentDates
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-          : undefined;
-      const nonAmortizedBondParam = pdfQuery.nonAmortizedBond === "false" ? false : true;
-      const amortizedPrincipalPaymentDatesParam =
-        typeof pdfQuery.amortizedPrincipalPaymentDates === "string" && pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
-          ? pdfQuery.amortizedPrincipalPaymentDates.trim()
-          : undefined;
-
-      const buffer = await generateOrderPdfBuffer({
-        user,
-
-        orderId: order.orderNumber,
-        bond,
-        qun:
-          settleOrder?.modQuantity != null
-            ? Number(settleOrder.modQuantity)
-            : order.quantity,
-        isReleased: true,
-        orderData: {
-          createdAt: orderDateForPdf.toISOString(),
-          subTotal:
-            settleOrder?.value != null
-              ? Number(settleOrder.value)
-              : Number(order.totalAmount),
-          stampDuty:
-            settleOrder?.stampDutyAmount != null
-              ? Number(settleOrder.stampDutyAmount)
-              : Number(order.stampDuty),
-          totalAmount:
-            settleOrder?.modConsideration != null
-              ? Number(settleOrder.modConsideration)
-              : Number(order.totalAmount),
-          price: Number(settleOrder?.price ?? 0),
-          metadata: {
-            dealId: (metadata.dealId as string) ?? undefined,
-            clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-            rfqNumber: (metadata.rfqNumber as string) ?? undefined,
-            orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
-            interestPaymentDates:
-              interestPaymentDatesParam?.length
-                ? interestPaymentDatesParam
-                : interestSchedule.dates.length > 0
-                  ? interestSchedule.dates
-                  : undefined,
-            interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
-            settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-            settlementDate: orderDateForPdf,
-            valueDate: bond.maturityDate
-              ? new Date(bond.maturityDate).toISOString()
-              : undefined,
-            accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
-            accruedInterestDays: accruedInterestDaysParam,
-            settlementNumber: settlementNumberParam ?? (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
-            settlementDateTime: settlementDateTimeParam,
-            lastInterestPaymentDate: lastInterestPaymentDateParam,
-            nonAmortizedBond: nonAmortizedBondParam,
-            amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParam,
-            settlementBank: settleOrder
-              ? {
-                bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-              }
-              : undefined,
-            settlementDemat: settleOrder
-              ? {
-                dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
-              : undefined,
-            settleOrder: settleOrder
-              ? {
-                id: settleOrder.id,
-                orderNumber: settleOrder.orderNumber,
-                symbol: settleOrder.symbol,
-                buySell: negotation?.buySell,
-                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
-                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
-                buyerRefNo: settleOrder.buyerRefNo,
-                sellerRefNo: settleOrder.sellerRefNo,
-                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
-                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
-                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
-                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
-                source: settleOrder.source,
-                modSettleDate: settleOrder.modSettleDate,
-                modQuantity: settleOrder.modQuantity,
-                modAccrInt: settleOrder.modAccrInt,
-                modConsideration: settleOrder.modConsideration,
-                settlementNo: settleOrder.settlementNo,
-                stampDutyAmount: settleOrder.stampDutyAmount,
-                stampDutyBearer: settleOrder.stampDutyBearer,
-                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
-                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
-                fundPayinRefId: settleOrder.fundPayinRefId,
-                settleStatus: settleOrder.settleStatus,
-                secPayinQuantity: settleOrder.secPayinQuantity,
-                secPayinRemarks: settleOrder.secPayinRemarks,
-                secPayinTime: settleOrder.secPayinTime,
-                fundsPayinAmount: settleOrder.fundsPayinAmount,
-                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
-                fundsPayinTime: settleOrder.fundsPayinTime,
-                payoutRemarks: settleOrder.payoutRemarks,
-                payoutTime: settleOrder.payoutTime,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-                utrNumber: settleOrder.utrNumber,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
-              : undefined,
-          },
-        },
-      });
-      const filename = `order-receipt-${order.orderNumber}.pdf`;
+      const { buffer, filename } =
+        await this.ordersService.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
       res.send(buffer);
     } catch (err) {
       console.error("Order receipt PDF failed:", err);
+      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: err.message,
+        });
+      }
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: err instanceof Error ? err.message : "Failed to generate order receipt PDF",
@@ -454,243 +304,20 @@ export class CrmOrdersController {
       });
     }
     try {
-      const order = await this.ordersService.getCustomerByOrderNumber(orderNumber);
-      if (!order) {
-        return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: "No order found for this settlement. Assign a customer first.",
-        });
-      }
-      const customerRepo = new CustomerProfileRepo();
-      const bondService = new BondService();
-      const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
-      const bond = await bondService.getBondDetails(order.isin);
-      if (!bond) {
-        return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: `Bond not found for ISIN: ${order.isin}`,
-        });
-      }
-      const settleOrder = await this.ordersService.getRfqByOrderNumber(orderNumber);
-      const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
-        where: {
-          customerProfileDataModelId: order.customerProfileId,
-          isPrimary: true,
-        },
-      });
-      const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
-        where: {
-          customerProfileDataModelId: order.customerProfileId,
-          isPrimary: true,
-        },
-      });
-      const negotation = await db.dataBase.rFQNegotiation.findFirst({
-        where: {
-          tradeNumber: settleOrder?.orderNumber,
-        },
-      });
-      const rfqDetails = await db.dataBase.rFQMasterISIN.findFirst({
-        where: {
-          number: negotation?.rfqNumber,
-        },
-      });
-      const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-      const orderDateForPdf: Date = new Date(`${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim());
-
-      const [bankName, dpName] = await Promise.all([
-        settleOrder?.ifscCode
-          ? fetchBankNameFromIfsc(getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined)
-          : Promise.resolve(null),
-        settleOrder?.dpId
-          ? Promise.resolve(getDpName(primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined))
-          : Promise.resolve(undefined),
-      ]);
-
-      const accessType: Record<string, string> = {
-        "1": "One to Many (OTM) on RFQ Platform of the Exchange",
-        "2": "One to One (OTO) on RFQ Platform of the Exchange",
-        "3": "Inter Scheme Transfer (IST) on RFQ Platform of the Exchange",
-      };
-      const accessKey =
-        rfqDetails?.access != null ? String(rfqDetails.access) : undefined;
-      const accessTypeText = accessKey ? accessType[accessKey] : undefined;
-
-
-      console.log(orderDateForPdf);
-
-
-      // 06-Nov-2025 12:00:00
-
-      const interestSchedule = getInterestPaymentSchedule({
-        orderDate: new Date(`${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim()),
-        maturityDate: bond.maturityDate ?? null,
-        interestPaymentFrequency: bond.interestPaymentFrequency,
-        paymentDayOfMonth: 20,
-        nextCouponDate:
-          bond.nextCouponDate != null &&
-            String(bond.nextCouponDate).trim() !== ""
-            ? new Date(bond.nextCouponDate)
-            : undefined,
-      });
-
       const pdfQuery = req.query as Record<string, string | undefined>;
-      const accruedInterestDaysParam =
-        pdfQuery.accruedInterestDays != null
-          ? Number(pdfQuery.accruedInterestDays)
-          : undefined;
-      const settlementNumberParam =
-        typeof pdfQuery.settlementNumber === "string" &&
-          pdfQuery.settlementNumber.trim() !== ""
-          ? pdfQuery.settlementNumber.trim()
-          : undefined;
-      const settlementDateTimeParam =
-        typeof pdfQuery.settlementDateTime === "string" &&
-          pdfQuery.settlementDateTime.trim() !== ""
-          ? pdfQuery.settlementDateTime.trim()
-          : undefined;
-      const lastInterestPaymentDateParam =
-        typeof pdfQuery.lastInterestPaymentDate === "string" &&
-          pdfQuery.lastInterestPaymentDate.trim() !== ""
-          ? pdfQuery.lastInterestPaymentDate.trim()
-          : undefined;
-      const interestPaymentDatesParamDeal =
-        typeof pdfQuery.interestPaymentDates === "string" &&
-          pdfQuery.interestPaymentDates.trim() !== ""
-          ? pdfQuery.interestPaymentDates
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : undefined;
-      const nonAmortizedBondParamDeal = pdfQuery.nonAmortizedBond === "false" ? false : true;
-      const amortizedPrincipalPaymentDatesParamDeal =
-        typeof pdfQuery.amortizedPrincipalPaymentDates === "string" && pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
-          ? pdfQuery.amortizedPrincipalPaymentDates.trim()
-          : undefined;
-
-      const buffer = await generateDealPdfBuffer({
-        user,
-        orderId: order.orderNumber,
-        bond,
-        qun:
-          settleOrder?.modQuantity != null
-            ? Number(settleOrder.modQuantity)
-            : order.quantity,
-        isReleased: false,
-        orderData: {
-          createdAt: orderDateForPdf.toISOString(),
-          subTotal:
-            settleOrder?.value != null
-              ? Number(settleOrder.value)
-              : Number(order.totalAmount),
-          stampDuty:
-            settleOrder?.stampDutyAmount != null
-              ? Number(settleOrder.stampDutyAmount)
-              : Number(order.stampDuty),
-          totalAmount:
-            settleOrder?.modConsideration != null
-              ? Number(settleOrder.modConsideration)
-              : Number(order.totalAmount),
-          price: Number(settleOrder?.price ?? 0),
-          metadata: {
-            dealId: (metadata.dealId as string) ?? undefined,
-            clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-            rfqNumber: (metadata.rfqNumber as string) ?? undefined,
-            orderType:
-              accessTypeText ??
-              "One To One (OTO) on RFQ Platform of the Exchange",
-            interestPaymentDates:
-              interestPaymentDatesParamDeal?.length
-                ? interestPaymentDatesParamDeal
-                : interestSchedule.dates.length > 0
-                  ? interestSchedule.dates
-                  : undefined,
-            interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
-            settlementOrderNumber:
-              negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-            settlementDate: orderDateForPdf,
-            valueDate: bond.maturityDate
-              ? new Date(bond.maturityDate).toISOString()
-              : undefined,
-            accruedInterest:
-              settleOrder?.modAccrInt != null
-                ? Number(settleOrder.modAccrInt)
-                : undefined,
-            accruedInterestDays: accruedInterestDaysParam,
-            settlementNumber:
-              settlementNumberParam ??
-              (settleOrder as { settlementNo?: string } | undefined)
-                ?.settlementNo,
-            settlementDateTime: settlementDateTimeParam,
-            lastInterestPaymentDate: lastInterestPaymentDateParam,
-            nonAmortizedBond: nonAmortizedBondParamDeal,
-            amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParamDeal,
-            settlementBank: settleOrder
-              ? {
-                bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-              }
-              : undefined,
-            settlementDemat: settleOrder
-              ? {
-                dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
-              : undefined,
-            settleOrder: settleOrder
-              ? {
-                id: settleOrder.id,
-                orderNumber: settleOrder.orderNumber,
-                symbol: settleOrder.symbol,
-                buySell: negotation?.buySell,
-                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
-                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
-                buyerRefNo: settleOrder.buyerRefNo,
-                sellerRefNo: settleOrder.sellerRefNo,
-                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
-                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
-                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
-                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
-                source: settleOrder.source,
-                modSettleDate: settleOrder.modSettleDate,
-                modQuantity: settleOrder.modQuantity,
-                modAccrInt: settleOrder.modAccrInt,
-                modConsideration: settleOrder.modConsideration,
-                settlementNo: settleOrder.settlementNo,
-                stampDutyAmount: settleOrder.stampDutyAmount,
-                stampDutyBearer: settleOrder.stampDutyBearer,
-                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
-                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
-                fundPayinRefId: settleOrder.fundPayinRefId,
-                settleStatus: settleOrder.settleStatus,
-                secPayinQuantity: settleOrder.secPayinQuantity,
-                secPayinRemarks: settleOrder.secPayinRemarks,
-                secPayinTime: settleOrder.secPayinTime,
-                fundsPayinAmount: settleOrder.fundsPayinAmount,
-                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
-                fundsPayinTime: settleOrder.fundsPayinTime,
-                payoutRemarks: settleOrder.payoutRemarks,
-                payoutTime: settleOrder.payoutTime,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-                utrNumber: settleOrder.utrNumber,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
-              : undefined,
-          },
-        },
-      });
-      const filename = `deal-sheet-${order.orderNumber}.pdf`;
+      const { buffer, filename } =
+        await this.ordersService.generateDealSheetPdfBuffer(orderNumber, pdfQuery);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${filename}"`
-      );
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
       res.send(buffer);
     } catch (err) {
       console.error("Deal sheet PDF failed:", err);
+      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: err.message,
+        });
+      }
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: err instanceof Error ? err.message : "Failed to generate deal sheet PDF",
@@ -747,6 +374,52 @@ export class CrmOrdersController {
     }
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    const accruedInterestDaysParam =
+      body.accruedInterestDays != null ? Number(body.accruedInterestDays) : undefined;
+    if (
+      accruedInterestDaysParam == null ||
+      !Number.isFinite(accruedInterestDaysParam) ||
+      accruedInterestDaysParam < 0
+    ) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "accruedInterestDays must be a valid non-negative number",
+      });
+    }
+
+    const settlementNumberParam =
+      typeof body.settlementNumber === "string" && body.settlementNumber.trim() !== ""
+        ? body.settlementNumber.trim()
+        : undefined;
+    const settlementDateTimeParam =
+      typeof body.settlementDateTime === "string" && body.settlementDateTime.trim() !== ""
+        ? body.settlementDateTime.trim()
+        : undefined;
+    const lastInterestPaymentDateParam =
+      typeof body.lastInterestPaymentDate === "string" &&
+      body.lastInterestPaymentDate.trim() !== ""
+        ? body.lastInterestPaymentDate.trim()
+        : undefined;
+
+    const pdfQuery: Record<string, string | undefined> = {
+      accruedInterestDays: String(accruedInterestDaysParam),
+    };
+    if (settlementNumberParam) pdfQuery.settlementNumber = settlementNumberParam;
+    if (settlementDateTimeParam) pdfQuery.settlementDateTime = settlementDateTimeParam;
+    if (lastInterestPaymentDateParam) {
+      pdfQuery.lastInterestPaymentDate = lastInterestPaymentDateParam;
+    }
+    if (typeof body.interestPaymentDates === "string" && body.interestPaymentDates.trim() !== "") {
+      pdfQuery.interestPaymentDates = body.interestPaymentDates.trim();
+    }
+    pdfQuery.nonAmortizedBond = body.nonAmortizedBond === false ? "false" : "true";
+    if (
+      typeof body.amortizedPrincipalPaymentDates === "string" &&
+      body.amortizedPrincipalPaymentDates.trim() !== ""
+    ) {
+      pdfQuery.amortizedPrincipalPaymentDates = body.amortizedPrincipalPaymentDates.trim();
+    }
+
     try {
       const order = await this.ordersService.getCustomerByOrderNumber(orderNumber);
       if (!order) {
@@ -756,235 +429,26 @@ export class CrmOrdersController {
         });
       }
       const customerRepo = new CustomerProfileRepo();
-      const bondService = new BondService();
       const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
-      const bond = await bondService.getBondDetails(order.isin);
-      if (!bond) {
-        return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: `Bond not found for ISIN: ${order.isin}`,
-        });
+
+      let buffer: Buffer;
+      let filename: string;
+      try {
+        const generated =
+          pdfType === "deal"
+            ? await this.ordersService.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
+            : await this.ordersService.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
+        buffer = generated.buffer;
+        filename = generated.filename;
+      } catch (pdfErr) {
+        if (pdfErr instanceof AppError && pdfErr.statusCode === HttpStatus.NOT_FOUND) {
+          return res.sendResponse({
+            statusCode: HttpStatus.NOT_FOUND,
+            message: pdfErr.message,
+          });
+        }
+        throw pdfErr;
       }
-      const settleOrder = await this.ordersService.getRfqByOrderNumber(orderNumber);
-      const negotation = await db.dataBase.rFQNegotiation.findFirst({
-        where: {
-          tradeNumber: settleOrder?.orderNumber,
-        },
-      });
-      const rfqDetails = await db.dataBase.rFQMasterISIN.findFirst({
-        where: {
-          number: negotation?.rfqNumber,
-        },
-      });
-      const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-      let orderDateForPdf: string | undefined =
-        negotation?.createdAt instanceof Date
-          ? order.createdAt.toISOString()
-          : String(order.createdAt);
-      if (settleOrder?.modSettleDate) {
-        const parsed = parseSettlementDateToISO(settleOrder.modSettleDate);
-        if (parsed) orderDateForPdf = parsed;
-      }
-      const [bankName, dpName] = await Promise.all([
-        settleOrder?.ifscCode
-          ? fetchBankNameFromIfsc(settleOrder.ifscCode)
-          : Promise.resolve(null),
-        settleOrder?.dpId
-          ? Promise.resolve(getDpName(settleOrder.dpId))
-          : Promise.resolve(undefined),
-      ]);
-
-      const accessType: Record<string, string> = {
-        "1": "One to Many (OTM) on RFQ Platform of the Exchange",
-        "2": "One to One (OTO) on RFQ Platform of the Exchange",
-        "3": "Inter Scheme Transfer (IST) on RFQ Platform of the Exchange",
-      };
-      const accessKey =
-        rfqDetails?.access != null ? String(rfqDetails.access) : undefined;
-      const accessTypeText = accessKey ? accessType[accessKey] : undefined;
-
-      const orderDateForSchedule = orderDateForPdf
-        ? new Date(orderDateForPdf)
-        : new Date();
-      const interestSchedule = getInterestPaymentSchedule({
-        orderDate: orderDateForSchedule,
-        maturityDate: bond.maturityDate ?? null,
-        interestPaymentFrequency: bond.interestPaymentFrequency,
-        paymentDayOfMonth: 20,
-        nextCouponDate:
-          bond.nextCouponDate != null &&
-            String(bond.nextCouponDate).trim() !== ""
-            ? new Date(bond.nextCouponDate)
-            : undefined,
-      });
-
-      const accruedInterestDaysParam =
-        body.accruedInterestDays != null
-          ? Number(body.accruedInterestDays)
-          : undefined;
-      if (
-        accruedInterestDaysParam == null ||
-        !Number.isFinite(accruedInterestDaysParam) ||
-        accruedInterestDaysParam < 0
-      ) {
-        return res.sendResponse({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: "accruedInterestDays must be a valid non-negative number",
-        });
-      }
-      const settlementNumberParam =
-        typeof body.settlementNumber === "string" &&
-          body.settlementNumber.trim() !== ""
-          ? body.settlementNumber.trim()
-          : undefined;
-      const settlementDateTimeParam =
-        typeof body.settlementDateTime === "string" &&
-          body.settlementDateTime.trim() !== ""
-          ? body.settlementDateTime.trim()
-          : undefined;
-      const lastInterestPaymentDateParam =
-        typeof body.lastInterestPaymentDate === "string" &&
-          body.lastInterestPaymentDate.trim() !== ""
-          ? body.lastInterestPaymentDate.trim()
-          : undefined;
-      const interestPaymentDatesParamEmail =
-        typeof body.interestPaymentDates === "string" &&
-          body.interestPaymentDates.trim() !== ""
-          ? body.interestPaymentDates
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : undefined;
-      const nonAmortizedBondParamEmail = body.nonAmortizedBond === false ? false : true;
-      const amortizedPrincipalPaymentDatesParamEmail =
-        typeof body.amortizedPrincipalPaymentDates === "string" && body.amortizedPrincipalPaymentDates.trim() !== ""
-          ? body.amortizedPrincipalPaymentDates.trim()
-          : undefined;
-
-      const pdfPayload = {
-        user,
-        orderId: order.orderNumber,
-        bond,
-        qun:
-          settleOrder?.modQuantity != null
-            ? Number(settleOrder.modQuantity)
-            : order.quantity,
-        isReleased: false,
-        orderData: {
-          createdAt: orderDateForPdf,
-          subTotal:
-            settleOrder?.value != null
-              ? Number(settleOrder.value)
-              : Number(order.totalAmount),
-          stampDuty:
-            settleOrder?.stampDutyAmount != null
-              ? Number(settleOrder.stampDutyAmount)
-              : Number(order.stampDuty),
-          totalAmount:
-            settleOrder?.modConsideration != null
-              ? Number(settleOrder.modConsideration)
-              : Number(order.totalAmount),
-          price: Number(settleOrder?.price ?? 0),
-          metadata: {
-            dealId: (metadata.dealId as string) ?? undefined,
-            clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-            rfqNumber: (metadata.rfqNumber as string) ?? undefined,
-            orderType:
-              accessTypeText ??
-              "One To One (OTO) on RFQ Platform of the Exchange",
-            interestPaymentDates:
-              interestPaymentDatesParamEmail?.length
-                ? interestPaymentDatesParamEmail
-                : interestSchedule.dates.length > 0
-                  ? interestSchedule.dates
-                  : undefined,
-            interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
-            settlementOrderNumber:
-              negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-            settlementDate: orderDateForPdf,
-            valueDate: bond.maturityDate
-              ? new Date(bond.maturityDate).toISOString()
-              : undefined,
-            accruedInterest:
-              settleOrder?.modAccrInt != null
-                ? Number(settleOrder.modAccrInt)
-                : undefined,
-            accruedInterestDays: accruedInterestDaysParam,
-            settlementNumber:
-              settlementNumberParam ??
-              (settleOrder as { settlementNo?: string } | undefined)
-                ?.settlementNo,
-            settlementDateTime: settlementDateTimeParam,
-            lastInterestPaymentDate: lastInterestPaymentDateParam,
-            nonAmortizedBond: nonAmortizedBondParamEmail,
-            amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParamEmail,
-            settlementBank: settleOrder
-              ? {
-                bankName: bankName ?? undefined,
-                ifscCode: settleOrder.ifscCode ?? undefined,
-                accountNo: settleOrder.accountNo ?? undefined,
-              }
-              : undefined,
-            settlementDemat: settleOrder
-              ? {
-                dpName: dpName ?? undefined,
-                dpId: settleOrder.dpId ?? undefined,
-                benId: settleOrder.benId ?? undefined,
-              }
-              : undefined,
-            settleOrder: settleOrder
-              ? {
-                id: settleOrder.id,
-                orderNumber: settleOrder.orderNumber,
-                symbol: settleOrder.symbol,
-                buySell: negotation?.buySell,
-                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
-                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
-                buyerRefNo: settleOrder.buyerRefNo,
-                sellerRefNo: settleOrder.sellerRefNo,
-                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
-                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
-                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
-                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
-                source: settleOrder.source,
-                modSettleDate: settleOrder.modSettleDate,
-                modQuantity: settleOrder.modQuantity,
-                modAccrInt: settleOrder.modAccrInt,
-                modConsideration: settleOrder.modConsideration,
-                settlementNo: settleOrder.settlementNo,
-                stampDutyAmount: settleOrder.stampDutyAmount,
-                stampDutyBearer: settleOrder.stampDutyBearer,
-                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
-                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
-                fundPayinRefId: settleOrder.fundPayinRefId,
-                settleStatus: settleOrder.settleStatus,
-                secPayinQuantity: settleOrder.secPayinQuantity,
-                secPayinRemarks: settleOrder.secPayinRemarks,
-                secPayinTime: settleOrder.secPayinTime,
-                fundsPayinAmount: settleOrder.fundsPayinAmount,
-                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
-                fundsPayinTime: settleOrder.fundsPayinTime,
-                payoutRemarks: settleOrder.payoutRemarks,
-                payoutTime: settleOrder.payoutTime,
-                ifscCode: settleOrder.ifscCode,
-                accountNo: settleOrder.accountNo,
-                utrNumber: settleOrder.utrNumber,
-                dpId: settleOrder.dpId,
-                benId: settleOrder.benId,
-              }
-              : undefined,
-          },
-        },
-      };
-
-      let buffer: Buffer =
-        pdfType === "deal"
-          ? await generateDealPdfBuffer(pdfPayload)
-          : await generateOrderPdfBuffer(pdfPayload);
-      const filename =
-        pdfType === "deal"
-          ? `deal-sheet-${order.orderNumber}.pdf`
-          : `order-receipt-${order.orderNumber}.pdf`;
 
       const recipientEmail =
         String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
@@ -1043,6 +507,12 @@ export class CrmOrdersController {
       });
     } catch (err) {
       console.error("Send PDF email failed:", err);
+      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: err.message,
+        });
+      }
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: err instanceof Error ? err.message : "Failed to send email",

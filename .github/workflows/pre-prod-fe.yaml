@@ -195,5 +195,5 @@ jobs:
         with:
           task-definition: preprod_fe-revision.json
           cluster: prod-cluster
-          service: pre-prod-fe-servic
+          service: preprod-fe-service
           force-new-deployment: true

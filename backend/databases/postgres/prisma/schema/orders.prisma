@@ -96,6 +96,29 @@ model OrderLogs {
     @@map("order_logs")
 }
 
+/** CRM settle-order PDF generator form fields (keyed by NSE settle / req order number). */
+model CrmOrderReceiptPdfOptions {
+    id Int @id @default(autoincrement())
+
+    orderNumber String @unique
+
+    accruedInterestDays Int?
+    settlementNumber    String?
+    settlementDateTime  String?
+
+    lastInterestPaymentDateRaw String?
+    lastInterestPaymentDate    String?
+    interestPaymentDates       String?
+
+    nonAmortizedBond               Boolean @default(true)
+    amortizedPrincipalPaymentDates String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("crm_order_receipt_pdf_options")
+}
+
 enum PaymentStatus {
     PENDING
     COMPLETED

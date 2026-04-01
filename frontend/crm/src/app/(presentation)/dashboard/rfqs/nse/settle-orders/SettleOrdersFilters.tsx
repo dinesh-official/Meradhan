@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { RefreshCw, X } from "lucide-react";
+import { Filter, RefreshCw, X } from "lucide-react";
 import { TSettleOrdersFilterHook } from "./hooks/useSettleOrdersFilterHook";
 
 interface SettleOrdersFiltersProps {
@@ -108,6 +108,22 @@ function SettleOrdersFilters({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => state.applyFilters()}
+            disabled={isLoading}
+            title={
+              state.hasPendingFilterChanges
+                ? "You have edited filters — click to load matching results"
+                : "Reload the table with the current filter values"
+            }
+            className={`flex items-center gap-2 h-8 ${state.hasPendingFilterChanges ? "ring-2 ring-amber-500/60" : ""}`}
+          >
+            <Filter className="w-3 h-3" />
+            Apply all filters
+          </Button>
+
           {hasActiveFilters() && (
             <Button
               variant="outline"

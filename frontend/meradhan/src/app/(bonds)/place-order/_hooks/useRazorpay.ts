@@ -239,17 +239,21 @@ export function useRazorpay() {
     }
   };
 
-  const cancelPayment = async (orderId: string): Promise<void> => {
+  const cancelPayment = async (orderId: string, allowRedirect: boolean = true): Promise<void> => {
     if (!orderReqData) {
       toast({ title: "Order Cancelled Successfully" });
+      if (allowRedirect) {
       window.location.reload();
+      }
       return;
     }
     try {
       setIsLoading(true);
       await apiClientCaller.post(`/customer/order/cancel/${orderId}`);
       toast({ title: "Order Cancelled Successfully" });
-      window.location.reload();
+      if (allowRedirect) {
+        window.location.reload();
+      }
     } catch {
       toast({
         title: "Cancellation Failed",
