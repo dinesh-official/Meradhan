@@ -1,4 +1,5 @@
-import { useState, useMemo, Dispatch, SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState, Dispatch, SetStateAction } from "react";
+import { parseAsString, useQueryStates } from "nuqs";
 
 // Utility function to format date to DD-MM-YYYY
 const formatDateForAPI = (date: Date): string => {
@@ -25,6 +26,15 @@ const getDefaultDates = () => {
   };
 };
 
+/** URL search params for settle orders (shareable / bookmarkable filters). */
+const settleOrdersUrlParsers = {
+  id: parseAsString,
+  order: parseAsString,
+  from: parseAsString,
+  to: parseAsString,
+  cp: parseAsString,
+};
+
 export interface SettleOrdersAppliedFilters {
   id: string;
   orderNumber: string;
@@ -49,98 +59,152 @@ export interface TSettleOrdersFilterHook {
     filtCounterParty: string;
     setFiltCounterParty: Dispatch<SetStateAction<string>>;
     paginationIndex: number;
-    setPaginationIndex: Dispatch<SetStateAction<number>>;
-    /** Filters last sent to the API (drives the table query). */
+    setPaginationIndex: (updater: SetStateAction<number>) => void;
     applied: SettleOrdersAppliedFilters;
-    /** True when draft inputs differ from applied filters (pending apply). */
     hasPendingFilterChanges: boolean;
   };
 }
 
 export const useSettleOrdersFilterHook = (): TSettleOrdersFilterHook => {
-  const defaultDates = getDefaultDates();
+  const defaultDatesRef = useRef(getDefaultDates());
 
-  const [id, setId] = useState<string>("");
-  const [orderNumber, setOrderNumber] = useState<string>("");
-  const [filtFromModSettleDate, setFiltFromModSettleDate] = useState<string>(
-    defaultDates.fromDate
-  );
-  const [filtToModSettleDate, setFiltToModSettleDate] = useState<string>(
-    defaultDates.toDate
-  );
-  const [filtCounterParty, setFiltCounterParty] = useState<string>("");
+  const [params, setParams] = useQueryStates(settleOrdersUrlParsers, {
+    history: "push",
+  });
 
-  const [applied, setApplied] = useState<SettleOrdersAppliedFilters>(() => ({
+  const applied = useMemo((): SettleOrdersAppliedFilters => {
+    const d = defaultDatesRef.current;
+    return {
+      id: params.id ?? "",
+      orderNumber: params.order ?? "",
+      filtFromModSettleDate: params.from ?? d.fromDate,
+      filtToModSettleDate: params.to ?? d.toDate,
+      filtCounterParty: params.cp ?? "",
+      paginationIndex: 1,
+    };
+  }, [params.id, params.order, params.from, params.to, params.cp]);
+
+  const [draft, setDraft] = useState({
     id: "",
     orderNumber: "",
-    filtFromModSettleDate: defaultDates.fromDate,
-    filtToModSettleDate: defaultDates.toDate,
+    filtFromModSettleDate: defaultDatesRef.current.fromDate,
+    filtToModSettleDate: defaultDatesRef.current.toDate,
     filtCounterParty: "",
-    paginationIndex: 1,
-  }));
+  });
+
+  // Keep draft in sync when URL / applied filters change (load, back/forward, apply, reset).
+  useEffect(() => {
+    setDraft({
+      id: applied.id,
+      orderNumber: applied.orderNumber,
+      filtFromModSettleDate: applied.filtFromModSettleDate,
+      filtToModSettleDate: applied.filtToModSettleDate,
+      filtCounterParty: applied.filtCounterParty,
+    });
+  }, [
+    applied.id,
+    applied.orderNumber,
+    applied.filtFromModSettleDate,
+    applied.filtToModSettleDate,
+    applied.filtCounterParty,
+  ]);
+
+  const [appliedForPagination, setAppliedForPagination] = useState<SettleOrdersAppliedFilters>(
+    () => ({
+      ...applied,
+      paginationIndex: 1,
+    })
+  );
+
+  // When URL filter params change (apply, reset, back/forward), sync API state and reset to page 1.
+  useEffect(() => {
+    setAppliedForPagination({
+      id: applied.id,
+      orderNumber: applied.orderNumber,
+      filtFromModSettleDate: applied.filtFromModSettleDate,
+      filtToModSettleDate: applied.filtToModSettleDate,
+      filtCounterParty: applied.filtCounterParty,
+      paginationIndex: 1,
+    });
+  }, [
+    applied.id,
+    applied.orderNumber,
+    applied.filtFromModSettleDate,
+    applied.filtToModSettleDate,
+    applied.filtCounterParty,
+  ]);
 
   const hasPendingFilterChanges = useMemo(() => {
     return (
-      id !== applied.id ||
-      orderNumber !== applied.orderNumber ||
-      filtFromModSettleDate !== applied.filtFromModSettleDate ||
-      filtToModSettleDate !== applied.filtToModSettleDate ||
-      filtCounterParty !== applied.filtCounterParty
+      draft.id !== applied.id ||
+      draft.orderNumber !== applied.orderNumber ||
+      draft.filtFromModSettleDate !== applied.filtFromModSettleDate ||
+      draft.filtToModSettleDate !== applied.filtToModSettleDate ||
+      draft.filtCounterParty !== applied.filtCounterParty
     );
-  }, [
-    id,
-    orderNumber,
-    filtFromModSettleDate,
-    filtToModSettleDate,
-    filtCounterParty,
-    applied,
-  ]);
+  }, [draft, applied]);
 
   function applyFilters() {
-    setApplied({
-      id,
-      orderNumber,
-      filtFromModSettleDate,
-      filtToModSettleDate,
-      filtCounterParty,
-      paginationIndex: 1,
+    setParams({
+      id: draft.id.trim() || null,
+      order: draft.orderNumber.trim() || null,
+      from: draft.filtFromModSettleDate || null,
+      to: draft.filtToModSettleDate || null,
+      cp: draft.filtCounterParty.trim() || null,
     });
   }
 
   function resetAll() {
     const d = getDefaultDates();
-    setId("");
-    setOrderNumber("");
-    setFiltFromModSettleDate(d.fromDate);
-    setFiltToModSettleDate(d.toDate);
-    setFiltCounterParty("");
-    setApplied({
-      id: "",
-      orderNumber: "",
-      filtFromModSettleDate: d.fromDate,
-      filtToModSettleDate: d.toDate,
-      filtCounterParty: "",
-      paginationIndex: 1,
-    });
+    defaultDatesRef.current = d;
+    setParams(null);
   }
+
+  const mergedApplied: SettleOrdersAppliedFilters = {
+    ...applied,
+    paginationIndex: appliedForPagination.paginationIndex,
+  };
 
   return {
     state: {
       resetAll,
       applyFilters,
-      id,
-      setId,
-      orderNumber,
-      setOrderNumber,
-      filtFromModSettleDate,
-      setFiltFromModSettleDate,
-      filtToModSettleDate,
-      setFiltToModSettleDate,
-      filtCounterParty,
-      setFiltCounterParty,
-      paginationIndex: applied.paginationIndex,
+      id: draft.id,
+      setId: (v) =>
+        setDraft((prev) => ({
+          ...prev,
+          id: typeof v === "function" ? v(prev.id) : v,
+        })),
+      orderNumber: draft.orderNumber,
+      setOrderNumber: (v) =>
+        setDraft((prev) => ({
+          ...prev,
+          orderNumber: typeof v === "function" ? v(prev.orderNumber) : v,
+        })),
+      filtFromModSettleDate: draft.filtFromModSettleDate,
+      setFiltFromModSettleDate: (v) =>
+        setDraft((prev) => ({
+          ...prev,
+          filtFromModSettleDate:
+            typeof v === "function" ? v(prev.filtFromModSettleDate) : v,
+        })),
+      filtToModSettleDate: draft.filtToModSettleDate,
+      setFiltToModSettleDate: (v) =>
+        setDraft((prev) => ({
+          ...prev,
+          filtToModSettleDate:
+            typeof v === "function" ? v(prev.filtToModSettleDate) : v,
+        })),
+      filtCounterParty: draft.filtCounterParty,
+      setFiltCounterParty: (v) =>
+        setDraft((prev) => ({
+          ...prev,
+          filtCounterParty:
+            typeof v === "function" ? v(prev.filtCounterParty) : v,
+        })),
+      paginationIndex: mergedApplied.paginationIndex,
       setPaginationIndex: (updater: SetStateAction<number>) => {
-        setApplied((prev) => ({
+        setAppliedForPagination((prev) => ({
           ...prev,
           paginationIndex:
             typeof updater === "function"
@@ -148,11 +212,10 @@ export const useSettleOrdersFilterHook = (): TSettleOrdersFilterHook => {
               : updater,
         }));
       },
-      applied,
+      applied: mergedApplied,
       hasPendingFilterChanges,
     },
   };
 };
 
-// Export utility function for use in API hook
 export { formatDateForAPI };
