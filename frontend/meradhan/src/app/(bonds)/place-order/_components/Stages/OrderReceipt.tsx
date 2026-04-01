@@ -71,7 +71,7 @@ function OrderReceipt({
             }}
           />{" "}
           &nbsp; I have read, understood, and agree to all the{" "}
-          <Link href="/terms-of-use" className="text-primary mx-1   ">
+          <Link href="/terms-of-use"     target="_blank" className="text-primary mx-1   ">
             Terms and Conditions
           </Link>
           .

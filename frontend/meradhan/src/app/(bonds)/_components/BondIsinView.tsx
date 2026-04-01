@@ -19,10 +19,18 @@ export default function BondIsinView({
 }: {
   bond: BondDetailResponse["responseData"];
 }) {
+  const putText =
+    bond.putCallOptionDetails
+      ?.split("Call:")?.[0]
+      ?.replace("Put:", "")
+      ?.trim() ?? "";
+
+  const callText = bond.putCallOptionDetails?.split("Call:")?.[1]?.trim() ?? "";
+
   const isSecured = () => {
-    if (bond.instrumentName.includes("UNSECURED")) {
+    if (bond.instrumentName?.includes("UNSECURED")) {
       return "Unsecured";
-    } else if (bond.instrumentName.includes("SECURED")) {
+    } else if (bond.instrumentName?.includes("SECURED")) {
       return "Secured";
     }
     return "-";
@@ -93,29 +101,18 @@ export default function BondIsinView({
             <SortInfoBox title="Put">
               <p className="flex items-center gap-1">
                 {pickWordsByMinLength(
-                  bond.putCallOptionDetails
-                    ?.split("Call:")?.[0]
-                    .replace("Put:", "")
-                    .trim() || "N/A",
+                  putText || "N/A",
                   15
                 )}
 
-                {(
-                  bond.putCallOptionDetails
-                    ?.split("Call:")?.[0]
-                    .replace("Put:", "")
-                    .trim() || ""
-                ).length > 15 && (
+                {putText.length > 15 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <FaInfoCircle className="cursor-pointer" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-wrap max-w-48">
-                          {bond.putCallOptionDetails
-                            ?.split("Call:")?.[0]
-                            .replace("Put:", "")
-                            .trim()}
+                          {putText}
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -125,20 +122,18 @@ export default function BondIsinView({
             <SortInfoBox title="Call">
               <p className="flex items-center gap-1 line-clamp-1">
                 {pickWordsByMinLength(
-                  bond.putCallOptionDetails?.split("Call:")?.[1].trim() ||
-                  "N/A",
+                  callText || "N/A",
                   15
                 )}
 
-                {(bond.putCallOptionDetails?.split("Call:")?.[1].trim() || "")
-                  .length > 15 && (
+                {callText.length > 15 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <FaInfoCircle className="cursor-pointer" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-wrap max-w-48">
-                          {bond.putCallOptionDetails?.split("Call:")?.[1].trim()}
+                          {callText}
                         </p>
                       </TooltipContent>
                     </Tooltip>

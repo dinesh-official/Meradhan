@@ -7,42 +7,44 @@ import { TSettleOrdersFilterHook, formatDateForAPI } from "./useSettleOrdersFilt
 
 export const useSettleOrdersApiHook = (filterState: TSettleOrdersFilterHook) => {
   const rfqApi = new apiGateway.crm.rfq.RfqIsinApi(apiClientCaller);
-  const state = filterState.state;
+  const { applied } = filterState.state;
 
   const fetchSettleOrdersQuery = useQuery({
     queryKey: [
-      "settleOrders", 
-      state.id,
-      state.orderNumber,
-      state.filtFromModSettleDate,
-      state.filtToModSettleDate,
-      state.filtCounterParty,
-      state.paginationIndex,
+      "settleOrders",
+      applied.id,
+      applied.orderNumber,
+      applied.filtFromModSettleDate,
+      applied.filtToModSettleDate,
+      applied.filtCounterParty,
+      applied.paginationIndex,
     ],
     queryFn: async () => {
       // Convert input dates (YYYY-MM-DD) to API format (DD-MM-YYYY)
-      const fromDateForAPI = state.filtFromModSettleDate ? 
-        formatDateForAPI(new Date(state.filtFromModSettleDate)) : "";
-      const toDateForAPI = state.filtToModSettleDate ? 
-        formatDateForAPI(new Date(state.filtToModSettleDate)) : "";
+      const fromDateForAPI = applied.filtFromModSettleDate
+        ? formatDateForAPI(new Date(applied.filtFromModSettleDate))
+        : "";
+      const toDateForAPI = applied.filtToModSettleDate
+        ? formatDateForAPI(new Date(applied.filtToModSettleDate))
+        : "";
 
-      // Build filter payload based on current filter state
+      // Build filter payload based on applied filters
       const filterPayload: z.infer<typeof appSchema.rfq.settleOrderFilterSchema> = {
         filtFromModSettleDate: fromDateForAPI,
         filtToModSettleDate: toDateForAPI,
       };
 
       // Add optional filters only if they have values
-      if (state.id) {
-        filterPayload.id = parseInt(state.id);
+      if (applied.id) {
+        filterPayload.id = parseInt(applied.id, 10);
       }
-      
-      if (state.orderNumber) {
-        filterPayload.orderNumber = state.orderNumber;
+
+      if (applied.orderNumber) {
+        filterPayload.orderNumber = applied.orderNumber;
       }
-      
-      if (state.filtCounterParty) {
-        filterPayload.filtCounterParty = state.filtCounterParty;
+
+      if (applied.filtCounterParty) {
+        filterPayload.filtCounterParty = applied.filtCounterParty;
       }
 
       const response = await rfqApi.getAllSettledOrders(filterPayload);
