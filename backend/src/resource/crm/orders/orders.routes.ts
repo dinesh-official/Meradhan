@@ -42,6 +42,18 @@ router.get(
 );
 
 router.get(
+  "/api/crm/orders/receipt-pdf-options/:orderNumber",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.getReceiptPdfOptions
+);
+
+router.put(
+  "/api/crm/orders/receipt-pdf-options/:orderNumber",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.upsertReceiptPdfOptions
+);
+
+router.get(
   "/api/crm/orders/receipt-pdf/:orderNumber",
   allowAccessMiddleware("CRM"),
   crmOrdersController.getOrderReceiptPdf

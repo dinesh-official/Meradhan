@@ -219,6 +219,15 @@ function GeneratePdfContent() {
     enabled: Boolean(orderNumber),
   });
 
+  const { data: pdfOptionsQuery, isFetched: pdfOptionsFetched } = useQuery({
+    queryKey: ["crm-receipt-pdf-options", orderNumber],
+    queryFn: () => ordersApi.getReceiptPdfOptions(orderNumber!),
+    enabled: Boolean(orderNumber),
+  });
+
+
+
+
 
 
   const assignOrderMutation = useMutation({
@@ -246,7 +255,12 @@ function GeneratePdfContent() {
   const customerGenderRaw = String(customerOrder?.customerProfile?.gender ?? "")
     .trim()
     .toLowerCase();
-  const salutationPrefix = customerGenderRaw === "female" ? "Ms." : "Mr.";
+  const emailSalutation =
+    customerGenderRaw === "female"
+      ? "Ms."
+      : customerGenderRaw === "male"
+        ? "Mr."
+        : "Mr. / Ms.";
   const clientFullName = `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.middleName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`
     .trim()
     .toUpperCase();
@@ -259,6 +273,7 @@ function GeneratePdfContent() {
     metaSide === "BUY" || metaSide === "SELL" ? metaSide : orderSide;
   const transactionLabel = effectiveOrderSide === "SELL" ? "sell" : "buy";
   const dealDateText = formatDealDateForEmail(rfq?.modSettleDate ?? rfq?.createdAt ?? null);
+
 
   useEffect(() => {
     const bs = String((rfq as { buySell?: string } | null)?.buySell ?? "")
@@ -276,10 +291,38 @@ function GeneratePdfContent() {
   }, [customerOrder?.metadata]);
 
   useEffect(() => {
-    if (rfq?.settlementNo != null && pdfSettlementNumber === "") {
-      setPdfSettlementNumber(String(rfq.settlementNo));
+    if (!orderNumber) return;
+    setPdfAccruedInterestDays("");
+    setPdfSettlementNumber("");
+    setPdfSettlementDateTime("");
+    setPdfLastInterestPaymentDateRaw("");
+    setPdfLastInterestPaymentDate("");
+    setPdfInterestPaymentDates("");
+    setPdfNonAmortizedBond(true);
+    setPdfAmortizedPrincipalPaymentDates("");
+  }, [orderNumber]);
+
+  useEffect(() => {
+    if (!pdfOptionsFetched || !orderNumber) return;
+    const row = pdfOptionsQuery?.responseData;
+    if (!row || row.orderNumber !== orderNumber) return;
+    if (row.accruedInterestDays != null) {
+      setPdfAccruedInterestDays(String(row.accruedInterestDays));
     }
-  }, [rfq?.settlementNo, pdfSettlementNumber]);
+    setPdfSettlementNumber(row.settlementNumber ?? "");
+    setPdfSettlementDateTime(row.settlementDateTime ?? "");
+    setPdfLastInterestPaymentDateRaw(row.lastInterestPaymentDateRaw ?? "");
+    setPdfLastInterestPaymentDate(row.lastInterestPaymentDate ?? "");
+    setPdfInterestPaymentDates(row.interestPaymentDates ?? "");
+    setPdfNonAmortizedBond(row.nonAmortizedBond);
+    setPdfAmortizedPrincipalPaymentDates(row.amortizedPrincipalPaymentDates ?? "");
+  }, [orderNumber, pdfOptionsFetched, pdfOptionsQuery?.responseData]);
+
+  useEffect(() => {
+    if (pdfOptionsQuery?.responseData) return;
+    if (rfq?.settlementNo == null || pdfSettlementNumber !== "") return;
+    setPdfSettlementNumber(String(rfq.settlementNo));
+  }, [rfq?.settlementNo, pdfSettlementNumber, pdfOptionsQuery?.responseData]);
 
   useEffect(() => {
     if (!emailTo && customerOrder?.customerProfile?.emailAddress) {
@@ -293,7 +336,7 @@ function GeneratePdfContent() {
         `Deal Sheet for ISIN ${isin} - Security Name ${securityName} - Deal Date ${dealDateText}`
       );
       setEmailBody(
-        `Dear ${salutationPrefix} ${clientFullName || "CUSTOMER"},
+        `Dear ${emailSalutation} ${clientFullName || "CUSTOMER"},
 
 Thank you for investing with MeraDhan. We truly value your trust and remain committed to providing you with a seamless bond investment experience.
 
@@ -320,7 +363,7 @@ MeraDhan Team`
 
     setEmailSubject(`Order Confirmation & Receipt – Order ID ${orderIdTpl}`);
     setEmailBody(
-      `Dear Mr. / Ms. ${displayName},
+      `Dear ${emailSalutation} ${displayName},
 
 Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
 
@@ -406,6 +449,29 @@ BSE Member ID: 6963`
     };
   };
 
+  const persistReceiptPdfOptions = async (accruedInterestDaysNum: number) => {
+    if (!orderNumber) return;
+    try {
+      await ordersApi.upsertReceiptPdfOptions(orderNumber, {
+        accruedInterestDays: accruedInterestDaysNum,
+        settlementNumber: pdfSettlementNumber.trim() || null,
+        settlementDateTime: pdfSettlementDateTime.trim() || null,
+        lastInterestPaymentDateRaw: pdfLastInterestPaymentDateRaw || null,
+        lastInterestPaymentDate: pdfLastInterestPaymentDate.trim() || null,
+        interestPaymentDates: pdfInterestPaymentDates.trim() || null,
+        nonAmortizedBond: pdfNonAmortizedBond,
+        amortizedPrincipalPaymentDates:
+          !pdfNonAmortizedBond && pdfAmortizedPrincipalPaymentDates.trim() !== ""
+            ? pdfAmortizedPrincipalPaymentDates.trim()
+            : null,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["crm-receipt-pdf-options", orderNumber] });
+      toast.success("Receipt PDF options saved for next time.");
+    } catch {
+      // Non-blocking: PDF already generated
+    }
+  };
+
   const downloadPdf = async (type: "order" | "deal") => {
     if (!orderNumber) return;
     const accruedInterestDaysNum = getValidatedAccruedInterestDays();
@@ -428,6 +494,7 @@ BSE Member ID: 6963`
       a.click();
       URL.revokeObjectURL(url);
       toast.success(type === "deal" ? "Deal sheet PDF downloaded." : "Order receipt PDF downloaded.");
+      void persistReceiptPdfOptions(accruedInterestDaysNum);
     } catch (err) {
       toast.error(getApiErrorMessage(err, "Failed to download PDF"));
     } finally {
@@ -465,6 +532,7 @@ BSE Member ID: 6963`
       };
       await ordersApi.sendPdfEmailToClient(orderNumber, payload);
       toast.success("Email sent to client with PDF attachment.");
+      void persistReceiptPdfOptions(accruedInterestDaysNum);
       setSendEmailOpen(false);
     } catch (err) {
       toast.error(getApiErrorMessage(err, "Failed to send email"));
@@ -591,7 +659,9 @@ BSE Member ID: 6963`
 
         {customerOrder?.customerProfile && (
           <Section title="Receipt PDF options (fill before generating PDF)">
-            <p className="text-muted-foreground text-sm mb-3">Accrued / Ex Interest is taken from settlement (negotiations) data.</p>
+            <p className="text-muted-foreground text-sm mb-3">
+              Accrued / Ex Interest is taken from settlement (negotiations) data. Values you use are saved for this order number when you download or email a PDF, and will auto-fill next time.
+            </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="pdf-accrued-days">No. of Days *</Label>
