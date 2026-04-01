@@ -3,7 +3,7 @@ name: stage fe deploy
 on:
   push:
     branches:
-      - preprod
+      - preprod-dk-fix-1-apr
 
 jobs:
   deploy:
