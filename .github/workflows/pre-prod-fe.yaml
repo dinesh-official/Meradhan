@@ -3,7 +3,7 @@ name: pre-prod fe deploy
 on:
   push:
     branches:
-      - preprod-dk-fix-1-apr
+      - preprod-
 
 jobs:
   deploy:
@@ -195,5 +195,5 @@ jobs:
         with:
           task-definition: preprod_fe-revision.json
           cluster: prod-cluster
-          service: pre-prod-fe-servic
+          service: preprod-fe-service
           force-new-deployment: true
