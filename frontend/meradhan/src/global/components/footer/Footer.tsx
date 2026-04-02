@@ -23,6 +23,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
             )}
           >
             Disclaimer : Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully
+          <br />
+          MeraDhan is a platform providing access to fixed income products and related information. We do not provide investment advisory services. Users are requested to make investment decisions based on their own assessment or consult their financial advisor.
           </p>
 
           <div
