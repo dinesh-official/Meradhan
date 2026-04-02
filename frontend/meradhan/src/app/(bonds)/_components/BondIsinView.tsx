@@ -1,18 +1,17 @@
-import BondsByCategories from "@/global/components/Bond/BondsByCategories";
-import { SortInfoBox } from "@/global/components/wrapper/cards/SortInfoBox";
-import { formatNumberTS } from "@/global/utils/formate";
-import { BondDetailResponse } from "@root/apiGateway";
-import { PiCurrencyInrBold } from "react-icons/pi";
-import BondInfoHeader from "./BondInfoHeader";
-import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import BondBuyNowCalc from "./BondBuyNowCalc";
-import { FaInfoCircle } from "react-icons/fa";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
+import BondsByCategories from "@/global/components/Bond/BondsByCategories";
+import { SortInfoBox } from "@/global/components/wrapper/cards/SortInfoBox";
+import { dateTimeUtils } from "@/global/utils/datetime.utils";
+import { formatNumberTS } from "@/global/utils/formate";
+import { BondDetailResponse } from "@root/apiGateway";
+import { FaInfoCircle } from "react-icons/fa";
+import { PiCurrencyInrBold } from "react-icons/pi";
+import BondInfoHeader from "./BondInfoHeader";
 
 export default function BondIsinView({
   bond,

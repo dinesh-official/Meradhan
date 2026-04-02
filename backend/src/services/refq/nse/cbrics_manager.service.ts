@@ -93,7 +93,7 @@ export class ParticipantManager {
     if (!user) {
       throw new AppError("No User Found");
     }
-    const dobDoi = user.aadhaarCard?.dateOfBirth?.replaceAll("/", "-") || "";
+    const dobDoi = user.panCard?.dateOfBirth?.replaceAll("/", "-") || "";
 
     const address = splitAddressInto3BalancedLines(
       removeLastCommaChunks(user.currentAddress!.fullAddress, 3),
@@ -307,7 +307,7 @@ export class ParticipantManager {
       expiryDate: null,
       leiCode: null,
       custodian: null,
-      dobDoi: user.aadhaarCard?.dateOfBirth?.replaceAll("/", "-") || "",
+      dobDoi: user.panCard?.dateOfBirth?.replaceAll("/", "-") || "",
       bankAccountList: user.bankAccounts.map((e) => {
         return {
           bankAccountNo: e.accountNumber,
