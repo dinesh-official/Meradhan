@@ -6,21 +6,29 @@ RUN apt-get update && apt-get install -y \
     qpdf \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy files
 COPY . .
 
 WORKDIR /app/packages/apiGateway
 RUN bun install
+
 WORKDIR /app/packages/config
 RUN bun install
+
 WORKDIR /app/packages/kyc-providers
 RUN bun install
+
 WORKDIR /app/packages/schema
 RUN bun install
+
 WORKDIR /app/backend
 RUN bun install
+
 WORKDIR /app/backend/databases/postgres
 RUN bunx prisma generate
-WORKDIR /app/backend
+
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 EXPOSE 4000
-CMD ["bun", "start"]
+WORKDIR /app/backend
+CMD ["/app/be-start.sh"]
