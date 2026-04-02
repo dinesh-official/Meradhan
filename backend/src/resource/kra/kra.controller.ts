@@ -3,6 +3,7 @@ import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 import { cacheStorage } from "@store/redis_store";
+import z from "zod";
 
 const RUNNER_KEY_PREFIX = "KRA:";
 const RUNNER_KEY_SUFFIX = "-RUNNER";
@@ -13,7 +14,17 @@ export class KraController {
    * Re-queues the KRA worker job for the given customer/KYC.
    * Returns 409 if a KRA process is already in progress (RUNNER key exists).
    */
+
+
   async rescheduleKra(req: Request, res: Response) {
+    const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
+
+    const schema = z.object({
+      pastExecution: z.enum(["MODIFY", "REGISTER", "NONE"]),
+    });
+
+    const { pastExecution } = schema.parse(req.body);
+
     const customerId = Number(req.body?.customerId);
     const kycDataStoreId = Number(req.body?.kycDataStoreId);
     const delayMs = req.body?.delayMs != null ? Number(req.body.delayMs) : 5000;
@@ -24,9 +35,16 @@ export class KraController {
         message: "customerId and kycDataStoreId are required and must be valid numbers",
       });
     }
+    const cachedKey = `KRA:${customerId}-${kycDataStoreId}`;
 
     const runnerCachedKey = `${RUNNER_KEY_PREFIX}${customerId}-${kycDataStoreId}${RUNNER_KEY_SUFFIX}`;
     const runner = await cacheStorage.get<string>(runnerCachedKey);
+    if (pastExecution !== "NONE") {
+      await cacheStorage.set(cachedKey, pastExecution, TTL_72_HOURS);
+    }
+    if (pastExecution == "NONE") {
+      await cacheStorage.delete(cachedKey);
+    }
     if (runner) {
       return res.sendResponse({
         statusCode: HttpStatus.CONFLICT,

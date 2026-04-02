@@ -285,7 +285,12 @@ export class CustomerKycApi {
   }
 
   async rescheduleKra(
-    payload: { customerId: number; kycDataStoreId: number; delayMs?: number },
+    payload: {
+      customerId: number;
+      kycDataStoreId: number;
+      pastExecution: "MODIFY" | "REGISTER" | "NONE";
+      delayMs?: number;
+    },
     config?: AxiosRequestConfig,
   ) {
     const { data } = await this.apiClient.post<RescheduleKraResponse>(
