@@ -34,4 +34,5 @@ RUN npm run build
 
 EXPOSE 4002
 
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
+CMD ["npx", "next", "start", "-p", "4002", "-H", "0.0.0.0"]

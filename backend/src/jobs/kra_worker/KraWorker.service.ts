@@ -33,12 +33,17 @@ export class KraWorkerService {
   private kraProcess = new KraProcess();
 
   async processKra(data: KraWorkerJobData) {
+
+    console.log("KRA PROCESS STARTED", data);
+    
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
     const runnerCachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
 
     const lastTask = await cacheStorage.get<string>(cachedKey);
+    console.log("LAST TASK", lastTask);
     const { customerId, kycDataStoreId } = data;
     const runner = await cacheStorage.get<string>(runnerCachedKey);
+    console.log("RUNNER", runner);
 
     if (!runner) {
       await db.dataBase.kraDataLogs.create({
