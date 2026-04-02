@@ -27,7 +27,7 @@ WORKDIR /app/backend/databases/postgres
 RUN bunx prisma generate
 
 COPY be-start.sh /app/be-start.sh
-RUN chmod +x /app/start.sh
+RUN chmod +x /app/be-start.sh
 
 EXPOSE 4000
 WORKDIR /app/backend
