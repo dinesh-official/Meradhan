@@ -71,8 +71,16 @@ export default function BondIsinView({
             </SortInfoBox>
             <SortInfoBox title="Coupon Rate">{bond.couponRate}%</SortInfoBox>
             <SortInfoBox title="Yield">{bond.yield !== null && bond.yield !== undefined ? `${bond.yield}%` : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Last Traded Yield">Coming Soon</SortInfoBox>
-            <SortInfoBox title="Last Traded Price">Coming Soon</SortInfoBox>
+            <SortInfoBox title="Last Traded Yield">{bond.lastTradeYield !== null && bond.lastTradeYield !== undefined ? `${bond.lastTradeYield}%` : "Coming Soon"}</SortInfoBox>
+            <SortInfoBox title="Last Traded Price">
+              {bond.lastTradePrice !== null && bond.lastTradePrice !== undefined ? (
+                <>
+                  <PiCurrencyInrBold /> {formatNumberTS(bond.lastTradePrice)}
+                </>
+              ) : (
+                "Coming Soon"
+              )}
+            </SortInfoBox>
             <SortInfoBox title="Allotment Date">
               {dateTimeUtils.formatDateTime(
                 bond.dateOfAllotment,
@@ -89,11 +97,11 @@ export default function BondIsinView({
             <SortInfoBox title="Interest Payment">
               {bond.interestPaymentMode?.replaceAll("_", " ") || "Coming Soon"}
             </SortInfoBox>
-            <SortInfoBox title="Coupon Type">Coming Soon</SortInfoBox>
-            <SortInfoBox title="Taxable">
-              {bond.taxStatus == "TAXABLE"
+            <SortInfoBox title="Coupon Type">{bond.couponType !== null && bond.couponType !== undefined ? bond.couponType : "Coming Soon"}</SortInfoBox>
+            <SortInfoBox title="Taxable"> 
+              {bond.taxStatus !== null && bond.taxStatus !== undefined && bond.taxStatus == "TAXABLE"
                 ? "Yes"
-                : bond.taxStatus == "TAX_FREE"
+                : bond.taxStatus !== null && bond.taxStatus !== undefined && bond.taxStatus == "TAX_FREE"
                   ? "No"
                   : "Coming Soon"}
             </SortInfoBox>
@@ -140,13 +148,13 @@ export default function BondIsinView({
                   )}
               </p>
             </SortInfoBox>
-            <SortInfoBox title="Mode of issuance">Coming Soon</SortInfoBox>
+            <SortInfoBox title="Mode of issuance">{bond.modeOfIssuance !== null && bond.modeOfIssuance !== undefined ? bond.modeOfIssuance : "Coming Soon"}</SortInfoBox>
             <SortInfoBox title="Security">{isSecured()}</SortInfoBox>
             <SortInfoBox title="Issue Size">
               <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize || 0)}
             </SortInfoBox>
             <SortInfoBox title="Next Interest Payment Date">
-              Coming Soon
+              {bond.nextCouponDate !== null && bond.nextCouponDate !== undefined ? dateTimeUtils.formatDateTime(bond.nextCouponDate, "DD MMM YYYY") : "Coming Soon"}
             </SortInfoBox>
           </div>
         </div>
