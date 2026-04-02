@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev \
+    qpdf \
     && rm -rf /var/lib/apt/lists/*
 
 

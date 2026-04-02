@@ -203,3 +203,27 @@ export interface SendOrderPdfEmailResponse {
     messageId?: string;
   };
 }
+
+/** Saved “Receipt PDF options” (GET/PUT /crm/orders/receipt-pdf-options/:orderNumber) */
+export interface CrmOrderReceiptPdfOptionsRow {
+  id: number;
+  orderNumber: string;
+  accruedInterestDays: number | null;
+  settlementNumber: string | null;
+  settlementDateTime: string | null;
+  lastInterestPaymentDateRaw: string | null;
+  lastInterestPaymentDate: string | null;
+  interestPaymentDates: string | null;
+  nonAmortizedBond: boolean;
+  amortizedPrincipalPaymentDates: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetReceiptPdfOptionsResponse {
+  responseData: CrmOrderReceiptPdfOptionsRow | null;
+}
+
+export interface UpsertReceiptPdfOptionsResponse {
+  responseData: CrmOrderReceiptPdfOptionsRow;
+}

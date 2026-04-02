@@ -8,6 +8,8 @@ import type {
   GetCustomerFullOrderResponse,
   CreateOrderFromRfqResponse,
   SendOrderPdfEmailResponse,
+  GetReceiptPdfOptionsResponse,
+  UpsertReceiptPdfOptionsResponse,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 
@@ -193,6 +195,39 @@ export class CrmOrdersApi {
   ): Promise<SendOrderPdfEmailResponse> {
     const { data } = await this.apiClient.post<SendOrderPdfEmailResponse>(
       `/crm/orders/send-pdf-email/${encodeURIComponent(orderNumber)}`,
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async getReceiptPdfOptions(
+    orderNumber: string,
+    config?: AxiosRequestConfig
+  ): Promise<GetReceiptPdfOptionsResponse> {
+    const { data } = await this.apiClient.get<GetReceiptPdfOptionsResponse>(
+      `/crm/orders/receipt-pdf-options/${encodeURIComponent(orderNumber)}`,
+      config
+    );
+    return data;
+  }
+
+  async upsertReceiptPdfOptions(
+    orderNumber: string,
+    payload: {
+      accruedInterestDays?: number;
+      settlementNumber?: string | null;
+      settlementDateTime?: string | null;
+      lastInterestPaymentDateRaw?: string | null;
+      lastInterestPaymentDate?: string | null;
+      interestPaymentDates?: string | null;
+      nonAmortizedBond?: boolean;
+      amortizedPrincipalPaymentDates?: string | null;
+    },
+    config?: AxiosRequestConfig
+  ): Promise<UpsertReceiptPdfOptionsResponse> {
+    const { data } = await this.apiClient.put<UpsertReceiptPdfOptionsResponse>(
+      `/crm/orders/receipt-pdf-options/${encodeURIComponent(orderNumber)}`,
       payload,
       config
     );
