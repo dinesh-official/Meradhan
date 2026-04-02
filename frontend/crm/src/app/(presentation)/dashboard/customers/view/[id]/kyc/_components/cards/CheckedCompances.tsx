@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export type Root = {
   step_1: {
+    usedExistingKra?: boolean;
     pan: {
       isFatca: boolean;
       lastName: string;
