@@ -117,9 +117,7 @@ function ReviewOrder({
   const otherCharges = 0;
 
   const principalScaled = orderPricing?.principalAmount
-  const accruedScaled = orderPricing?.accruedInterest
-    ? orderPricing.accruedInterest * quantity
-    : 0;
+  const accruedScaled = orderPricing?.accruedInterest||0;
   const stampScaled = orderPricing?.stampDuty
   const settlementAmount = orderPricing?.settlementAmount ?? 0
 

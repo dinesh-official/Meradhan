@@ -123,10 +123,10 @@ function CustomerKycView({ id }: { id: number}) {
       toast.error("KRA process is already running for this customer.");
       return;
     }
-    // if (data?.kycStatus === "VERIFIED") {
-    //   toast.error("KYC already verified");
-    //   return;
-    // }
+    if (data?.kycStatus === "VERIFIED") {
+      toast.error("KYC already verified");
+      return;
+    }
 
     // Reset form each time you open the popup.
     setPastExecution("MODIFY");
