@@ -14,8 +14,14 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { useCustomerTableActions } from "./useCustomerTableActionHook";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import { canAccessNotifications } from "@/global/utils/role.utils";
+import { useState } from "react";
+import CustomerNotificationLogsDialog from "./CustomerNotificationLogsDialog";
 
 const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
+  const { cookies } = useAppCookie();
+  const [notificationLogsOpen, setNotificationLogsOpen] = useState(false);
   const { trackActivity } = useUserTracking();
   const {
     handleProfileView,
@@ -71,6 +77,12 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
           <DropdownMenuItem onClick={handleProfileView}>
             View Profile
           </DropdownMenuItem>
+
+          <ShowOnly condition={canAccessNotifications(cookies.role)}>
+            <DropdownMenuItem onClick={() => setNotificationLogsOpen(true)}>
+              Notification logs
+            </DropdownMenuItem>
+          </ShowOnly>
 
           <AllowOnlyView permissions={["delete:customer"]} condition={profile.kycStatus !== "PENDING"}>
             <DropdownMenuItem
@@ -142,6 +154,11 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
           </AllowOnlyView>
         </DropdownMenuContent>
       </DropdownMenu>
+      <CustomerNotificationLogsDialog
+        customerProfileId={profile.id}
+        open={notificationLogsOpen}
+        onOpenChange={setNotificationLogsOpen}
+      />
     </>
   );
 };

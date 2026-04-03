@@ -22,6 +22,7 @@ export {
 import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";
 import * as auditlogs from "./lib/crm/auditlogs.schema";
+import * as notificationsSchema from "./lib/crm/notifications.schema";
 
 import * as Enum from "./lib/enums";
 import * as bondsSchema from "./lib/bonds/bonds.schema";
@@ -38,6 +39,7 @@ export const appSchema = {
     partnership: partnershipSchema,
     orders: crmOrdersSchema,
     auditlogs,
+    notifications: notificationsSchema,
     rfq: {
       nse: {
         isin: nseIsinSchema,

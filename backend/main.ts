@@ -23,6 +23,7 @@ import localDataRfqRoutes from "@resource/crm/refq/nse/local/localdata_rfq.route
 import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
 import trashRoutes from "@resource/crm/trash/trash.routes";
 import crmUsersRoutes from "@resource/crm/users/crmusers.routes";
+import notificationRoutes from "@resource/crm/notifications/notification.routes";
 import auditlogsRoutes from "@resource/customer/auditlogs/auditlogs.routes";
 import customerAuthRoutes from "@resource/customer/auth/customer.auth.routes";
 import customerBondsRoutes from "@resource/customer/bonds/customer_bonds.routes";
@@ -62,6 +63,7 @@ server.addRoutes([
   partnershipFollowUpRouter,
   crmAuditlogsRoutes,
   crmOrdersRoutes,
+  notificationRoutes,
   participantsRouter,
   commonApiRoutes,
   dashboardRoutes,
