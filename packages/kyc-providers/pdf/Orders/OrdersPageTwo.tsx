@@ -93,10 +93,7 @@ function OrdersPageTwo({
       clientId: settlementDemat.benId ?? "—",
     }
     : user.dematAccounts?.find((e) => e.isPrimary);
-  const confirmationDateTime =
-    formatDateTimeIST(orderData?.metadata?.settlementDateTime) ||
-    orderData?.metadata?.settlementDateTime?.trim() ||
-    formatOrderDateForConfirmation(orderData?.createdAt);
+  const confirmationDateTime = orderData?.metadata?.settlementDateTime;
 
   return (
     <View

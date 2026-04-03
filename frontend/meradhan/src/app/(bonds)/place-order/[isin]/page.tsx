@@ -10,6 +10,7 @@ import OrderStep from "../_components/OrderStep";
 import { generateDraftPlaceOrderLabel } from "../_utils/calcAmount";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import { redirect } from "next/navigation";
+import { getBondPurchaseEligibility } from "@/global/utils/bondPurchaseEligibility";
 export const revalidate = 0;
 
 export const generateMetadata = async ({
@@ -23,9 +24,9 @@ export const generateMetadata = async ({
   return await generateBondInfoPageMetaData(isin, "place-order/[isin]");
 };
 
-async function page({ params, searchParams }: { params: Promise<{ isin: string }>, searchParams: Promise<{ quantity: string }> }) {
+async function page({ params, searchParams }: { params: Promise<{ isin: string }>, searchParams: Promise<{ quantity?: string, allowTrade?: string }> }) {
   const { isin } = await params;
-  const { quantity } = await searchParams;
+  const { quantity, allowTrade } = await searchParams;
 
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const orderId = generateDraftPlaceOrderLabel();
@@ -93,6 +94,66 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               />
               <h2 className="text-2xl font-semibold mt-4">Bond Not Found</h2>
               <p className="text-gray-600">The bond you are looking for does not exist.</p>
+
+              <Link href="/bonds" className="mt-6 inline-block">
+                <Button>Back to Bonds</Button>
+              </Link>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
+
+
+  if (!responseData.allowForPurchase) {
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Order Not Allowed"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">Order Not Allowed</h2>
+              <p className="text-gray-600">The bond you are looking for is not allowed for purchase.</p>
+              <Link href="/bonds" className="mt-6 inline-block">
+                <Button>Back to Bonds</Button>
+              </Link>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
+  const purchase = getBondPurchaseEligibility(responseData);
+
+  if (!purchase.eligible) {
+    const missingFields = purchase.missingFields.join(", ");
+
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Order Not Allowed"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">Order Not Allowed</h2>
+              <p className="text-gray-600">The bond you are looking for is not allowed for purchase. Please contact support.</p>
+              {
+                allowTrade === "true" ? (
+                  <p className="text-gray-600">The bond you are looking for is not allowed for purchase. {missingFields}</p>
+                ) : null
+              }
 
               <Link href="/bonds" className="mt-6 inline-block">
                 <Button>Back to Bonds</Button>

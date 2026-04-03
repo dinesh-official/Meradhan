@@ -118,6 +118,12 @@ export const NAV_ITEMS: NavItem[] = [
             allowOnly: ["view:rfq"],
           },
           {
+            label: "Settlement Dates",
+            path: "/dashboard/rfqs/nse/settlement-dates",
+            module: "rfq",
+            allowOnly: ["view:rfq"],
+          },
+          {
             label: "Participants",
             path: "/dashboard/rfqs/nse/participants",
             module: "rfq",

@@ -4,6 +4,10 @@ import type z from "zod";
 import { BondQueryBuilder } from "./bond_query_builder";
 import { isISIN } from "@utils/filters/convert";
 import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
+import { sendBackOfficeEmail } from "@communication/email_communication";
+import { placeOrderEmailCustomer, sendPlaceOrderEmail } from "./place-order-email";
+import { env } from "@packages/config/src/env";
+import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
 
 export type GetBondOrderPricingResult =
   | { ok: true; pricing: ReturnType<typeof computeBondOrderPricingData> }
@@ -129,13 +133,13 @@ export class BondService {
         orderBy:
           options?.all == "YES"
             ? [
-                {
-                  allowForPurchase: "desc",
-                },
-                {
-                  sortedAt: "asc",
-                },
-              ]
+              {
+                allowForPurchase: "desc",
+              },
+              {
+                sortedAt: "asc",
+              },
+            ]
             : orderBy,
         ...paginationOptions,
       }),
@@ -450,5 +454,78 @@ export class BondService {
       where: { isOngoingDeal: true },
     });
     return data;
+  }
+
+  async placeOrder(orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>) {
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: orderData.customerProfileId },
+    });
+    if (!customer) {
+      throw new Error(`Customer with ID ${orderData.customerProfileId} not found`);
+    }
+    const data = await db.dataBase.leadsModel.create({
+      data: {
+        bondType: "CORPORATE",
+        fullName: customer.firstName + " " + customer.lastName,
+        phoneNo: customer.phoneNo ?? "",
+        leadSource: "WEBSITE",
+        status: "NEW",
+        createdBy: customer.id,
+        emailAddress: customer.emailAddress ?? "",
+        exInvestmentAmount: orderData.settlementAmount,
+        note: "Order placed for " + orderData.bondName + " with ISIN " + orderData.isin + " and quantity " + orderData.quantity + " at " + orderData.dealDate,
+      },
+    });
+
+
+    // format the request date to DD-MMM-YYYY HH:MM AM/PM
+    const requestDate = new Date(orderData.requestDate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+
+    orderData.requestDate = requestDate;
+
+    const orderPdfService = new OrderPdfService();
+    let orderPdfAttachments:
+      | { filename: string; path: string }[]
+      | undefined;
+    try {
+      const pdfFilePath = await orderPdfService.generateTempOrderPdfFile({
+        userId: customer.id,
+        isin: orderData.isin,
+        qun: orderData.quantity,
+        isReleased: false,
+        requestDate,
+      });
+      orderPdfAttachments = [
+        {
+          filename: `MERADHAN-ORDER-${orderData.isin}-${orderData.quantity}.pdf`,
+          path: pdfFilePath,
+        },
+      ];
+    } catch (e) {
+      console.error("placeOrder: failed to generate order PDF for email", e);
+    }
+
+    await Promise.all([
+      sendBackOfficeEmail({
+        to: customer.emailAddress ?? "",
+        subject: "Order Request Received – ISIN: " + orderData.isin + " | Request Date: " + requestDate,
+        text: await placeOrderEmailCustomer(orderData),
+        attachments: orderPdfAttachments,
+      }),
+      sendBackOfficeEmail({
+        to: "dl.sales@meradhan.co",
+        subject: env.CBRICS_ENV === "UAT" ? `UAT Testing | Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.settlementAmount} [Please DELETE this email its a test email]` : `Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.settlementAmount} | Request Date: ${requestDate}`,
+        text: await sendPlaceOrderEmail(orderData),
+        attachments: orderPdfAttachments,
+      }),
+    ]);
+    return { success: true, message: "Order placed successfully" };
   }
 }
