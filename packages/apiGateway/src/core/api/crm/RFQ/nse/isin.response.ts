@@ -278,3 +278,20 @@ export interface SettleOrderData {
   dpId?: string;
   benId?: string;
 }
+
+/** CRM NSE settlement calendar row (`nse_settlement_no`). */
+export type NseSettlementNoRecord = {
+  id: number;
+  /** Stored as yyyy-mm-dd */
+  date: string;
+  settlementNo: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NseSettlementNoListResponse = {
+  items: NseSettlementNoRecord[];
+  total: number;
+  page: number;
+  pageSize: number;
+};

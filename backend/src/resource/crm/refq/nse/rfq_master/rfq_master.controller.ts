@@ -227,4 +227,38 @@ export class RfqMasterController {
       responseData: result,
     });
   }
+
+  async getSettlementNo(req: Request, res: Response) {
+    const date = req.query.date as string;
+    const result = await this.rfqMasterService.getSettlementNo(date);
+    res.sendResponse({
+      statusCode: 200,
+      responseData: result,
+    });
+  }
+
+  async createOrUpdateSettlementNo(req: Request, res: Response) {
+    const data = appSchema.rfq.settlementNoSchema.parse(req.body);
+    const result = await this.rfqMasterService.createOrUpdateSettlementNo(data.date, data.settlementNo);
+    res.sendResponse({
+      statusCode: 200,
+      responseData: result,
+    });
+  }
+
+  async getAllSettlementNos(req: Request, res: Response) {
+    const page = Number(req.query.page as string || 1);
+    const pageSize = Number(req.query.pageSize as string || 30);
+    const yearMonth =
+      typeof req.query.yearMonth === "string" ? req.query.yearMonth : undefined;
+    const result = await this.rfqMasterService.getAllSettlementNos(
+      page,
+      pageSize,
+      yearMonth
+    );
+    res.sendResponse({
+      statusCode: 200,
+      responseData: result,
+    });
+  }
 }

@@ -21,7 +21,7 @@ import { useOrderState } from "../store/useOrderState";
 import { useEffect, useRef } from "react";
 import { useOrderActivityTracking } from "../_hooks/useOrderActivityTracking";
 
-const stepNames = ["Place Order", "Order Receipt", "Make Payment"];
+const stepNames = ["Place Order", "Order Receipt", "Confirmation"];
 
 function OrderStep({
   bond,
@@ -92,6 +92,7 @@ function OrderStep({
               bond={bond}
               customer={customer}
               orderId={orderId}
+              orderPricing={orderPricing}
               key={"Order-Receipt"}
             />,
             <Payment

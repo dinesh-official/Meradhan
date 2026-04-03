@@ -310,7 +310,6 @@ function BondForm({ initialData, isin }: BondFormProps) {
     onSuccess: () => {
       toast.success("Bond created successfully");
       queryClient.invalidateQueries({ queryKey: ["bonds"] });
-      router.push("/dashboard/bonds");
     },
     onError: (error: AxiosError) => {
       toast.error(
@@ -922,8 +921,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -1038,8 +1037,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -1275,8 +1274,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -1305,8 +1304,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>

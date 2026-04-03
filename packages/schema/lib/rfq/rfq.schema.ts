@@ -247,3 +247,9 @@ export const dealAmendFilterSchema = z.object({
   filtFromDate: z.string().optional(),
   filtToDate: z.string().max(30).optional(),
 });
+
+
+export const settlementNoSchema = z.object({
+  date: z.string(),
+  settlementNo: z.string(),
+});

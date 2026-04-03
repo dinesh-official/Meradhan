@@ -42,5 +42,7 @@ bondRoute.put("/api/bonds/:isin", allowAccessMiddleware("CRM"), (req, res) =>
   bondController.updateBond(req, res)
 );
 
+bondRoute.post("/api/bonds/place-order", allowAccessMiddleware("USER"), (req, res) => bondController.placeOrder(req, res));
+
 
 export default bondRoute;

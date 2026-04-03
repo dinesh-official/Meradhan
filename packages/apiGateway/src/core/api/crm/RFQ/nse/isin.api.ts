@@ -6,6 +6,8 @@ import type {
   CreateNegotiationResponse,
   CreateRfqResponseItem,
   NseISINResponseData,
+  NseSettlementNoListResponse,
+  NseSettlementNoRecord,
   SettleOrderData,
 } from "./isin.response";
 import type { BaseResponseData } from "../../../../../types/base";
@@ -172,5 +174,32 @@ export class RfqIsinApi {
       filter
     );
     return response.data;
+  }
+
+  async getAllSettlementNos(
+    params?: { page?: number; pageSize?: number; yearMonth?: string },
+    config?: AxiosRequestConfig
+  ) {
+    const res = await this.apiClient.get<
+      BaseResponseData<NseSettlementNoListResponse>
+    >("/crm/rfq/nse/settlement-no/all", {
+      ...config,
+      params: {
+        page: params?.page ?? 1,
+        pageSize: params?.pageSize ?? 20,
+        ...(params?.yearMonth ? { yearMonth: params.yearMonth } : {}),
+      },
+    });
+    return res.data;
+  }
+
+  async createOrUpdateSettlementNo(
+    payload: z.infer<typeof appSchema.rfq.settlementNoSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const res = await this.apiClient.post<
+      BaseResponseData<NseSettlementNoRecord>
+    >("/crm/rfq/nse/settlement-no", payload, config);
+    return res.data;
   }
 }
