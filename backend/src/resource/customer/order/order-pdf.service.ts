@@ -81,10 +81,16 @@ export class OrderPdfService {
       recordDays,
       nextCouponDate: nextCouponDateStr.toISOString(),
     });
+    let settlementNumber = "--";
 
-    const settlementNumber = await this.rfqMasterService.getSettlementNo(
-      pricing.settlementDate
-    );
+    try {
+      const st = await this.rfqMasterService.getSettlementNo(
+        pricing.settlementDate
+      );
+      settlementNumber = st.settlementNo;
+    } catch (error) {
+      console.log("SETTLEMENT NUMBER ERROR", error);
+    }
 
     const orderData = {
       price: pricing.cleanPrice,
@@ -96,7 +102,7 @@ export class OrderPdfService {
         accruedInterest: pricing.accruedInterest,
         accruedInterestDays: pricing.noOfAccrualDays,
         settlementDate: pricing.settlementDate,
-        settlementNumber: settlementNumber.settlementNo,
+        settlementNumber: settlementNumber,
         orderType: "One to One (OTO) on RFQ Platform of the Exchange",
         settlementDateTime: new Date(requestDate || new Date()).toLocaleString("en-GB", {
           day: "2-digit",
