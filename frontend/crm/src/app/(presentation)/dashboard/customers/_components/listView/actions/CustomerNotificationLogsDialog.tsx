@@ -7,8 +7,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
+import { MessageSquareText } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type LogRow = {
@@ -96,10 +103,18 @@ export default function CustomerNotificationLogsDialog({
                   <th className="border-b p-3 text-left font-medium">Campaign status</th>
                   <th className="border-b p-3 text-left font-medium">Your status</th>
                   <th className="border-b p-3 text-left font-medium">Phone</th>
+                  <th className="border-b p-3 text-center font-medium w-12">Msg</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                <TooltipProvider delayDuration={100}>
+                {rows.map((r) => {
+                  const msgText = r.notificationLog.messagePreview
+                    ?? (r.notificationLog.templateVariables
+                        ? `Variables: ${JSON.stringify(r.notificationLog.templateVariables)}`
+                        : null);
+
+                  return (
                   <tr key={r.id} className="odd:bg-background even:bg-muted/30 hover:bg-muted/60 transition-colors">
                     <td className="p-3 align-top whitespace-nowrap">
                       {formatDate(r.notificationLog.sentAt)}
@@ -113,8 +128,29 @@ export default function CustomerNotificationLogsDialog({
                     </td>
                     <td className="p-3 align-top">{r.deliveryStatus}</td>
                     <td className="p-3 align-top font-mono text-xs">{r.phone}</td>
+                    <td className="p-3 align-top text-center">
+                      {msgText ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
+                              <MessageSquareText className="w-4 h-4" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="left"
+                            className="max-w-xs text-xs leading-relaxed whitespace-pre-wrap break-words"
+                          >
+                            {msgText}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <span className="text-muted-foreground/40 text-xs">—</span>
+                      )}
+                    </td>
                   </tr>
-                ))}
+                  );
+                })}
+                </TooltipProvider>
               </tbody>
             </table>
           )}

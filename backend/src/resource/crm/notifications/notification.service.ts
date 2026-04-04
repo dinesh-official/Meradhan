@@ -319,17 +319,30 @@ export class NotificationService {
       },
     });
 
-    const previewParts = Object.entries(input.templateVariables)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(", ");
+    // Resolve the actual message text from the saved template and substitute ##var## placeholders
+    const tplRecord = await db.dataBase.notificationTemplateModel.findFirst({
+      where: { templateId: input.dltTemplateId, isActive: true },
+      select: { message: true },
+    });
+
+    let messagePreview: string | null = null;
+    if (tplRecord?.message) {
+      const resolved = tplRecord.message.replace(
+        /##(\w+)##/g,
+        (_, key) => input.templateVariables[key] ?? `##${key}##`
+      );
+      messagePreview = resolved.length > 500 ? `${resolved.slice(0, 497)}...` : resolved;
+    } else {
+      // Fallback: store variables as key=value if template text is not found
+      const fallback = Object.entries(input.templateVariables)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(", ");
+      messagePreview = fallback || null;
+    }
+
     await db.dataBase.notificationLogModel.update({
       where: { id: header.id },
-      data: {
-        messagePreview:
-          previewParts.length > 500
-            ? `${previewParts.slice(0, 497)}...`
-            : previewParts || null,
-      },
+      data: { messagePreview },
     });
 
     for (const r of recipients) {
