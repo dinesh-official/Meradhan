@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-meradhan-be:145",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-meradhan-be:146",
     "containerDefinitions": [
         {
             "name": "stage-meradhan-be",
@@ -34,7 +34,7 @@
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 145,
+    "revision": 146,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -75,13 +75,13 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "512",
-    "memory": "1024",
+    "cpu": "256",
+    "memory": "512",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2026-04-04T05:34:29.585Z",
+    "registeredAt": "2026-04-04T06:15:48.523Z",
     "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []
