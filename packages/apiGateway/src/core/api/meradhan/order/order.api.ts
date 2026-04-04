@@ -1,6 +1,9 @@
 import type { AxiosRequestConfig } from "axios";
 import type { IApiCaller } from "../../../connection/apiCaller.interface";
-import type { GetOrderHistoryResponse } from "./order.response";
+import type {
+  GetOrderHistoryResponse,
+  GetPaymentGatewayModeResponse,
+} from "./order.response";
 import { appSchema } from "@root/schema";
 import type z from "zod";
 
@@ -8,6 +11,16 @@ export class CustomerOrderApi {
   private schema = appSchema.order;
 
   constructor(private apiClient: IApiCaller) {}
+
+  async getPaymentGatewayMode(
+    config?: AxiosRequestConfig
+  ): Promise<GetPaymentGatewayModeResponse> {
+    const { data } = await this.apiClient.get<GetPaymentGatewayModeResponse>(
+      "/customer/order/payment-gateway-mode",
+      config
+    );
+    return data;
+  }
 
   async getOrderHistory(
     query?: z.infer<typeof this.schema.OrderQuerySchema>,

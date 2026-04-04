@@ -179,6 +179,12 @@ export const NAV_ITEMS: NavItem[] = [
         module: "orders",
         allowOnly: ["view:orders"],
       },
+      {
+        label: "PG Management",
+        path: "/dashboard/orders/pg-management",
+        module: "orders",
+        allowOnly: ["view:orders"],
+      },
     ],
   },
 

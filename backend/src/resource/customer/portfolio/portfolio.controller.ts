@@ -97,14 +97,21 @@ export class PortfolioController {
     const customerId = req.customer?.id;
     if (!customerId) throw new AppError("Unauthorized");
 
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const body = req.body ?? {};
+    const pageRaw = body.page ?? req.query.page;
+    const limitRaw = body.limit ?? req.query.limit;
+    const pageNum =
+      pageRaw != null && pageRaw !== "" ? Number(pageRaw) : 1;
+    const limitNum =
+      limitRaw != null && limitRaw !== "" ? Number(limitRaw) : 10;
+    const page = Number.isFinite(pageNum) && pageNum >= 1 ? pageNum : 1;
+    const limit = Number.isFinite(limitNum) && limitNum >= 1 ? Math.min(limitNum, 100) : 10;
     const {
       bondTypes,
       bondRatings,
       couponRanges,
       paymentFrequencies,
-    } = req.body ?? {};
+    } = body;
 
     const result = await this.portfolioService.getPortfolioDetails(
       customerId,
