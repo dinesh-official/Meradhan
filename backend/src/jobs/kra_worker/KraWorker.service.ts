@@ -85,6 +85,31 @@ export class KraWorkerService {
 
       const kyc = payload.data as Root;
 
+      if (data.cbricsOnly) {
+        try {
+          await this.registerOnCbrics(customerId, kycDataStoreId);
+        } catch (error) {
+          await db.dataBase.kraDataLogs.create({
+            data: {
+              requestData: {
+                customerId: customerId,
+                cbricsOnly: true,
+              },
+              responseData: {
+                error: "CBRICS Registration Failed",
+                message: error?.toString(),
+              },
+              userId: customer.id,
+              kycId: kycDataStoreId,
+              stage: "FAILED_CBRICS_REGISTRATION",
+              reqTime: new Date().toISOString(),
+              resTime: new Date().toISOString(),
+            },
+          });
+        }
+        return;
+      }
+
       const isUsedKra = kyc.step_1.usedExistingKra;
 
       if (isUsedKra) {
