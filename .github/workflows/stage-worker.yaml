@@ -112,7 +112,7 @@ jobs:
           echo "RFQ_CBRICS_ENV=UAT" >> .env
           echo "CBRICS_ENV=UAT" >>  .env
 
-          echo "DEV_OPENAI_API_KEY=${ secrets.OPENAI_API_KEY }" >> .env
+          echo "DEV_OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
 
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
