@@ -19,8 +19,8 @@ function Payment({
     <div className="container max-w-2xl mx-auto">
       <h1 className="title text-center">Order Request Received</h1>
 
-      <div className="mt-8 text-center text-muted-foreground space-y-5 text-base leading-relaxed">
-        <p className="text-foreground">
+      <div className="mt-8 space-y-5 text-center text-base leading-relaxed text-black">
+        <p>
           Thank you for submitting your order request on MeraDhan.
         </p>
         <p>
