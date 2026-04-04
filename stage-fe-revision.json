@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-fe:1",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-fe:136",
     "containerDefinitions": [
         {
             "name": "stage-fe",
@@ -15,10 +15,8 @@
             ],
             "essential": true,
             "environment": [],
-            "environmentFiles": [],
             "mountPoints": [],
             "volumesFrom": [],
-            "ulimits": [],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
@@ -36,7 +34,7 @@
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 1,
+    "revision": 136,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -71,20 +69,20 @@
     "placementConstraints": [],
     "compatibilities": [
         "EC2",
-        "MANAGED_INSTANCES",
-        "FARGATE"
+        "FARGATE",
+        "MANAGED_INSTANCES"
     ],
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "512",
-    "memory": "2048",
+    "cpu": "256",
+    "memory": "1024",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2026-01-11T06:59:42.149Z",
-    "registeredBy": "arn:aws:iam::450321244603:user/lokesh",
+    "registeredAt": "2026-04-04T05:22:52.838Z",
+    "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []
 }
