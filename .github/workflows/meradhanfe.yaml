@@ -45,6 +45,9 @@ jobs:
           DIRECT_URL="${{ secrets.DIRECT_URL }}"
           echo "DIRECT_URL=$DIRECT_URL" >> .env
 
+          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
+          
           REDIS_HOST="${{ secrets.REDIS_HOST }}"
           echo "REDIS_HOST=$REDIS_HOST" >> .env
 

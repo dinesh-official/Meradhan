@@ -379,6 +379,8 @@ export class KraWorkerService {
         data: {
           requestData: {
             customerId: customerId,
+            kycDataStoreId: kycDataStoreId,
+            date: new Date().toISOString(),
           },
           responseData: cbUser,
           userId: customerId,
@@ -390,6 +392,9 @@ export class KraWorkerService {
       });
     } catch (error) {
       const err = error as AxiosError;
+      console.log("CBRICS REGISTER ERROR MESSAGE", err.message);
+      console.log("CBRICS REGISTER ERROR", err.response?.data);
+
       await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
@@ -401,6 +406,8 @@ export class KraWorkerService {
         data: {
           requestData: {
             customerId: customerId,
+            kycDataStoreId: kycDataStoreId,
+            date: new Date().toISOString(),
           },
           responseData: err.response?.data || err.message,
           userId: customerId,
@@ -791,9 +798,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-            data.step_1.pan.response.details.aadhaar.current_address_details
-              .state,
-          )?.code
+          data.step_1.pan.response.details.aadhaar.current_address_details
+            .state,
+        )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",

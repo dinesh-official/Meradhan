@@ -208,4 +208,12 @@ export class BondController {
       responseData: data,
     });
   }
+  async placeOrder(req: Request, res: Response) {
+    const orderData = appSchema.bonds.orderPlaceSchema.parse(req.body);
+    const data = await this.bondService.placeOrder(orderData);
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
 }

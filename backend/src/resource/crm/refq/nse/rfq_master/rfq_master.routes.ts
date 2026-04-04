@@ -59,4 +59,22 @@ rfqMasterRouter.post(
   (req, res) => controller.getAllSettledOrders(req, res)
 );
 
+rfqMasterRouter.get(
+  "/api/crm/rfq/nse/settlement-no",
+  allowAccessMiddleware("PUBLIC"),
+  (req, res) => controller.getSettlementNo(req, res)
+);
+
+rfqMasterRouter.post(
+  "/api/crm/rfq/nse/settlement-no",
+  allowAccessMiddleware("ADMIN", "SUPER_ADMIN"),
+  (req, res) => controller.createOrUpdateSettlementNo(req, res)
+);
+
+rfqMasterRouter.get(
+  "/api/crm/rfq/nse/settlement-no/all",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.getAllSettlementNos(req, res)
+);
+
 export default rfqMasterRouter;
