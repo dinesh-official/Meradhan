@@ -1,6 +1,12 @@
 import { NAV_ITEMS, NavItem } from '../constants/navlinks.constants';
 import { ROLE_PERMISSIONS, Role, Permission } from '../constants/role.constants';
 
+const NOTIFICATION_ROLES: Role[] = ["SALES", "ADMIN", "SUPER_ADMIN"];
+
+export function canAccessNotifications(role: Role): boolean {
+  return NOTIFICATION_ROLES.includes(role);
+}
+
 // 7️⃣ Helper to check permission
 export const hasPermission = (role: Role, permission: Permission): boolean => {
     return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
@@ -16,11 +22,17 @@ export const hasOneOfPermission = (role: Role, permissions: Permission[]): boole
  */
 function generateNavItemsByPermissions(
     navItems: NavItem[],
-    userPermissions: Permission[]
+    userPermissions: Permission[],
+    userRole: Role,
 ): NavItem[] {
-    const hasAccess = (allowOnly?: Permission[]): boolean => {
-        if (!allowOnly || allowOnly.length === 0) return true;
-        return allowOnly.some(permission => userPermissions.includes(permission));
+    const hasAccess = (item: NavItem): boolean => {
+        if (item.roles && !item.roles.includes(userRole)) {
+            return false;
+        }
+        if (!item.allowOnly || item.allowOnly.length === 0) {
+            return true;
+        }
+        return item.allowOnly.some(permission => userPermissions.includes(permission));
     };
 
     const filterNavItems = (items: NavItem[]): NavItem[] => {
@@ -32,7 +44,7 @@ function generateNavItemsByPermissions(
                     filteredChildren = filterNavItems(item.children);
                 }
 
-                if (hasAccess(item.allowOnly) || (filteredChildren && filteredChildren.length > 0)) {
+                if (hasAccess(item) || (filteredChildren && filteredChildren.length > 0)) {
                     return {
                         ...item,
                         children: filteredChildren,
@@ -52,5 +64,5 @@ function generateNavItemsByPermissions(
  */
 export function generateNavItemsByRole(role: Role): NavItem[] {
     const permissions = ROLE_PERMISSIONS[role] || [];
-    return generateNavItemsByPermissions(NAV_ITEMS, permissions);
+    return generateNavItemsByPermissions(NAV_ITEMS, permissions, role);
 }

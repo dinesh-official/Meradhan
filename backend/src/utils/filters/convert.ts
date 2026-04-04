@@ -16,7 +16,7 @@ export function removeCountryCode(
     "49",
     "33",
     "39",
-    "7",
+    "91",
   ];
 
   // Try removing known country code if found
