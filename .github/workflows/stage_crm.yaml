@@ -29,6 +29,8 @@ jobs:
           DEV_REDIS_HOST: ${{ secrets.DEV_REDIS_HOST }}
           DEV_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }}
 
+          DEV_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
           DEV_KRA_USERNAME: ${{ secrets.DEV_KRA_USERNAME }}
           DEV_KRA_PASSWORD: ${{ secrets.DEV_KRA_PASSWORD }}
           DEV_KRA_PASS_KEY: ${{ secrets.DEV_KRA_PASS_KEY }}
@@ -111,6 +113,8 @@ jobs:
 
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
+
+          echo "DEV_OPENAI_API_KEY=${ secrets.OPENAI_API_KEY }" >> .env
 
           echo "KRA_USERNAME=${DEV_KRA_USERNAME}" >> .env
           echo "KRA_PASSWORD=${DEV_KRA_PASSWORD}" >> .env
