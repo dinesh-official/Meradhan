@@ -76,6 +76,8 @@ jobs:
           DEV_RAZORPAY_KEY_SECRET: ${{ secrets.DEV_RAZORPAY_KEY_SECRET }}
           DEV_RAZORPAY_WEBHOOK_SECRET: ${{ secrets.DEV_RAZORPAY_WEBHOOK_SECRET }}
 
+          DEV_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
           DEV_S3_ACCESS_KEY_ID: ${{ secrets.DEV_S3_ACCESS_KEY_ID }}
           DEV_S3_SECRET_ACCESS_KEY: ${{ secrets.DEV_S3_SECRET_ACCESS_KEY }}
           DEV_S3_REGION: ap-south-1
@@ -151,6 +153,8 @@ jobs:
           echo "AUTH_MICROSOFT_ENTRA_ID_ID=${DEV_AUTH_MICROSOFT_ENTRA_ID_ID}" >> .env
           echo "AUTH_MICROSOFT_ENTRA_ID_SECRET=${DEV_AUTH_MICROSOFT_ENTRA_ID_SECRET}" >> .env
           echo "AUTH_MICROSOFT_ENTRA_ID_ISSUER=${DEV_AUTH_MICROSOFT_ENTRA_ID_ISSUER}" >> .env
+
+          echo "OPENAI_API_KEY=${DEV_OPENAI_API_KEY}" >> .env
 
           echo "RAZORPAY_KEY_ID=${DEV_RAZORPAY_KEY_ID}" >> .env
           echo "RAZORPAY_KEY_SECRET=${DEV_RAZORPAY_KEY_SECRET}" >> .env
