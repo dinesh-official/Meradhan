@@ -12,8 +12,12 @@ model CRMUserDataModel {
   createdBy                  Int?
   CustomersAuthDataModel     CustomersAuthDataModel[]
   LeadsModel                 LeadsModel[]
-  PartnershipSubmissionModel PartnershipSubmissionModel[]
+    PartnershipSubmissionModel PartnershipSubmissionModel[]
 
-  @@index([email])
-  @@map("crm_users")
+    notificationSavedLists   CrmNotificationSavedListModel[]
+    notificationLogsSent     NotificationLogModel[]           @relation("NotificationSentBy")
+    notificationTemplates    NotificationTemplateModel[]      @relation("NotificationTemplateCreatedBy")
+
+    @@index([email])
+    @@map("crm_users")
 }

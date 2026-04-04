@@ -19,6 +19,7 @@ import * as crmLeads from "./src/core/api/crm/crmLeads.api";
 import * as crmPartnership from "./src/core/api/crm/crmPartnership.api";
 import { CrmOrdersApi } from "./src/core/api/crm/orders.api";
 import { CrmDashboardApi } from "./src/core/api/crm/dashboard.api";
+import { CrmNotificationsApi } from "./src/core/api/crm/notifications.api";
 export * from "./src/core/api/crm/crmLeads.api";
 export * from "./src/core/api/crm/crmPartnership.api";
 export * from "./src/core/api/crm/dashboard.api";
@@ -63,6 +64,9 @@ export default {
     crmOrdersApi: CrmOrdersApi,
     dashboard: {
       CrmDashboardApi,
+    },
+    notifications: {
+      CrmNotificationsApi,
     },
     auditlogs,
     rfq: {

@@ -103,6 +103,9 @@ model CustomerProfileDataModel {
     orders        Order[]
     customerBonds CustomerBonds[]
 
+    notificationSavedListMembers CrmNotificationSavedListMemberModel[]
+    notificationRecipientLogs    NotificationRecipientLogModel[]
+
     @@index([emailAddress, userName])
     @@map("customers_profile_data")
 }

@@ -1,22 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { BondDetailsResponse, CustomerByIdPayload } from "@root/apiGateway";
-import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import { maskEmail } from "@/global/utils/formate";
 import Link from "next/link";
 import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
-import { getPlaceOrderBusinessDates } from "../../_utils/businessDates";
-import { useOrderState } from "../../store/useOrderState";
-
-const WEEKEND_ONLY_HOLIDAYS = new Set<string>();
 
 function Payment({
-  bond,
-  customer,
   orderId,
-  settlementDate
 }: {
   bond: BondDetailsResponse;
   customer: CustomerByIdPayload;
@@ -24,43 +14,30 @@ function Payment({
   settlementDate: string;
 }) {
   const { trackButtonClick } = useOrderActivityTracking();
-  const meradhanOrderNumber = useOrderState((s) => s.meradhanOrderNumber);
-  const { settlementDate: computedSettlementDate } = getPlaceOrderBusinessDates(
-    WEEKEND_ONLY_HOLIDAYS,
-    "1"
-  );
-  return (
-    <div className="container">
-      <h1 className="title text-center">Payment Completed</h1>
-      <p className="mt-4 text-center">
-        Order Number:{" "}
-        <span className="text-primary">{meradhanOrderNumber ?? orderId}</span>
-      </p>
 
-      <div className="flex justify-center items-center flex-col gap-4 mt-10">
-        {/* <Image
-          src={`/images/icons/payment.svg`}
-          width={100}
-          height={100}
-          className="w-40 h-auto"
-          alt="payment"
-        /> */}
-        <div className="lg:w-[600px] mx-auto text-center flex flex-col gap-4 mt-5">
-          <p>
-            Your deal will be settled on{" "}
-            {dateTimeUtils.formatDateTime(settlementDate, "DD MMMM YYYY")}{" "}
-            (T + 1) after NCL receives your
-            payment through the payment gateway.
-          </p>
-          <p>
-            We have emailed the order receipt to{" "}
-            {maskEmail(customer.emailAddress)}. Please check your inbox or spam
-            folder (mark it as safe).
-          </p>
-        </div>
+  return (
+    <div className="container max-w-2xl mx-auto">
+      <h1 className="title text-center">Order Request Received</h1>
+
+      <div className="mt-8 text-center text-muted-foreground space-y-5 text-base leading-relaxed">
+        <p className="text-foreground">
+          Thank you for submitting your order request on MeraDhan.
+        </p>
+        <p>
+          Our team will connect with you shortly to guide you through the
+          payment process and complete your transaction.
+        </p>
+        <p>
+          Please note that the deal will be processed only after successful
+          receipt of funds.
+        </p>
+        <p>
+          Please also note that the final order number will be generated upon
+          successful completion of your payment.
+        </p>
       </div>
 
-      <div className="flex justify-center items-center gap-4 mt-10">
+      <div className="flex justify-center items-center gap-4 mt-12 flex-wrap">
         <Link href="/bonds">
           <Button
             className="md:w-auto w-full"

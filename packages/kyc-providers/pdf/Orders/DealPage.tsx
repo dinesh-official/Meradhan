@@ -59,6 +59,7 @@ interface OrderData {
     interestPaymentDates?: string[];
     interestPaymentFrequencyLabel?: string;
     nonAmortizedBond?: boolean;
+    dealDate?: string;
     amortizedPrincipalPaymentDates?: string;
     settleOrder?: {
       source?: number;

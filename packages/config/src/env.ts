@@ -42,6 +42,14 @@ const EnvSchema = z.object(
     MSG91_SIGNUP_TEMPLATE: z.string().min(1, { message: "MSG91_SIGNUP_TEMPLATE is required" }),
     MSG91_LOGIN_TEMPLATE: z.string().min(1, { message: "MSG91_LOGIN_TEMPLATE is required" }),
     MSG91_VERIFY_TEMPLATE: z.string().min(1, { message: "MSG91_VERIFY_TEMPLATE is required" }),
+    /// Optional: DLT template SMS (bulk/flow); used by CRM notification send
+    MSG91_DLT_FLOW_URL: z.string().url().optional(),
+    /// Optional JSON array of { "templateId": string, "label": string } for Send UI
+    MSG91_DLT_TEMPLATES_JSON: z.string().optional(),
+
+    // OpenAI (CRM NL → SQL for notifications)
+    OPENAI_API_KEY: z.string().optional(),
+    OPENAI_MODEL: z.string().optional().default("gpt-4o-mini"),
 
     // SMTP
     SMTP_SENDER: z.string().min(1, { message: "SMTP_SENDER is required" }),

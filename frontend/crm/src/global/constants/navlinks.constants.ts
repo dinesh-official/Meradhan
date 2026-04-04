@@ -2,6 +2,7 @@
 // navbarConfig.ts
 import {
   BarChart,
+  Bell,
   Briefcase,
   ClipboardList,
   HelpCircle,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { FaMoneyBill } from "react-icons/fa";
-import { ModuleName, Permission } from "./role.constants";
+import { ModuleName, Permission, Role } from "./role.constants";
 
 /**
  * Define the structure of nested navigation items (up to 4 levels)
@@ -26,6 +27,8 @@ export interface NavItem {
   module?: ModuleName;
   children?: NavItem[]; // nested submenus
   allowOnly?: Permission[];
+  /** If set, only these CRM roles see the item (checked with allowOnly when both exist). */
+  roles?: Role[];
   section?: boolean;
 }
 
@@ -58,6 +61,30 @@ export const NAV_ITEMS: NavItem[] = [
         path: "/dashboard/leads/partnerships",
         module: "leads",
         allowOnly: ["view:leads"],
+      },
+    ],
+  },
+
+  {
+    label: "Notifications",
+    icon: Bell,
+    roles: ["SALES", "ADMIN", "SUPER_ADMIN"],
+    children: [
+      {
+        label: "Customer List",
+        path: "/dashboard/notifications/customer-list",
+      },
+      {
+        label: "Send Notification",
+        path: "/dashboard/notifications/send",
+      },
+      {
+        label: "Notification Lists",
+        path: "/dashboard/notifications/lists",
+      },
+      {
+        label: "Templates",
+        path: "/dashboard/notifications/templates",
       },
     ],
   },
@@ -114,6 +141,12 @@ export const NAV_ITEMS: NavItem[] = [
           {
             label: "Settle Orders",
             path: "/dashboard/rfqs/nse/settle-orders",
+            module: "rfq",
+            allowOnly: ["view:rfq"],
+          },
+          {
+            label: "Settlement Dates",
+            path: "/dashboard/rfqs/nse/settlement-dates",
             module: "rfq",
             allowOnly: ["view:rfq"],
           },

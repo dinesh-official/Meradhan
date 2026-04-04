@@ -17,6 +17,71 @@ import { getDpName } from "dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 
+/**
+ * RFQ master stores `date` as DD-MMM-YYYY (e.g. 03-Apr-2026) and `quoteTime` as HH:MM or HH:MM:SS.
+ * Parsing with `new Date("03-Apr-2026 12:00:00")` is unreliable; missing RFQ rows yield Invalid Date.
+ */
+function parseRfqMasterDateTime(
+  datePart: string | null | undefined,
+  quoteTimePart: string | null | undefined,
+  fallback: Date,
+): Date {
+  const rawDate = datePart?.trim();
+  if (!rawDate) {
+    return fallback;
+  }
+
+  const timeRaw = quoteTimePart?.trim();
+  let time = "12:00:00";
+  if (timeRaw) {
+    const parts = timeRaw.split(":");
+    if (parts.length === 2) {
+      time = `${timeRaw}:00`;
+    } else {
+      time = timeRaw;
+    }
+  }
+
+  const ddMmmYyyy = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(rawDate);
+  if (ddMmmYyyy) {
+    const day = Number(ddMmmYyyy[1]);
+    const monKey = (ddMmmYyyy[2] ?? "").slice(0, 3).toLowerCase();
+    const year = Number(ddMmmYyyy[3] ?? NaN);
+    const MONTH: Record<string, number> = {
+      jan: 0,
+      feb: 1,
+      mar: 2,
+      apr: 3,
+      may: 4,
+      jun: 5,
+      jul: 6,
+      aug: 7,
+      sep: 8,
+      oct: 9,
+      nov: 10,
+      dec: 11,
+    };
+    const month = MONTH[monKey];
+    const tm = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(time);
+    const hh = tm ? Number(tm[1]) : 12;
+    const mm = tm ? Number(tm[2]) : 0;
+    const ss = tm && tm[3] !== undefined ? Number(tm[3]) : 0;
+
+    if (month !== undefined) {
+      const out = new Date(year, month, day, hh, mm, ss);
+      if (!Number.isNaN(out.getTime())) {
+        return out;
+      }
+    }
+  }
+
+  const parsed = new Date(`${rawDate} ${time}`.trim());
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed;
+  }
+  return fallback;
+}
+
 export class CrmOrdersService {
   async getAllOrders(
     page: number = 1,
@@ -455,7 +520,13 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    const orderDateForPdf: Date = new Date(`${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim());
+    const fallbackOrderDate =
+      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
+    const orderDateForPdf = parseRfqMasterDateTime(
+      rfqDetails?.date,
+      rfqDetails?.quoteTime,
+      fallbackOrderDate,
+    );
     const [bankName, dpName] = await Promise.all([
       settleOrder?.ifscCode
         ? fetchBankNameFromIfsc(settleOrder.ifscCode)
@@ -471,9 +542,8 @@ export class CrmOrdersService {
     const accessKey = rfqDetails?.access != null ? String(rfqDetails.access) : undefined;
     const accessTypeText = accessKey ? accessType[accessKey] : undefined;
 
-    const orderDateForSchedule = orderDateForPdf ? new Date(orderDateForPdf) : new Date();
     const interestSchedule = getInterestPaymentSchedule({
-      orderDate: orderDateForSchedule,
+      orderDate: orderDateForPdf,
       maturityDate: bond.maturityDate ?? null,
       interestPaymentFrequency: bond.interestPaymentFrequency,
       paymentDayOfMonth: 20,
@@ -495,20 +565,20 @@ export class CrmOrdersService {
         : undefined;
     const lastInterestPaymentDateParam =
       typeof pdfQuery.lastInterestPaymentDate === "string" &&
-      pdfQuery.lastInterestPaymentDate.trim() !== ""
+        pdfQuery.lastInterestPaymentDate.trim() !== ""
         ? pdfQuery.lastInterestPaymentDate.trim()
         : undefined;
     const interestPaymentDatesParam =
       typeof pdfQuery.interestPaymentDates === "string" && pdfQuery.interestPaymentDates.trim() !== ""
         ? pdfQuery.interestPaymentDates
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
         : undefined;
     const nonAmortizedBondParam = pdfQuery.nonAmortizedBond === "false" ? false : true;
     const amortizedPrincipalPaymentDatesParam =
       typeof pdfQuery.amortizedPrincipalPaymentDates === "string" &&
-      pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
+        pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
         ? pdfQuery.amortizedPrincipalPaymentDates.trim()
         : undefined;
 
@@ -563,58 +633,58 @@ export class CrmOrdersService {
           amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParam,
           settlementBank: settleOrder
             ? {
-                bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-              }
+              bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
+              ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+              accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
+            }
             : undefined,
           settlementDemat: settleOrder
             ? {
-                dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
+              dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
+              dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+              benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
+            }
             : undefined,
           settleOrder: settleOrder
             ? {
-                id: settleOrder.id,
-                orderNumber: settleOrder.orderNumber,
-                symbol: settleOrder.symbol,
-                buySell: negotation?.buySell,
-                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
-                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
-                buyerRefNo: settleOrder.buyerRefNo,
-                sellerRefNo: settleOrder.sellerRefNo,
-                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
-                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
-                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
-                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
-                source: settleOrder.source,
-                modSettleDate: settleOrder.modSettleDate,
-                modQuantity: settleOrder.modQuantity,
-                modAccrInt: settleOrder.modAccrInt,
-                modConsideration: settleOrder.modConsideration,
-                settlementNo: settleOrder.settlementNo,
-                stampDutyAmount: settleOrder.stampDutyAmount,
-                stampDutyBearer: settleOrder.stampDutyBearer,
-                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
-                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
-                fundPayinRefId: settleOrder.fundPayinRefId,
-                settleStatus: settleOrder.settleStatus,
-                secPayinQuantity: settleOrder.secPayinQuantity,
-                secPayinRemarks: settleOrder.secPayinRemarks,
-                secPayinTime: settleOrder.secPayinTime,
-                fundsPayinAmount: settleOrder.fundsPayinAmount,
-                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
-                fundsPayinTime: settleOrder.fundsPayinTime,
-                payoutRemarks: settleOrder.payoutRemarks,
-                payoutTime: settleOrder.payoutTime,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-                utrNumber: settleOrder.utrNumber,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
+              id: settleOrder.id,
+              orderNumber: settleOrder.orderNumber,
+              symbol: settleOrder.symbol,
+              buySell: negotation?.buySell,
+              buyParticipantLoginId: settleOrder.buyParticipantLoginId,
+              sellParticipantLoginId: settleOrder.sellParticipantLoginId,
+              buyerRefNo: settleOrder.buyerRefNo,
+              sellerRefNo: settleOrder.sellerRefNo,
+              buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
+              sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
+              buyBrokerLoginId: settleOrder.buyBrokerLoginId,
+              sellBrokerLoginId: settleOrder.sellBrokerLoginId,
+              source: settleOrder.source,
+              modSettleDate: settleOrder.modSettleDate,
+              modQuantity: settleOrder.modQuantity,
+              modAccrInt: settleOrder.modAccrInt,
+              modConsideration: settleOrder.modConsideration,
+              settlementNo: settleOrder.settlementNo,
+              stampDutyAmount: settleOrder.stampDutyAmount,
+              stampDutyBearer: settleOrder.stampDutyBearer,
+              buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
+              sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
+              fundPayinRefId: settleOrder.fundPayinRefId,
+              settleStatus: settleOrder.settleStatus,
+              secPayinQuantity: settleOrder.secPayinQuantity,
+              secPayinRemarks: settleOrder.secPayinRemarks,
+              secPayinTime: settleOrder.secPayinTime,
+              fundsPayinAmount: settleOrder.fundsPayinAmount,
+              fundsPayinRemarks: settleOrder.fundsPayinRemarks,
+              fundsPayinTime: settleOrder.fundsPayinTime,
+              payoutRemarks: settleOrder.payoutRemarks,
+              payoutTime: settleOrder.payoutTime,
+              ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+              accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
+              utrNumber: settleOrder.utrNumber,
+              dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+              benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
+            }
             : undefined,
         },
       },
@@ -677,8 +747,12 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    const orderDateForPdf: Date = new Date(
-      `${rfqDetails?.date} ${rfqDetails?.quoteTime ?? "12:00:00"}`.trim(),
+    const fallbackOrderDateDeal =
+      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
+    const orderDateForPdf = parseRfqMasterDateTime(
+      rfqDetails?.date,
+      rfqDetails?.quoteTime,
+      fallbackOrderDateDeal,
     );
 
     const [bankName, dpName] = await Promise.all([
@@ -721,20 +795,20 @@ export class CrmOrdersService {
         : undefined;
     const lastInterestPaymentDateParam =
       typeof pdfQuery.lastInterestPaymentDate === "string" &&
-      pdfQuery.lastInterestPaymentDate.trim() !== ""
+        pdfQuery.lastInterestPaymentDate.trim() !== ""
         ? pdfQuery.lastInterestPaymentDate.trim()
         : undefined;
     const interestPaymentDatesParamDeal =
       typeof pdfQuery.interestPaymentDates === "string" && pdfQuery.interestPaymentDates.trim() !== ""
         ? pdfQuery.interestPaymentDates
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
         : undefined;
     const nonAmortizedBondParamDeal = pdfQuery.nonAmortizedBond === "false" ? false : true;
     const amortizedPrincipalPaymentDatesParamDeal =
       typeof pdfQuery.amortizedPrincipalPaymentDates === "string" &&
-      pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
+        pdfQuery.amortizedPrincipalPaymentDates.trim() !== ""
         ? pdfQuery.amortizedPrincipalPaymentDates.trim()
         : undefined;
 
@@ -791,58 +865,58 @@ export class CrmOrdersService {
           amortizedPrincipalPaymentDates: amortizedPrincipalPaymentDatesParamDeal,
           settlementBank: settleOrder
             ? {
-                bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-              }
+              bankName: getUserPrimaryBankAccount?.bankName ?? bankName ?? undefined,
+              ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+              accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
+            }
             : undefined,
           settlementDemat: settleOrder
             ? {
-                dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
+              dpName: primaryDematAccount?.depositoryParticipantName ?? dpName ?? undefined,
+              dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+              benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
+            }
             : undefined,
           settleOrder: settleOrder
             ? {
-                id: settleOrder.id,
-                orderNumber: settleOrder.orderNumber,
-                symbol: settleOrder.symbol,
-                buySell: negotation?.buySell,
-                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
-                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
-                buyerRefNo: settleOrder.buyerRefNo,
-                sellerRefNo: settleOrder.sellerRefNo,
-                buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
-                sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
-                buyBrokerLoginId: settleOrder.buyBrokerLoginId,
-                sellBrokerLoginId: settleOrder.sellBrokerLoginId,
-                source: settleOrder.source,
-                modSettleDate: settleOrder.modSettleDate,
-                modQuantity: settleOrder.modQuantity,
-                modAccrInt: settleOrder.modAccrInt,
-                modConsideration: settleOrder.modConsideration,
-                settlementNo: settleOrder.settlementNo,
-                stampDutyAmount: settleOrder.stampDutyAmount,
-                stampDutyBearer: settleOrder.stampDutyBearer,
-                buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
-                sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
-                fundPayinRefId: settleOrder.fundPayinRefId,
-                settleStatus: settleOrder.settleStatus,
-                secPayinQuantity: settleOrder.secPayinQuantity,
-                secPayinRemarks: settleOrder.secPayinRemarks,
-                secPayinTime: settleOrder.secPayinTime,
-                fundsPayinAmount: settleOrder.fundsPayinAmount,
-                fundsPayinRemarks: settleOrder.fundsPayinRemarks,
-                fundsPayinTime: settleOrder.fundsPayinTime,
-                payoutRemarks: settleOrder.payoutRemarks,
-                payoutTime: settleOrder.payoutTime,
-                ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
-                accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
-                utrNumber: settleOrder.utrNumber,
-                dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
-                benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
-              }
+              id: settleOrder.id,
+              orderNumber: settleOrder.orderNumber,
+              symbol: settleOrder.symbol,
+              buySell: negotation?.buySell,
+              buyParticipantLoginId: settleOrder.buyParticipantLoginId,
+              sellParticipantLoginId: settleOrder.sellParticipantLoginId,
+              buyerRefNo: settleOrder.buyerRefNo,
+              sellerRefNo: settleOrder.sellerRefNo,
+              buyBackofficeLoginId: settleOrder.buyBackofficeLoginId,
+              sellBackofficeLoginId: settleOrder.sellBackofficeLoginId,
+              buyBrokerLoginId: settleOrder.buyBrokerLoginId,
+              sellBrokerLoginId: settleOrder.sellBrokerLoginId,
+              source: settleOrder.source,
+              modSettleDate: settleOrder.modSettleDate,
+              modQuantity: settleOrder.modQuantity,
+              modAccrInt: settleOrder.modAccrInt,
+              modConsideration: settleOrder.modConsideration,
+              settlementNo: settleOrder.settlementNo,
+              stampDutyAmount: settleOrder.stampDutyAmount,
+              stampDutyBearer: settleOrder.stampDutyBearer,
+              buyerFundPayinObligation: settleOrder.buyerFundPayinObligation,
+              sellerFundPayoutObligation: settleOrder.sellerFundPayoutObligation,
+              fundPayinRefId: settleOrder.fundPayinRefId,
+              settleStatus: settleOrder.settleStatus,
+              secPayinQuantity: settleOrder.secPayinQuantity,
+              secPayinRemarks: settleOrder.secPayinRemarks,
+              secPayinTime: settleOrder.secPayinTime,
+              fundsPayinAmount: settleOrder.fundsPayinAmount,
+              fundsPayinRemarks: settleOrder.fundsPayinRemarks,
+              fundsPayinTime: settleOrder.fundsPayinTime,
+              payoutRemarks: settleOrder.payoutRemarks,
+              payoutTime: settleOrder.payoutTime,
+              ifscCode: getUserPrimaryBankAccount?.ifscCode ?? settleOrder.ifscCode ?? undefined,
+              accountNo: getUserPrimaryBankAccount?.accountNumber ?? settleOrder.accountNo ?? undefined,
+              utrNumber: settleOrder.utrNumber,
+              dpId: primaryDematAccount?.dpId ?? settleOrder.dpId ?? undefined,
+              benId: primaryDematAccount?.clientId ?? settleOrder.benId ?? undefined,
+            }
             : undefined,
         },
       },
