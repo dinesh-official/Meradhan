@@ -1,15 +1,15 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-crm-ui:137",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-meradhan-worker:141",
     "containerDefinitions": [
         {
-            "name": "stage-crm-ui",
-            "image": "450321244603.dkr.ecr.ap-south-1.amazonaws.com/stage-crm-ui:latest",
+            "name": "stage-worker",
+            "image": "450321244603.dkr.ecr.ap-south-1.amazonaws.com/stage-meradhan-worker:latest",
             "cpu": 0,
             "portMappings": [
                 {
-                    "name": "crm",
-                    "containerPort": 4001,
-                    "hostPort": 4001,
+                    "name": "stage-worker-80-tcp",
+                    "containerPort": 80,
+                    "hostPort": 80,
                     "protocol": "tcp"
                 }
             ],
@@ -20,7 +20,7 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/stage-crm-ui",
+                    "awslogs-group": "/ecs/stage-meradhan-worker",
                     "awslogs-create-group": "true",
                     "awslogs-region": "ap-south-1",
                     "awslogs-stream-prefix": "ecs"
@@ -30,11 +30,11 @@
             "systemControls": []
         }
     ],
-    "family": "stage-crm-ui",
+    "family": "stage-meradhan-worker",
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 137,
+    "revision": 141,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -76,12 +76,12 @@
         "FARGATE"
     ],
     "cpu": "256",
-    "memory": "512",
+    "memory": "1024",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2026-04-04T06:17:57.176Z",
+    "registeredAt": "2026-04-04T06:21:49.850Z",
     "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []
