@@ -2,6 +2,60 @@ import { db } from "@core/database/database";
 import { appSchema } from "@root/schema";
 import type { z } from "zod";
 
+const MONTH_ABBREV = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+/** Renders e.g. `2026-04-06` as `06-Apr-2026` (avoids UTC shift from `Date` parsing). */
+function formatDealDateForEmail(dealDate: string): string {
+  const trimmed = dealDate.trim();
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(trimmed);
+  if (ymd) {
+    const y = Number(ymd[1]);
+    const m = Number(ymd[2]) - 1;
+    const day = Number(ymd[3]);
+    if (
+      Number.isFinite(y) &&
+      m >= 0 &&
+      m < 12 &&
+      Number.isFinite(day) &&
+      day >= 1 &&
+      day <= 31
+    ) {
+      const d = new Date(y, m, day);
+      if (d.getFullYear() === y && d.getMonth() === m && d.getDate() === day) {
+        const dd = String(day).padStart(2, "0");
+        return `${dd}-${MONTH_ABBREV[m]}-${y}`;
+      }
+    }
+  }
+  const parsed = new Date(trimmed);
+  if (!Number.isNaN(parsed.getTime())) {
+    const dd = String(parsed.getDate()).padStart(2, "0");
+    return `${dd}-${MONTH_ABBREV[parsed.getMonth()]}-${parsed.getFullYear()}`;
+  }
+  return trimmed;
+}
+
+function formatPercent2(value: unknown): string {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) {
+    return String(value ?? "");
+  }
+  return n.toFixed(2);
+}
+
 export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>) => {
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: orderData.customerProfileId },
@@ -25,11 +79,11 @@ Request Details
 
 Bond Name: ${bond.bondName}
 ISIN: ${bond.isin}
-Coupon Rate: ${bond.couponRate} % p.a.
+Coupon Rate: ${formatPercent2(bond.couponRate)} % p.a.
 Indicative Yield: ${bond.yield} % p.a.
 Quantity: ${orderData.quantity}
-Investment Amount: ₹ ${orderData.settlementAmount}
-Expected Deal Date: ${orderData.dealDate} (subject to confirmation)
+Investment Amount: ₹ ${orderData.faceValue * orderData.quantity}
+Expected Deal Date: ${formatDealDateForEmail(orderData.dealDate)} (subject to confirmation)
 Settlement Cycle: ${orderData.settlementType} (from deal date)
 Request Date and Time: ${orderData.requestDate}
 

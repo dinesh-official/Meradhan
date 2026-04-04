@@ -374,7 +374,7 @@ export class CustomerKycKycService {
       "Demat Account",
       "Risk Profiling",
       "e-Signature",
-      "100%",
+      "completed",
     ];
 
     const kycData = await db.dataBase.kYC_FLOW.findFirst({
