@@ -55,6 +55,8 @@ jobs:
 
           DEV_RFQ_CBRICS_PASSWORD: ${{ secrets.DEV_RFQ_CBRICS_PASSWORD }}
 
+          DEV_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
           DEV_DIGIO_USERNAME_PASS: ${{ secrets.DEV_DIGIO_USERNAME_PASS }}
 
           DEV_NDSL_REQUESTOR_ID: ${{ secrets.DEV_NDSL_REQUESTOR_ID }}
@@ -112,6 +114,8 @@ jobs:
 
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
+
+          echo "DEV_OPENAI_API_KEY=${secrets.OPENAI_API_KEY}" >> .env
 
           KRA_USERNAME="${{ secrets.KRA_USERNAME }}"
           echo "KRA_USERNAME=$KRA_USERNAME" >> .env
