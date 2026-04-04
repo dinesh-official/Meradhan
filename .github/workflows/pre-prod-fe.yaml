@@ -108,7 +108,7 @@ jobs:
           echo "DATABASE_URL=${DEV_DATABASE_URL}" >> .env
           echo "DIRECT_URL=${DEV_DIRECT_URL}" >> .env
 
-          echo "DEV_OPENAI_API_KEY=${secrets.OPENAI_API_KEY }" >> .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
 
           echo "RFQ_CBRICS_ENV=UAT" >> .env
           echo "CBRICS_ENV=UAT" >>  .env
