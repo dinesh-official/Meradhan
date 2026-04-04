@@ -169,7 +169,7 @@ jobs:
           NSDL_MODE="${{ secrets.NSDL_MODE }}"
           echo "NSDL_MODE=$NSDL_MODE" >> .env
 
-          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
 
           S3_ACCESS_KEY_ID="${{ secrets.S3_ACCESS_KEY_ID }}"
