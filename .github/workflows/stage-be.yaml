@@ -114,7 +114,7 @@ jobs:
           echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
           echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
           
-          echo "DEV_OPENAI_API_KEY=${secrets.OPENAI_API_KEY}" >> .env 
+          echo "DEV_OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env 
         
           echo "KRA_USERNAME=${DEV_KRA_USERNAME}" >> .env
           echo "KRA_PASSWORD=${DEV_KRA_PASSWORD}" >> .env
