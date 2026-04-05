@@ -150,8 +150,6 @@ export class NseCBRICS {
       const key = await this.getLoginKey(attempt < 1); // force relogin only if retry
       return await apiCall(key);
     } catch (error) {
-      console.log("withReLoginRetry-error", error);
-      console.log("withReLoginRetry-attempt", error?.toString());
       if (
         axios.isAxiosError(error) &&
         this.isLoginExpired(error) &&

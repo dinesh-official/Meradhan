@@ -1,4 +1,5 @@
 import { appSchema } from "@root/schema";
+import type { BaseResponseData } from "../../../types/base";
 import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
@@ -208,6 +209,28 @@ export class CustomerAuthApi {
       success: boolean;
       message: string;
     }>("/auth/customer/profile/mobile/verify", payload, config);
+    return data;
+  }
+
+  async sendEmailChangeOtp(
+    payload: z.infer<typeof this.schema.customerEmailChangeSendOtpSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ otpToken: string }>
+    >("/auth/customer/profile/email/send-otp", payload, config);
+    return data;
+  }
+
+  async verifyEmailChange(
+    payload: z.infer<typeof this.schema.customerEmailChangeVerifySchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/profile/email/verify",
+      payload,
+      config
+    );
     return data;
   }
 

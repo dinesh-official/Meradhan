@@ -500,7 +500,6 @@ export class BondService {
       timeZone: "Asia/Kolkata",
     })
 
-    orderData.requestDate = requestDate;
 
     const orderPdfService = new OrderPdfService();
     let orderPdfAttachments:
@@ -512,7 +511,7 @@ export class BondService {
         isin: orderData.isin,
         qun: orderData.quantity,
         isReleased: false,
-        requestDate,
+        requestDate: orderData.requestDate,
       });
       orderPdfAttachments = [
         {
@@ -524,6 +523,8 @@ export class BondService {
       console.error("placeOrder: failed to generate order PDF for email", e);
     }
 
+    orderData.requestDate = requestDate;
+
     await Promise.all([
       sendBackOfficeEmail({
         to: customer.emailAddress ?? "",
@@ -533,7 +534,7 @@ export class BondService {
       }),
       sendBackOfficeEmail({
         to: "dl.sales@meradhan.co",
-        subject: env.CBRICS_ENV === "UAT" ? `UAT Testing | Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.settlementAmount} [Please DELETE this email its a test email]` : `Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.settlementAmount} | Request Date: ${requestDate}`,
+        subject: env.CBRICS_ENV === "UAT" ? `UAT Testing | Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.settlementAmount} [Please DELETE this email its a test email]` : `Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.faceValue * orderData.quantity} | Request Date: ${requestDate}`,
         text: await sendPlaceOrderEmail(orderData),
         attachments: orderPdfAttachments,
       }),
