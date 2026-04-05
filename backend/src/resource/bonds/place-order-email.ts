@@ -129,7 +129,7 @@ Registered Mobile: ${customer.phoneNo}
 Bond: ${bond.bondName}
 ISIN: ${bond.isin}
 Quantity: ${orderData.quantity}
-Order Value: ${orderData.faceValue * orderData.quantity}
+Order Value: ₹ ${orderData.faceValue * orderData.quantity}
 Request Date & Time: ${orderData.requestDate}
 
 Please ensure timely follow-up and update the status internally once contacted.
