@@ -1,4 +1,5 @@
 import { generateTempOrderPdf } from "@packages/kyc-providers";
+import { formatDate } from "@packages/kyc-providers/pdf/helper";
 import { BondService } from "@resource/bonds/bond.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
@@ -77,7 +78,7 @@ export class OrderPdfService {
       quantity,
       cleanPrice: cleanPrice ?? 0,
       couponRate: Number(bond.couponRate),
-      lastCouponDate: lastCouponDateStr.toISOString(),
+      lastCouponDate: (lastCouponDateStr.toISOString()),
       recordDays,
       nextCouponDate: nextCouponDateStr.toISOString(),
     });
@@ -97,7 +98,9 @@ export class OrderPdfService {
       subTotal: pricing.principalAmount,
       stampDuty: pricing.stampDuty,
       totalAmount: pricing.principalAmount + pricing.accruedInterest,
+      createdAt: new Date(pricing.dealDate).toISOString(),
       metadata: {
+        lastInterestPaymentDate: formatDate(lastCouponDateStr.toISOString(), "DD-MMM-YYYY"),
         valueDate: pricing.dealDate,
         accruedInterest: pricing.accruedInterest,
         accruedInterestDays: pricing.noOfAccrualDays,
