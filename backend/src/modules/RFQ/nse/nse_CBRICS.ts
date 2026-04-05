@@ -216,12 +216,15 @@ export class NseCBRICS {
   public async unregisteredParticipant(
     payload: UnregisteredParticipantRequest
   ) {
+    console.log("unregisteredParticipant-payload", payload);
+
     return this.withReLoginRetry(async (loginKey) => {
       const { data } = await this.client.post<UnregisteredParticipantResponse>(
         "/unreg",
         payload,
         { headers: { loginKey } }
       );
+      console.log("unregisteredParticipant-response", data);
       return data;
     });
   }
