@@ -158,7 +158,7 @@ export class NseCBRICS {
         attempt < 1 // allow only one retry
       ) {
         console.warn(`Login expired. Retrying... (Attempt ${attempt + 1}/1)`);
-        return this.withReLoginRetry(apiCall, attempt + 1);
+        return await this.withReLoginRetry(apiCall, attempt + 1);
       }
 
       if (error instanceof AxiosError) {
@@ -174,10 +174,17 @@ export class NseCBRICS {
             "CBRICS Request Failed - " + error.toString()
           );
         } else if (error.response?.data.messages) {
-          throw new Error(
-            error.response?.data.messages?.[0].toString() ||
-            "CBRICS Request Failed - " + error.toString()
-          );
+          if (typeof error.response?.data.messages?.[0] === "string") {
+            throw new Error(
+              error.response?.data.messages?.[0]?.toString() ||
+              "CBRICS Request Failed - " + error.toString()
+            );
+          } else {
+            throw new Error(
+              error.response?.data.messages?.[0]?.msg?.toString() ||
+              "CBRICS Request Failed - " + error.toString()
+            );
+          }
         }
       }
 
