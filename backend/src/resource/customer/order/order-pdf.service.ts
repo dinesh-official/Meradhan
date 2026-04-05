@@ -78,7 +78,7 @@ export class OrderPdfService {
       quantity,
       cleanPrice: cleanPrice ?? 0,
       couponRate: Number(bond.couponRate),
-      lastCouponDate: formatDate(lastCouponDateStr.toISOString(), "DD-MMM-YYYY"),
+      lastCouponDate: (lastCouponDateStr.toISOString()),
       recordDays,
       nextCouponDate: nextCouponDateStr.toISOString(),
     });
