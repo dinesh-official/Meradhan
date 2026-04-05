@@ -31,7 +31,7 @@ export const useDhanGPT = () => {
   ) => {
     setLoading(true);
     try {
-      const dhangptUrl = BASES_URLS.DHANGPT || "https://dhangpt.meradhan.co";
+      const dhangptUrl = "/api/dhangpt";
       const res = await fetch(`${dhangptUrl}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

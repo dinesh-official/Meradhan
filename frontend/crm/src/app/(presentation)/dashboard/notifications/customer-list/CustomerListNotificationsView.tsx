@@ -21,12 +21,24 @@ import Swal from "sweetalert2";
 
 type Row = Record<string, unknown>;
 
+const KYC_STEP_LABELS: Record<number, string> = {
+  0: "Not Started",
+  1: "Identity Validation",
+  2: "Personal Details",
+  3: "Bank Account",
+  4: "Demat Account",
+  5: "Risk Profiling",
+  6: "e-Signature",
+  7: "Completed",
+};
+
 export default function CustomerListNotificationsView() {
   const { cookies } = useAppCookie();
   const [mounted, setMounted] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
+  const [queried, setQueried] = useState(false);
   const [sqlEcho, setSqlEcho] = useState<string | null>(null);
   const [saveOpen, setSaveOpen] = useState(false);
   const [listName, setListName] = useState("");
@@ -50,6 +62,7 @@ export default function CustomerListNotificationsView() {
   const runQuery = async () => {
     setLoading(true);
     setSqlEcho(null);
+    setQueried(false);
     try {
       const res = await api.queryCustomers({ prompt });
       const data = res.data as {
@@ -57,6 +70,7 @@ export default function CustomerListNotificationsView() {
       };
       const payload = data.responseData;
       setRows(payload?.rows ?? []);
+      setQueried(true);
       if (payload?.sql) {
         setSqlEcho(payload.sql);
       }
@@ -166,6 +180,17 @@ export default function CustomerListNotificationsView() {
         </CardContent>
       </Card>
 
+      {queried && rows.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-base font-semibold text-muted-foreground">No customer data found</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Your query ran successfully but matched no customers. Try a different search.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {rows.length > 0 ? (
         <Card>
           <CardHeader>
@@ -189,7 +214,7 @@ export default function CustomerListNotificationsView() {
                   <tr key={i} className="odd:bg-background even:bg-muted/40">
                     {columns.map((c) => (
                       <td key={c} className="border p-2 align-top max-w-[240px] truncate">
-                        {formatCell(row[c])}
+                        {formatCell(c, row[c])}
                       </td>
                     ))}
                   </tr>
@@ -224,12 +249,16 @@ export default function CustomerListNotificationsView() {
   );
 }
 
-function formatCell(v: unknown): string {
-  if (v === null || v === undefined) {
-    return "";
+function formatCell(column: string, v: unknown): string {
+  if (v === null || v === undefined) return "";
+
+  if (column === "step") {
+    const n = typeof v === "number" ? v : Number(v);
+    if (!isNaN(n) && n in KYC_STEP_LABELS) {
+      return KYC_STEP_LABELS[n]!;
+    }
   }
-  if (typeof v === "object") {
-    return JSON.stringify(v);
-  }
+
+  if (typeof v === "object") return JSON.stringify(v);
   return String(v);
 }

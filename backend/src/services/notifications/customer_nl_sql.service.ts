@@ -1,46 +1,96 @@
 import { env } from "@packages/config/env";
 
 /**
- * Complete column reference for customers_profile_data.
- * All camelCase names MUST be double-quoted in the generated SQL ("firstName", not first_name).
+ * Complete column reference for customers_profile_data and kyc_dump.
+ * All camelCase names MUST be double-quoted in the generated SQL.
  */
 const SCHEMA_HINT = `
-Table name (exact): customers_profile_data
+=== TABLE 1: customers_profile_data ===
+Primary customer profile table.
 
-All columns — use the EXACT spelling below, double-quoted in SQL:
-  "id"           INTEGER  — primary key
-  "userName"     TEXT     — unique login handle
-  "firstName"    TEXT     — given name
-  "middleName"   TEXT
-  "lastName"     TEXT     — family name
-  "gender"       TEXT     — one of: 'MALE', 'FEMALE', 'OTHER', 'NA' (nullable)
-  "legalEntityName" TEXT  — nullable, used for corporate accounts
-  "emailAddress" TEXT     — unique email
-  "phoneNo"      TEXT     — mobile number (nullable, unique)
-  "whatsAppNo"   TEXT     — nullable
-  "avatar"       TEXT     — nullable
-  "userType"     TEXT     — one of: 'INDIVIDUAL', 'INDIVIDUAL_NRI_NRO', 'TRUST', 'CORPORATE', 'HUF', 'LLP', 'PARTNERSHIP_FIRM'
-  "kycStatus"    TEXT     — one of: 'PENDING', 'UNDER_REVIEW', 'VERIFIED', 'REJECTED', 'RE_KYC'
-  "kraStatus"    TEXT     — default 'PENDING'
-  "VerifiedBy"   INTEGER  — nullable (FK to CRM user who verified)
-  "verifyDate"   TIMESTAMPTZ — nullable
-  "kycSubmitDate" TIMESTAMPTZ — nullable
-  "useKraKyc"    BOOLEAN
+Columns — double-quote every camelCase name:
+  "id"               INTEGER      — primary key
+  "userName"         TEXT         — unique login handle
+  "firstName"        TEXT         — given name
+  "middleName"       TEXT
+  "lastName"         TEXT         — family name
+  "gender"           TEXT         — 'MALE', 'FEMALE', 'OTHER', 'NA' (nullable)
+  "legalEntityName"  TEXT         — nullable, corporate accounts
+  "emailAddress"     TEXT         — unique email
+  "phoneNo"          TEXT         — mobile number (nullable, unique)
+  "whatsAppNo"       TEXT         — nullable
+  "userType"         TEXT         — 'INDIVIDUAL', 'INDIVIDUAL_NRI_NRO', 'TRUST', 'CORPORATE', 'HUF', 'LLP', 'PARTNERSHIP_FIRM'
+  "kycStatus"        TEXT         — coarse KYC verification status: 'PENDING', 'UNDER_REVIEW', 'VERIFIED', 'REJECTED', 'RE_KYC'
+  "kraStatus"        TEXT         — default 'PENDING'
+  "VerifiedBy"       INTEGER      — nullable
+  "verifyDate"       TIMESTAMPTZ  — nullable
+  "kycSubmitDate"    TIMESTAMPTZ  — nullable
+  "useKraKyc"        BOOLEAN
   "isAFatcaCustomer" BOOLEAN
-  "isAPep"       BOOLEAN
-  "allowSEBITerms" BOOLEAN
-  "isDeleted"    BOOLEAN  — soft-delete flag; always filter WHERE "isDeleted" = false unless asked otherwise
-  "createdAt"    TIMESTAMPTZ
-  "updatedAt"    TIMESTAMPTZ
-  "createdBy"    INTEGER  — nullable (CRM user id)
-  "customersAuthDataModelId" INTEGER — FK (internal, avoid filtering on this)
+  "isAPep"           BOOLEAN
+  "allowSEBITerms"   BOOLEAN
+  "isDeleted"        BOOLEAN      — soft-delete; always filter WHERE cpd."isDeleted" = false
+  "createdAt"        TIMESTAMPTZ
+  "updatedAt"        TIMESTAMPTZ
+  "createdBy"        INTEGER      — nullable
 
-IMPORTANT:
-- Every column name is camelCase and MUST be double-quoted: "firstName", NOT first_name.
-- Do NOT reference any other table or use JOINs.
-- Use ILIKE for case-insensitive text search.
-- Example: customers whose firstName starts with 'A':
-  SELECT "id","firstName","lastName","emailAddress","phoneNo" FROM customers_profile_data WHERE "isDeleted" = false AND "firstName" ILIKE 'A%' LIMIT 500;
+=== TABLE 2: kyc_dump ===
+Stores the detailed KYC onboarding step for each customer (one row per customer).
+Join key: kyc_dump."userID" = customers_profile_data."id"
+NOTE: "userID" in kyc_dump is camelCase — double-quote it.
+
+Columns:
+  "userID"     INTEGER  — FK → customers_profile_data."id"
+  "step"       INTEGER  — current KYC step (see mapping below)
+  "updated_at" TIMESTAMPTZ — when the step was last updated (use for time-based KYC queries)
+
+KYC step values (use the INTEGER in SQL, never the label string):
+  0 = Not Started
+  1 = Identity Validation
+  2 = Personal Details
+  3 = Bank Account
+  4 = Demat Account
+  5 = Risk Profiling
+  6 = e-Signature
+  7 = completed (KYC fully done)
+
+When to use kyc_dump:
+  - User asks about KYC step, progress, or stage → JOIN kyc_dump and filter on "step"
+  - User asks about KYC verification status (verified, rejected, pending) → use "kycStatus" on customers_profile_data (no join needed)
+  - User asks about KYC completion time → JOIN kyc_dump and filter on "updated_at"
+
+=== JOIN PATTERN (use this exact alias style) ===
+  FROM customers_profile_data cpd
+  JOIN kyc_dump kd ON kd."userID" = cpd."id"
+  WHERE cpd."isDeleted" = false
+
+=== EXAMPLES ===
+1. Customers at Bank Account step:
+   SELECT cpd."id", cpd."firstName", cpd."lastName", cpd."emailAddress", cpd."phoneNo", kd."step"
+   FROM customers_profile_data cpd
+   JOIN kyc_dump kd ON kd."userID" = cpd."id"
+   WHERE cpd."isDeleted" = false AND kd."step" = 2
+   LIMIT 500;
+
+2. Customers who completed KYC (step 6):
+   SELECT cpd."id", cpd."firstName", cpd."lastName", cpd."emailAddress", cpd."phoneNo"
+   FROM customers_profile_data cpd
+   JOIN kyc_dump kd ON kd."userID" = cpd."id"
+   WHERE cpd."isDeleted" = false AND kd."step" = 6
+   LIMIT 500;
+
+3. Customers who completed KYC in the last 7 days:
+   SELECT cpd."id", cpd."firstName", cpd."lastName", cpd."emailAddress", cpd."phoneNo", kd."updated_at"
+   FROM customers_profile_data cpd
+   JOIN kyc_dump kd ON kd."userID" = cpd."id"
+   WHERE cpd."isDeleted" = false AND kd."step" = 6 AND kd."updated_at" >= NOW() - INTERVAL '7 days'
+   LIMIT 500;
+
+4. Customers whose firstName starts with 'N' (no KYC join needed):
+   SELECT "id", "firstName", "lastName", "emailAddress", "phoneNo"
+   FROM customers_profile_data
+   WHERE "isDeleted" = false AND "firstName" ILIKE 'N%'
+   LIMIT 500;
 `.trim();
 
 export function extractSqlFromLlmResponse(raw: string): string {
@@ -50,6 +100,8 @@ export function extractSqlFromLlmResponse(raw: string): string {
   }
   return raw.trim();
 }
+
+const ALLOWED_TABLES = ["customers_profile_data", "kyc_dump"];
 
 export function validateCustomerProfileSelectSql(sql: string): { ok: true } | { ok: false; reason: string } {
   const trimmed = sql.trim();
@@ -72,11 +124,18 @@ export function validateCustomerProfileSelectSql(sql: string): { ok: true } | { 
   if (/\bUNION\b/i.test(trimmed)) {
     return { ok: false, reason: "UNION is not allowed." };
   }
-  if (/\bJOIN\b/i.test(trimmed)) {
-    return { ok: false, reason: "JOIN is not allowed." };
-  }
   if (!/\bFROM\s+["']?customers_profile_data["']?\b/i.test(trimmed)) {
-    return { ok: false, reason: "Query must read from customers_profile_data only." };
+    return { ok: false, reason: "Query must read from customers_profile_data." };
+  }
+
+  // Allow only JOIN with kyc_dump; no other tables permitted
+  const joinPattern = /\bJOIN\s+["']?(\w+)["']?/gi;
+  let match: RegExpExecArray | null;
+  while ((match = joinPattern.exec(trimmed)) !== null) {
+    const joinedTable = (match[1] ?? "").toLowerCase();
+    if (!ALLOWED_TABLES.includes(joinedTable)) {
+      return { ok: false, reason: `JOIN with table "${match[1] ?? ""}" is not allowed.` };
+    }
   }
 
   return { ok: true };
@@ -94,13 +153,16 @@ Schema reference:
 ${SCHEMA_HINT}
 
 Rules:
-1. Query ONLY the table customers_profile_data.
-2. Every camelCase column name MUST be double-quoted (e.g. "firstName", "emailAddress").
-3. Always include WHERE "isDeleted" = false unless the user explicitly asks for deleted records.
+1. Query customers_profile_data as the primary table. You may JOIN kyc_dump when the query involves KYC step or KYC progress.
+2. Every camelCase column name MUST be double-quoted (e.g. "firstName", "userID"). snake_case columns like "updated_at" do not need quotes but are fine with them.
+3. Always include WHERE cpd."isDeleted" = false (or WHERE "isDeleted" = false when no alias is used).
 4. Use ILIKE for case-insensitive text matching.
-5. No JOINs, UNION, subqueries referencing other tables, comments, or multiple statements.
-6. End with LIMIT 500 if no smaller LIMIT is already present.
-7. Output raw SQL only — no markdown fences, no prose.`;
+5. No UNION, subqueries referencing other tables, comments, or multiple statements.
+6. Only JOIN kyc_dump — no other tables.
+7. End with LIMIT 500 if no smaller LIMIT is already present.
+8. When joining kyc_dump use aliases: customers_profile_data AS cpd, kyc_dump AS kd.
+9. For KYC step queries always filter on kd."step" using the INTEGER value, never the label string.
+10. Output raw SQL only — no markdown fences, no prose.`;
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",

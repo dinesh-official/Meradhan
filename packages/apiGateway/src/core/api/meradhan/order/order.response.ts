@@ -1,5 +1,9 @@
 import type { BaseResponseData } from "../../../../types/base";
 
+export type GetPaymentGatewayModeResponse = BaseResponseData<{
+  paymentGatewayMode: "PAYMENT" | "INQUIRY";
+}>;
+
 export interface Order {
   id: number;
   orderNumber: string;

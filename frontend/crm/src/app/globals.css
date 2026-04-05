@@ -271,6 +271,20 @@ html {
   animation: slide-out-right 0.3s ease-in forwards;
 }
 
+/* Indeterminate segment for KRA processing bar (CRM KYC view) */
+@keyframes kra-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+.animate-kra-indeterminate {
+  animation: kra-indeterminate 1.35s ease-in-out infinite;
+}
+
 /* Print: when Corporate KYC print content exists, show only that; multi-page PDF */
 @media print {
   @page {

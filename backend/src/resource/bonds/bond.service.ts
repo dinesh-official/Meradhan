@@ -6,6 +6,8 @@ import { isISIN } from "@utils/filters/convert";
 import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { placeOrderEmailCustomer, sendPlaceOrderEmail } from "./place-order-email";
+import { AppConfigService } from "@resource/app-config/app-config.service";
+import { AppError } from "@utils/error/AppError";
 import { env } from "@packages/config/src/env";
 import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
 
@@ -457,6 +459,15 @@ export class BondService {
   }
 
   async placeOrder(orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>) {
+    const appConfig = new AppConfigService();
+    const pgMode = await appConfig.getPaymentGatewayMode();
+    if (pgMode === "PAYMENT") {
+      throw new AppError(
+        "Orders must be completed through the Razorpay payment gateway. Please use Proceed to Pay on the order receipt.",
+        { code: "ORDER_FLOW_REQUIRES_PAYMENT" },
+      );
+    }
+
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: orderData.customerProfileId },
     });
@@ -479,13 +490,14 @@ export class BondService {
 
 
     // format the request date to DD-MMM-YYYY HH:MM AM/PM
-    const requestDate = new Date(orderData.requestDate).toLocaleDateString("en-GB", {
+    const requestDate = new Date(orderData.requestDate).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
+      timeZone: "Asia/Kolkata",
     })
 
     orderData.requestDate = requestDate;

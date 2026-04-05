@@ -100,7 +100,7 @@ export class PortfolioService {
     });
 
     return {
-      totalInvested: formatted,
+      totalInvested: rounded,
       formattedTotalInvested: formatted,
       currency: "₹",
       totalInvestments: settled.length,

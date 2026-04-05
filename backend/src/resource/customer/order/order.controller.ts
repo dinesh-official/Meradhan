@@ -4,10 +4,21 @@ import { type Request, type Response } from "express";
 import { OrderService } from "./order.service";
 import { OrderPdfService } from "./order-pdf.service";
 import { db } from "@core/database/database";
+import { AppConfigService } from "@resource/app-config/app-config.service";
 
 export class OrderController {
   private orderService = new OrderService();
   private orderPdfService = new OrderPdfService();
+  private appConfigService = new AppConfigService();
+
+  getPaymentGatewayMode = async (_req: Request, res: Response) => {
+    const paymentGatewayMode =
+      await this.appConfigService.getPaymentGatewayMode();
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { paymentGatewayMode },
+    });
+  };
 
   previewOrder = async (req: Request, res: Response) => {
     const item = req.body;

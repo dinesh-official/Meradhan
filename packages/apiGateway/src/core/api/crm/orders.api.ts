@@ -10,6 +10,8 @@ import type {
   SendOrderPdfEmailResponse,
   GetReceiptPdfOptionsResponse,
   UpsertReceiptPdfOptionsResponse,
+  GetPaymentGatewaySettingsResponse,
+  PaymentGatewayMode,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 
@@ -17,6 +19,29 @@ export class CrmOrdersApi {
   private schema = appSchema.crm.orders;
 
   constructor(private apiClient: IApiCaller) {}
+
+  async getPaymentGatewaySettings(
+    config?: AxiosRequestConfig
+  ): Promise<GetPaymentGatewaySettingsResponse> {
+    const { data } = await this.apiClient.get<GetPaymentGatewaySettingsResponse>(
+      "/crm/orders/payment-gateway-settings",
+      config
+    );
+    return data;
+  }
+
+  async updatePaymentGatewaySettings(
+    payload: { paymentGatewayMode: PaymentGatewayMode },
+    config?: AxiosRequestConfig
+  ): Promise<GetPaymentGatewaySettingsResponse> {
+    const { data } =
+      await this.apiClient.patch<GetPaymentGatewaySettingsResponse>(
+        "/crm/orders/payment-gateway-settings",
+        payload,
+        config
+      );
+    return data;
+  }
 
   async getAllOrders(
     query?: z.infer<typeof this.schema.CrmOrdersQuerySchema>,

@@ -4,6 +4,7 @@ import CardPagination from "@/global/elements/table/CardPagination";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import OrderSearchFilterBar from "./_components/listView/OrderSearchFilterBar";
 import OrderTable from "./_components/listView/OrderTable";
+import OrdersSectionTabs from "./_components/OrdersSectionTabs";
 import { useOrderFilterListHook } from "./_components/listView/useOrderListHook";
 import { useOrderFilterListApiHook } from "./_components/listView/useOrderListApiHook";
 
@@ -23,6 +24,7 @@ function CrmOrdersView() {
 
   return (
     <div>
+      <OrdersSectionTabs />
       <PageInfoBar
         title="Order Management"
         description="Manage customer orders and track settlement status"
