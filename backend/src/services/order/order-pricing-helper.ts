@@ -112,8 +112,9 @@ const WEEKDAY_NAMES = [
     "Saturday",
 ] as const;
 
-function utcDayName(isoDate: string) {
-    return WEEKDAY_NAMES[utcDayOfWeek(isoDate)];
+function utcDayName(isoDate: string): string {
+    const i = utcDayOfWeek(isoDate);
+    return WEEKDAY_NAMES[i] ?? WEEKDAY_NAMES[0];
 }
 
 function isWorkingDayUTC(isoDate: string, holidays: Set<string>) {
@@ -191,6 +192,8 @@ function computeBondSettlement(
         executionIsWorkingDay && executionInHours ? "T+0" : "T+1";
     const allowTrade = executionIsWorkingDay && executionInHours;
 
+
+
     const dealDateObj =
         executionIsWorkingDay && executionInHours
             ? utcMidnightForISODate(toUTCISODate(executionDateTime))
@@ -201,17 +204,14 @@ function computeBondSettlement(
     const dealDate = toUTCISODate(dealDateObj);
     const settlementDateObj = firstWorkingDayAfterCalendarDay(dealDateObj, holidays);
     const settlementDate = toUTCISODate(settlementDateObj);
-    const dealDay = utcDayName(dealDate);
-    const settlementDay = utcDayName(settlementDate);
-
     return {
         dealDate,
         settlementDate,
         dealOrder: originalOrderCycle,
         allowTrade,
-        dealDay: dealDay ?? "",
+        dealDay: utcDayName(dealDate),
         settlementOrder: "T+1",
-        settlementDay: settlementDay ?? "",
+        settlementDay: utcDayName(settlementDate),
         allowSettlement: originalOrderCycle === "T+0" ? ["T+0", "T+1"] : ["T+1"],
     };
 }
@@ -326,7 +326,6 @@ type BondOrderPricingData = {
 
 export const computeBondOrderPricingData = (params: BondOrderPricingData) => {
     const settlementDate = computeBondSettlement(new Date());
-
     const principal = principalAmount(params.faceValue, params.quantity, params.cleanPrice);
     const settlementMidnight = utcMidnightForISODate(settlementDate.settlementDate);
     const accruedIntr = accruedInterest({
@@ -364,3 +363,15 @@ export const computeBondOrderPricingData = (params: BondOrderPricingData) => {
         settlementAmount: payAmount,
     });
 }
+
+let a = computeBondOrderPricingData({
+    faceValue: 1000,
+    quantity: 1,
+    cleanPrice: 100,
+    couponRate: 7.5,
+    lastCouponDate: "2026-01-01",
+    recordDays: 7,
+    nextCouponDate: "2026-02-01",
+});
+
+console.log(a);
