@@ -116,6 +116,25 @@ export const sendCustomerSignupOtpEmail = async (data: {
   );
 };
 
+export const sendCustomerEmailChangeOtpEmail = async (data: {
+  email: string;
+  userName: string;
+  otp: string;
+}) => {
+  await emailOtpSenderQueue.add(
+    {
+      ...data,
+      subject: `OTP to verify your new MeraDhan email - ${getFormattedTimestamp()}`,
+      type: "email_change",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
 export const sendCustomerSigninOtpEmail = async (data: {
   email: string;
   userName: string;

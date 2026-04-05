@@ -24,6 +24,7 @@ export class OtpVerificationService implements IOtpVerificationService {
     private useOf:
       | "AUTH_OTP"
       | "EMAIL_VERIFY"
+      | "EMAIL_CHANGE"
       | "MOBILE_VERIFY"
       | "REKYC_VERIFY" = "AUTH_OTP"
   ) {
