@@ -421,7 +421,7 @@ export class CrmOrdersController {
         : undefined;
     const lastInterestPaymentDateParam =
       typeof body.lastInterestPaymentDate === "string" &&
-      body.lastInterestPaymentDate.trim() !== ""
+        body.lastInterestPaymentDate.trim() !== ""
         ? body.lastInterestPaymentDate.trim()
         : undefined;
 
@@ -505,7 +505,7 @@ export class CrmOrdersController {
         });
       }
 
-      
+
       const htmlBody = messageBody
         .split("\n")
         .map((line) => line.trim())
