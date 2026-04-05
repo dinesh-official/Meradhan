@@ -99,7 +99,7 @@ export class OrderPdfService {
       stampDuty: pricing.stampDuty,
       totalAmount: pricing.principalAmount + pricing.accruedInterest,
       metadata: {
-        lastInterestPaymentDate: lastCouponDateStr.toISOString(),
+        lastInterestPaymentDate: formatDate(lastCouponDateStr.toISOString(), "DD-MMM-YYYY"),
         valueDate: pricing.dealDate,
         accruedInterest: pricing.accruedInterest,
         accruedInterestDays: pricing.noOfAccrualDays,
