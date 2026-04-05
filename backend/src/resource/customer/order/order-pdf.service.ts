@@ -78,7 +78,7 @@ export class OrderPdfService {
       quantity,
       cleanPrice: cleanPrice ?? 0,
       couponRate: Number(bond.couponRate),
-      lastCouponDate: formatDate(lastCouponDateStr.toISOString(), "DD-MMM-YYYY"),
+      lastCouponDate: (lastCouponDateStr.toISOString()),
       recordDays,
       nextCouponDate: nextCouponDateStr.toISOString(),
     });
@@ -98,6 +98,7 @@ export class OrderPdfService {
       subTotal: pricing.principalAmount,
       stampDuty: pricing.stampDuty,
       totalAmount: pricing.principalAmount + pricing.accruedInterest,
+      createdAt: new Date(pricing.dealDate).toISOString(),
       metadata: {
         lastInterestPaymentDate: formatDate(lastCouponDateStr.toISOString(), "DD-MMM-YYYY"),
         valueDate: pricing.dealDate,
