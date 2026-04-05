@@ -530,11 +530,11 @@ export class BondService {
         to: customer.emailAddress ?? "",
         subject: "Order Request Received – ISIN: " + orderData.isin + " | Request Date: " + requestDate,
         text: await placeOrderEmailCustomer(orderData),
-        attachments: orderPdfAttachments,
+        // attachments: orderPdfAttachments,
       }),
       sendBackOfficeEmail({
         to: "dl.sales@meradhan.co",
-        subject: env.CBRICS_ENV === "UAT" ? `UAT Testing | Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.settlementAmount} [Please DELETE this email its a test email]` : `Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.faceValue * orderData.quantity} | Request Date: ${requestDate}`,
+        subject: env.CBRICS_ENV === "UAT" ? `UAT Testing | Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.faceValue * orderData.quantity} [Please DELETE this email its a test email]` : `Order Request | ${orderData.isin} | Qty: ${orderData.quantity} | Rs. ${orderData.faceValue * orderData.quantity} | Request Date: ${requestDate}`,
         text: await sendPlaceOrderEmail(orderData),
         attachments: orderPdfAttachments,
       }),
