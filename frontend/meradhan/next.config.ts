@@ -51,6 +51,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/api/dhangpt/:path*",
+        destination: `http://150.242.201.184:6004/:path*`,
+      },
+      {
         source: "/api/server/:path*",
         destination: `${BASES_URLS.API_SERVER}/api/:path*`,
       },
@@ -78,6 +82,7 @@ const nextConfig: NextConfig = {
         source: "/api/meradhan/kra/uat/:path*",
         destination: `https://pilot.kra.ndml.in/:path*`,
       },
+
     ];
   },
 };

@@ -12,6 +12,18 @@ router.get(
 );
 
 router.get(
+  "/api/crm/orders/payment-gateway-settings",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.getPaymentGatewaySettings
+);
+
+router.patch(
+  "/api/crm/orders/payment-gateway-settings",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.updatePaymentGatewaySettings
+);
+
+router.get(
   "/api/crm/orders/:id",
   allowAccessMiddleware("CRM"),
   crmOrdersController.getOrderById

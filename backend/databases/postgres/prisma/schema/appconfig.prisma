@@ -1,0 +1,11 @@
+/// Site-wide order flow: Razorpay checkout vs inquiry-only (lead + email).
+enum PaymentGatewayMode {
+  PAYMENT
+  INQUIRY
+}
+
+model AppConfig {
+  id                 Int                 @id @default(1)
+  paymentGatewayMode PaymentGatewayMode  @default(INQUIRY)
+  updatedAt          DateTime            @updatedAt
+}

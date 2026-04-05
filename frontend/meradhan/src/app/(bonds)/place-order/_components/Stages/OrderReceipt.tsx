@@ -11,6 +11,7 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { IoMdArrowDropright } from "react-icons/io";
 import { useRazorpay } from "../../_hooks/useRazorpay";
 import { useOrderState } from "../../store/useOrderState";
@@ -45,6 +46,37 @@ function OrderReceipt({
     trackPaymentAttempt,
     trackButtonClick,
   } = useOrderActivityTracking();
+
+  const orderApi = new apiGateway.meradhan.customerOrderApi(apiClientCaller);
+  const { data: pgModeResponse } = useQuery({
+    queryKey: ["paymentGatewayMode"],
+    queryFn: () => orderApi.getPaymentGatewayMode(),
+  });
+  const isPaymentMode =
+    pgModeResponse?.responseData.paymentGatewayMode === "PAYMENT";
+
+  const validateBeforeSubmit = (): boolean => {
+    if (!orderPricing) {
+      toast({
+        title: "Pricing unavailable",
+        description:
+          "Order pricing could not be loaded. Please go back and try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    const yieldVal = Number(bond.buyYield ?? bond.yield);
+    if (!Number.isFinite(yieldVal) || yieldVal < 1) {
+      toast({
+        title: "Invalid yield",
+        description:
+          "Indicative yield must be available to place this order.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
 
   return (
     <div className="container">
@@ -116,120 +148,113 @@ function OrderReceipt({
         height={500}
         className="rounded-md overflow-hidden mt-8"
       />
-      <div className="flex justify-center items-center gap-4 mt-10">
-        <Button
-          className="md:w-auto w-full"
-          variant="default"
-          disabled={
-            !(checkTaC && checkOrderCerTaC) ||
-            !orderPricing ||
-            isPlacing
-          }
-          onClick={async () => {
-            if (!orderPricing) {
-              toast({
-                title: "Pricing unavailable",
-                description:
-                  "Order pricing could not be loaded. Please go back and try again.",
-                variant: "destructive",
-              });
-              return;
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10">
+        {!isPaymentMode && (
+          <Button
+            className="md:w-auto w-full"
+            variant="default"
+            disabled={
+              !(checkTaC && checkOrderCerTaC) ||
+              !orderPricing ||
+              isPlacing
             }
-            const yieldVal = Number(bond.buyYield ?? bond.yield);
-            if (!Number.isFinite(yieldVal) || yieldVal < 1) {
-              toast({
-                title: "Invalid yield",
-                description:
-                  "Indicative yield must be available to place this order.",
-                variant: "destructive",
-              });
-              return;
-            }
-            trackButtonClick(orderId, "PLACE_ORDER", {
-              step: 2,
-              isin: bond.isin,
-              quantity,
-              bondName: bond.bondName,
-            });
-            setIsPlacing(true);
-            try {
-              const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
-              await bondsApi.placeOrder({
-                customerProfileId: customer.id,
-                bondName: bond.bondName,
+            onClick={async () => {
+              if (!validateBeforeSubmit()) return;
+              if (!(checkTaC && checkOrderCerTaC)) return;
+              const yieldVal = Number(bond.buyYield ?? bond.yield);
+              trackButtonClick(orderId, "PLACE_ORDER", {
+                step: 2,
                 isin: bond.isin,
-                couponRate: orderPricing.couponRate,
-                yield: yieldVal,
-                faceValue: orderPricing.faceValue,
                 quantity,
-                settlementAmount: orderPricing.settlementAmount,
-                dealDate: orderPricing.dealDate,
-                settlementType: orderPricing.settlementOrder,
-                requestDate: new Date().toISOString(),
-              });
-              setStep(3);
-            } catch (err: unknown) {
-              const message =
-                err &&
-                  typeof err === "object" &&
-                  "response" in err &&
-                  (err as { response?: { data?: { message?: string } } })
-                    .response?.data?.message
-                  ? String(
-                    (err as { response: { data: { message?: string } } })
-                      .response.data.message
-                  )
-                  : err instanceof Error
-                    ? err.message
-                    : "Could not place order. Please try again.";
-              toast({
-                title: "Could not place order",
-                description: message,
-                variant: "destructive",
-              });
-            } finally {
-              setIsPlacing(false);
-            }
-          }}
-        >
-          {isPlacing ? "Placing…" : "Place Order"}{" "}
-          <IoMdArrowDropright />
-        </Button>
-        {/* <Button
-          className="md:w-auto w-full"
-          variant="default"
-          disabled={!(checkTaC && checkOrderCerTaC)}
-          onClick={() => {
-            trackButtonClick(orderId, "PROCEED_TO_PAY", {
-              step: 2,
-              isin: bond.isin,
-              quantity,
-              bondName: bond.bondName,
-            });
-            trackPaymentAttempt(orderId, {
-              isin: bond.isin,
-              quantity,
-              bondName: bond.bondName,
-            });
-            makePayment({
-              isin: bond.isin,
-              bondData: {
                 bondName: bond.bondName,
-              },
-              quantity: quantity,
-
-              session: {
-                firstName: customer.firstName,
-                lastName: customer.lastName,
-                emailAddress: customer.emailAddress,
-                contact: customer.phoneNo,
-              },
-              orderId: orderId,
-            });
-          }}
-        >
-          Proceed to Pay <IoMdArrowDropright />
-        </Button> */}
+              });
+              setIsPlacing(true);
+              try {
+                const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+                await bondsApi.placeOrder({
+                  customerProfileId: customer.id,
+                  bondName: bond.bondName,
+                  isin: bond.isin,
+                  couponRate: orderPricing!.couponRate,
+                  yield: yieldVal,
+                  faceValue: orderPricing!.faceValue,
+                  quantity,
+                  settlementAmount: orderPricing!.settlementAmount,
+                  dealDate: orderPricing!.dealDate,
+                  settlementType: orderPricing!.settlementOrder,
+                  requestDate: new Date().toISOString(),
+                });
+                setStep(3);
+              } catch (err: unknown) {
+                const message =
+                  err &&
+                    typeof err === "object" &&
+                    "response" in err &&
+                    (err as { response?: { data?: { message?: string } } })
+                      .response?.data?.message
+                    ? String(
+                      (err as { response: { data: { message?: string } } })
+                        .response.data.message
+                    )
+                    : err instanceof Error
+                      ? err.message
+                      : "Could not place order. Please try again.";
+                toast({
+                  title: "Could not place order",
+                  description: message,
+                  variant: "destructive",
+                });
+              } finally {
+                setIsPlacing(false);
+              }
+            }}
+          >
+            {isPlacing ? "Placing…" : "Place Order"}{" "}
+            <IoMdArrowDropright />
+          </Button>
+        )}
+        {isPaymentMode && (
+          <Button
+            className="md:w-auto w-full"
+            variant="default"
+            disabled={
+              !(checkTaC && checkOrderCerTaC) ||
+              !orderPricing ||
+              isLoading
+            }
+            onClick={() => {
+              if (!validateBeforeSubmit()) return;
+              if (!(checkTaC && checkOrderCerTaC)) return;
+              trackButtonClick(orderId, "PROCEED_TO_PAY", {
+                step: 2,
+                isin: bond.isin,
+                quantity,
+                bondName: bond.bondName,
+              });
+              trackPaymentAttempt(orderId, {
+                isin: bond.isin,
+                quantity,
+                bondName: bond.bondName,
+              });
+              makePayment({
+                isin: bond.isin,
+                bondData: {
+                  bondName: bond.bondName,
+                },
+                quantity: quantity,
+                session: {
+                  firstName: customer.firstName,
+                  lastName: customer.lastName,
+                  emailAddress: customer.emailAddress,
+                  contact: customer.phoneNo,
+                },
+                orderId: orderId,
+              });
+            }}
+          >
+            Proceed to Pay <IoMdArrowDropright />
+          </Button>
+        )}
         <Button
           className="md:w-auto w-full"
           variant="outline"

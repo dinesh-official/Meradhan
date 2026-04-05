@@ -5,6 +5,12 @@ import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 const orderRoutes = Router();
 const orderController = new OrderController();
 
+orderRoutes.get(
+  "/api/customer/order/payment-gateway-mode",
+  allowAccessMiddleware("USER"),
+  orderController.getPaymentGatewayMode
+);
+
 orderRoutes.post(
   "/api/customer/order/preview",
   allowAccessMiddleware("USER"),

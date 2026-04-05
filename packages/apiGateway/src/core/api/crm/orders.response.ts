@@ -227,3 +227,11 @@ export interface GetReceiptPdfOptionsResponse {
 export interface UpsertReceiptPdfOptionsResponse {
   responseData: CrmOrderReceiptPdfOptionsRow;
 }
+
+export type PaymentGatewayMode = "PAYMENT" | "INQUIRY";
+
+export interface GetPaymentGatewaySettingsResponse {
+  responseData: {
+    paymentGatewayMode: PaymentGatewayMode;
+  };
+}

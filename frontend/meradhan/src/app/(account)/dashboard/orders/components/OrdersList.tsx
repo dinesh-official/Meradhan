@@ -42,7 +42,7 @@ function OrdersList({ orders, isLoading, error }: OrdersListProps) {
   }
 
   return (
-    <div className="md:hidden">
+    <div className="w-full min-w-0 md:hidden">
       {orders.map((order, index) => (
         <OrderCard
           key={order.id}
