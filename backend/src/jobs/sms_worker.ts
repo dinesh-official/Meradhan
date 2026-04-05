@@ -12,6 +12,7 @@ import {
 import { render } from "@react-email/components";
 import MeraDhanOtpEmail from "@emails/crm_login_otp_email";
 import RekycConfirmationOtpEmail from "@emails/rekyc_confirmation_otp_email";
+import { meraDhanOtpEmailTextEmailChange } from "@emails/text/meraDhanOtpEmailTextEmailChange";
 import { meraDhanOtpEmailTextLogin } from "@emails/text/meraDhanOtpEmailTextLogin";
 import { meraDhanOtpEmailTextSignup } from "@emails/text/meraDhanOtpEmailTextSignup";
 import { meraDhanRekycOtpEmailText } from "@emails/text/meraDhanRekycOtpEmailText";
@@ -39,6 +40,14 @@ startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
       to: email,
       subject: subject,
       text: meraDhanOtpEmailTextSignup({ userName, otpCode: otp }),
+    });
+    return;
+  }
+  if (type == "email_change") {
+    await emailSend.sendEmail({
+      to: email,
+      subject: subject,
+      text: meraDhanOtpEmailTextEmailChange({ userName, otpCode: otp }),
     });
     return;
   }

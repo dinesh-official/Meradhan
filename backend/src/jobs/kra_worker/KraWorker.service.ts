@@ -35,7 +35,7 @@ export class KraWorkerService {
   async processKra(data: KraWorkerJobData) {
 
     console.log("KRA PROCESS STARTED", data);
-    
+
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
     const runnerCachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
 
@@ -405,7 +405,6 @@ export class KraWorkerService {
           requestData: {
             customerId: customerId,
             kycDataStoreId: kycDataStoreId,
-            date: new Date().toISOString(),
           },
           responseData: cbUser,
           userId: customerId,

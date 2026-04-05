@@ -1,7 +1,14 @@
-import type { Request, Response } from "express";
-import { CustomerProfileService } from "./customer.profile.service";
+import { cookieOptions } from "@config/cookie";
 import { appSchema } from "@root/schema";
+import {
+  crateMeradhanActivityLog,
+  revalidateMeradhanTrackingSession,
+} from "@resource/customer/auditlogs/auditlog.repo";
+import { trackRateLimitSuccess } from "@resource/customer/auth/customer.auth.ratelimit";
+import { HttpStatus } from "@utils/error/AppError";
+import type { Request, Response } from "express";
 import { CustomerManageAccountsService } from "./customer.manage_accounts.service";
+import { CustomerProfileService } from "./customer.profile.service";
 
 export class CustomerProfileController {
   private profileService = new CustomerProfileService();
@@ -140,6 +147,64 @@ export class CustomerProfileController {
     res.status(200).json({
       success: true,
       message: "Risk profile answers saved successfully.",
+    });
+  }
+
+  async sendEmailChangeOtp(req: Request, res: Response) {
+    const { newEmail } = appSchema.customer.customerEmailChangeSendOtpSchema.parse(
+      req.body,
+    );
+    const { token } = await this.profileService.sendEmailChangeOtp({
+      customerId: req.customer!.id,
+      newEmail,
+    });
+    await trackRateLimitSuccess(req, "otp-send");
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { otpToken: token },
+    });
+  }
+
+  async verifyEmailChange(req: Request, res: Response) {
+    const { newEmail, otp, token } =
+      appSchema.customer.customerEmailChangeVerifySchema.parse(req.body);
+    const data = await this.profileService.verifyEmailChange({
+      customerId: req.customer!.id,
+      newEmail,
+      token,
+      otp,
+    });
+
+    await crateMeradhanActivityLog(req, {
+      userId: data.id,
+      action: "PRIMARY_EMAIL_CHANGED",
+      entityType: "Profile",
+      entityId: data.id,
+      details: {
+        Reason:
+          "Primary email has been changed; change verified by OTP.",
+        previousEmail: data.previousEmail,
+        newEmail: data.email,
+        verifiedBy: "OTP",
+      },
+    });
+
+    await revalidateMeradhanTrackingSession(req, {
+      userId: data.id,
+      sessionId: req.cookies["meradhan_tracking_session"],
+    });
+    await trackRateLimitSuccess(req, "otp-verify");
+
+    res.cookie("token", data.token, cookieOptions);
+    res.cookie("userId", data.id.toString(), cookieOptions);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: {
+        id: data.id,
+        email: data.email,
+        avatar: data.avatar,
+        token: data.token,
+      },
     });
   }
 }

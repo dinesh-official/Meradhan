@@ -88,7 +88,14 @@ const DEFAULT_OTP_VERIFY_CONFIG: RateLimitConfig = {
 
 function extractIdentifier(req: Request): string | null {
   const body = req.body || {};
-  return body.email || body.mobile || body.identity || body.value || null;
+  return (
+    body.email ||
+    body.mobile ||
+    body.identity ||
+    body.value ||
+    body.newEmail ||
+    null
+  );
 }
 
 function isCaptchaValid(req: Request): boolean {
