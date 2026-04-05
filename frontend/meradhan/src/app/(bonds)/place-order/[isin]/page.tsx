@@ -34,23 +34,47 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     apiServerCaller
   );
 
-  const { responseData } = await apiCaller.getBondDetailsByIsin(isin);
+  let responseData: Awaited<
+    ReturnType<typeof apiCaller.getBondDetailsByIsin>
+  >["responseData"] | null = null;
+  let bondDetailsRequestFailed = false;
+  try {
+    const bondEnvelope = await apiCaller.getBondDetailsByIsin(isin);
+    responseData = bondEnvelope.responseData ?? null;
+  } catch {
+    bondDetailsRequestFailed = true;
+    responseData = null;
+  }
 
   let orderPricing: BondOrderPricingData | null = null;
-  try {
-    const pricingEnvelope = await apiCaller.getBondOrderPricing(isin, Number(quantity ?? 1));
-    if (pricingEnvelope.responseData) {
-      orderPricing = pricingEnvelope.responseData;
+  if (responseData) {
+    try {
+      const pricingEnvelope = await apiCaller.getBondOrderPricing(
+        isin,
+        Number(quantity ?? 1),
+      );
+      if (pricingEnvelope.responseData) {
+        orderPricing = pricingEnvelope.responseData;
+      }
+    } catch {
+      orderPricing = null;
     }
-  } catch {
-    orderPricing = null;
   }
 
   const session = await getSession();
   if (!session?.id) {
     redirect("/logout");
   }
-  const userData = await customerApi.customerInfoById(Number(session?.id));
+
+  let customerPayload: Awaited<
+    ReturnType<typeof customerApi.customerInfoById>
+  >["data"]["responseData"] | null = null;
+  try {
+    const userData = await customerApi.customerInfoById(Number(session.id));
+    customerPayload = userData.data.responseData ?? null;
+  } catch {
+    customerPayload = null;
+  }
 
   if (session?.kycStatus !== "VERIFIED") {
     return (
@@ -88,16 +112,31 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
               <Image
                 src="/images/icons/sad-emoji.svg"
-                alt="Bond Not Found"
+                alt={bondDetailsRequestFailed ? "Load error" : "Bond Not Found"}
                 width={60}
                 height={60}
               />
-              <h2 className="text-2xl font-semibold mt-4">Bond Not Found</h2>
-              <p className="text-gray-600">The bond you are looking for does not exist.</p>
+              <h2 className="text-2xl font-semibold mt-4">
+                {bondDetailsRequestFailed
+                  ? "Couldn’t load bond"
+                  : "Bond Not Found"}
+              </h2>
+              <p className="text-gray-600 max-w-md">
+                {bondDetailsRequestFailed
+                  ? "We couldn’t reach our servers or the request timed out. Refresh the page or try again in a moment."
+                  : "The bond you are looking for does not exist."}
+              </p>
 
-              <Link href="/bonds" className="mt-6 inline-block">
-                <Button>Back to Bonds</Button>
-              </Link>
+              <div className="flex flex-wrap gap-3 justify-center mt-2">
+                {bondDetailsRequestFailed ? (
+                  <Button asChild>
+                    <Link href={`/place-order/${isin}`}>Try again</Link>
+                  </Button>
+                ) : null}
+                <Button variant="outlineSecondary" asChild>
+                  <Link href="/bonds">Back to Bonds</Link>
+                </Button>
+              </div>
             </div>
           </SectionWrapper>
         </div>
@@ -165,11 +204,44 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     );
   }
 
+  if (!customerPayload) {
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Profile load error"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">
+                Couldn’t load your profile
+              </h2>
+              <p className="text-gray-600 max-w-md">
+                Please refresh the page. If this keeps happening, sign out and sign in again.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Button asChild>
+                  <Link href={`/place-order/${isin}`}>Try again</Link>
+                </Button>
+                <Button variant="outlineSecondary" asChild>
+                  <Link href="/dashboard/profile">Profile</Link>
+                </Button>
+              </div>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
   return (
     <ViewPort>
       <OrderStep
         bond={responseData}
-        customer={userData.data.responseData}
+        customer={customerPayload}
         orderId={orderId}
         orderPricing={orderPricing}
       />

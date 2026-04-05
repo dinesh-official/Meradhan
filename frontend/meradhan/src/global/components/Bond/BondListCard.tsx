@@ -92,7 +92,7 @@ export function BondListCard({
               )}
               <SharePopupTrigger
                 title="Share Bond"
-                url={HOST_URL + "/detail/" + data.isin}
+                url={HOST_URL + "/bonds/detail/" + data.isin}
               >
                 <RiShareFill
                   className="text-gray-600 cursor-pointer"

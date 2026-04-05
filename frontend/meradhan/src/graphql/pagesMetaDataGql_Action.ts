@@ -117,9 +117,18 @@ export const generateBondInfoPageMetaData = async (
   slug?: string,
 ): Promise<Metadata> => {
   const gqlCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
-  const bond = await gqlCaller.getBondDetailsByIsin(isin);
-
-  const bondData = bond.responseData;
+  let bondData: Awaited<
+    ReturnType<typeof gqlCaller.getBondDetailsByIsin>
+  >["responseData"] | null = null;
+  try {
+    const bond = await gqlCaller.getBondDetailsByIsin(isin);
+    bondData = bond.responseData ?? null;
+  } catch {
+    return {};
+  }
+  if (!bondData) {
+    return {};
+  }
 
   try {
     const { data } = await gqlClient.query<PagesMetaDataResponse>({
