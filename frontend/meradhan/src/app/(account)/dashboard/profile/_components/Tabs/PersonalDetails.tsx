@@ -154,9 +154,233 @@ function EmailVerification({
       }
     >
       <p className="flex items-center gap-2 font-medium text-sm">
-        {profile.emailAddress || "--"}
+        {profile.emailAddress || "--"}{" "}
+        {profile.kycStatus == "PENDING" && (
+          <EmailChangeUpdate profile={profile}>
+            <FaEdit className="cursor-pointer" />
+          </EmailChangeUpdate>
+        )}
       </p>
     </DataInfoLabel>
+  );
+}
+
+function EmailChangeUpdate({
+  children,
+  profile,
+}: {
+  children: ReactNode;
+  profile: GetCustomerResponseById["responseData"];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [step, setStep] = useState<"email" | "otp">("email");
+  const [newEmail, setNewEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpToken, setOtpToken] = useState("");
+  const [emailError, setEmailError] = useState<string | undefined>();
+  const [allowResend, setAllowResend] = useState(false);
+  const [resendCount, setResendCount] = useState(0);
+  const { isActive, reset, start, time } = useTimer({
+    duration: 180,
+    onFinish() {
+      setAllowResend(true);
+    },
+  });
+
+  const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
+    apiClientCaller
+  );
+
+  const resetDialog = () => {
+    setStep("email");
+    setNewEmail("");
+    setOtp("");
+    setOtpToken("");
+    setEmailError(undefined);
+    setAllowResend(false);
+    setResendCount(0);
+    reset();
+  };
+
+  const sendEmailChangeOtpMutation = useMutation({
+    mutationKey: ["profile-email-change-send-otp", profile.id],
+    mutationFn: async () => {
+      const res = await customerApi.sendEmailChangeOtp({ newEmail: newEmail.trim() });
+      return res.responseData.otpToken;
+    },
+    onSuccess: (token) => {
+      setOtpToken(token);
+      setStep("otp");
+      setOtp("");
+      toast.success("OTP sent to your new email address");
+      setAllowResend(false);
+      setResendCount((c) => c + 1);
+      reset();
+      start();
+    },
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(
+        err?.response?.data?.message || "Could not send OTP. Try again."
+      );
+    },
+  });
+
+  const verifyEmailChangeMutation = useMutation({
+    mutationKey: ["profile-email-change-verify", profile.id],
+    mutationFn: async () => {
+      return await customerApi.verifyEmailChange({
+        newEmail: newEmail.trim(),
+        otp,
+        token: otpToken,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Email updated successfully");
+      setIsOpen(false);
+      resetDialog();
+      queryClient.invalidateQueries({
+        queryKey: ["profile-page", profile.id],
+      });
+    },
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(
+        err?.response?.data?.message || "OTP verification failed"
+      );
+    },
+  });
+
+  const validateEmail = (value: string) => {
+    const v = value.trim();
+    if (!v) return "Email is required";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Enter a valid email";
+    return undefined;
+  };
+
+  const handleSendOtp = () => {
+    const err = validateEmail(newEmail);
+    setEmailError(err);
+    if (err) return;
+    sendEmailChangeOtpMutation.mutate();
+  };
+
+  const handleVerifyOtp = () => {
+    if (otp.length !== 6) {
+      toast.error("Please enter the 6-digit OTP");
+      return;
+    }
+    verifyEmailChangeMutation.mutate();
+  };
+
+  const handleResendOtp = () => {
+    if (resendCount >= 3) {
+      toast.error("Maximum resend attempts reached");
+      return;
+    }
+    if (isActive) return;
+    sendEmailChangeOtpMutation.mutate();
+  };
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) resetDialog();
+      }}
+    >
+      <DialogTrigger onClick={() => setIsOpen(true)}>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-medium">
+            {step === "email" ? "Change email address" : "Verify new email"}
+          </DialogTitle>
+          <DialogDescription className="text-gray-600">
+            {step === "email"
+              ? "Enter the new email address. We will send an OTP to that address only."
+              : `Enter the OTP sent to ${newEmail.trim()}.`}
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === "email" ? (
+          <>
+            <div className="flex flex-col gap-3 py-5">
+              <Input
+                type="email"
+                placeholder="New email address"
+                className={`bg-muted py-5 border-none placeholder:text-[#7fabd2] ${emailError ? "border-red-500 border" : ""}`}
+                value={newEmail}
+                onChange={(e) => {
+                  setNewEmail(e.target.value);
+                  if (emailError) setEmailError(undefined);
+                }}
+                autoComplete="email"
+              />
+              {emailError && (
+                <p className="font-medium text-red-500 text-sm">{emailError}</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                className="w-full"
+                onClick={handleSendOtp}
+                disabled={sendEmailChangeOtpMutation.isPending}
+              >
+                {sendEmailChangeOtpMutation.isPending ? "Sending…" : "Send OTP"}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-3 py-5">
+              <SignInOtpInput
+                otp={otp}
+                setOtp={(e) => setOtp(e)}
+                length={6}
+              />
+            </div>
+            <DialogFooter className="flex-col gap-2 sm:flex-col">
+              <Button
+                className="w-full"
+                onClick={handleVerifyOtp}
+                disabled={verifyEmailChangeMutation.isPending}
+              >
+                {verifyEmailChangeMutation.isPending ? "Verifying…" : "Verify & update email"}
+              </Button>
+              <Button
+                variant="link"
+                type="button"
+                disabled={
+                  sendEmailChangeOtpMutation.isPending ||
+                  isActive ||
+                  resendCount >= 3 ||
+                  !allowResend
+                }
+                onClick={handleResendOtp}
+              >
+                {sendEmailChangeOtpMutation.isPending
+                  ? "Sending…"
+                  : isActive
+                    ? `Resend OTP (${time})`
+                    : "Resend OTP"}
+              </Button>
+              <Button
+                variant="ghost"
+                type="button"
+                className="text-sm"
+                onClick={() => {
+                  setStep("email");
+                  setOtp("");
+                }}
+              >
+                Change email address
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
