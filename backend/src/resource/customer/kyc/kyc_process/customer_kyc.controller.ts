@@ -353,8 +353,8 @@ export class CustomerKycKycController {
     const id = req.customer!.id;
     const data = appSchema.kyc.kraVerifyRequestSchema.parse(req.body);
 
-    // const response = await this.panKycService.createKraVerifyRequest(id, data);
-    const response = await this.panKycService.createKraVerifyRequestMock(id, data);
+    const response = await this.panKycService.createKraVerifyRequest(id, data);
+    // const response = await this.panKycService.createKraVerifyRequestMock(id, data);
 
 
     const responseData = response
