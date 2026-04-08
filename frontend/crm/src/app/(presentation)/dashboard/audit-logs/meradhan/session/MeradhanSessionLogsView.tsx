@@ -70,26 +70,14 @@ function SessionLogsMeradhan() {
   // Client-side filtering for search and device type
   const filteredData =
     sessionData.data?.data?.filter((item) => {
+      const searchNeedle = debouncedSearch.trim().toLowerCase();
       const matchesSearch =
-        !debouncedSearch ||
-        (item.ipAddress &&
-          item.ipAddress
-            .toLowerCase()
-            .includes(debouncedSearch.toLowerCase())) ||
-        (item.browserName &&
-          item.browserName
-            .toLowerCase()
-            .includes(debouncedSearch.toLowerCase())) ||
-        (item.operatingSystem &&
-          item.operatingSystem
-            .toLowerCase()
-            .includes(debouncedSearch.toLowerCase())) ||
-        item.sessionToken
-          .toLowerCase()
-          .includes(debouncedSearch.toLowerCase()) ||
-        item.trackingToken
-          .toLowerCase()
-          .includes(debouncedSearch.toLowerCase());
+        !searchNeedle ||
+        (item.ipAddress ?? "").toLowerCase().includes(searchNeedle) ||
+        (item.browserName ?? "").toLowerCase().includes(searchNeedle) ||
+        (item.operatingSystem ?? "").toLowerCase().includes(searchNeedle) ||
+        (item.sessionToken ?? "").toLowerCase().includes(searchNeedle) ||
+        (item.trackingToken ?? "").toLowerCase().includes(searchNeedle);
 
       const matchesDeviceType =
         !deviceFilter ||

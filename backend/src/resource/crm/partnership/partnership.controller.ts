@@ -118,7 +118,7 @@ export class PartnershipController {
         id: currentUserId,
       },
     });
-    const isAdmin = user?.role === "ADMIN";
+    const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role ?? "");
 
     const response = await this.manager.filterPartnership(
       payload,

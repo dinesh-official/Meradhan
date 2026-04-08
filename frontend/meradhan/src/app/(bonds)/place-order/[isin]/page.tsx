@@ -61,6 +61,8 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     }
   }
 
+  console.log(orderPricing);
+
   const session = await getSession();
   if (!session?.id) {
     redirect("/logout");
