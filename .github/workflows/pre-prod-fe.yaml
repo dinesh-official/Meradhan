@@ -63,9 +63,9 @@ jobs:
           DEV_NSDL_SECRET_KEY: ${{ secrets.DEV_NSDL_SECRET_KEY }}
           DEV_NSDL_MODE: ${{ secrets.DEV_NSDL_MODE }}
 
-          DEV_CDSL_AES_KEY: ${{ secrets.DEV_CDSL_AES_KEY }}
-          DEV_ENTITY_ID: ${{ secrets.DEV_ENTITY_ID }}
-          DEV_CDSL_MODE: ${{ secrets.DEV_CDSL_MODE }}
+          DEV_CDSL_AES_KEY: ${{ secrets.CDSL_AES_KEY }}
+          DEV_ENTITY_ID: ${{ secrets.ENTITY_ID }}
+          DEV_CDSL_MODE: ${{ secrets.CDSL_MODE }}
 
           DEV_AUTH_SECRET: ${{ secrets.DEV_AUTH_SECRET }}
           DEV_AUTH_GOOGLE_ID: ${{ secrets.DEV_AUTH_GOOGLE_ID }}
