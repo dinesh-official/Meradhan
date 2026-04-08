@@ -17,6 +17,7 @@ import { IoMdArrowDropright } from "react-icons/io";
 import { useKycDataStorage } from "../../_store/useKycDataStorage";
 import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 function KycESign() {
   const { handleEsignKyc, isPending } = useHandelEsignKyc();
@@ -66,7 +67,7 @@ function KycESign() {
             <label className="flex items-center gap-2 mt-6">
               <Checkbox
                 checked={state?.step_6?.terms}
-                onCheckedChange={(e) => setStep6Data("terms", e)}
+                onCheckedChange={(e) => { isPending ? toast.error("Please wait for the e-sign process to complete") : setStep6Data("terms", e) }}
               />
               By continue, I agree to the following terms:
             </label>

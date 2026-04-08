@@ -12,7 +12,6 @@ import React from "react";
 export interface PanCardInfoProps {
   panCardNumber: string;
   DateOFBirth: string;
-  gender: string;
   Name: string;
   nameVerificationStatus: boolean;
   panVerificationStatus: boolean;
@@ -44,9 +43,6 @@ export default function PanCardInfoCard(panCardInfoData: PanCardInfoProps) {
           </LabelView>
           <LabelView title="Date of Birth">
             <p className="text-sm">{panCardInfoData.DateOFBirth}</p>
-          </LabelView>
-          <LabelView title="Gender">
-            <p className="text-sm">{panCardInfoData.gender}</p>
           </LabelView>
           <LabelView title="Full Name">
             <p className="text-sm">
