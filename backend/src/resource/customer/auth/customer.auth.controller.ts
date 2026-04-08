@@ -191,6 +191,17 @@ export class CustomerAuthController {
       otp,
       token,
     });
+    await addMeradhanLoginBasedAuditLog(req, {
+      userId: data.id,
+      sessionType: "SIGNIN_OTP",
+      success: true,
+      entityType: "Auth",
+      email: data.email,
+    });
+    await revalidateMeradhanTrackingSession(req, {
+      userId: data.id,
+      sessionId: req.cookies["meradhan_tracking_session"],
+    });
     // Track successful OTP verification for rate limiting
     await trackRateLimitSuccess(req, "otp-verify");
     res.cookie("token", data.token, cookieOptions);

@@ -163,6 +163,7 @@ export function useKraInfoStep() {
 
   const handleUseExisting = () => {
     const kra = state.step_1.kraResponse;
+    setStep1PanData("confirmPanTimestamp", new Date().toISOString());
     setUsedExistingKra(true);
     if (kra) prefillFromKra(kra);
     handelPanVerification();
