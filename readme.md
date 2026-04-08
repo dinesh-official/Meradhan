@@ -6,6 +6,7 @@
 
 ### Strapi Cms
 
+
 - DataBase: PostgreSQL
 - API: GraphQL
 - Storage : Local filesystem
