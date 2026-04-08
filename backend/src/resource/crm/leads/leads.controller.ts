@@ -95,18 +95,8 @@ export class LeadController {
 
   async filterLead(req: Request, res: Response): Promise<void> {
     const payload = appSchema.crm.leads.findManyLeadsSchema.parse(req.query);
-    // ADMIN sees all; USER (req.customer) is restricted to own or assigned leads
-    const currentUserId = req.session?.id;
-    const user = await db.dataBase.cRMUserDataModel.findUnique({
-      where: {
-        id: currentUserId,
-      },
-    });
-    const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role ?? "");
-    const response = await this.manager.filterLead(
-      payload,
-      isAdmin ? undefined : user?.id
-    );
+    // CRM requirement: all CRM roles can view all leads
+    const response = await this.manager.filterLead(payload, undefined);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "lead get successfully",

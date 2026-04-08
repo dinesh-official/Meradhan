@@ -17,6 +17,7 @@ import { toDdMmYyyy } from "../../../_utils/kraRequestFormat";
 import { useKraInfoStep } from "./_hooks/useKraInfoStep";
 import { KraInfoView } from "./KraInfoView";
 import { useKycDataProvider } from "../../../_context/KycDataProvider";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function KraInfoStep() {
   const { state, setKraResponse, prevLocalStep } = useKycDataStorage();
@@ -72,6 +73,16 @@ export default function KraInfoStep() {
     },
   });
 
+
+  if (refreshKraMutation.isPending) {
+    return (
+      <Card accountMode>
+        <CardContent accountMode className="py-8 flex justify-center items-center">
+          <Spinner className="size-10" />
+        </CardContent>
+      </Card>
+    );
+  }
 
 
   if (!kra) {

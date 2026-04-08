@@ -12,6 +12,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  Download,
   FileSpreadsheet,
   Loader2,
   Save,
@@ -49,6 +50,9 @@ export default function SettlementDatesView() {
   const { cookies } = useAppCookie();
   const canSave =
     cookies.role === "ADMIN" || cookies.role === "SUPER_ADMIN";
+
+  const NSE_SETTLEMENT_CSV_URL =
+    "https://bricsonline.nseindia.com/bondsnew/rest/login";
 
   const [yearMonth, setYearMonth] = React.useState(() =>
     format(new Date(), "yyyy-MM")
@@ -173,13 +177,28 @@ export default function SettlementDatesView() {
     <div className="flex flex-col gap-5 mt-5">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">
-            Saved settlement dates
-          </CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
-            Choose a month to load rows from the database. Dates are stored as
-            yyyy-mm-dd; pagination applies per month.
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle className="text-base font-semibold">
+                Saved settlement dates
+              </CardTitle>
+              <p className="text-sm text-muted-foreground font-normal mt-1">
+                Choose a month to load rows from the database. Dates are stored as
+                yyyy-mm-dd; pagination applies per month.
+              </p>
+            </div>
+            <a
+              href={NSE_SETTLEMENT_CSV_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <Button type="button" variant="outline" className="w-full sm:w-auto">
+                <Download className="mr-2 h-4 w-4" />
+                Download CSV
+              </Button>
+            </a>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between mb-6">

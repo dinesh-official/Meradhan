@@ -112,18 +112,8 @@ export class PartnershipController {
   async filterPartnership(req: Request, res: Response): Promise<void> {
     const payload =
       appSchema.crm.partnership.findManyPartnershipsSchema.parse(req.query);
-    const currentUserId = req.session?.id;
-    const user = await db.dataBase.cRMUserDataModel.findUnique({
-      where: {
-        id: currentUserId,
-      },
-    });
-    const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role ?? "");
-
-    const response = await this.manager.filterPartnership(
-      payload,
-      isAdmin ? undefined : user?.id
-    );
+    // CRM requirement: all CRM roles can view all partnerships
+    const response = await this.manager.filterPartnership(payload, undefined);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "Partnerships retrieved successfully",

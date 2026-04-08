@@ -36,7 +36,7 @@ type BondOrderPricingData = {
 
 // ✅ UPDATED MARKET WINDOW (UTC)
 const DEFAULT_TRADING_START = 3 * 60 + 30; // 03:30 UTC
-const DEFAULT_TRADING_CUTOFF = 11 * 60 + 45;    // 11:45 UTC
+const DEFAULT_TRADING_CUTOFF = 11 * 60 + 45; // 11:45 IST
 
 const DEFAULT_BOND_MARKET_HOLIDAYS: readonly string[] = [
     "2026-01-15", "2026-01-26", "2026-02-19", "2026-03-03", "2026-03-19",
@@ -341,3 +341,4 @@ console.log(computeBondOrderPricingData({
     recordDays: 15,
     nextCouponDate: "2026-04-08",
 }));
+console.log(new Date().toISOString());
