@@ -2,12 +2,16 @@ import { meraDhanEmailVerificationEmailText } from "@emails/text/meraDhanEmailVe
 import { meraDhanForgotPasswordEmailText } from "@emails/text/meraDhanForgotPasswordEmailText";
 import { meraDhanPasswordResetSuccessEmailText } from "@emails/text/meraDhanPasswordResetSuccessEmailText";
 import { meraDhanWelcomeEmailText } from "@emails/text/meraDhanWelcomeEmailText";
+import { meraDhanAddBankAccountsClearingCorporationsEmailText } from "@emails/text/meraDhanAddBankAccountsClearingCorporationsEmailText";
+import { meraDhanKycSubmittedForVerificationEmailText } from "@emails/text/meraDhanKycSubmittedForVerificationEmailText";
 import type { Job } from "bull";
 import { EmailCommunication } from "../communication/email_communication";
 import { startQueueWorker } from "./helper/start_queue_worker_helper";
 import {
+  addBankAccountsClearingCorporationsEmailQueue,
   emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
+  kycSubmittedForVerificationEmailQueue,
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
 } from "./queue/worker_queues";
@@ -87,5 +91,34 @@ startQueueWorker(emailVerificationQueue, async (job: Job) => {
       userName,
       verificationLink: link,
     }),
+  });
+});
+
+startQueueWorker(addBankAccountsClearingCorporationsEmailQueue, async (job: Job) => {
+  const emailSend = new EmailCommunication();
+  const { email, customerName, subject } = job.data as {
+    email: string;
+    customerName: string;
+    subject: string;
+  };
+  await emailSend.sendEmail({
+    to: email,
+    subject,
+    html: meraDhanAddBankAccountsClearingCorporationsEmailText({ customerName }),
+  });
+});
+
+startQueueWorker(kycSubmittedForVerificationEmailQueue, async (job: Job) => {
+  const emailSend = new EmailCommunication();
+  const { email, customerName, title, subject } = job.data as {
+    email: string;
+    customerName: string;
+    title?: "Mr." | "Ms.";
+    subject: string;
+  };
+  await emailSend.sendEmail({
+    to: email,
+    subject,
+    html: meraDhanKycSubmittedForVerificationEmailText({ customerName, title }),
   });
 });

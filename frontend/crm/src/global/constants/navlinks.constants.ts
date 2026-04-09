@@ -221,6 +221,33 @@ export const NAV_ITEMS: NavItem[] = [
     icon: FaMoneyBill,
     module: "bonds",
     allowOnly: ["view:bonds"],
+    children: [
+      {
+        label: "All Bonds",
+        path: "/dashboard/bonds",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
+        label: "Priced List Upload",
+        path: "/dashboard/bonds/priced-list",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
+        label: "Reference Data Upload",
+        path: "/dashboard/bonds/reference-data",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
+        label: "Margin Management",
+        path: "/dashboard/bonds/margins",
+        module: "bonds",
+        allowOnly: ["edit:bonds"],
+        roles: ["ADMIN", "SUPER_ADMIN"],
+      },
+    ],
   },
   {
     label: "Reports",
