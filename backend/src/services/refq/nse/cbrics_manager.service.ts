@@ -425,10 +425,12 @@ export class ParticipantManager {
             participant: {
               select: {
                 id: true,
-              },
-              include: {
-                bankAccountList: true,
-                dpAccountList: true,
+                bankAccountList: {
+                  select: { id: true },
+                },
+                dpAccountList: {
+                  select: { id: true },
+                },
               },
             },
           },
