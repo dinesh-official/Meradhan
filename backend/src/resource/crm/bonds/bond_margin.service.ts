@@ -1,8 +1,29 @@
+import type { BondMargin, Prisma } from "@databases/generated/prisma/postgres";
 import { db } from "@core/database/database";
+import {
+  BOND_MARGIN_STANDARD_RATINGS,
+  BOND_MARGIN_WITHOUT_RATING,
+  isAllowedBondMarginRating,
+} from "./bond_margin.constants";
 
-type MarginInput = {
-  sectorName: string;
-  rating: string;
+/** Without-rating row first so it’s visible at the top of each sector’s collapsible table. */
+const RATING_SORT_ORDER = new Map<string, number>(
+  [BOND_MARGIN_WITHOUT_RATING, ...BOND_MARGIN_STANDARD_RATINGS].map((r, i) => [
+    r,
+    i,
+  ]),
+);
+
+function sortMarginsByRating(rows: BondMargin[]): BondMargin[] {
+  return [...rows].sort((a, b) => {
+    const ia = RATING_SORT_ORDER.get(a.rating) ?? 999;
+    const ib = RATING_SORT_ORDER.get(b.rating) ?? 999;
+    if (ia !== ib) return ia - ib;
+    return a.rating.localeCompare(b.rating);
+  });
+}
+
+type SlabInput = {
   underOneYear: number;
   oneToThreeYears: number;
   threeToFiveYears: number;
@@ -24,65 +45,163 @@ function asString(value: unknown, field: string): string {
   return s;
 }
 
+function normalizeSlabs(body: Record<string, unknown>): SlabInput {
+  return {
+    underOneYear: asNumber(body.underOneYear, "underOneYear"),
+    oneToThreeYears: asNumber(body.oneToThreeYears, "oneToThreeYears"),
+    threeToFiveYears: asNumber(body.threeToFiveYears, "threeToFiveYears"),
+    fiveToSevenYears: asNumber(body.fiveToSevenYears, "fiveToSevenYears"),
+    sevenToTenYears: asNumber(body.sevenToTenYears, "sevenToTenYears"),
+    tenToFifteenYears: asNumber(body.tenToFifteenYears, "tenToFifteenYears"),
+    moreThanFifteenYears: asNumber(
+      body.moreThanFifteenYears,
+      "moreThanFifteenYears",
+    ),
+  };
+}
+
+function parseRating(body: Record<string, unknown>): string | undefined {
+  const r = body.rating;
+  if (r == null || r === "") return undefined;
+  const s = String(r).trim();
+  return s || undefined;
+}
+
 export class BondMarginService {
-  async list(params: { search?: string; page: number; limit: number }) {
-    const page = Math.max(1, params.page);
-    const limit = Math.min(200, Math.max(1, params.limit));
-    const skip = (page - 1) * limit;
+  /**
+   * Paginate by **sector** (groups). Each group contains all rating rows for that sector.
+   */
+  async listGrouped(params: { search?: string; page: number; limit: number }) {
+    const safePage = Math.max(1, params.page);
+    const limitSectors = Math.min(50, Math.max(1, params.limit));
+    const skip = (safePage - 1) * limitSectors;
     const search = params.search?.trim();
 
-    const where =
+    const where: Prisma.BondMarginWhereInput | undefined =
       search && search.length > 0
         ? {
             OR: [
-              { sectorName: { contains: search, mode: "insensitive" as const } },
-              { rating: { contains: search, mode: "insensitive" as const } },
+              { sectorName: { contains: search, mode: "insensitive" } },
+              { rating: { contains: search, mode: "insensitive" } },
             ],
           }
-        : {};
+        : undefined;
 
-    const [total, items] = await Promise.all([
-      db.dataBase.bondMargin.count({ where }),
-      db.dataBase.bondMargin.findMany({
-        where,
-        orderBy: [{ sectorName: "asc" }, { rating: "asc" }],
-        skip,
-        take: limit,
-      }),
-    ]);
+    const sectorGroups = await db.dataBase.bondMargin.groupBy({
+      by: ["sectorName"],
+      where,
+      orderBy: { sectorName: "asc" },
+    });
 
-    const totalPages = Math.max(1, Math.ceil(total / limit));
-    return { data: items, meta: { page, limit, total, totalPages } };
-  }
+    const totalSectors = sectorGroups.length;
+    const pageSectorNames = sectorGroups
+      .slice(skip, skip + limitSectors)
+      .map((g) => g.sectorName);
 
-  normalizeInput(body: Record<string, unknown>): MarginInput {
+    if (pageSectorNames.length === 0) {
+      const totalPages = Math.max(1, Math.ceil(totalSectors / limitSectors) || 1);
+      return {
+        groups: [] as { sectorName: string; rows: BondMargin[] }[],
+        meta: {
+          page: safePage,
+          limit: limitSectors,
+          total: totalSectors,
+          totalPages,
+          hasNextPage: safePage < totalPages,
+          hasPrevPage: safePage > 1,
+        },
+      };
+    }
+
+    const rows = await db.dataBase.bondMargin.findMany({
+      where: { sectorName: { in: pageSectorNames } },
+      orderBy: [{ sectorName: "asc" }, { rating: "asc" }],
+    });
+
+    const bySector = new Map<string, BondMargin[]>();
+    for (const r of rows) {
+      const list = bySector.get(r.sectorName) ?? [];
+      list.push(r);
+      bySector.set(r.sectorName, list);
+    }
+
+    const groups = pageSectorNames.map((name) => ({
+      sectorName: name,
+      rows: sortMarginsByRating(bySector.get(name) ?? []),
+    }));
+
+    const totalPages = Math.max(1, Math.ceil(totalSectors / limitSectors));
     return {
-      sectorName: asString(body.sectorName, "sectorName"),
-      rating: asString(body.rating, "rating"),
-      underOneYear: asNumber(body.underOneYear, "underOneYear"),
-      oneToThreeYears: asNumber(body.oneToThreeYears, "oneToThreeYears"),
-      threeToFiveYears: asNumber(body.threeToFiveYears, "threeToFiveYears"),
-      fiveToSevenYears: asNumber(body.fiveToSevenYears, "fiveToSevenYears"),
-      sevenToTenYears: asNumber(body.sevenToTenYears, "sevenToTenYears"),
-      tenToFifteenYears: asNumber(body.tenToFifteenYears, "tenToFifteenYears"),
-      moreThanFifteenYears: asNumber(
-        body.moreThanFifteenYears,
-        "moreThanFifteenYears",
-      ),
+      groups,
+      meta: {
+        page: safePage,
+        limit: limitSectors,
+        total: totalSectors,
+        totalPages,
+        hasNextPage: safePage < totalPages,
+        hasPrevPage: safePage > 1,
+      },
     };
   }
 
   async create(body: Record<string, unknown>) {
-    const data = this.normalizeInput(body);
-    const created = await db.dataBase.bondMargin.create({ data });
-    return created;
+    const sectorName = asString(body.sectorName, "sectorName");
+    const slabs = normalizeSlabs(body);
+    const ratingOpt = parseRating(body);
+
+    const ratingsToCreate: string[] = !ratingOpt
+      ? [...BOND_MARGIN_STANDARD_RATINGS, BOND_MARGIN_WITHOUT_RATING]
+      : [ratingOpt];
+
+    for (const r of ratingsToCreate) {
+      if (!isAllowedBondMarginRating(r)) {
+        throw new Error(
+          `Invalid rating "${r}". Use a standard rating, or leave empty to create all.`,
+        );
+      }
+    }
+
+    const dataRows = ratingsToCreate.map((rating) => ({
+      sectorName,
+      rating,
+      ...slabs,
+    }));
+
+    const result = await db.dataBase.bondMargin.createMany({
+      data: dataRows,
+      skipDuplicates: true,
+    });
+
+    const rows = sortMarginsByRating(
+      await db.dataBase.bondMargin.findMany({
+        where: {
+          sectorName,
+          rating: { in: ratingsToCreate },
+        },
+      }),
+    );
+
+    return {
+      createdCount: result.count,
+      rows,
+    };
   }
 
   async update(id: string, body: Record<string, unknown>) {
-    const data = this.normalizeInput(body);
+    const sectorName = asString(body.sectorName, "sectorName");
+    const ratingRaw = parseRating(body);
+    if (!ratingRaw || !isAllowedBondMarginRating(ratingRaw)) {
+      throw new Error("Invalid or missing rating for update.");
+    }
+    const slabs = normalizeSlabs(body);
+
     const updated = await db.dataBase.bondMargin.update({
       where: { id },
-      data,
+      data: {
+        sectorName,
+        rating: ratingRaw,
+        ...slabs,
+      },
     });
     return updated;
   }
@@ -92,4 +211,3 @@ export class BondMarginService {
     return true;
   }
 }
-
