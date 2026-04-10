@@ -9,6 +9,8 @@ export enum QueueNames {
   forgotPasswordEmail = "forgotPasswordEmailMD",
   successResetPassword = "successResetPasswordMD",
   emailVerification = "emailVerificationMD",
+  addBankAccountsClearingCorporationsEmail = "addBankAccountsClearingCorporationsEmailMD",
+  kycSubmittedForVerificationEmail = "kycSubmittedForVerificationEmailMD",
   kraProcessWork = "kraProcessWorkMD",
   orderSettlement = "orderOrderSettlementMD",
   submitProfileCompleat = "submitProfileMD",

@@ -33,10 +33,12 @@ const getFormattedTimestamp = (): string => {
 };
 
 import {
+  addBankAccountsClearingCorporationsEmailQueue,
   emailAdminOtpSenderQueue,
   emailOtpSenderQueue,
   emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
+  kycSubmittedForVerificationEmailQueue,
   rekycOtpSenderQueue,
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
@@ -215,6 +217,42 @@ export const sendEmailVerificationLink = async (data: {
     {
       ...data,
       subject: `Verify Your Email – MeraDhan ${getFormattedTimestamp()}`,
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendAddClearingCorporationBankAccountsEmail = async (data: {
+  email: string;
+  customerName: string;
+}) => {
+  await addBankAccountsClearingCorporationsEmailQueue.add(
+    {
+      ...data,
+      subject:
+        "Important: Please Add Clearing Corporation Bank Accounts Before Investing",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendKycSubmittedForVerificationEmail = async (data: {
+  email: string;
+  customerName: string;
+  title?: "Mr." | "Ms.";
+}) => {
+  await kycSubmittedForVerificationEmailQueue.add(
+    {
+      ...data,
+      subject: "KYC Submitted for Verification - MeraDhan",
     },
     {
       removeOnComplete: true,
