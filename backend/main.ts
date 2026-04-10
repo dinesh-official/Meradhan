@@ -21,6 +21,7 @@ import crmOrdersRoutes from "@resource/crm/orders/orders.routes";
 import partnershipFollowUpRouter from "@resource/crm/partnership/followup/partnership_follow_up.routes";
 import partnershipRoutes from "@resource/crm/partnership/partnership.routes";
 import participantsRouter from "@resource/crm/refq/nse/cbrics/cbrics.routes";
+import nseNotificationsRoutes from "@resource/crm/refq/nse/notifications/nse_notifications.routes";
 import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
 import localDataRfqRoutes from "@resource/crm/refq/nse/local/localdata_rfq.routes";
 import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes";
@@ -71,6 +72,7 @@ server.addRoutes([
   crmOrdersRoutes,
   notificationRoutes,
   participantsRouter,
+  nseNotificationsRoutes,
   commonApiRoutes,
   dashboardRoutes,
   kraRoutes,

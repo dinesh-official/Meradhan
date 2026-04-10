@@ -12,5 +12,6 @@ model BondMargin {
     createdAt            DateTime @default(now())
     updatedAt            DateTime @updatedAt
 
+    @@unique([sectorName, rating], name: "bond_priced_margin_sector_rating_key")
     @@map("bond_priced_margin")
 }

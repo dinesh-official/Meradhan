@@ -22,9 +22,14 @@ export default function StickyHeader({
 
   const navItems = useMemo(
     () =>
-      hideAadhaarSection
-        ? allNavItems.filter((i) => i.id !== "aadhaar-address")
-        : allNavItems,
+      allNavItems.map((i) =>
+        i.id === "aadhaar-address"
+          ? {
+              ...i,
+              label: hideAadhaarSection ? "Addresses" : "Aadhaar & Address",
+            }
+          : i,
+      ),
     [hideAadhaarSection],
   );
 

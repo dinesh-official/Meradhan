@@ -2,12 +2,22 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import CardPagination from "@/global/elements/table/CardPagination";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { FileSpreadsheet, Upload } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -89,8 +99,21 @@ function normalizeSheetName(name: string): string {
   return name.trim().toLowerCase();
 }
 
+function isXlsxFile(file: File): boolean {
+  const n = file.name.toLowerCase();
+  return (
+    n.endsWith(".xlsx") ||
+    file.type ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    file.type === "application/vnd.ms-excel"
+  );
+}
+
 export default function BondReferenceDataView() {
   const [file, setFile] = useState<File | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -246,6 +269,7 @@ export default function BondReferenceDataView() {
       toast.success(`Upload complete. Processed ${processed} ISIN(s).`);
       setFile(null);
       setUploadProgress(null);
+      setUploadOpen(false);
       listQuery.refetch();
     },
     onError: (err: unknown) => {
@@ -263,6 +287,37 @@ export default function BondReferenceDataView() {
   const items = listQuery.data?.data ?? [];
   const meta = listQuery.data?.meta;
 
+  const assignXlsxFile = useCallback((f: File | null | undefined) => {
+    if (!f) return;
+    if (!isXlsxFile(f)) {
+      toast.error("Please choose an Excel .xlsx file.");
+      return;
+    }
+    setFile(f);
+  }, []);
+
+  const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    assignXlsxFile(e.target.files?.[0]);
+    e.target.value = "";
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    assignXlsxFile(e.dataTransfer.files?.[0]);
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const resetUploadDialog = () => {
+    setFile(null);
+    setUploadProgress(null);
+    setDragActive(false);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -275,59 +330,158 @@ export default function BondReferenceDataView() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Input
-                placeholder="Search by ISIN or Issuer"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full md:w-[420px]"
-              />
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+            <Input
+              placeholder="Search by ISIN or Issuer"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="min-h-9 w-full sm:min-w-0 sm:flex-1 md:max-w-md"
+            />
+            <div className="flex shrink-0 items-center gap-2 sm:justify-end">
               <Button
+                type="button"
                 variant="outline"
+                className="min-h-9"
                 onClick={() => setSearchInput("")}
                 disabled={!searchInput}
               >
                 Clear
               </Button>
+              <Button
+                type="button"
+                className="min-h-9 whitespace-nowrap"
+                onClick={() => setUploadOpen(true)}
+              >
+                <Upload className="mr-2 h-4 w-4 shrink-0" />
+                Upload XLSX
+              </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Upload the Excel (3 sheets: AD, Coupon Payment Dates, Redemption Schedule).
-            </p>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Excel must include 3 sheets: AD, Coupon Payment Dates, Redemption Schedule.
+            Use Upload XLSX to import.
+          </p>
+        </div>
 
-          <div className="flex flex-col gap-2 md:flex-row md:items-center">
-            <Input
+        <Dialog
+          open={uploadOpen}
+          onOpenChange={(open) => {
+            if (!open && uploadMutation.isPending) return;
+            setUploadOpen(open);
+            if (!open) resetUploadDialog();
+          }}
+        >
+          <DialogContent
+            className="sm:max-w-lg"
+            showCloseButton={!uploadMutation.isPending}
+            onPointerDownOutside={(e) => {
+              if (uploadMutation.isPending) e.preventDefault();
+            }}
+            onEscapeKeyDown={(e) => {
+              if (uploadMutation.isPending) e.preventDefault();
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Upload reference data (Excel)</DialogTitle>
+              <DialogDescription>
+                Drop your .xlsx here or browse. The file is read in your browser; each
+                ISIN is sent to the server with its coupon and redemption rows.
+              </DialogDescription>
+            </DialogHeader>
+
+            <input
+              ref={fileInputRef}
               type="file"
               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="md:w-[360px]"
+              className="sr-only"
+              onChange={onFileInputChange}
             />
-            <div className="flex flex-col gap-2 md:w-[260px]">
+
+            <div
+              role="presentation"
+              onDrop={onDrop}
+              onDragOver={onDragOver}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                setDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setDragActive(false);
+                }
+              }}
+              className={cn(
+                "flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors",
+                dragActive
+                  ? "border-primary bg-primary/5"
+                  : "border-muted-foreground/25 bg-muted/20",
+                uploadMutation.isPending && "pointer-events-none opacity-70"
+              )}
+            >
+              <FileSpreadsheet
+                className={cn(
+                  "h-10 w-10",
+                  dragActive ? "text-primary" : "text-muted-foreground"
+                )}
+              />
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Drop .xlsx here</p>
+                <p className="text-xs text-muted-foreground">
+                  Sheets: AD · Coupon Payment Dates · Redemption Schedule
+                </p>
+              </div>
               <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={uploadMutation.isPending}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Browse files
+              </Button>
+              {file && (
+                <p className="text-xs font-medium text-foreground truncate max-w-full px-2">
+                  Selected: {file.name}
+                </p>
+              )}
+            </div>
+
+            {uploadMutation.isPending && (
+              <div className="space-y-2">
+                <Progress value={uploadProgress?.percent ?? 0} />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{uploadProgress?.percent ?? 0}%</span>
+                  <span>
+                    {(uploadProgress?.loaded ?? 0).toLocaleString("en-IN")}
+                    {uploadProgress?.total != null
+                      ? ` / ${uploadProgress.total.toLocaleString("en-IN")} ISINs`
+                      : " ISINs"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={uploadMutation.isPending}
+                onClick={() => setUploadOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
                 onClick={() => uploadMutation.mutate()}
                 disabled={!file || uploadMutation.isPending}
               >
-                {uploadMutation.isPending ? "Uploading..." : "Upload XLSX"}
+                {uploadMutation.isPending ? "Uploading…" : "Start upload"}
               </Button>
-              {uploadMutation.isPending && (
-                <div className="space-y-1">
-                  <Progress value={uploadProgress?.percent ?? 0} />
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{uploadProgress?.percent ?? 0}%</span>
-                    <span>
-                      {(uploadProgress?.loaded ?? 0).toLocaleString("en-IN")}
-                      {uploadProgress?.total
-                        ? ` / ${uploadProgress.total.toLocaleString("en-IN")} ISINs`
-                        : " ISINs"}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="w-full overflow-auto rounded-md border bg-background">
           <table className="min-w-[1200px] w-full text-sm">

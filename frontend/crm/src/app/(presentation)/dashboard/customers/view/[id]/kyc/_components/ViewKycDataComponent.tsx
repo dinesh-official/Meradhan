@@ -179,57 +179,59 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
         />
       </div>
 
-      {/* Addresses */}
-      <div className="scroll-mt-16" id="addresses">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Addresses</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            <div>
-              <CardTitle className="text-sm mb-4">Current address</CardTitle>
-              {data.currentAddress ? (
-                <AddressCard
-                  addressLine1={data.currentAddress.line1 || "------"}
-                  addressLine2={data.currentAddress.line2 || undefined}
-                  addressLine3={data.currentAddress.line3 || undefined}
-                  postOffice={data.currentAddress.postOffice || "-----"}
-                  district={data.currentAddress.cityOrDistrict || "------"}
-                  stateName={formatStateName(data.currentAddress.state)}
-                  pinCode={data.currentAddress.pinCode || "------"}
-                  country={data.currentAddress.country || "------"}
-                  fullAddress={data.currentAddress.fullAddress || "------"}
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No current address available.
-                </p>
-              )}
-            </div>
+      {/* KRA path: only standalone Addresses at #aadhaar — no DigiLocker Aadhaar block */}
+      {hideAadhaarSection && (
+        <div className="scroll-mt-16" id="aadhaar-address">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Addresses</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <CardTitle className="text-sm mb-4">Current address</CardTitle>
+                {data.currentAddress ? (
+                  <AddressCard
+                    addressLine1={data.currentAddress.line1 || "------"}
+                    addressLine2={data.currentAddress.line2 || undefined}
+                    addressLine3={data.currentAddress.line3 || undefined}
+                    postOffice={data.currentAddress.postOffice || "-----"}
+                    district={data.currentAddress.cityOrDistrict || "------"}
+                    stateName={formatStateName(data.currentAddress.state)}
+                    pinCode={data.currentAddress.pinCode || "------"}
+                    country={data.currentAddress.country || "------"}
+                    fullAddress={data.currentAddress.fullAddress || "------"}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No current address available.
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <CardTitle className="text-sm mb-4">Permanent address</CardTitle>
-              {data.permanentAddress ? (
-                <AddressCard
-                  addressLine1={data.permanentAddress.line1 || "------"}
-                  addressLine2={data.permanentAddress.line2 || undefined}
-                  addressLine3={data.permanentAddress.line3 || undefined}
-                  postOffice={data.permanentAddress.postOffice || "-----"}
-                  district={data.permanentAddress.cityOrDistrict || "------"}
-                  stateName={formatStateName(data.permanentAddress.state)}
-                  pinCode={data.permanentAddress.pinCode || "------"}
-                  country={data.permanentAddress.country || "------"}
-                  fullAddress={data.permanentAddress.fullAddress || "------"}
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No permanent address available.
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              <div>
+                <CardTitle className="text-sm mb-4">Permanent address</CardTitle>
+                {data.permanentAddress ? (
+                  <AddressCard
+                    addressLine1={data.permanentAddress.line1 || "------"}
+                    addressLine2={data.permanentAddress.line2 || undefined}
+                    addressLine3={data.permanentAddress.line3 || undefined}
+                    postOffice={data.permanentAddress.postOffice || "-----"}
+                    district={data.permanentAddress.cityOrDistrict || "------"}
+                    stateName={formatStateName(data.permanentAddress.state)}
+                    pinCode={data.permanentAddress.pinCode || "------"}
+                    country={data.permanentAddress.country || "------"}
+                    fullAddress={data.permanentAddress.fullAddress || "------"}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No permanent address available.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Identity Documents */}
       <div className="flex flex-col gap-5 scroll-mt-16">
