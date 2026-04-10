@@ -3,7 +3,7 @@ name: SonarQube Analysis
 on:
   push:
     branches:
-      - sonar
+      - staging
   workflow_dispatch:
 
 jobs:
