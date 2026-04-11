@@ -11,6 +11,7 @@ export class PaymentController {
   private orderService = new OrderService();
 
   handleWebhook = async (req: Request, res: Response) => {
+    console.log(req.body, req.headers);
     const signature = req.headers["x-razorpay-signature"] as string;
 
     // Validate signature header

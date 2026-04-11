@@ -15,7 +15,7 @@ function page() {
     <ViewPort headerOnly>
       <div className="flex justify-center items-center bg-muted py-10 min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-72px)]">
         <div className="container">
-          <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
+          <Card className="grid lg:grid-cols-2 p-0 lg:p-0 border-0 w-full overflow-hidden">
             <CardContent className="flex flex-col gap-4 md:px-14 px-6  py-14">
               <h3 className="text-2xl">Login</h3>
 
@@ -46,7 +46,7 @@ function page() {
             </CardContent>
             <div className="flex justify-center items-center bg-primary py-14 lg:py-20 w-full h-full">
               <Image
-                src={`/static/login.svg`}
+                src={`/assets/login.svg`}
                 alt="blog"
                 width={1200}
                 height={800}

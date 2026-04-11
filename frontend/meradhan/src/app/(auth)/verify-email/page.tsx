@@ -43,7 +43,7 @@ async function page({
     <ViewPort headerOnly>
       <div className="flex justify-center items-center bg-muted py-10 min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-72px)]">
         <div className="container">
-          <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
+          <Card className="grid lg:grid-cols-2 p-0 lg:p-0 border-0 w-full overflow-hidden">
             <CardContent className="flex flex-col justify-between gap-4 p-10 lg:p-14">
               {verified ? (
                 <div className="flex flex-col justify-between gap-4">
@@ -70,7 +70,7 @@ async function page({
 
             <div className="flex justify-center items-center bg-primary py-10 lg:py-10 w-full h-full">
               <Image
-                src={`/static/login.svg`}
+                src={`/assets/login.svg`}
                 alt="Email Verification"
                 width={1200}
                 height={800}
