@@ -156,6 +156,12 @@ export const NAV_ITEMS: NavItem[] = [
             module: "rfq",
             allowOnly: ["view:rfq"],
           },
+          {
+            label: "NSE webhook notifications",
+            path: "/dashboard/rfqs/nse/webhook-notifications",
+            module: "rfq",
+            allowOnly: ["view:rfq"],
+          },
           // {
           //     label: 'Add Participant',
           //     path: '/dashboard/rfqs/nse/participants/create',

@@ -16,6 +16,7 @@ import { OrderService } from "@resource/customer/order/order.service";
 import { AppError } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import { db } from "@core/database/database";
+import type { BondDetailsResponse } from "@packages/apiGateway";
 
 // Type definitions for settlement service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -110,50 +111,36 @@ export class OrderSettlementService {
       logger.logInfo(
         `Creating RFQ for ISIN ${order.isin} for order ${order.id}`
       );
+      console.log("order", order);
 
       // Using fixed values from the working payload
-      console.log(NSE_CONSTANTS);
-      const bondData = await db.dataBase.nseIsinSecurityReceipt.findFirst({
-        where: {
-          symbol: order.isin,
-        },
-      });
-      if (!bondData) {
-        throw new AppError("Bond data not found for ISIN", {
-          code: "BOND_DATA_NOT_FOUND",
-        });
-      }
 
-      const fv = bondData?.faceValue ?? 0;
-      const quantity = order.quantity;
-      const value = fv * quantity;
+      const value = Number(order.faceValue) * Number(order.quantity);
       const inCrores = value / 10000000;
 
-      console.log("inCrores", inCrores);
-
+      const bond = (order.bondDetails as unknown as BondDetailsResponse);
 
 
       // Create RFQ for the ISIN using the working payload structure
       const rfqResponse = await this.nseRfq.createRfq({
-
-        segment: NSE_CONSTANTS.SEGMENT.RFQ,
+        segment: "R",
         isin: order.isin,
-        participantCode: NSE_CONSTANTS.PARTICIPANT.CODE,
-        dealType: NSE_CONSTANTS.DEAL_TYPE.DIRECT,
-        clientCode: NSE_CONSTANTS.PARTICIPANT.CODE,
-        buySell: NSE_CONSTANTS.DEAL_TYPE.BUY,
-        quoteType: NSE_CONSTANTS.QUOTE_TYPE.PRICE,
-        settlementType: NSE_CONSTANTS.DEFAULT.SETTLEMENT_TYPE,
+        participantCode: "BCISPL",
+        dealType: "D",
+        clientCode: "BCISPL",
+        buySell: "B",
+        quoteType: "Y",
+        settlementType: 0,
         value: inCrores,
         quantity: order.quantity,
-        yieldType: NSE_CONSTANTS.QUOTE_TYPE.YIELD,
-        yield: NSE_CONSTANTS.DEFAULT.YIELD,
-        calcMethod: NSE_CONSTANTS.CALC_METHOD.ORIGINAL,
-        gtdFlag: NSE_CONSTANTS.GTD_FLAG.YES,
-        quoteNegotiable: null,
-        access: NSE_CONSTANTS.DEFAULT.ACCESS_LEVEL,
-        participantList: [NSE_CONSTANTS.PARTICIPANT.CODE],
-        valueNegotiable: NSE_CONSTANTS.VALUE_NEGOTIABLE.YES,
+        yieldType: "YTM",
+        yield: Number(bond.yield),
+        calcMethod: "O",
+        gtdFlag: "Y",
+        quoteNegotiable: "Y",
+        access: 2,
+        participantList: ["BCISPL"],
+        valueNegotiable: "Y",
       });
 
       console.log("rfqResponse", rfqResponse);
@@ -187,6 +174,7 @@ export class OrderSettlementService {
         value: value,
       };
     } catch (error) {
+      console.log(error);
       logger.logError(
         `Failed to create RFQ for ISIN ${order.isin} for order ${order.id}:`,
         error
@@ -273,27 +261,24 @@ export class OrderSettlementService {
 
 
       // Calculate consideration: quantity * price / 100 + accrued interest
-      const accruedInterest = await this.getAccruedInterest(order);
-      // inncr
-      const unitPriceNum = Number(order.unitPrice);
-      console.log("unitPriceNum", unitPriceNum);
-      console.log("accruedInterest", accruedInterest);
-      console.log("order.quantity", order.quantity);
-      console.log("consideration", (order.quantity * unitPriceNum) / 100 + accruedInterest);
-      const consideration = (
-        (order.quantity * unitPriceNum) / 100 + accruedInterest) / 100;
+      const accruedInterest = (order.bondDetails as any)?.pricing?.accruedInterest ?? 0;
+      const cleanPrice = (order.bondDetails as any)?.pricing?.cleanPrice ?? 0;
+      const principalAmount = (order.bondDetails as any)?.pricing?.principalAmount ?? 0;
+
+      const consideration = principalAmount + accruedInterest;
+
 
       await this.nseRfq.proposeDeal({
         ngRfqNumber: rfqNumber,
         ngId: negotiationId,
-        participantCode: NSE_CONSTANTS.PARTICIPANT.CODE,
-        dealType: NSE_CONSTANTS.DEAL_TYPE.DIRECT,
-        clientCode: order.customerProfile?.nseDataSet?.participant?.loginId ?? "",
-        price: 100,
-        accruedInterest: accruedInterest,
-        consideration: consideration,
-        calcMethod: NSE_CONSTANTS.CALC_METHOD.ORIGINAL,
-        role: NSE_CONSTANTS.ROLE.RESPONDER,
+        participantCode: "BCISPL",
+        dealType: "D",
+        clientCode: "BCISPL",
+        price: cleanPrice,
+        accruedInterest: Number(accruedInterest.toFixed(2)),
+        consideration: Number(consideration.toFixed(2)),
+        calcMethod: "O",
+        role: "I",
         remarks: `Auto-proposed deal for order ${order.id}`,
       });
 
@@ -305,6 +290,7 @@ export class OrderSettlementService {
         { rfqNumber, negotiationId, consideration, accruedInterest },
         { dealDetails: { price: order.unitPrice, calcMethod: "M" } }
       );
+
 
       logger.logInfo(`Deal proposed successfully for order ${order.id}`);
     } catch (error) {
@@ -341,17 +327,17 @@ export class OrderSettlementService {
 
       // Calculate accepted values (should match proposed values)
       const acceptedAccruedInterest = await this.getAccruedInterest(order);
-      const unitPriceNum = Number(order.unitPrice);
-      const acceptedConsideration =
-        (order.quantity * unitPriceNum) / 100 + acceptedAccruedInterest;
+      const principalAmount = (order.bondDetails as any)?.pricing?.principalAmount ?? 0;
+      const acceptedConsideration = principalAmount + acceptedAccruedInterest;
+      const cleanPrice = (order.bondDetails as any)?.pricing?.cleanPrice ?? 0;
 
       await this.nseRfq.acceptOrRejectDeal({
         rfqNumber: rfqNumber,
         id: negotiationId,
-        acceptedPrice: unitPriceNum,
-        acceptedAccruedInterest: acceptedAccruedInterest,
-        acceptedConsideration: acceptedConsideration,
-        confirmStatus: NSE_CONSTANTS.CONFIRM_STATUS.ACCEPT,
+        acceptedPrice: cleanPrice,
+        acceptedAccruedInterest: Number(acceptedAccruedInterest.toFixed(2)),
+        acceptedConsideration: Number(acceptedConsideration.toFixed(2)),
+        confirmStatus: "PC",
       });
 
       // Log deal acceptance

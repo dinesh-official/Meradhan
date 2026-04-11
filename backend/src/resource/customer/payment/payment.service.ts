@@ -79,6 +79,7 @@ export class PaymentService {
       receipt,
       // method: "netbanking",
       bank_account: bank,
+
     };
     console.log(options);
 

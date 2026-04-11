@@ -1,4 +1,5 @@
 import type { appSchema } from "@root/schema";
+import type { Prisma } from "@databases/generated/prisma/postgres";
 import type z from "zod";
 import { AuditLogRepository } from "./auditlog.repo";
 import { db } from "@core/database/database";
@@ -180,33 +181,96 @@ export class AuditLogsService {
     startDate?: Date,
     endDate?: Date,
     page: number = 1,
-    pageSize: number = 20
+    pageSize: number = 20,
+    search?: string
   ) {
     const safePage = Math.max(1, Number(page) || 1);
     const safePageSize = Math.min(100, Math.max(1, Number(pageSize) || 20));
     const skip = (safePage - 1) * safePageSize;
     const take = safePageSize;
 
-    const where: Record<string, unknown> = {};
+    const andParts: Prisma.SessionLogsMeradhanWhereInput[] = [];
 
     if (startDate || endDate) {
-      where.startTime = {
-        gte: startDate,
-        lte: endDate,
-      };
+      andParts.push({
+        startTime: {
+          gte: startDate,
+          lte: endDate,
+        },
+      });
     }
 
     if (userId !== undefined) {
-      where.userId = userId;
+      andParts.push({ userId });
     }
 
     if (sessionToken) {
-      where.sessionToken = sessionToken;
+      andParts.push({ sessionToken });
+    } else if (trackingToken) {
+      andParts.push({ sessionToken: trackingToken });
     }
 
-    if (trackingToken) {
-      where.trackingToken = trackingToken;
+    const trimmedSearch = search?.trim();
+    if (trimmedSearch) {
+      const matchingProfiles = await db.dataBase.customerProfileDataModel.findMany(
+        {
+          where: {
+            OR: [
+              {
+                firstName: {
+                  contains: trimmedSearch,
+                  mode: "insensitive",
+                },
+              },
+              {
+                middleName: {
+                  contains: trimmedSearch,
+                  mode: "insensitive",
+                },
+              },
+              {
+                lastName: {
+                  contains: trimmedSearch,
+                  mode: "insensitive",
+                },
+              },
+              {
+                emailAddress: {
+                  contains: trimmedSearch,
+                  mode: "insensitive",
+                },
+              },
+            ],
+          },
+          select: { id: true },
+        }
+      );
+      const matchedUserIds = matchingProfiles.map((p) => p.id);
+      const numericId = /^\d+$/.test(trimmedSearch)
+        ? Number(trimmedSearch)
+        : null;
+
+      const searchOr: Prisma.SessionLogsMeradhanWhereInput[] = [
+        { ipAddress: { contains: trimmedSearch, mode: "insensitive" } },
+        { browserName: { contains: trimmedSearch, mode: "insensitive" } },
+        { operatingSystem: { contains: trimmedSearch, mode: "insensitive" } },
+        { sessionToken: { contains: trimmedSearch, mode: "insensitive" } },
+      ];
+      if (matchedUserIds.length > 0) {
+        searchOr.push({ userId: { in: matchedUserIds } });
+      }
+      if (numericId !== null && Number.isFinite(numericId)) {
+        searchOr.push({ userId: numericId });
+      }
+      andParts.push({ OR: searchOr });
     }
+
+    const where: Prisma.SessionLogsMeradhanWhereInput =
+      andParts.length === 0
+        ? {}
+        : andParts.length === 1
+          ? andParts[0]!
+          : { AND: andParts };
 
     const [total, sessions] = await Promise.all([
       db.dataBase.sessionLogsMeradhan.count({ where }),
@@ -237,12 +301,24 @@ export class AuditLogsService {
         if (session.userId) {
           user = await db.dataBase.customerProfileDataModel.findUnique({
             where: { id: session.userId },
-            select: { firstName: true, middleName: true, lastName: true },
+            select: {
+              firstName: true,
+              middleName: true,
+              lastName: true,
+              emailAddress: true,
+            },
           });
         }
         return {
           ...session,
-          user,
+          user: user
+            ? {
+                firstName: user.firstName,
+                middleName: user.middleName,
+                lastName: user.lastName,
+                email: user.emailAddress ?? null,
+              }
+            : null,
           pageViews: pageViews.filter(
             (pv) => pv.sessionId == session.sessionToken
           ),

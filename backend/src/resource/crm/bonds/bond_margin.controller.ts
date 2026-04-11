@@ -9,7 +9,7 @@ export class BondMarginController {
     const search = req.query.search?.toString();
     const page = req.query.page ? Number(req.query.page) : 1;
     const limit = req.query.limit ? Number(req.query.limit) : 25;
-    const data = await this.service.list({ search, page, limit });
+    const data = await this.service.listGrouped({ search, page, limit });
     return res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,

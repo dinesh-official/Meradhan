@@ -62,29 +62,21 @@ function SessionLogsMeradhan() {
         pageSize,
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
+        search: debouncedSearch.trim() || undefined,
       });
       return response.data.responseData;
     },
   });
 
-  // Client-side filtering for search and device type
+  // Server applies name/email/user id/IP/browser/OS/session search; filter device client-side only
   const filteredData =
     sessionData.data?.data?.filter((item) => {
-      const searchNeedle = debouncedSearch.trim().toLowerCase();
-      const matchesSearch =
-        !searchNeedle ||
-        (item.ipAddress ?? "").toLowerCase().includes(searchNeedle) ||
-        (item.browserName ?? "").toLowerCase().includes(searchNeedle) ||
-        (item.operatingSystem ?? "").toLowerCase().includes(searchNeedle) ||
-        (item.sessionToken ?? "").toLowerCase().includes(searchNeedle) ||
-        (item.trackingToken ?? "").toLowerCase().includes(searchNeedle);
-
       const matchesDeviceType =
         !deviceFilter ||
         (item.deviceType &&
           item.deviceType.toLowerCase() === deviceFilter.toLowerCase());
 
-      return matchesSearch && matchesDeviceType;
+      return matchesDeviceType;
     }) || [];
 
   const handleClearFilters = () => {
@@ -250,7 +242,7 @@ function SessionLogsMeradhan() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search by IP, browser, OS, session..."
+                    placeholder="Search by name, email, user id, IP, browser, OS, session..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
