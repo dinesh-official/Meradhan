@@ -33,12 +33,17 @@ export class KraWorkerService {
   private kraProcess = new KraProcess();
 
   async processKra(data: KraWorkerJobData) {
+
+    console.log("KRA PROCESS STARTED", data);
+
     const cachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}`;
     const runnerCachedKey = `KRA:${data.customerId}-${data.kycDataStoreId}-RUNNER`;
 
     const lastTask = await cacheStorage.get<string>(cachedKey);
+    console.log("LAST TASK", lastTask);
     const { customerId, kycDataStoreId } = data;
     const runner = await cacheStorage.get<string>(runnerCachedKey);
+    console.log("RUNNER", runner);
 
     if (!runner) {
       await db.dataBase.kraDataLogs.create({
@@ -79,6 +84,31 @@ export class KraWorkerService {
       }
 
       const kyc = payload.data as Root;
+
+      if (data.cbricsOnly) {
+        try {
+          await this.registerOnCbrics(customerId, kycDataStoreId);
+        } catch (error) {
+          await db.dataBase.kraDataLogs.create({
+            data: {
+              requestData: {
+                customerId: customerId,
+                cbricsOnly: true,
+              },
+              responseData: {
+                error: "CBRICS Registration Failed",
+                message: error?.toString(),
+              },
+              userId: customer.id,
+              kycId: kycDataStoreId,
+              stage: "FAILED_CBRICS_REGISTRATION",
+              reqTime: new Date().toISOString(),
+              resTime: new Date().toISOString(),
+            },
+          });
+        }
+        return;
+      }
 
       const isUsedKra = kyc.step_1.usedExistingKra;
 
@@ -374,6 +404,7 @@ export class KraWorkerService {
         data: {
           requestData: {
             customerId: customerId,
+            kycDataStoreId: kycDataStoreId,
           },
           responseData: cbUser,
           userId: customerId,
@@ -385,6 +416,9 @@ export class KraWorkerService {
       });
     } catch (error) {
       const err = error as AxiosError;
+      console.log("CBRICS REGISTER ERROR MESSAGE", err.message);
+      console.log("CBRICS REGISTER ERROR", err.response?.data);
+
       await cacheStorage.delete(`KRA:${customerId}-${kycDataStoreId}-RUNNER`);
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
@@ -396,6 +430,8 @@ export class KraWorkerService {
         data: {
           requestData: {
             customerId: customerId,
+            kycDataStoreId: kycDataStoreId,
+            date: new Date().toISOString(),
           },
           responseData: err.response?.data || err.message,
           userId: customerId,
@@ -786,9 +822,9 @@ export class KraProcess {
       APP_COR_CTRY: getKraCountry("india")?.code,
       APP_OTH_COR_STATE: isModify
         ? getKraCountry(
-            data.step_1.pan.response.details.aadhaar.current_address_details
-              .state,
-          )?.code
+          data.step_1.pan.response.details.aadhaar.current_address_details
+            .state,
+        )?.code
         : undefined,
       APP_OFF_NO: "",
       APP_RES_NO: "",

@@ -2,6 +2,7 @@ import type z from "zod";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 import type { appSchema } from "@root/schema";
 import type { AxiosRequestConfig } from "axios";
+import type { BaseResponseData } from "../../../types/base";
 import type {
   BondDetailResponse,
   BondOrderPricingResponse,
@@ -98,6 +99,17 @@ export class BondsApi {
       `/bonds/ongoing-deals`,
       config
     );
+    return response.data;
+  }
+
+  /** Records bond order request (lead) and triggers acknowledgement email. */
+  public async placeOrder(
+    payload: z.infer<typeof appSchema.bonds.orderPlaceSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const response = await this.apiClient.post<
+      BaseResponseData<unknown>
+    >(`/bonds/place-order`, payload, config);
     return response.data;
   }
 }

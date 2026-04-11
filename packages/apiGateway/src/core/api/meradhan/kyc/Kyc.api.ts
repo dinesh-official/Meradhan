@@ -288,7 +288,7 @@ export class CustomerKycApi {
     payload: {
       customerId: number;
       kycDataStoreId: number;
-      pastExecution: "MODIFY" | "REGISTER" | "NONE";
+      pastExecution: "MODIFY" | "REGISTER" | "NONE" | "CBRICS_ONLY";
       delayMs?: number;
     },
     config?: AxiosRequestConfig,

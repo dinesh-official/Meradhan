@@ -77,7 +77,7 @@ function ReviewOrder({
       setIsFirstRender(false);
       return;
     }
-    const timmer  = setTimeout(() => {  
+    const timmer = setTimeout(() => {
       window.location.reload();
     }, 1000);
     return () => clearTimeout(timmer);
@@ -117,9 +117,7 @@ function ReviewOrder({
   const otherCharges = 0;
 
   const principalScaled = orderPricing?.principalAmount
-  const accruedScaled = orderPricing?.accruedInterest
-    ? orderPricing.accruedInterest * quantity
-    : 0;
+  const accruedScaled = orderPricing?.accruedInterest||0;
   const stampScaled = orderPricing?.stampDuty
   const settlementAmount = orderPricing?.settlementAmount ?? 0
 
@@ -138,7 +136,7 @@ function ReviewOrder({
           <div className="md:block hidden">
             <BondInfoData bondData={bond} />
           </div>
-          <RatingOrDelete rating={bond.creditRating}  />
+          <RatingOrDelete rating={bond.creditRating} />
         </div>
       </div>
       <div className="md:hidden mt-5">
@@ -207,7 +205,7 @@ function ReviewOrder({
             )}
           </BondInfoLabel>
 
-   
+
 
 
           <BondInfoLabel title={`Quantity of Bonds (Max. ${maxQuantity} Qty.)`}>
@@ -425,107 +423,107 @@ function ReviewOrder({
         {
           !orderPricing?.allowTrade && <p className="text-sm text-red-500 mt-8">Trading is currently unavailable as the market is closed. Please try again during market hours or contact support for assistance.</p>
         }
-      {
-        (orderPricing?.allowTrade  || allowTrade) && <>
-          <label className="flex justify-start mt-5 gap-3">
-          <Checkbox
-            className="mt-[2px]"
-            checked={isChecked}
-            onClick={() => {
-              const newValue = !isChecked;
-              setIsChecked(newValue);
-              trackCheckboxInteraction(orderId, "BROKER_PERMISSION", newValue);
-            }}
-          />
-          <p className="text-sm">
-            I hereby give MeraDhan permission to act as my broker and to send or
-            respond to fixed (non-negotiable) quotes for this security on the
-            RFQ platform (One to One Mode) of any stock exchange, and to take
-            any steps needed to complete the transaction.
-          </p>
-        </label>
-        <div className="mt-8">
-          <Dialog>
-            <DialogTrigger disabled={!isChecked}>
-              <Button
-                className="md:w-auto w-full"
-                disabled={!isChecked}
+        {
+          (orderPricing?.allowTrade || allowTrade) && <>
+            <label className="flex justify-start mt-5 gap-3">
+              <Checkbox
+                className="mt-[2px]"
+                checked={isChecked}
                 onClick={() => {
-                  if (isChecked) {
-                    trackButtonClick(orderId, "CONFIRM_CONTINUE_REVIEW", {
-                      step: 1,
-                    });
-                  }
+                  const newValue = !isChecked;
+                  setIsChecked(newValue);
+                  trackCheckboxInteraction(orderId, "BROKER_PERMISSION", newValue);
                 }}
-              >
-                Confirm & Continue <IoMdArrowDropright />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader className="text-center gap-4 flex flex-col items-center">
-                <Image
-                  src={`/images/icons/self-declaration.svg`}
-                  width={60}
-                  alt=""
-                  height={60}
-                />
-                <DialogTitle className="font-medium">
-                  Risk Understanding & Self-Declaration
-                </DialogTitle>
-              </DialogHeader>
-              <label className="text-sm flex gap-3">
-                <Checkbox
-                  className="mt-[2px]"
-                  checked={isCheckedRisk}
-                  onClick={() => {
-                    const newValue = !isCheckedRisk;
-                    setIsCheckedRisk(newValue);
-                    trackCheckboxInteraction(orderId, "RISK_DECLARATION", newValue);
-                  }}
-                />
-                <p>
-                  I confirm that I have read and understood all the documents
-                  related to this security. I am aware that the credit rating of
-                  the selected security{" "}
-                  <b>{bond.bondName} 10.75 NCD 19AG28 FVRS10000</b> is{" "}
-                  <b>{bond.creditRating}</b>. I am investing in this bond after
-                  fully understanding the risks involved. This investment
-                  decision is my own and has not been influenced by any advice,
-                  suggestion, or recommendation from MeraDhan.
-                </p>
-              </label>
-             
-              <div className="mt-4 flex justify-center gap-4">
-                <Button
-                  disabled={!isCheckedRisk}
-                  onClick={() => {
-                    trackButtonClick(orderId, "CONFIRM_CONTINUE_DIALOG", {
-                      step: 1,
-                      nextStep: 2,
-                    });
-                    setStep(step + 1);
-                  }}
-                >
-                  Confirm & Continue <IoMdArrowDropright />
-                </Button>
-                <DialogTrigger>
+              />
+              <p className="text-sm">
+                I hereby give MeraDhan permission to act as my broker and to send or
+                respond to fixed (non-negotiable) quotes for this security on the
+                RFQ platform (One to One Mode) of any stock exchange, and to take
+                any steps needed to complete the transaction.
+              </p>
+            </label>
+            <div className="mt-8">
+              <Dialog>
+                <DialogTrigger disabled={!isChecked}>
                   <Button
-                    variant="outline"
+                    className="md:w-auto w-full"
+                    disabled={!isChecked}
                     onClick={() => {
-                      trackButtonClick(orderId, "CANCEL_DIALOG", {
-                        step: 1,
-                      });
+                      if (isChecked) {
+                        trackButtonClick(orderId, "CONFIRM_CONTINUE_REVIEW", {
+                          step: 1,
+                        });
+                      }
                     }}
                   >
-                    Cancel
+                    Confirm & Continue <IoMdArrowDropright />
                   </Button>
                 </DialogTrigger>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-        </>
-      }
+                <DialogContent>
+                  <DialogHeader className="text-center gap-4 flex flex-col items-center">
+                    <Image
+                      src={`/images/icons/self-declaration.svg`}
+                      width={60}
+                      alt=""
+                      height={60}
+                    />
+                    <DialogTitle className="font-medium">
+                      Risk Understanding & Self-Declaration
+                    </DialogTitle>
+                  </DialogHeader>
+                  <label className="text-sm flex gap-3">
+                    <Checkbox
+                      className="mt-[2px]"
+                      checked={isCheckedRisk}
+                      onClick={() => {
+                        const newValue = !isCheckedRisk;
+                        setIsCheckedRisk(newValue);
+                        trackCheckboxInteraction(orderId, "RISK_DECLARATION", newValue);
+                      }}
+                    />
+                    <p>
+                      I confirm that I have read and understood all the documents
+                      related to this security. I am aware that the credit rating of
+                      the selected security{" "}
+                      <b>{bond.description}</b> is{" "}
+                      <b>{bond.creditRating}</b>. I am investing in this bond after
+                      fully understanding the risks involved. This investment
+                      decision is my own and has not been influenced by any advice,
+                      suggestion, or recommendation from MeraDhan.
+                    </p>
+                  </label>
+
+                  <div className="mt-4 flex justify-center gap-4">
+                    <Button
+                      disabled={!isCheckedRisk}
+                      onClick={() => {
+                        trackButtonClick(orderId, "CONFIRM_CONTINUE_DIALOG", {
+                          step: 1,
+                          nextStep: 2,
+                        });
+                        setStep(step + 1);
+                      }}
+                    >
+                      Confirm & Continue <IoMdArrowDropright />
+                    </Button>
+                    <DialogTrigger>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          trackButtonClick(orderId, "CANCEL_DIALOG", {
+                            step: 1,
+                          });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </DialogTrigger>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </>
+        }
       </div>
       <div className="flex gap-2 flex-col">
         <p className="font-semibold mt-10">Note:</p>

@@ -15,7 +15,7 @@ import { useState } from "react";
 import DealProposerSection from "./_tabs/Deal_Proposer/DealProposerSection";
 
 function NSEDealsView() {
-  const [tabs, setTabs] = useState("deal_proposer");
+  const [tabs, setTabs] = useState("all");
   const [date, setdate] = useState(new Date().toISOString().split("T")[0]);
   const [confirmStatus, setConfirmStatus] = useState("");
   const [rfqNumber, setRfqNumber] = useState("");
@@ -175,7 +175,7 @@ function NSEDealsView() {
             View and manage deals across different stages
           </CardDescription>
           <div className="flex justify-between items-center gap-5 mt-2">
-            <Tabs defaultValue="deal_proposer" onValueChange={setTabs}>
+            <Tabs value={tabs} defaultValue="all" onValueChange={setTabs}>
               <TabsList>
                 <TabsTrigger value="all">All Deals</TabsTrigger>
                 <TabsTrigger value="deal_proposer">Deal Proposer (PP/PR)</TabsTrigger>

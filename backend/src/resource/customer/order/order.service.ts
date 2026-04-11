@@ -17,6 +17,7 @@ import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
 import { BondService } from "@resource/bonds/bond.service";
+import { AppConfigService } from "@resource/app-config/app-config.service";
 
 // PaymentStatus enum values (matches Prisma schema orders.prisma)
 const PaymentStatus = {
@@ -41,6 +42,7 @@ type OrderPreviewItem = z.infer<typeof appSchema.order.OrderPreviewItemSchema>;
 
 export class OrderService {
   private payment = new PaymentService();
+  private appConfig = new AppConfigService();
 
   private async getBondDetails(isin: string) {
     const bond = await db.dataBase.bonds.findFirst({
@@ -72,7 +74,7 @@ export class OrderService {
         code: "BOND_ORDER_PRICING_FAILED",
       });
     }
-    
+
     return {
       subTotal: bond.ok ? bond.pricing.principalAmount : 0,
       stampDuty: bond.ok ? bond.pricing.stampDuty : 0,
@@ -83,6 +85,10 @@ export class OrderService {
       unitPrice: bondDetails?.sellPrice ?? 0,
       faceValue: bondDetails?.faceValue ?? 0,
       bondDetails: bondDetails,
+      yield: bondDetails?.yield ?? 0,
+      couponRate: bondDetails?.couponRate ?? 0,
+      interestPaymentFrequency: bondDetails?.interestPaymentFrequency ?? "",
+      pricing: bond.ok ? bond.pricing : null,
     };
   }
 
@@ -91,6 +97,14 @@ export class OrderService {
     item: OrderPreviewItem,
     _legacyClientOrderId?: string,
   ) {
+    const pgMode = await this.appConfig.getPaymentGatewayMode();
+    if (pgMode === "INQUIRY") {
+      throw new AppError(
+        "Payment gateway is in inquiry-only mode. Please submit your order as an inquiry.",
+        { code: "PAYMENT_GATEWAY_DISABLED" },
+      );
+    }
+
     const preview = await this.previewOrder(item);
     const customerBank = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
@@ -123,7 +137,10 @@ export class OrderService {
         faceValue: preview.faceValue,
         quantity: preview.quantity,
         unitPrice: preview.unitPrice,
-        bondDetails: preview.bondDetails as Prisma.InputJsonValue,
+        bondDetails: {
+          ...preview.bondDetails,
+          pricing: preview.pricing,
+        },
         metadata: {} as Prisma.InputJsonValue,
       },
     });

@@ -32,9 +32,16 @@ export class NseWebhookController {
       userAgent: req.headers["user-agent"],
     });
 
+    const payload = req.body;
     await db.dataBase.nseWebhookNotification.create({
       data: {
-        payload: req.body,
+        payload,
+        type: "CBRICS",
+      },
+    });
+    await db.dataBase.nseCbricsNotification.create({
+      data: {
+        payload,
         type: "CBRICS",
       },
     });

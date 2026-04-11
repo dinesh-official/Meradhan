@@ -374,7 +374,7 @@ export class CustomerKycKycService {
       "Demat Account",
       "Risk Profiling",
       "e-Signature",
-      "100%",
+      "completed",
     ];
 
     const kycData = await db.dataBase.kYC_FLOW.findFirst({
@@ -667,7 +667,7 @@ export class CustomerKycKycService {
     const mockPan = pan.replace(/[- ]/g, "").toUpperCase() || "DUMPA0032D";
     const mockDob = dob.trim() || "29/10/1999";
     const mockMobile = (user.phoneNo ?? "").replace(/\D/g, "") || "7038984595";
-    const mockEmail = (user.emailAddress ?? "").trim().toLowerCase() || "ganeshvijayavchar8793@gmail.com";
+    const mockEmail = "from-kra-email-id@gmail.com";
 
     // APP_PAN_INQ – same structure and codes as real KRA response (DB stores response as-is)
     const p = {

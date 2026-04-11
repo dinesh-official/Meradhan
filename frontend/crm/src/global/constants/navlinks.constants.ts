@@ -145,8 +145,20 @@ export const NAV_ITEMS: NavItem[] = [
             allowOnly: ["view:rfq"],
           },
           {
+            label: "Settlement Dates",
+            path: "/dashboard/rfqs/nse/settlement-dates",
+            module: "rfq",
+            allowOnly: ["view:rfq"],
+          },
+          {
             label: "Participants",
             path: "/dashboard/rfqs/nse/participants",
+            module: "rfq",
+            allowOnly: ["view:rfq"],
+          },
+          {
+            label: "NSE webhook notifications",
+            path: "/dashboard/rfqs/nse/webhook-notifications",
             module: "rfq",
             allowOnly: ["view:rfq"],
           },
@@ -170,6 +182,12 @@ export const NAV_ITEMS: NavItem[] = [
       {
         label: "View Orders",
         path: "/dashboard/orders",
+        module: "orders",
+        allowOnly: ["view:orders"],
+      },
+      {
+        label: "PG Management",
+        path: "/dashboard/orders/pg-management",
         module: "orders",
         allowOnly: ["view:orders"],
       },
@@ -209,6 +227,33 @@ export const NAV_ITEMS: NavItem[] = [
     icon: FaMoneyBill,
     module: "bonds",
     allowOnly: ["view:bonds"],
+    children: [
+      {
+        label: "All Bonds",
+        path: "/dashboard/bonds",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
+        label: "Consolidated Management",
+        path: "/dashboard/bonds/priced-list",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
+        label: "Reference Data Management",
+        path: "/dashboard/bonds/reference-data",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
+        label: "Margin Management",
+        path: "/dashboard/bonds/margins",
+        module: "bonds",
+        allowOnly: ["edit:bonds"],
+        roles: ["ADMIN", "SUPER_ADMIN"],
+      },
+    ],
   },
   {
     label: "Reports",

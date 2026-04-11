@@ -292,7 +292,7 @@ function SignUpForm() {
               }
               className="data-[state=checked]:bg-secondary mt-0.5 border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white"
             />
-            <span>I agree to receive communications via WhatsApp</span>
+            <span>I agree to receive communications via WhatsApp and RCS</span>
           </label>
         </section>
 

@@ -1,7 +1,10 @@
 import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
-import { sendRekycConfirmationOtpEmail } from "@jobs/helper/send_emails";
+import {
+  sendKycSubmittedForVerificationEmail,
+  sendRekycConfirmationOtpEmail,
+} from "@jobs/helper/send_emails";
 import { OtpVerificationService } from "@services/otp_verification.service";
 import { tokenUtils } from "@utils/token/JwtToken_utils";
 import { CustomerKycKycService } from "../kyc_process/customer_kyc.service";
@@ -214,6 +217,38 @@ export class KycStoreController {
       await db.dataBase.kYC_FLOW.create({
         data: { data: data, userID: id, step: Number(step), complete },
       });
+    }
+
+    if (complete) {
+      try {
+        const customer = await db.dataBase.customerProfileDataModel.findUnique({
+          where: { id },
+          select: {
+            firstName: true,
+            lastName: true,
+            emailAddress: true,
+            gender: true,
+          },
+        });
+
+        if (customer?.emailAddress) {
+          const customerName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
+          const title =
+            customer.gender === "MALE"
+              ? ("Mr." as const)
+              : customer.gender === "FEMALE"
+                ? ("Ms." as const)
+                : undefined;
+
+          await sendKycSubmittedForVerificationEmail({
+            email: customer.emailAddress,
+            customerName: customerName || "Customer",
+            title,
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
     }
 
     res.sendResponse({

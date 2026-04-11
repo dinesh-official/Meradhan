@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -172,6 +173,18 @@ const STOCK_EXCHANGE_OPTIONS = [
   { value: "UNKNOWN", label: "Unknown" },
 ];
 
+/** Slugs must match MeraDhan `/bonds/...` filters and `bond.service` `categories.has` */
+const BOND_LISTING_CATEGORY_OPTIONS = [
+  { value: "corporate", label: "Corporate" },
+  { value: "banks", label: "Bank bonds" },
+  { value: "nbfc", label: "NBFC" },
+  { value: "psu", label: "PSU" },
+  { value: "tax-free", label: "Tax free" },
+  { value: "zero-coupon", label: "Zero coupon" },
+  { value: "perpetual", label: "Perpetual" },
+  { value: "latest-release", label: "Latest release" },
+] as const;
+
 function BondForm({ initialData, isin }: BondFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -310,7 +323,6 @@ function BondForm({ initialData, isin }: BondFormProps) {
     onSuccess: () => {
       toast.success("Bond created successfully");
       queryClient.invalidateQueries({ queryKey: ["bonds"] });
-      router.push("/dashboard/bonds");
     },
     onError: (error: AxiosError) => {
       toast.error(
@@ -424,6 +436,54 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={field.value || ""}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="categories"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Listing categories</FormLabel>
+                      <FormDescription>
+                        Controls which MeraDhan bond listing filters include this
+                        ISIN (stored as <code className="text-xs">categories</code>{" "}
+                        in the database). Use the same slugs as the public site
+                        (e.g. tax-free, banks).
+                      </FormDescription>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+                        {BOND_LISTING_CATEGORY_OPTIONS.map((opt) => {
+                          const list = field.value ?? [];
+                          const checked = list.includes(opt.value);
+                          return (
+                            <label
+                              key={opt.value}
+                              className="flex items-center gap-2 text-sm font-normal cursor-pointer"
+                            >
+                              <Checkbox
+                                checked={checked}
+                                onCheckedChange={(v) => {
+                                  const on = v === true;
+                                  if (on && !list.includes(opt.value)) {
+                                    field.onChange([...list, opt.value]);
+                                  } else if (!on) {
+                                    field.onChange(
+                                      list.filter((c) => c !== opt.value),
+                                    );
+                                  }
+                                }}
+                              />
+                              {opt.label}
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <p className="text-muted-foreground text-xs pt-2">
+                        Other values already saved on this bond are kept on
+                        submit even if not listed above.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -922,8 +982,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -1038,8 +1098,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -1275,8 +1335,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>
@@ -1305,8 +1365,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           value={
                             field.value
                               ? new Date(field.value as unknown as string)
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                               : ""
                           }
                           onChange={(e) =>

@@ -12,9 +12,33 @@ import {
   getCustomerDobRawForPdf,
 } from "@utils/dobPdfPassword";
 import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
+import { AppConfigService } from "@resource/app-config/app-config.service";
 
 export class CrmOrdersController {
   private ordersService = new CrmOrdersService();
+  private appConfigService = new AppConfigService();
+
+  getPaymentGatewaySettings = async (_req: Request, res: Response) => {
+    const paymentGatewayMode =
+      await this.appConfigService.getPaymentGatewayMode();
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { paymentGatewayMode },
+    });
+  };
+
+  updatePaymentGatewaySettings = async (req: Request, res: Response) => {
+    const body = appSchema.crm.orders.UpdatePaymentGatewayModeSchema.parse(
+      req.body,
+    );
+    const paymentGatewayMode = await this.appConfigService.setPaymentGatewayMode(
+      body.paymentGatewayMode,
+    );
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { paymentGatewayMode },
+    });
+  };
 
   getAllOrders = async (req: Request, res: Response) => {
     const query = appSchema.crm.orders.CrmOrdersQuerySchema.parse(req.query);
@@ -397,7 +421,7 @@ export class CrmOrdersController {
         : undefined;
     const lastInterestPaymentDateParam =
       typeof body.lastInterestPaymentDate === "string" &&
-      body.lastInterestPaymentDate.trim() !== ""
+        body.lastInterestPaymentDate.trim() !== ""
         ? body.lastInterestPaymentDate.trim()
         : undefined;
 
@@ -481,7 +505,7 @@ export class CrmOrdersController {
         });
       }
 
-      
+
       const htmlBody = messageBody
         .split("\n")
         .map((line) => line.trim())

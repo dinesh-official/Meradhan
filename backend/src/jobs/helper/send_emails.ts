@@ -33,10 +33,12 @@ const getFormattedTimestamp = (): string => {
 };
 
 import {
+  addBankAccountsClearingCorporationsEmailQueue,
   emailAdminOtpSenderQueue,
   emailOtpSenderQueue,
   emailVerificationQueue,
   forgotPasswordLinkSenderQueue,
+  kycSubmittedForVerificationEmailQueue,
   rekycOtpSenderQueue,
   successResetPasswordQueue,
   welcomeEmailSenderQueue,
@@ -107,6 +109,25 @@ export const sendCustomerSignupOtpEmail = async (data: {
       ...data,
       subject: `OTP for MeraDhan Signup - ${getFormattedTimestamp()}`,
       type: "signup",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendCustomerEmailChangeOtpEmail = async (data: {
+  email: string;
+  userName: string;
+  otp: string;
+}) => {
+  await emailOtpSenderQueue.add(
+    {
+      ...data,
+      subject: `OTP to verify your new MeraDhan email - ${getFormattedTimestamp()}`,
+      type: "email_change",
     },
     {
       removeOnComplete: true,
@@ -196,6 +217,42 @@ export const sendEmailVerificationLink = async (data: {
     {
       ...data,
       subject: `Verify Your Email – MeraDhan ${getFormattedTimestamp()}`,
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendAddClearingCorporationBankAccountsEmail = async (data: {
+  email: string;
+  customerName: string;
+}) => {
+  await addBankAccountsClearingCorporationsEmailQueue.add(
+    {
+      ...data,
+      subject:
+        "Important: Please Add Clearing Corporation Bank Accounts Before Investing",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendKycSubmittedForVerificationEmail = async (data: {
+  email: string;
+  customerName: string;
+  title?: "Mr." | "Ms.";
+}) => {
+  await kycSubmittedForVerificationEmailQueue.add(
+    {
+      ...data,
+      subject: "KYC Submitted for Verification - MeraDhan",
     },
     {
       removeOnComplete: true,

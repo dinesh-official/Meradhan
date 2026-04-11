@@ -93,7 +93,7 @@ export class ParticipantManager {
     if (!user) {
       throw new AppError("No User Found");
     }
-    const dobDoi = user.panCard?.dateOfBirth?.replaceAll("/", "-") || "";
+    const dobDoi = user.panCard?.dateOfBirth?.replaceAll("/", "-").split("-").reverse().join("-") || "";
 
     const address = splitAddressInto3BalancedLines(
       removeLastCommaChunks(user.currentAddress!.fullAddress, 3),
@@ -425,10 +425,12 @@ export class ParticipantManager {
             participant: {
               select: {
                 id: true,
-              },
-              include: {
-                bankAccountList: true,
-                dpAccountList: true,
+                bankAccountList: {
+                  select: { id: true },
+                },
+                dpAccountList: {
+                  select: { id: true },
+                },
               },
             },
           },

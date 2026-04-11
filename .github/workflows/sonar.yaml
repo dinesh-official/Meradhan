@@ -1,0 +1,56 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest  
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create tsconfig
+        run: |
+          cat > tsconfig.sonar.json << 'EOF'
+          {
+            "compilerOptions": {
+              "target": "ES2020",
+              "module": "commonjs",
+              "moduleResolution": "node",
+              "allowJs": true,
+              "skipLibCheck": true
+            },
+            "include": ["**/*"],
+            "exclude": ["node_modules", "dist", "build", ".next"]
+          }
+          EOF
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ vars.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=MeraDhan
+            -Dsonar.projectName="MeraDhan"
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/.next/**,**/coverage/**
+            -Dsonar.typescript.tsconfigPath=tsconfig.sonar.json
+            -Dsonar.javascript.node.maxspace=4096
+            -Dsonar.sourceEncoding=UTF-8
+
+      - name: Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        env:
+          SONAR_TOKEN: ${{ vars.SONAR_TOKEN }}

@@ -1,15 +1,24 @@
-import { generateTempOrderPdf } from "@packages/kyc-providers";
-import { BondService } from "@resource/bonds/bond.service";
-import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { appSchema } from "@root/schema";
-import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { type Request, type Response } from "express";
 import { OrderService } from "./order.service";
+import { OrderPdfService } from "./order-pdf.service";
 import { db } from "@core/database/database";
+import { AppConfigService } from "@resource/app-config/app-config.service";
 
 export class OrderController {
   private orderService = new OrderService();
+  private orderPdfService = new OrderPdfService();
+  private appConfigService = new AppConfigService();
+
+  getPaymentGatewayMode = async (_req: Request, res: Response) => {
+    const paymentGatewayMode =
+      await this.appConfigService.getPaymentGatewayMode();
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { paymentGatewayMode },
+    });
+  };
 
   previewOrder = async (req: Request, res: Response) => {
     const item = req.body;
@@ -93,72 +102,19 @@ export class OrderController {
   };
 
   getOrderPdf = async (req: Request, res: Response) => {
-    const repo = new CustomerProfileRepo();
-    const bondService = new BondService();
-
+    const customerId = req.customer!.id;
     const isin = req.query.isin as string;
-    const orderId = req.query.orderId as string || "XXXXXXXX";
+    const orderId = req.query.orderId as string | undefined;
     const rawQun = req.query.qun ? Number(req.query.qun) : 1;
-    const quantity =
-      Number.isFinite(rawQun) && rawQun > 0 ? rawQun : 1;
 
-    const bond = await bondService.getBondDetails(isin);
-    if (!bond) {
-      throw new AppError("Bond not found", {
-        statusCode: HttpStatus.NOT_FOUND,
-      });
-    }
-
-    const lastCouponDateStr = bond.lastCouponDate;
-    const nextCouponDateStr = bond.nextCouponDate;
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-      throw new AppError(
-        "Bond is missing lastCouponDate or nextCouponDate required for order pricing",
-        { statusCode: HttpStatus.BAD_REQUEST }
-      );
-    }
-
-    const cleanPrice = bond.sellPrice;
-
-    const recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-
-    const pricing = computeBondOrderPricingData({
-      faceValue: bond.faceValue,
-      quantity,
-      cleanPrice: cleanPrice ?? 0,
-      couponRate: Number(bond.couponRate),
-      lastCouponDate: lastCouponDateStr.toISOString(),
-      recordDays,
-      nextCouponDate: nextCouponDateStr.toISOString(),
-    });
-
-    const orderData = {
-      price: pricing.cleanPrice,
-      subTotal: pricing.principalAmount,
-      stampDuty: pricing.stampDuty,
-      totalAmount: pricing.principalAmount + pricing.accruedInterest,
-      metadata: {
-        valueDate: pricing.dealDate,
-        accruedInterest: pricing.accruedInterest,
-        accruedInterestDays: pricing.noOfAccrualDays,
-        settlementDate: pricing.settlementDate,
-        orderType: "One to One (OTO) on RFQ Platform of the Exchange",
-      },
-    };
-
-    const pdfFile = await generateTempOrderPdf({
+    const pdfFile = await this.orderPdfService.generateTempOrderPdfFile({
+      userId: customerId,
+      isin,
+      qun: rawQun,
       orderId,
       isReleased: req.query?.isReleased === "true",
-      bond,
-      qun: quantity,
-      user: await repo.getFullCustomerProfile(req.customer!.id),
-      orderData,
     });
-    // send the file as response
+
     res.sendFile(pdfFile, (err) => {
       if (err) {
         console.error("Error sending file:", err);

@@ -218,6 +218,8 @@ export class AuditLogsApiV2 {
       pageSize?: number;
       startDate?: string | Date;
       endDate?: string | Date;
+      /** Search by user name, email, user id, IP, browser, OS, session token */
+      search?: string;
     },
     config?: AxiosRequestConfig
   ) {

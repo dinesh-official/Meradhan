@@ -70,6 +70,8 @@
     "ioredis": "^5.8.1",
     "jsonwebtoken": "^9.0.2",
     "kyc-providers": "file:../packages/kyc-providers",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.6.1",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",

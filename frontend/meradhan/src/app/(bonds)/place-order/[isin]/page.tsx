@@ -10,6 +10,7 @@ import OrderStep from "../_components/OrderStep";
 import { generateDraftPlaceOrderLabel } from "../_utils/calcAmount";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import { redirect } from "next/navigation";
+import { getBondPurchaseEligibility } from "@/global/utils/bondPurchaseEligibility";
 export const revalidate = 0;
 
 export const generateMetadata = async ({
@@ -23,9 +24,9 @@ export const generateMetadata = async ({
   return await generateBondInfoPageMetaData(isin, "place-order/[isin]");
 };
 
-async function page({ params, searchParams }: { params: Promise<{ isin: string }>, searchParams: Promise<{ quantity: string }> }) {
+async function page({ params, searchParams }: { params: Promise<{ isin: string }>, searchParams: Promise<{ quantity?: string, allowTrade?: string }> }) {
   const { isin } = await params;
-  const { quantity } = await searchParams;
+  const { quantity, allowTrade } = await searchParams;
 
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const orderId = generateDraftPlaceOrderLabel();
@@ -33,23 +34,49 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     apiServerCaller
   );
 
-  const { responseData } = await apiCaller.getBondDetailsByIsin(isin);
+  let responseData: Awaited<
+    ReturnType<typeof apiCaller.getBondDetailsByIsin>
+  >["responseData"] | null = null;
+  let bondDetailsRequestFailed = false;
+  try {
+    const bondEnvelope = await apiCaller.getBondDetailsByIsin(isin);
+    responseData = bondEnvelope.responseData ?? null;
+  } catch {
+    bondDetailsRequestFailed = true;
+    responseData = null;
+  }
 
   let orderPricing: BondOrderPricingData | null = null;
-  try {
-    const pricingEnvelope = await apiCaller.getBondOrderPricing(isin, Number(quantity ?? 1));
-    if (pricingEnvelope.responseData) {
-      orderPricing = pricingEnvelope.responseData;
+  if (responseData) {
+    try {
+      const pricingEnvelope = await apiCaller.getBondOrderPricing(
+        isin,
+        Number(quantity ?? 1),
+      );
+      if (pricingEnvelope.responseData) {
+        orderPricing = pricingEnvelope.responseData;
+      }
+    } catch {
+      orderPricing = null;
     }
-  } catch {
-    orderPricing = null;
   }
+
+  console.log(orderPricing);
 
   const session = await getSession();
   if (!session?.id) {
     redirect("/logout");
   }
-  const userData = await customerApi.customerInfoById(Number(session?.id));
+
+  let customerPayload: Awaited<
+    ReturnType<typeof customerApi.customerInfoById>
+  >["data"]["responseData"] | null = null;
+  try {
+    const userData = await customerApi.customerInfoById(Number(session.id));
+    customerPayload = userData.data.responseData ?? null;
+  } catch {
+    customerPayload = null;
+  }
 
   if (session?.kycStatus !== "VERIFIED") {
     return (
@@ -87,12 +114,87 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
               <Image
                 src="/images/icons/sad-emoji.svg"
-                alt="Bond Not Found"
+                alt={bondDetailsRequestFailed ? "Load error" : "Bond Not Found"}
                 width={60}
                 height={60}
               />
-              <h2 className="text-2xl font-semibold mt-4">Bond Not Found</h2>
-              <p className="text-gray-600">The bond you are looking for does not exist.</p>
+              <h2 className="text-2xl font-semibold mt-4">
+                {bondDetailsRequestFailed
+                  ? "Couldn’t load bond"
+                  : "Bond Not Found"}
+              </h2>
+              <p className="text-gray-600 max-w-md">
+                {bondDetailsRequestFailed
+                  ? "We couldn’t reach our servers or the request timed out. Refresh the page or try again in a moment."
+                  : "The bond you are looking for does not exist."}
+              </p>
+
+              <div className="flex flex-wrap gap-3 justify-center mt-2">
+                {bondDetailsRequestFailed ? (
+                  <Button asChild>
+                    <Link href={`/place-order/${isin}`}>Try again</Link>
+                  </Button>
+                ) : null}
+                <Button variant="outlineSecondary" asChild>
+                  <Link href="/bonds">Back to Bonds</Link>
+                </Button>
+              </div>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
+
+
+  if (!responseData.allowForPurchase) {
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Order Not Allowed"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">Order Not Allowed</h2>
+              <p className="text-gray-600">The bond you are looking for is not allowed for purchase.</p>
+              <Link href="/bonds" className="mt-6 inline-block">
+                <Button>Back to Bonds</Button>
+              </Link>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
+  const purchase = getBondPurchaseEligibility(responseData);
+
+  if (!purchase.eligible) {
+    const missingFields = purchase.missingFields.join(", ");
+
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Order Not Allowed"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">Order Not Allowed</h2>
+              <p className="text-gray-600">The bond you are looking for is not allowed for purchase. Please contact support.</p>
+              {
+                allowTrade === "true" ? (
+                  <p className="text-gray-600">The bond you are looking for is not allowed for purchase. {missingFields}</p>
+                ) : null
+              }
 
               <Link href="/bonds" className="mt-6 inline-block">
                 <Button>Back to Bonds</Button>
@@ -104,11 +206,44 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     );
   }
 
+  if (!customerPayload) {
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Profile load error"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">
+                Couldn’t load your profile
+              </h2>
+              <p className="text-gray-600 max-w-md">
+                Please refresh the page. If this keeps happening, sign out and sign in again.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Button asChild>
+                  <Link href={`/place-order/${isin}`}>Try again</Link>
+                </Button>
+                <Button variant="outlineSecondary" asChild>
+                  <Link href="/dashboard/profile">Profile</Link>
+                </Button>
+              </div>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
   return (
     <ViewPort>
       <OrderStep
         bond={responseData}
-        customer={userData.data.responseData}
+        customer={customerPayload}
         orderId={orderId}
         orderPricing={orderPricing}
       />

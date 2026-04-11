@@ -20,7 +20,7 @@ export class KraController {
     const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
 
     const schema = z.object({
-      pastExecution: z.enum(["MODIFY", "REGISTER", "NONE"]),
+      pastExecution: z.enum(["MODIFY", "REGISTER", "NONE", "CBRICS_ONLY"]),
     });
 
     const { pastExecution } = schema.parse(req.body);
@@ -40,7 +40,9 @@ export class KraController {
     const runnerCachedKey = `${RUNNER_KEY_PREFIX}${customerId}-${kycDataStoreId}${RUNNER_KEY_SUFFIX}`;
     const runner = await cacheStorage.get<string>(runnerCachedKey);
     if (pastExecution !== "NONE") {
-      await cacheStorage.set(cachedKey, pastExecution, TTL_72_HOURS);
+      const cacheValue =
+        pastExecution === "CBRICS_ONLY" ? "MODIFY" : pastExecution;
+      await cacheStorage.set(cachedKey, cacheValue, TTL_72_HOURS);
     }
     if (pastExecution == "NONE") {
       await cacheStorage.delete(cachedKey);
@@ -73,18 +75,12 @@ export class KraController {
       });
     }
 
-    if (customer.kraStatus === "VERIFIED") {
-      return res.sendResponse({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: "Cannot reschedule KRA: customer KYC is already VERIFIED",
-      });
-    }
-
     const job = await addKraWorkerJob(
       {
         customerId,
         kycDataStoreId,
         stage: "ENQUIRY_KRA",
+        ...(pastExecution === "CBRICS_ONLY" ? { cbricsOnly: true } : {}),
       },
       delayMs
     );

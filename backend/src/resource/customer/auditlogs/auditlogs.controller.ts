@@ -184,6 +184,7 @@ export class AuditLogsController {
       : undefined;
     const page = req.query.page ? Number(req.query.page) : 1;
     const pageSize = req.query.pageSize ? Number(req.query.pageSize) : 20;
+    const search = req.query.search ? String(req.query.search) : undefined;
 
     const logs = await this.auditLogsService.getMeradhanSessionLogs(
       userId,
@@ -192,7 +193,8 @@ export class AuditLogsController {
       startDate,
       endDate,
       page,
-      pageSize
+      pageSize,
+      search
     );
 
     res.sendResponse({

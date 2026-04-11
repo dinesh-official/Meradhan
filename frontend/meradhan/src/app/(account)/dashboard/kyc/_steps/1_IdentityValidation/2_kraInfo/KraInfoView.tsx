@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { IoMdArrowDropright } from "react-icons/io";
 import Swal from "sweetalert2";
 import type { IKraDownloadResponse } from "@root/apiGateway";
+import Link from "next/link";
 
 function formatGender(gen: string | null): string {
   if (!gen) return "";
@@ -64,6 +65,16 @@ function formatKraStatus(code: string | null | undefined): string {
   if (!code) return "-";
   const c = String(code).trim();
   return KRA_STATUS_LABELS[c] ?? code;
+}
+
+/** Last 10 digits for display-side comparison (aligned with KYC service mobile match) */
+function normalizeMobileDigits(s: string | null | undefined): string {
+  const raw = (s ?? "").toString().trim().replaceAll(" ", "");
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length >= 10) {
+    return digits.slice(-10);
+  }
+  return digits;
 }
 
 /** KRA nationality code → display label (per KRA spec) */
@@ -147,6 +158,13 @@ export interface KraInfoViewProps {
   onUseExisting?: () => void;
   onStartFresh?: () => void;
   isPending?: boolean;
+  /** Logged-in profile email (for mismatch copy vs KRA `appEmail`) */
+  accountEmail?: string | null;
+  /** Logged-in profile mobile (for mismatch copy vs KRA `appMobNo`) */
+  accountMobile?: string | null;
+  /** Re-fetch KRA download and rematch flags (same PAN/DOB as step 1) */
+  onRefreshKra?: () => void;
+  isRefreshKraPending?: boolean;
 }
 
 export function KraInfoView({
@@ -157,6 +175,10 @@ export function KraInfoView({
   onUseExisting,
   onStartFresh,
   isPending = false,
+  accountEmail = null,
+  accountMobile = null,
+  onRefreshKra,
+  isRefreshKraPending = false,
 }: KraInfoViewProps) {
   const canProceedWithExistingKyc =
     kra.isNameMatch &&
@@ -164,6 +186,13 @@ export function KraInfoView({
     kra.isPANMatch &&
     kra.isMobileMatch &&
     kra.isEmailMatch;
+
+  const kraMobileNorm = normalizeMobileDigits(kra.appMobNo);
+  const accountMobileNorm = normalizeMobileDigits(accountMobile);
+  const mobileMismatchExplicit =
+    kraMobileNorm.length === 10 &&
+    accountMobileNorm.length === 10 &&
+    kraMobileNorm !== accountMobileNorm;
 
   return (
     <Card accountMode>
@@ -219,6 +248,42 @@ export function KraInfoView({
             >
               <p className="font-medium">{kra.appEmail ?? "-"}</p>
             </DataInfoLabel>
+            {!preview && !kra.isEmailMatch && (
+              <div className="md:col-span-3 space-y-2 rounded-md border border-amber-200/80 bg-muted/60 px-3 py-3 text-sm dark:border-amber-900/50">
+                <p className="font-medium text-amber-800 dark:text-amber-200">
+                  {kra.appEmail?.toLowerCase() != accountEmail?.toLowerCase() ? `Email ID — Does not match your account email` : "Please Revalidate KYC to update your email status"}
+                  {accountEmail ? (
+                    <span className="font-normal text-foreground"> ({accountEmail})</span>
+                  ) : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Your KRA email does not match your registered email.{" "}
+                  <Link
+                    href="/dashboard/profile"
+                    className="text-primary font-medium underline underline-offset-2"
+                  >
+                    Click here
+                  </Link>{" "}
+                  to update it in your profile.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Note: This email will become your login ID after update. Once updated, click “Revalidate KYC” to proceed.
+                </p>
+                {onRefreshKra && (
+                  <div className="pt-1">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={onRefreshKra}
+                      disabled={isRefreshKraPending || isPending}
+                    >
+                      {isRefreshKraPending ? "Refreshing…" : "Revalidate KYC"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
             <DataInfoLabel
               title="Mobile Number"
               status={kra.isMobileMatch ? "SUCCESS" : "ERROR"}
@@ -229,6 +294,49 @@ export function KraInfoView({
                 {kra.appMobNo ? `${kra.appMobNo}` : "-"}
               </p>
             </DataInfoLabel>
+            {!preview && !kra.isMobileMatch && (
+              <div className="md:col-span-3 space-y-2 rounded-md border border-amber-200/80 bg-muted/60 px-3 py-3 text-sm dark:border-amber-900/50">
+                <p className="font-medium text-amber-800 dark:text-amber-200">
+                  {mobileMismatchExplicit
+                    ? "Mobile number — Does not match your account mobile"
+                    : "Please Revalidate KYC to update your mobile match status"}
+                  {accountMobile ? (
+                    <span className="font-normal text-foreground">
+                      {" "}
+                      ({accountMobile})
+                    </span>
+                  ) : null}
+                </p>
+                <p className="text-muted-foreground">
+                  Your KRA mobile number does not match your registered mobile.{" "}
+                  <Link
+                    href="/dashboard/profile"
+                    className="text-primary font-medium underline underline-offset-2"
+                  >
+                    Click here
+                  </Link>{" "}
+                  to update it in your profile.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Note: After updating your mobile number in your profile, click
+                  &quot;Revalidate KYC&quot; to refresh KRA match status and
+                  continue.
+                </p>
+                {onRefreshKra && (
+                  <div className="pt-1">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={onRefreshKra}
+                      disabled={isRefreshKraPending || isPending}
+                    >
+                      {isRefreshKraPending ? "Refreshing…" : "Revalidate KYC"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
             <DataInfoLabel title="Gender">
               <p className="font-medium">{formatGender(kra.appGen)}</p>
             </DataInfoLabel>

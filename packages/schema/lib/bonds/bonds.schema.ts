@@ -154,3 +154,17 @@ export const bondCreateUpdateSchema = z.object({
   startDate: z.coerce.date().optional().nullable(),
   endDate: z.coerce.date().optional().nullable(),
 });
+
+export const orderPlaceSchema = z.object({
+  customerProfileId: z.number().int().nonnegative().min(1, "Customer profile ID must be positive"),
+  bondName: z.string().trim().min(1, "Bond name is required"),
+  isin: z.string().trim().min(1, "ISIN is required"),
+  couponRate: z.number().nonnegative().min(1, "Coupon rate must be positive"),
+  yield: z.number().nonnegative().min(1, "Yield must be positive"),
+  faceValue: z.number().nonnegative().min(1, "Face value must be positive"),
+  quantity: z.number().int().nonnegative().min(1, "Quantity must be positive"),
+  settlementAmount: z.number().nonnegative().min(1, "Settlement amount must be positive"),
+  dealDate: z.string().trim().min(1, "Deal date is required"),
+  settlementType: z.enum(["T+0", "T+1"]).default("T+1"),
+  requestDate: z.string().trim().min(1, "Request date is required"),
+});

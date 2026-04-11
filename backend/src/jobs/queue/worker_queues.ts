@@ -50,6 +50,16 @@ export const emailVerificationQueue = new Bull(
   sharedRedisOpts,
 );
 
+export const addBankAccountsClearingCorporationsEmailQueue = new Bull(
+  QueueNames.addBankAccountsClearingCorporationsEmail,
+  sharedRedisOpts,
+);
+
+export const kycSubmittedForVerificationEmailQueue = new Bull(
+  QueueNames.kycSubmittedForVerificationEmail,
+  sharedRedisOpts,
+);
+
 export const kraWorkerQueue = new Bull(
   QueueNames.kraProcessWork,
   sharedRedisOpts,

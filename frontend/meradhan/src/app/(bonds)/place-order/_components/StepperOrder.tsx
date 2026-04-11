@@ -20,20 +20,21 @@ const steps = [
   },
   {
     step: 3,
-    title: "Make Payment",
+    title: "Confirmation",
   },
 ];
 
 export default function StepperOrder() {
-  const { step } = useOrderState();
+  const { step: currentStep } = useOrderState();
   return (
     <div className="space-y-8 text-center max-w-[800px] mx-auto mb-10">
-      <Stepper defaultValue={step} value={step}>
-        {steps.map(({ step, title }) => (
+      <Stepper defaultValue={currentStep} value={currentStep}>
+        {steps.map(({ step: stepNumber, title }) => (
           <StepperItem
             className="relative flex-1 flex-col!"
-            key={step}
-            step={step}
+            key={stepNumber}
+            step={stepNumber}
+            completed={currentStep === 3 && stepNumber === 3}
           >
             <StepperTrigger className="flex-col gap-3 rounded text-center">
               <StepperIndicator />
@@ -43,7 +44,7 @@ export default function StepperOrder() {
                 </StepperTitle>
               </div>
             </StepperTrigger>
-            {step < steps.length && (
+            {stepNumber < steps.length && (
               <StepperSeparator className="-order-1 -translate-y-1/2 absolute inset-x-0 top-3 left-[calc(50%+0.75rem+0.125rem)] m-0 group-data-[orientation=horizontal]/stepper:w-[calc(100%-1.5rem-0.25rem)] group-data-[orientation=horizontal]/stepper:flex-none" />
             )}
           </StepperItem>

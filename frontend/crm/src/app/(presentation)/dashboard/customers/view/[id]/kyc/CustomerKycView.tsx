@@ -17,8 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Check, RefreshCw } from "lucide-react";
+import { Check, Loader2, RefreshCw } from "lucide-react";
 import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 function CustomerKycView({ id }: { id: number}) {
   const profileApi = new apiGateway.crm.customer.CrmCustomerApi(
@@ -28,32 +29,23 @@ function CustomerKycView({ id }: { id: number}) {
     apiClientCaller,
   );
 
-  const [kraRunning, setKraRunning] = React.useState<boolean>(false);
-  const [kraRunningLoading, setKraRunningLoading] =
-    React.useState<boolean>(true);
-  const [kycDataStoreId, setKycDataStoreId] = React.useState<number | null>(null);
-
-  React.useEffect(() => {
-    let ignore = false;
-    async function checkKraStatus() {
-      setKraRunningLoading(true);
-      try {
-        const resp = await kycApi.customerKraStatus(id);
-        const data = resp.data.responseData;
-        if (!ignore) setKraRunning(data?.isRunning);
-        if (!ignore) setKycDataStoreId(data?.kycDataStoreId);
-      } catch (e) {
-        if (!ignore) setKraRunning(false);
-      } finally {
-        if (!ignore) setKraRunningLoading(false);
-      }
-    }
-    checkKraStatus();
-    return () => {
-      ignore = true;
-    };
-  }, [id]);
   const queryClient = useQueryClient();
+
+  const {
+    data: kraStatusData,
+    isPending: kraRunningLoading,
+  } = useQuery({
+    queryKey: ["CustomerKraStatus", id],
+    queryFn: async () => {
+      const resp = await kycApi.customerKraStatus(id);
+      return resp.data.responseData;
+    },
+    refetchInterval: (query) =>
+      query.state.data?.isRunning ? 5000 : false,
+  });
+
+  const kraRunning = kraStatusData?.isRunning === true;
+  const kycDataStoreId = kraStatusData?.kycDataStoreId ?? null;
 
   const { data, isLoading } = useQuery({
     queryKey: ["KycView", id],
@@ -71,8 +63,20 @@ function CustomerKycView({ id }: { id: number}) {
     },
   });
 
-  const pastExecutionOptions = ["MODIFY", "REGISTER", "NONE"] as const;
+  const pastExecutionOptions = [
+    "MODIFY",
+    "REGISTER",
+    "NONE",
+    "CBRICS_ONLY",
+  ] as const;
   type PastExecution = (typeof pastExecutionOptions)[number];
+
+  const pastExecutionLabels: Record<PastExecution, string> = {
+    MODIFY: "Modify KRA",
+    REGISTER: "Fresh KRA (register)",
+    NONE: "None",
+    CBRICS_ONLY: "CBRICS only",
+  };
 
   const [retriggerOpen, setRetriggerOpen] = React.useState(false);
   const [pastExecution, setPastExecution] =
@@ -92,6 +96,7 @@ function CustomerKycView({ id }: { id: number}) {
     onSuccess: () => {
       toast.success("KRA process rescheduled successfully.");
       queryClient.invalidateQueries({ queryKey: ["KycKraLogsView", id] });
+      queryClient.invalidateQueries({ queryKey: ["CustomerKraStatus", id] });
       setRetriggerOpen(false);
       setConfirmValue("");
     },
@@ -123,10 +128,6 @@ function CustomerKycView({ id }: { id: number}) {
       toast.error("KRA process is already running for this customer.");
       return;
     }
-    // if (data?.kycStatus === "VERIFIED") {
-    //   toast.error("KYC already verified");
-    //   return;
-    // }
 
     // Reset form each time you open the popup.
     setPastExecution("MODIFY");
@@ -169,6 +170,30 @@ function CustomerKycView({ id }: { id: number}) {
 
   return (
     <div className="flex flex-col gap-5">
+      {kraRunning ? (
+        <div className="flex flex-col gap-0 overflow-hidden rounded-lg border border-blue-200 bg-blue-50/90 text-blue-950 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-50">
+          <Alert className="rounded-none border-0 bg-transparent py-3 text-inherit [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400">
+            <Loader2
+              className="size-4 shrink-0 animate-spin"
+              aria-hidden
+            />
+            <AlertTitle>KRA processing</AlertTitle>
+            <AlertDescription>
+              KRA verification is running for this customer. Status refreshes
+              automatically; you can keep working on this page.
+            </AlertDescription>
+          </Alert>
+          <div
+            className="relative h-1 w-full overflow-hidden bg-blue-200/80 dark:bg-blue-900/60"
+            role="progressbar"
+            aria-label="KRA processing"
+            aria-busy="true"
+          >
+            <div className="absolute top-0 left-0 h-full w-[38%] rounded-full bg-blue-600 dark:bg-blue-400 animate-kra-indeterminate" />
+          </div>
+        </div>
+      ) : null}
+
       <PageInfoBar
         title={"KYC Data - " + data.firstName}
         description="Comprehensive KYC information and document verification status"
@@ -184,11 +209,11 @@ function CustomerKycView({ id }: { id: number}) {
                 ? "Checking KRA status..."
                 : kraRunning
                   ? "KRA process is already running"
-                  : canRetriggerKra && kycDataStoreId == null
+                  : kycDataStoreId == null
                     ? "No KYC flow found"
-                    : !canRetriggerKra && data?.kycStatus === "VERIFIED"
-                      ? "KYC already verified"
-                      : undefined
+                  : !canRetriggerKra && data?.kycStatus === "PENDING"
+                    ? "KYC is still pending"
+                    : undefined
             }
           >
             {rescheduleMutation.isPending ? (
@@ -208,18 +233,19 @@ function CustomerKycView({ id }: { id: number}) {
           if (!open) setConfirmValue("");
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Retrigger KRA</DialogTitle>
             <DialogDescription>
-              Select `pastExecution` and type `CONFIRM` to proceed.
+              Select past execution (2×2), then type CONFIRM to proceed. CBRICS
+              only skips CVL KRA and runs NSE CBRICS registration.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Past execution</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {pastExecutionOptions.map((opt) => {
                   const selected = pastExecution === opt;
                   return (
@@ -236,7 +262,7 @@ function CustomerKycView({ id }: { id: number}) {
                       ].join(" ")}
                     >
                       <div className="flex items-center justify-between gap-3 h-full">
-                        <div className="font-semibold">{opt}</div>
+                        <div className="font-semibold">{pastExecutionLabels[opt]}</div>
                         {selected ? (
                           <Check className="size-4 text-blue-700" />
                         ) : (

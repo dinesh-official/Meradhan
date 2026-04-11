@@ -29,6 +29,8 @@ jobs:
           DEV_REDIS_HOST: ${{ secrets.DEV_REDIS_HOST }}
           DEV_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }}
 
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
           DEV_KRA_USERNAME: ${{ secrets.DEV_KRA_USERNAME }}
           DEV_KRA_PASSWORD: ${{ secrets.DEV_KRA_PASSWORD }}
           DEV_KRA_PASS_KEY: ${{ secrets.DEV_KRA_PASS_KEY }}
@@ -84,6 +86,8 @@ jobs:
           DEV_S3_ENDPOINT: https://staging-meradhan-storage.s3.ap-south-1.amazonaws.com
           DEV_S3_BUCKET_NAME: staging-meradhan-storage
 
+          
+
         run: |
           # Static Public values
           echo "NEXT_PUBLIC_HOST_URL=https://www.preprodfe.meradhan.co" > .env
@@ -103,6 +107,8 @@ jobs:
           
           echo "JWT_SECRET=${DEV_JWT_SECRET}" >> .env
           echo "PASSWORD_PEPPER=${DEV_PASSWORD_PEPPER}" >> .env
+
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env 
 
           echo "DATABASE_URL=${DEV_DATABASE_URL}" >> .env
           echo "DIRECT_URL=${DEV_DIRECT_URL}" >> .env

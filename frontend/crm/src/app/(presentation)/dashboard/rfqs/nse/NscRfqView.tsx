@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import { Plus } from "lucide-react";
+import { Bell, Plus } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import NscRfqView from "./_components/rfcqLIst/RefqListView";
@@ -14,13 +14,21 @@ function NscRfqViewPage() {
         title="NSE RFQ Management"
         description="Manage NSE Request for Quote records"
         actions={
-          <AllowOnlyView permissions={['create:rfq']} >
-            <Link href={`/dashboard/rfqs/nse/create`}>
-              <Button>
-                <Plus /> Create New RFQ
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/dashboard/rfqs/nse/webhook-notifications">
+              <Button type="button" variant="outline" size="sm">
+                <Bell className="size-4" />
+                Webhook notifications
               </Button>
             </Link>
-          </AllowOnlyView>
+            <AllowOnlyView permissions={["create:rfq"]}>
+              <Link href={`/dashboard/rfqs/nse/create`}>
+                <Button>
+                  <Plus /> Create New RFQ
+                </Button>
+              </Link>
+            </AllowOnlyView>
+          </div>
         }
       />
       <br />

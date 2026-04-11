@@ -3,10 +3,14 @@ import type { appSchema } from "@root/schema";
 import { NseRfqManager } from "@services/refq/nse/nseisin_manager.service";
 import type z from "zod";
 import { RfqMasterDbSyncManager } from "./rfq_master.manager";
+import { SettlementNoService } from "@services/refq/nse/settlement-no.service";
+import { AppError, HttpStatus } from "@utils/error/AppError";
+import { db } from "@core/database/database";
 
 export class RfqMasterService {
   private rfqManager = new NseRfqManager();
   private cbricsManager = new NseCBRICS();
+  private settlementNoService = new SettlementNoService();
 
   private rfqDbSyncManager = new RfqMasterDbSyncManager();
 
@@ -221,4 +225,65 @@ export class RfqMasterService {
     });
     return await Promise.all(settledOrders);
   }
+
+  async getSettlementNo(date: string) {
+    const settlementNo = await this.settlementNoService.getSettlementNo(date);
+    if (!settlementNo) {
+      throw new AppError("Settlement No not found for this date", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "SETTLEMENT_NO_NOT_FOUND",
+      });
+    }
+    return settlementNo;
+  }
+
+  async createOrUpdateSettlementNo(date: string, settlementNo: string) {
+    return await this.settlementNoService.createOrUpdateSettlementNo(date, settlementNo);
+  }
+
+  /**
+   * @param yearMonth Optional `yyyy-MM`; filters `date` in [first day, first day of next month).
+   */
+  async getAllSettlementNos(
+    page: number,
+    pageSize: number,
+    yearMonth?: string
+  ) {
+    const ym =
+      yearMonth && /^\d{4}-\d{2}$/.test(yearMonth) ? yearMonth : undefined;
+    const where = ym
+      ? {
+          date: {
+            gte: `${ym}-01`,
+            lt: firstDayOfNextMonthIso(ym),
+          },
+        }
+      : {};
+
+    const [items, total] = await Promise.all([
+      db.dataBase.nseSettlementNo.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          date: "desc",
+        },
+      }),
+      db.dataBase.nseSettlementNo.count({ where }),
+    ]);
+
+    return { items, total, page, pageSize };
+  }
+}
+
+/** `yyyy-MM` → ISO date string for the first day of the following calendar month (for exclusive upper bound). */
+function firstDayOfNextMonthIso(yearMonth: string): string {
+  const [ys, ms] = yearMonth.split("-");
+  const y = Number(ys);
+  const m = Number(ms);
+  const d = new Date(y, m, 1);
+  const yy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
 }

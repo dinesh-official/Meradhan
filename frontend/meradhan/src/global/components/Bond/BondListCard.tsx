@@ -16,6 +16,7 @@ import BondAddToWatchList from "./BondAddToWatchList";
 import { BondInfoLabel } from "./BondInfoLabel";
 import CreditRatingBadge from "./CreaditRatingBadge";
 import { useCompareSelectStore } from "@/app/(bonds)/_hooks/useCompareSelectStore";
+import { getBondPurchaseEligibility } from "@/global/utils/bondPurchaseEligibility";
 
 export function BondListCard({
   gridMode,
@@ -29,6 +30,8 @@ export function BondListCard({
   odd?: boolean;
 }) {
   const { addItem, removeItem, selectedItems } = useCompareSelectStore();
+  const purchase = getBondPurchaseEligibility(data);
+
   return (
     <Card
       className={cn(
@@ -47,13 +50,17 @@ export function BondListCard({
               <p className="text-xl line-clamp-1">{data.bondName}</p>
               {/* // make sure 2 buttons on that code deferent places */}
               {!gridMode && (
-                <div className="hidden lg:flex gap-5 col-span-2">
+                <div className="hidden lg:flex gap-3 col-span-2 flex-wrap justify-end">
                   <Link href={`/bonds/detail/` + data.isin}>
                     <Button variant={`outline`} className="bg-transparent">
                       View Details
                     </Button>
                   </Link>
-                  {/* <Button>Buy Now</Button> */}
+                  {purchase.eligible && (
+                    <Link href={`/place-order/${data.isin}`}>
+                      <Button title="Place order for this bond">Buy Now</Button>
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
@@ -85,7 +92,7 @@ export function BondListCard({
               )}
               <SharePopupTrigger
                 title="Share Bond"
-                url={HOST_URL + "/detail/" + data.isin}
+                url={HOST_URL + "/bonds/detail/" + data.isin}
               >
                 <RiShareFill
                   className="text-gray-600 cursor-pointer"
@@ -133,11 +140,11 @@ export function BondListCard({
 
               <div
                 className={cn(
-                  "gap-5 grid grid-cols-1 col-span-2 mt-2",
+                  "gap-3 grid col-span-2 mt-2",
+                  purchase.eligible ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1",
                   !gridMode && "lg:hidden grid"
                 )}
               >
-                {/* // make sure 2 buttons on that code deferent places */}
                 <Link
                   href={`/bonds/detail/${data.isin}`}
                   className="block w-full"
@@ -146,7 +153,13 @@ export function BondListCard({
                     View Details
                   </Button>
                 </Link>
-                {/* <Button>Buy Now</Button> */}
+                {purchase.eligible && (
+                  <Link href={`/place-order/${data.isin}`} className="block w-full">
+                    <Button className="w-full" title="Place order for this bond">
+                      Buy Now
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

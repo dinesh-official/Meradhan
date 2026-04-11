@@ -156,10 +156,11 @@ export class NseCBRICS {
         attempt < 1 // allow only one retry
       ) {
         console.warn(`Login expired. Retrying... (Attempt ${attempt + 1}/1)`);
-        return this.withReLoginRetry(apiCall, attempt + 1);
+        return await this.withReLoginRetry(apiCall, attempt + 1);
       }
 
       if (error instanceof AxiosError) {
+        console.log("withReLoginRetry-error", error.response?.data);
         if (error.response?.data.message) {
           throw new Error(
             error.response?.data.message?.toString() ||
@@ -171,10 +172,17 @@ export class NseCBRICS {
             "CBRICS Request Failed - " + error.toString()
           );
         } else if (error.response?.data.messages) {
-          throw new Error(
-            error.response?.data.messages?.[0].toString() ||
-            "CBRICS Request Failed - " + error.toString()
-          );
+          if (typeof error.response?.data.messages?.[0] === "string") {
+            throw new Error(
+              error.response?.data.messages?.[0]?.toString() ||
+              "CBRICS Request Failed - " + error.toString()
+            );
+          } else {
+            throw new Error(
+              error.response?.data.messages?.[0]?.msg?.toString() ||
+              "CBRICS Request Failed - " + error.toString()
+            );
+          }
         }
       }
 
@@ -216,12 +224,15 @@ export class NseCBRICS {
   public async unregisteredParticipant(
     payload: UnregisteredParticipantRequest
   ) {
+    console.log("unregisteredParticipant-payload", payload);
+
     return this.withReLoginRetry(async (loginKey) => {
       const { data } = await this.client.post<UnregisteredParticipantResponse>(
         "/unreg",
         payload,
         { headers: { loginKey } }
       );
+      console.log("unregisteredParticipant-response", data);
       return data;
     });
   }

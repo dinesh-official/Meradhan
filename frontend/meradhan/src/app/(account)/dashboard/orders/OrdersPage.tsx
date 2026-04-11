@@ -58,7 +58,7 @@ function OrdersPage() {
   const endItem = Math.min(page * limit, meta.total);
 
   return (
-    <div>
+    <div className="flex w-full min-w-0 max-w-[90vw] flex-col">
       {/* Mobile Layout */}
       <div className="md:hidden">
         <div className="flex flex-col gap-4 mb-6">
@@ -147,7 +147,7 @@ function OrdersPage() {
       <OrdersTable orders={orders} isLoading={isLoading} />
 
       {!isLoading && meta.totalPages > 1 && (
-        <div className="mt-5">
+        <div className="mt-5 shrink-0">
           {/* Mobile Layout */}
           <div className="md:hidden flex flex-col gap-3 items-center">
             <CardPagination

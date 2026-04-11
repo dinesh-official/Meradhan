@@ -186,3 +186,13 @@ model NseCbricsNotification {
 
     @@map("nse_cbrics_notification")
 }
+
+model NseSettlementNo {
+    id           Int      @id @default(autoincrement())
+    date         String
+    settlementNo String   @unique
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@map("nse_settlement_no")
+}
