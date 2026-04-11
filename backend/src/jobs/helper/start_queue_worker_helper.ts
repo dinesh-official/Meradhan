@@ -18,8 +18,7 @@ export const startQueueWorker = (
     try {
       await processor(job);
     } catch (err) {
-      console.log("Error Here");
-
+      console.log("Error Here", err);
       logger.logError(`❌ Job ${job.id} failed:`, err);
       throw err; // Bull will handle retries if configured
     }

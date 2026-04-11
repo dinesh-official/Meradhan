@@ -74,7 +74,7 @@ export class OrderService {
         code: "BOND_ORDER_PRICING_FAILED",
       });
     }
-    
+
     return {
       subTotal: bond.ok ? bond.pricing.principalAmount : 0,
       stampDuty: bond.ok ? bond.pricing.stampDuty : 0,
@@ -85,6 +85,10 @@ export class OrderService {
       unitPrice: bondDetails?.sellPrice ?? 0,
       faceValue: bondDetails?.faceValue ?? 0,
       bondDetails: bondDetails,
+      yield: bondDetails?.yield ?? 0,
+      couponRate: bondDetails?.couponRate ?? 0,
+      interestPaymentFrequency: bondDetails?.interestPaymentFrequency ?? "",
+      pricing: bond.ok ? bond.pricing : null,
     };
   }
 
@@ -133,7 +137,10 @@ export class OrderService {
         faceValue: preview.faceValue,
         quantity: preview.quantity,
         unitPrice: preview.unitPrice,
-        bondDetails: preview.bondDetails as Prisma.InputJsonValue,
+        bondDetails: {
+          ...preview.bondDetails,
+          pricing: preview.pricing,
+        },
         metadata: {} as Prisma.InputJsonValue,
       },
     });
