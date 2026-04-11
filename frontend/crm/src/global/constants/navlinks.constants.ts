@@ -86,6 +86,10 @@ export const NAV_ITEMS: NavItem[] = [
         label: "Templates",
         path: "/dashboard/notifications/templates",
       },
+      {
+        label: "Logs",
+        path: "/dashboard/notifications/logs",
+      },
     ],
   },
 

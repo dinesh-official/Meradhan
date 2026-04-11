@@ -55,6 +55,10 @@ router.get("/api/crm/notifications/logs", ...gate, (req, res) =>
   controller.listLogs(req, res)
 );
 
+router.get("/api/crm/notifications/logs/:logId/recipients", ...gate, (req, res) =>
+  controller.getLogRecipients(req, res)
+);
+
 router.get(
   "/api/crm/customers/:customerProfileId/notification-logs",
   ...gate,

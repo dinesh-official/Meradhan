@@ -1,7 +1,8 @@
-/// Broadcast medium (WhatsApp reserved for later phases)
+/// Broadcast medium
 enum NotificationMedium {
     SMS
     WHATSAPP
+    RCS
 }
 
 /// Aggregate status for a send batch (notification_logs)
@@ -22,18 +23,20 @@ enum NotificationRecipientDeliveryStatus {
     INVALID_NUMBER
 }
 
-/// DLT-registered SMS templates managed through the CRM UI
+/// Templates managed through the CRM UI (one per medium type)
 model NotificationTemplateModel {
-    id           Int              @id @default(autoincrement())
+    id           Int                  @id @default(autoincrement())
     name         String
-    templateId   String           @unique
+    templateId   String
+    medium       NotificationMedium   @default(SMS)
     message      String
-    isActive     Boolean          @default(true)
+    isActive     Boolean              @default(true)
     createdById  Int
-    createdBy    CRMUserDataModel @relation("NotificationTemplateCreatedBy", fields: [createdById], references: [id])
-    createdAt    DateTime         @default(now())
-    updatedAt    DateTime         @updatedAt
+    createdBy    CRMUserDataModel     @relation("NotificationTemplateCreatedBy", fields: [createdById], references: [id])
+    createdAt    DateTime             @default(now())
+    updatedAt    DateTime             @updatedAt
 
+    @@unique([templateId, medium])
     @@map("notification_templates")
 }
 
