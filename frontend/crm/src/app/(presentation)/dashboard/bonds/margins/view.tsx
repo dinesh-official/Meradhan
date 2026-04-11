@@ -71,7 +71,7 @@ type GroupedListResponse = {
 type CreateResponse = { createdCount: number; rows: MarginRow[] };
 
 function displayRatingLabel(rating: string): string {
-  if (rating === BOND_MARGIN_WITHOUT_RATING) return "Without rating";
+  if (rating === BOND_MARGIN_WITHOUT_RATING) return "Default";
   return rating;
 }
 
@@ -88,7 +88,7 @@ type Editable = Omit<MarginRow, "id" | "updatedAt">;
 function blankRow(): Editable {
   return {
     sectorName: "",
-    /** Default: create a single “without rating” row; pick batch option for all ratings. */
+    /** Default: create a single “default” row; pick batch option for all ratings. */
     rating: BOND_MARGIN_WITHOUT_RATING,
     underOneYear: 0,
     oneToThreeYears: 0,
@@ -383,10 +383,10 @@ export default function BondMarginManagementView() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={BOND_MARGIN_WITHOUT_RATING}>
-                        Without rating (default)
+                        Default
                       </SelectItem>
                       <SelectItem value={RATING_BATCH}>
-                        All ratings + without rating (batch)
+                        All ratings + default (batch)
                       </SelectItem>
                       {BOND_MARGIN_STANDARD_RATINGS.map((r) => (
                         <SelectItem key={r} value={r}>
@@ -396,8 +396,8 @@ export default function BondMarginManagementView() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Default creates one “without rating” row. Choose batch to add every rating
-                    plus without rating in one go.
+                    Default creates one “default” row. Choose batch to add every rating
+                    plus default in one go.
                   </p>
                 </div>
               </div>
@@ -462,7 +462,7 @@ export default function BondMarginManagementView() {
               <div className="flex flex-col gap-1">
                 <div className="font-medium">No sectors found</div>
                 <div className="text-sm text-muted-foreground">
-                      {search ? "Try clearing search." : "Use “Add margin” above to create one."}
+                  {search ? "Try clearing search." : "Use “Add margin” above to create one."}
                 </div>
               </div>
             </div>
@@ -474,132 +474,132 @@ export default function BondMarginManagementView() {
                 (r) => r.rating === BOND_MARGIN_WITHOUT_RATING,
               );
               return (
-              <Collapsible key={g.sectorName} defaultOpen className="rounded-md border bg-muted/5">
-                <CollapsibleTrigger className="flex w-full flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2 text-left hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
-                  <ChevronDown className="size-4 shrink-0 transition-transform" />
-                  <span className="min-w-0 font-medium">{g.sectorName}</span>
-                  {hasWithoutRating ? (
-                    <Badge variant="secondary" className="shrink-0 text-[11px] font-normal">
-                      Without rating
-                    </Badge>
-                  ) : null}
-                  <span className="text-xs text-muted-foreground sm:ml-auto">
-                    ({g.rows.length} rating{g.rows.length === 1 ? "" : "s"})
-                  </span>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="w-full overflow-auto border-t">
-                    <table className="min-w-[1200px] w-full text-sm">
-                      <thead className="bg-muted/40">
-                        <tr className="text-left">
-                          <th className="px-3 py-2 font-medium text-muted-foreground">
-                            Rating
-                          </th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">
-                            &lt; 1y
-                          </th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">1–3y</th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">3–5y</th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">5–7y</th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">7–10y</th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">10–15y</th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">
-                            &gt; 15y
-                          </th>
-                          <th className="px-3 py-2 font-medium text-muted-foreground">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {g.rows.map((r) => {
-                          const isEditing = editId === r.id;
-                          return (
-                            <tr
-                              key={r.id}
-                              className="border-t odd:bg-muted/10 hover:bg-muted/30 transition-colors"
-                            >
-                              <td className="px-3 py-2 align-top">
-                                {isEditing ? (
-                                  <Select
-                                    value={ratingSelectValue(editDraft, "edit")}
-                                    onValueChange={(v) => onRatingSelect(v, setEditDraft)}
-                                  >
-                                    <SelectTrigger className="h-8 w-[200px]">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value={BOND_MARGIN_WITHOUT_RATING}>
-                                        Without rating
-                                      </SelectItem>
-                                      {BOND_MARGIN_STANDARD_RATINGS.map((opt) => (
-                                        <SelectItem key={opt} value={opt}>
-                                          {opt}
+                <Collapsible key={g.sectorName} defaultOpen className="rounded-md border bg-muted/5">
+                  <CollapsibleTrigger className="flex w-full flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2 text-left hover:bg-muted/30 [&[data-state=open]>svg]:rotate-180">
+                    <ChevronDown className="size-4 shrink-0 transition-transform" />
+                    <span className="min-w-0 font-medium">{g.sectorName}</span>
+                    {hasWithoutRating ? (
+                      <Badge variant="secondary" className="shrink-0 text-[11px] font-normal">
+                        Default
+                      </Badge>
+                    ) : null}
+                    <span className="text-xs text-muted-foreground sm:ml-auto">
+                      ({g.rows.length} rating{g.rows.length === 1 ? "" : "s"})
+                    </span>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="w-full overflow-auto border-t">
+                      <table className="min-w-[1200px] w-full text-sm">
+                        <thead className="bg-muted/40">
+                          <tr className="text-left">
+                            <th className="px-3 py-2 font-medium text-muted-foreground">
+                              Rating
+                            </th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">
+                              &lt; 1y
+                            </th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">1–3y</th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">3–5y</th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">5–7y</th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">7–10y</th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">10–15y</th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">
+                              &gt; 15y
+                            </th>
+                            <th className="px-3 py-2 font-medium text-muted-foreground">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {g.rows.map((r) => {
+                            const isEditing = editId === r.id;
+                            return (
+                              <tr
+                                key={r.id}
+                                className="border-t odd:bg-muted/10 hover:bg-muted/30 transition-colors"
+                              >
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing ? (
+                                    <Select
+                                      value={ratingSelectValue(editDraft, "edit")}
+                                      onValueChange={(v) => onRatingSelect(v, setEditDraft)}
+                                    >
+                                      <SelectTrigger className="h-8 w-[200px]">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value={BOND_MARGIN_WITHOUT_RATING}>
+                                          Default
                                         </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                ) : (
-                                  displayRatingLabel(r.rating)
-                                )}
-                              </td>
-                              <td className="px-3 py-2 align-top">
-                                {isEditing
-                                  ? renderLabeledNumCell("< 1y", editDraft.underOneYear, (n) =>
+                                        {BOND_MARGIN_STANDARD_RATINGS.map((opt) => (
+                                          <SelectItem key={opt} value={opt}>
+                                            {opt}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  ) : (
+                                    displayRatingLabel(r.rating)
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing
+                                    ? renderLabeledNumCell("< 1y", editDraft.underOneYear, (n) =>
                                       setEditDraft((d) => ({ ...d, underOneYear: n })),
                                     )
-                                  : r.underOneYear}
-                              </td>
-                              <td className="px-3 py-2 align-top">
-                                {isEditing
-                                  ? renderLabeledNumCell("1–3y", editDraft.oneToThreeYears, (n) =>
+                                    : r.underOneYear}
+                                </td>
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing
+                                    ? renderLabeledNumCell("1–3y", editDraft.oneToThreeYears, (n) =>
                                       setEditDraft((d) => ({ ...d, oneToThreeYears: n })),
                                     )
-                                  : r.oneToThreeYears}
-                              </td>
-                              <td className="px-3 py-2 align-top">
-                                {isEditing
-                                  ? renderLabeledNumCell(
+                                    : r.oneToThreeYears}
+                                </td>
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing
+                                    ? renderLabeledNumCell(
                                       "3–5y",
                                       editDraft.threeToFiveYears,
                                       (n) =>
                                         setEditDraft((d) => ({ ...d, threeToFiveYears: n })),
                                     )
-                                  : r.threeToFiveYears}
-                              </td>
-                              <td className="px-3 py-2 align-top">
-                                {isEditing
-                                  ? renderLabeledNumCell(
+                                    : r.threeToFiveYears}
+                                </td>
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing
+                                    ? renderLabeledNumCell(
                                       "5–7y",
                                       editDraft.fiveToSevenYears,
                                       (n) =>
                                         setEditDraft((d) => ({ ...d, fiveToSevenYears: n })),
                                     )
-                                  : r.fiveToSevenYears}
-                              </td>
-                              <td className="px-3 py-2 align-top">
-                                {isEditing
-                                  ? renderLabeledNumCell(
+                                    : r.fiveToSevenYears}
+                                </td>
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing
+                                    ? renderLabeledNumCell(
                                       "7–10y",
                                       editDraft.sevenToTenYears,
                                       (n) =>
                                         setEditDraft((d) => ({ ...d, sevenToTenYears: n })),
                                     )
-                                  : r.sevenToTenYears}
-                              </td>
-                              <td className="px-3 py-2 align-top">
-                                {isEditing
-                                  ? renderLabeledNumCell(
+                                    : r.sevenToTenYears}
+                                </td>
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing
+                                    ? renderLabeledNumCell(
                                       "10–15y",
                                       editDraft.tenToFifteenYears,
                                       (n) =>
                                         setEditDraft((d) => ({ ...d, tenToFifteenYears: n })),
                                     )
-                                  : r.tenToFifteenYears}
-                              </td>
-                              <td className="px-3 py-2 align-top">
-                                {isEditing
-                                  ? renderLabeledNumCell(
+                                    : r.tenToFifteenYears}
+                                </td>
+                                <td className="px-3 py-2 align-top">
+                                  {isEditing
+                                    ? renderLabeledNumCell(
                                       "> 15y",
                                       editDraft.moreThanFifteenYears,
                                       (n) =>
@@ -608,52 +608,52 @@ export default function BondMarginManagementView() {
                                           moreThanFifteenYears: n,
                                         })),
                                     )
-                                  : r.moreThanFifteenYears}
-                              </td>
-                              <td className="px-3 py-2 whitespace-nowrap align-top">
-                                {!isEditing ? (
-                                  <div className="flex items-center gap-2">
-                                    <Button size="sm" variant="outline" onClick={() => startEdit(r)}>
-                                      Edit
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      onClick={() => {
-                                        if (confirm("Delete this margin row?")) {
-                                          deleteMutation.mutate(r.id);
+                                    : r.moreThanFifteenYears}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap align-top">
+                                  {!isEditing ? (
+                                    <div className="flex items-center gap-2">
+                                      <Button size="sm" variant="outline" onClick={() => startEdit(r)}>
+                                        Edit
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => {
+                                          if (confirm("Delete this margin row?")) {
+                                            deleteMutation.mutate(r.id);
+                                          }
+                                        }}
+                                        disabled={deleteMutation.isPending}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="sm"
+                                        onClick={() =>
+                                          updateMutation.mutate({ id: r.id, data: editDraft })
                                         }
-                                      }}
-                                      disabled={deleteMutation.isPending}
-                                    >
-                                      Delete
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center gap-2">
-                                    <Button
-                                      size="sm"
-                                      onClick={() =>
-                                        updateMutation.mutate({ id: r.id, data: editDraft })
-                                      }
-                                      disabled={updateMutation.isPending}
-                                    >
-                                      {updateMutation.isPending ? "Saving..." : "Save"}
-                                    </Button>
-                                    <Button size="sm" variant="outline" onClick={() => setEditId(null)}>
-                                      Cancel
-                                    </Button>
-                                  </div>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                                        disabled={updateMutation.isPending}
+                                      >
+                                        {updateMutation.isPending ? "Saving..." : "Save"}
+                                      </Button>
+                                      <Button size="sm" variant="outline" onClick={() => setEditId(null)}>
+                                        Cancel
+                                      </Button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               );
             })}
         </div>

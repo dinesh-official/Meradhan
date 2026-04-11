@@ -235,13 +235,13 @@ export const NAV_ITEMS: NavItem[] = [
         allowOnly: ["view:bonds"],
       },
       {
-        label: "Priced List Upload",
+        label: "Consolidated Management",
         path: "/dashboard/bonds/priced-list",
         module: "bonds",
         allowOnly: ["view:bonds"],
       },
       {
-        label: "Reference Data Upload",
+        label: "Reference Data Management",
         path: "/dashboard/bonds/reference-data",
         module: "bonds",
         allowOnly: ["view:bonds"],
