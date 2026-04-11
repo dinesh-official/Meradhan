@@ -14,7 +14,7 @@ function page() {
     <ViewPort headerOnly>
       <div className="flex justify-center items-center bg-muted py-10 min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-72px)]">
         <div className="container">
-          <Card className="grid lg:grid-cols-2 p-0 border-0 w-full overflow-hidden">
+          <Card className="grid lg:grid-cols-2 p-0 lg:p-0 border-0 w-full overflow-hidden">
             <SignUpForm />
             <div className="flex flex-col justify-center items-start gap-3 bg-primary p-10 lg:p-20 w-full h-full">
               <h5 className={cn("text-white text-2xl quicksand-medium")}>
