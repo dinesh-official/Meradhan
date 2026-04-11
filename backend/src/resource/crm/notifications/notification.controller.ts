@@ -76,7 +76,8 @@ export class NotificationController {
   send = async (req: Request, res: Response) => {
     const body = appSchema.crm.notifications.sendNotificationSchema.parse(req.body);
     const userId = req.session!.id;
-    const data = await this.service.sendNotification(userId, {
+    const role = req.session!.role;
+    const data = await this.service.sendNotification(userId, role, {
       savedListId: body.savedListId,
       medium: body.medium as NotificationMedium,
       dltTemplateId: body.dltTemplateId,
@@ -141,6 +142,12 @@ export class NotificationController {
     });
   };
 
+  getLogRecipients = async (req: Request, res: Response) => {
+    const logId = Number(req.params.logId);
+    const data = await this.service.getLogRecipients(logId);
+    res.sendResponse({ statusCode: HttpStatus.OK, responseData: data });
+  };
+
   customerLogs = async (req: Request, res: Response) => {
     const customerProfileId = Number(req.params.customerProfileId);
     const data = await this.service.listCustomerNotificationLogs(customerProfileId);
@@ -152,22 +159,29 @@ export class NotificationController {
 
   /* ─── DLT Template CRUD ─────────────────────────────────── */
 
-  listTemplates = async (_req: Request, res: Response) => {
-    const data = await this.service.listTemplates();
+  listTemplates = async (req: Request, res: Response) => {
+    const q = appSchema.crm.notifications.listTemplatesQuerySchema.parse(req.query);
+    const data = await this.service.listTemplates(q.medium as NotificationMedium | undefined);
     res.sendResponse({ statusCode: HttpStatus.OK, responseData: data });
   };
 
   createTemplate = async (req: Request, res: Response) => {
     const body = appSchema.crm.notifications.createTemplateSchema.parse(req.body);
     const userId = req.session!.id;
-    const data = await this.service.createTemplate(userId, body);
+    const data = await this.service.createTemplate(userId, {
+      ...body,
+      medium: body.medium as NotificationMedium,
+    });
     res.sendResponse({ statusCode: HttpStatus.CREATED, responseData: data });
   };
 
   updateTemplate = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const body = appSchema.crm.notifications.updateTemplateSchema.parse(req.body);
-    const data = await this.service.updateTemplate(id, body);
+    const data = await this.service.updateTemplate(id, {
+      ...body,
+      ...(body.medium ? { medium: body.medium as NotificationMedium } : {}),
+    });
     res.sendResponse({ statusCode: HttpStatus.OK, responseData: data });
   };
 

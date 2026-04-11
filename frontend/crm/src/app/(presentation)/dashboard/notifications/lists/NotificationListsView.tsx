@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
@@ -10,7 +11,7 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 import { canAccessNotifications } from "@/global/utils/role.utils";
 import apiGateway from "@root/apiGateway";
 import { format } from "date-fns";
-import { Eye, List, Trash2, Users } from "lucide-react";
+import { Eye, List, Search, Trash2, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import SavedListMembersDialog, {
@@ -49,6 +50,8 @@ export default function NotificationListsView() {
   const [lists, setLists] = useState<SavedList[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const [search, setSearch] = useState("");
 
   const [dialogList, setDialogList] = useState<SavedList | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -137,12 +140,40 @@ export default function NotificationListsView() {
     );
   }
 
+  const filteredLists = search.trim()
+    ? lists.filter((l) =>
+        l.name.toLowerCase().includes(search.trim().toLowerCase())
+      )
+    : lists;
+
   return (
     <div className="p-4 space-y-4">
       <PageInfoBar
         title="Notification Lists"
         description="All saved customer lists used for notifications."
       />
+
+      {/* Search bar — only show once lists have loaded */}
+      {!loading && lists.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder="Search by list name…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-9"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <div className="space-y-3">
@@ -160,9 +191,21 @@ export default function NotificationListsView() {
             </p>
           </CardContent>
         </Card>
+      ) : filteredLists.length === 0 ? (
+        <Card>
+          <CardContent className="py-16 text-center">
+            <Search className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-muted-foreground text-sm">
+              No lists match <span className="font-medium">&ldquo;{search}&rdquo;</span>.
+            </p>
+            <Button variant="link" size="sm" onClick={() => setSearch("")} className="mt-1">
+              Clear search
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <div className="overflow-y-auto max-h-[calc(100vh-180px)] space-y-2 pr-1">
-          {lists.map((list) => {
+          {filteredLists.map((list) => {
             const memberCount = list._count?.members ?? 0;
             return (
               <Card key={list.id} className="transition-shadow hover:shadow-md">

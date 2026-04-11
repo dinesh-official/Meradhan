@@ -18,11 +18,13 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 import { canAccessNotifications } from "@/global/utils/role.utils";
 import apiGateway from "@root/apiGateway";
 import { Eye, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Swal from "sweetalert2";
 import SavedListMembersDialog from "../_components/SavedListMembersDialog";
 
 /* ─── types ─────────────────────────────────────────────────── */
+
+type Medium = "SMS" | "WHATSAPP" | "RCS";
 
 type SavedList = {
   id: number;
@@ -34,10 +36,19 @@ type DltTemplate = {
   id: number;
   name: string;
   templateId: string;
+  medium: Medium;
   message: string;
 };
 
 type ApiResponse<T> = { responseData?: T };
+
+/* ─── medium config ──────────────────────────────────────────── */
+
+const MEDIUMS: { value: Medium; label: string; comingSoon?: boolean }[] = [
+  { value: "SMS", label: "SMS" },
+  { value: "WHATSAPP", label: "WhatsApp", comingSoon: true },
+  { value: "RCS", label: "RCS", comingSoon: true },
+];
 
 /* ─── helpers ────────────────────────────────────────────────── */
 
@@ -94,19 +105,21 @@ export default function SendNotificationView() {
   const [savedListId, setSavedListId] = useState<string>("");
   const [viewListOpen, setViewListOpen] = useState(false);
 
-  const [dltTemplates, setDltTemplates] = useState<DltTemplate[]>([]);
+  const [medium, setMedium] = useState<Medium>("SMS");
+  const [allTemplates, setAllTemplates] = useState<DltTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [varsJson, setVarsJson] = useState("{}");
   const [sendLoading, setSendLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
+  const api = new apiGateway.crm.notifications.CrmNotificationsApi(apiClientCaller);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const api = new apiGateway.crm.notifications.CrmNotificationsApi(apiClientCaller);
-
+  // Load saved lists once
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -120,28 +133,29 @@ export default function SendNotificationView() {
         if (!cancelled) setListsLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
+  }, []);
+
+  // Load ALL templates once (we filter client-side by medium)
+  const loadTemplates = useCallback(async () => {
+    setTemplatesLoading(true);
+    try {
+      const res = await api.listTemplates();
+      const data = res.data as ApiResponse<DltTemplate[]>;
+      setAllTemplates(data.responseData ?? []);
+    } catch {
+      setAllTemplates([]);
+    } finally {
+      setTemplatesLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await api.listTemplates();
-        const data = res.data as ApiResponse<DltTemplate[]>;
-        if (!cancelled) setDltTemplates(data.responseData ?? []);
-      } catch {
-        if (!cancelled) setDltTemplates([]);
-      } finally {
-        if (!cancelled) setTemplatesLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (mounted) loadTemplates();
+  }, [mounted, loadTemplates]);
+
+  // Templates filtered to selected medium
+  const dltTemplates = allTemplates.filter((t) => t.medium === medium);
 
   if (!mounted) return null;
   if (!canAccessNotifications(cookies.role)) {
@@ -154,6 +168,13 @@ export default function SendNotificationView() {
 
   const selectedList = lists.find((l) => String(l.id) === savedListId) ?? null;
   const selectedTemplate = dltTemplates.find((t) => String(t.id) === selectedTemplateId) ?? null;
+
+  const handleMediumChange = (val: Medium) => {
+    setMedium(val);
+    setSelectedTemplateId("");
+    setVarsJson("{}");
+    setSent(false);
+  };
 
   const handleTemplateChange = (value: string) => {
     setSelectedTemplateId(value);
@@ -174,13 +195,15 @@ export default function SendNotificationView() {
     );
   };
 
+  const isComingSoon = MEDIUMS.find((m) => m.value === medium)?.comingSoon ?? false;
+
   const send = async () => {
     if (!savedListId) {
       await Swal.fire("List required", "Choose a saved customer list.", "warning");
       return;
     }
     if (!selectedTemplate) {
-      await Swal.fire("Template required", "Select a DLT template.", "warning");
+      await Swal.fire("Template required", "Select a template.", "warning");
       return;
     }
 
@@ -198,7 +221,7 @@ export default function SendNotificationView() {
 
     const count = selectedList?._count?.members ?? "—";
     const confirm = await Swal.fire({
-      title: "Send SMS?",
+      title: `Send ${medium}?`,
       html: `Template: <b>${selectedTemplate.name}</b><br/>Sending to <b>${count}</b> member(s) in <b>${selectedList?.name}</b>.`,
       icon: "question",
       showCancelButton: true,
@@ -211,12 +234,12 @@ export default function SendNotificationView() {
     try {
       await api.send({
         savedListId: Number(savedListId),
-        medium: "SMS",
+        medium,
         dltTemplateId: selectedTemplate.templateId,
         templateVariables,
       });
       setSent(true);
-      await Swal.fire("Sent", "SMS batch has been processed.", "success");
+      await Swal.fire("Sent", "Notification batch has been processed.", "success");
     } catch (e) {
       await Swal.fire("Send failed", extractMsg(e), "error");
     } finally {
@@ -230,9 +253,38 @@ export default function SendNotificationView() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">DLT template SMS</CardTitle>
+          <CardTitle className="text-lg">Send notification</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 max-w-3xl">
+
+          {/* ── Medium selector ── */}
+          <div className="space-y-2">
+            <Label>Medium</Label>
+            <div className="flex gap-2 flex-wrap">
+              {MEDIUMS.map((m) => (
+                <button
+                  key={m.value}
+                  type="button"
+                  onClick={() => handleMediumChange(m.value)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    medium === m.value
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                  }`}
+                >
+                  {m.label}
+                  {m.comingSoon && (
+                    <span className="ml-1.5 text-xs opacity-70">(soon)</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            {isComingSoon && (
+              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-1.5">
+                {medium === "WHATSAPP" ? "WhatsApp" : "RCS"} sending is coming soon. You can create and browse templates, but sending is not yet enabled.
+              </p>
+            )}
+          </div>
 
           {/* ── Saved list ── */}
           <div className="space-y-2">
@@ -283,7 +335,7 @@ export default function SendNotificationView() {
             </div>
           </div>
 
-          {/* ── Template dropdown ── */}
+          {/* ── Template dropdown (filtered by medium) ── */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Select Template</Label>
@@ -308,7 +360,7 @@ export default function SendNotificationView() {
                     templatesLoading
                       ? "Loading templates…"
                       : dltTemplates.length === 0
-                      ? "No templates — add one first"
+                      ? `No ${medium} templates — add one first`
                       : "Select template"
                   }
                 />
@@ -316,7 +368,7 @@ export default function SendNotificationView() {
               <SelectContent>
                 {dltTemplates.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">
-                    No templates found. Admins can add them from Notification Templates.
+                    No {medium} templates found. Admins can add them from Notification Templates.
                   </div>
                 ) : (
                   dltTemplates.map((t) => (
@@ -347,17 +399,6 @@ export default function SendNotificationView() {
             )}
           </div>
 
-          {/* ── Medium ── */}
-          <div className="space-y-1">
-            <Label>Medium</Label>
-            <p className="text-sm text-muted-foreground">
-              SMS{" "}
-              <span className="text-xs border rounded px-1.5 py-0.5 ml-1 text-muted-foreground">
-                WhatsApp — coming soon
-              </span>
-            </p>
-          </div>
-
           {/* ── Template variables ── */}
           <div className="space-y-2">
             <Label htmlFor="vars">Template variables</Label>
@@ -374,7 +415,10 @@ export default function SendNotificationView() {
             </p>
           </div>
 
-          <Button onClick={send} disabled={sendLoading || sent || !savedListId || !selectedTemplateId}>
+          <Button
+            onClick={send}
+            disabled={sendLoading || sent || !savedListId || !selectedTemplateId || isComingSoon}
+          >
             {sendLoading ? "Sending…" : sent ? "Message sent" : "Send message"}
           </Button>
         </CardContent>
