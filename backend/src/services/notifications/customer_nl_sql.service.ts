@@ -54,39 +54,58 @@ KYC step values (use the INTEGER in SQL, never the label string):
   6 = e-Signature
   7 = completed (KYC fully done)
 
-When to use kyc_dump:
-  - User asks about KYC step, progress, or stage → JOIN kyc_dump and filter on "step"
-  - User asks about KYC verification status (verified, rejected, pending) → use "kycStatus" on customers_profile_data (no join needed)
-  - User asks about KYC completion time → JOIN kyc_dump and filter on "updated_at"
+CRITICAL — "Not started" has TWO database states:
+  A. Row exists in kyc_dump with step = 0  (customer opened KYC but did nothing)
+  B. NO row exists in kyc_dump at all      (customer never opened KYC)
+  Both must be captured. Use LEFT JOIN + (kd."step" = 0 OR kd."userID" IS NULL).
 
-=== JOIN PATTERN (use this exact alias style) ===
+When to use kyc_dump:
+  - User asks about KYC not started / not done / not begun → LEFT JOIN kyc_dump, filter (kd."step" = 0 OR kd."userID" IS NULL)
+  - User asks about a specific step 1–7 → JOIN kyc_dump (INNER), filter kd."step" = N
+  - User asks about KYC verification status (verified, rejected, pending) → use "kycStatus" on customers_profile_data (no join needed)
+  - User asks about KYC completion time → JOIN kyc_dump, filter kd."step" = 7 AND kd."updated_at"
+
+=== JOIN PATTERNS ===
+For steps 1–7 (row always exists) — use INNER JOIN:
   FROM customers_profile_data cpd
   JOIN kyc_dump kd ON kd."userID" = cpd."id"
   WHERE cpd."isDeleted" = false
 
+For "not started" (step 0 OR no row) — use LEFT JOIN:
+  FROM customers_profile_data cpd
+  LEFT JOIN kyc_dump kd ON kd."userID" = cpd."id"
+  WHERE cpd."isDeleted" = false AND (kd."step" = 0 OR kd."userID" IS NULL)
+
 === EXAMPLES ===
-1. Customers at Bank Account step:
+1. Customers who have NOT started KYC (step 0 or no kyc_dump row):
+   SELECT cpd."id", cpd."firstName", cpd."lastName", cpd."emailAddress", cpd."phoneNo"
+   FROM customers_profile_data cpd
+   LEFT JOIN kyc_dump kd ON kd."userID" = cpd."id"
+   WHERE cpd."isDeleted" = false AND (kd."step" = 0 OR kd."userID" IS NULL)
+   LIMIT 500;
+
+2. Customers at Bank Account step (step 3):
    SELECT cpd."id", cpd."firstName", cpd."lastName", cpd."emailAddress", cpd."phoneNo", kd."step"
    FROM customers_profile_data cpd
    JOIN kyc_dump kd ON kd."userID" = cpd."id"
-   WHERE cpd."isDeleted" = false AND kd."step" = 2
+   WHERE cpd."isDeleted" = false AND kd."step" = 3
    LIMIT 500;
 
-2. Customers who completed KYC (step 6):
+3. Customers who completed KYC (step 7):
    SELECT cpd."id", cpd."firstName", cpd."lastName", cpd."emailAddress", cpd."phoneNo"
    FROM customers_profile_data cpd
    JOIN kyc_dump kd ON kd."userID" = cpd."id"
-   WHERE cpd."isDeleted" = false AND kd."step" = 6
+   WHERE cpd."isDeleted" = false AND kd."step" = 7
    LIMIT 500;
 
-3. Customers who completed KYC in the last 7 days:
+4. Customers who completed KYC in the last 7 days:
    SELECT cpd."id", cpd."firstName", cpd."lastName", cpd."emailAddress", cpd."phoneNo", kd."updated_at"
    FROM customers_profile_data cpd
    JOIN kyc_dump kd ON kd."userID" = cpd."id"
-   WHERE cpd."isDeleted" = false AND kd."step" = 6 AND kd."updated_at" >= NOW() - INTERVAL '7 days'
+   WHERE cpd."isDeleted" = false AND kd."step" = 7 AND kd."updated_at" >= NOW() - INTERVAL '7 days'
    LIMIT 500;
 
-4. Customers whose firstName starts with 'N' (no KYC join needed):
+5. Customers whose firstName starts with 'N' (no KYC join needed):
    SELECT "id", "firstName", "lastName", "emailAddress", "phoneNo"
    FROM customers_profile_data
    WHERE "isDeleted" = false AND "firstName" ILIKE 'N%'
@@ -128,8 +147,8 @@ export function validateCustomerProfileSelectSql(sql: string): { ok: true } | { 
     return { ok: false, reason: "Query must read from customers_profile_data." };
   }
 
-  // Allow only JOIN with kyc_dump; no other tables permitted
-  const joinPattern = /\bJOIN\s+["']?(\w+)["']?/gi;
+  // Allow only (LEFT) JOIN with kyc_dump; no other tables permitted
+  const joinPattern = /\b(?:LEFT\s+)?JOIN\s+["']?(\w+)["']?/gi;
   let match: RegExpExecArray | null;
   while ((match = joinPattern.exec(trimmed)) !== null) {
     const joinedTable = (match[1] ?? "").toLowerCase();
@@ -153,7 +172,7 @@ Schema reference:
 ${SCHEMA_HINT}
 
 Rules:
-1. Query customers_profile_data as the primary table. You may JOIN kyc_dump when the query involves KYC step or KYC progress.
+1. Query customers_profile_data as the primary table. You may JOIN or LEFT JOIN kyc_dump when the query involves KYC step or KYC progress.
 2. Every camelCase column name MUST be double-quoted (e.g. "firstName", "userID"). snake_case columns like "updated_at" do not need quotes but are fine with them.
 3. Always include WHERE cpd."isDeleted" = false (or WHERE "isDeleted" = false when no alias is used).
 4. Use ILIKE for case-insensitive text matching.
@@ -162,7 +181,9 @@ Rules:
 7. End with LIMIT 500 if no smaller LIMIT is already present.
 8. When joining kyc_dump use aliases: customers_profile_data AS cpd, kyc_dump AS kd.
 9. For KYC step queries always filter on kd."step" using the INTEGER value, never the label string.
-10. Output raw SQL only — no markdown fences, no prose.`;
+10. CRITICAL: "KYC not started / not done / not begun" requires LEFT JOIN and filter (kd."step" = 0 OR kd."userID" IS NULL) because customers may have step=0 row OR no row at all in kyc_dump.
+11. For steps 1–7 use INNER JOIN (row is guaranteed to exist).
+12. Output raw SQL only — no markdown fences, no prose.`;
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",

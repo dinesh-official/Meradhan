@@ -99,6 +99,13 @@ export class CrmNotificationsApi {
     );
   }
 
+  getLogRecipients(logId: number, config?: AxiosRequestConfig) {
+    return this.apiClient.get<unknown>(
+      `/crm/notifications/logs/${logId}/recipients`,
+      config
+    );
+  }
+
   customerNotificationLogs(
     customerProfileId: number,
     config?: AxiosRequestConfig
@@ -111,8 +118,14 @@ export class CrmNotificationsApi {
 
   /* ─── DLT Templates ──────────────────────────────────────── */
 
-  listTemplates(config?: AxiosRequestConfig) {
-    return this.apiClient.get<unknown>("/crm/notifications/templates", config);
+  listTemplates(
+    query?: z.infer<(typeof appSchema.crm.notifications)["listTemplatesQuerySchema"]>,
+    config?: AxiosRequestConfig
+  ) {
+    return this.apiClient.get<unknown>("/crm/notifications/templates", {
+      ...config,
+      params: query,
+    });
   }
 
   createTemplate(
