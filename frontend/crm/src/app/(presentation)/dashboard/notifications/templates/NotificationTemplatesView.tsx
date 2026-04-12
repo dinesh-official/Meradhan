@@ -11,6 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
@@ -19,22 +26,35 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 import { canAccessNotifications } from "@/global/utils/role.utils";
 import apiGateway from "@root/apiGateway";
 import { format } from "date-fns";
-import { Copy, FileText, Pencil, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Copy, FileText, MessageSquare, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 import Swal from "sweetalert2";
 
 /* ─── types ─────────────────────────────────────────────────── */
+
+type Medium = "SMS" | "WHATSAPP" | "RCS";
 
 type Template = {
   id: number;
   name: string;
   templateId: string;
+  medium: Medium;
   message: string;
   createdAt: string;
   createdBy: { id: number; name: string };
 };
 
 type ApiResponse<T> = { responseData?: T };
+
+const MEDIUMS: { value: Medium; label: string; color: string }[] = [
+  { value: "SMS", label: "SMS", color: "bg-blue-100 text-blue-800 border-blue-300" },
+  { value: "WHATSAPP", label: "WhatsApp", color: "bg-green-100 text-green-800 border-green-300" },
+  { value: "RCS", label: "RCS", color: "bg-purple-100 text-purple-800 border-purple-300" },
+];
+
+function mediumMeta(m: Medium) {
+  return MEDIUMS.find((x) => x.value === m) ?? MEDIUMS[0];
+}
 
 function extractMsg(e: unknown): string {
   if (
@@ -54,7 +74,7 @@ function extractVariables(message: string): string[] {
   return [...new Set(matches.map((m) => m[1]))];
 }
 
-const BLANK_FORM = { name: "", templateId: "", message: "" };
+const BLANK_FORM = { name: "", templateId: "", medium: "SMS" as Medium, message: "" };
 
 /* ─── sub-component: message preview with highlights ───────── */
 
@@ -84,6 +104,7 @@ export default function NotificationTemplatesView() {
   const { cookies } = useAppCookie();
   const [mounted, setMounted] = useState(false);
 
+  const [activeMedium, setActiveMedium] = useState<Medium | "ALL">("ALL");
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -100,33 +121,34 @@ export default function NotificationTemplatesView() {
     setMounted(true);
   }, []);
 
+  const loadTemplates = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.listTemplates(
+        activeMedium !== "ALL" ? { medium: activeMedium } : undefined
+      );
+      const data = res.data as ApiResponse<Template[]>;
+      setTemplates(data.responseData ?? []);
+    } catch {
+      setTemplates([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeMedium]);
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await api.listTemplates();
-        const data = res.data as ApiResponse<Template[]>;
-        if (!cancelled) setTemplates(data.responseData ?? []);
-      } catch {
-        if (!cancelled) setTemplates([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (mounted) loadTemplates();
+  }, [mounted, loadTemplates]);
 
   const openCreate = () => {
     setEditing(null);
-    setForm(BLANK_FORM);
+    setForm({ ...BLANK_FORM, medium: activeMedium !== "ALL" ? activeMedium : "SMS" });
     setDialogOpen(true);
   };
 
   const openEdit = (t: Template) => {
     setEditing(t);
-    setForm({ name: t.name, templateId: t.templateId, message: t.message });
+    setForm({ name: t.name, templateId: t.templateId, medium: t.medium, message: t.message });
     setDialogOpen(true);
   };
 
@@ -148,7 +170,11 @@ export default function NotificationTemplatesView() {
       } else {
         const res = await api.createTemplate(form);
         const data = res.data as ApiResponse<Template>;
-        setTemplates((prev) => [...prev, data.responseData!]);
+        const created = data.responseData!;
+        // Only add to current list if it matches the active medium filter
+        if (activeMedium === "ALL" || created.medium === activeMedium) {
+          setTemplates((prev) => [...prev, created]);
+        }
         await Swal.fire({ icon: "success", title: "Template created", timer: 1200, showConfirmButton: false });
       }
       setDialogOpen(false);
@@ -200,16 +226,37 @@ export default function NotificationTemplatesView() {
     <div className="p-4 space-y-4">
       <PageInfoBar
         title="Notification Templates"
-        description="Manage DLT-registered SMS templates. All roles can view; only admins can create or modify."
+        description="Manage templates per medium (SMS, WhatsApp, RCS). All roles can view; only admins can create or modify."
       />
 
-      <div className="flex justify-end">
-        {isAdmin && (
-          <Button onClick={openCreate} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Add template
+      {/* Medium filter tabs */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button
+          variant={activeMedium === "ALL" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setActiveMedium("ALL")}
+        >
+          All
+        </Button>
+        {MEDIUMS.map((m) => (
+          <Button
+            key={m.value}
+            variant={activeMedium === m.value ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveMedium(m.value)}
+          >
+            {m.label}
           </Button>
-        )}
+        ))}
+
+        <div className="ml-auto">
+          {isAdmin && (
+            <Button onClick={openCreate} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Add template
+            </Button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -230,7 +277,8 @@ export default function NotificationTemplatesView() {
       ) : (
         <div className="space-y-3">
           {templates.map((t) => {
-            const vars = extractVariables(t.message);
+            const tVars = extractVariables(t.message);
+            const meta = mediumMeta(t.medium);
             return (
               <div
                 key={t.id}
@@ -241,9 +289,16 @@ export default function NotificationTemplatesView() {
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{t.name}</span>
-                      {vars.length > 0 && (
+                      {/* Medium badge */}
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${meta.color}`}
+                      >
+                        <MessageSquare className="w-3 h-3" />
+                        {meta.label}
+                      </span>
+                      {tVars.length > 0 && (
                         <Badge variant="outline" className="text-xs">
-                          {vars.length} var{vars.length !== 1 ? "s" : ""}
+                          {tVars.length} var{tVars.length !== 1 ? "s" : ""}
                         </Badge>
                       )}
                     </div>
@@ -292,9 +347,9 @@ export default function NotificationTemplatesView() {
                 </div>
 
                 {/* Variables pill list */}
-                {vars.length > 0 && (
+                {tVars.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {vars.map((v) => (
+                    {tVars.map((v) => (
                       <Badge
                         key={v}
                         variant="secondary"
@@ -337,16 +392,37 @@ export default function NotificationTemplatesView() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="tpl-id">DLT Template ID</Label>
-                <Input
-                  id="tpl-id"
-                  placeholder="e.g. 1707xxxxxxxxx"
-                  value={form.templateId}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, templateId: e.target.value }))
-                  }
-                />
+                <Label htmlFor="tpl-medium">Medium</Label>
+                <Select
+                  value={form.medium}
+                  onValueChange={(v) => setForm((f) => ({ ...f, medium: v as Medium }))}
+                >
+                  <SelectTrigger id="tpl-medium" className="w-full">
+                    <SelectValue placeholder="Select medium" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SMS">SMS</SelectItem>
+                    <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                    <SelectItem value="RCS">RCS (coming soon)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="tpl-id">Template ID / API ID</Label>
+              <Input
+                id="tpl-id"
+                placeholder={
+                  form.medium === "SMS"
+                    ? "e.g. 1707xxxxxxxxx (DLT ID)"
+                    : "e.g. MSG91 template key"
+                }
+                value={form.templateId}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, templateId: e.target.value }))
+                }
+              />
             </div>
 
             <div className="space-y-1.5">

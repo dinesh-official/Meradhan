@@ -230,6 +230,7 @@ export class NotificationService {
 
   async sendNotification(
     userId: number,
+    role: string,
     input: {
       savedListId: number;
       medium: NotificationMedium;
@@ -237,19 +238,24 @@ export class NotificationService {
       templateVariables: Record<string, string>;
     }
   ) {
-    if (input.medium === NotificationMedium.WHATSAPP) {
-      throw new AppError("WhatsApp notifications are not enabled yet.", {
-        statusCode: HttpStatus.BAD_REQUEST,
-        code: "MEDIUM_NOT_SUPPORTED",
-      });
+    if (
+      input.medium === NotificationMedium.WHATSAPP ||
+      input.medium === NotificationMedium.RCS
+    ) {
+      throw new AppError(
+        `${input.medium === NotificationMedium.WHATSAPP ? "WhatsApp" : "RCS"} notifications are not enabled yet.`,
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "MEDIUM_NOT_SUPPORTED",
+        }
+      );
     }
 
+    // Use role-aware access check so ADMIN/SUPER_ADMIN can send to any list
+    await this.assertListAccess(userId, role, input.savedListId);
+
     const list = await db.dataBase.crmNotificationSavedListModel.findFirst({
-      where: {
-        id: input.savedListId,
-        createdById: userId,
-        isActive: true,
-      },
+      where: { id: input.savedListId, isActive: true },
       include: {
         members: {
           select: { customerProfileId: true },
@@ -321,7 +327,7 @@ export class NotificationService {
 
     // Resolve the actual message text from the saved template and substitute ##var## placeholders
     const tplRecord = await db.dataBase.notificationTemplateModel.findFirst({
-      where: { templateId: input.dltTemplateId, isActive: true },
+      where: { templateId: input.dltTemplateId, medium: input.medium, isActive: true },
       select: { message: true },
     });
 
@@ -458,33 +464,27 @@ export class NotificationService {
 
   /* ─── DLT Template CRUD ──────────────────────────────────── */
 
-  async listTemplates() {
-    return db.dataBase.notificationTemplateModel.findMany({
-      where: { isActive: true },
-      orderBy: { name: "asc" },
-      select: {
-        id: true,
-        name: true,
-        templateId: true,
-        message: true,
-        createdAt: true,
-        createdBy: { select: { id: true, name: true } },
-      },
-    });
-  }
-
   private readonly TEMPLATE_SELECT = {
     id: true,
     name: true,
     templateId: true,
+    medium: true,
     message: true,
     createdAt: true,
     createdBy: { select: { id: true, name: true } },
   } as const;
 
+  async listTemplates(medium?: NotificationMedium) {
+    return db.dataBase.notificationTemplateModel.findMany({
+      where: { isActive: true, ...(medium ? { medium } : {}) },
+      orderBy: { name: "asc" },
+      select: this.TEMPLATE_SELECT,
+    });
+  }
+
   async createTemplate(
     userId: number,
-    data: { name: string; templateId: string; message: string }
+    data: { name: string; templateId: string; medium: NotificationMedium; message: string }
   ) {
     return db.dataBase.notificationTemplateModel.create({
       data: { ...data, createdById: userId },
@@ -494,7 +494,7 @@ export class NotificationService {
 
   async updateTemplate(
     id: number,
-    data: { name?: string; templateId?: string; message?: string }
+    data: { name?: string; templateId?: string; medium?: NotificationMedium; message?: string }
   ) {
     const existing = await db.dataBase.notificationTemplateModel.findFirst({
       where: { id, isActive: true },
@@ -525,6 +525,29 @@ export class NotificationService {
     return db.dataBase.notificationTemplateModel.update({
       where: { id },
       data: { isActive: false },
+    });
+  }
+
+  async getLogRecipients(logId: number) {
+    return db.dataBase.notificationRecipientLogModel.findMany({
+      where: { notificationLogId: logId },
+      orderBy: { id: "asc" },
+      select: {
+        id: true,
+        phone: true,
+        deliveryStatus: true,
+        providerMessageId: true,
+        errorMessage: true,
+        customerProfile: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            userName: true,
+            emailAddress: true,
+          },
+        },
+      },
     });
   }
 
