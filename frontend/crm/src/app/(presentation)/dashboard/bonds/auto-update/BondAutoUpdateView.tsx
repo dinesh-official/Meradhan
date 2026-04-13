@@ -54,6 +54,13 @@ import {
   type AutofillMergeKey,
 } from "./mergeAutofillIntoForm";
 
+/** Fields whose calculator values depend on which yield feed was used (non-consolidated vs consolidated). */
+const YIELD_SOURCE_AFFECTED_KEYS: readonly AutofillMergeKey[] = [
+  "buyYield",
+  "yield",
+  "sellPrice",
+];
+
 const api = new apiGateway.bondsApi.BondsApi(apiClientCaller);
 
 function formatDisplayValue(v: unknown): string {
@@ -665,26 +672,34 @@ export default function BondAutoUpdateView() {
                         </div>
                         {model.autofill.sources.yieldSource !== "consolidated" ? (
                           <div
-                            className="rounded-lg border-2 border-amber-500/80 bg-amber-100/90 px-3 py-3 text-sm shadow-sm dark:border-amber-500/60 dark:bg-amber-950/50 dark:text-amber-50"
+                            className="rounded-lg border border-amber-500/50 bg-amber-50/90 px-3 py-2.5 text-sm dark:border-amber-600/40 dark:bg-amber-950/40 dark:text-amber-50"
                             role="status"
                           >
-                            <p className="font-semibold text-amber-950 dark:text-amber-100">
-                              Not the consolidated priced list
+                            <p className="font-medium text-amber-950 dark:text-amber-100">
+                              Yield not from the consolidated priced list
                             </p>
-                            <p className="mt-1 text-amber-900/95 dark:text-amber-100/90">
-                              Yield for this autofill is sourced from{" "}
-                              {model.autofill.sources.yieldSource === "override" ? (
-                                <span className="font-medium">your pricing yield override</span>
-                              ) : (
-                                <span className="font-medium">the bond / margin record</span>
-                              )}
-                              , not from the consolidated priced list. Verify before accepting.
+                            <p className="mt-1 text-amber-900/90 dark:text-amber-100/85">
+                              {model.autofill.sources.yieldSource === "override"
+                                ? "Using your pricing yield override."
+                                : "Using the bond / margin record."}{" "}
+                              Review the highlighted rows before accepting.
                             </p>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {YIELD_SOURCE_AFFECTED_KEYS.map((k) => (
+                                <Badge
+                                  key={k}
+                                  variant="outline"
+                                  className="font-mono text-[11px] border-amber-600/40 bg-amber-100/80 text-amber-950 dark:bg-amber-900/50 dark:text-amber-50"
+                                >
+                                  {k}
+                                </Badge>
+                              ))}
+                            </div>
                           </div>
                         ) : (
                           <div className="rounded-md border border-emerald-300/60 bg-emerald-50/90 px-3 py-2 text-sm text-emerald-950 dark:border-emerald-700/50 dark:bg-emerald-950/30 dark:text-emerald-100">
-                            <span className="font-medium">Consolidated priced list</span> — yield follows
-                            consolidated / margin rules.
+                            <span className="font-medium">Consolidated priced list</span> — pricing uses the
+                            consolidated yield path.
                           </div>
                         )}
                         {autofillWarnings(model.autofill).map((w) => (
@@ -715,8 +730,17 @@ export default function BondAutoUpdateView() {
                                 const curVal = model.formBase[key as keyof BondFormData];
                                 const draft = model.draft!;
                                 const sug = draft[key as keyof DraftSuggestions];
+                                const yieldSourceAffected =
+                                  model.autofill.sources.yieldSource !== "consolidated" &&
+                                  YIELD_SOURCE_AFFECTED_KEYS.includes(key);
                                 return (
-                                  <TableRow key={key}>
+                                  <TableRow
+                                    key={key}
+                                    className={cn(
+                                      yieldSourceAffected &&
+                                        "bg-amber-50/90 dark:bg-amber-950/25 border-l-4 border-l-amber-500/80",
+                                    )}
+                                  >
                                     <TableCell>
                                       <Checkbox
                                         checked={model.include[key]}
@@ -726,7 +750,19 @@ export default function BondAutoUpdateView() {
                                         aria-label={`Apply ${key}`}
                                       />
                                     </TableCell>
-                                    <TableCell className="font-mono text-xs whitespace-nowrap">{key}</TableCell>
+                                    <TableCell className="font-mono text-xs whitespace-nowrap">
+                                      <span className="inline-flex items-center gap-2">
+                                        {key}
+                                        {yieldSourceAffected ? (
+                                          <Badge
+                                            variant="secondary"
+                                            className="h-5 px-1.5 text-[10px] font-normal text-amber-950 bg-amber-200/80 dark:bg-amber-900/60 dark:text-amber-100"
+                                          >
+                                            yield path
+                                          </Badge>
+                                        ) : null}
+                                      </span>
+                                    </TableCell>
                                     <TableCell className="text-muted-foreground text-sm max-w-[180px] break-all">
                                       {formatDisplayValue(curVal)}
                                     </TableCell>

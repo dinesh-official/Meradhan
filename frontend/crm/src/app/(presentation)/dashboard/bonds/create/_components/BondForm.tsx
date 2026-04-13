@@ -296,7 +296,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
         recordDate: initialData.recordDate
           ? parseApiDateStringToLocalDate(String(initialData.recordDate))
           : undefined,
-        recordDays: initialData.recordDays ?? undefined,
+        recordDays:
+          initialData.recordDays != null && Number.isFinite(initialData.recordDays)
+            ? Math.round(Number(initialData.recordDays))
+            : 0,
         imDocumentLink: initialData.imDocumentLink || undefined,
         exchangeListedOn:
           (initialData.exchangeListedOn as BondFormData["exchangeListedOn"]) ||
@@ -342,6 +345,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         isOngoingDeal: false,
         ignoreAutoUpdate: false,
         allCouponDates: [],
+        recordDays: 0,
       },
   });
 
@@ -378,6 +382,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
 
   const [buyYieldPromptOpen, setBuyYieldPromptOpen] = useState(false);
   const [buyYieldDraft, setBuyYieldDraft] = useState("");
+  const [buyYieldError, setBuyYieldError] = useState<string | null>(null);
 
   const applyDealAutofillResult = (data: BondDealAutofillResponse) => {
     const s = data.suggested;
@@ -469,9 +474,15 @@ function BondForm({ initialData, isin }: BondFormProps) {
         applyDealAutofillResult(data);
         setBuyYieldPromptOpen(false);
         setBuyYieldDraft("");
+        setBuyYieldError(null);
       }
     },
     onError: (error: AxiosError) => {
+      setBuyYieldError(
+        (error?.response?.data as { message?: string })?.message ||
+          error?.message ||
+          "Could not save buy yield or auto-fill",
+      );
       toast.error(
         (error?.response?.data as { message: string })?.message ||
         error?.message ||
@@ -483,6 +494,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
   const onDealAutofillButtonClick = () => {
     if (!hasBondBuyYield(form.getValues("buyYield"))) {
       setBuyYieldDraft("");
+      setBuyYieldError(null);
       setBuyYieldPromptOpen(true);
       return;
     }
@@ -493,9 +505,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
     const raw = buyYieldDraft.trim().replace(/,/g, "");
     const n = parseFloat(raw);
     if (!Number.isFinite(n)) {
-      toast.error("Enter a valid buy yield (%).");
+      setBuyYieldError("Enter a valid buy yield (%).");
       return;
     }
+    setBuyYieldError(null);
     saveBuyYieldAndAutofillMutation.mutate(n);
   };
 
@@ -1184,14 +1197,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   name="recordDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Record days</FormLabel>
+                      <FormLabel>Record days *</FormLabel>
                       <FormDescription>
-                        e.g. 7, 15, 20 (days before record date)
+                        Whole calendar days relative to record date (may be negative)
                       </FormDescription>
                       <FormControl>
                         <Input
                           type="number"
-                          min={0}
                           step={1}
                           placeholder="0"
                           value={field.value ?? ""}
@@ -2092,7 +2104,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
               autoComplete="off"
               placeholder="e.g. 7.25"
               value={buyYieldDraft}
-              onChange={(e) => setBuyYieldDraft(e.target.value)}
+              aria-invalid={Boolean(buyYieldError)}
+              onChange={(e) => {
+                setBuyYieldDraft(e.target.value);
+                if (buyYieldError) setBuyYieldError(null);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -2101,6 +2117,9 @@ function BondForm({ initialData, isin }: BondFormProps) {
               }}
               disabled={saveBuyYieldAndAutofillMutation.isPending}
             />
+            {buyYieldError ? (
+              <p className="text-destructive text-xs">{buyYieldError}</p>
+            ) : null}
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button

@@ -92,7 +92,7 @@ export function bondDetailsResponseToFormData(
     recordDate: initialData.recordDate
       ? parseApiDateStringToLocalDate(String(initialData.recordDate))
       : undefined,
-    recordDays: initialData.recordDays ?? undefined,
+    recordDays: num(initialData.recordDays, 0),
     imDocumentLink: initialData.imDocumentLink || undefined,
     exchangeListedOn:
       (initialData.exchangeListedOn as BondFormData["exchangeListedOn"]) || undefined,
