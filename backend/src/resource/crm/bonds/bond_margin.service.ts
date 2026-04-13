@@ -114,7 +114,12 @@ export class BondMarginService {
     }
 
     const rows = await db.dataBase.bondMargin.findMany({
-      where: { sectorName: { in: pageSectorNames } },
+      where: {
+        AND: [
+          { sectorName: { in: pageSectorNames } },
+          ...(where ? [where] : []),
+        ],
+      },
       orderBy: [{ sectorName: "asc" }, { rating: "asc" }],
     });
 

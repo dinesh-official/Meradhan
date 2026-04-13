@@ -254,12 +254,6 @@ export class CrmOrdersController {
       accruedInterestDays = undefined;
     } else {
       const n = Number(accruedRaw);
-      if (!Number.isFinite(n) || n < 0) {
-        return res.sendResponse({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: "accruedInterestDays must be a non-negative number when provided",
-        });
-      }
       accruedInterestDays = Math.floor(n);
     }
     try {
@@ -400,16 +394,6 @@ export class CrmOrdersController {
 
     const accruedInterestDaysParam =
       body.accruedInterestDays != null ? Number(body.accruedInterestDays) : undefined;
-    if (
-      accruedInterestDaysParam == null ||
-      !Number.isFinite(accruedInterestDaysParam) ||
-      accruedInterestDaysParam < 0
-    ) {
-      return res.sendResponse({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: "accruedInterestDays must be a valid non-negative number",
-      });
-    }
 
     const settlementNumberParam =
       typeof body.settlementNumber === "string" && body.settlementNumber.trim() !== ""

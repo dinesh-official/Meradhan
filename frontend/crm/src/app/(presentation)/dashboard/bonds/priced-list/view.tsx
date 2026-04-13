@@ -11,11 +11,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import CardPagination from "@/global/elements/table/CardPagination";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FileSpreadsheet, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileSpreadsheet, Upload } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import Papa from "papaparse";
@@ -24,7 +31,7 @@ import { cn } from "@/lib/utils";
 type ListItem = {
   id: number;
   provider: string | null;
-  timestamp: string | null;
+  timestamp: string;
   isin: string;
   issuerName: string | null;
   couponRate: number | null;
@@ -44,7 +51,14 @@ type ListResponse = {
   meta: { page: number; limit: number; total: number; totalPages: number };
 };
 
-async function fetchList(params: { search: string; page: number; limit: number }) {
+async function fetchList(params: {
+  search: string;
+  page: number;
+  limit: number;
+  /** YYYY-MM-DD — UTC day filter on `timestamp` (default: today in UI) */
+  pricingDate: string;
+  sortOrder: "asc" | "desc";
+}) {
   const res = await apiClientCaller.get<{ responseData: ListResponse }>(
     "/crm/bonds/priced-list",
     {
@@ -52,6 +66,33 @@ async function fetchList(params: { search: string; page: number; limit: number }
     }
   );
   return res.data.responseData;
+}
+
+function localYmd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function addDaysYmd(ymd: string, delta: number): string {
+  const base =
+    ymd && /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd : localYmd(new Date());
+  const [y, m, d] = base.split("-").map(Number);
+  const next = new Date(y, m - 1, d);
+  next.setDate(next.getDate() + delta);
+  return localYmd(next);
+}
+
+function formatYmdLong(ymd: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return "";
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 const numberFmt = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 4 });
@@ -109,6 +150,8 @@ export default function BondPricedListView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [listDate, setListDate] = useState(() => localYmd(new Date()));
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
   const [uploadProgress, setUploadProgress] = useState<{
     percent: number;
@@ -125,15 +168,19 @@ export default function BondPricedListView() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const queryKey = useMemo(() => ["bond-priced-list", { search, page, limit }], [
-    search,
-    page,
-    limit,
-  ]);
+  useEffect(() => {
+    setPage(1);
+  }, [listDate, sortOrder]);
+
+  const queryKey = useMemo(
+    () => ["bond-priced-list", { search, page, limit, listDate, sortOrder }],
+    [search, page, limit, listDate, sortOrder],
+  );
 
   const listQuery = useQuery({
     queryKey,
-    queryFn: () => fetchList({ search, page, limit }),
+    queryFn: () =>
+      fetchList({ search, page, limit, pricingDate: listDate, sortOrder }),
   });
 
   const uploadMutation = useMutation({
@@ -270,7 +317,59 @@ export default function BondPricedListView() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+            <div className="flex min-w-0 flex-col gap-1">
+              <span className="text-xs text-muted-foreground">Filter by quote date</span>
+              <div className="flex flex-wrap items-center gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 shrink-0"
+                  aria-label="Previous day"
+                  onClick={() => setListDate((prev) => addDaysYmd(prev, -1))}
+                >
+                  <ChevronLeft className="size-4" aria-hidden />
+                </Button>
+                <Input
+                  type="date"
+                  value={listDate}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v) setListDate(v);
+                  }}
+                  className="h-9 w-[158px] shrink-0 font-mono text-sm"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 shrink-0"
+                  aria-label="Next day"
+                  onClick={() => setListDate((prev) => addDaysYmd(prev, 1))}
+                >
+                  <ChevronRight className="size-4" aria-hidden />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">{formatYmdLong(listDate)}</p>
+            </div>
+            <div className="flex flex-col gap-1 sm:min-w-[200px]">
+              <span className="text-xs text-muted-foreground">Sort by date</span>
+              <Select
+                value={sortOrder}
+                onValueChange={(v) => setSortOrder(v === "asc" ? "asc" : "desc")}
+              >
+                <SelectTrigger className="h-9 w-full sm:w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Newest first</SelectItem>
+                  <SelectItem value="asc">Oldest first</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
             <Input
               placeholder="Search by ISIN or Issuer"
@@ -299,7 +398,8 @@ export default function BondPricedListView() {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Tip: paste an ISIN for an exact-ish match, or type issuer name.
+            Rows match the stored quote calendar day (same ISIN can appear on different days). Tip: paste
+            an ISIN or type issuer name to narrow further.
           </p>
         </div>
 
@@ -423,7 +523,7 @@ export default function BondPricedListView() {
         </Dialog>
 
         <div className="w-full overflow-auto rounded-md border bg-background">
-          <table className="min-w-[1200px] w-full text-sm">
+          <table className="min-w-[1280px] w-full text-sm">
             <thead className="bg-muted/40 sticky top-0 z-10">
               <tr className="text-left">
                 <th className="px-3 py-2 font-medium text-muted-foreground">Timestamp</th>
@@ -454,8 +554,8 @@ export default function BondPricedListView() {
                       <div className="font-medium">No records found</div>
                       <div className="text-sm text-muted-foreground">
                         {search
-                          ? "Try clearing the search, or upload a newer CSV."
-                          : "Upload a CSV to start exploring the priced list."}
+                          ? "Try clearing the search or pick another day."
+                          : `No rows for ${formatYmdLong(listDate)}. Try previous/next day or upload a CSV for this date.`}
                       </div>
                     </div>
                   </td>

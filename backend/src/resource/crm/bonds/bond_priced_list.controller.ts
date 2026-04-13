@@ -28,11 +28,16 @@ export class BondPricedListController {
     const search = req.query.search?.toString();
     const page = req.query.page ? Number(req.query.page) : 1;
     const limit = req.query.limit ? Number(req.query.limit) : 25;
+    const pricingDate = req.query.pricingDate?.toString();
+    const sortRaw = req.query.sortOrder?.toString().toLowerCase();
+    const sortOrder = sortRaw === "asc" ? "asc" : "desc";
 
     const data = await this.service.listConsolidated({
       search,
       page,
       limit,
+      pricingDate,
+      sortOrder,
     });
 
     return res.sendResponse({

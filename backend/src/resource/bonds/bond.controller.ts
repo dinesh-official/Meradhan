@@ -4,6 +4,7 @@ import { BondService } from "./bond.service";
 import { HttpStatus } from "@utils/error/AppError";
 import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
+import { getBondDealAutofill } from "./bond_clac";
 
 export class BondController {
   private bondService = new BondService();
@@ -42,6 +43,57 @@ export class BondController {
       statusCode: HttpStatus.OK,
       responseData: result.pricing,
     });
+  }
+
+  /**
+   * CRM: suggested bond fields + sale price from calc service, using DB + margin/yield logic in `bond_clac`.
+   * Query: quantity, settlementDate (YYYY-MM-DD), pricingYield (optional override for “Offered / Sell” yield).
+   */
+  async getBondDealAutofill(req: Request, res: Response) {
+    const isin = req.params.isin?.toString() ?? "";
+    if (!isin) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: "Missing ISIN",
+      });
+    }
+    const quantity = req.query.quantity ? Number(req.query.quantity) : 1;
+    const settlementDate = req.query.settlementDate?.toString();
+    const pyRaw = req.query.pricingYield;
+    const pricingYield =
+      pyRaw != null && String(pyRaw).trim() !== ""
+        ? Number(pyRaw)
+        : undefined;
+    try {
+      const data = await getBondDealAutofill({
+        isin,
+        quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+        settlementDate,
+        pricingYield:
+          pricingYield != null && Number.isFinite(pricingYield)
+            ? pricingYield
+            : undefined,
+      });
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to build deal autofill";
+      if (msg.includes("not found")) {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          success: false,
+          message: msg,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: msg,
+      });
+    }
   }
 
   async filterListedBonds(req: Request, res: Response) {
