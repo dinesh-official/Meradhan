@@ -414,10 +414,6 @@ BSE Member ID: 6963`
       return null;
     }
     const accruedInterestDaysNum = Number(daysRaw);
-    if (!Number.isFinite(accruedInterestDaysNum) || accruedInterestDaysNum < 0) {
-      toast.error("No. of Days must be a valid non-negative number.");
-      return null;
-    }
     return accruedInterestDaysNum;
   };
 
@@ -764,75 +760,75 @@ BSE Member ID: 6963`
           </Card>
         ) : customerOrder?.customerProfile ? (
           <>
-          <Section title="Customer (assigned order)">
-            <InfoRow label="Name" value={`${customerOrder.customerProfile.firstName ?? ""} ${customerOrder.customerProfile.middleName ?? ""} ${customerOrder.customerProfile.lastName ?? ""}`.trim() || "—"} />
-            <InfoRow label="Email" value={customerOrder.customerProfile.emailAddress} />
-            <InfoRow label="Phone" value={customerOrder.customerProfile.phoneNo} />
-            <InfoRow label="User name" value={customerOrder.customerProfile.userName} />
-            <InfoRow label="KYC status" value={customerOrder.customerProfile.kycStatus} />
-            {customerOrder.customerProfile.bankAccounts?.length ? (
-              <>
-                <div className="py-2 border-b border-border/50 font-medium">Bank accounts</div>
-                {customerOrder.customerProfile.bankAccounts.map((acc, i) => (
-                  <div key={acc.id ?? i} className="py-2 border-b border-border/50 last:border-0 pl-2 text-muted-foreground">
-                    <div className="font-medium text-foreground">
-                      Account {i + 1} {((acc as { isPrimary?: boolean }).isPrimary) ? "(Primary)" : ""}
+            <Section title="Customer (assigned order)">
+              <InfoRow label="Name" value={`${customerOrder.customerProfile.firstName ?? ""} ${customerOrder.customerProfile.middleName ?? ""} ${customerOrder.customerProfile.lastName ?? ""}`.trim() || "—"} />
+              <InfoRow label="Email" value={customerOrder.customerProfile.emailAddress} />
+              <InfoRow label="Phone" value={customerOrder.customerProfile.phoneNo} />
+              <InfoRow label="User name" value={customerOrder.customerProfile.userName} />
+              <InfoRow label="KYC status" value={customerOrder.customerProfile.kycStatus} />
+              {customerOrder.customerProfile.bankAccounts?.length ? (
+                <>
+                  <div className="py-2 border-b border-border/50 font-medium">Bank accounts</div>
+                  {customerOrder.customerProfile.bankAccounts.map((acc, i) => (
+                    <div key={acc.id ?? i} className="py-2 border-b border-border/50 last:border-0 pl-2 text-muted-foreground">
+                      <div className="font-medium text-foreground">
+                        Account {i + 1} {((acc as { isPrimary?: boolean }).isPrimary) ? "(Primary)" : ""}
+                      </div>
+                      {(() => {
+                        const bank = acc as Record<string, unknown>;
+                        return (
+                          <>
+                            <div>Account Holder Name: {formatVal(getPreferredValue(bank, ["accountHolderName", "holderName", "beneficiaryName", "name"]))}</div>
+                            <div>Bank Account Type: {formatVal(getPreferredValue(bank, ["bankAccountType", "accountType", "type"]))}</div>
+                            <div>Account Number: {formatVal(getPreferredValue(bank, ["accountNo", "accountNumber"]))}</div>
+                            <div>Ifsc Code: {formatVal(getPreferredValue(bank, ["ifscCode", "ifsc"]))}</div>
+                            <div>Bank Name: {formatVal(getPreferredValue(bank, ["bankName"]))}</div>
+                            <div>Branch: {formatVal(getPreferredValue(bank, ["branch", "branchName"]))}</div>
+                          </>
+                        );
+                      })()}
                     </div>
-                    {(() => {
-                      const bank = acc as Record<string, unknown>;
-                      return (
-                        <>
-                          <div>Account Holder Name: {formatVal(getPreferredValue(bank, ["accountHolderName", "holderName", "beneficiaryName", "name"]))}</div>
-                          <div>Bank Account Type: {formatVal(getPreferredValue(bank, ["bankAccountType", "accountType", "type"]))}</div>
-                          <div>Account Number: {formatVal(getPreferredValue(bank, ["accountNo", "accountNumber"]))}</div>
-                          <div>Ifsc Code: {formatVal(getPreferredValue(bank, ["ifscCode", "ifsc"]))}</div>
-                          <div>Bank Name: {formatVal(getPreferredValue(bank, ["bankName"]))}</div>
-                          <div>Branch: {formatVal(getPreferredValue(bank, ["branch", "branchName"]))}</div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                ))}
-              </>
-            ) : null}
-            {customerOrder.customerProfile.dematAccounts?.length ? (
-              <>
-                <div className="py-2 border-b border-border/50 font-medium mt-2">Demat accounts</div>
-                {customerOrder.customerProfile.dematAccounts.map((d, i) => (
-                  <div key={d.id ?? i} className="py-2 border-b border-border/50 last:border-0 pl-2 text-muted-foreground">
-                    <div className="font-medium text-foreground">
-                      Demat {i + 1} {((d as { isPrimary?: boolean }).isPrimary) ? "(Primary)" : ""}
+                  ))}
+                </>
+              ) : null}
+              {customerOrder.customerProfile.dematAccounts?.length ? (
+                <>
+                  <div className="py-2 border-b border-border/50 font-medium mt-2">Demat accounts</div>
+                  {customerOrder.customerProfile.dematAccounts.map((d, i) => (
+                    <div key={d.id ?? i} className="py-2 border-b border-border/50 last:border-0 pl-2 text-muted-foreground">
+                      <div className="font-medium text-foreground">
+                        Demat {i + 1} {((d as { isPrimary?: boolean }).isPrimary) ? "(Primary)" : ""}
+                      </div>
+                      {(() => {
+                        const demat = d as Record<string, unknown>;
+                        return (
+                          <>
+                            <div>Depository Name: {formatVal(getPreferredValue(demat, ["depositoryName", "depository", "dpName"]))}</div>
+                            <div>Dp Id: {formatVal(getPreferredValue(demat, ["dpId"]))}</div>
+                            <div>Client Id: {formatVal(getPreferredValue(demat, ["clientId", "benId"]))}</div>
+                            <div>Account Type: {formatVal(getPreferredValue(demat, ["accountType", "type"]))}</div>
+                            <div>Depository Participant Name: {formatVal(getPreferredValue(demat, ["depositoryParticipantName", "dpName", "participantName"]))}</div>
+                            <div>Primary Pan Number: {formatVal(getPreferredValue(demat, ["primaryPanNumber", "panNumber", "panCardNo"]))}</div>
+                            <div>Account Holder Name: {formatVal(getPreferredValue(demat, ["accountHolderName", "holderName", "name"]))}</div>
+                          </>
+                        );
+                      })()}
                     </div>
-                    {(() => {
-                      const demat = d as Record<string, unknown>;
-                      return (
-                        <>
-                          <div>Depository Name: {formatVal(getPreferredValue(demat, ["depositoryName", "depository", "dpName"]))}</div>
-                          <div>Dp Id: {formatVal(getPreferredValue(demat, ["dpId"]))}</div>
-                          <div>Client Id: {formatVal(getPreferredValue(demat, ["clientId", "benId"]))}</div>
-                          <div>Account Type: {formatVal(getPreferredValue(demat, ["accountType", "type"]))}</div>
-                          <div>Depository Participant Name: {formatVal(getPreferredValue(demat, ["depositoryParticipantName", "dpName", "participantName"]))}</div>
-                          <div>Primary Pan Number: {formatVal(getPreferredValue(demat, ["primaryPanNumber", "panNumber", "panCardNo"]))}</div>
-                          <div>Account Holder Name: {formatVal(getPreferredValue(demat, ["accountHolderName", "holderName", "name"]))}</div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                ))}
-              </>
-            ) : null}
-          </Section>
-          {customerOrder?.orderNumber ? (
-            <Section title="MeraDhan identifiers">
-              <InfoRow label="MeraDhan Order ID" value={customerOrder.orderNumber} />
-              <InfoRow
-                label="MeraDhan Deal ID"
-                value={
-                  (customerOrder.metadata as { dealId?: string } | undefined)?.dealId ?? "—"
-                }
-              />
+                  ))}
+                </>
+              ) : null}
             </Section>
-          ) : null}
+            {customerOrder?.orderNumber ? (
+              <Section title="MeraDhan identifiers">
+                <InfoRow label="MeraDhan Order ID" value={customerOrder.orderNumber} />
+                <InfoRow
+                  label="MeraDhan Deal ID"
+                  value={
+                    (customerOrder.metadata as { dealId?: string } | undefined)?.dealId ?? "—"
+                  }
+                />
+              </Section>
+            ) : null}
           </>
         ) : (
           <Card>

@@ -1,7 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Prisma } from "@databases/generated/prisma/postgres";
 import { db } from "@core/database/database";
 import * as xlsx from "xlsx";
 import moment from "moment";
+
+/** `YYYY-MM-DD` → [start, end) in UTC for `timestamptz` / `timestamp` filters */
+function utcDayRangeFromYmd(ymd: string | undefined): { gte: Date; lt: Date } | undefined {
+  if (!ymd?.trim()) return undefined;
+  const s = ymd.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return undefined;
+  const y = Number(s.slice(0, 4));
+  const mo = Number(s.slice(5, 7)) - 1;
+  const d = Number(s.slice(8, 10));
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return undefined;
+  const gte = new Date(Date.UTC(y, mo, d));
+  const lt = new Date(Date.UTC(y, mo, d + 1));
+  return { gte, lt };
+}
 
 function isDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
@@ -56,6 +71,74 @@ function sanitizeJsonValue(value: unknown): any {
   return value;
 }
 
+/**
+ * Upsert key `(isin, timestamp)`: use full DATE+TIME when present; otherwise UTC midnight
+ * from a parseable DATE-only cell (same calendar day as legacy `quoteDate` behavior).
+ */
+/** Align with PostgreSQL `TIMESTAMP(3)` (ms precision) for stable `(isin, timestamp)` upserts. */
+function normalizeTimestampForDb(d: Date): Date {
+  return new Date(Math.trunc(d.getTime()));
+}
+
+function consolidatedTimestampFromParts(
+  timestamp: Date | null,
+  dateRaw: string | null,
+): Date | null {
+  if (timestamp && !Number.isNaN(timestamp.getTime())) {
+    return normalizeTimestampForDb(timestamp);
+  }
+  if (dateRaw?.trim()) {
+    const d = parseDate(dateRaw.trim(), [
+      "YYYY-MM-DD",
+      "DD-MM-YYYY",
+      "DD/MM/YYYY",
+      "DD/MM/YY",
+      "DD-MMM-YYYY",
+    ]);
+    if (d && !Number.isNaN(d.getTime())) {
+      return normalizeTimestampForDb(
+        new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())),
+      );
+    }
+  }
+  return null;
+}
+
+type ConsolidatedRowPayload = {
+  provider: string | null;
+  dateRaw: string | null;
+  timeRaw: string | null;
+  timestamp: Date;
+  isin: string;
+  issuerName: string | null;
+  couponRate: number | null;
+  maturityDate: Date | null;
+  yield: number | null;
+  currency: string | null;
+  faceValue: number | null;
+  quantity: string | null;
+  rating: string | null;
+  ratingAgency: string | null;
+  price: number | null;
+  dirtyPrice: number | null;
+  cleanPrice: number | null;
+  accruedInterest: number | null;
+  taxFree: boolean | null;
+  isListed: string | null;
+  raw: any;
+  updatedAt: Date;
+};
+
+/** Same ISIN + same instant must appear once; last row wins (avoids P2002 from parallel duplicate creates). */
+function dedupeConsolidatedRows(rows: ConsolidatedRowPayload[]): ConsolidatedRowPayload[] {
+  const map = new Map<string, ConsolidatedRowPayload>();
+  for (const row of rows) {
+    const k = `${row.isin}\0${row.timestamp.getTime()}`;
+    map.set(k, row);
+  }
+  return [...map.values()];
+}
+
 export class BondPricedListService {
   async upsertConsolidatedRow(row: any) {
     const provider = row["PROVIDER"] || null;
@@ -87,6 +170,13 @@ export class BondPricedListService {
       throw new Error("Missing ISIN in row");
     }
 
+    const timestampResolved = consolidatedTimestampFromParts(timestamp, dateRaw);
+    if (!timestampResolved) {
+      throw new Error(
+        "Cannot determine timestamp: need DATE + TIMESTAMP columns, or a parseable DATE cell.",
+      );
+    }
+
     const issuerName = row["ISSUER_NAME"] || null;
 
     const maturityDate = parseDate(row["MATURITY"], [
@@ -101,7 +191,7 @@ export class BondPricedListService {
       provider,
       dateRaw,
       timeRaw,
-      timestamp,
+      timestamp: timestampResolved,
       isin,
       issuerName,
       couponRate: toFloat(row["COUPON"]),
@@ -123,12 +213,39 @@ export class BondPricedListService {
     };
 
     await db.dataBase.bondPricedListConsolidated.upsert({
-      where: { isin },
+      where: {
+        bond_priced_list_consolidated_isin_timestamp_key: {
+          isin,
+          timestamp: timestampResolved,
+        },
+      },
       create: record,
-      update: record,
+      update: {
+        provider: record.provider,
+        dateRaw: record.dateRaw,
+        timeRaw: record.timeRaw,
+        timestamp: record.timestamp,
+        issuerName: record.issuerName,
+        couponRate: record.couponRate,
+        maturityDate: record.maturityDate,
+        yield: record.yield,
+        currency: record.currency,
+        faceValue: record.faceValue,
+        quantity: record.quantity,
+        rating: record.rating,
+        ratingAgency: record.ratingAgency,
+        price: record.price,
+        dirtyPrice: record.dirtyPrice,
+        cleanPrice: record.cleanPrice,
+        accruedInterest: record.accruedInterest,
+        taxFree: record.taxFree,
+        isListed: record.isListed,
+        raw: record.raw,
+        updatedAt: record.updatedAt,
+      },
     });
 
-    return { isin };
+    return { isin, timestamp: timestampResolved };
   }
 
   async bulkUploadConsolidatedCsv(filePath: string) {
@@ -170,6 +287,9 @@ export class BondPricedListService {
         const isin = String(row["ISIN"] || "").trim();
         if (!isin) return null;
 
+        const timestampResolved = consolidatedTimestampFromParts(timestamp, dateRaw);
+        if (!timestampResolved) return null;
+
         const issuerName = row["ISSUER_NAME"] || null;
 
         const maturityDate = parseDate(row["MATURITY"], [
@@ -184,7 +304,7 @@ export class BondPricedListService {
           provider,
           dateRaw,
           timeRaw,
-          timestamp,
+          timestamp: timestampResolved,
           isin,
           issuerName,
           couponRate: toFloat(row["COUPON"]),
@@ -206,95 +326,99 @@ export class BondPricedListService {
           updatedAt: new Date(),
         };
       })
-      .filter(Boolean) as any[];
+      .filter(Boolean) as ConsolidatedRowPayload[];
 
-    if (data.length === 0) {
+    const deduped = dedupeConsolidatedRows(data);
+
+    if (deduped.length === 0) {
       return { inserted: 0 };
     }
 
-    // ISIN is unique. If the ISIN already exists, update it.
-    // Chunking keeps DB load reasonable for large files.
+    // Upsert on (isin, timestamp): same ISIN at another instant is a new row.
+    // Sequential upserts within a chunk avoid P2002 when duplicate keys were concurrent inserts.
     const chunkSize = 250;
-    const concurrency = 8;
     let processed = 0;
 
-    for (let i = 0; i < data.length; i += chunkSize) {
-      const chunk = data.slice(i, i + chunkSize);
-      const inFlight: Promise<unknown>[] = [];
-
+    for (let i = 0; i < deduped.length; i += chunkSize) {
+      const chunk = deduped.slice(i, i + chunkSize);
       for (const row of chunk) {
-        inFlight.push(
-          db.dataBase.bondPricedListConsolidated.upsert({
-            where: { isin: row.isin },
-            create: row,
-            update: {
-              provider: row.provider,
-              dateRaw: row.dateRaw,
-              timeRaw: row.timeRaw,
+        await db.dataBase.bondPricedListConsolidated.upsert({
+          where: {
+            bond_priced_list_consolidated_isin_timestamp_key: {
+              isin: row.isin,
               timestamp: row.timestamp,
-              issuerName: row.issuerName,
-              couponRate: row.couponRate,
-              maturityDate: row.maturityDate,
-              yield: row.yield,
-              currency: row.currency,
-              faceValue: row.faceValue,
-              quantity: row.quantity,
-              rating: row.rating,
-              ratingAgency: row.ratingAgency,
-              price: row.price,
-              dirtyPrice: row.dirtyPrice,
-              cleanPrice: row.cleanPrice,
-              accruedInterest: row.accruedInterest,
-              taxFree: row.taxFree,
-              isListed: row.isListed,
-              raw: row.raw,
-              updatedAt: new Date(),
             },
-          })
-        );
-
-        if (inFlight.length >= concurrency) {
-          await Promise.all(inFlight);
-          inFlight.length = 0;
-        }
+          },
+          create: row,
+          update: {
+            provider: row.provider,
+            dateRaw: row.dateRaw,
+            timeRaw: row.timeRaw,
+            timestamp: row.timestamp,
+            issuerName: row.issuerName,
+            couponRate: row.couponRate,
+            maturityDate: row.maturityDate,
+            yield: row.yield,
+            currency: row.currency,
+            faceValue: row.faceValue,
+            quantity: row.quantity,
+            rating: row.rating,
+            ratingAgency: row.ratingAgency,
+            price: row.price,
+            dirtyPrice: row.dirtyPrice,
+            cleanPrice: row.cleanPrice,
+            accruedInterest: row.accruedInterest,
+            taxFree: row.taxFree,
+            isListed: row.isListed,
+            raw: row.raw,
+            updatedAt: new Date(),
+          },
+        });
+        processed += 1;
       }
-
-      if (inFlight.length > 0) {
-        await Promise.all(inFlight);
-      }
-      processed += chunk.length;
     }
 
-    return { inserted: processed };
+    return { inserted: processed, skippedDuplicateRows: data.length - deduped.length };
   }
 
   async listConsolidated(params: {
     search?: string;
     page: number;
     limit: number;
+    /** `YYYY-MM-DD` — UTC calendar day filter on `timestamp` */
+    pricingDate?: string;
+    /** Sort by date fields: newest first (`desc`) or oldest first (`asc`) */
+    sortOrder?: "asc" | "desc";
   }) {
     const page = Math.max(1, params.page);
     const limit = Math.min(200, Math.max(1, params.limit));
     const skip = (page - 1) * limit;
     const search = params.search?.trim();
+    const dayRange = utcDayRangeFromYmd(params.pricingDate);
+    const dir: Prisma.SortOrder = params.sortOrder === "asc" ? "asc" : "desc";
 
-    const where =
-      search && search.length > 0
-        ? {
-            OR: [
-              { isin: { contains: search, mode: "insensitive" as const } },
-              {
-                issuerName: { contains: search, mode: "insensitive" as const },
-              },
-            ],
-          }
-        : {};
+    const filters: Prisma.BondPricedListConsolidatedWhereInput[] = [];
+    if (dayRange) {
+      filters.push({
+        timestamp: { gte: dayRange.gte, lt: dayRange.lt },
+      });
+    }
+    if (search && search.length > 0) {
+      filters.push({
+        OR: [
+          { isin: { contains: search, mode: "insensitive" } },
+          { issuerName: { contains: search, mode: "insensitive" } },
+        ],
+      });
+    }
+    const where: Prisma.BondPricedListConsolidatedWhereInput =
+      filters.length > 0 ? { AND: filters } : {};
 
     const [total, items] = await Promise.all([
       db.dataBase.bondPricedListConsolidated.count({ where }),
       db.dataBase.bondPricedListConsolidated.findMany({
         where,
-        orderBy: [{ timestamp: "desc" }, { id: "desc" }],
+        orderBy: [{ timestamp: dir }, { id: dir }],
         skip,
         take: limit,
         select: {

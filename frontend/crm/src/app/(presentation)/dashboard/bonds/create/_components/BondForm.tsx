@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import {
   Select,
   SelectContent,
@@ -27,20 +29,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { appSchema } from "@root/schema";
 import apiGateway from "@root/apiGateway";
+import type { BondDealAutofillResponse } from "@root/apiGateway";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "nextjs-toploader/app";
 import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { AxiosError } from "axios";
-import { format } from "date-fns";
+import {
+  formatDateForDateInput,
+  parseApiDateStringToLocalDate,
+} from "../../_utils/bondCalendarDates";
 
 const OPTIONAL_ENUM_NONE = "__none__" as const;
+
+/** Buy yield must exist before deal autofill — margin/yield chain needs it on the bond row. */
+function hasBondBuyYield(v: unknown): boolean {
+  if (v == null || v === "") return false;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n);
+}
 
 type BondFormData = z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>;
 const bondSchema = appSchema.bonds
@@ -232,18 +253,18 @@ function BondForm({ initialData, isin }: BondFormProps) {
         isListed: initialData.isListed as "YES" | "NO" | "UNKNOWN",
         ratingAgencyName: initialData.ratingAgencyName || undefined,
         ratingDate: initialData.ratingDate
-          ? new Date(initialData.ratingDate)
+          ? parseApiDateStringToLocalDate(String(initialData.ratingDate))
           : undefined,
         categories: initialData.categories || [],
         sectorName: initialData.sectorName || undefined,
         dateOfAllotment: initialData.dateOfAllotment
-          ? new Date(initialData.dateOfAllotment)
+          ? parseApiDateStringToLocalDate(String(initialData.dateOfAllotment))
           : undefined,
         redemptionDate: initialData.redemptionDate
-          ? new Date(initialData.redemptionDate)
+          ? parseApiDateStringToLocalDate(String(initialData.redemptionDate))
           : undefined,
         maturityDate: initialData.maturityDate
-          ? new Date(initialData.maturityDate)
+          ? parseApiDateStringToLocalDate(String(initialData.maturityDate))
           : undefined,
         sortedAt: initialData.sortedAt || 0,
         isConvertedDeal: initialData.isConvertedDeal || undefined,
@@ -251,33 +272,40 @@ function BondForm({ initialData, isin }: BondFormProps) {
         lastTradePrice: initialData.lastTradePrice || undefined,
         lastTradeYield: initialData.lastTradeYield || undefined,
         nextCouponDate: initialData.nextCouponDate
-          ? new Date(initialData.nextCouponDate)
+          ? parseApiDateStringToLocalDate(String(initialData.nextCouponDate))
           : undefined,
         modeOfIssuance: initialData.modeOfIssuance || undefined,
         couponType: initialData.couponType || undefined,
         buyYield: initialData.buyYield || undefined,
         providerName: initialData.providerName || undefined,
         providerInterestDate: initialData.providerInterestDate
-          ? new Date(initialData.providerInterestDate)
+          ? parseApiDateStringToLocalDate(String(initialData.providerInterestDate))
           : undefined,
         providerQuantity: initialData.providerQuantity || undefined,
         isOngoingDeal: initialData.isOngoingDeal ?? false,
         providerPrice: initialData.providerPrice || undefined,
         ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
         allCouponDates: (initialData.allCouponDates ?? []).map((d) =>
-          typeof d === "string" ? new Date(d) : new Date(d),
+          typeof d === "string"
+            ? parseApiDateStringToLocalDate(d)
+            : d instanceof Date
+              ? d
+              : parseApiDateStringToLocalDate(String(d)),
         ),
         dayConvention: initialData.dayConvention || undefined,
         recordDate: initialData.recordDate
-          ? new Date(initialData.recordDate)
+          ? parseApiDateStringToLocalDate(String(initialData.recordDate))
           : undefined,
-        recordDays: initialData.recordDays ?? undefined,
+        recordDays:
+          initialData.recordDays != null && Number.isFinite(initialData.recordDays)
+            ? Math.round(Number(initialData.recordDays))
+            : 0,
         imDocumentLink: initialData.imDocumentLink || undefined,
         exchangeListedOn:
           (initialData.exchangeListedOn as BondFormData["exchangeListedOn"]) ||
           undefined,
         lastCouponDate: initialData.lastCouponDate
-          ? new Date(initialData.lastCouponDate)
+          ? parseApiDateStringToLocalDate(String(initialData.lastCouponDate))
           : undefined,
         isPerpetual: initialData.isPerpetual ?? undefined,
         bondType:
@@ -291,9 +319,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
         sellPrice: initialData.sellPrice ?? undefined,
         redemptionType: initialData.redemptionType || undefined,
         startDate: initialData.startDate
-          ? new Date(initialData.startDate)
+          ? parseApiDateStringToLocalDate(String(initialData.startDate))
           : undefined,
-        endDate: initialData.endDate ? new Date(initialData.endDate) : undefined,
+        endDate: initialData.endDate
+          ? parseApiDateStringToLocalDate(String(initialData.endDate))
+          : undefined,
       }
       : {
         isin: "",
@@ -315,6 +345,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         isOngoingDeal: false,
         ignoreAutoUpdate: false,
         allCouponDates: [],
+        recordDays: 0,
       },
   });
 
@@ -339,7 +370,6 @@ function BondForm({ initialData, isin }: BondFormProps) {
       toast.success("Bond updated successfully");
       queryClient.invalidateQueries({ queryKey: ["bonds"] });
       queryClient.invalidateQueries({ queryKey: ["bond", isin] });
-      router.push("/dashboard/bonds");
     },
     onError: (error: AxiosError) => {
       toast.error(
@@ -350,6 +380,138 @@ function BondForm({ initialData, isin }: BondFormProps) {
     },
   });
 
+  const [buyYieldPromptOpen, setBuyYieldPromptOpen] = useState(false);
+  const [buyYieldDraft, setBuyYieldDraft] = useState("");
+  const [buyYieldError, setBuyYieldError] = useState<string | null>(null);
+
+  const applyDealAutofillResult = (data: BondDealAutofillResponse) => {
+    const s = data.suggested;
+    /** Parse `YYYY-MM-DD` as local calendar date (avoids UTC off-by-one in some timezones). */
+    const toDate = (ymd: string | null | undefined) => {
+      if (!ymd?.trim()) return undefined;
+      const s = ymd.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const [y, m, d] = s.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        return Number.isNaN(dt.getTime()) ? undefined : dt;
+      }
+      const d = new Date(s);
+      return Number.isNaN(d.getTime()) ? undefined : d;
+    };
+    const md = toDate(s.maturityDate);
+    if (md) form.setValue("maturityDate", md);
+    const allot = toDate(s.dateOfAllotment);
+    if (allot) form.setValue("dateOfAllotment", allot);
+    const lc = toDate(s.lastCouponDate);
+    if (lc) form.setValue("lastCouponDate", lc);
+    const nc = toDate(s.nextCouponDate);
+    if (nc) form.setValue("nextCouponDate", nc);
+    const rec = toDate(s.recordDate ?? undefined);
+    if (rec) form.setValue("recordDate", rec);
+    if (s.recordDays != null && Number.isFinite(s.recordDays)) {
+      form.setValue("recordDays", s.recordDays);
+    }
+    if (s.dayConvention != null) form.setValue("dayConvention", s.dayConvention);
+    if (s.interestPaymentFrequency) {
+      form.setValue(
+        "interestPaymentFrequency",
+        s.interestPaymentFrequency as BondFormData["interestPaymentFrequency"],
+      );
+    }
+    if (s.interestPaymentMode) {
+      form.setValue(
+        "interestPaymentMode",
+        s.interestPaymentMode as BondFormData["interestPaymentMode"],
+      );
+    }
+    if (Number.isFinite(s.faceValue)) form.setValue("faceValue", s.faceValue);
+    if (Number.isFinite(s.couponRate)) form.setValue("couponRate", s.couponRate);
+    if (s.buyYield != null && Number.isFinite(s.buyYield)) {
+      form.setValue("buyYield", s.buyYield);
+    }
+    if (Number.isFinite(s.yield)) form.setValue("yield", s.yield);
+    if (s.sellPrice != null && Number.isFinite(s.sellPrice)) {
+      form.setValue("sellPrice", s.sellPrice);
+    }
+    const sale = s.sellPrice != null ? `₹${s.sellPrice.toLocaleString("en-IN", { maximumFractionDigits: 4 })}` : "—";
+    const dueHint = s.dueDate ? ` Due ${s.dueDate}.` : "";
+    toast.success(
+      `Filled: sale price (clean) ${sale}, yield ${Number.isFinite(s.yield) ? `${s.yield}%` : "—"}.${dueHint} Settlement ₹${data.pricing.settlementAmount?.toLocaleString("en-IN") ?? "—"
+      }, accrued ₹${data.pricing.totalAccruedInterest?.toLocaleString("en-IN") ?? "—"} (${data.sources.yieldSource} yield).`,
+    );
+  };
+
+  const autofillErrorToast = (error: AxiosError) => {
+    toast.error(
+      (error?.response?.data as { message: string })?.message ||
+      error?.message ||
+      "Could not auto-fill from calculator",
+    );
+  };
+
+  const dealAutofillMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiCaller.getBondDealAutofill(isin!, { quantity: 1 });
+      return res.responseData;
+    },
+    onSuccess: (data) => {
+      if (data) applyDealAutofillResult(data);
+    },
+    onError: autofillErrorToast,
+  });
+
+  const saveBuyYieldAndAutofillMutation = useMutation({
+    mutationFn: async (buyYield: number) => {
+      await apiCaller.updateBond(isin!, { ...form.getValues(), buyYield });
+      form.setValue("buyYield", buyYield);
+      await queryClient.invalidateQueries({ queryKey: ["bond", isin] });
+      await queryClient.invalidateQueries({ queryKey: ["bonds"] });
+      const res = await apiCaller.getBondDealAutofill(isin!, { quantity: 1 });
+      return res.responseData;
+    },
+    onSuccess: (data) => {
+      if (data) {
+        applyDealAutofillResult(data);
+        setBuyYieldPromptOpen(false);
+        setBuyYieldDraft("");
+        setBuyYieldError(null);
+      }
+    },
+    onError: (error: AxiosError) => {
+      setBuyYieldError(
+        (error?.response?.data as { message?: string })?.message ||
+          error?.message ||
+          "Could not save buy yield or auto-fill",
+      );
+      toast.error(
+        (error?.response?.data as { message: string })?.message ||
+        error?.message ||
+        "Could not save buy yield or auto-fill",
+      );
+    },
+  });
+
+  const onDealAutofillButtonClick = () => {
+    if (!hasBondBuyYield(form.getValues("buyYield"))) {
+      setBuyYieldDraft("");
+      setBuyYieldError(null);
+      setBuyYieldPromptOpen(true);
+      return;
+    }
+    dealAutofillMutation.mutate();
+  };
+
+  const submitBuyYieldThenAutofill = () => {
+    const raw = buyYieldDraft.trim().replace(/,/g, "");
+    const n = parseFloat(raw);
+    if (!Number.isFinite(n)) {
+      setBuyYieldError("Enter a valid buy yield (%).");
+      return;
+    }
+    setBuyYieldError(null);
+    saveBuyYieldAndAutofillMutation.mutate(n);
+  };
+
   const onSubmit = (data: BondFormData) => {
     if (isUpdateMode) {
       updateMutation.mutate(data);
@@ -358,12 +520,57 @@ function BondForm({ initialData, isin }: BondFormProps) {
     }
   };
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    dealAutofillMutation.isPending ||
+    saveBuyYieldAndAutofillMutation.isPending;
+
+  const dealAutofillBusy =
+    dealAutofillMutation.isPending || saveBuyYieldAndAutofillMutation.isPending;
 
   return (
     <div className="container mx-auto py-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {isUpdateMode && isin ? (
+            <Card className="border-primary/25 bg-primary/5 shadow-sm">
+              <CardHeader className="space-y-3 pb-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">Pricing calculator — auto-fill</CardTitle>
+                    <CardDescription className="text-sm leading-relaxed">
+                      One click loads data from your database (schedules, margins, consolidated yield) and calls{" "}
+                      <span className="font-medium text-foreground">calc.meradhan.co</span> to compute{" "}
+                      <span className="font-medium text-foreground">offered yield</span>,{" "}
+                      <span className="font-medium text-foreground">last &amp; next coupon dates</span>, and{" "}
+                      <span className="font-medium text-foreground">sale price (clean, ₹)</span>,{" "}
+                      <span className="font-medium text-foreground">record date</span> &amp;{" "}
+                      <span className="font-medium text-foreground">record days</span> (from DB / reference when
+                      available) — plus settlement and accrued amounts in the toast.{" "}
+                      <span className="font-medium text-foreground">Buy yield</span> must be set on the bond; if it is
+                      missing, you will be asked to enter it first (it is saved, then this runs again).
+                    </CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    disabled={dealAutofillBusy}
+                    className="h-11 shrink-0 gap-2 px-5 font-medium shadow-sm"
+                    onClick={onDealAutofillButtonClick}
+                    aria-label="Auto-fill bond fields from calculator and database"
+                  >
+                    {dealAutofillBusy ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Sparkles className="size-4" aria-hidden />
+                    )}
+                    Fill sale price &amp; dates
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          ) : null}
+
           {/* Basic Information */}
           <Card>
             <CardHeader>
@@ -527,14 +734,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Issue Price *</FormLabel>
                       <FormControl>
-                        <Input
+                        <DecimalInput
                           {...field}
-                          type="number"
-                          step="0.01"
+                          value={field.value}
+                          onChange={field.onChange}
+                          emptyAsZero
                           placeholder="0.00"
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -549,14 +754,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Face Value *</FormLabel>
                       <FormControl>
-                        <Input
+                        <DecimalInput
                           {...field}
-                          type="number"
-                          step="0.01"
+                          value={field.value}
+                          onChange={field.onChange}
+                          emptyAsZero
                           placeholder="0.00"
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -571,16 +774,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Stamp Duty Percentage (%)</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
+                          emptyAsZero
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? parseFloat(e.target.value) : 0
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -595,14 +794,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Coupon Rate (%) *</FormLabel>
                       <FormControl>
-                        <Input
+                        <DecimalInput
                           {...field}
-                          type="number"
-                          step="0.01"
+                          value={field.value}
+                          onChange={field.onChange}
+                          emptyAsZero
                           placeholder="0.00"
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -617,18 +814,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Total Issue Size</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -826,14 +1016,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? new Date(e.target.value) : null
+                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
                             )
                           }
                         />
@@ -855,14 +1043,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? new Date(e.target.value) : null
+                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
                             )
                           }
                         />
@@ -884,14 +1070,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? new Date(e.target.value) : null
+                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
                             )
                           }
                         />
@@ -928,10 +1112,20 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           rows={4}
                           placeholder={"2026-06-15\n2026-12-15"}
                           value={(field.value ?? [])
-                            .filter(
-                              (d) => !Number.isNaN(new Date(d).getTime()),
+                            .filter((d) => {
+                              const x =
+                                d instanceof Date
+                                  ? d
+                                  : parseApiDateStringToLocalDate(String(d));
+                              return !Number.isNaN(x.getTime());
+                            })
+                            .map((d) =>
+                              formatDateForDateInput(
+                                d instanceof Date
+                                  ? d
+                                  : parseApiDateStringToLocalDate(String(d)),
+                              ),
                             )
-                            .map((d) => format(new Date(d), "yyyy-MM-dd"))
                             .join("\n")}
                           onChange={(e) => {
                             const lines = e.target.value
@@ -940,7 +1134,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                               .filter(Boolean);
                             const dates: Date[] = [];
                             for (const line of lines) {
-                              const dt = new Date(line);
+                              const dt = parseApiDateStringToLocalDate(line);
                               if (!Number.isNaN(dt.getTime())) dates.push(dt);
                             }
                             field.onChange(dates);
@@ -981,15 +1175,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
                               e.target.value
-                                ? new Date(e.target.value)
+                                ? parseApiDateStringToLocalDate(e.target.value)
                                 : null,
                             )
                           }
@@ -1005,14 +1197,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   name="recordDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Record days</FormLabel>
+                      <FormLabel>Record days *</FormLabel>
                       <FormDescription>
-                        e.g. 7, 15, 20 (days before record date)
+                        Whole calendar days relative to record date (may be negative)
                       </FormDescription>
                       <FormControl>
                         <Input
                           type="number"
-                          min={0}
                           step={1}
                           placeholder="0"
                           value={field.value ?? ""}
@@ -1097,15 +1288,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
                               e.target.value
-                                ? new Date(e.target.value)
+                                ? parseApiDateStringToLocalDate(e.target.value)
                                 : null,
                             )
                           }
@@ -1260,18 +1449,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Buy price</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : parseFloat(e.target.value),
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1286,18 +1468,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Sell price</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : parseFloat(e.target.value),
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1334,15 +1509,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
                               e.target.value
-                                ? new Date(e.target.value)
+                                ? parseApiDateStringToLocalDate(e.target.value)
                                 : null,
                             )
                           }
@@ -1364,15 +1537,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
                               e.target.value
-                                ? new Date(e.target.value)
+                                ? parseApiDateStringToLocalDate(e.target.value)
                                 : null,
                             )
                           }
@@ -1556,14 +1727,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? new Date(e.target.value) : null
+                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
                             )
                           }
                         />
@@ -1612,18 +1781,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Yield - Offered / Sell (%)</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1638,18 +1800,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Last Trade Price</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1664,18 +1819,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Last Trade Yield (%)</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1690,18 +1838,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Buy Yield (%)</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1720,14 +1861,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? new Date(e.target.value) : null
+                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
                             )
                           }
                         />
@@ -1811,18 +1950,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Provider Price</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
+                        <DecimalInput
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
                           placeholder="0.00"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1867,14 +1999,12 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           type="date"
                           value={
                             field.value
-                              ? new Date(field.value as unknown as string)
-                                .toISOString()
-                                .split("T")[0]
+                              ? formatDateForDateInput(field.value as Date)
                               : ""
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? new Date(e.target.value) : null
+                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
                             )
                           }
                         />
@@ -1954,6 +2084,66 @@ function BondForm({ initialData, isin }: BondFormProps) {
           </div>
         </form>
       </Form>
+
+      <Dialog open={buyYieldPromptOpen} onOpenChange={setBuyYieldPromptOpen}>
+        <DialogContent className="sm:max-w-md" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Enter buy yield</DialogTitle>
+            <DialogDescription>
+              Buy yield is required before we can run the pricing calculator. It will be saved on this bond, then sale price and dates will load.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-1">
+            <label htmlFor="buy-yield-autofill" className="text-sm font-medium leading-none">
+              Buy yield (%)
+            </label>
+            <Input
+              id="buy-yield-autofill"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder="e.g. 7.25"
+              value={buyYieldDraft}
+              aria-invalid={Boolean(buyYieldError)}
+              onChange={(e) => {
+                setBuyYieldDraft(e.target.value);
+                if (buyYieldError) setBuyYieldError(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  submitBuyYieldThenAutofill();
+                }
+              }}
+              disabled={saveBuyYieldAndAutofillMutation.isPending}
+            />
+            {buyYieldError ? (
+              <p className="text-destructive text-xs">{buyYieldError}</p>
+            ) : null}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setBuyYieldPromptOpen(false)}
+              disabled={saveBuyYieldAndAutofillMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={submitBuyYieldThenAutofill}
+              disabled={saveBuyYieldAndAutofillMutation.isPending}
+              className="gap-2"
+            >
+              {saveBuyYieldAndAutofillMutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : null}
+              Save &amp; fill
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

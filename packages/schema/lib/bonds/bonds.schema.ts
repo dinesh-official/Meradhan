@@ -140,7 +140,9 @@ export const bondCreateUpdateSchema = z.object({
   allCouponDates: z.array(z.coerce.date()).default([]),
   dayConvention: z.string().trim().optional().nullable(),
   recordDate: z.coerce.date().optional().nullable(),
-  recordDays: z.number().int().nonnegative().optional().nullable(),
+  recordDays: z
+    .number({ error: () => "Record days is required" })
+    .int("Record days must be a whole number"),
   imDocumentLink: z.string().trim().optional().nullable(),
   exchangeListedOn: STOCK_EXCHANGE_ENUM.optional().nullable(),
   lastCouponDate: z.coerce.date().optional().nullable(),
