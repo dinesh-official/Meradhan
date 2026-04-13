@@ -140,11 +140,10 @@ export default function BondMarginManagementView() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const queryKey = useMemo(() => ["bond-margins", { search, page, limit }], [
-    search,
-    page,
-    limit,
-  ]);
+  const queryKey = useMemo(
+    () => ["bond-margins", { search, page, limit }],
+    [search, page, limit],
+  );
 
   const listQuery = useQuery({
     queryKey,
@@ -293,7 +292,7 @@ export default function BondMarginManagementView() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:min-w-0 lg:flex-1">
             <Input
               placeholder="Search by sector or rating"
               value={searchInput}
@@ -372,7 +371,7 @@ export default function BondMarginManagementView() {
                     }
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 md:col-span-2">
                   <div className="text-xs text-muted-foreground">Rating</div>
                   <Select
                     value={ratingSelectValue(createDraft, "create")}
@@ -489,7 +488,7 @@ export default function BondMarginManagementView() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="w-full overflow-auto border-t">
-                      <table className="min-w-[1200px] w-full text-sm">
+                      <table className="min-w-[1100px] w-full text-sm">
                         <thead className="bg-muted/40">
                           <tr className="text-left">
                             <th className="px-3 py-2 font-medium text-muted-foreground">

@@ -39,6 +39,7 @@ import customerProfileRoutes from "@resource/customer/profile/customer.profile.r
 import watchListRoutes from "@resource/customer/watchlist/watchlist.routes";
 import portfolioRoutes from "@resource/customer/portfolio/portfolio.routes";
 import logger from "@utils/logger/logger";
+import { calculateBondMargin } from "@resource/bonds/bond_clac";
 const monitoring = new PrometheusMonitorProvider();
 const response_time_monitor = new PrometheusResponseTimeMonitor();
 
@@ -104,10 +105,14 @@ server.addRoutes([
 // Connect to databases and start server
 checkConnectToDatabases()
   .then(async () => {
+
+    const data = await calculateBondMargin({ isin: "INE0NES07279", quantity: 1 });
+    console.log(data);
     logger.logInfo("All databases connected successfully.");
     server.start();
   })
   .catch((error) => {
+    console.log(error);
     logger.logError("Error connecting to databases:", error);
     process.exit(1);
   });

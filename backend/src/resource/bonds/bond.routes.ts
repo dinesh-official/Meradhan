@@ -30,6 +30,10 @@ bondRoute.get("/api/bonds/:isin/order-pricing", (req, res) =>
   bondController.getBondOrderPricing(req, res),
 );
 
+bondRoute.get("/api/bonds/:isin/deal-autofill", (req, res) =>
+  bondController.getBondDealAutofill(req, res),
+);
+
 bondRoute.get("/api/bonds/:isin", (req, res) =>
   bondController.getBondDetails(req, res)
 );

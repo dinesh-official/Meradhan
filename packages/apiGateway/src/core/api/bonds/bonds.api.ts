@@ -4,6 +4,7 @@ import type { appSchema } from "@root/schema";
 import type { AxiosRequestConfig } from "axios";
 import type { BaseResponseData } from "../../../types/base";
 import type {
+  BondDealAutofillResponse,
   BondDetailResponse,
   BondOrderPricingResponse,
   LatestBondsResponse,
@@ -46,6 +47,25 @@ export class BondsApi {
       `/bonds/${isin}/order-pricing`,
       { ...config, params: { quantity } },
       
+    );
+    return response.data;
+  }
+
+  /**
+   * CRM: auto-fill bond update form fields + sale price from DB, margin rules, and calc.meradhan.co.
+   */
+  public async getBondDealAutofill(
+    isin: string,
+    params?: {
+      quantity?: number;
+      settlementDate?: string;
+      pricingYield?: number;
+    },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<BaseResponseData<BondDealAutofillResponse>>(
+      `/bonds/${isin}/deal-autofill`,
+      { ...config, params },
     );
     return response.data;
   }
