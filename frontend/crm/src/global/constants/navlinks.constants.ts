@@ -235,6 +235,12 @@ export const NAV_ITEMS: NavItem[] = [
         allowOnly: ["view:bonds"],
       },
       {
+        label: "Auto-update (sale-ready)",
+        path: "/dashboard/bonds/auto-update",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
         label: "Consolidated Management",
         path: "/dashboard/bonds/priced-list",
         module: "bonds",

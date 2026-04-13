@@ -23,6 +23,10 @@ export class BondQueryBuilder {
     this.addMaturityFilter(conditions, filters.maturity);
     this.addCouponFilter(conditions, filters.coupon);
 
+    if (filters.allowForPurchase === true) {
+      conditions.push({ allowForPurchase: { equals: true } });
+    }
+
     // Combine all conditions with AND logic
     return conditions.length > 0 ? { AND: conditions } : {};
   }

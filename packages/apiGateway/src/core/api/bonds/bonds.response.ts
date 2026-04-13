@@ -98,3 +98,59 @@ export interface BondOrderPricingData {
 }
 
 export type BondOrderPricingResponse = BaseResponseData<BondOrderPricingData>;
+
+/** Snapshot from calc.meradhan.co (fields used by CRM bond autofill). */
+export interface BondCalcServiceSnapshot {
+  accrued_days: number;
+  final_price: string;
+  final_yield: string;
+  final_yield_raw: number;
+  total_ai: string;
+  settlement_amount: string;
+  principal_amount: string;
+  total_consideration: string;
+  settle_dt: string;
+  [key: string]: unknown;
+}
+
+export interface BondDealAutofillSuggestions {
+  maturityDate: string | null;
+  dateOfAllotment: string | null;
+  lastCouponDate: string;
+  nextCouponDate: string;
+  recordDate: string | null;
+  recordDays: number | null;
+  /** Reference coupon-payment `dueDate` (YYYY-MM-DD) */
+  dueDate: string | null;
+  dayConvention: string | null;
+  interestPaymentFrequency: string;
+  interestPaymentMode: string;
+  faceValue: number;
+  couponRate: number;
+  buyYield: number | null;
+  yield: number;
+  sellPrice: number | null;
+}
+
+export interface BondDealAutofillResponse {
+  isin: string;
+  quantity: number;
+  sources: {
+    usedReferenceMetadata: boolean;
+    usedCouponSchedule: boolean;
+    yieldSource: "override" | "consolidated" | "bonds";
+  };
+  suggested: BondDealAutofillSuggestions;
+  pricing: {
+    finalPrice: number | null;
+    finalYieldRaw: number;
+    settlementAmount: number | null;
+    totalAccruedInterest: number | null;
+    principalAmount: number | null;
+    totalConsideration: number | null;
+    calc: BondCalcServiceSnapshot;
+  };
+  margin: Record<string, unknown>;
+}
+
+export type BondDealAutofillApiResponse = BaseResponseData<BondDealAutofillResponse>;

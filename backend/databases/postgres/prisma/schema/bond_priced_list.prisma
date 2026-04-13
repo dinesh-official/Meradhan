@@ -5,10 +5,10 @@ model BondPricedListConsolidated {
   provider  String?
   dateRaw   String?
   timeRaw   String?
-  timestamp DateTime?
+  timestamp DateTime
 
-  /// Identifiers
-  isin       String @unique
+  /// Identifiers — upsert key = `isin` + `timestamp` (full quote instant)
+  isin       String
   issuerName String?
 
   /// Frequently queried fields (normalized where possible)
@@ -37,6 +37,7 @@ model BondPricedListConsolidated {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([isin, timestamp], name: "bond_priced_list_consolidated_isin_timestamp_key")
   @@index([issuerName])
   @@index([timestamp])
   @@map("bond_priced_list_consolidated")
@@ -46,7 +47,7 @@ model BondReferenceMetadata {
   id Int @id @default(autoincrement())
 
   /// One metadata record per ISIN from the reference file
-  isin       String @unique
+  isin       String  @unique
   issuerName String?
 
   issueDate    DateTime?
@@ -63,8 +64,8 @@ model BondReferenceMetadata {
   seniority                String?
   natureOfInstrument       String?
 
-  callableFlag String?
-  puttableFlag String?
+  callableFlag  String?
+  puttableFlag  String?
   dayConvention String?
 
   previousCouponDate DateTime?
@@ -80,10 +81,10 @@ model BondReferenceMetadata {
   bloombergSecurityType String?
   marketSector          String?
 
-  faceValue    Float?
-  issuePrice   Float?
-  bondCategory String?
-  taxable      String?
+  faceValue      Float?
+  issuePrice     Float?
+  bondCategory   String?
+  taxable        String?
   modeOfIssuance String?
 
   yield           Float?
@@ -104,11 +105,11 @@ model BondReferenceMetadata {
 model BondReferenceCouponPaymentDate {
   id Int @id @default(autoincrement())
 
-  isin String
+  isin                 String
   interestPaymentDates String?
-  recordDays Float?
-  recordDate DateTime?
-  dueDate DateTime?
+  recordDays           Float?
+  recordDate           DateTime?
+  dueDate              DateTime?
 
   raw Json?
 
@@ -124,13 +125,13 @@ model BondReferenceCouponPaymentDate {
 model BondReferenceRedemptionSchedule {
   id Int @id @default(autoincrement())
 
-  isin String
-  redemptionType String?
-  startDate DateTime?
-  endDate DateTime?
-  price Float?
-  amount Float?
-  optionType String?
+  isin            String
+  redemptionType  String?
+  startDate       DateTime?
+  endDate         DateTime?
+  price           Float?
+  amount          Float?
+  optionType      String?
   optionFrequency String?
 
   raw Json?
@@ -143,4 +144,3 @@ model BondReferenceRedemptionSchedule {
   @@index([endDate])
   @@map("bond_reference_redemption_schedule")
 }
-

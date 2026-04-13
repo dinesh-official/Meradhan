@@ -1,0 +1,850 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
+import {
+  AlertCircle,
+  Check,
+  ChevronRight,
+  Loader2,
+  RefreshCw,
+  Sparkles,
+  X,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { DecimalInput } from "@/components/ui/decimal-input";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import { cn } from "@/lib/utils";
+import apiGateway from "@root/apiGateway";
+import type {
+  BondDealAutofillResponse,
+  BondDetailsResponse,
+} from "@root/apiGateway";
+
+import { formatDateForDateInput } from "../_utils/bondCalendarDates";
+import {
+  bondDetailsResponseToFormData,
+  type BondFormData,
+} from "../_utils/bondDetailsToFormData";
+import {
+  AUTOFILL_MERGE_KEYS,
+  defaultIncludeMap,
+  mergeAutofillIntoForm,
+  type AutofillMergeKey,
+} from "./mergeAutofillIntoForm";
+
+const api = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+
+function formatDisplayValue(v: unknown): string {
+  if (v == null || v === "") return "—";
+  if (v instanceof Date) return formatDateForDateInput(v);
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "—";
+  return String(v);
+}
+
+function autofillWarnings(res: BondDealAutofillResponse): string[] {
+  const w: string[] = [];
+  const { sources } = res;
+  if (!sources.usedReferenceMetadata) {
+    w.push(
+      "Reference metadata was not used — dates and some fields may come only from the bond row or calculator.",
+    );
+  }
+  if (!sources.usedCouponSchedule) {
+    w.push(
+      "Coupon payment schedule was not applied — last/next coupon may be synthetic or from the bond row.",
+    );
+  }
+  return w;
+}
+
+type DraftSuggestions = BondDealAutofillResponse["suggested"];
+
+type BondRowModel = {
+  bond: BondDetailsResponse;
+  formBase: BondFormData;
+  open: boolean;
+  autofill: BondDealAutofillResponse | null;
+  draft: DraftSuggestions | null;
+  include: Record<AutofillMergeKey, boolean>;
+  error: string | null;
+  /** Row highlight only after Accept (save), Reject, or failed save — not after Load autofill. */
+  outcome: "idle" | "success" | "error" | "rejected";
+};
+
+function createInitialRow(b: BondDetailsResponse): BondRowModel {
+  return {
+    bond: b,
+    formBase: bondDetailsResponseToFormData(b),
+    open: false,
+    autofill: null,
+    draft: null,
+    include: defaultIncludeMap(),
+    error: null,
+    outcome: "idle",
+  };
+}
+
+export default function BondAutoUpdateView() {
+  const queryClient = useQueryClient();
+  const [rows, setRows] = useState<Record<string, BondRowModel>>({});
+  const rowsRef = useRef(rows);
+  useEffect(() => {
+    rowsRef.current = rows;
+  }, [rows]);
+
+  /** Sequential bulk load / save progress (one bond at a time). */
+  const [bulkProgress, setBulkProgress] = useState<{
+    kind: "load" | "save";
+    current: number;
+    total: number;
+  } | null>(null);
+
+  const listQuery = useQuery({
+    queryKey: ["bonds", "auto-update", "sale-ready"],
+    queryFn: async () => {
+      const { responseData } = await api.getListedBonds({
+        filters: { allowForPurchase: true },
+        params: { page: 1, limit: 200, category: "all", all: "YES" },
+      });
+      return responseData;
+    },
+  });
+
+  const ensureRow = useCallback(
+    (b: BondDetailsResponse) => {
+      setRows((prev) => {
+        if (prev[b.isin]) return prev;
+        return {
+          ...prev,
+          [b.isin]: {
+            bond: b,
+            formBase: bondDetailsResponseToFormData(b),
+            open: false,
+            autofill: null,
+            draft: null,
+            include: defaultIncludeMap(),
+            error: null,
+            outcome: "idle",
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const list = listQuery.data?.data;
+    if (!list?.length) return;
+    for (const b of list) ensureRow(b);
+  }, [listQuery.data, ensureRow]);
+
+  const autofillMutation = useMutation({
+    mutationFn: async (isin: string) => {
+      const res = await api.getBondDealAutofill(isin, { quantity: 1 });
+      return { isin, data: res.responseData };
+    },
+    onSuccess: ({ isin, data }) => {
+      if (!data) {
+        setRows((prev) => {
+          const cur = prev[isin];
+          if (!cur) return prev;
+          return {
+            ...prev,
+            [isin]: {
+              ...cur,
+              error: "No autofill payload returned",
+              autofill: null,
+              draft: null,
+            },
+          };
+        });
+        toast.error("No autofill payload returned");
+        return;
+      }
+      setRows((prev) => {
+        const cur = prev[isin];
+        if (!cur) return prev;
+        return {
+          ...prev,
+          [isin]: {
+            ...cur,
+            autofill: data,
+            draft: { ...data.suggested },
+            include: defaultIncludeMap(),
+            error: null,
+            open: true,
+          },
+        };
+      });
+      toast.success(`Autofill loaded for ${isin}`);
+    },
+    onError: (err: AxiosError, isin: string) => {
+      const msg =
+        (err?.response?.data as { message?: string })?.message ||
+        err?.message ||
+        "Autofill failed";
+      setRows((prev) => {
+        const cur = prev[isin];
+        if (!cur) return prev;
+        return {
+          ...prev,
+          [isin]: { ...cur, error: msg, autofill: null, draft: null },
+        };
+      });
+      toast.error(msg);
+    },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async ({ isin, payload }: { isin: string; payload: BondFormData }) => {
+      await api.updateBond(isin, payload);
+      const detail = await api.getBondDetailsByIsin(isin);
+      if (!detail.responseData) {
+        throw new Error("Bond details missing after update");
+      }
+      return { isin, bond: detail.responseData };
+    },
+    onSuccess: ({ isin, bond }) => {
+      toast.success(`Bond ${isin} updated`);
+      queryClient.invalidateQueries({ queryKey: ["bonds"] });
+      queryClient.invalidateQueries({ queryKey: ["bond", isin] });
+      listQuery.refetch();
+      setRows((prev) => {
+        const cur = prev[isin];
+        if (!cur) return prev;
+        const nextBond = bond;
+        return {
+          ...prev,
+          [isin]: {
+            ...cur,
+            bond: nextBond,
+            formBase: bondDetailsResponseToFormData(nextBond),
+            autofill: null,
+            draft: null,
+            error: null,
+            include: defaultIncludeMap(),
+            outcome: "success",
+          },
+        };
+      });
+    },
+    onError: (
+      err: AxiosError,
+      variables: { isin: string; payload: BondFormData } | undefined,
+    ) => {
+      const isin = variables?.isin;
+      if (isin) {
+        setRows((prev) => {
+          const cur = prev[isin];
+          if (!cur) return prev;
+          return { ...prev, [isin]: { ...cur, outcome: "error" } };
+        });
+      }
+      toast.error(
+        (err?.response?.data as { message?: string })?.message ||
+          err?.message ||
+          "Update failed",
+      );
+    },
+  });
+
+  const loadAllAutofill = useCallback(async () => {
+    const list = listQuery.data?.data;
+    if (!list?.length) return;
+    setBulkProgress({ kind: "load", current: 0, total: list.length });
+    let ok = 0;
+    let fail = 0;
+    for (let i = 0; i < list.length; i++) {
+      const b = list[i]!;
+      setBulkProgress({ kind: "load", current: i + 1, total: list.length });
+      try {
+        const res = await api.getBondDealAutofill(b.isin, { quantity: 1 });
+        if (!res.responseData) {
+          fail++;
+          setRows((prev) => {
+            const cur = prev[b.isin] ?? createInitialRow(b);
+            return {
+              ...prev,
+              [b.isin]: {
+                ...cur,
+                error: "No autofill payload",
+                autofill: null,
+                draft: null,
+              },
+            };
+          });
+          continue;
+        }
+        ok++;
+        const data = res.responseData;
+        setRows((prev) => {
+          const cur = prev[b.isin] ?? createInitialRow(b);
+          return {
+            ...prev,
+            [b.isin]: {
+              ...cur,
+              autofill: data,
+              draft: { ...data.suggested },
+              include: defaultIncludeMap(),
+              error: null,
+              open: true,
+            },
+          };
+        });
+      } catch (e) {
+        fail++;
+        const err = e as AxiosError;
+        const msg =
+          (err?.response?.data as { message?: string })?.message ||
+          err?.message ||
+          "Autofill failed";
+        setRows((prev) => {
+          const cur = prev[b.isin] ?? createInitialRow(b);
+          return {
+            ...prev,
+            [b.isin]: {
+              ...cur,
+              error: msg,
+              autofill: null,
+              draft: null,
+            },
+          };
+        });
+      }
+    }
+    setBulkProgress(null);
+    toast.success(`Load all finished: ${ok} succeeded, ${fail} failed.`);
+  }, [listQuery]);
+
+  const saveAllWithAutofill = useCallback(async () => {
+    const list = listQuery.data?.data ?? [];
+    const isins = list
+      .map((b) => b.isin)
+      .filter((isin) => {
+        const r = rowsRef.current[isin];
+        return r?.draft != null && r?.autofill != null;
+      });
+    if (isins.length === 0) {
+      toast.info(
+        "No bonds with loaded autofill to save. Use “Load all” or per-bond “Load autofill” first.",
+      );
+      return;
+    }
+    setBulkProgress({ kind: "save", current: 0, total: isins.length });
+    let ok = 0;
+    let fail = 0;
+    for (let i = 0; i < isins.length; i++) {
+      const isin = isins[i]!;
+      setBulkProgress({ kind: "save", current: i + 1, total: isins.length });
+      const row = rowsRef.current[isin];
+      if (!row?.draft) {
+        fail++;
+        continue;
+      }
+      try {
+        const payload = mergeAutofillIntoForm(row.formBase, row.draft, row.include);
+        await api.updateBond(isin, payload);
+        const detail = await api.getBondDetailsByIsin(isin);
+        if (!detail.responseData) throw new Error("Bond details missing after update");
+        const fresh = detail.responseData;
+        setRows((prev) => ({
+          ...prev,
+          [isin]: {
+            ...(prev[isin] ?? row),
+            bond: fresh,
+            formBase: bondDetailsResponseToFormData(fresh),
+            autofill: null,
+            draft: null,
+            error: null,
+            include: defaultIncludeMap(),
+            outcome: "success",
+          },
+        }));
+        queryClient.invalidateQueries({ queryKey: ["bonds"] });
+        queryClient.invalidateQueries({ queryKey: ["bond", isin] });
+        ok++;
+      } catch {
+        fail++;
+        setRows((prev) => {
+          const cur = prev[isin];
+          if (!cur) return prev;
+          return { ...prev, [isin]: { ...cur, outcome: "error" } };
+        });
+      }
+    }
+    await listQuery.refetch();
+    setBulkProgress(null);
+    toast.success(`Save all finished: ${ok} saved, ${fail} failed.`);
+  }, [listQuery, queryClient]);
+
+  const updateDraft = (
+    isin: string,
+    patch: Partial<DraftSuggestions>,
+  ) => {
+    setRows((prev) => {
+      const cur = prev[isin];
+      if (!cur?.draft) return prev;
+      return {
+        ...prev,
+        [isin]: { ...cur, draft: { ...cur.draft, ...patch } },
+      };
+    });
+  };
+
+  const toggleInclude = (isin: string, key: AutofillMergeKey, checked: boolean) => {
+    setRows((prev) => {
+      const cur = prev[isin];
+      if (!cur) return prev;
+      return {
+        ...prev,
+        [isin]: { ...cur, include: { ...cur.include, [key]: checked } },
+      };
+    });
+  };
+
+  const rejectRow = (isin: string) => {
+    setRows((prev) => {
+      const cur = prev[isin];
+      if (!cur) return prev;
+      return {
+        ...prev,
+        [isin]: {
+          ...cur,
+          autofill: null,
+          draft: null,
+          error: null,
+          include: defaultIncludeMap(),
+          outcome: "rejected",
+        },
+      };
+    });
+  };
+
+  const acceptRow = (isin: string) => {
+    const cur = rows[isin];
+    if (!cur?.draft) return;
+    const payload = mergeAutofillIntoForm(cur.formBase, cur.draft, cur.include);
+    saveMutation.mutate({ isin, payload });
+  };
+
+  const setOpen = (isin: string, open: boolean) => {
+    setRows((prev) => {
+      const cur = prev[isin];
+      if (!cur) return prev;
+      return { ...prev, [isin]: { ...cur, open } };
+    });
+  };
+
+  const bonds = useMemo(
+    () => listQuery.data?.data ?? [],
+    [listQuery.data?.data],
+  );
+  const readyToSaveCount = useMemo(
+    () =>
+      bonds.filter(
+        (b) => rows[b.isin]?.draft != null && rows[b.isin]?.autofill != null,
+      ).length,
+    [bonds, rows],
+  );
+  const bulkBusy = bulkProgress != null;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-muted-foreground text-sm max-w-3xl">
+          Bonds with <span className="font-medium text-foreground">Allow for purchase</span> (sale-ready).
+          Load deal autofill from the same API as the bond form, review each field, uncheck what you do not want
+          to overwrite, edit values, then accept to save or reject to discard.
+        </p>
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:flex-wrap sm:justify-end">
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            className="shrink-0 gap-2"
+            onClick={() => void loadAllAutofill()}
+            disabled={
+              bulkBusy ||
+              listQuery.isFetching ||
+              listQuery.isLoading ||
+              bonds.length === 0
+            }
+          >
+            {bulkProgress?.kind === "load" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Sparkles className="size-4" />
+            )}
+            Load all
+          </Button>
+          <AllowOnlyView permissions={["edit:bonds"]}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={() => void saveAllWithAutofill()}
+              disabled={
+                bulkBusy ||
+                listQuery.isFetching ||
+                readyToSaveCount === 0
+              }
+            >
+              {bulkProgress?.kind === "save" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Check className="size-4" />
+              )}
+              Save all ({readyToSaveCount})
+            </Button>
+          </AllowOnlyView>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0 gap-2"
+            onClick={() => listQuery.refetch()}
+            disabled={listQuery.isFetching || bulkBusy}
+          >
+            {listQuery.isFetching ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <RefreshCw className="size-4" />
+            )}
+            Refresh list
+          </Button>
+        </div>
+      </div>
+
+      {bulkProgress && (
+        <p className="text-muted-foreground text-sm">
+          {bulkProgress.kind === "load" ? "Loading autofill" : "Saving bonds"}{" "}
+          <span className="font-mono font-medium text-foreground">
+            {bulkProgress.current}/{bulkProgress.total}
+          </span>{" "}
+          (one ISIN at a time)
+        </p>
+      )}
+
+      {listQuery.isError && (
+        <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertCircle className="size-4 shrink-0" />
+          Could not load bonds. Check your connection and try again.
+        </div>
+      )}
+
+      {listQuery.isLoading ? (
+        <div className="flex justify-center py-16 text-muted-foreground">
+          <Loader2 className="size-8 animate-spin" />
+        </div>
+      ) : bonds.length === 0 ? (
+        <p className="text-muted-foreground text-sm py-8 text-center">
+          No bonds are currently marked as available for purchase. Enable “Allow for purchase” on a bond to see it
+          here.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {bonds.map((b) => {
+            const row = rows[b.isin];
+            const model = row ?? {
+              bond: b,
+              formBase: bondDetailsResponseToFormData(b),
+              open: false,
+              autofill: null,
+              draft: null,
+              include: defaultIncludeMap(),
+              error: null,
+              outcome: "idle" as const,
+            };
+            const loading =
+              (autofillMutation.isPending && autofillMutation.variables === b.isin) ||
+              bulkBusy;
+            const saving =
+              (saveMutation.isPending && saveMutation.variables?.isin === b.isin) ||
+              bulkBusy;
+
+            return (
+              <Collapsible
+                key={b.isin}
+                open={model.open}
+                onOpenChange={(o) => setOpen(b.isin, o)}
+                className={cn(
+                  "rounded-lg border transition-colors",
+                  (model.outcome ?? "idle") === "success" &&
+                    "border-emerald-500/50 bg-emerald-50 dark:border-emerald-600/40 dark:bg-emerald-950/35",
+                  (model.outcome ?? "idle") === "error" &&
+                    "border-red-500/50 bg-red-50 dark:border-red-600/40 dark:bg-red-950/35",
+                  (model.outcome ?? "idle") === "rejected" &&
+                    "border-amber-500/50 bg-amber-50 dark:border-amber-600/40 dark:bg-amber-950/35",
+                  (model.outcome ?? "idle") === "idle" && "bg-card",
+                )}
+              >
+                <div className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-left">
+                    <ChevronRight
+                      className={cn(
+                        "text-muted-foreground size-4 shrink-0 transition-transform",
+                        model.open && "rotate-90",
+                      )}
+                    />
+                    <div>
+                      <div className="font-medium">{b.bondName}</div>
+                      <div className="text-muted-foreground text-xs font-mono">{b.isin}</div>
+                    </div>
+                  </CollapsibleTrigger>
+                  <div className="flex flex-wrap items-center gap-2 pl-7 sm:pl-0">
+                    <Button type="button" size="sm" variant="secondary" className="gap-1" asChild>
+                      <Link href={`/dashboard/bonds/update/${encodeURIComponent(b.isin)}`}>Edit bond</Link>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="gap-1"
+                      disabled={loading}
+                      onClick={() => {
+                        ensureRow(b);
+                        autofillMutation.mutate(b.isin);
+                      }}
+                    >
+                      {loading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="size-4" />
+                      )}
+                      Load autofill
+                    </Button>
+                  </div>
+                </div>
+
+                {model.error && (
+                  <div className="mx-4 mb-3 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                    <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                    {model.error}
+                  </div>
+                )}
+
+                <CollapsibleContent>
+                  <div className="border-t px-4 pb-4 pt-2 space-y-4">
+                    {!model.autofill || !model.draft ? (
+                      <p className="text-muted-foreground text-sm py-4">
+                        Click <span className="font-medium text-foreground">Load autofill</span> to fetch calculator
+                        suggestions and reference-backed fields for this ISIN.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="outline">Yield: {model.autofill.sources.yieldSource}</Badge>
+                          <Badge variant={model.autofill.sources.usedReferenceMetadata ? "default" : "secondary"}>
+                            Reference metadata {model.autofill.sources.usedReferenceMetadata ? "on" : "off"}
+                          </Badge>
+                          <Badge variant={model.autofill.sources.usedCouponSchedule ? "default" : "secondary"}>
+                            Coupon schedule {model.autofill.sources.usedCouponSchedule ? "on" : "off"}
+                          </Badge>
+                        </div>
+                        {model.autofill.sources.yieldSource !== "consolidated" ? (
+                          <div
+                            className="rounded-lg border-2 border-amber-500/80 bg-amber-100/90 px-3 py-3 text-sm shadow-sm dark:border-amber-500/60 dark:bg-amber-950/50 dark:text-amber-50"
+                            role="status"
+                          >
+                            <p className="font-semibold text-amber-950 dark:text-amber-100">
+                              Not the consolidated priced list
+                            </p>
+                            <p className="mt-1 text-amber-900/95 dark:text-amber-100/90">
+                              Yield for this autofill is sourced from{" "}
+                              {model.autofill.sources.yieldSource === "override" ? (
+                                <span className="font-medium">your pricing yield override</span>
+                              ) : (
+                                <span className="font-medium">the bond / margin record</span>
+                              )}
+                              , not from the consolidated priced list. Verify before accepting.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="rounded-md border border-emerald-300/60 bg-emerald-50/90 px-3 py-2 text-sm text-emerald-950 dark:border-emerald-700/50 dark:bg-emerald-950/30 dark:text-emerald-100">
+                            <span className="font-medium">Consolidated priced list</span> — yield follows
+                            consolidated / margin rules.
+                          </div>
+                        )}
+                        {autofillWarnings(model.autofill).map((w) => (
+                          <p key={w} className="text-amber-700 dark:text-amber-400 text-sm flex gap-2">
+                            <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                            {w}
+                          </p>
+                        ))}
+                        {model.draft.dueDate && (
+                          <p className="text-muted-foreground text-sm">
+                            Reference <span className="font-medium">due date</span> (informational, not saved on bond):{" "}
+                            <span className="font-mono">{model.draft.dueDate}</span>
+                          </p>
+                        )}
+
+                        <div className="rounded-md border overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="w-10">Use</TableHead>
+                                <TableHead>Field</TableHead>
+                                <TableHead>Current (saved)</TableHead>
+                                <TableHead>New (editable)</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {AUTOFILL_MERGE_KEYS.map((key) => {
+                                const curVal = model.formBase[key as keyof BondFormData];
+                                const draft = model.draft!;
+                                const sug = draft[key as keyof DraftSuggestions];
+                                return (
+                                  <TableRow key={key}>
+                                    <TableCell>
+                                      <Checkbox
+                                        checked={model.include[key]}
+                                        onCheckedChange={(c) =>
+                                          toggleInclude(b.isin, key, Boolean(c))
+                                        }
+                                        aria-label={`Apply ${key}`}
+                                      />
+                                    </TableCell>
+                                    <TableCell className="font-mono text-xs whitespace-nowrap">{key}</TableCell>
+                                    <TableCell className="text-muted-foreground text-sm max-w-[180px] break-all">
+                                      {formatDisplayValue(curVal)}
+                                    </TableCell>
+                                    <TableCell>
+                                      {key === "recordDays" ? (
+                                        <Input
+                                          type="number"
+                                          className="h-9 font-mono text-sm"
+                                          value={sug == null ? "" : String(sug)}
+                                          onChange={(e) => {
+                                            const v = e.target.value;
+                                            updateDraft(b.isin, {
+                                              recordDays:
+                                                v === "" ? null : Math.round(parseFloat(v)),
+                                            });
+                                          }}
+                                        />
+                                      ) : key === "faceValue" ||
+                                        key === "couponRate" ||
+                                        key === "buyYield" ||
+                                        key === "yield" ||
+                                        key === "sellPrice" ? (
+                                        <DecimalInput
+                                          className="h-9 font-mono text-sm"
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                  const n =
+                                                    typeof sug === "number"
+                                                      ? sug
+                                                      : Number(sug);
+                                                  return Number.isFinite(n)
+                                                    ? n
+                                                    : undefined;
+                                                })()
+                                          }
+                                          onChange={(n) =>
+                                            updateDraft(b.isin, {
+                                              [key]: n ?? null,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "dayConvention" ||
+                                        key === "interestPaymentFrequency" ||
+                                        key === "interestPaymentMode" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              [key]: e.target.value,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : (
+                                        <Input
+                                          type="date"
+                                          className="h-9 font-mono text-sm"
+                                          value={
+                                            sug != null &&
+                                            typeof sug === "string" &&
+                                            /^\d{4}-\d{2}-\d{2}$/.test(sug)
+                                              ? sug
+                                              : ""
+                                          }
+                                          onChange={(e) => {
+                                            const v = e.target.value;
+                                            updateDraft(b.isin, {
+                                              [key]: v || null,
+                                            } as Partial<DraftSuggestions>);
+                                          }}
+                                        />
+                                      )}
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 justify-end">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="gap-1"
+                            onClick={() => rejectRow(b.isin)}
+                            disabled={saving}
+                          >
+                            <X className="size-4" />
+                            Reject
+                          </Button>
+                          <AllowOnlyView permissions={["edit:bonds"]}>
+                            <Button
+                              type="button"
+                              className="gap-1"
+                              disabled={saving}
+                              onClick={() => acceptRow(b.isin)}
+                            >
+                              {saving ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <Check className="size-4" />
+                              )}
+                              Accept &amp; save
+                            </Button>
+                          </AllowOnlyView>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
