@@ -758,7 +758,7 @@ export class CrmOrdersService {
       9: "Document not received for unregistered participant",
     }
 
-    if (settleOrder?.settleStatus && settleOrder?.settleStatus !== 4) {
+    if (settleOrder?.settleStatus !== 4) {
       if (env.CBRICS_ENV === "PROD") {
         throw new AppError(`Settlement is not completed. Please wait for the settlement to complete. ${validSettlementStatus[settleOrder?.settleStatus as keyof typeof validSettlementStatus] ?? "Unknown"}`, {
           statusCode: HttpStatus.BAD_REQUEST,
