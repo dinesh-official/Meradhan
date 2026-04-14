@@ -849,7 +849,7 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: settleOrder?.payoutTime,
+          settlementDate: settleOrder?.payoutTime || settleOrder?.modSettleDate,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
