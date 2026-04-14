@@ -510,39 +510,6 @@ export class CrmOrdersService {
     }
 
     const settleOrder = await this.getRfqByOrderNumber(orderNumber);
-    // Settlement status
-    // 0 = Settlement Pending
-    // 1 = Securities Payin Done
-    // 2 = Funds Payin Done
-    // 3 = Payin Completed
-    // 4 = Payout Done Successfully
-    // 5 = Payin reversed
-    // 6 = Settle order expired
-    // 7 = Order not settleable
-    // 8 = Settlement of order cancelled
-    // 9 = Document not received for unregistered participant
-
-    const validSettlementStatus = {
-      0: "Settlement Pending",
-      1: "Securities Payin Done",
-      2: "Funds Payin Done",
-      3: "Payin Completed",
-      4: "Payout Done Successfully",
-      5: "Payin reversed",
-      6: "Settle order expired",
-      7: "Order not settleable",
-      8: "Settlement of order cancelled",
-      9: "Document not received for unregistered participant",
-    }
-
-    if (settleOrder?.settleStatus && settleOrder?.settleStatus !== 4) {
-      if (env.CBRICS_ENV === "PROD") {
-        throw new AppError(`Settlement is not completed. Please wait for the settlement to complete. [${validSettlementStatus[settleOrder?.settleStatus as keyof typeof validSettlementStatus] ?? "Unknown"}]`, {
-          statusCode: HttpStatus.BAD_REQUEST,
-          code: "SETTLEMENT_NOT_COMPLETED",
-        });
-      }
-    }
 
     const negotation = await db.dataBase.rFQNegotiation.findFirst({
       where: {
@@ -765,6 +732,41 @@ export class CrmOrdersService {
     }
 
     const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+
+    // Settlement status
+    // 0 = Settlement Pending
+    // 1 = Securities Payin Done
+    // 2 = Funds Payin Done
+    // 3 = Payin Completed
+    // 4 = Payout Done Successfully
+    // 5 = Payin reversed
+    // 6 = Settle order expired
+    // 7 = Order not settleable
+    // 8 = Settlement of order cancelled
+    // 9 = Document not received for unregistered participant
+
+    const validSettlementStatus = {
+      0: "Settlement Pending",
+      1: "Securities Payin Done",
+      2: "Funds Payin Done",
+      3: "Payin Completed",
+      4: "Payout Done Successfully",
+      5: "Payin reversed",
+      6: "Settle order expired",
+      7: "Order not settleable",
+      8: "Settlement of order cancelled",
+      9: "Document not received for unregistered participant",
+    }
+
+    if (settleOrder?.settleStatus && settleOrder?.settleStatus !== 4) {
+      if (env.CBRICS_ENV === "PROD") {
+        throw new AppError(`Settlement is not completed. Please wait for the settlement to complete. ${validSettlementStatus[settleOrder?.settleStatus as keyof typeof validSettlementStatus] ?? "Unknown"}`, {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "SETTLEMENT_NOT_COMPLETED",
+        });
+      }
+    }
+
     const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
         customerProfileDataModelId: order.customerProfileId,
