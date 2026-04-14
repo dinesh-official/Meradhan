@@ -120,6 +120,27 @@ function NseTableView({
             },
           },
           {
+            key: "date",
+            label: "Date",
+            cell(row) {
+              return row?.date ? row.date : "--";
+            },
+          },
+          {
+            key: "quoteTime",
+            label: "Quote Time",
+            cell(row) {
+              return row?.quoteTime ? row.quoteTime : "--";
+            },
+          },
+          {
+            key: "settlementDate",
+            label: "Settlement Date",
+            cell(row) {
+              return row?.settlementDate ? row.settlementDate : "--";
+            },
+          },
+          {
             key: "createdAt",
             label: "Created At",
             cell(row) {

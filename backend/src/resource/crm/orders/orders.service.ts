@@ -520,6 +520,10 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
+    console.log(rfqDetails?.date,
+      rfqDetails?.quoteTime,);
+
+
     const fallbackOrderDate =
       order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
     const orderDateForPdf = parseRfqMasterDateTime(
@@ -619,7 +623,7 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: orderDateForPdf,
+          settlementDate: rfqDetails?.settlementDate,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
@@ -849,12 +853,12 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: settleOrder?.payoutTime || settleOrder?.modSettleDate,
+          settlementDate: rfqDetails?.settlementDate || settleOrder?.modSettleDate,
+          payoutTime: settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
-          accruedInterest:
-            settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
+          accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
           accruedInterestDays: accruedInterestDaysParam,
           settlementNumber:
             settlementNumberParam ??
