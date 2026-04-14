@@ -21,6 +21,9 @@ interface OrderPdfOrderData {
     accruedInterest?: number;
     accruedInterestDays?: number;
     settlementDate?: string;
+    payoutTime?: string;
+    settlementDateTime?: string;
+    settlementType: number;
     valueDate?: string;
     lastInterestPaymentDate?: string;
     settlementNumber?: string;

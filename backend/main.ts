@@ -105,9 +105,6 @@ server.addRoutes([
 // Connect to databases and start server
 checkConnectToDatabases()
   .then(async () => {
-
-    const data = await calculateBondMargin({ isin: "INE0NES07279", quantity: 1 });
-    console.log(data);
     logger.logInfo("All databases connected successfully.");
     server.start();
   })

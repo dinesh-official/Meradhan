@@ -52,6 +52,8 @@ interface OrderData {
     /** No. of days for Accrued / Ex Interest */
     accruedInterestDays?: number;
     settlementDate?: string;
+    payoutTime?: string;
+    settlementDateTime?: string;
     valueDate?: string;
     lastInterestPaymentDate?: string;
     /** Settlement No. for page 2 */
@@ -100,14 +102,14 @@ export default function DealPage({
   // Calculate dates
   const now = new Date();
   const orderDate = orderData?.createdAt ? new Date(orderData.createdAt) : now;
-  const dealDate = orderData?.metadata?.settlementDate
+  const settlementDate = orderData?.metadata?.settlementDate
     ? new Date(orderData.metadata.settlementDate)
     : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
   const valueDate = orderData?.metadata?.valueDate
     ? new Date(orderData.metadata.valueDate)
     : bond.maturityDate
       ? new Date(bond.maturityDate)
-      : new Date(dealDate.getTime() + 24 * 60 * 60 * 1000); // Fallback: day after deal date
+      : new Date(settlementDate.getTime()); // Fallback: day after deal date
 
   // Calculate financials
   const faceValue = Number(bond.faceValue) || 1000;
@@ -250,8 +252,8 @@ ${getInterestPaymentDatesDisplay()} `,
     ],
     [
       "Date",
-      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")} `,
-      `Settlement Date: ${formatDate(orderData?.metadata?.settlementDate ? new Date(orderData.metadata.settlementDate).toISOString() : valueDate.toISOString(), "DD-MMM-YYYY")} `,
+      `Deal Date: ${formatDate(orderDate?.toISOString(), "DD-MMM-YYYY")} `,
+      `Settlement Date: ${orderData?.metadata?.settlementDate} `,
     ],
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
@@ -291,7 +293,7 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
     [
       "Settlement Date & Time",
-      formatDate(orderData?.metadata?.settlementDate ? (orderData.metadata.settlementDate)?.toString() : valueDate.toISOString(), "DD-MMM-YYYY") + " " + String(dealDate.getHours()).padStart(2, "0") + ":" + String(dealDate.getMinutes()).padStart(2, "0") + ":" + String(dealDate.getSeconds()).padStart(2, "0")
+      formatDate(orderData?.metadata?.payoutTime ? (orderData.metadata.payoutTime)?.toString() : settlementDate.toISOString(), "DD-MMM-YYYY") + " " + String(settlementDate.getHours()).padStart(2, "0") + ":" + String(settlementDate.getMinutes()).padStart(2, "0") + ":" + String(settlementDate.getSeconds()).padStart(2, "0")
     ],
   ]
 
