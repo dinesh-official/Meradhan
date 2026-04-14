@@ -858,8 +858,7 @@ export class CrmOrdersService {
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
-          accruedInterest:
-            settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
+          accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
           accruedInterestDays: accruedInterestDaysParam,
           settlementNumber:
             settlementNumberParam ??
