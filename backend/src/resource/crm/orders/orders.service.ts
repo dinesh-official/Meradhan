@@ -16,6 +16,7 @@ import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
 import { getDpName } from "dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
+import { env } from "@packages/config/src/env";
 
 /**
  * RFQ master stores `date` as DD-MMM-YYYY (e.g. 03-Apr-2026) and `quoteTime` as HH:MM or HH:MM:SS.
@@ -509,6 +510,7 @@ export class CrmOrdersService {
     }
 
     const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+
     const negotation = await db.dataBase.rFQNegotiation.findFirst({
       where: {
         tradeNumber: settleOrder?.orderNumber,
@@ -520,6 +522,10 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
+    console.log(rfqDetails?.date,
+      rfqDetails?.quoteTime,);
+
+
     const fallbackOrderDate =
       order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
     const orderDateForPdf = parseRfqMasterDateTime(
@@ -619,7 +625,9 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: orderDateForPdf,
+          settlementDate: (rfqDetails?.settlementDate || settleOrder?.modSettleDate) ?? undefined as string | undefined,
+          payoutTime: (settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate) ?? undefined as string | undefined,
+          settlementType: rfqDetails?.settlementType ?? 0,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
@@ -724,6 +732,41 @@ export class CrmOrdersService {
     }
 
     const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+
+    // Settlement status
+    // 0 = Settlement Pending
+    // 1 = Securities Payin Done
+    // 2 = Funds Payin Done
+    // 3 = Payin Completed
+    // 4 = Payout Done Successfully
+    // 5 = Payin reversed
+    // 6 = Settle order expired
+    // 7 = Order not settleable
+    // 8 = Settlement of order cancelled
+    // 9 = Document not received for unregistered participant
+
+    const validSettlementStatus = {
+      0: "Settlement Pending",
+      1: "Securities Payin Done",
+      2: "Funds Payin Done",
+      3: "Payin Completed",
+      4: "Payout Done Successfully",
+      5: "Payin reversed",
+      6: "Settle order expired",
+      7: "Order not settleable",
+      8: "Settlement of order cancelled",
+      9: "Document not received for unregistered participant",
+    }
+
+    if (settleOrder?.settleStatus && settleOrder?.settleStatus !== 4) {
+      if (env.CBRICS_ENV === "PROD") {
+        throw new AppError(`Settlement is not completed. Please wait for the settlement to complete. ${validSettlementStatus[settleOrder?.settleStatus as keyof typeof validSettlementStatus] ?? "Unknown"}`, {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "SETTLEMENT_NOT_COMPLETED",
+        });
+      }
+    }
+
     const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
         customerProfileDataModelId: order.customerProfileId,
@@ -837,6 +880,7 @@ export class CrmOrdersService {
             : Number(order.totalAmount),
         price: Number(settleOrder?.price ?? 0),
         metadata: {
+          settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
           rfqNumber: (metadata.rfqNumber as string) ?? undefined,
@@ -849,12 +893,12 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: settleOrder?.payoutTime,
+          settlementDate: rfqDetails?.settlementDate || settleOrder?.modSettleDate,
+          payoutTime: settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
-          accruedInterest:
-            settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
+          accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
           accruedInterestDays: accruedInterestDaysParam,
           settlementNumber:
             settlementNumberParam ??

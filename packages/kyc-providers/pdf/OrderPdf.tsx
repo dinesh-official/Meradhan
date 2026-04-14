@@ -21,6 +21,9 @@ interface OrderPdfOrderData {
     accruedInterest?: number;
     accruedInterestDays?: number;
     settlementDate?: string;
+    payoutTime?: string;
+    settlementDateTime?: string;
+    settlementType: number;
     valueDate?: string;
     lastInterestPaymentDate?: string;
     settlementNumber?: string;
@@ -111,7 +114,7 @@ export function OrderPdf({
   return (
     <Document >
       <Page size="A4" style={{ fontFamily: "Poppins" }}    >
-        <LogoSvgTop showAll={true} title={ releasedOrder? "ORDER RECEIPT" : "ORDER RECEIPT (DRAFT)"} />
+        <LogoSvgTop showAll={true} title={releasedOrder ? "ORDER RECEIPT" : "ORDER RECEIPT (DRAFT)"} />
         <OrdersPage
           bond={bond}
           user={user}
@@ -123,7 +126,7 @@ export function OrderPdf({
         <Footer />
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
-        <LogoSvgTop showAll={true} title={ releasedOrder? "ORDER RECEIPT" : "ORDER RECEIPT (DRAFT)"} />
+        <LogoSvgTop showAll={true} title={releasedOrder ? "ORDER RECEIPT" : "ORDER RECEIPT (DRAFT)"} />
         <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
         <Footer />
       </Page>
