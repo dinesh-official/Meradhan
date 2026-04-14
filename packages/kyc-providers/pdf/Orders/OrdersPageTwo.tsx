@@ -131,7 +131,7 @@ Mode of Pay: RTGS / NEFT / Bank Transfer`}
           <Text>
             {`CM Name: NSE Clearing Ltd.
 CM-BP ID: IN568177
-Market Type: Corporate Bond (T + 0)
+Market Type: Corporate Bond (T + 1)
 Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
           </Text>
         </View>
