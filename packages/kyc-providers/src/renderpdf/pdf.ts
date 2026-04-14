@@ -59,7 +59,7 @@ export async function generateTempOrderPdf({
     createdAt?: string;
     metadata?: { dealId?: string; rfqNumber?: string;[key: string]: unknown };
   };
-  
+
 }) {
   try {
     const dirPath = path.join(process.cwd(), "tmp-orders-pdfs");
@@ -115,6 +115,16 @@ export async function generateOrderPdfBuffer({
     metadata?: { dealId?: string; rfqNumber?: string;[key: string]: unknown };
   };
 }): Promise<Buffer> {
+
+  // console.log({
+  //   bond,
+  //   isReleased,
+  //   user,
+  //   orderId,
+  //   qun,
+  //   orderData,
+  // });
+
   const buffer = await renderToBuffer(
     OrderPdf({
       bond,
@@ -149,9 +159,18 @@ export async function generateDealPdfBuffer({
     stampDuty?: number;
     totalAmount?: number;
     createdAt?: string;
-    metadata?: { dealId?: string; rfqNumber?: string;[key: string]: unknown };
+    metadata?: { dealId?: string; rfqNumber?: string; settlementDateTime?: string;[key: string]: unknown };
   };
 }): Promise<Buffer> {
+  console.log({
+    bond,
+    orderId,
+    qun,
+    user,
+    releasedOrder: isReleased,
+    orderData,
+  });
+
   const buffer = await renderToBuffer(
     DealPdf({
       bond,
