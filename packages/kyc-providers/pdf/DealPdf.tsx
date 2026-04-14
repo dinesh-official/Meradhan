@@ -23,6 +23,7 @@ interface OrderPdfOrderData {
     settlementDate?: string;
     payoutTime?: string;
     settlementDateTime?: string;
+    settlementType: number;
     valueDate?: string;
     lastInterestPaymentDate?: string;
     settlementNumber?: string;

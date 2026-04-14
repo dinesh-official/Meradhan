@@ -53,12 +53,15 @@ interface OrderData {
     /** No. of days for Accrued / Ex Interest */
     accruedInterestDays?: number;
     settlementDate?: string;
+    payoutTime?: string;
+    settlementDateTime?: string;
     valueDate?: string;
     lastInterestPaymentDate?: string;
     /** Settlement No. for page 2 */
     settlementNumber?: string;
     interestPaymentDates?: string[];
     interestPaymentFrequencyLabel?: string;
+    settlementType: number;
     /** When true (default), Maturity Date row shows 100.0000%; when false, shows amortizedPrincipalPaymentDates */
     nonAmortizedBond?: boolean;
     amortizedPrincipalPaymentDates?: string;
