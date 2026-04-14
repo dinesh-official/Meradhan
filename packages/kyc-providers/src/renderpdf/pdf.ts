@@ -57,7 +57,7 @@ export async function generateTempOrderPdf({
     stampDuty?: number;
     totalAmount?: number;
     createdAt?: string;
-    metadata?: { dealId?: string; rfqNumber?: string;[key: string]: unknown };
+    metadata?: { dealId?: string; rfqNumber?: string; payoutTime?: string; settlementDateTime?: string; settlementType: number; settlementDate?: string;[key: string]: unknown };
   };
 
 }) {
@@ -112,7 +112,7 @@ export async function generateOrderPdfBuffer({
     stampDuty?: number;
     totalAmount?: number;
     createdAt?: string;
-    metadata?: { dealId?: string; rfqNumber?: string;[key: string]: unknown };
+    metadata?: { dealId?: string; rfqNumber?: string; payoutTime?: string; settlementDateTime?: string; settlementType: number; settlementDate?: string;[key: string]: unknown };
   };
 }): Promise<Buffer> {
 
@@ -159,7 +159,7 @@ export async function generateDealPdfBuffer({
     stampDuty?: number;
     totalAmount?: number;
     createdAt?: string;
-    metadata?: { dealId?: string; rfqNumber?: string; settlementDateTime?: string;[key: string]: unknown };
+    metadata?: { dealId?: string; rfqNumber?: string; settlementDateTime?: string; settlementType: number;[key: string]: unknown };
   };
 }): Promise<Buffer> {
   console.log({

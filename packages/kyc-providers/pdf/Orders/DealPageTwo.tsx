@@ -22,6 +22,7 @@ interface OrdersPageTwoOrderData {
     settlementDemat?: SettlementDemat;
     /** Settlement No. e.g. 2602020 */
     settlementNumber?: string;
+    settlementType: number;
   };
 }
 
@@ -69,7 +70,7 @@ Mode of Pay: RTGS / NEFT / Bank Transfer`}
           <Text>
             {`CM Name: NSE Clearing Ltd.
 CM-BP ID: IN568177
-Market Type: Corporate Bond (T + 1)
+Market Type: Corporate Bond (T + ${orderData?.metadata?.settlementType})
 Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
           </Text>
         </View>
