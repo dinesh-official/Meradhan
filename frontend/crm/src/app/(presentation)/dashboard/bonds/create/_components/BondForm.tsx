@@ -450,8 +450,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
   };
 
   const dealAutofillMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiCaller.getBondDealAutofill(isin!, { quantity: 1 });
+    mutationFn: async (opts?: { pricingYield?: number }) => {
+      const res = await apiCaller.getBondDealAutofill(isin!, {
+        quantity: 1,
+        ...(opts?.pricingYield != null && Number.isFinite(opts.pricingYield)
+          ? { pricingYield: opts.pricingYield }
+          : {}),
+      });
       return res.responseData;
     },
     onSuccess: (data) => {
@@ -480,8 +485,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
     onError: (error: AxiosError) => {
       setBuyYieldError(
         (error?.response?.data as { message?: string })?.message ||
-          error?.message ||
-          "Could not save buy yield or auto-fill",
+        error?.message ||
+        "Could not save buy yield or auto-fill",
       );
       toast.error(
         (error?.response?.data as { message: string })?.message ||
@@ -498,7 +503,29 @@ function BondForm({ initialData, isin }: BondFormProps) {
       setBuyYieldPromptOpen(true);
       return;
     }
-    dealAutofillMutation.mutate();
+    dealAutofillMutation.mutate({});
+  };
+
+  const parseYieldPercent = (v: unknown): number | undefined => {
+    if (v == null || v === "") return undefined;
+    const n = typeof v === "number" ? v : Number(String(v).trim().replace(/,/g, ""));
+    return Number.isFinite(n) ? n : undefined;
+  };
+
+  const onCalcBySellYieldClick = () => {
+    if (!isin) return;
+    if (!hasBondBuyYield(form.getValues("buyYield"))) {
+      setBuyYieldDraft("");
+      setBuyYieldError(null);
+      setBuyYieldPromptOpen(true);
+      return;
+    }
+    const py = parseYieldPercent(form.getValues("yield"));
+    if (py == null) {
+      toast.error("Enter a valid sell yield (%) first.");
+      return;
+    }
+    dealAutofillMutation.mutate({ pricingYield: py });
   };
 
   const submitBuyYieldThenAutofill = () => {
@@ -1789,6 +1816,16 @@ function BondForm({ initialData, isin }: BondFormProps) {
                         />
                       </FormControl>
                       <FormMessage />
+                      {isUpdateMode && isin ? (
+                        <button
+                          type="button"
+                          className="text-primary hover:underline text-left text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
+                          disabled={dealAutofillBusy}
+                          onClick={onCalcBySellYieldClick}
+                        >
+                          Calc by my sell yield
+                        </button>
+                      ) : null}
                     </FormItem>
                   )}
                 />
