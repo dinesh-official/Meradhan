@@ -33,6 +33,10 @@ bondRoute.get("/api/bonds/:isin/order-pricing", (req, res) =>
 bondRoute.get("/api/bonds/:isin/deal-autofill", (req, res) =>
   bondController.getBondDealAutofill(req, res),
 );
+/** Same as GET; use POST when sending `pricingYield` in the JSON body (avoids query-string params). */
+bondRoute.post("/api/bonds/:isin/deal-autofill", (req, res) =>
+  bondController.getBondDealAutofill(req, res),
+);
 
 bondRoute.get("/api/bonds/:isin", (req, res) =>
   bondController.getBondDetails(req, res)

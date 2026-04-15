@@ -457,6 +457,20 @@ function toCalcPaymentFrequency(raw: string | null | undefined): string {
     return "Monthly";
 }
 
+const addIstTimezoneToDate = (date: string) => {
+    const d = new Date(date)
+    d.setHours(d.getHours() + 5)
+    d.setMinutes(d.getMinutes() + 30)
+    return d.toISOString().split("T")[0]!;
+}
+
+const removeIstTimezoneFromDate = (date: string) => {
+    const d = new Date(date)
+    d.setHours(d.getHours() - 5)
+    d.setMinutes(d.getMinutes() - 30)
+    return d.toISOString().split("T")[0]!;
+}
+
 function buildBondCalcServicePayload(args: {
     bondMargin: {
         yield: number;
@@ -532,17 +546,18 @@ function buildBondCalcServicePayload(args: {
     );
     const yieldStr = Number.isFinite(args.pricingYield) ? String(args.pricingYield) : "0";
 
+
     return {
         Face_Value: fv,
         Coupon_Rate_Pct: String(coupon),
         Payment_Frequency: freq,
         Quantity: String(Math.max(1, args.quantity)),
         Settlement_Date: settlement,
-        Dated_Date: dated || settlement,
+        Dated_Date: removeIstTimezoneFromDate(dated),
         Last_IP_Date: lastIp,
         Next_IP_Date: nextIp,
-        Maturity_Date: maturity,
-        Period_Status: "Normal",
+        Maturity_Date: removeIstTimezoneFromDate(maturity),
+        Period_Status: "Shut Period",
         Input_Type: "Calculate from Yield",
         Pricing_Input: yieldStr,
         Is_End_Of_Month_Bond: "No",
@@ -583,6 +598,7 @@ export const calculateBondMargin = async ({
         settlementDate: settlementYmd,
         pricingYield: bondMargin.yield,
     });
+    console.log(payload);
     const calc = await calculateBondFromService(payload);
     return {
         margin: bondMargin,
@@ -850,6 +866,7 @@ export async function calculateBondFromService(
         Stamp_Duty: string
     }
 ): Promise<ExternalCalcResponse> {
+    console.log(JSON.stringify(payload, null, 2));
     const url = "https://calc.meradhan.co/api/calculate";
     const res = await fetch(url, {
         method: "POST",
