@@ -53,6 +53,7 @@ export class BondsApi {
 
   /**
    * CRM: auto-fill bond update form fields + sale price from DB, margin rules, and calc.meradhan.co.
+   * When `pricingYield` is set, uses POST with a JSON body (no query-string `pricingYield` param).
    */
   public async getBondDealAutofill(
     isin: string,
@@ -63,9 +64,38 @@ export class BondsApi {
     },
     config?: AxiosRequestConfig,
   ) {
+    const quantity = params?.quantity ?? 1;
+    const settlementDate = params?.settlementDate;
+    const pricingYield = params?.pricingYield;
+
+    if (pricingYield != null && Number.isFinite(pricingYield)) {
+      const response = await this.apiClient.post<
+        BaseResponseData<BondDealAutofillResponse>
+      >(
+        `/bonds/${isin}/deal-autofill`,
+        {
+          quantity,
+          ...(settlementDate != null && settlementDate !== ""
+            ? { settlementDate }
+            : {}),
+          pricingYield,
+        },
+        config,
+      );
+      return response.data;
+    }
+
     const response = await this.apiClient.get<BaseResponseData<BondDealAutofillResponse>>(
       `/bonds/${isin}/deal-autofill`,
-      { ...config, params },
+      {
+        ...config,
+        params: {
+          quantity,
+          ...(settlementDate != null && settlementDate !== ""
+            ? { settlementDate }
+            : {}),
+        },
+      },
     );
     return response.data;
   }

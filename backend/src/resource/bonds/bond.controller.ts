@@ -47,7 +47,8 @@ export class BondController {
 
   /**
    * CRM: suggested bond fields + sale price from calc service, using DB + margin/yield logic in `bond_clac`.
-   * Query: quantity, settlementDate (YYYY-MM-DD), pricingYield (optional override for “Offered / Sell” yield).
+   * GET query: quantity, settlementDate (YYYY-MM-DD), pricingYield (optional; legacy).
+   * POST JSON body: { quantity?, settlementDate?, pricingYield? } — preferred for custom pricing yield (no query params).
    */
   async getBondDealAutofill(req: Request, res: Response) {
     const isin = req.params.isin?.toString() ?? "";
@@ -58,17 +59,48 @@ export class BondController {
         message: "Missing ISIN",
       });
     }
-    const quantity = req.query.quantity ? Number(req.query.quantity) : 1;
-    const settlementDate = req.query.settlementDate?.toString();
-    const pyRaw = req.query.pricingYield;
-    const pricingYield =
-      pyRaw != null && String(pyRaw).trim() !== ""
-        ? Number(pyRaw)
-        : undefined;
+    const fromBody =
+      req.method === "POST" &&
+      req.body != null &&
+      typeof req.body === "object" &&
+      !Array.isArray(req.body);
+
+    let quantity = 1;
+    let settlementDate: string | undefined;
+    let pricingYield: number | undefined;
+
+    if (fromBody) {
+      const b = req.body as Record<string, unknown>;
+      const qRaw = b.quantity;
+      const q = qRaw != null && String(qRaw).trim() !== "" ? Number(qRaw) : 1;
+      quantity = Number.isFinite(q) && q > 0 ? q : 1;
+      const sd = b.settlementDate;
+      settlementDate =
+        sd != null && String(sd).trim() !== "" ? String(sd) : undefined;
+      const pyRaw = b.pricingYield;
+      if (pyRaw != null && String(pyRaw).trim() !== "") {
+        const n = Number(pyRaw);
+        pricingYield = Number.isFinite(n) ? n : undefined;
+      }
+    } else {
+      const q = req.query.quantity ? Number(req.query.quantity) : 1;
+      quantity = Number.isFinite(q) && q > 0 ? q : 1;
+      settlementDate = req.query.settlementDate?.toString();
+      const pyRaw = req.query.pricingYield;
+      pricingYield =
+        pyRaw != null && String(pyRaw).trim() !== ""
+          ? Number(pyRaw)
+          : undefined;
+      pricingYield =
+        pricingYield != null && Number.isFinite(pricingYield)
+          ? pricingYield
+          : undefined;
+    }
+
     try {
       const data = await getBondDealAutofill({
         isin,
-        quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+        quantity,
         settlementDate,
         pricingYield:
           pricingYield != null && Number.isFinite(pricingYield)
