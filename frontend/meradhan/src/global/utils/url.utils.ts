@@ -1,3 +1,4 @@
+import { BASES_URLS } from "@/core/config/base.urls";
 import { ASSETS_URL } from "../constants/domains";
 
 export function genMediaUrl(mediaPath?: string | null): string {
@@ -28,7 +29,7 @@ export function genCmsMediaUrl(mediaPath?: string | null): string {
     return mediaPath;
   }
 
-  return `/assets/cms/media/${mediaPath.replace(/^\/+/, "")}`;
+  return `${BASES_URLS.CMS}/assets/cms/media/${mediaPath.replace(/^\/+/, "")}`;
 }
 
 // utils/generatePageUrl.ts
