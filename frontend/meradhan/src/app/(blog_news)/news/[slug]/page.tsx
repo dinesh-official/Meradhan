@@ -91,8 +91,8 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
                 <p>
                   {calculateReadTime(
                     post.Contents.Introduction +
-                      post.Contents.Content_1 +
-                      post.Contents.Content_2
+                    post.Contents.Content_1 +
+                    post.Contents.Content_2
                   )}
                 </p>
               </div>
@@ -121,7 +121,7 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
             alt="Blog"
             width={1300}
             height={900}
-            className="rounded-xl w-full object-cover aspect-video"
+            className="rounded-xl w-full object-cover aspect-vide bg-gray-50"
           />
 
           <div className="gap-5 grid lg:grid-cols-3">
