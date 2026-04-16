@@ -3,6 +3,7 @@
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import { gqlClient } from "@/core/connection/apollo-client";
 import { convertUTCtoIST } from "@/global/utils/datetime.utils";
+import { genCmsMediaUrl } from "@/global/utils/url.utils";
 import { gql } from "@apollo/client";
 import apiGateway from "@root/apiGateway";
 import { Metadata } from "next";
@@ -97,7 +98,9 @@ export const generatePagesMetaData = async (
       openGraph: {
         title: metadata?.Title,
         description: metadata?.Description,
-        images: metadata?.Og_Image ? [metadata.Og_Image.url] : undefined,
+        images: metadata?.Og_Image?.url
+          ? [genCmsMediaUrl(metadata.Og_Image.url)]
+          : undefined,
       },
     };
   } catch (e) {

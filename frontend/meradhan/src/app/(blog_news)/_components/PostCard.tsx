@@ -1,3 +1,4 @@
+"use client";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -39,7 +40,11 @@ function PostCard({
           alt="Blog"
           width={1300}
           height={900}
-          className="rounded-xl w-full object-cover aspect-video"
+          className="rounded-xl w-full object-cover aspect-video bg-gray-50"
+          // on error image
+          onError={(e) => {
+            e.currentTarget.src = "https://i.sstatic.net/y9DpT.jpg";
+          }}
         />
       </Link>
       <div className="flex justify-between items-center">

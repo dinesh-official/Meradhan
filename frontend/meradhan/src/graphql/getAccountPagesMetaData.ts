@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gqlClient } from "@/core/connection/apollo-client";
 import { convertUTCtoIST } from "@/global/utils/datetime.utils";
+import { genCmsMediaUrl } from "@/global/utils/url.utils";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
@@ -74,10 +75,10 @@ export const getAccountPagesMetaData = async (
     openGraph: {
       title: accountPageMetaData?.MetaData?.Title,
       description: accountPageMetaData?.MetaData?.Description,
-      images: accountPageMetaData?.MetaData?.Og_Image
+      images: accountPageMetaData?.MetaData?.Og_Image?.url
         ? [
             {
-              url: accountPageMetaData.MetaData.Og_Image.url,
+              url: genCmsMediaUrl(accountPageMetaData.MetaData.Og_Image.url),
             },
           ]
         : [],

@@ -1,6 +1,7 @@
 "use server";
 import { gqlClient } from "@/core/connection/apollo-client";
 import { convertUTCtoIST } from "@/global/utils/datetime.utils";
+import { genCmsMediaUrl } from "@/global/utils/url.utils";
 import { gql } from "@apollo/client";
 import { Metadata } from "next";
 
@@ -119,7 +120,7 @@ export const getDynamicPageMetaDataGql = async (
     openGraph: {
       title: md?.Title,
       description: md?.Description,
-      images: md?.Og_Image ? [md.Og_Image.url] : undefined,
+      images: md?.Og_Image?.url ? [genCmsMediaUrl(md.Og_Image.url)] : undefined,
     },
   };
 };

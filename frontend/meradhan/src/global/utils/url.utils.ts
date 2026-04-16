@@ -19,6 +19,18 @@ export function genMediaUrl(mediaPath?: string | null): string {
 
 }
 
+export function genCmsMediaUrl(mediaPath?: string | null): string {
+  if (!mediaPath) return "/noimage.jpg";
+
+  const isFullUrl = /^(https?:\/\/|data:|urn:)/i.test(mediaPath);
+
+  if (isFullUrl) {
+    return mediaPath;
+  }
+
+  return `/assets/cms/media/${mediaPath.replace(/^\/+/, "")}`;
+}
+
 // utils/generatePageUrl.ts
 export function generatePageUrl({
   basePath,

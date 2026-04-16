@@ -1,3 +1,4 @@
+"use client";
 import { HOST_URL } from "@/global/constants/domains";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 import Image from "next/image";
@@ -29,6 +30,10 @@ function AuthorViewSharePostCard({
           width={100}
           height={100}
           className="rounded-full w-10 h-10 object-cover"
+          // on error image
+          onError={(e) => {
+            e.currentTarget.src = "https://i.sstatic.net/y9DpT.jpg";
+          }}
         />
         <p>{name}</p>
       </div>
