@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
 import { MdOutlineArrowRight } from "react-icons/md";
 import { useEffect } from "react";
 import { KycDataStorage } from "@/app/(account)/dashboard/kyc/_store/useKycDataStorage";
+import { findCdslDpId } from "@/app/(account)/dashboard/kyc/_utils/cdslDpid";
+import { findDpId } from "@/app/(account)/dashboard/kyc/_utils/nsdlDpid";
 function NewDematAccount({
   data,
   error,
@@ -65,6 +67,7 @@ function NewDematAccount({
               <Select
                 value={data?.depositoryName}
                 onValueChange={(e) => {
+                  updateData("depositoryParticipantName", "");
                   updateData("depositoryName", e);
                   // Clear DP ID if changing from NSDL to CDSL
                   if (e === "CDSL") {
@@ -87,7 +90,11 @@ function NewDematAccount({
               <LabelInput label="DP ID" required error={error?.dpId?.[0]}>
                 <Input
                   value={data?.dpId}
-                  onChange={(e) => updateData("dpId", e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    updateData("dpId", value);
+                    updateData("depositoryParticipantName", findDpId(value) || "");
+                  }}
                 />
               </LabelInput>
             )}
@@ -100,9 +107,18 @@ function NewDematAccount({
             >
               <Input
                 value={data.beneficiaryClientId}
-                onChange={(e) =>
-                  updateData("beneficiaryClientId", e.target.value)
-                }
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase();
+                  updateData("beneficiaryClientId", value);
+
+                  if (data.depositoryName === "CDSL") {
+                    updateData("dpId", value.slice(0, 8));
+                    updateData(
+                      "depositoryParticipantName",
+                      findCdslDpId(value) || "",
+                    );
+                  }
+                }}
               />
             </LabelInput>
 
@@ -153,6 +169,8 @@ function NewDematAccount({
                 onChange={(e) =>
                   updateData("depositoryParticipantName", e.target.value)
                 }
+                disabled
+                adminMode
               />
             </LabelInput>
 
