@@ -1,5 +1,6 @@
 import { Document, Font, Page } from "@react-pdf/renderer";
 import CorporateKycPdfPage1Content from "./pages/page1";
+import CorporateKycPdfPage2Content from "./pages/page2";
 
 function CorpoRatePdf() {
     Font.register({
@@ -67,6 +68,9 @@ function CorpoRatePdf() {
         <Document>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
                 <CorporateKycPdfPage1Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage2Content />
             </Page>
         </Document>
     );
