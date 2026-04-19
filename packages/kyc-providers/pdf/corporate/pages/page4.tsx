@@ -73,7 +73,7 @@ function CorporateKycPdfPage4Content() {
           <CheckBoxRow label="Driving License" checked={false} />
         </View>
         <View style={tw("w-[55%]")}>
-          <InputField title="(Expiry Date) DD / MM / YYYY" value=" " className="w-[100%]" />
+          <InputField title="(Expiry Date) DD / MM / YYYY" value=" " className="" />
         </View>
       </View>
       <View style={tw("flex flex-row flex-wrap gap-2 mt-1 items-end")}>
@@ -81,7 +81,7 @@ function CorporateKycPdfPage4Content() {
           <CheckBoxRow label="Passport Number" checked={false} />
         </View>
         <View style={tw("w-[55%]")}>
-          <InputField title="(Expiry Date) DD / MM / YYYY" value=" " className="w-[100%]" />
+          <InputField title="(Expiry Date) DD / MM / YYYY" value=" " className="" />
         </View>
       </View>
       <View style={tw("mt-1")}>
@@ -91,28 +91,28 @@ function CorporateKycPdfPage4Content() {
         />
       </View>
       <View style={{ marginTop: 4 }}>
-        <InputField title="Identification Number" value=" " className="w-[100%]" />
+        <InputField title="Identification Number" value=" " className="" />
       </View>
 
       <View style={tw("bg-main px-2 py-1 w-full mx-auto rounded mt-2")}>
         <Text style={tw("text-[8px] text-white font-[600]")}>3. Contact Details</Text>
       </View>
       <View style={{ marginTop: 4 }}>
-        <InputField title="Email ID:" value=" " className="w-[100%]" />
+        <InputField title="Email ID:" value=" " className="" />
         <View style={tw("flex flex-row gap-2 mt-1")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="Mobile Number:" value=" " className="w-[100%]" />
+            <InputField title="Mobile Number:" value=" " className="" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Alternate Mobile Number:" value=" " className="w-[100%]" />
+            <InputField title="Alternate Mobile Number:" value=" " className="" />
           </View>
         </View>
         <View style={tw("flex flex-row gap-2 mt-1")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="Telephone (Office):" value=" " className="w-[100%]" />
+            <InputField title="Telephone (Office):" value=" " className="" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Telephone (Residence):" value=" " className="w-[100%]" />
+            <InputField title="Telephone (Residence):" value=" " className="" />
           </View>
         </View>
       </View>
@@ -170,10 +170,10 @@ function CorporateKycPdfPage4Content() {
 
       <View style={tw("flex flex-row gap-2 mt-2")}>
         <View style={tw("w-[48%]")}>
-          <InputField title="Date: DD / MM / YYYY" value=" " className="w-[100%]" />
+          <InputField title="Date: DD / MM / YYYY" value=" " className="" />
         </View>
         <View style={tw("w-[48%]")}>
-          <InputField title="Place:" value=" " className="w-[100%]" />
+          <InputField title="Place:" value=" " className="" />
         </View>
       </View>
 
@@ -194,22 +194,22 @@ function CorporateKycPdfPage4Content() {
         <InputField title="KYC Carried out by:" value=" " className="w-[90%]" />
         <View style={tw("flex flex-row gap-2 mt-1")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="KYC Date: DD / MM / YYYY" value=" " className="w-[100%]" />
+            <InputField title="KYC Date: DD / MM / YYYY" value=" " className="" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Emp. Name:" value=" " className="w-[100%]" />
+            <InputField title="Emp. Name:" value=" " className="" />
           </View>
         </View>
         <View style={tw("flex flex-row gap-2 mt-1")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="Emp. Code:" value=" " className="w-[100%]" />
+            <InputField title="Emp. Code:" value=" " className="" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Emp. Designation:" value=" " className="w-[100%]" />
+            <InputField title="Emp. Designation:" value=" " className="" />
           </View>
         </View>
         <View style={{ marginTop: 4 }}>
-          <InputField title="Intermediary Details:*" value=" " className="w-[100%]" />
+          <InputField title="Intermediary Details:*" value=" " className="" />
         </View>
         <View style={tw("flex flex-row flex-wrap gap-2 mt-1")}>
           <CheckBoxRow label="Self certified document copies received (Originals Verified)" checked={false} />
@@ -218,7 +218,7 @@ function CorporateKycPdfPage4Content() {
           <CheckBoxRow label="True Copies of documents received (Attested)" checked={false} />
         </View>
         <View style={{ marginTop: 4 }}>
-          <InputField title="AMC / Intermediary Name OR Code:" value=" " className="w-[100%]" />
+          <InputField title="AMC / Intermediary Name OR Code:" value=" " className="" />
         </View>
         <View style={tw("flex flex-row justify-between gap-3 mt-2")}>
           <View style={tw("w-[45%] border border-gray-300 h-16 p-1")}>

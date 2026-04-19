@@ -3,6 +3,13 @@ import CorporateKycPdfPage1Content from "./pages/page1";
 import CorporateKycPdfPage2Content from "./pages/page2";
 import CorporateKycPdfPage3Content from "./pages/page3";
 import CorporateKycPdfPage4Content from "./pages/page4";
+import CorporateKycPdfPage5Content from "./pages/page5";
+import CorporateKycPdfPage6Content from "./pages/page6";
+import CorporateKycPdfPage7Content from "./pages/page7";
+import CorporateKycPdfPage8Content from "./pages/page8";
+import CorporateKycPdfPage9Content from "./pages/page9";
+import CorporateKycPdfPage10Content from "./pages/page10";
+import CorporateKycPdfPage11Content from "./pages/page11";
 
 function CorpoRatePdf() {
     Font.register({
@@ -79,6 +86,27 @@ function CorpoRatePdf() {
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
                 <CorporateKycPdfPage4Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage5Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage6Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage7Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage8Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage9Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage10Content />
+            </Page>
+            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+                <CorporateKycPdfPage11Content />
             </Page>
         </Document>
     );
