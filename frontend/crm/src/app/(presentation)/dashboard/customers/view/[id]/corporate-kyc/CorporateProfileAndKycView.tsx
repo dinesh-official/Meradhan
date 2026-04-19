@@ -10,7 +10,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { encodeId } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useQueries } from "@tanstack/react-query";
-import { Building2, FileDown, IdCardIcon, NotebookPen, Pencil } from "lucide-react";
+import { Building2, FileDown, IdCardIcon, NotebookPen, Loader2, Pencil } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -22,6 +22,8 @@ import {
   DocumentUrlsSection,
   PromotersSection,
 } from "./_components/CorporateKycSections";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function CorporateProfileAndKycView({
   profileId,
@@ -56,6 +58,7 @@ export default function CorporateProfileAndKycView({
   const isLoading = customerQuery.isLoading;
   const encodedId = encodeId(profileId);
   const isCorporate = customer?.userType === "CORPORATE";
+  const [kycPdfLoading, setKycPdfLoading] = useState(false);
 
   if (isLoading) {
     return (
@@ -67,6 +70,28 @@ export default function CorporateProfileAndKycView({
 
   const handlePrintPdf = () => {
     window.print();
+  };
+
+  const handleDownloadKycPdf = async () => {
+    if (!isCorporate || !corporateKyc) {
+      toast.error("Corporate KYC must be saved before downloading the PDF.");
+      return;
+    }
+    setKycPdfLoading(true);
+    try {
+      const blob = await api.getCorporateKycPdf(profileId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `corporate-kyc-${profileId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Corporate KYC PDF downloaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not download PDF");
+    } finally {
+      setKycPdfLoading(false);
+    }
   };
 
   const printDate = new Date().toLocaleDateString("en-IN", {
@@ -108,6 +133,21 @@ export default function CorporateProfileAndKycView({
               >
                 <FileDown className="h-4 w-4" /> Print / Save as PDF
               </Button>
+              {isCorporate && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!corporateKyc || kycPdfLoading || corporateKycQuery.isLoading}
+                  onClick={handleDownloadKycPdf}
+                >
+                  {kycPdfLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileDown className="h-4 w-4" />
+                  )}
+                  Download KYC PDF
+                </Button>
+              )}
               {!isCorporate && (
                 <AllowOnlyView permissions={["view:customerkyc"]}>
                   <Button variant="outline" asChild>

@@ -44,6 +44,12 @@ crmCustomersRoutes.delete(
 );
 
 crmCustomersRoutes.get(
+  "/api/crm/customer/:customerId/corporate-kyc/pdf",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.downloadCorporateKycPdf(req, res)
+);
+
+crmCustomersRoutes.get(
   "/api/crm/customer/:customerId/corporate-kyc",
   allowAccessMiddleware("ADMIN", "USER"),
   (req, res) => controller.getCorporateKyc(req, res)
