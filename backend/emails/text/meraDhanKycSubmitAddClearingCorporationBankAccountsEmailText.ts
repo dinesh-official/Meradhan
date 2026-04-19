@@ -1,4 +1,4 @@
-export const meraDhanAddBankAccountsClearingCorporationsEmailText = (data: {
+export const meraDhanKycSubmitAddClearingCorporationBankAccountsEmailText = (data: {
   customerName: string;
 }) => {
   const name = data.customerName?.trim() || "Customer";

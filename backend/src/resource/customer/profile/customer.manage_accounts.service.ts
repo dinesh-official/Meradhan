@@ -4,7 +4,6 @@ import type { appSchema } from "@root/schema";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { AppError } from "@utils/error/AppError";
 import type z from "zod";
-import { sendAddClearingCorporationBankAccountsEmail } from "@jobs/helper/send_emails";
 
 const KYC_VERIFIED_REQUIRED_MSG =
   "You cannot add, update, or delete bank or demat accounts until your KYC is verified.";
@@ -80,24 +79,6 @@ export class CustomerManageAccountsService {
         },
       },
     });
-
-    // Email alert to customer after successful add (queued; doesn't block API).
-    try {
-      const customer = await db.dataBase.customerProfileDataModel.findUnique({
-        where: { id: customerId },
-        select: { firstName: true, lastName: true, emailAddress: true },
-      });
-      if (customer?.emailAddress) {
-        const customerName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
-        await sendAddClearingCorporationBankAccountsEmail({
-          email: customer.emailAddress,
-          customerName: customerName || "Customer",
-        });
-      }
-    } catch (e) {
-      // Non-critical; bank add should still succeed even if email fails.
-      console.log(e);
-    }
 
     try {
       await this.cbricsManager.addBankAccount(customerId, {

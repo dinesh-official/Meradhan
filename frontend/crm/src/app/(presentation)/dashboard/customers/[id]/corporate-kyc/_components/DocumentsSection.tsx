@@ -12,7 +12,10 @@ const DOCUMENT_FIELDS: {
   label: string;
 }[] = [
     { key: "panCopyFileUrl", label: "PAN copy" },
-    { key: "balanceSheetCopyUrl", label: "Balance sheet copy" },
+    {
+      key: "balanceSheetCopyUrl",
+      label: "Balance Sheet / Networth Certificate Copy",
+    },
     { key: "certificateOfIncorporationUrl", label: "Certificate of incorporation" },
     { key: "memorandumCopyUrl", label: "Memorandum copy" },
     { key: "boardResolutionCopyUrl", label: "Board resolution copy" },
@@ -28,11 +31,16 @@ const DOCUMENT_FIELDS: {
     { key: "powerOfAttorneyCopyUrl", label: "Power of attorney copy" },
   ];
 
+const ATTACHMENT_FIELDS: {
+  key: keyof NonNullable<CorporateKycFormHook["form"]>;
+  label: string;
+}[] = [{ key: "termsAndConditionsUrl", label: "Terms & Conditions" }];
+
 export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, setField } = hook;
   const { uploadFile } = useCorporateKycFileUpload();
 
-  const uploadedList = DOCUMENT_FIELDS.filter((f) => {
+  const uploadedList = [...DOCUMENT_FIELDS, ...ATTACHMENT_FIELDS].filter((f) => {
     const v = form[f.key];
     return typeof v === "string" && v.trim() !== "";
   });
@@ -55,6 +63,23 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
               placeholder="Select file or paste URL"
             />
           ))}
+        </div>
+
+        <div className="pt-2">
+          <h3 className="text-sm font-medium mb-3">Attachments</h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            {ATTACHMENT_FIELDS.map(({ key, label }) => (
+              <FileUploadField
+                key={key}
+                label={label}
+                value={(form[key] as string) ?? ""}
+                onChangeAction={(v) => setField(key, v)}
+                onUpload={(file) => uploadFile(file, "corporate-kyc")}
+                accept=".pdf,.jpg,.jpeg,.png"
+                placeholder="Select file or paste URL"
+              />
+            ))}
+          </div>
         </div>
 
         <InputField

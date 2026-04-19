@@ -28,10 +28,23 @@ model CorporateKycModel {
   correspondenceFullAddress String?
   correspondenceLine1        String?
   correspondenceLine2        String?
+  correspondenceLine3        String?
   correspondenceCity         String?
   correspondenceDistrict     String?
   correspondencePinCode     String?
   correspondenceState       String?
+  correspondenceAddressProofCopyUrl String?
+
+  // ---------- Registered address ----------
+  registeredFullAddress String?
+  registeredLine1        String?
+  registeredLine2        String?
+  registeredLine3        String?
+  registeredCity         String?
+  registeredDistrict     String?
+  registeredPinCode     String?
+  registeredState       String?
+  registeredAddressProofCopyUrl String?
 
   // ---------- Documents (file paths or URLs) ----------
   balanceSheetCopyUrl                 String?
@@ -48,6 +61,9 @@ model CorporateKycModel {
   directorsListCopyUrl              String?
   powerOfAttorneyCopyUrl            String?
   documentsType                     String?
+
+  // ---------- Attachments / verifications (uploads) ----------
+  termsAndConditionsUrl String?
 
   // ---------- FATCA ----------
   fatcaApplicable                   Boolean  @default(false)
@@ -130,6 +146,11 @@ model CorporateKycDirectorModel {
 
   fullName     String
   pan          String?
+  /// Optional file paths/URLs for director uploads
+  panCopyFileUrl        String?
+  aadharCopyFileUrl     String?
+  passportPhotoFileUrl  String?
+  pepDeclaration        String?
   designation  String?
   din          String?   /// Director Identification Number
   email        String?
@@ -152,6 +173,10 @@ model CorporateKycPromoterModel {
 
   fullName    String
   pan         String?
+  panCopyFileUrl        String?
+  aadharCopyFileUrl     String?
+  passportPhotoFileUrl  String?
+  pepDeclaration        String?
   designation String?
   din         String?
   email       String?
@@ -174,6 +199,10 @@ model CorporateKycAuthorisedSignatoryModel {
 
   fullName    String
   pan         String
+  panCopyFileUrl        String?
+  aadharCopyFileUrl     String?
+  passportPhotoFileUrl  String?
+  pepDeclaration        String?
   designation String?
   din         String?
   email       String

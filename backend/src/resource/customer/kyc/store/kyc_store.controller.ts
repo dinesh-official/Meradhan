@@ -2,6 +2,7 @@ import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import {
+  sendKycSubmitAddClearingCorporationBankAccountsEmail,
   sendKycSubmittedForVerificationEmail,
   sendRekycConfirmationOtpEmail,
 } from "@jobs/helper/send_emails";
@@ -57,7 +58,7 @@ export class KycStoreController {
     if (!response) {
       res.sendResponse({
         statusCode: HttpStatus.NOT_FOUND,
-        responseData: { isRunning: false , kycDataStoreId: null},
+        responseData: { isRunning: false, kycDataStoreId: null },
       });
       return;
     }
@@ -244,6 +245,13 @@ export class KycStoreController {
             email: customer.emailAddress,
             customerName: customerName || "Customer",
             title,
+          });
+
+          // Send "Add Clearing Corporation Bank Accounts" email 2 hours after KYC is marked complete=true.
+          await sendKycSubmitAddClearingCorporationBankAccountsEmail({
+            email: customer.emailAddress,
+            customerName: customerName || "Customer",
+            delayMs: 2 * 60 * 60 * 1000, // 2 hours
           });
         }
       } catch (e) {
