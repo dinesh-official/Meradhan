@@ -10,8 +10,10 @@ import CorporateKycPdfPage8Content from "./pages/page8";
 import CorporateKycPdfPage9Content from "./pages/page9";
 import CorporateKycPdfPage10Content from "./pages/page10";
 import CorporateKycPdfPage11Content from "./pages/page11";
+import type { CorporateKycPdfData } from "./corporateKycPdfData";
 
-function CorpoRatePdf() {
+function CorpoRatePdf({ data }: { data?: CorporateKycPdfData }) {
+    const pdfData = data ?? {};
     Font.register({
         family: "Poppins",
         fonts: [
@@ -76,37 +78,37 @@ function CorpoRatePdf() {
     return (
         <Document>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage1Content />
+                <CorporateKycPdfPage1Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage2Content />
+                <CorporateKycPdfPage2Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage3Content />
+                <CorporateKycPdfPage3Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage4Content />
+                <CorporateKycPdfPage4Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage5Content />
+                <CorporateKycPdfPage5Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage6Content />
+                <CorporateKycPdfPage6Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage7Content />
+                <CorporateKycPdfPage7Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage8Content />
+                <CorporateKycPdfPage8Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage9Content />
+                <CorporateKycPdfPage9Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage10Content />
+                <CorporateKycPdfPage10Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
-                <CorporateKycPdfPage11Content />
+                <CorporateKycPdfPage11Content data={pdfData} />
             </Page>
         </Document>
     );

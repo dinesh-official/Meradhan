@@ -1,15 +1,18 @@
 import { Text, View } from "@react-pdf/renderer";
+import type { CorporateKycPdfData } from "../corporateKycPdfData";
+import { pdfChk, pdfStr } from "../corporateKycPdfData";
 import { CheckBoxRow } from "../../elements/CheckBoxRow";
 import InputField from "../../elements/TextFiled";
 import { tw } from "../../MdPdf";
 
-const BANK_SLOTS = [1, 2, 3, 4, 5] as const;
+const BANK_SLOTS = [0, 1, 2, 3, 4] as const;
 
 /**
  * Page 6 — Part IV Annexure A bank accounts (KYC_P1_Non_Individuals_v1_P6.pdf). No logo / no footer.
  */
-function CorporateKycPdfPage6Content() {
+function CorporateKycPdfPage6Content({ data = {} }: { data?: CorporateKycPdfData }) {
   const pad = { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 10 };
+  const banks = data.bankAccounts ?? [];
 
   return (
     <View style={[{ fontFamily: "Poppins" }, pad]}>
@@ -30,60 +33,65 @@ function CorporateKycPdfPage6Content() {
 
       <Text style={{ fontSize: 8, fontWeight: 600, marginTop: 8 }}>Details of Applicant</Text>
       <View style={{ marginTop: 3 }}>
-        <InputField title="PAN:*" value=" " className="" />
+        <InputField title="PAN:*" value={pdfStr(data.pan)} className="" />
         <View style={{ marginTop: 2 }}>
-          <InputField title="Name (same as per PAN):*" value=" " className="" />
+          <InputField title="Name (same as per PAN):*" value={pdfStr(data.entityName)} className="" />
         </View>
       </View>
 
       <Text style={{ fontSize: 8, fontWeight: 600, marginTop: 8 }}>Bank Details</Text>
 
-      {BANK_SLOTS.map((n) => (
+      {BANK_SLOTS.map((idx) => {
+        const n = idx + 1;
+        const b = banks[idx];
+        const primary = b?.isPrimary;
+        return (
         <View key={n} style={{ marginTop: n === 1 ? 4 : 6 }}>
           <View style={tw("flex flex-row flex-wrap items-end gap-2")}>
             <Text style={{ fontSize: 8, fontWeight: 600 }}>{n}. Is it a Primary account?:</Text>
-            <CheckBoxRow label="Yes" checked={false} />
-            <CheckBoxRow label="No" checked={false} />
+            <CheckBoxRow label="Yes" checked={primary === true} />
+            <CheckBoxRow label="No" checked={primary === false} />
           </View>
           <View style={{ marginTop: 2 }}>
-            <InputField title="IFSC Code:" value=" " className="" />
+            <InputField title="IFSC Code:" value={pdfStr(b?.ifsc)} className="" />
           </View>
           <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
             <View style={tw("w-[48%]")}>
-              <InputField title="Name as per Bank:" value=" " className="" />
+              <InputField title="Name as per Bank:" value={pdfStr(b?.nameAsPerBank)} className="" />
             </View>
             <View style={tw("w-[48%]")}>
-              <InputField title="Name as per PAN:" value=" " className="" />
+              <InputField title="Name as per PAN:" value={pdfStr(b?.nameAsPerPan)} className="" />
             </View>
           </View>
           <View style={{ marginTop: 2 }}>
-            <InputField title="Branch:" value=" " className="" />
+            <InputField title="Branch:" value={pdfStr(b?.branch)} className="" />
           </View>
           <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
             <View style={tw("w-[48%]")}>
-              <InputField title="Account Type:" value=" " className="" />
+              <InputField title="Account Type:" value={pdfStr(b?.accountType)} className="" />
             </View>
             <View style={tw("w-[48%]")}>
-              <InputField title="Account Number:" value=" " className="" />
+              <InputField title="Account Number:" value={pdfStr(b?.accountNumber)} className="" />
             </View>
           </View>
           <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
             <View style={tw("w-[48%]")}>
-              <InputField title="Bank Name:" value=" " className="" />
+              <InputField title="Bank Name:" value={pdfStr(b?.bankName)} className="" />
             </View>
             <View style={tw("w-[48%]")}>
-              <InputField title="MICR Code:" value=" " className="" />
+              <InputField title="MICR Code:" value={pdfStr(b?.micr)} className="" />
             </View>
           </View>
         </View>
-      ))}
+        );
+      })}
 
       <View style={tw("flex flex-row gap-3 mt-3 flex-wrap")}>
         <View style={tw("w-[45%]")}>
-          <InputField title="Place:" value=" " className="" />
+          <InputField title="Place:" value={pdfStr(data.declarationPlace)} className="" />
         </View>
         <View style={tw("w-[45%]")}>
-          <InputField title="Date: DD / MM / YYYY" value=" " className="" />
+          <InputField title="Date: DD / MM / YYYY" value={pdfStr(data.declarationDate)} className="" />
         </View>
       </View>
 

@@ -7,8 +7,8 @@ import MdPdf from "../../pdf/MdPdf";
 import { DealPdf } from "../../pdf/DealPdf";
 import { OrderPdf } from "../../pdf/OrderPdf";
 import { mapAllPages } from "../../pdf/dataMapper";
-import CorpoRatePdf, {
-} from "../../pdf/corporate/CorpoRatePdf";
+import CorpoRatePdf from "../../pdf/corporate/CorpoRatePdf";
+import { mapCorporateKycResponseToPdfData } from "../../pdf/corporate/corporateKycPdfData";
 
 
 export async function generateKycPdf(userData: any) {
@@ -190,11 +190,12 @@ export async function generateDealPdfBuffer({
 
 /** Renders corporate (non-individual) KYC PDF to a buffer. */
 export async function generateCorporateRatePdfBuffer(
-  data: any
+  data: unknown
 ): Promise<Buffer> {
+  const pdfData = mapCorporateKycResponseToPdfData(data);
   const buffer = await renderToBuffer(
     // CorpoRatePdf renders <Document>; react-pdf typings are overly strict on createElement.
-    createElement(CorpoRatePdf, { data }) as Parameters<typeof renderToBuffer>[0]
+    createElement(CorpoRatePdf, { data: pdfData }) as Parameters<typeof renderToBuffer>[0]
   );
   return Buffer.from(buffer);
 }

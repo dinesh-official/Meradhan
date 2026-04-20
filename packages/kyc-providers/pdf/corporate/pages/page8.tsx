@@ -1,15 +1,18 @@
 import { Text, View } from "@react-pdf/renderer";
+import type { CorporateKycPdfData } from "../corporateKycPdfData";
+import { pdfChk, pdfStr } from "../corporateKycPdfData";
 import { CheckBoxRow } from "../../elements/CheckBoxRow";
 import InputField from "../../elements/TextFiled";
 import { tw } from "../../MdPdf";
 
-const ROWS = [1, 2, 3, 4] as const;
+const ROWS = [0, 1, 2, 3] as const;
 
 /**
  * Page 8 — Annexure 1 promoters/partners/directors grid (KYC_P1_Non_Individuals_v1_P8.pdf). No logo / no footer.
  */
-function CorporateKycPdfPage8Content() {
+function CorporateKycPdfPage8Content({ data = {} }: { data?: CorporateKycPdfData }) {
   const pad = { paddingHorizontal: 22, paddingTop: 18, paddingBottom: 10 };
+  const rows = data.promoterRows ?? [];
 
   return (
     <View style={[{ fontFamily: "Poppins" }, pad]}>
@@ -31,10 +34,10 @@ function CorporateKycPdfPage8Content() {
       </View>
 
       <View style={{ marginTop: 4 }}>
-        <InputField title="Name of Applicant:" value=" " className="" />
+        <InputField title="Name of Applicant:" value={pdfStr(data.entityName)} className="" />
       </View>
       <View style={{ marginTop: 4 }}>
-        <InputField title="PAN of the Applicant:" value=" " className="" />
+        <InputField title="PAN of the Applicant:" value={pdfStr(data.pan)} className="" />
       </View>
 
       <Text style={{ fontSize: 7.5, fontWeight: 600, marginTop: 8, marginBottom: 4 }}>
@@ -42,7 +45,10 @@ function CorporateKycPdfPage8Content() {
         Relationship with Applicant (i.e. promoters, whole-time directors etc.) · Whether Politically Exposed?
       </Text>
 
-      {ROWS.map((sr) => (
+      {ROWS.map((idx) => {
+        const sr = idx + 1;
+        const p = rows[idx];
+        return (
         <View
           key={sr}
           style={{
@@ -55,29 +61,29 @@ function CorporateKycPdfPage8Content() {
           <Text style={{ fontSize: 8, fontWeight: 700, marginBottom: 4 }}>Sr. No. {sr}</Text>
           <View style={tw("flex flex-row ")}>
             <View style={{ flex: 1 }}>
-              <InputField title="PAN:" value=" " className="" />
+              <InputField title="PAN:" value={pdfStr(p?.pan)} className="" />
               <View style={{ marginTop: 2 }}>
-                <InputField title="Name:" value=" " className="" />
+                <InputField title="Name:" value={pdfStr(p?.name)} className="" />
               </View>
               <View style={tw("flex flex-row gap-2 ")}>
                 <View style={tw("w-[48%]")}>
-                  <InputField title="DIN (For Directors):" value=" " className="" />
+                  <InputField title="DIN (For Directors):" value={pdfStr(p?.din)} className="" />
                 </View>
                 <View style={tw("w-[48%]")}>
-                  <InputField title="Aadhaar (for others):" value=" " className="" />
+                  <InputField title="Aadhaar (for others):" value={pdfStr(p?.aadhar)} className="" />
                 </View>
               </View>
               <View style={{ marginTop: 2 }}>
-                <InputField title="Residential / Registered Address:" value=" " className="" />
+                <InputField title="Residential / Registered Address:" value={pdfStr(p?.address)} className="" />
               </View>
               <View style={{ marginTop: 2 }}>
-                <InputField title="Relationship with Applicant:" value=" " className="" />
+                <InputField title="Relationship with Applicant:" value={pdfStr(p?.relationship)} className="" />
               </View>
               <Text style={{ fontSize: 7.5, fontWeight: 600, marginTop: 4 }}>Whether Politically Exposed?</Text>
               <View style={tw("flex flex-row gap-4 mt-1")}>
-                <CheckBoxRow label="PEP" checked={false} />
-                <CheckBoxRow label="RPEP" checked={false} />
-                <CheckBoxRow label="No" checked={false} />
+                <CheckBoxRow label="PEP" checked={pdfChk(p?.pep)} />
+                <CheckBoxRow label="RPEP" checked={pdfChk(p?.rpep)} />
+                <CheckBoxRow label="No" checked={pdfChk(p?.pepNo)} />
               </View>
             </View>
             <View style={{ width: 72, alignItems: "center" }}>
@@ -93,7 +99,8 @@ function CorporateKycPdfPage8Content() {
             </View>
           </View>
         </View>
-      ))}
+        );
+      })}
 
       <Text style={{ fontSize: 8, fontWeight: 600, marginTop: 8 }}>
         Name & Signature of the Authorised Signatory(ies) Along with Stamp
@@ -103,7 +110,7 @@ function CorporateKycPdfPage8Content() {
           <Text style={{ fontSize: 6.5, textAlign: "center" }}>Signatory / Stamp</Text>
         </View>
         <View style={tw("w-[40%]")}>
-          <InputField title="Date: DD / MM / YYYY" value=" " className="" />
+          <InputField title="Date: DD / MM / YYYY" value={pdfStr(data.declarationDate)} className="" />
         </View>
       </View>
 

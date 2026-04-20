@@ -1,4 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
+import type { CorporateKycPdfData } from "../corporateKycPdfData";
+import { pdfChk, pdfStr } from "../corporateKycPdfData";
 import { CheckBoxRow } from "../../elements/CheckBoxRow";
 import InputField from "../../elements/TextFiled";
 import { tw } from "../../MdPdf";
@@ -6,8 +8,11 @@ import { tw } from "../../MdPdf";
 /**
  * Page 2 — layout aligned to KYC_P1_Non_Individuals_v1_P2.pdf (no logo / no footer).
  */
-function CorporateKycPdfPage2Content() {
+function CorporateKycPdfPage2Content({ data = {} }: { data?: CorporateKycPdfData }) {
   const pad = { paddingHorizontal: 24, paddingTop: 30, paddingBottom: 12 };
+  const poi = data.poaPermanent ?? data.poi ?? {};
+  const c = data.contact ?? {};
+  const ou = data.officeUse ?? {};
 
   return (
     <View style={[{ fontFamily: "Poppins" }, pad]}>
@@ -19,39 +24,39 @@ function CorporateKycPdfPage2Content() {
 
       <View style={tw("flex flex-row flex-start gap-1 flex-wrap")}>
         <View style={tw("w-[34%]")}>
-          <CheckBoxRow label="Certificate of Incorporation/Formation" checked={false} />
+          <CheckBoxRow label="Certificate of Incorporation/Formation" checked={pdfChk(poi.certificateOfIncorporation)} />
         </View>
         <View style={tw("w-[30%]")}>
-          <CheckBoxRow label="Registration Certificate" checked={false} />
+          <CheckBoxRow label="Registration Certificate" checked={pdfChk(poi.registrationCertificate)} />
         </View>
         <View style={tw("w-[34%] flex flex-row items-center gap-1")}>
-          <CheckBoxRow label="Other document" checked={false} />
+          <CheckBoxRow label="Other document" checked={pdfChk(poi.otherDocument)} />
           <View style={{ flex: 1 }}>
-            <InputField title="" value=" " className="w-[100%]" />
+            <InputField title="" value={pdfStr(data.otherPoaText)} className="w-[100%]" />
           </View>
         </View>
       </View>
 
       <View style={tw("flex flex-row flex-start gap-1 flex-wrap mt-1")}>
         <View style={tw("w-[34%]")}>
-          <CheckBoxRow label="Latest Telephone Bill # (Landline only)" checked={false} />
+          <CheckBoxRow label="Latest Telephone Bill # (Landline only)" checked={pdfChk(poi.telephoneBill)} />
         </View>
         <View style={tw("w-[30%]")}>
-          <CheckBoxRow label="Latest Electricity Bill #" checked={false} />
+          <CheckBoxRow label="Latest Electricity Bill #" checked={pdfChk(poi.electricityBill)} />
         </View>
         <View style={tw("w-[34%]")}>
-          <CheckBoxRow label="Latest Bank Account Statement #" checked={false} />
+          <CheckBoxRow label="Latest Bank Account Statement #" checked={pdfChk(poi.bankStatement)} />
         </View>
       </View>
 
       <View style={tw("flex flex-row flex-start gap-2 flex-wrap mt-1 items-end")}>
         <View style={tw("w-[55%]")}>
-          <CheckBoxRow label="Registered Lease / Sale Agreement of Office Premises" checked={false} />
+          <CheckBoxRow label="Registered Lease / Sale Agreement of Office Premises" checked={pdfChk(poi.registeredLease)} />
         </View>
         <View style={tw("w-[42%]")}>
           <InputField
             title="Validity / Expiry Date of POA (DD / MM / YYYY):*"
-            value=" "
+            value={pdfStr(data.poiExpiry)}
             className="w-[100%]"
           />
         </View>
@@ -59,10 +64,10 @@ function CorporateKycPdfPage2Content() {
 
       <View style={tw("flex flex-row flex-start gap-2 mt-1 items-end")}>
         <View style={tw("w-[40%]")}>
-          <CheckBoxRow label="Any other proof of address document" checked={false} />
+          <CheckBoxRow label="Any other proof of address document" checked={pdfChk(poi.anyOtherPoa)} />
         </View>
         <View style={{ flex: 1 }}>
-          <InputField title="" value=" " className="w-[100%]" />
+          <InputField title="" value={pdfStr(data.otherPoaText)} className="w-[100%]" />
         </View>
       </View>
 
@@ -75,26 +80,26 @@ function CorporateKycPdfPage2Content() {
       <View style={{ marginTop: 4 }}>
         <View style={tw("flex flex-row gap-2")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="Email ID:*" value=" " className="w-[100%]" />
+            <InputField title="Email ID:*" value={pdfStr(c.email)} className="w-[100%]" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Alternate Email ID:" value=" " className="w-[100%]" />
-          </View>
-        </View>
-        <View style={tw("flex flex-row gap-2 mt-1")}>
-          <View style={tw("w-[48%]")}>
-            <InputField title="Mobile No.:*" value=" " className="w-[100%]" />
-          </View>
-          <View style={tw("w-[48%]")}>
-            <InputField title="Alternate Mobile No.:" value=" " className="w-[100%]" />
+            <InputField title="Alternate Email ID:" value={pdfStr(c.alternateEmail)} className="w-[100%]" />
           </View>
         </View>
         <View style={tw("flex flex-row gap-2 mt-1")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="Fax:" value=" " className="w-[100%]" />
+            <InputField title="Mobile No.:*" value={pdfStr(c.mobile)} className="w-[100%]" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Telephone (Off):" value=" " className="w-[100%]" />
+            <InputField title="Alternate Mobile No.:" value={pdfStr(c.alternateMobile)} className="w-[100%]" />
+          </View>
+        </View>
+        <View style={tw("flex flex-row gap-2 mt-1")}>
+          <View style={tw("w-[48%]")}>
+            <InputField title="Fax:" value={pdfStr(c.fax)} className="w-[100%]" />
+          </View>
+          <View style={tw("w-[48%]")}>
+            <InputField title="Telephone (Off):" value={pdfStr(c.telephoneOff)} className="w-[100%]" />
           </View>
         </View>
       </View>
@@ -106,7 +111,7 @@ function CorporateKycPdfPage2Content() {
         </Text>
       </View>
       <View style={{ marginTop: 4 }}>
-        <InputField title="Number of Related Persons:*" value=" " className="w-[40%]" />
+        <InputField title="Number of Related Persons:*" value={pdfStr(data.annexuresRelatedPersonsCount)} className="w-[40%]" />
       </View>
 
       {/* 5. Remarks */}
@@ -114,7 +119,7 @@ function CorporateKycPdfPage2Content() {
         <Text style={tw("text-[8px] text-white font-[600]")}>5. Remarks</Text>
       </View>
       <View style={{ marginTop: 4 }}>
-        <InputField title="" value=" " className="w-[100%]" />
+        <InputField title="" value={pdfStr(data.remarks)} className="w-[100%]" />
       </View>
 
       {/* 6. Applicant Declaration */}
@@ -157,10 +162,10 @@ function CorporateKycPdfPage2Content() {
       </View>
       <View style={tw("flex flex-row gap-2 mt-1")}>
         <View style={tw("w-[48%]")}>
-          <InputField title="Date (DD / MM / YYYY):*" value=" " className="w-[90%]" />
+          <InputField title="Date (DD / MM / YYYY):*" value={pdfStr(data.declarationDate)} className="w-[90%]" />
         </View>
         <View style={tw("w-[48%]")}>
-          <InputField title="Place:*" value=" " className="w-[90%]" />
+          <InputField title="Place:*" value={pdfStr(data.declarationPlace)} className="w-[90%]" />
         </View>
       </View>
 
@@ -170,34 +175,34 @@ function CorporateKycPdfPage2Content() {
         <Text style={tw("text-[8px] text-white font-[600]")}>7. For Office Use Only</Text>
       </View>
       <View style={{ marginTop: 4 }}>
-        <InputField title="KYC Carried out by:" value=" " className="w-[90%]" />
+        <InputField title="KYC Carried out by:" value={pdfStr(ou.kycBy)} className="w-[90%]" />
         <View style={tw("flex flex-row gap-2 mt-1")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="KYC Date (DD / MM / YYYY):*" value=" " className="w-[100%]" />
+            <InputField title="KYC Date (DD / MM / YYYY):*" value={pdfStr(ou.kycDate)} className="w-[100%]" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Emp. Name:" value=" " className="w-[100%]" />
+            <InputField title="Emp. Name:" value={pdfStr(ou.empName)} className="w-[100%]" />
           </View>
         </View>
         <View style={tw("flex flex-row gap-2 mt-1")}>
           <View style={tw("w-[48%]")}>
-            <InputField title="Emp. Code:" value=" " className="w-[100%]" />
+            <InputField title="Emp. Code:" value={pdfStr(ou.empCode)} className="w-[100%]" />
           </View>
           <View style={tw("w-[48%]")}>
-            <InputField title="Emp. Designation:" value=" " className="w-[100%]" />
+            <InputField title="Emp. Designation:" value={pdfStr(ou.empDesignation)} className="w-[100%]" />
           </View>
         </View>
         <View style={{ marginTop: 4 }}>
-          <InputField title="Intermediary Details:*" value=" " className="w-[100%]" />
+          <InputField title="Intermediary Details:*" value={pdfStr(ou.intermediaryDetails)} className="w-[100%]" />
         </View>
         <View style={tw("flex flex-row flex-wrap gap-2 mt-1")}>
-          <CheckBoxRow label="Self certified document copies received (Originals Verified)" checked={false} />
+          <CheckBoxRow label="Self certified document copies received (Originals Verified)" checked={pdfChk(ou.selfCertifiedCopies)} />
         </View>
         <View style={tw("mt-1")}>
-          <CheckBoxRow label="True Copies of documents received (Attested)" checked={false} />
+          <CheckBoxRow label="True Copies of documents received (Attested)" checked={pdfChk(ou.trueCopiesAttested)} />
         </View>
         <View style={{ marginTop: 4 }}>
-          <InputField title="AMC / Intermediary Name OR Code:" value=" " className="w-[100%]" />
+          <InputField title="AMC / Intermediary Name OR Code:" value={pdfStr(ou.amcIntermediaryName)} className="w-[100%]" />
         </View>
         <View style={tw("flex flex-row justify-between gap-3 mt-2")}>
           <View style={tw("w-[45%] border border-gray-300 h-20 p-1")}>
