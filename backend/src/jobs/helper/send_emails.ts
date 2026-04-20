@@ -34,6 +34,10 @@ const getFormattedTimestamp = (): string => {
 
 import {
   addBankAccountsClearingCorporationsEmailQueue,
+  bankAccountSubmissionReceivedEmailQueue,
+  dematAccountSubmissionReceivedEmailQueue,
+  kycReminderNotStartedEmailQueue,
+  kycApprovedEmailQueue,
   emailAdminOtpSenderQueue,
   emailOtpSenderQueue,
   emailVerificationQueue,
@@ -231,6 +235,7 @@ export const sendKycSubmitAddClearingCorporationBankAccountsEmail = async (data:
   customerName: string;
   /** Optional queue delay in ms (Bull delay). */
   delayMs?: number;
+  title?: "Mr." | "Ms.";
 }) => {
   await addBankAccountsClearingCorporationsEmailQueue.add(
     {
@@ -256,6 +261,88 @@ export const sendKycSubmittedForVerificationEmail = async (data: {
     {
       ...data,
       subject: "KYC Submitted for Verification - MeraDhan",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendBankAccountSubmissionReceivedEmail = async (data: {
+  email: string;
+  customerName: string;
+  title?: "Mr." | "Ms.";
+  last4Digits: string;
+}) => {
+  await bankAccountSubmissionReceivedEmailQueue.add(
+    {
+      ...data,
+      subject: "Bank Account Submission Received - Verification Pending",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendDematAccountSubmissionReceivedEmail = async (data: {
+  email: string;
+  customerName: string;
+  title?: "Mr." | "Ms.";
+  dpId: string;
+  last4Digits: string;
+}) => {
+  await dematAccountSubmissionReceivedEmailQueue.add(
+    {
+      ...data,
+      subject: "Demat Account Submission Received – Verification Pending",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+    },
+  );
+};
+
+export const sendKycReminderNotStartedEmail = async (data: {
+  customerId: number;
+  email: string;
+  customerFullName: string;
+  title?: "Mr." | "Ms.";
+  startKycLink: string;
+  /** Optional queue delay in ms (Bull delay). */
+  delayMs?: number;
+}) => {
+  await kycReminderNotStartedEmailQueue.add(
+    {
+      ...data,
+      subject: "Complete Your KYC to Start Investing on MeraDhan",
+    },
+    {
+      removeOnComplete: true,
+      attempts: 1,
+      removeOnFail: true,
+      delay: data.delayMs,
+    },
+  );
+};
+
+export const sendKycApprovedEmail = async (data: {
+  customerId: number;
+  email: string;
+  customerFullName: string;
+  title?: "Mr." | "Ms.";
+  loginLink: string;
+}) => {
+  await kycApprovedEmailQueue.add(
+    {
+      ...data,
+      subject: "Your KYC Has Been Successfully Verified",
     },
     {
       removeOnComplete: true,

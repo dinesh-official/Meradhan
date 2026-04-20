@@ -2,6 +2,7 @@ import { db } from "@core/database/database";
 import { HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import { type Request, type Response } from "express";
+import { sendKycApprovedEmail } from "@jobs/helper/send_emails";
 
 export class NseWebhookController {
   /**
@@ -45,6 +46,71 @@ export class NseWebhookController {
         type: "CBRICS",
       },
     });
+
+    // KYC approved hook: CBRICS can notify unregistered participant approval via `unregList`.
+    // We treat workflowStatus/actualStatus == 1 as approved and transition customer KYC to VERIFIED (once).
+    try {
+      const unregList = (payload as { unregList?: Array<Record<string, unknown>> })?.unregList;
+      if (Array.isArray(unregList) && unregList.length) {
+        for (const item of unregList) {
+          const loginId = typeof item.loginId === "string" ? item.loginId : undefined;
+          const workflowStatus = item.workflowStatus;
+          const actualStatus = item.actualStatus;
+          const approved =
+            workflowStatus === 1 ||
+            actualStatus === 1 ||
+            String(workflowStatus ?? "") === "1" ||
+            String(actualStatus ?? "") === "1";
+
+          if (!approved || !loginId) continue;
+
+          const customer = await db.dataBase.customerProfileDataModel.findFirst({
+            where: { userName: loginId },
+            select: {
+              id: true,
+              kycStatus: true,
+              emailAddress: true,
+              firstName: true,
+              lastName: true,
+              gender: true,
+            },
+          });
+          if (!customer) continue;
+          if (customer.kycStatus === "VERIFIED") continue;
+
+          await db.dataBase.customerProfileDataModel.update({
+            where: { id: customer.id },
+            data: {
+              kycStatus: "VERIFIED",
+              kraStatus: "VERIFIED",
+              verifyDate: new Date(),
+            },
+          });
+
+          if (customer.emailAddress) {
+            const fullName =
+              `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
+              "Customer";
+            const title =
+              customer.gender === "MALE"
+                ? ("Mr." as const)
+                : customer.gender === "FEMALE"
+                  ? ("Ms." as const)
+                  : undefined;
+            await sendKycApprovedEmail({
+              customerId: customer.id,
+              email: customer.emailAddress,
+              customerFullName: fullName,
+              title,
+              loginLink: "https://www.meradhan.co/login",
+            });
+          }
+        }
+      }
+    } catch (e) {
+      logger.logError("CBRICS webhook: KYC approved hook failed", { error: e });
+    }
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: {
