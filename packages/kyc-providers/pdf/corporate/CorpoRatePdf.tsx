@@ -77,7 +77,7 @@ function CorpoRatePdf({ data }: { data?: CorporateKycPdfData }) {
     });
     return (
         <Document>
-            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+            <Page size="A4" style={{ fontFamily: "Poppins" }} dpi={270} >
                 <CorporateKycPdfPage1Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
@@ -98,7 +98,7 @@ function CorpoRatePdf({ data }: { data?: CorporateKycPdfData }) {
             <Page size="A4" style={{ fontFamily: "Poppins" }}>
                 <CorporateKycPdfPage7Content data={pdfData} />
             </Page>
-            <Page size="A4" style={{ fontFamily: "Poppins" }}>
+            <Page size="A4" orientation="landscape" style={{ fontFamily: "Poppins" }}>
                 <CorporateKycPdfPage8Content data={pdfData} />
             </Page>
             <Page size="A4" style={{ fontFamily: "Poppins" }}>

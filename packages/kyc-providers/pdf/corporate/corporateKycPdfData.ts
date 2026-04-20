@@ -175,6 +175,9 @@ export type CorporateKycPdfData = {
       aadhar: string;
       address: string;
       relationship: string;
+      passportPhotoAttached: boolean;
+      panCopyAttached: boolean;
+      aadharCopyAttached: boolean;
       pep: boolean;
       rpep: boolean;
       pepNo: boolean;
@@ -324,7 +327,7 @@ export function mapCorporateKycResponseToPdfData(kyc: unknown): CorporateKycPdfD
 
   const bankAccounts = mapBankAccounts(k.bankAccounts);
   const dematAccounts = mapDematAccounts(k.dematAccounts);
-  const promoterRows = mapPromoterRows(k.directors, k.promoters);
+  const promoterRows = mapPromoterRows(k.directors, k.promoters, k.partners);
 
   const relatedPerson = mapFirstDirector(k.directors);
 
@@ -452,12 +455,19 @@ function mapDematAccounts(raw: unknown): CorporateKycPdfData["dematAccounts"] {
   });
 }
 
-function mapPromoterRows(directors: unknown, promoters: unknown): CorporateKycPdfData["promoterRows"] {
-  const list = Array.isArray(directors) && (directors as unknown[]).length
-    ? (directors as unknown[])
-    : Array.isArray(promoters)
-      ? (promoters as unknown[])
-      : [];
+function mapPromoterRows(
+  directors: unknown,
+  promoters: unknown,
+  partners: unknown
+): CorporateKycPdfData["promoterRows"] {
+  const list =
+    Array.isArray(directors) && (directors as unknown[]).length
+      ? (directors as unknown[])
+      : Array.isArray(promoters) && (promoters as unknown[]).length
+        ? (promoters as unknown[])
+        : Array.isArray(partners)
+          ? (partners as unknown[])
+          : [];
   return list.slice(0, 4).map((p) => {
     const x = p as Record<string, unknown>;
     const pep = String(x.pepDeclaration ?? "").toUpperCase();
@@ -468,6 +478,9 @@ function mapPromoterRows(directors: unknown, promoters: unknown): CorporateKycPd
       aadhar: (x.aadharNumber as string) ?? undefined,
       address: (x.address as string) ?? undefined,
       relationship: (x.designation as string) ?? undefined,
+      passportPhotoAttached: hasUrl(x.passportPhotoFileUrl),
+      panCopyAttached: hasUrl(x.panCopyFileUrl),
+      aadharCopyAttached: hasUrl(x.aadharCopyFileUrl),
       pep: pep === "PEP" || pep === "YES",
       rpep: pep.includes("RELATED"),
       pepNo: pep === "NO",
