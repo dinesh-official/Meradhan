@@ -48,19 +48,14 @@ export class NseWebhookController {
     });
 
     // KYC approved hook: CBRICS can notify unregistered participant approval via `unregList`.
-    // We treat workflowStatus/actualStatus == 1 as approved and transition customer KYC to VERIFIED (once).
+    // Only treat actualStatus == 4 as approved and transition customer KYC to VERIFIED (once).
     try {
       const unregList = (payload as { unregList?: Array<Record<string, unknown>> })?.unregList;
       if (Array.isArray(unregList) && unregList.length) {
         for (const item of unregList) {
           const loginId = typeof item.loginId === "string" ? item.loginId : undefined;
-          const workflowStatus = item.workflowStatus;
           const actualStatus = item.actualStatus;
-          const approved =
-            workflowStatus === 1 ||
-            actualStatus === 1 ||
-            String(workflowStatus ?? "") === "1" ||
-            String(actualStatus ?? "") === "1";
+          const approved = actualStatus === 4 || String(actualStatus ?? "") === "4";
 
           if (!approved || !loginId) continue;
 
