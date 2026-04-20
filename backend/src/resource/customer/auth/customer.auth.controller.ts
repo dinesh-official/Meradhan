@@ -108,7 +108,7 @@ export class CustomerAuthController {
       userName: userData?.firstName + " " + userData?.lastName,
     });
 
-    // KYC reminder (not started) — 24 days after signup verification.
+    // KYC reminder (not started) — 24 hours after signup verification.
     // Will be skipped at send-time if KYC has already started/completed.
     try {
       const fullName = `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim() || "Customer";
@@ -128,7 +128,7 @@ export class CustomerAuthController {
         customerFullName: fullName,
         title,
         startKycLink: "https://www.meradhan.co/dashboard/kyc",
-        delayMs: 24 * 24 * 60 * 60 * 1000,
+        delayMs: 24 * 60 * 60 * 1000,
       });
     } catch (e) {
       console.log(e);
