@@ -23,10 +23,24 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
     correspondenceFullAddress: payload.correspondenceFullAddress ?? undefined,
     correspondenceLine1: payload.correspondenceLine1 ?? undefined,
     correspondenceLine2: payload.correspondenceLine2 ?? undefined,
+    correspondenceLine3: payload.correspondenceLine3 ?? undefined,
     correspondenceCity: payload.correspondenceCity ?? undefined,
     correspondenceDistrict: payload.correspondenceDistrict ?? undefined,
     correspondencePinCode: payload.correspondencePinCode ?? undefined,
     correspondenceState: payload.correspondenceState ?? undefined,
+    correspondenceAddressProofCopyUrl:
+      payload.correspondenceAddressProofCopyUrl ?? undefined,
+
+    registeredFullAddress: payload.registeredFullAddress ?? undefined,
+    registeredLine1: payload.registeredLine1 ?? undefined,
+    registeredLine2: payload.registeredLine2 ?? undefined,
+    registeredLine3: payload.registeredLine3 ?? undefined,
+    registeredCity: payload.registeredCity ?? undefined,
+    registeredDistrict: payload.registeredDistrict ?? undefined,
+    registeredPinCode: payload.registeredPinCode ?? undefined,
+    registeredState: payload.registeredState ?? undefined,
+    registeredAddressProofCopyUrl:
+      payload.registeredAddressProofCopyUrl ?? undefined,
     balanceSheetCopyUrl: payload.balanceSheetCopyUrl ?? undefined,
     certificateOfIncorporationUrl: payload.certificateOfIncorporationUrl ?? undefined,
     memorandumCopyUrl: payload.memorandumCopyUrl ?? undefined,
@@ -42,6 +56,7 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
     directorsListCopyUrl: payload.directorsListCopyUrl ?? undefined,
     powerOfAttorneyCopyUrl: payload.powerOfAttorneyCopyUrl ?? undefined,
     documentsType: payload.documentsType ?? undefined,
+    termsAndConditionsUrl: payload.termsAndConditionsUrl ?? undefined,
     fatcaApplicable: payload.fatcaApplicable ?? false,
     fatcaEntityName: payload.fatcaEntityName ?? undefined,
     fatcaCountryOfIncorporation: payload.fatcaCountryOfIncorporation ?? undefined,
@@ -78,6 +93,10 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
       create: (payload.directors ?? []).map((d) => ({
         fullName: d.fullName,
         pan: d.pan ?? undefined,
+        panCopyFileUrl: d.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: d.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: d.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: d.pepDeclaration ?? undefined,
         designation: d.designation ?? undefined,
         din: d.din ?? undefined,
         email: d.email || undefined,
@@ -88,6 +107,10 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
       create: (payload.promoters ?? []).map((p) => ({
         fullName: p.fullName,
         pan: p.pan ?? undefined,
+        panCopyFileUrl: (p as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: (p as unknown as { aadharCopyFileUrl?: string }).aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: (p as unknown as { passportPhotoFileUrl?: string }).passportPhotoFileUrl ?? undefined,
+        pepDeclaration: (p as unknown as { pepDeclaration?: string }).pepDeclaration ?? undefined,
         designation: p.designation ?? undefined,
         din: p.din ?? undefined,
         email: p.email || undefined,
@@ -98,6 +121,14 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
       create: (payload.authorisedSignatories ?? []).map((s) => ({
         fullName: s.fullName,
         pan: s.pan,
+        panCopyFileUrl:
+          (s as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl:
+          (s as unknown as { aadharCopyFileUrl?: string }).aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl:
+          (s as unknown as { passportPhotoFileUrl?: string }).passportPhotoFileUrl ?? undefined,
+        pepDeclaration:
+          (s as unknown as { pepDeclaration?: string }).pepDeclaration ?? undefined,
         designation: s.designation ?? undefined,
         din: s.din ?? undefined,
         email: s.email,
@@ -139,10 +170,24 @@ export class CorporateKycService {
         correspondenceFullAddress: payload.correspondenceFullAddress ?? undefined,
         correspondenceLine1: payload.correspondenceLine1 ?? undefined,
         correspondenceLine2: payload.correspondenceLine2 ?? undefined,
+        correspondenceLine3: payload.correspondenceLine3 ?? undefined,
         correspondenceCity: payload.correspondenceCity ?? undefined,
         correspondenceDistrict: payload.correspondenceDistrict ?? undefined,
         correspondencePinCode: payload.correspondencePinCode ?? undefined,
         correspondenceState: payload.correspondenceState ?? undefined,
+        correspondenceAddressProofCopyUrl:
+          payload.correspondenceAddressProofCopyUrl ?? undefined,
+
+        registeredFullAddress: payload.registeredFullAddress ?? undefined,
+        registeredLine1: payload.registeredLine1 ?? undefined,
+        registeredLine2: payload.registeredLine2 ?? undefined,
+        registeredLine3: payload.registeredLine3 ?? undefined,
+        registeredCity: payload.registeredCity ?? undefined,
+        registeredDistrict: payload.registeredDistrict ?? undefined,
+        registeredPinCode: payload.registeredPinCode ?? undefined,
+        registeredState: payload.registeredState ?? undefined,
+        registeredAddressProofCopyUrl:
+          payload.registeredAddressProofCopyUrl ?? undefined,
         balanceSheetCopyUrl: payload.balanceSheetCopyUrl ?? undefined,
         certificateOfIncorporationUrl:
           payload.certificateOfIncorporationUrl ?? undefined,
@@ -161,6 +206,7 @@ export class CorporateKycService {
         directorsListCopyUrl: payload.directorsListCopyUrl ?? undefined,
         powerOfAttorneyCopyUrl: payload.powerOfAttorneyCopyUrl ?? undefined,
         documentsType: payload.documentsType ?? undefined,
+        termsAndConditionsUrl: payload.termsAndConditionsUrl ?? undefined,
         fatcaApplicable: payload.fatcaApplicable ?? false,
         fatcaEntityName: payload.fatcaEntityName ?? undefined,
         fatcaCountryOfIncorporation:
@@ -200,6 +246,10 @@ export class CorporateKycService {
           create: (payload.directors ?? []).map((d) => ({
             fullName: d.fullName,
             pan: d.pan ?? undefined,
+            panCopyFileUrl: d.panCopyFileUrl ?? undefined,
+            aadharCopyFileUrl: d.aadharCopyFileUrl ?? undefined,
+            passportPhotoFileUrl: d.passportPhotoFileUrl ?? undefined,
+            pepDeclaration: d.pepDeclaration ?? undefined,
             designation: d.designation ?? undefined,
             din: d.din ?? undefined,
             email: d.email || undefined,
@@ -211,6 +261,10 @@ export class CorporateKycService {
           create: (payload.promoters ?? []).map((p) => ({
             fullName: p.fullName,
             pan: p.pan ?? undefined,
+            panCopyFileUrl: (p as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
+            aadharCopyFileUrl: (p as unknown as { aadharCopyFileUrl?: string }).aadharCopyFileUrl ?? undefined,
+            passportPhotoFileUrl: (p as unknown as { passportPhotoFileUrl?: string }).passportPhotoFileUrl ?? undefined,
+            pepDeclaration: (p as unknown as { pepDeclaration?: string }).pepDeclaration ?? undefined,
             designation: p.designation ?? undefined,
             din: p.din ?? undefined,
             email: p.email || undefined,
@@ -222,6 +276,14 @@ export class CorporateKycService {
           create: (payload.authorisedSignatories ?? []).map((s) => ({
             fullName: s.fullName,
             pan: s.pan,
+            panCopyFileUrl:
+              (s as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
+            aadharCopyFileUrl:
+              (s as unknown as { aadharCopyFileUrl?: string }).aadharCopyFileUrl ?? undefined,
+            passportPhotoFileUrl:
+              (s as unknown as { passportPhotoFileUrl?: string }).passportPhotoFileUrl ?? undefined,
+            pepDeclaration:
+              (s as unknown as { pepDeclaration?: string }).pepDeclaration ?? undefined,
             designation: s.designation ?? undefined,
             din: s.din ?? undefined,
             email: s.email,
@@ -257,98 +319,7 @@ export class CorporateKycService {
     return this.mapToResponse(created);
   }
 
-  private mapToResponse(row: {
-    id: number;
-    customerProfileDataModelId: number;
-    entityName: string;
-    dateOfCommencementOfBusiness: Date | null;
-    countryOfIncorporation: string | null;
-    panCopyFileUrl: string | null;
-    entityConstitutionType: string | null;
-    otherConstitutionType: string | null;
-    dateOfIncorporation: Date | null;
-    placeOfIncorporation: string | null;
-    panNumber: string | null;
-    cinOrRegistrationNumber: string | null;
-    correspondenceFullAddress: string | null;
-    correspondenceLine1: string | null;
-    correspondenceLine2: string | null;
-    correspondenceCity: string | null;
-    correspondenceDistrict: string | null;
-    correspondencePinCode: string | null;
-    correspondenceState: string | null;
-    balanceSheetCopyUrl: string | null;
-    certificateOfIncorporationUrl: string | null;
-    memorandumCopyUrl: string | null;
-    boardResolutionCopyUrl: string | null;
-    gstCopyUrl: string | null;
-    clientMasterHoldingCopyUrl: string | null;
-    annualIncome: string | null;
-    shareHoldingPatternCopyUrl: string | null;
-    certificateOfCommencementOfBizUrl: string | null;
-    articlesOfAssociationUrl: string | null;
-    gstNumber: string | null;
-    directorsListCopyUrl: string | null;
-    powerOfAttorneyCopyUrl: string | null;
-    documentsType: string | null;
-    fatcaApplicable: boolean;
-    fatcaEntityName: string | null;
-    fatcaCountryOfIncorporation: string | null;
-    fatcaEntityType: string | null;
-    fatcaClassification: string | null;
-    giin: string | null;
-    taxResidencyOfEntity: string | null;
-    declarationByAuthorisedSignatory: boolean;
-    bankAccounts: Array<{
-      id: number;
-      accountHolderName: string;
-      accountNumber: string;
-      branch: string | null;
-      bankName: string;
-      ifscCode: string;
-      bankProofFileUrls: unknown;
-      isPrimaryAccount: boolean;
-    }>;
-    dematAccounts: Array<{
-      id: number;
-      depository: string;
-      accountType: string | null;
-      dpId: string;
-      clientId: string;
-      accountHolderName: string;
-      dematProofFileUrl: string | null;
-      isPrimary: boolean;
-    }>;
-    directors: Array<{
-      id: number;
-      fullName: string;
-      pan: string | null;
-      designation: string | null;
-      din: string | null;
-      email: string | null;
-      mobile: string | null;
-    }>;
-    promoters: Array<{
-      id: number;
-      fullName: string;
-      pan: string | null;
-      designation: string | null;
-      din: string | null;
-      email: string | null;
-      mobile: string | null;
-    }>;
-    authorisedSignatories: Array<{
-      id: number;
-      fullName: string;
-      pan: string;
-      designation: string | null;
-      din: string | null;
-      email: string;
-      mobile: string | null;
-    }>;
-    createdAt: Date;
-    updatedAt: Date;
-  }) {
+  private mapToResponse(row: any) {
     return {
       id: row.id,
       customerId: row.customerProfileDataModelId,
@@ -365,10 +336,23 @@ export class CorporateKycService {
       correspondenceFullAddress: row.correspondenceFullAddress ?? undefined,
       correspondenceLine1: row.correspondenceLine1 ?? undefined,
       correspondenceLine2: row.correspondenceLine2 ?? undefined,
+      correspondenceLine3: row.correspondenceLine3 ?? undefined,
       correspondenceCity: row.correspondenceCity ?? undefined,
       correspondenceDistrict: row.correspondenceDistrict ?? undefined,
       correspondencePinCode: row.correspondencePinCode ?? undefined,
       correspondenceState: row.correspondenceState ?? undefined,
+      correspondenceAddressProofCopyUrl:
+        row.correspondenceAddressProofCopyUrl ?? undefined,
+      registeredFullAddress: row.registeredFullAddress ?? undefined,
+      registeredLine1: row.registeredLine1 ?? undefined,
+      registeredLine2: row.registeredLine2 ?? undefined,
+      registeredLine3: row.registeredLine3 ?? undefined,
+      registeredCity: row.registeredCity ?? undefined,
+      registeredDistrict: row.registeredDistrict ?? undefined,
+      registeredPinCode: row.registeredPinCode ?? undefined,
+      registeredState: row.registeredState ?? undefined,
+      registeredAddressProofCopyUrl:
+        row.registeredAddressProofCopyUrl ?? undefined,
       balanceSheetCopyUrl: row.balanceSheetCopyUrl ?? undefined,
       certificateOfIncorporationUrl:
         row.certificateOfIncorporationUrl ?? undefined,
@@ -385,6 +369,7 @@ export class CorporateKycService {
       directorsListCopyUrl: row.directorsListCopyUrl ?? undefined,
       powerOfAttorneyCopyUrl: row.powerOfAttorneyCopyUrl ?? undefined,
       documentsType: row.documentsType ?? undefined,
+      termsAndConditionsUrl: row.termsAndConditionsUrl ?? undefined,
       fatcaApplicable: row.fatcaApplicable,
       fatcaEntityName: row.fatcaEntityName ?? undefined,
       fatcaCountryOfIncorporation: row.fatcaCountryOfIncorporation ?? undefined,
@@ -393,7 +378,7 @@ export class CorporateKycService {
       giin: row.giin ?? undefined,
       taxResidencyOfEntity: row.taxResidencyOfEntity ?? undefined,
       declarationByAuthorisedSignatory: row.declarationByAuthorisedSignatory,
-      bankAccounts: row.bankAccounts.map((a) => ({
+      bankAccounts: (row.bankAccounts as any[]).map((a: any) => ({
         id: a.id,
         accountHolderName: a.accountHolderName,
         accountNumber: a.accountNumber,
@@ -405,7 +390,7 @@ export class CorporateKycService {
           : [],
         isPrimaryAccount: a.isPrimaryAccount,
       })),
-      dematAccounts: row.dematAccounts.map((d) => ({
+      dematAccounts: (row.dematAccounts as any[]).map((d: any) => ({
         id: d.id,
         depository: d.depository,
         accountType: d.accountType ?? undefined,
@@ -415,28 +400,40 @@ export class CorporateKycService {
         dematProofFileUrl: d.dematProofFileUrl ?? undefined,
         isPrimary: d.isPrimary,
       })),
-      directors: row.directors.map((d) => ({
+      directors: (row.directors as any[]).map((d: any) => ({
         id: d.id,
         fullName: d.fullName,
         pan: d.pan ?? undefined,
+        panCopyFileUrl: d.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: d.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: d.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: d.pepDeclaration ?? undefined,
         designation: d.designation ?? undefined,
         din: d.din ?? undefined,
         email: d.email ?? undefined,
         mobile: d.mobile ?? undefined,
       })),
-      promoters: row.promoters.map((p) => ({
+      promoters: (row.promoters as any[]).map((p: any) => ({
         id: p.id,
         fullName: p.fullName,
         pan: p.pan ?? undefined,
+        panCopyFileUrl: p.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: p.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: p.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: p.pepDeclaration ?? undefined,
         designation: p.designation ?? undefined,
         din: p.din ?? undefined,
         email: p.email ?? undefined,
         mobile: p.mobile ?? undefined,
       })),
-      authorisedSignatories: row.authorisedSignatories.map((s) => ({
+      authorisedSignatories: (row.authorisedSignatories as any[]).map((s: any) => ({
         id: s.id,
         fullName: s.fullName,
         pan: s.pan,
+        panCopyFileUrl: s.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: s.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: s.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: s.pepDeclaration ?? undefined,
         designation: s.designation ?? undefined,
         din: s.din ?? undefined,
         email: s.email,

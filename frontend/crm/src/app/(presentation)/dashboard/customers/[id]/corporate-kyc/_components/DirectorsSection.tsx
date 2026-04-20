@@ -2,13 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
 import type { CorporateKycDirectorPayload } from "@root/schema";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
+import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 
 export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, errors, setDirector, addDirector, removeDirector } = hook;
+  const { uploadFile } = useCorporateKycFileUpload();
   const list = form.directors ?? [];
   const rowErrors = (i: number): Record<string, string[]> =>
     (errors.directors?.[i] ?? {}) as Record<string, string[]>;
@@ -52,6 +55,30 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
               label="PAN"
               value={dir.pan ?? ""}
               onChangeAction={(v) => setDirector(index, { pan: v })}
+            />
+            <FileUploadField
+              label="Passport size photo (optional)"
+              value={dir.passportPhotoFileUrl ?? ""}
+              onChangeAction={(v) => setDirector(index, { passportPhotoFileUrl: v })}
+              onUpload={(file) => uploadFile(file, "corporate-kyc/directors")}
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
+            />
+            <FileUploadField
+              label="Aadhaar copy (optional)"
+              value={dir.aadharCopyFileUrl ?? ""}
+              onChangeAction={(v) => setDirector(index, { aadharCopyFileUrl: v })}
+              onUpload={(file) => uploadFile(file, "corporate-kyc/directors")}
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
+            />
+            <FileUploadField
+              label="PAN copy (optional)"
+              value={dir.panCopyFileUrl ?? ""}
+              onChangeAction={(v) => setDirector(index, { panCopyFileUrl: v })}
+              onUpload={(file) => uploadFile(file, "corporate-kyc/directors")}
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
             />
             <InputField
               label="Designation"

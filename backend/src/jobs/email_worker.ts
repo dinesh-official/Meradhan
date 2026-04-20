@@ -2,7 +2,7 @@ import { meraDhanEmailVerificationEmailText } from "@emails/text/meraDhanEmailVe
 import { meraDhanForgotPasswordEmailText } from "@emails/text/meraDhanForgotPasswordEmailText";
 import { meraDhanPasswordResetSuccessEmailText } from "@emails/text/meraDhanPasswordResetSuccessEmailText";
 import { meraDhanWelcomeEmailText } from "@emails/text/meraDhanWelcomeEmailText";
-import { meraDhanAddBankAccountsClearingCorporationsEmailText } from "@emails/text/meraDhanAddBankAccountsClearingCorporationsEmailText";
+import { meraDhanKycSubmitAddClearingCorporationBankAccountsEmailText } from "@emails/text/meraDhanKycSubmitAddClearingCorporationBankAccountsEmailText";
 import { meraDhanKycSubmittedForVerificationEmailText } from "@emails/text/meraDhanKycSubmittedForVerificationEmailText";
 import type { Job } from "bull";
 import { EmailCommunication } from "../communication/email_communication";
@@ -104,7 +104,9 @@ startQueueWorker(addBankAccountsClearingCorporationsEmailQueue, async (job: Job)
   await emailSend.sendEmail({
     to: email,
     subject,
-    html: meraDhanAddBankAccountsClearingCorporationsEmailText({ customerName }),
+    html: meraDhanKycSubmitAddClearingCorporationBankAccountsEmailText({
+      customerName,
+    }),
   });
 });
 

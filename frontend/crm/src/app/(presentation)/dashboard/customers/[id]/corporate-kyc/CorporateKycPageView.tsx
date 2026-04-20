@@ -21,6 +21,7 @@ import { DocumentsSection } from "./_components/DocumentsSection";
 import { EntityDetailsSection } from "./_components/EntityDetailsSection";
 import { FatcaSection } from "./_components/FatcaSection";
 import { PromotersSection } from "./_components/PromotersSection";
+import { RegisteredAddressSection } from "./_components/RegisteredAddressSection";
 
 export default function CorporateKycPageView({
   customerId,
@@ -127,6 +128,7 @@ export default function CorporateKycPageView({
       <div className="flex flex-col gap-6">
         <EntityDetailsSection hook={hook} />
         <CorrespondenceAddressSection hook={hook} />
+        <RegisteredAddressSection hook={hook} />
         <DocumentsSection hook={hook} />
         <FatcaSection hook={hook} />
         <BankAccountsSection hook={hook} />

@@ -17,6 +17,7 @@ export const CorporateEntityTypeEnum = z.enum([
 ]);
 
 export const DepositoryNameEnum = z.enum(["NSDL", "CDSL"]);
+export const PepDeclarationEnum = z.enum(["PEP", "RPEP", "NO"]);
 
 // Nested schemas for one-to-many relations
 export const corporateKycBankAccountSchema = z.object({
@@ -48,6 +49,10 @@ export const corporateKycDirectorSchema = z.object({
   id: z.number().optional(),
   fullName: z.string().min(1, "Director full name is required"),
   pan: z.string().optional(),
+  panCopyFileUrl: z.string().optional(),
+  aadharCopyFileUrl: z.string().optional(),
+  passportPhotoFileUrl: z.string().optional(),
+  pepDeclaration: PepDeclarationEnum.optional(),
   designation: z.string().optional(),
   din: z.string().optional(),
   email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
@@ -58,6 +63,10 @@ export const corporateKycPromoterSchema = z.object({
   id: z.number().optional(),
   fullName: z.string().min(1, "Promoter full name is required"),
   pan: z.string().optional(),
+  panCopyFileUrl: z.string().optional(),
+  aadharCopyFileUrl: z.string().optional(),
+  passportPhotoFileUrl: z.string().optional(),
+  pepDeclaration: PepDeclarationEnum.optional(),
   designation: z.string().optional(),
   din: z.string().optional(),
   email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
@@ -68,6 +77,10 @@ export const corporateKycAuthorisedSignatorySchema = z.object({
   id: z.number().optional(),
   fullName: z.string().min(1, "Full name is required"),
   pan: z.string().min(1, "PAN is required"),
+  panCopyFileUrl: z.string().optional(),
+  aadharCopyFileUrl: z.string().optional(),
+  passportPhotoFileUrl: z.string().optional(),
+  pepDeclaration: PepDeclarationEnum.optional(),
   designation: z.string().optional(),
   din: z.string().optional(),
   email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -96,10 +109,23 @@ export const createCorporateKycSchema = z.object({
   correspondenceFullAddress: z.string().optional(),
   correspondenceLine1: z.string().optional(),
   correspondenceLine2: z.string().optional(),
+  correspondenceLine3: z.string().optional(),
   correspondenceCity: z.string().optional(),
   correspondenceDistrict: z.string().optional(),
   correspondencePinCode: z.string().optional(),
   correspondenceState: z.string().optional(),
+  correspondenceAddressProofCopyUrl: z.string().optional(),
+
+  // Registered address
+  registeredFullAddress: z.string().optional(),
+  registeredLine1: z.string().optional(),
+  registeredLine2: z.string().optional(),
+  registeredLine3: z.string().optional(),
+  registeredCity: z.string().optional(),
+  registeredDistrict: z.string().optional(),
+  registeredPinCode: z.string().optional(),
+  registeredState: z.string().optional(),
+  registeredAddressProofCopyUrl: z.string().optional(),
 
   // Documents
   balanceSheetCopyUrl: z.string().optional(),
@@ -116,6 +142,9 @@ export const createCorporateKycSchema = z.object({
   directorsListCopyUrl: z.string().optional(),
   powerOfAttorneyCopyUrl: z.string().optional(),
   documentsType: z.string().optional(),
+
+  // Attachments / verifications (uploads)
+  termsAndConditionsUrl: z.string().optional(),
 
   // FATCA
   fatcaApplicable: z.boolean().default(false),

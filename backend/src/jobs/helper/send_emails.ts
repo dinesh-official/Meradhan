@@ -226,9 +226,11 @@ export const sendEmailVerificationLink = async (data: {
   );
 };
 
-export const sendAddClearingCorporationBankAccountsEmail = async (data: {
+export const sendKycSubmitAddClearingCorporationBankAccountsEmail = async (data: {
   email: string;
   customerName: string;
+  /** Optional queue delay in ms (Bull delay). */
+  delayMs?: number;
 }) => {
   await addBankAccountsClearingCorporationsEmailQueue.add(
     {
@@ -240,6 +242,7 @@ export const sendAddClearingCorporationBankAccountsEmail = async (data: {
       removeOnComplete: true,
       attempts: 1,
       removeOnFail: true,
+      delay: data.delayMs,
     },
   );
 };

@@ -107,6 +107,8 @@ export class OrderPdfService {
         settlementDate: pricing.settlementDate,
         settlementNumber: settlementNumber,
         orderType: "One to One (OTO) on RFQ Platform of the Exchange",
+        // Required by PDF generator typing
+        settlementType: 1,
         settlementDateTime: new Date(requestDate || new Date()).toLocaleString("en-GB", {
           day: "2-digit",
           month: "2-digit",
