@@ -3,8 +3,9 @@ import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { AppError } from "@utils/error/AppError";
+import { sendBankAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
 import type z from "zod";
-import { sendAddClearingCorporationBankAccountsEmail } from "@jobs/helper/send_emails";
+import { sendDematAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
 
 const KYC_VERIFIED_REQUIRED_MSG =
   "You cannot add, update, or delete bank or demat accounts until your KYC is verified.";
@@ -81,21 +82,38 @@ export class CustomerManageAccountsService {
       },
     });
 
-    // Email alert to customer after successful add (queued; doesn't block API).
+    // Acknowledgement email (KYC verified users only reach this point)
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: { firstName: true, lastName: true, emailAddress: true },
+        select: {
+          emailAddress: true,
+          firstName: true,
+          lastName: true,
+          gender: true,
+        },
       });
       if (customer?.emailAddress) {
-        const customerName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
-        await sendAddClearingCorporationBankAccountsEmail({
+        const customerName =
+          `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
+          "Customer";
+        const title =
+          customer.gender === "MALE"
+            ? ("Mr." as const)
+            : customer.gender === "FEMALE"
+              ? ("Ms." as const)
+              : undefined;
+        const last4Digits = String(bankDetails.accountNumber ?? "")
+          .replace(/\s+/g, "")
+          .slice(-4);
+        await sendBankAccountSubmissionReceivedEmail({
           email: customer.emailAddress,
-          customerName: customerName || "Customer",
+          customerName,
+          title,
+          last4Digits: last4Digits || "----",
         });
       }
     } catch (e) {
-      // Non-critical; bank add should still succeed even if email fails.
       console.log(e);
     }
 
@@ -231,6 +249,43 @@ export class CustomerManageAccountsService {
         },
       },
     });
+
+    // Acknowledgement email (KYC verified users only reach this point)
+    try {
+      const customer = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id: customerId },
+        select: {
+          emailAddress: true,
+          firstName: true,
+          lastName: true,
+          gender: true,
+        },
+      });
+      if (customer?.emailAddress) {
+        const customerName =
+          `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
+          "Customer";
+        const title =
+          customer.gender === "MALE"
+            ? ("Mr." as const)
+            : customer.gender === "FEMALE"
+              ? ("Ms." as const)
+              : undefined;
+        const last4Digits = String(dematDetails.clientId ?? "")
+          .replace(/\s+/g, "")
+          .slice(-4);
+        await sendDematAccountSubmissionReceivedEmail({
+          email: customer.emailAddress,
+          customerName,
+          title,
+          dpId: dematDetails.dpId,
+          last4Digits: last4Digits || "----",
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
     try {
       await this.cbricsManager.addDpAccount(customerId, {
         clientId: dematDetails.clientId,

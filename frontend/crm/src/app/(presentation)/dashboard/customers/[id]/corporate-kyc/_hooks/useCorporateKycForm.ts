@@ -55,6 +55,9 @@ const defaultDematAccount = (): CorporateKycDematAccountPayload => ({
 const defaultDirector = (): CorporateKycDirectorPayload => ({
   fullName: "",
   pan: "",
+  panCopyFileUrl: "",
+  aadharCopyFileUrl: "",
+  passportPhotoFileUrl: "",
   designation: "",
   din: "",
   email: "",

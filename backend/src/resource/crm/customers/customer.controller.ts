@@ -1,5 +1,5 @@
 import { appSchema } from "@root/schema";
-import { HttpStatus } from "@utils/error/AppError";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { CustomerProfileRepo } from "./customer.repo";
 import { CustomerProfileService } from "./customer.service";
@@ -160,6 +160,38 @@ export class CustomerProfileController {
       statusCode: HttpStatus.OK,
       responseData: response,
     });
+  }
+
+  async downloadCorporateKycPdf(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+    try {
+      const { buffer, filename } =
+        await this.profileService.getCorporatePdf(customerId);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.send(buffer);
+    } catch (err) {
+      console.error("Corporate KYC PDF failed:", err);
+      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+        res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          message: err.message,
+        });
+        return;
+      }
+      res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error ? err.message : "Failed to generate corporate KYC PDF",
+      });
+    }
   }
 
   async saveCorporateKyc(req: Request, res: Response): Promise<void> {

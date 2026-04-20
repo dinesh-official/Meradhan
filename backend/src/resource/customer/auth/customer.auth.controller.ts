@@ -9,6 +9,7 @@ import { db } from "@core/database/database";
 import {
   sendCustomerSignupOtpEmail,
   sendCustomerWelcomeEmail,
+  sendKycReminderNotStartedEmail,
 } from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
 import {
@@ -106,6 +107,32 @@ export class CustomerAuthController {
       email: user.email,
       userName: userData?.firstName + " " + userData?.lastName,
     });
+
+    // KYC reminder (not started) — 24 days after signup verification.
+    // Will be skipped at send-time if KYC has already started/completed.
+    try {
+      const fullName = `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim() || "Customer";
+      const profile = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id: user.id },
+        select: { gender: true },
+      });
+      const title =
+        profile?.gender === "MALE"
+          ? ("Mr." as const)
+          : profile?.gender === "FEMALE"
+            ? ("Ms." as const)
+            : undefined;
+      await sendKycReminderNotStartedEmail({
+        customerId: user.id,
+        email: user.email,
+        customerFullName: fullName,
+        title,
+        startKycLink: "https://www.meradhan.co/dashboard/kyc",
+        delayMs: 24 * 24 * 60 * 60 * 1000,
+      });
+    } catch (e) {
+      console.log(e);
+    }
     await addMeradhanLoginBasedAuditLog(req, {
       userId: user.id,
       sessionType: "SIGNUP_VERIFIED",

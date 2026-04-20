@@ -12,6 +12,7 @@ import type {
   UpdateCustomerResponse,
 } from "../../../types/response.types";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
+import { ApiError } from "../../connection/error";
 import type { BaseResponseData } from "../../../types/base";
 
 export interface TCrmCustomerInterface {
@@ -46,6 +47,12 @@ export interface TCrmCustomerInterface {
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<GetCorporateKycResponse>>;
 
+  /** Binary PDF — use `responseType: "blob"` internally. */
+  getCorporateKycPdf(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<Blob>;
+
   saveCorporateKyc(
     customerId: number,
     data: z.infer<(typeof appSchema.customer)["createCorporateKycSchema"]>,
@@ -54,7 +61,7 @@ export interface TCrmCustomerInterface {
 }
 
 export class CrmCustomerApi implements TCrmCustomerInterface {
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   async createCustomer(
     data: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>,
@@ -131,6 +138,38 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
       `/crm/customer/${customerId}/corporate-kyc`,
       config,
     );
+  }
+
+  async getCorporateKycPdf(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<Blob> {
+    try {
+      const response = await this.apiClient.get<Blob>(
+        `/crm/customer/${customerId}/corporate-kyc/pdf`,
+        { ...config, responseType: "blob" },
+      );
+      return response.data;
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        err.response?.data instanceof Blob &&
+        err.response.data.type?.includes("json")
+      ) {
+        try {
+          const text = await err.response.data.text();
+          const j = JSON.parse(text) as { message?: string };
+          throw new Error(j.message ?? "Failed to download corporate KYC PDF");
+        } catch (e) {
+          if (e instanceof SyntaxError) {
+            /* ignore — fall through to rethrow Axios error */
+          } else {
+            throw e;
+          }
+        }
+      }
+      throw err instanceof Error ? err : new Error("Failed to download corporate KYC PDF");
+    }
   }
 
   async saveCorporateKyc(

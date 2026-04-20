@@ -60,6 +60,26 @@ export const kycSubmittedForVerificationEmailQueue = new Bull(
   sharedRedisOpts,
 );
 
+export const bankAccountSubmissionReceivedEmailQueue = new Bull(
+  QueueNames.bankAccountSubmissionReceivedEmail,
+  sharedRedisOpts,
+);
+
+export const dematAccountSubmissionReceivedEmailQueue = new Bull(
+  QueueNames.dematAccountSubmissionReceivedEmail,
+  sharedRedisOpts,
+);
+
+export const kycReminderNotStartedEmailQueue = new Bull(
+  QueueNames.kycReminderNotStartedEmail,
+  sharedRedisOpts,
+);
+
+export const kycApprovedEmailQueue = new Bull(
+  QueueNames.kycApprovedEmail,
+  sharedRedisOpts,
+);
+
 export const kraWorkerQueue = new Bull(
   QueueNames.kraProcessWork,
   sharedRedisOpts,
