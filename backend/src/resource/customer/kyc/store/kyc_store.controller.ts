@@ -2,6 +2,8 @@ import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import {
+  sendKycSubmitAddClearingCorporationBankAccountsEmail,
+  sendKycSubmittedForVerificationEmail,
   sendRekycConfirmationOtpEmail,
 } from "@jobs/helper/send_emails";
 import { OtpVerificationService } from "@services/otp_verification.service";
@@ -9,6 +11,7 @@ import { tokenUtils } from "@utils/token/JwtToken_utils";
 import { CustomerKycKycService } from "../kyc_process/customer_kyc.service";
 import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 import { KraProcess } from "@jobs/kra_worker/KraWorker.service";
+import { addCompleteCustomerKycProfile, addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
 
 // KYC store controller class to get and set kyc data in kyc_flow table to track kyc progress for customer to resume later
 export class KycStoreController {
@@ -230,9 +233,62 @@ export class KycStoreController {
           },
         });
 
-        if (customer?.emailAddress) {
-          // Intentionally left blank: customer email notifications for KYC submission
-          // are triggered when KYC transitions to UNDER_REVIEW (submission moment).
+        // set kyc status
+        const store = await db.dataBase.kYC_FLOW.findFirst({
+          where: { userID: id },
+        });
+
+        const prev = await db.dataBase.customerProfileDataModel.findUnique({
+          where: { id: Number(id) },
+          select: { kycStatus: true },
+        });
+
+        await db.dataBase.customerProfileDataModel.update({
+          where: {
+            id: Number(id),
+          },
+          data: {
+            kycStatus: "UNDER_REVIEW",
+            kycSubmitDate: new Date(),
+          },
+          select: {
+            emailAddress: true,
+            firstName: true,
+            lastName: true,
+            gender: true,
+          },
+        });
+        await addCompleteCustomerKycProfile(id);
+        // Start KRa Process
+        await addKraWorkerJob(
+          {
+            customerId: id,
+            kycDataStoreId: store!.id,
+            stage: "ENQUIRY_KRA",
+            data: {
+              currentStepName: store?.currentStepName,
+            },
+          },
+          5 * 60 * 1000,
+        );
+
+        // Send "KYC Submitted" email when status transitions to UNDER_REVIEW (avoid duplicates).
+        if (prev?.kycStatus !== "UNDER_REVIEW" && customer?.emailAddress) {
+          const customerName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() || "Customer";
+          const title =
+            customer.gender === "MALE"
+              ? ("Mr." as const)
+              : customer.gender === "FEMALE"
+                ? ("Ms." as const)
+                : undefined;
+
+          await sendKycSubmittedForVerificationEmail({
+            email: customer.emailAddress,
+            customerName,
+            title,
+          });
+
+
         }
       } catch (e) {
         console.log(e);
