@@ -34,6 +34,32 @@ export class NsdlBondService {
   private readonly TMP_DIR = os.tmpdir();
   private readonly FILE_NAME = "bonds_data.xls";
 
+  private formatDateDmy(value: unknown): unknown {
+    if (value == null || value === "") return value;
+
+    let d: Date | null =
+      value instanceof Date
+        ? value
+        : typeof value === "string"
+          ? new Date(value)
+          : null;
+
+    // If xlsx gives us an Excel serial date (number), convert it.
+    if (!d && typeof value === "number") {
+      const parsed = xlsx.SSF.parse_date_code(value);
+      if (parsed) {
+        d = new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d));
+      }
+    }
+
+    if (!d || isNaN(d.getTime())) return value;
+
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const yyyy = String(d.getUTCFullYear());
+    return `${dd}-${mm}-${yyyy}`;
+  }
+
   private get httpsAgent() {
     return new https.Agent({
       keepAlive: true,
@@ -126,7 +152,7 @@ export class NsdlBondService {
       throw new Error(`File not found: ${filePath}`);
     }
 
-    const workbook = xlsx.readFile(filePath);
+    const workbook = xlsx.readFile(filePath, { cellDates: true });
     const sheetName = workbook.SheetNames[0];
     if (!sheetName) {
       throw new Error("No sheets found in the XLS/XLSX file.");
@@ -138,15 +164,22 @@ export class NsdlBondService {
     }
 
     const jsonData = xlsx.utils.sheet_to_json(worksheet, {
-      raw: false,
-      dateNF: "yyyy-mm-dd",
+      // Get underlying values (Date / Excel serial) and format ourselves.
+      raw: true,
+      dateNF: "dd-mm-yyyy",
     });
 
+    const normalized = (jsonData as BondDataSet[]).map((row) => ({
+      ...row,
+      DATE_OF_ALLOTMENT: this.formatDateDmy(row.DATE_OF_ALLOTMENT),
+      REDEMPTION: this.formatDateDmy(row.REDEMPTION),
+    }));
+
     const outputPath = path.join(process.cwd(), "bonds.json");
-    fs.writeFileSync(outputPath, JSON.stringify(jsonData, null, 2));
+    fs.writeFileSync(outputPath, JSON.stringify(normalized, null, 2));
 
     console.log(`✅ JSON file created at: ${outputPath}`);
-    return jsonData as BondDataSet[];
+    return normalized;
   }
 
   // 🟢 Public method to fetch + download + parse NSDL data
