@@ -63,6 +63,22 @@ const YIELD_SOURCE_AFFECTED_KEYS: readonly AutofillMergeKey[] = [
 
 const api = new apiGateway.bondsApi.BondsApi(apiClientCaller);
 
+/** Empty draft → default autofill; non-empty → must parse as % or fail. */
+function autofillParamsFromCustomYieldDraft(draft: string | undefined):
+  | { ok: true; params: { quantity: number; pricingYield?: number } }
+  | { ok: false; message: string } {
+  const raw = (draft ?? "").trim().replace(/,/g, "");
+  if (raw === "") return { ok: true, params: { quantity: 1 } };
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n)) {
+    return {
+      ok: false,
+      message: "Enter a valid custom yield (%), or leave the field empty for default pricing.",
+    };
+  }
+  return { ok: true, params: { quantity: 1, pricingYield: n } };
+}
+
 function formatDisplayValue(v: unknown): string {
   if (v == null || v === "") return "—";
   if (v instanceof Date) return formatDateForDateInput(v);
@@ -167,9 +183,20 @@ export default function BondAutoUpdateView() {
     for (const b of list) ensureRow(b);
   }, [listQuery.data, ensureRow]);
 
+  /** Per-ISIN draft for “custom yield” row; sent in POST body, not query params. */
+  const [customYieldByIsin, setCustomYieldByIsin] = useState<Record<string, string>>(
+    {},
+  );
+
   const autofillMutation = useMutation({
-    mutationFn: async (isin: string) => {
-      const res = await api.getBondDealAutofill(isin, { quantity: 1 });
+    mutationFn: async (args: { isin: string; pricingYield?: number }) => {
+      const { isin, pricingYield } = args;
+      const res = await api.getBondDealAutofill(isin, {
+        quantity: 1,
+        ...(pricingYield != null && Number.isFinite(pricingYield)
+          ? { pricingYield }
+          : {}),
+      });
       return { isin, data: res.responseData };
     },
     onSuccess: ({ isin, data }) => {
@@ -207,7 +234,8 @@ export default function BondAutoUpdateView() {
       });
       toast.success(`Autofill loaded for ${isin}`);
     },
-    onError: (err: AxiosError, isin: string) => {
+    onError: (err: AxiosError, variables: { isin: string; pricingYield?: number }) => {
+      const { isin } = variables;
       const msg =
         (err?.response?.data as { message?: string })?.message ||
         err?.message ||
@@ -224,8 +252,12 @@ export default function BondAutoUpdateView() {
     },
   });
 
-  const saveMutation = useMutation({
-    mutationFn: async ({ isin, payload }: { isin: string; payload: BondFormData }) => {
+  const saveMutation = useMutation<
+    { isin: string; bond: BondDetailsResponse },
+    AxiosError,
+    { isin: string; payload: BondFormData }
+  >({
+    mutationFn: async ({ isin, payload }) => {
       await api.updateBond(isin, payload);
       const detail = await api.getBondDetailsByIsin(isin);
       if (!detail.responseData) {
@@ -287,7 +319,24 @@ export default function BondAutoUpdateView() {
       const b = list[i]!;
       setBulkProgress({ kind: "load", current: i + 1, total: list.length });
       try {
-        const res = await api.getBondDealAutofill(b.isin, { quantity: 1 });
+        const parsed = autofillParamsFromCustomYieldDraft(customYieldByIsin[b.isin]);
+        if (!parsed.ok) {
+          fail++;
+          setRows((prev) => {
+            const cur = prev[b.isin] ?? createInitialRow(b);
+            return {
+              ...prev,
+              [b.isin]: {
+                ...cur,
+                error: parsed.message,
+                autofill: null,
+                draft: null,
+              },
+            };
+          });
+          continue;
+        }
+        const res = await api.getBondDealAutofill(b.isin, parsed.params);
         if (!res.responseData) {
           fail++;
           setRows((prev) => {
@@ -343,7 +392,7 @@ export default function BondAutoUpdateView() {
     }
     setBulkProgress(null);
     toast.success(`Load all finished: ${ok} succeeded, ${fail} failed.`);
-  }, [listQuery]);
+  }, [listQuery, customYieldByIsin]);
 
   const saveAllWithAutofill = useCallback(async () => {
     const list = listQuery.data?.data ?? [];
@@ -464,6 +513,21 @@ export default function BondAutoUpdateView() {
     });
   };
 
+  /** Empty field → default autofill; non-empty → must be a valid % (sent as pricingYield in POST body). */
+  const loadBondAutofill = (b: BondDetailsResponse) => {
+    ensureRow(b);
+    const parsed = autofillParamsFromCustomYieldDraft(customYieldByIsin[b.isin]);
+    if (!parsed.ok) {
+      toast.error(parsed.message);
+      return;
+    }
+    const { params } = parsed;
+    autofillMutation.mutate({
+      isin: b.isin,
+      ...(params.pricingYield != null ? { pricingYield: params.pricingYield } : {}),
+    });
+  };
+
   const bonds = useMemo(
     () => listQuery.data?.data ?? [],
     [listQuery.data?.data],
@@ -483,7 +547,9 @@ export default function BondAutoUpdateView() {
         <p className="text-muted-foreground text-sm max-w-3xl">
           Bonds with <span className="font-medium text-foreground">Allow for purchase</span> (sale-ready).
           Load deal autofill from the same API as the bond form, review each field, uncheck what you do not want
-          to overwrite, edit values, then accept to save or reject to discard.
+          to overwrite, edit values, then accept to save or reject to discard.{" "}
+          <span className="font-medium text-foreground">Load all</span> uses each row&apos;s optional custom yield
+          when filled.
         </p>
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:flex-wrap sm:justify-end">
           <Button
@@ -586,7 +652,8 @@ export default function BondAutoUpdateView() {
               outcome: "idle" as const,
             };
             const loading =
-              (autofillMutation.isPending && autofillMutation.variables === b.isin) ||
+              (autofillMutation.isPending &&
+                autofillMutation.variables?.isin === b.isin) ||
               bulkBusy;
             const saving =
               (saveMutation.isPending && saveMutation.variables?.isin === b.isin) ||
@@ -622,18 +689,39 @@ export default function BondAutoUpdateView() {
                     </div>
                   </CollapsibleTrigger>
                   <div className="flex flex-wrap items-center gap-2 pl-7 sm:pl-0">
-                    <Button type="button" size="sm" variant="secondary" className="gap-1" asChild>
-                      <Link href={`/dashboard/bonds/update/${encodeURIComponent(b.isin)}`}>Edit bond</Link>
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-muted-foreground text-xs whitespace-nowrap">
+                        Custom yield %
+                      </span>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        placeholder="optional"
+                        className="h-9 w-[92px] font-mono text-sm"
+                        value={customYieldByIsin[b.isin] ?? ""}
+                        onChange={(e) =>
+                          setCustomYieldByIsin((prev) => ({
+                            ...prev,
+                            [b.isin]: e.target.value,
+                          }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            loadBondAutofill(b);
+                          }
+                        }}
+                        disabled={loading}
+                        aria-label={`Optional custom pricing yield percent for ${b.isin}; leave empty for default`}
+                      />
+                    </div>
                     <Button
                       type="button"
                       size="sm"
                       className="gap-1"
                       disabled={loading}
-                      onClick={() => {
-                        ensureRow(b);
-                        autofillMutation.mutate(b.isin);
-                      }}
+                      onClick={() => loadBondAutofill(b)}
                     >
                       {loading ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -641,6 +729,9 @@ export default function BondAutoUpdateView() {
                         <Sparkles className="size-4" />
                       )}
                       Load autofill
+                    </Button>
+                    <Button type="button" size="sm" variant="secondary" className="gap-1" asChild>
+                      <Link href={`/dashboard/bonds/update/${encodeURIComponent(b.isin)}`}>Edit bond</Link>
                     </Button>
                   </div>
                 </div>
@@ -656,8 +747,9 @@ export default function BondAutoUpdateView() {
                   <div className="border-t px-4 pb-4 pt-2 space-y-4">
                     {!model.autofill || !model.draft ? (
                       <p className="text-muted-foreground text-sm py-4">
-                        Click <span className="font-medium text-foreground">Load autofill</span> to fetch calculator
-                        suggestions and reference-backed fields for this ISIN.
+                        Optionally enter <span className="font-medium text-foreground">Custom yield %</span>, then
+                        click <span className="font-medium text-foreground">Load autofill</span> to use it; leave the
+                        field empty for default pricing. Same API as the bond form.
                       </p>
                     ) : (
                       <>
@@ -731,7 +823,7 @@ export default function BondAutoUpdateView() {
                                 const draft = model.draft!;
                                 const sug = draft[key as keyof DraftSuggestions];
                                 const yieldSourceAffected =
-                                  model.autofill.sources.yieldSource !== "consolidated" &&
+                                  model.autofill!.sources.yieldSource !== "consolidated" &&
                                   YIELD_SOURCE_AFFECTED_KEYS.includes(key);
                                 return (
                                   <TableRow

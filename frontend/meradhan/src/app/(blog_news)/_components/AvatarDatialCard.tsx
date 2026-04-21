@@ -1,3 +1,4 @@
+"use client";
 import { HOST_URL } from "@/global/constants/domains";
 import {
   SharePopupTrigger,
@@ -46,6 +47,10 @@ function AvatarDetailCard({
           width={100}
           height={100}
           className="w-12 h-12 rounded-full  object-cover"
+          // on error image
+          onError={(e) => {
+            e.currentTarget.src = "https://i.sstatic.net/y9DpT.jpg";
+          }}
         />
         <div className="w-full">
           <p className="text-gray-800 text-lg">{name}</p>

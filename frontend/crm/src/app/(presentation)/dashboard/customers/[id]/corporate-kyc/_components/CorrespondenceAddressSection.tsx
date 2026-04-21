@@ -1,8 +1,10 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
+import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 
 export function CorrespondenceAddressSection({
   hook,
@@ -10,6 +12,7 @@ export function CorrespondenceAddressSection({
   hook: CorporateKycFormHook;
 }) {
   const { form, errors, setField } = hook;
+  const { uploadFile } = useCorporateKycFileUpload();
   return (
     <Card>
       <CardHeader>
@@ -34,6 +37,11 @@ export function CorrespondenceAddressSection({
           onChangeAction={(v) => setField("correspondenceLine2", v)}
         />
         <InputField
+          label="Line 3"
+          value={form.correspondenceLine3 ?? ""}
+          onChangeAction={(v) => setField("correspondenceLine3", v)}
+        />
+        <InputField
           label="City"
           value={form.correspondenceCity ?? ""}
           onChangeAction={(v) => setField("correspondenceCity", v)}
@@ -54,6 +62,15 @@ export function CorrespondenceAddressSection({
           value={form.correspondencePinCode ?? ""}
           onChangeAction={(v) => setField("correspondencePinCode", v)}
           error={errors.correspondencePinCode?.[0]}
+        />
+        <FileUploadField
+          label="Address proof copy"
+          value={form.correspondenceAddressProofCopyUrl ?? ""}
+          onChangeAction={(v) => setField("correspondenceAddressProofCopyUrl", v)}
+          onUpload={(file) => uploadFile(file, "corporate-kyc/address-proof")}
+          accept=".pdf,.jpg,.jpeg,.png"
+          placeholder="Select file or paste URL"
+          className="md:col-span-2"
         />
       </CardContent>
     </Card>

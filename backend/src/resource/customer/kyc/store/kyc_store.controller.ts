@@ -2,7 +2,6 @@ import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import {
-  sendKycSubmittedForVerificationEmail,
   sendRekycConfirmationOtpEmail,
 } from "@jobs/helper/send_emails";
 import { OtpVerificationService } from "@services/otp_verification.service";
@@ -57,7 +56,7 @@ export class KycStoreController {
     if (!response) {
       res.sendResponse({
         statusCode: HttpStatus.NOT_FOUND,
-        responseData: { isRunning: false , kycDataStoreId: null},
+        responseData: { isRunning: false, kycDataStoreId: null },
       });
       return;
     }
@@ -232,19 +231,8 @@ export class KycStoreController {
         });
 
         if (customer?.emailAddress) {
-          const customerName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim();
-          const title =
-            customer.gender === "MALE"
-              ? ("Mr." as const)
-              : customer.gender === "FEMALE"
-                ? ("Ms." as const)
-                : undefined;
-
-          await sendKycSubmittedForVerificationEmail({
-            email: customer.emailAddress,
-            customerName: customerName || "Customer",
-            title,
-          });
+          // Intentionally left blank: customer email notifications for KYC submission
+          // are triggered when KYC transitions to UNDER_REVIEW (submission moment).
         }
       } catch (e) {
         console.log(e);

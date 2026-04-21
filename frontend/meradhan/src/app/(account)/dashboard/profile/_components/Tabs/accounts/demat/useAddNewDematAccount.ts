@@ -58,6 +58,8 @@ export const useAddNewDematAccountFormHook = ({
 
         accountHolderName: data.accountHolderName!,
         primaryPanNumber: data.panNumber ? data.panNumber[0] : "",
+        sndPanNumber: data.panNumber?.[1] || undefined,
+        trdPanNumber: data.panNumber?.[2] || undefined,
         accountType: data.accountType,
         clientId: data.beneficiaryClientId!,
         depositoryParticipantName: data.depositoryParticipantName!,
@@ -147,7 +149,8 @@ export const useAddNewDematAccountFormHook = ({
 
   return {
     handelSubmit,
-    isPending: verifyDematAccount.isPending,
+    isPending:
+      verifyDematAccount.isPending || useAddNewDematAccountMutation.isPending,
     error,
     data,
     updateData: (

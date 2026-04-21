@@ -1,3 +1,4 @@
+import { BASES_URLS } from "@/core/config/base.urls";
 import { ASSETS_URL } from "../constants/domains";
 
 export function genMediaUrl(mediaPath?: string | null): string {
@@ -17,6 +18,18 @@ export function genMediaUrl(mediaPath?: string | null): string {
   return `${ASSETS_URL}/files/${normalizedPath}`;
   // return `${ASSETS_URL}/${normalizedPath}`;
 
+}
+
+export function genCmsMediaUrl(mediaPath?: string | null): string {
+  if (!mediaPath) return "/noimage.jpg";
+
+  const isFullUrl = /^(https?:\/\/|data:|urn:)/i.test(mediaPath);
+
+  if (isFullUrl) {
+    return mediaPath;
+  }
+
+  return `${BASES_URLS.CMS}/assets/cms/media/${mediaPath.replace(/^\/+/, "")}`;
 }
 
 // utils/generatePageUrl.ts

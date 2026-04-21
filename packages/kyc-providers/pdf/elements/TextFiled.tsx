@@ -18,7 +18,7 @@ function TextFiled({
     >
       <Text style={tw(` w-auto ${className}`)}>{title}</Text>
       <View style={tw(`border-b  border-gray-200 w-[100%] py-[4px] `)}>
-        <Text style={tw(`w-full font-[500]`)}>{value}</Text>
+        <Text style={[tw(`w-full font-[500]`)]}>{value}</Text>
       </View>
     </View>
   );

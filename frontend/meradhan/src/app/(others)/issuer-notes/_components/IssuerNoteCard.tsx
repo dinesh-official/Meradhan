@@ -1,3 +1,4 @@
+"use client";
 import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
 import { CMS_URL, HOST_URL } from "@/global/constants/domains";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
@@ -50,6 +51,10 @@ export function IssuerNoteCard({
           height={200}
           alt="No found"
           className="min-w-16 w-20 h-auto"
+          // on error image
+          onError={(e) => {
+            e.currentTarget.src = "https://i.sstatic.net/y9DpT.jpg";
+          }}
         />
         <SharePopupTrigger
           title={"Share Issuer Note"}
@@ -107,9 +112,9 @@ export function IssuerNoteCard({
               value={
                 data?.bondData?.maturityDate
                   ? dateTimeUtils.formatDateTime(
-                      data?.bondData?.maturityDate,
-                      "DD MMM YYYY"
-                    )
+                    data?.bondData?.maturityDate,
+                    "DD MMM YYYY"
+                  )
                   : "NA"
               }
             />

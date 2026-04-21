@@ -66,6 +66,16 @@ function maskPanLast4(pan: string | null | undefined): string {
   return "x".repeat(s.length - 4) + s.slice(-4);
 }
 
+function getEmailSalutationFromGender(gender: unknown): "Mr." | "Ms." | "Mr. / Ms." {
+  const g = String(gender ?? "")
+    .trim()
+    .toLowerCase();
+  if (!g) return "Mr. / Ms.";
+  if (g === "female" || g === "f" || g === "woman" || g === "w") return "Ms.";
+  if (g === "male" || g === "m" || g === "man") return "Mr.";
+  return "Mr. / Ms.";
+}
+
 function getPreferredValue(
   data: Record<string, unknown>,
   keys: string[]
@@ -252,15 +262,7 @@ function GeneratePdfContent() {
     data?.responseData ?? null;
   const customerOrder: CustomerFullOrder | null =
     customerOrderData?.responseData ?? null;
-  const customerGenderRaw = String(customerOrder?.customerProfile?.gender ?? "")
-    .trim()
-    .toLowerCase();
-  const emailSalutation =
-    customerGenderRaw === "female"
-      ? "Ms."
-      : customerGenderRaw === "male"
-        ? "Mr."
-        : "Mr. / Ms.";
+  const emailSalutation = getEmailSalutationFromGender(customerOrder?.customerProfile?.gender);
   const clientFullName = `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.middleName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`
     .trim()
     .toUpperCase();

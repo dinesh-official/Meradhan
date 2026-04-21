@@ -1,8 +1,12 @@
 import type { DataBaseSchema } from "@core/database/database";
 import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
+import { generateCorporateRatePdfBuffer } from "@packages/kyc-providers";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import type z from "zod";
+import { CorporateKycRepo } from "./corporatekyc.repo";
+import { CorporateKycService } from "./corporatekyc.service";
 import type { CustomerProfileRepo } from "./customer.repo";
 
 const KYC_STEP_NAMES = [
@@ -120,10 +124,10 @@ export class CustomerProfileService extends CustomerProfileManager {
     const kycFlows =
       customerIds.length > 0
         ? await db.dataBase.kYC_FLOW.findMany({
-            where: { userID: { in: customerIds } },
-            select: { userID: true, step: true, currentStepName: true, complete: true },
-            orderBy: { updatedAt: "desc" },
-          })
+          where: { userID: { in: customerIds } },
+          select: { userID: true, step: true, currentStepName: true, complete: true },
+          orderBy: { updatedAt: "desc" },
+        })
         : [];
 
     const kycByUser = new Map<number, { step: number; currentStepName: string | null; complete: boolean }>();
@@ -141,8 +145,8 @@ export class CustomerProfileService extends CustomerProfileManager {
       const kyc = kycByUser.get(row.id);
       const currentKycStepName = kyc
         ? (KYC_STEP_NAMES[kyc.step - 1] || "Unknown")
-        : "Not Started" ;
-      return { ...row, currentKycStepName: currentKycStepName.trim() + ` - Step [${kyc?.step ?? 0}]`  };
+        : "Not Started";
+      return { ...row, currentKycStepName: currentKycStepName.trim() + ` - Step [${kyc?.step ?? 0}]` };
     });
 
     return {
@@ -163,4 +167,28 @@ export class CustomerProfileService extends CustomerProfileManager {
   async getCustomerByParticipantCode(participantCode: string) {
     return await this.customerRepo.getCustomerByParticipantCode(participantCode);
   }
+
+  async getCorporatePdf(customerId: number): Promise<{ buffer: Buffer; filename: string }> {
+    const corporateKycService = new CorporateKycService(new CorporateKycRepo());
+    const kyc = await corporateKycService.getByCustomerId(customerId);
+    if (!kyc) {
+      throw new AppError("Corporate KYC not found for this customer", {
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    const buffer = await generateCorporateRatePdfBuffer(kyc);
+    const filename = corporateKycPdfFilename(customerId, kyc.entityName);
+    return { buffer, filename };
+  }
+}
+
+function corporateKycPdfFilename(customerId: number, entityName: string | undefined): string {
+  const base = (entityName ?? "corporate")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+  return `corporate-kyc-${customerId}-${base || "entity"}.pdf`;
 }
