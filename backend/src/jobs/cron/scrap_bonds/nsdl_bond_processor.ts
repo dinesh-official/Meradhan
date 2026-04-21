@@ -7,6 +7,68 @@ import fs from "fs";
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) { }
 
+  /**
+   * NSDL XLS sometimes contains placeholder maturity like 31-12-9999, but during parsing
+   * it can get truncated/normalized to a 2-digit year (e.g. 31-12-99). JavaScript then
+   * interprets "99" as 1999. This parser expands 2-digit years safely and preserves the
+   * 9999 placeholder when it appears as 31-12-99 / 31/12/99 / 31.12.99.
+   */
+  private parseNsdlDateString(raw: string): Date | null {
+    const s = (raw ?? "").toString().trim();
+    if (!s) return null;
+
+    // If it's a numeric string, it might be an Excel serial number.
+    if (/^\d+(\.\d+)?$/.test(s)) {
+      const n = Number(s);
+      if (!Number.isFinite(n)) return null;
+      // Avoid treating 2-digit years ("99") as dates.
+      if (n <= 100) return null;
+      // Typical Excel date serials are in the ~20k..60k range.
+      if (n >= 1000 && n <= 80000) {
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        const millisecondsPerDay = 24 * 60 * 60 * 1000;
+        return new Date(excelEpoch.getTime() + n * millisecondsPerDay);
+      }
+      // Otherwise, let other parsing try.
+    }
+
+    // Handle common dd-mm-yy / dd/mm/yy / dd.mm.yy and dd-mm-yyyy etc.
+    const dmy = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})$/.exec(s);
+    if (dmy) {
+      const day = Number(dmy[1]);
+      const month = Number(dmy[2]);
+      let yearRaw = dmy[3]!;
+      let year = Number(yearRaw);
+      if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) {
+        return null;
+      }
+      if (yearRaw.length === 2) {
+        // Preserve NSDL perpetual placeholder (commonly 31-12-9999 -> 31-12-99 after truncation)
+        if (year === 99 && day === 31 && month === 12) {
+          year = 9999;
+        } else {
+          // Expand 2-digit years as 20xx (avoids JS mapping to 19xx).
+          year = 2000 + year;
+        }
+      }
+      // Build in UTC to avoid local timezone shifting the date.
+      const dt = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    // Handle yyyy-mm-dd / yyyy/mm/dd / yyyy.mm.dd
+    const ymd = /^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/.exec(s);
+    if (ymd) {
+      const year = Number(ymd[1]);
+      const month = Number(ymd[2]);
+      const day = Number(ymd[3]);
+      const dt = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    return null;
+  }
+
   // Extract dates from text using multiple formats UTIL function
   private extractDatesFromText(text: string) {
     const formats = [
@@ -96,10 +158,23 @@ export class NsdlBondProcessor {
       return date.toISOString(); // Return ISO string format
     }
 
-    const jsDate = new Date(serialDate); // Convert to JavaScript Date
+    const raw = (serialDate ?? "").toString().trim();
+
+    // Avoid JS Date quirks: "99" becomes 1999-01-01 in many environments.
+    if (/^\d{1,2}$/.test(raw)) {
+      return null;
+    }
+
+    // Prefer explicit NSDL-safe parsing (prevents "99" => 1999).
+    const nsdlParsed = this.parseNsdlDateString(raw);
+    if (nsdlParsed) {
+      return this.convertUTCToIST(nsdlParsed.toISOString());
+    }
+
+    const jsDate = new Date(raw); // Convert to JavaScript Date
     if (isNaN(jsDate.getTime())) {
       return this.convertUTCToIST(
-        this.extractDatesFromText(serialDate.toString().trim())?.toISOString()
+        this.extractDatesFromText(raw)?.toISOString()
       );
     } else {
       return this.convertUTCToIST(jsDate.toISOString());
@@ -305,7 +380,16 @@ export class NsdlBondProcessor {
   // Extract redemption date from bond data
   private getRedemptionDate() {
     const dateField = this.bond.REDEMPTION;
-    const redemptionDate = this.getStructuredDate(dateField);
+    let redemptionDate = dateField ? this.getStructuredDate(dateField) : null;
+
+    // NSDL perpetual bonds often use a 9999 placeholder that can get truncated.
+    // If we can't parse redemption but bond looks perpetual, keep a consistent max date.
+    if (!redemptionDate && this.isPerpetualBond()) {
+      redemptionDate = this.convertUTCToIST(
+        new Date(Date.UTC(9999, 11, 31, 0, 0, 0)).toISOString(),
+      );
+    }
+
     const line = `ISIN:${this.bond.ISIN} | DATE:${redemptionDate} | ${dateField}\n`;
     fs.appendFileSync("redemptions.txt", line);
 
