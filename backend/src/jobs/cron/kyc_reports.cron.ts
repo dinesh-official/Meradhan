@@ -54,18 +54,132 @@ async function buildKycSubmissionSummary(range: { from: Date; to: Date }) {
   return { total, rows };
 }
 
+async function buildKycSummary(range: { from: Date; to: Date }) {
+  const initiated = await db.dataBase.kYC_FLOW.count({
+    where: {
+      createdAt: { gte: range.from, lt: range.to },
+      markExpired: false,
+      userID: { not: null },
+    },
+  });
+
+  const submitted = await db.dataBase.customerProfileDataModel.count({
+    where: { kycSubmitDate: { gte: range.from, lt: range.to } },
+  });
+
+  const completed = await db.dataBase.customerProfileDataModel.count({
+    where: {
+      kycStatus: "VERIFIED",
+      verifyDate: { gte: range.from, lt: range.to },
+    },
+  });
+
+  const pendingByReason = await db.dataBase.kYC_FLOW.groupBy({
+    by: ["currentStepName"],
+    where: {
+      createdAt: { gte: range.from, lt: range.to },
+      markExpired: false,
+      userID: { not: null },
+      complete: false,
+    },
+    _count: { _all: true },
+  });
+
+  const pendingReasons = pendingByReason
+    .slice()
+    .sort((a, b) =>
+      String(a.currentStepName ?? "").localeCompare(String(b.currentStepName ?? "")),
+    )
+    .map((r) => ({
+      reason: String(r.currentStepName ?? "Unknown"),
+      count: r._count._all,
+    }));
+
+  const pendingTotal = pendingReasons.reduce((sum, r) => sum + r.count, 0);
+
+  return { initiated, submitted, completed, pendingTotal, pendingReasons };
+}
+
 function renderSummaryEmailHtml(opts: {
   title: string;
   subtitle: string;
   total: number;
   rows: Array<{ status: string; count: number }>;
+  kycSummary: {
+    initiated: number;
+    submitted: number;
+    completed: number;
+    pendingTotal: number;
+    pendingReasons: Array<{ reason: string; count: number }>;
+  };
 }) {
-  const { title, subtitle, total, rows } = opts;
+  const { title, subtitle, total, rows, kycSummary } = opts;
 
   return `
   <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.4;">
     <h2 style="margin: 0 0 8px;">${htmlEscape(title)}</h2>
     <p style="margin: 0 0 14px; color: #444;">${htmlEscape(subtitle)}</p>
+
+    <h3 style="margin: 0 0 10px;">KYC Summary</h3>
+    <table cellpadding="8" cellspacing="0" style="border-collapse: collapse; border: 1px solid #ddd; width: 520px;">
+      <thead>
+        <tr style="background: #f6f6f6;">
+          <th align="left" style="border: 1px solid #ddd;">Metric</th>
+          <th align="right" style="border: 1px solid #ddd;">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border: 1px solid #ddd;">Total initiated</td>
+          <td align="right" style="border: 1px solid #ddd;"><strong>${kycSummary.initiated}</strong></td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd;">Submitted</td>
+          <td align="right" style="border: 1px solid #ddd;"><strong>${kycSummary.submitted}</strong></td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd;">Completed</td>
+          <td align="right" style="border: 1px solid #ddd;"><strong>${kycSummary.completed}</strong></td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd;">Pending</td>
+          <td align="right" style="border: 1px solid #ddd;"><strong>${kycSummary.pendingTotal}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="height: 14px;"></div>
+
+    <table cellpadding="8" cellspacing="0" style="border-collapse: collapse; border: 1px solid #ddd; width: 520px;">
+      <thead>
+        <tr style="background: #f6f6f6;">
+          <th align="left" style="border: 1px solid #ddd;">Pending reason</th>
+          <th align="right" style="border: 1px solid #ddd;">Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${
+          kycSummary.pendingReasons.length
+            ? kycSummary.pendingReasons
+              .map(
+                (r) => `
+          <tr>
+            <td style="border: 1px solid #ddd;">${htmlEscape(r.reason)}</td>
+            <td align="right" style="border: 1px solid #ddd;">${r.count}</td>
+          </tr>
+        `.trim(),
+              )
+              .join("\n")
+            : `
+        <tr>
+          <td colspan="2" style="border: 1px solid #ddd; color: #666;">No pending KYCs initiated in this period.</td>
+        </tr>
+        `.trim()
+        }
+      </tbody>
+    </table>
+
+    <div style="height: 18px;"></div>
 
     <table cellpadding="8" cellspacing="0" style="border-collapse: collapse; border: 1px solid #ddd; width: 520px;">
       <thead>
@@ -128,11 +242,13 @@ async function sendKycReportEmail(params: {
   range: { from: Date; to: Date };
 }) {
   const summary = await buildKycSubmissionSummary(params.range);
+  const kycSummary = await buildKycSummary(params.range);
   const html = renderSummaryEmailHtml({
     title: params.title,
     subtitle: params.subtitle,
     total: summary.total,
     rows: summary.rows,
+    kycSummary,
   });
 
   const emailer = new EmailCommunication();
