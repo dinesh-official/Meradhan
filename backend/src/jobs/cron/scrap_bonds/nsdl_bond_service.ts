@@ -29,10 +29,64 @@ export interface BondDataSet {
   REMARKS: any;
 }
 
+const IST = "Asia/Kolkata";
+
 export class NsdlBondService {
   private readonly NSDL_URL = "https://nsdl.co.in/downloadables/list-debt.php";
   private readonly TMP_DIR = os.tmpdir();
   private readonly FILE_NAME = "bonds_data.xls";
+
+  /** Format any sheet cell as `dd-mm-yyyy` using the calendar day in IST only (NSDL/India). */
+  private formatDateDmyIst(value: unknown): unknown {
+    if (value == null || value === "") return value;
+
+    // Excel serial: use SSF y/m/d as the calendar day (no server-local TZ).
+    if (typeof value === "number") {
+      const parsed = xlsx.SSF.parse_date_code(value);
+      if (parsed) {
+        const dd = String(parsed.d).padStart(2, "0");
+        const mm = String(parsed.m).padStart(2, "0");
+        const yyyy = String(parsed.y);
+        return `${dd}-${mm}-${yyyy}`;
+      }
+    }
+
+    let d: Date | null = null;
+    if (value instanceof Date) {
+      d = value;
+    } else if (typeof value === "string") {
+      const t = value.trim();
+      // Already d-m-y in common NSDL shapes — keep as calendar string (treat as IST-semantic).
+      if (/^\d{1,2}[/\-.]\d{1,2}[/\-.](\d{2}|\d{4})$/.test(t)) {
+        const p = /^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2}|\d{4})$/.exec(t);
+        if (p) {
+          let day = Number(p[1]);
+          let month = Number(p[2]);
+          let year = Number(p[3]);
+          if (p[3]!.length === 2) year = 2000 + year;
+          if (Number.isFinite(day) && Number.isFinite(month) && Number.isFinite(year)) {
+            return `${String(day).padStart(2, "0")}-${String(month).padStart(2, "0")}-${year}`;
+          }
+        }
+      }
+      d = new Date(t);
+    }
+
+    if (!d || isNaN(d.getTime())) return value;
+
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: IST,
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).formatToParts(d);
+    const day = parts.find((x) => x.type === "day")?.value;
+    const month = parts.find((x) => x.type === "month")?.value;
+    const year = parts.find((x) => x.type === "year")?.value;
+    if (day && month && year) return `${day}-${month}-${year}`;
+
+    return value;
+  }
 
   private get httpsAgent() {
     return new https.Agent({
@@ -126,7 +180,7 @@ export class NsdlBondService {
       throw new Error(`File not found: ${filePath}`);
     }
 
-    const workbook = xlsx.readFile(filePath);
+    const workbook = xlsx.readFile(filePath, { cellDates: true });
     const sheetName = workbook.SheetNames[0];
     if (!sheetName) {
       throw new Error("No sheets found in the XLS/XLSX file.");
@@ -138,15 +192,21 @@ export class NsdlBondService {
     }
 
     const jsonData = xlsx.utils.sheet_to_json(worksheet, {
-      raw: false,
-      dateNF: "yyyy-mm-dd",
+      // Underlying values (Date / serial); we format to dd-mm-yyyy in IST in formatDateDmyIst.
+      raw: true,
     });
 
+    const normalized = (jsonData as BondDataSet[]).map((row) => ({
+      ...row,
+      DATE_OF_ALLOTMENT: this.formatDateDmyIst(row.DATE_OF_ALLOTMENT),
+      REDEMPTION: this.formatDateDmyIst(row.REDEMPTION),
+    }));
+
     const outputPath = path.join(process.cwd(), "bonds.json");
-    fs.writeFileSync(outputPath, JSON.stringify(jsonData, null, 2));
+    fs.writeFileSync(outputPath, JSON.stringify(normalized, null, 2));
 
     console.log(`✅ JSON file created at: ${outputPath}`);
-    return jsonData as BondDataSet[];
+    return normalized;
   }
 
   // 🟢 Public method to fetch + download + parse NSDL data

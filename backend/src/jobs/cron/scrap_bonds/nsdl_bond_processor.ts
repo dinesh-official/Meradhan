@@ -145,7 +145,6 @@ export class NsdlBondProcessor {
   }
   private getStructuredDate(serialDate: string | number) {
     if (typeof serialDate === "number") {
-      // Handle cases where the date is in string format
       const excelEpoch = new Date(Date.UTC(1899, 11, 30)); // Excel's day 0 (Dec 30, 1899)
       const millisecondsPerDay = 24 * 60 * 60 * 1000;
 
@@ -155,7 +154,8 @@ export class NsdlBondProcessor {
       );
       // console.log(`Converted serial date ${serialDate} to JS Date: ${date.toISOString()}`);
 
-      return date.toISOString(); // Return ISO string format
+      // Keep behavior consistent with string parsing: store IST ISO in DB.
+      return this.convertUTCToIST(date.toISOString());
     }
 
     const raw = (serialDate ?? "").toString().trim();
@@ -171,14 +171,13 @@ export class NsdlBondProcessor {
       return this.convertUTCToIST(nsdlParsed.toISOString());
     }
 
-    const jsDate = new Date(raw); // Convert to JavaScript Date
-    if (isNaN(jsDate.getTime())) {
-      return this.convertUTCToIST(
-        this.extractDatesFromText(raw)?.toISOString()
-      );
-    } else {
-      return this.convertUTCToIST(jsDate.toISOString());
-    }
+    // Fallback: try dayjs formats list before JS Date (JS Date is locale-dependent).
+    const extracted = this.extractDatesFromText(raw);
+    if (extracted) return this.convertUTCToIST(extracted.toISOString());
+
+    const jsDate = new Date(raw);
+    if (isNaN(jsDate.getTime())) return null;
+    return this.convertUTCToIST(jsDate.toISOString());
   }
   private formatString(str: string | number | undefined) {
     if (str === undefined) {
@@ -378,7 +377,7 @@ export class NsdlBondProcessor {
   }
 
   // Extract redemption date from bond data
-  private getRedemptionDate() {
+  private getRedemptionDate(logToFile = true) {
     const dateField = this.bond.REDEMPTION;
     let redemptionDate = dateField ? this.getStructuredDate(dateField) : null;
 
@@ -390,8 +389,10 @@ export class NsdlBondProcessor {
       );
     }
 
-    const line = `ISIN:${this.bond.ISIN} | DATE:${redemptionDate} | ${dateField}\n`;
-    fs.appendFileSync("redemptions.txt", line);
+    if (logToFile) {
+      const line = `ISIN:${this.bond.ISIN} | DATE:${redemptionDate} | ${dateField}\n`;
+      fs.appendFileSync("redemptions.txt", line);
+    }
 
     return redemptionDate;
   }
@@ -568,6 +569,9 @@ export class NsdlBondProcessor {
 
   // Main parse function to extract and structure bond data
   public parse(): DataBaseSchema.BondsCreateInput {
+    const redemptionDate = this.getRedemptionDate(true);
+    console.log(this.bond.ISIN, redemptionDate);
+
     return {
       isin: this.formatString(this.bond.ISIN),
       bondName: this.formatString(this.bond.COMPANY),
@@ -593,7 +597,7 @@ export class NsdlBondProcessor {
       ),
       remarks: this.formatString(this.bond.REMARKS),
       taxStatus: this.getTaxable(),
-      redemptionDate: this.getRedemptionDate(),
+      redemptionDate,
       creditRating: this.getCreditRating(),
       interestPaymentMode: this.getInterestFrequency(),
       isListed: this.isListedBond(),
@@ -603,7 +607,7 @@ export class NsdlBondProcessor {
       categories: this.getBondCategories(),
       sectorName: this.getBondCorporateName(this.bond.COMPANY),
       dateOfAllotment: this.getDateOfAllotment(),
-      maturityDate: this.getRedemptionDate(),
+      maturityDate: redemptionDate,
     };
   }
 }

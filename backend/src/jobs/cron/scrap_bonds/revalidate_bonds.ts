@@ -3,6 +3,8 @@ import { db } from "@core/database/database";
 import { formatDateTime } from "@jobs/kra_worker/KraWorker.service";
 import { NsdlBondProcessor } from "./nsdl_bond_processor";
 import { NsdlBondService } from "./nsdl_bond_service";
+import fs from "fs/promises";
+import path from "path";
 
 export const revalidateBonds = async () => {
   console.log("Revalidating bonds...");
@@ -10,6 +12,16 @@ export const revalidateBonds = async () => {
   // Rebuild and revalidate bonds list from NSDL
   const service = new NsdlBondService();
   const raw = await service.fetchBondData();
+  const outPath =
+    path.basename(process.cwd()) === "backend"
+      ? path.resolve(process.cwd(), "redemptions.txt")
+      : path.resolve(process.cwd(), "backend", "redemptions.txt");
+  await fs.writeFile(
+    outPath,
+    typeof raw === "string" ? raw : JSON.stringify(raw, null, 2),
+    "utf8"
+  );
+
 
   // helper functions
   const toISODate = (v?: string) => {

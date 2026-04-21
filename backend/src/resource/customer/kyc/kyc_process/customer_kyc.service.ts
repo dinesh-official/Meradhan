@@ -3,10 +3,6 @@ import {
   addCompleteCustomerKycProfile,
   addKraWorkerJob,
 } from "@jobs/kra_worker/kraWroker.helper";
-import {
-  sendKycSubmitAddClearingCorporationBankAccountsEmail,
-  sendKycSubmittedForVerificationEmail,
-} from "@jobs/helper/send_emails";
 import { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import { makeFullname } from "@utils/generate/generate_username";
@@ -340,69 +336,6 @@ export class CustomerKycKycService {
     userName?: string,
   ) {
     const pdfUrl = await this.kycProvider.getEsignPdf(document_id, userName);
-    // set kyc status
-    const store = await db.dataBase.kYC_FLOW.findFirst({
-      where: { userID: customerId },
-    });
-
-    const prev = await db.dataBase.customerProfileDataModel.findUnique({
-      where: { id: Number(customerId) },
-      select: { kycStatus: true },
-    });
-
-    const customer = await db.dataBase.customerProfileDataModel.update({
-      where: {
-        id: Number(customerId),
-      },
-      data: {
-        kycStatus: "UNDER_REVIEW",
-        kycSubmitDate: new Date(),
-      },
-      select: {
-        emailAddress: true,
-        firstName: true,
-        lastName: true,
-        gender: true,
-      },
-    });
-    await addCompleteCustomerKycProfile(customerId);
-
-    // Send "KYC Submitted" email when status transitions to UNDER_REVIEW (avoid duplicates).
-    if (prev?.kycStatus !== "UNDER_REVIEW" && customer?.emailAddress) {
-      const customerName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() || "Customer";
-      const title =
-        customer.gender === "MALE"
-          ? ("Mr." as const)
-          : customer.gender === "FEMALE"
-            ? ("Ms." as const)
-            : undefined;
-      await sendKycSubmittedForVerificationEmail({
-        email: customer.emailAddress,
-        customerName,
-        title,
-      });
-
-      // Payee addition email (with NSCCL accounts PDF) 10 minutes after KYC submission.
-      await sendKycSubmitAddClearingCorporationBankAccountsEmail({
-        email: customer.emailAddress,
-        customerName,
-        title,
-        delayMs: 10 * 60 * 1000,
-      });
-    }
-
-    // Start KRa Process
-    await addKraWorkerJob(
-      {
-        customerId: customerId,
-        kycDataStoreId: store!.id,
-        stage: "ENQUIRY_KRA",
-        data: {
-          currentStepName: store?.currentStepName,
-        },
-      },
-      5 * 60 * 1000,
-    );
     return pdfUrl;
   }
 
