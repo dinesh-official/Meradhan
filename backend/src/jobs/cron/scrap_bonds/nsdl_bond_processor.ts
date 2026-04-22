@@ -7,6 +7,68 @@ import fs from "fs";
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) { }
 
+  /**
+   * NSDL XLS sometimes contains placeholder maturity like 31-12-9999, but during parsing
+   * it can get truncated/normalized to a 2-digit year (e.g. 31-12-99). JavaScript then
+   * interprets "99" as 1999. This parser expands 2-digit years safely and preserves the
+   * 9999 placeholder when it appears as 31-12-99 / 31/12/99 / 31.12.99.
+   */
+  private parseNsdlDateString(raw: string): Date | null {
+    const s = (raw ?? "").toString().trim();
+    if (!s) return null;
+
+    // If it's a numeric string, it might be an Excel serial number.
+    if (/^\d+(\.\d+)?$/.test(s)) {
+      const n = Number(s);
+      if (!Number.isFinite(n)) return null;
+      // Avoid treating 2-digit years ("99") as dates.
+      if (n <= 100) return null;
+      // Typical Excel date serials are in the ~20k..60k range.
+      if (n >= 1000 && n <= 80000) {
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        const millisecondsPerDay = 24 * 60 * 60 * 1000;
+        return new Date(excelEpoch.getTime() + n * millisecondsPerDay);
+      }
+      // Otherwise, let other parsing try.
+    }
+
+    // Handle common dd-mm-yy / dd/mm/yy / dd.mm.yy and dd-mm-yyyy etc.
+    const dmy = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})$/.exec(s);
+    if (dmy) {
+      const day = Number(dmy[1]);
+      const month = Number(dmy[2]);
+      let yearRaw = dmy[3]!;
+      let year = Number(yearRaw);
+      if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) {
+        return null;
+      }
+      if (yearRaw.length === 2) {
+        // Preserve NSDL perpetual placeholder (commonly 31-12-9999 -> 31-12-99 after truncation)
+        if (year === 99 && day === 31 && month === 12) {
+          year = 9999;
+        } else {
+          // Expand 2-digit years as 20xx (avoids JS mapping to 19xx).
+          year = 2000 + year;
+        }
+      }
+      // Build in UTC to avoid local timezone shifting the date.
+      const dt = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    // Handle yyyy-mm-dd / yyyy/mm/dd / yyyy.mm.dd
+    const ymd = /^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/.exec(s);
+    if (ymd) {
+      const year = Number(ymd[1]);
+      const month = Number(ymd[2]);
+      const day = Number(ymd[3]);
+      const dt = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    return null;
+  }
+
   // Extract dates from text using multiple formats UTIL function
   private extractDatesFromText(text: string) {
     const formats = [
@@ -83,7 +145,6 @@ export class NsdlBondProcessor {
   }
   private getStructuredDate(serialDate: string | number) {
     if (typeof serialDate === "number") {
-      // Handle cases where the date is in string format
       const excelEpoch = new Date(Date.UTC(1899, 11, 30)); // Excel's day 0 (Dec 30, 1899)
       const millisecondsPerDay = 24 * 60 * 60 * 1000;
 
@@ -93,17 +154,30 @@ export class NsdlBondProcessor {
       );
       // console.log(`Converted serial date ${serialDate} to JS Date: ${date.toISOString()}`);
 
-      return date.toISOString(); // Return ISO string format
+      // Keep behavior consistent with string parsing: store IST ISO in DB.
+      return this.convertUTCToIST(date.toISOString());
     }
 
-    const jsDate = new Date(serialDate); // Convert to JavaScript Date
-    if (isNaN(jsDate.getTime())) {
-      return this.convertUTCToIST(
-        this.extractDatesFromText(serialDate.toString().trim())?.toISOString()
-      );
-    } else {
-      return this.convertUTCToIST(jsDate.toISOString());
+    const raw = (serialDate ?? "").toString().trim();
+
+    // Avoid JS Date quirks: "99" becomes 1999-01-01 in many environments.
+    if (/^\d{1,2}$/.test(raw)) {
+      return null;
     }
+
+    // Prefer explicit NSDL-safe parsing (prevents "99" => 1999).
+    const nsdlParsed = this.parseNsdlDateString(raw);
+    if (nsdlParsed) {
+      return this.convertUTCToIST(nsdlParsed.toISOString());
+    }
+
+    // Fallback: try dayjs formats list before JS Date (JS Date is locale-dependent).
+    const extracted = this.extractDatesFromText(raw);
+    if (extracted) return this.convertUTCToIST(extracted.toISOString());
+
+    const jsDate = new Date(raw);
+    if (isNaN(jsDate.getTime())) return null;
+    return this.convertUTCToIST(jsDate.toISOString());
   }
   private formatString(str: string | number | undefined) {
     if (str === undefined) {
@@ -303,11 +377,22 @@ export class NsdlBondProcessor {
   }
 
   // Extract redemption date from bond data
-  private getRedemptionDate() {
+  private getRedemptionDate(logToFile = true) {
     const dateField = this.bond.REDEMPTION;
-    const redemptionDate = this.getStructuredDate(dateField);
-    const line = `ISIN:${this.bond.ISIN} | DATE:${redemptionDate} | ${dateField}\n`;
-    fs.appendFileSync("redemptions.txt", line);
+    let redemptionDate = dateField ? this.getStructuredDate(dateField) : null;
+
+    // NSDL perpetual bonds often use a 9999 placeholder that can get truncated.
+    // If we can't parse redemption but bond looks perpetual, keep a consistent max date.
+    if (!redemptionDate && this.isPerpetualBond()) {
+      redemptionDate = this.convertUTCToIST(
+        new Date(Date.UTC(9999, 11, 31, 0, 0, 0)).toISOString(),
+      );
+    }
+
+    if (logToFile) {
+      const line = `ISIN:${this.bond.ISIN} | DATE:${redemptionDate} | ${dateField}\n`;
+      fs.appendFileSync("redemptions.txt", line);
+    }
 
     return redemptionDate;
   }
@@ -484,6 +569,9 @@ export class NsdlBondProcessor {
 
   // Main parse function to extract and structure bond data
   public parse(): DataBaseSchema.BondsCreateInput {
+    const redemptionDate = this.getRedemptionDate(true);
+    console.log(this.bond.ISIN, redemptionDate);
+
     return {
       isin: this.formatString(this.bond.ISIN),
       bondName: this.formatString(this.bond.COMPANY),
@@ -509,7 +597,7 @@ export class NsdlBondProcessor {
       ),
       remarks: this.formatString(this.bond.REMARKS),
       taxStatus: this.getTaxable(),
-      redemptionDate: this.getRedemptionDate(),
+      redemptionDate,
       creditRating: this.getCreditRating(),
       interestPaymentMode: this.getInterestFrequency(),
       isListed: this.isListedBond(),
@@ -519,7 +607,7 @@ export class NsdlBondProcessor {
       categories: this.getBondCategories(),
       sectorName: this.getBondCorporateName(this.bond.COMPANY),
       dateOfAllotment: this.getDateOfAllotment(),
-      maturityDate: this.getRedemptionDate(),
+      maturityDate: redemptionDate,
     };
   }
 }

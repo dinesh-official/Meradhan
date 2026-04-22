@@ -12,7 +12,7 @@ import crmAuditlogsRoutes from "@resource/crm/auditlogs/auditlogs.routes";
 import crmAuthRoutes from "@resource/crm/auth/auth.routes";
 import crmCustomersRoutes from "@resource/crm/customers/customers.routes";
 import dashboardRoutes from "@resource/crm/dashboard/dashboard.routes";
-import crmBondPricedListRoutes from "@resource/crm/bonds/bond_priced_list.routes";
+import crmBondPricedListRoutes from "./src/resource/crm/bonds/bond_priced_list.routes";
 import crmBondReferenceDataRoutes from "@resource/crm/bonds/bond_reference_data.routes";
 import crmBondMarginRoutes from "@resource/crm/bonds/bond_margin.routes";
 import followUpRouter from "@resource/crm/leads/followup/leads_follow_up.routes";
