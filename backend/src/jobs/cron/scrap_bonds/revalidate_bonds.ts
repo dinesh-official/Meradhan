@@ -3,6 +3,8 @@ import { db } from "@core/database/database";
 import { formatDateTime } from "@jobs/kra_worker/KraWorker.service";
 import { NsdlBondProcessor } from "./nsdl_bond_processor";
 import { NsdlBondService } from "./nsdl_bond_service";
+import fs from "fs/promises";
+import path from "path";
 
 export const revalidateBonds = async () => {
   console.log("Revalidating bonds...");
@@ -10,6 +12,16 @@ export const revalidateBonds = async () => {
   // Rebuild and revalidate bonds list from NSDL
   const service = new NsdlBondService();
   const raw = await service.fetchBondData();
+  const outPath =
+    path.basename(process.cwd()) === "backend"
+      ? path.resolve(process.cwd(), "redemptions.txt")
+      : path.resolve(process.cwd(), "backend", "redemptions.txt");
+  await fs.writeFile(
+    outPath,
+    typeof raw === "string" ? raw : JSON.stringify(raw, null, 2),
+    "utf8"
+  );
+
 
   // helper functions
   const toISODate = (v?: string) => {
@@ -26,9 +38,37 @@ export const revalidateBonds = async () => {
   };
 
   const isYearOver9999 = (date: string | Date) => {
+    console.log(date);
+
     const d = date instanceof Date ? date : toISODate(date);
     if (!d) return false;
     return d.getUTCFullYear() > 9999;
+  };
+
+  const asIsoString = (v?: string | Date | null) => {
+    if (!v) return undefined;
+    if (v instanceof Date) return v.toISOString();
+    return String(v);
+  };
+
+  const yearOf = (v?: string | Date | null) => {
+    const iso = asIsoString(v);
+    if (!iso) return undefined;
+    const d = toISODate(iso);
+    return d?.getUTCFullYear();
+  };
+
+  const isSuspicious1999 = (parsedIso?: string | null, rawValue?: unknown) => {
+    const y = yearOf(parsedIso ?? undefined);
+    if (y !== 1999) return false;
+    const raw = String(rawValue ?? "").trim();
+    // Common NSDL placeholder/malformed patterns that previously collapsed to "99"
+    return (
+      raw === "99" ||
+      raw === "1999" ||
+      /[\/\-.]99$/.test(raw) || // dd-mm-99 etc
+      /\b99\b/.test(raw)
+    );
   };
 
   // Map raw rows -> parsed rows with error handling
@@ -36,17 +76,37 @@ export const revalidateBonds = async () => {
     .map((r, idx) => {
       try {
         const parsed = new NsdlBondProcessor(r).parse();
-        return { ...parsed, _index: idx };
+        return {
+          ...parsed,
+          _index: idx,
+          _raw: {
+            dateOfAllotment: r.DATE_OF_ALLOTMENT,
+            redemption: r.REDEMPTION,
+          },
+        };
       } catch (error) {
         console.error(
           `Error processing bond at index ${idx} (ISIN: ${r.ISIN || "unknown"}):`,
           error
         );
-        // Return null for failed parsing, will be filtered out later
+        // Return null for failed parsing, will be filtered out later₹
         return null;
       }
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
+
+  const badDateSuspects = parsedRows.filter(
+    (e) =>
+      isSuspicious1999(asIsoString(e.maturityDate) ?? null, e._raw?.redemption) ||
+      isSuspicious1999(asIsoString(e.redemptionDate) ?? null, e._raw?.redemption) ||
+      isSuspicious1999(asIsoString(e.dateOfAllotment) ?? null, e._raw?.dateOfAllotment)
+  );
+
+  const missingMaturityNonPerpetual = parsedRows.filter((e) => {
+    const rawName = String(e.instrumentName ?? "").toLowerCase();
+    const looksPerpetual = rawName.includes(" perpetual ");
+    return !looksPerpetual && !e.maturityDate;
+  });
 
   const expired = parsedRows.filter(
     (e) => e.maturityDate && isRedemptionExpired(e.maturityDate)
@@ -90,11 +150,14 @@ export const revalidateBonds = async () => {
     ...expired,
   ];
 
+
+
   for (const e of order) {
+    console.log("Updating");
 
     try {
       // Exclude _index from the data before upserting
-      const { ...bondData } = e;
+      const { _index, _raw, ...bondData } = e;
 
 
       // Check if bond exists and has ignoreAutoUpdate enabled
@@ -145,6 +208,21 @@ export const revalidateBonds = async () => {
     Expired Bonds: ${expired.length}
     New Bonds Added: ${created}
     Bonds Updated: ${updated}
+    \n
+    Date Quality Checks
+    Suspected "99→1999" date conversions: ${badDateSuspects.length}
+    Missing maturity (non-perpetual): ${missingMaturityNonPerpetual.length}
+    \n
+    Top suspected rows (ISIN | raw_allotment | raw_redemption | parsed_allotment | parsed_maturity)
+    ${badDateSuspects
+      .slice(0, 20)
+      .map(
+        (e) =>
+          `${e.isin} | ${String(e._raw?.dateOfAllotment ?? "")} | ${String(
+            e._raw?.redemption ?? ""
+          )} | ${String(e.dateOfAllotment ?? "")} | ${String(e.maturityDate ?? "")}`
+      )
+      .join("\n")}
     `;
 
   try {

@@ -5,7 +5,8 @@ import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { AppError } from "@utils/error/AppError";
 import { sendBankAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
 import type z from "zod";
-import { sendDematAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
+import { meraDhanDematAccountSubmissionReceivedEmailText } from "@emails/text/meraDhanDematAccountSubmissionReceivedEmailText";
+import { EmailCommunication } from "../../../communication/email_communication";
 
 const KYC_VERIFIED_REQUIRED_MSG =
   "You cannot add, update, or delete bank or demat accounts until your KYC is verified.";
@@ -274,12 +275,16 @@ export class CustomerManageAccountsService {
         const last4Digits = String(dematDetails.clientId ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
-        await sendDematAccountSubmissionReceivedEmail({
-          email: customer.emailAddress,
-          customerName,
-          title,
-          dpId: dematDetails.dpId,
-          last4Digits: last4Digits || "----",
+        const emailSend = new EmailCommunication();
+        await emailSend.sendEmail({
+          to: customer.emailAddress,
+          subject: "Demat Account Submission Received – Verification Pending",
+          html: meraDhanDematAccountSubmissionReceivedEmailText({
+            customerName,
+            title,
+            dpId: dematDetails.dpId,
+            last4Digits: last4Digits || "----",
+          }),
         });
       }
     } catch (e) {
