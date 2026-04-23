@@ -23,8 +23,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
             )}
           >
             Disclaimer : Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully
-          <br />
-          MeraDhan is a platform providing access to fixed income products and related information. We do not provide investment advisory services. Users are requested to make investment decisions based on their own assessment or consult their financial advisor.
+            <br />
+            MeraDhan is a platform providing access to fixed income products and related information. We do not provide investment advisory services. Users are requested to make investment decisions based on their own assessment or consult their financial advisor.
           </p>
 
           <div
@@ -95,7 +95,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
               </ul>
               <div className="flex flex-col gap-2 text-xs">
                 <p><b>BondNest Capital India Securities Private Limited</b></p>
-                <p><b>SEBI Registration No.:</b> INZ00033023</p>
+                <p><b>SEBI Registration No.:</b> INZ000330234</p>
                 <p><b>NSE Member ID:</b> 90480 (Debt Segment)</p>
                 <p><b>BSE Member ID:</b> 6963 (Debt Segment)</p>
                 <p><b>CIN:</b> U66190MH2025PTC441753</p>
