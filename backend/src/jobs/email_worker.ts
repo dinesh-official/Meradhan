@@ -115,7 +115,7 @@ startQueueWorker(addBankAccountsClearingCorporationsEmailQueue, async (job: Job)
   };
   const attachmentPath = path.resolve(
     process.cwd(),
-    "backend/emails/assets/NCL-bank-accounts-for-payee-addition.pdf",
+    "backend/public/documents/NCL-bank-accounts-for-payee-addition.pdf",
   );
   await emailSend.sendEmail({
     to: email,
