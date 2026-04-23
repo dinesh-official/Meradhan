@@ -55,7 +55,7 @@ export const ADDRESSES: Record<string, AddressInfo> = {
 export const REGULATORY_INFO: readonly RegulatoryInfoItem[] = [
     {
         label: "SEBI Registration No.:",
-        value: "INZ00033023",
+        value: "INZ000330234",
         description: "Stock Broker",
     },
     {
