@@ -401,7 +401,7 @@ Disclaimer: Fixed returns do not constitute guaranteed or assured returns. Inves
 
 BondNest Capital India Securities Private Limited operates the MeraDhan platform as an Online Bond Platform Provider (OBPP).
 
-SEBI Registration No.: INZ00033023
+SEBI Registration No.: INZ000330234
 
 NSE Member ID: 90480
 

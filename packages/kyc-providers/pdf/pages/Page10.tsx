@@ -154,7 +154,7 @@ function Page10() {
         <View style={tw(`flex flex-row gap-4 flex-between`)}>
           <View style={tw(`flex gap-3 flex-row`)}>
             <Text style={tw(`font-[600]`)}>SEBI Registration Number:</Text>
-            <Text>INZ000330234</Text>
+            <Text>INZ0003302344</Text>
           </View>
           <View style={tw(`flex gap-3 flex-row`)}>
             <Text style={tw(`font-[600]`)}>NSE Trading Member:</Text>

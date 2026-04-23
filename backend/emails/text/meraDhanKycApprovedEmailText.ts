@@ -39,7 +39,7 @@ export const meraDhanKycApprovedEmailText = (data: {
 
     <p style="font-size: 12px; color: #555; margin-top: 12px;">
       BondNest Capital India Securities Private Limited operates the MeraDhan platform as an Online Bond Platform Provider (OBPP).<br/>
-      SEBI Registration No.: INZ00033023<br/>
+      SEBI Registration No.: INZ000330234<br/>
       NSE Member ID: 90480<br/>
       BSE Member ID: 6963
     </p>
