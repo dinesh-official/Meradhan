@@ -81,11 +81,35 @@ model CorporateKycModel {
   directors               CorporateKycDirectorModel[]
   promoters               CorporateKycPromoterModel[]
   authorisedSignatories    CorporateKycAuthorisedSignatoryModel[]
+  attachments             CorporateKycAttachmentModel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("corporate_kyc")
+}
+
+// ---------------------------------------------------------------------------
+// Attachments / notes for Corporate KYC (CRM uploads with label)
+// ---------------------------------------------------------------------------
+model CorporateKycAttachmentModel {
+  id Int @id @default(autoincrement())
+
+  corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
+  corporateKycModelId Int
+
+  label   String
+  fileUrl String
+
+  /// CRM user id who uploaded (optional; no FK to keep it lightweight)
+  createdByCrmUserId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([corporateKycModelId])
+  @@index([createdAt])
+  @@map("corporate_kyc_attachments")
 }
 
 // ---------------------------------------------------------------------------
@@ -199,6 +223,7 @@ model CorporateKycAuthorisedSignatoryModel {
 
   fullName    String
   pan         String
+  signatureFileUrl     String?
   panCopyFileUrl        String?
   aadharCopyFileUrl     String?
   passportPhotoFileUrl  String?

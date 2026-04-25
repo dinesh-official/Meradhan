@@ -67,6 +67,10 @@ const defaultDirector = (): CorporateKycDirectorPayload => ({
 const defaultAuthorisedSignatory = (): CorporateKycAuthorisedSignatoryPayload => ({
   fullName: "",
   pan: "",
+  signatureFileUrl: "",
+  panCopyFileUrl: "",
+  aadharCopyFileUrl: "",
+  passportPhotoFileUrl: "",
   designation: "",
   din: "",
   email: "",

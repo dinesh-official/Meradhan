@@ -77,6 +77,190 @@ export class ParticipantManager {
     this.cbrics = new NseCBRICS();
   }
 
+  /**
+   * Corporate participant registration using Corporate KYC table (QC form) data.
+   *
+   * This is intentionally separate from `registerParticipant()` (individual flow)
+   * so we don't disturb existing behaviour.
+   */
+  public async registerCorporateParticipantFromCorporateKyc(userId: number) {
+    const corporateKyc = await db.dataBase.corporateKycModel.findUnique({
+      where: { customerProfileDataModelId: userId },
+      include: {
+        bankAccounts: true,
+        dematAccounts: true,
+        authorisedSignatories: true,
+      },
+    });
+
+    if (!corporateKyc) {
+      throw new AppError("Corporate KYC not found", {
+        code: "CORPORATE_KYC_NOT_FOUND",
+        statusCode: 404,
+      });
+    }
+
+    const signatory = corporateKyc.authorisedSignatories?.[0];
+    const contactPerson =
+      signatory?.fullName?.trim() ||
+      corporateKyc.entityName?.trim() ||
+      "CORPORATE";
+
+    const email = (signatory?.email ?? "").trim();
+    const mobile = (signatory?.mobile ?? "").trim();
+
+    const fullAddress =
+      corporateKyc.registeredFullAddress?.trim() ||
+      corporateKyc.correspondenceFullAddress?.trim() ||
+      [
+        corporateKyc.registeredLine1,
+        corporateKyc.registeredLine2,
+        corporateKyc.registeredLine3,
+        corporateKyc.registeredCity,
+        corporateKyc.registeredDistrict,
+        corporateKyc.registeredState,
+        corporateKyc.registeredPinCode,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+    const address = splitAddressInto3BalancedLines(
+      removeLastCommaChunks(fullAddress, 3),
+    );
+
+    const stateRaw =
+      corporateKyc.registeredState?.trim() ||
+      corporateKyc.correspondenceState?.trim() ||
+      "";
+    const stateNameForCb = kraStateCodeToName(stateRaw);
+    const stateCode =
+      getStateCode(stateNameForCb) ??
+      getStateCode("IMPORT (Not Registered in India)");
+
+    if (!stateCode) {
+      throw new AppError("State Code cannot be empty.", {
+        code: "CBRICS_STATE_CODE_EMPTY",
+        statusCode: 400,
+      });
+    }
+
+    const dobDoi = corporateKyc.dateOfIncorporation
+      ? corporateKyc.dateOfIncorporation.toISOString().slice(0, 10).split("-").reverse().join("-")
+      : "";
+
+    const participant = await this.cbrics.unregisteredParticipant({
+      address: address?.line1 || "",
+      address2: address?.line2 || undefined,
+      address3: address?.line3 || undefined,
+      contactPerson,
+      firstName: corporateKyc.entityName,
+      loginId: `CORP${userId}`,
+      mobileList: mobile ? [removeCountryCode(mobile)] : [],
+      panNo: corporateKyc.panNumber ?? "",
+      emailList: email ? [email] : [],
+      stateCode: stateCode,
+      regAddress: fullAddress,
+      dobDoi,
+      telephone: mobile ? removeCountryCode(mobile) : "",
+      expiryDate: null,
+      leiCode: null,
+      custodian: null,
+      bankAccountList: (corporateKyc.bankAccounts ?? []).map((e) => {
+        return {
+          bankAccountNo: e.accountNumber,
+          bankIFSC: e.ifscCode,
+          bankName: e.bankName,
+          isDefault: e.isPrimaryAccount ? "Y" : "N",
+          status: "A",
+        };
+      }),
+      dpAccountList: (corporateKyc.dematAccounts ?? []).map((e) => {
+        return {
+          benId: e.clientId,
+          dpType: e.depository,
+          dpId: e.depository == "NSDL" ? e.dpId : undefined,
+          isDefault: e.isPrimary ? "Y" : "N",
+          status: "A",
+        };
+      }),
+    });
+
+    const saveToMyDb = await db.dataBase.customerProfileDataModel.update({
+      where: { id: userId },
+      data: {
+        nseDataSet: {
+          create: {
+            participant: {
+              create: {
+                actualStatus: participant.actualStatus,
+                contactPerson: participant.contactPerson,
+                custodian: participant.custodian,
+                dobDoi: participant.dobDoi,
+                userId: userId,
+                firstName: participant.firstName,
+                id: participant.id,
+                loginId: participant.loginId,
+                panNo: participant.panNo,
+                regAddress: participant.regAddress,
+                stateCode: participant.stateCode,
+                telephone: participant.telephone,
+                workflowStatus: participant.workflowStatus,
+                address: participant.address,
+                address2: participant.address2,
+                address3: participant.address3,
+                emailList: participant.emailList,
+                expiryDate: participant.expiryDate,
+                fax: participant.fax,
+                leiCode: participant.leiCode,
+                mobileList: participant.mobileList,
+                panVerRemarks: participant.panVerRemarks,
+                panVerStatus: participant.panVerStatus,
+                remarks: participant.remarks,
+                bankAccountList: {
+                  createMany: {
+                    data: participant.bankAccountList.map((bank) => {
+                      return {
+                        bankAccountNo: bank.bankAccountNo!,
+                        bankIFSC: bank.bankIFSC,
+                        bankName: bank.bankName,
+                        isDefault: bank.isDefault,
+                        status: bank.status,
+                        workflowStatus: bank.workflowStatus,
+                      };
+                    }),
+                  },
+                },
+                dpAccountList: {
+                  createMany: {
+                    data: participant.dpAccountList.map((dp) => {
+                      return {
+                        benId: dp.benId,
+                        dpType: dp.dpType,
+                        dpId: dp.dpId,
+                        isDefault: dp.isDefault,
+                        status: dp.status,
+                        workflowStatus: dp.workflowStatus,
+                      };
+                    }),
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      include: {
+        nseDataSet: {
+          include: {
+            participant: true,
+          },
+        },
+      },
+    });
+
+    return saveToMyDb.nseDataSet!.participant;
+  }
+
   public async registerParticipant(userId: number) {
     // query data
     const user = await db.dataBase.customerProfileDataModel.findUnique({

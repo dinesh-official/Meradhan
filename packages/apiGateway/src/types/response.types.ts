@@ -382,6 +382,10 @@ export type CorporateKycDirectorResponse = {
   id: number;
   fullName: string;
   pan?: string;
+  panCopyFileUrl?: string;
+  aadharCopyFileUrl?: string;
+  passportPhotoFileUrl?: string;
+  pepDeclaration?: string;
   designation?: string;
   din?: string;
   email?: string;
@@ -394,6 +398,11 @@ export type CorporateKycAuthorisedSignatoryResponse = {
   id: number;
   fullName: string;
   pan: string;
+  signatureFileUrl?: string;
+  panCopyFileUrl?: string;
+  aadharCopyFileUrl?: string;
+  passportPhotoFileUrl?: string;
+  pepDeclaration?: string;
   designation?: string;
   din?: string;
   email: string;

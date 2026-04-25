@@ -2,13 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
 import type { CorporateKycPromoterPayload } from "@root/schema";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
+import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, errors, setPromoter, addPromoter, removePromoter } = hook;
+  const { uploadFile } = useCorporateKycFileUpload();
   const list = form.promoters ?? [];
   const rowErrors = (i: number): Record<string, string[]> =>
     (errors.promoters?.[i] ?? {}) as Record<string, string[]>;
@@ -16,14 +21,14 @@ export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Promoters</CardTitle>
+        <CardTitle className="text-sm">Promoters</CardTitle>
         <Button type="button" variant="outline" size="sm" onClick={addPromoter}>
           <Plus className="h-4 w-4" /> Add
         </Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {list.length === 0 && (
-          <p className="text-muted-foreground text-sm">No promoters added.</p>
+          <p className="text-muted-foreground text-xs">No promoters added.</p>
         )}
         {list.map((p: CorporateKycPromoterPayload, index: number) => (
           <div
@@ -31,7 +36,7 @@ export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
             className="rounded-lg border p-4 grid gap-3 md:grid-cols-2"
           >
             <div className="md:col-span-2 flex justify-between items-center">
-              <span className="text-sm font-medium">Promoter {index + 1}</span>
+              <span className="text-xs font-medium">Promoter {index + 1}</span>
               <Button
                 type="button"
                 variant="ghost"
@@ -52,6 +57,35 @@ export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
               label="PAN"
               value={p.pan ?? ""}
               onChangeAction={(v) => setPromoter(index, { pan: v })}
+            />
+            <FileUploadField
+              label="Passport size photo (optional)"
+              className="md:col-span-2"
+              value={p.passportPhotoFileUrl ?? ""}
+              onChangeAction={(v) =>
+                setPromoter(index, { passportPhotoFileUrl: v })
+              }
+              onUpload={(file) => uploadFile(file, "corporate-kyc/promoters")}
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
+            />
+            <FileUploadField
+              label="Aadhaar copy (optional)"
+              className="md:col-span-2"
+              value={p.aadharCopyFileUrl ?? ""}
+              onChangeAction={(v) => setPromoter(index, { aadharCopyFileUrl: v })}
+              onUpload={(file) => uploadFile(file, "corporate-kyc/promoters")}
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
+            />
+            <FileUploadField
+              label="PAN copy (optional)"
+              className="md:col-span-2"
+              value={p.panCopyFileUrl ?? ""}
+              onChangeAction={(v) => setPromoter(index, { panCopyFileUrl: v })}
+              onUpload={(file) => uploadFile(file, "corporate-kyc/promoters")}
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
             />
             <InputField
               label="Designation"
@@ -75,6 +109,17 @@ export function PromotersSection({ hook }: { hook: CorporateKycFormHook }) {
               value={p.mobile ?? ""}
               onChangeAction={(v) => setPromoter(index, { mobile: v })}
             />
+            <div className="md:col-span-2 flex items-center gap-2 rounded-md border bg-muted/20 px-3 py-2">
+              <Checkbox
+                checked={(p.pepDeclaration ?? "NO") !== "NO"}
+                onCheckedChange={(checked) =>
+                  setPromoter(index, { pepDeclaration: checked ? "PEP" : "NO" })
+                }
+              />
+              <Label className="text-xs text-muted-foreground">
+                Politically Exposed Person (PEP)
+              </Label>
+            </div>
           </div>
         ))}
       </CardContent>

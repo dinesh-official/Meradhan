@@ -16,9 +16,9 @@ export function CorrespondenceAddressSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Correspondence address</CardTitle>
+        <CardTitle className="text-sm">Correspondence address</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
+      <CardContent className="grid gap-3 md:grid-cols-2">
         <InputField
           label="Full address"
           placeholder="Complete address"

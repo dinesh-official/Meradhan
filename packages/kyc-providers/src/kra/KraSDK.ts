@@ -7,11 +7,16 @@ import type {
   PanModifyKraPayload,
   T_APP_PAN_INQ,
   T_APP_PAN_INQ_DOWNLOAD,
+  T_NON_INDIVIDUAL_PAN_DOWNLOAD,
   T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
   T_PAN_MODIFY_RESPONSE,
   T_PAN_REGISTER_RESPONSE,
 } from "./kra.types";
 import { KraXMLBuilder, KraXMLParser } from "./KraXMLBuilder";
+import {
+  buildKraNonIndividualAppReqRootXml,
+  type KraNonIndAppReqRoot,
+} from "./kraNonIndBuilder";
 export type KraEnvironment = "UAT" | "PROD";
 
 export interface KraConfig {
@@ -134,6 +139,85 @@ export class KraSDK {
     )) as T_APP_PAN_INQ;
   }
 
+  /**
+   * Non-Individual inquiry (no DOB in request body).
+   * Matches the `_docs` sample inquiry payload shape.
+   */
+  public async nonIndividualPanInquiry({
+    pan,
+    mobile,
+    reqNo,
+  }: {
+    pan: string;
+    mobile: string;
+    reqNo: string;
+  }) {
+    const encrypted = await this.ensureEncryptedPassword();
+
+    const innerXML = `<APP_REQ_ROOT><APP_PAN_INQ><APP_PAN_NO>${pan}</APP_PAN_NO><APP_MOBILE_NO>${mobile}</APP_MOBILE_NO><APP_REQ_NO>${reqNo}</APP_REQ_NO></APP_PAN_INQ></APP_REQ_ROOT>`;
+    const xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <ser:panInquiryDetails>
+      <arg0><![CDATA[${innerXML}]]></arg0>
+      <arg1>${this.userName}</arg1>
+      <arg2>${encrypted}</arg2>
+      <arg3>${this.passKey}</arg3>
+    </ser:panInquiryDetails>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+    const response = await axios.post(this.panServiceUrl, xml, {
+      httpsAgent: insecureAgent,
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        SOAPAction: "panInquiryDetails",
+        Password: encrypted,
+      },
+    });
+
+    return (await KraXMLBuilder.parseSoapReturn(response.data)) as T_APP_PAN_INQ;
+  }
+
+  /**
+   * Non-Individual inquiryTwo (no DOB in request body).
+   */
+  public async nonIndividualPanInquiryTwo({
+    pan,
+    mobile,
+    reqNo,
+  }: {
+    pan: string;
+    mobile: string;
+    reqNo: string;
+  }) {
+    const encrypted = await this.ensureEncryptedPassword();
+
+    const innerXML = `<APP_REQ_ROOT><APP_PAN_INQ><APP_PAN_NO>${pan}</APP_PAN_NO><APP_MOBILE_NO>${mobile}</APP_MOBILE_NO><APP_REQ_NO>${reqNo}</APP_REQ_NO></APP_PAN_INQ></APP_REQ_ROOT>`;
+    const xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <ser:panInquiryDetailsTwo>
+      <arg0><![CDATA[${innerXML}]]></arg0>
+      <arg1>${this.userName}</arg1>
+      <arg2>${encrypted}</arg2>
+      <arg3>${this.passKey}</arg3>
+    </ser:panInquiryDetailsTwo>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+    const response = await axios.post(this.panServiceUrl, xml, {
+      httpsAgent: insecureAgent,
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        SOAPAction: "panInquiryDetailsTwo",
+        Password: encrypted,
+      },
+    });
+
+    return (await KraXMLBuilder.parseSoapReturn(response.data)) as T_APP_PAN_INQ;
+  }
+
   // 1.1. PAN Inquiry Two
   public async panInquiryTwo({
     dob,
@@ -209,6 +293,44 @@ export class KraSDK {
     )) as T_APP_PAN_INQ_DOWNLOAD;
   }
 
+  /**
+   * Non-Individual download response is richer (APP_ADDL_DATA embedded, FATCA blocks, etc).
+   * Request is same SOAP method; only return type differs.
+   */
+  public async nonIndividualPanDownloadDetailsComplete({
+    dob,
+    mobile,
+    pan,
+  }: {
+    pan: string;
+    dob: string;
+    mobile: string;
+  }) {
+    const encrypted = await this.ensureEncryptedPassword();
+
+    const xml = KraXMLBuilder.buildPanDownloadXML({
+      pan,
+      dob,
+      mobile,
+      encryptedPassword: encrypted,
+      passKey: this.passKey,
+      userName: this.userName,
+    });
+
+    const response = await axios.post(this.panServiceUrl, xml, {
+      httpsAgent: insecureAgent,
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        SOAPAction: "panDownloadDetailsComplete",
+        Password: encrypted,
+      },
+    });
+
+    return (await KraXMLBuilder.parseSoapReturn(
+      response.data
+    )) as T_NON_INDIVIDUAL_PAN_DOWNLOAD;
+  }
+
   // 3. Register PAN / Upload KRA XML
   public async panRegisterUploadKraXML({
     APP_PAN_INQ,
@@ -245,6 +367,46 @@ export class KraSDK {
     )) as T_PAN_REGISTER_RESPONSE;
   }
 
+  /**
+   * Non-Individual Registration (upload KRA XML).
+   *
+   * Uses the same SOAP `registration` method but builds the inner `<APP_REQ_ROOT>` using
+   * `buildKraNonIndividualAppReqRootXml`.
+   */
+  public async nonIndividualRegisterUploadKraXML(payload: KraNonIndAppReqRoot) {
+    const encrypted = await this.ensureEncryptedPassword();
+    const innerXml = buildKraNonIndividualAppReqRootXml(payload);
+
+    const buffer = Buffer.from(innerXml, "utf8");
+    const byteArray = Array.from(buffer);
+
+    const soap = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:com="http://common.nsdl.com">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <com:registration>
+      ${byteArray.map((r) => `<input>${r}</input>`).join("")}
+      <userId>${this.userName}</userId>
+      <userPassword>${encrypted}</userPassword>
+      <passKey>${this.passKey}</passKey>
+      <okraCdOrMiId>${this.okraCdOrMiId}</okraCdOrMiId>
+    </com:registration>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+    const response = await axios.post(this.okraServiceUrl, soap, {
+      httpsAgent: insecureAgent,
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        SOAPAction: "registration",
+        Password: encrypted,
+      },
+    });
+
+    return (await KraXMLParser.parseRegistrationResponse(
+      response.data
+    )) as T_PAN_REGISTER_RESPONSE;
+  }
+
   // 4. Modify PAN Details (KRA XML Upload)
   public async panModifyKraXML(payload: PanModifyKraPayload) {
     const encrypted = await this.ensureEncryptedPassword();
@@ -265,6 +427,39 @@ export class KraSDK {
 
     return (await KraXMLParser.parseModifyPdfResponse(
       response.data,
+    )) as T_PAN_MODIFY_RESPONSE;
+  }
+
+  /**
+   * Non-Individual Modify (processModification) using Non-Individual `<APP_REQ_ROOT>`.
+   */
+  public async nonIndividualModifyKraXML(payload: KraNonIndAppReqRoot) {
+    const encrypted = await this.ensureEncryptedPassword();
+    const innerXml = buildKraNonIndividualAppReqRootXml(payload).trim();
+
+    const soap = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <ser:processModification>
+      <arg0><![CDATA[${innerXml}]]></arg0>
+      <arg1>${this.userName}</arg1>
+      <arg2>${encrypted}</arg2>
+      <arg3>${this.passKey}</arg3>
+    </ser:processModification>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+    const response = await axios.post(this.panServiceUrl, soap, {
+      httpsAgent: insecureAgent,
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        SOAPAction: "processModification",
+        Password: encrypted,
+      },
+    });
+
+    return (await KraXMLParser.parseModifyPdfResponse(
+      response.data
     )) as T_PAN_MODIFY_RESPONSE;
   }
 }

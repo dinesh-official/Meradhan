@@ -11,6 +11,8 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import OrdersSectionTabs from "./OrdersSectionTabs";
+import RazorpayRoutesSection from "./RazorpayRoutesSection";
+import { getErrorMessage } from "@/core/utils/getErrorMessage";
 
 export default function PgManagementView() {
   const queryClient = useQueryClient();
@@ -31,13 +33,7 @@ export default function PgManagementView() {
       toast.success("Settings saved");
     },
     onError: (err: unknown) => {
-      const message =
-        err &&
-        typeof err === "object" &&
-        "message" in err &&
-        typeof (err as { message?: string }).message === "string"
-          ? (err as { message: string }).message
-          : "Could not update payment mode.";
+      const message = getErrorMessage(err, "Could not update payment mode.");
       toast.error("Update failed", { description: message });
     },
   });
@@ -85,6 +81,8 @@ export default function PgManagementView() {
           </div>
         </CardContent>
       </Card>
+
+      <RazorpayRoutesSection />
     </div>
   );
 }

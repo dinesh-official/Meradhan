@@ -22,9 +22,9 @@ export function EntityDetailsSection({ hook }: { hook: CorporateKycFormHook }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Entity details</CardTitle>
+        <CardTitle className="text-sm">Entity details</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
+      <CardContent className="grid gap-3 md:grid-cols-2">
         <InputField
           label="Entity name"
           placeholder="Legal entity name"

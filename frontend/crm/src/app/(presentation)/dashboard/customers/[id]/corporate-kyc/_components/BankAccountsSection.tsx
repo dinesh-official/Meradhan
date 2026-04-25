@@ -22,14 +22,14 @@ export function BankAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Bank accounts</CardTitle>
+        <CardTitle className="text-sm">Bank accounts</CardTitle>
         <Button type="button" variant="outline" size="sm" onClick={addBankAccount}>
           <Plus className="h-4 w-4" /> Add
         </Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {list.length === 0 && (
-          <p className="text-muted-foreground text-sm">No bank accounts added.</p>
+          <p className="text-muted-foreground text-xs">No bank accounts added.</p>
         )}
         {list.map((acc: CorporateKycBankAccountPayload, index: number) => (
           <div
@@ -37,7 +37,7 @@ export function BankAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
             className="rounded-lg border p-4 grid gap-3 md:grid-cols-2"
           >
             <div className="md:col-span-2 flex justify-between items-center">
-              <span className="text-sm font-medium">Account {index + 1}</span>
+              <span className="text-xs font-medium">Account {index + 1}</span>
               <Button
                 type="button"
                 variant="ghost"
