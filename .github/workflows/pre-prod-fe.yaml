@@ -84,7 +84,6 @@ jobs:
           DEV_S3_SECRET_ACCESS_KEY: ${{ secrets.DEV_S3_SECRET_ACCESS_KEY }}
           DEV_S3_REGION: ap-south-1
           DEV_S3_ENDPOINT: https://staging-meradhan-storage.s3.ap-south-1.amazonaws.com
-          DEV_S3_BUCKET_NAME: staging-meradhan-storage
           MSG91_RCS_URL: ${{ vars.MSG91_RCS_URL }}
 
         run: |
