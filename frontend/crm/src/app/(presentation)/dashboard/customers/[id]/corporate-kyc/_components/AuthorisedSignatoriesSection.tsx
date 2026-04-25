@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { SelectField } from "@/global/elements/inputs/SelectField";
 import type { CorporateKycAuthorisedSignatoryPayload } from "@root/schema";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 export function AuthorisedSignatoriesSection({
   hook,
@@ -164,19 +163,22 @@ export function AuthorisedSignatoriesSection({
                 setAuthorisedSignatory(index, { mobile: v })
               }
             />
-            <div className="md:col-span-2 flex items-center gap-2 rounded-md border bg-muted/20 px-3 py-2">
-              <Checkbox
-                checked={(s.pepDeclaration ?? "NO") !== "NO"}
-                onCheckedChange={(checked) =>
-                  setAuthorisedSignatory(index, {
-                    pepDeclaration: checked ? "PEP" : "NO",
-                  })
-                }
-              />
-              <Label className="text-xs text-muted-foreground">
-                Politically Exposed Person (PEP)
-              </Label>
-            </div>
+            <SelectField
+              label="Whether Politically Exposed?"
+              className="md:col-span-2"
+              value={(s.pepDeclaration as unknown as string | undefined) ?? "NA"}
+              onChangeAction={(v) =>
+                setAuthorisedSignatory(index, {
+                  pepDeclaration:
+                    v as unknown as CorporateKycAuthorisedSignatoryPayload["pepDeclaration"],
+                })
+              }
+              options={[
+                { label: "NA", value: "NA" },
+                { label: "PEP", value: "PEP" },
+                { label: "RPEP", value: "RPEP" },
+              ]}
+            />
           </div>
         ))}
       </CardContent>

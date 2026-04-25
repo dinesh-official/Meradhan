@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { SelectField } from "@/global/elements/inputs/SelectField";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { useState } from "react";
+import { addressProofOptions } from "../_utils/addressProofOptions";
 
 function copyCorrespondenceToRegistered(hook: CorporateKycFormHook) {
   const { form, setField } = hook;
@@ -18,6 +20,10 @@ function copyCorrespondenceToRegistered(hook: CorporateKycFormHook) {
   setField("registeredDistrict", form.correspondenceDistrict ?? "");
   setField("registeredState", form.correspondenceState ?? "");
   setField("registeredPinCode", form.correspondencePinCode ?? "");
+  setField(
+    "registeredAddressProofType",
+    form.correspondenceAddressProofType ?? "",
+  );
   setField(
     "registeredAddressProofCopyUrl",
     form.correspondenceAddressProofCopyUrl ?? "",
@@ -91,6 +97,13 @@ export function RegisteredAddressSection({ hook }: { hook: CorporateKycFormHook 
           value={form.registeredPinCode ?? ""}
           onChangeAction={(v) => setField("registeredPinCode", v)}
           error={(errors as { registeredPinCode?: string[] }).registeredPinCode?.[0]}
+        />
+        <SelectField
+          label="Address proof type"
+          placeholder="Select address proof type"
+          value={form.registeredAddressProofType ?? ""}
+          onChangeAction={(v) => setField("registeredAddressProofType", v)}
+          options={addressProofOptions}
         />
         <FileUploadField
           label="Address proof copy"

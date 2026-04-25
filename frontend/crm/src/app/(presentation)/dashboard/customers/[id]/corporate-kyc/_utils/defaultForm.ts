@@ -19,6 +19,7 @@ export const defaultCorporateKycForm: CreateCorporateKycPayload = {
   correspondenceDistrict: "",
   correspondencePinCode: "",
   correspondenceState: "",
+  correspondenceAddressProofType: "",
   correspondenceAddressProofCopyUrl: "",
 
   registeredFullAddress: "",
@@ -29,6 +30,7 @@ export const defaultCorporateKycForm: CreateCorporateKycPayload = {
   registeredDistrict: "",
   registeredPinCode: "",
   registeredState: "",
+  registeredAddressProofType: "",
   registeredAddressProofCopyUrl: "",
   balanceSheetCopyUrl: "",
   certificateOfIncorporationUrl: "",
