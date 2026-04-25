@@ -77,6 +77,7 @@ export const corporateKycAuthorisedSignatorySchema = z.object({
   id: z.number().optional(),
   fullName: z.string().min(1, "Full name is required"),
   pan: z.string().min(1, "PAN is required"),
+  signatureFileUrl: z.string().optional(),
   panCopyFileUrl: z.string().optional(),
   aadharCopyFileUrl: z.string().optional(),
   passportPhotoFileUrl: z.string().optional(),

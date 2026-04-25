@@ -28,14 +28,14 @@ export function DematAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Demat accounts</CardTitle>
+        <CardTitle className="text-sm">Demat accounts</CardTitle>
         <Button type="button" variant="outline" size="sm" onClick={addDematAccount}>
           <Plus className="h-4 w-4" /> Add
         </Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {list.length === 0 && (
-          <p className="text-muted-foreground text-sm">No demat accounts added.</p>
+          <p className="text-muted-foreground text-xs">No demat accounts added.</p>
         )}
         {list.map((acc: CorporateKycDematAccountPayload, index: number) => (
           <div
@@ -43,7 +43,7 @@ export function DematAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
             className="rounded-lg border p-4 grid gap-3 md:grid-cols-2"
           >
             <div className="md:col-span-2 flex justify-between items-center">
-              <span className="text-sm font-medium">Demat account {index + 1}</span>
+              <span className="text-xs font-medium">Demat account {index + 1}</span>
               <Button
                 type="button"
                 variant="ghost"

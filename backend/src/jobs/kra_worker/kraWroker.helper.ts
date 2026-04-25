@@ -8,6 +8,8 @@ export interface KraWorkerJobData<T = Record<string, unknown>> {
   customerId: number;
   kycDataStoreId: number;
   stage: "ENQUIRY_KRA" | "REGISTER_KRA" | "DOWNLOAD_KRA" | "MODIFY_KRA";
+  /** Defaults to INDIVIDUAL if omitted (backwards compatible). */
+  kraType?: "INDIVIDUAL" | "CORPORATE";
   /** CRM reschedule: skip CVL KRA enquiry/register/download and run CBRICS registration only. */
   cbricsOnly?: boolean;
   data?: T;

@@ -106,12 +106,13 @@ export default function CorporateKycPageView({
         title="Corporate KYC"
         description="Manage corporate KYC details for this customer"
         actions={
-          <div className="flex gap-2">
+          <div className="flex w-full flex-wrap items-center justify-start gap-2 md:w-auto md:justify-end">
             <Button
               type="button"
               variant="outline"
               onClick={handleReset}
               disabled={saving}
+              className="h-9 text-xs"
             >
               Reset
             </Button>
@@ -119,13 +120,14 @@ export default function CorporateKycPageView({
               type="button"
               onClick={handleSave}
               disabled={saving}
+              className="h-9 text-xs"
             >
               {saving ? "Saving…" : "Save Corporate KYC"}
             </Button>
           </div>
         }
       />
-      <div className="flex flex-col gap-6">
+      <div className="w-full space-y-6">
         <EntityDetailsSection hook={hook} />
         <CorrespondenceAddressSection hook={hook} />
         <RegisteredAddressSection hook={hook} />

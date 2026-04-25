@@ -6,14 +6,20 @@ import { CustomerProfileService } from "./customer.service";
 import { CorporateKycRepo } from "./corporatekyc.repo";
 import { CorporateKycService } from "./corporatekyc.service";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
+import { cacheStorage } from "@store/redis_store";
+import { kraWorkerQueue } from "@jobs/queue/worker_queues";
+import { CorporateKycAttachmentsRepo } from "./corporatekyc_attachments.repo";
+import z from "zod";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;
   private corporateKycService: CorporateKycService;
+  private corporateKycAttachmentsRepo: CorporateKycAttachmentsRepo;
   constructor() {
     const repo = new CustomerProfileRepo();
     this.profileService = new CustomerProfileService(repo);
     this.corporateKycService = new CorporateKycService(new CorporateKycRepo());
+    this.corporateKycAttachmentsRepo = new CorporateKycAttachmentsRepo();
   }
 
   async createCustomer(req: Request, res: Response): Promise<void> {
@@ -204,6 +210,182 @@ export class CustomerProfileController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,
+    });
+  }
+
+  async corporateKraStatus(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    const kycDataStoreId = corporateKyc?.id ?? null;
+    if (!kycDataStoreId) {
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: { isRunning: false, kycDataStoreId: null },
+      });
+      return;
+    }
+
+    const cachedKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RUNNER`;
+    const runner = await cacheStorage.get<string>(cachedKey);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { isRunning: Boolean(runner), kycDataStoreId },
+    });
+  }
+
+  async triggerCorporateKra(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Corporate KYC data not found. Please save corporate KYC first.",
+      });
+      return;
+    }
+
+    const missing: string[] = [];
+    const pan = (corporateKyc as any).panNumber ?? (corporateKyc as any).pan ?? null;
+    if (!pan) missing.push("PAN");
+
+    const doi =
+      (corporateKyc as any).dateOfIncorporation ??
+      (corporateKyc as any).incorporationDate ??
+      (corporateKyc as any).commencementDate ??
+      null;
+    if (!doi) missing.push("Date of incorporation/commencement");
+
+    const authorisedSignatories = (corporateKyc as any).authorisedSignatories ?? [];
+    if (!Array.isArray(authorisedSignatories) || authorisedSignatories.length === 0) {
+      missing.push("At least 1 authorised signatory");
+    } else {
+      const first = authorisedSignatories[0] ?? {};
+      if (!first?.email) missing.push("Authorised signatory email");
+      if (!first?.mobile) missing.push("Authorised signatory mobile");
+    }
+
+    if (missing.length > 0) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `Missing required corporate KYC data: ${missing.join(", ")}`,
+      });
+      return;
+    }
+
+    const TTL_72_HOURS = 72 * 60 * 60;
+    const kycDataStoreId = corporateKyc.id;
+    const cachedKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RUNNER`;
+    const runner = await cacheStorage.get<string>(cachedKey);
+    if (runner) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "KRA process is already running for this corporate customer.",
+      });
+      return;
+    }
+
+    await cacheStorage.set(cachedKey, new Date().toISOString(), TTL_72_HOURS);
+    await kraWorkerQueue.add(
+      {
+        kraType: "CORPORATE",
+        customerId,
+        kycDataStoreId,
+        stage: "ENQUIRY_KRA",
+      },
+      { attempts: 1, delay: 0 },
+    );
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "Corporate KRA triggered successfully.",
+      responseData: { isTriggered: true },
+    });
+  }
+
+  async listCorporateKycAttachments(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: [],
+      });
+      return;
+    }
+
+    const items = await this.corporateKycAttachmentsRepo.listByCorporateKycId(corporateKyc.id);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: items,
+    });
+  }
+
+  async createCorporateKycAttachment(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Corporate KYC data not found. Please save corporate KYC first.",
+      });
+      return;
+    }
+
+    const payload = z
+      .object({
+        label: z.string().trim().min(1, "Label is required"),
+        fileUrl: z.string().trim().min(1, "File URL is required"),
+      })
+      .parse(req.body);
+
+    const createdByCrmUserId =
+      typeof (req.session as { id?: unknown } | undefined)?.id === "number"
+        ? ((req.session as { id: number }).id as number)
+        : undefined;
+
+    const created = await this.corporateKycAttachmentsRepo.create({
+      corporateKycModelId: corporateKyc.id,
+      label: payload.label,
+      fileUrl: payload.fileUrl,
+      createdByCrmUserId,
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: created,
+      message: "Attachment saved successfully",
     });
   }
 

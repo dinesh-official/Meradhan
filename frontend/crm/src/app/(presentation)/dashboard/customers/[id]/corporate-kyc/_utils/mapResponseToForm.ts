@@ -9,6 +9,15 @@ function toDateOnly(value: string | undefined | null): string {
   return s;
 }
 
+function normalizePepDeclaration(v: unknown): "PEP" | "RPEP" | "NO" | undefined {
+  if (v == null) return undefined;
+  const s = String(v).trim().toUpperCase();
+  if (s === "" || s === "NULL" || s === "UNDEFINED") return undefined;
+  if (s === "YES") return "PEP";
+  if (s === "PEP" || s === "RPEP" || s === "NO") return s as "PEP" | "RPEP" | "NO";
+  return undefined;
+}
+
 export function mapCorporateKycResponseToForm(
   data: CorporateKycResponse
 ): CreateCorporateKycPayload {
@@ -103,11 +112,10 @@ export function mapCorporateKycResponseToForm(
       id: d.id,
       fullName: d.fullName,
       pan: d.pan ?? "",
-      panCopyFileUrl: (d as unknown as { panCopyFileUrl?: string | null }).panCopyFileUrl ?? "",
-      aadharCopyFileUrl:
-        (d as unknown as { aadharCopyFileUrl?: string | null }).aadharCopyFileUrl ?? "",
-      passportPhotoFileUrl:
-        (d as unknown as { passportPhotoFileUrl?: string | null }).passportPhotoFileUrl ?? "",
+      panCopyFileUrl: d.panCopyFileUrl ?? "",
+      aadharCopyFileUrl: d.aadharCopyFileUrl ?? "",
+      passportPhotoFileUrl: d.passportPhotoFileUrl ?? "",
+      pepDeclaration: normalizePepDeclaration(d.pepDeclaration),
       designation: d.designation ?? "",
       din: d.din ?? "",
       email: d.email ?? "",
@@ -117,6 +125,10 @@ export function mapCorporateKycResponseToForm(
       id: p.id,
       fullName: p.fullName,
       pan: p.pan ?? "",
+      panCopyFileUrl: p.panCopyFileUrl ?? "",
+      aadharCopyFileUrl: p.aadharCopyFileUrl ?? "",
+      passportPhotoFileUrl: p.passportPhotoFileUrl ?? "",
+      pepDeclaration: normalizePepDeclaration(p.pepDeclaration),
       designation: p.designation ?? "",
       din: p.din ?? "",
       email: p.email ?? "",
@@ -126,6 +138,11 @@ export function mapCorporateKycResponseToForm(
       id: s.id,
       fullName: s.fullName,
       pan: s.pan,
+      signatureFileUrl: (s as unknown as { signatureFileUrl?: string | null }).signatureFileUrl ?? "",
+      panCopyFileUrl: s.panCopyFileUrl ?? "",
+      aadharCopyFileUrl: s.aadharCopyFileUrl ?? "",
+      passportPhotoFileUrl: s.passportPhotoFileUrl ?? "",
+      pepDeclaration: normalizePepDeclaration(s.pepDeclaration),
       designation: s.designation ?? "",
       din: s.din ?? "",
       email: s.email,

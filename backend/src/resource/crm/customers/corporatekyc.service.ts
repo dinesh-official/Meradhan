@@ -121,6 +121,9 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
       create: (payload.authorisedSignatories ?? []).map((s) => ({
         fullName: s.fullName,
         pan: s.pan,
+        signatureFileUrl:
+          (s as unknown as { signatureFileUrl?: string }).signatureFileUrl ??
+          undefined,
         panCopyFileUrl:
           (s as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
         aadharCopyFileUrl:
@@ -276,6 +279,9 @@ export class CorporateKycService {
           create: (payload.authorisedSignatories ?? []).map((s) => ({
             fullName: s.fullName,
             pan: s.pan,
+            signatureFileUrl:
+              (s as unknown as { signatureFileUrl?: string }).signatureFileUrl ??
+              undefined,
             panCopyFileUrl:
               (s as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
             aadharCopyFileUrl:
@@ -430,6 +436,7 @@ export class CorporateKycService {
         id: s.id,
         fullName: s.fullName,
         pan: s.pan,
+        signatureFileUrl: s.signatureFileUrl ?? undefined,
         panCopyFileUrl: s.panCopyFileUrl ?? undefined,
         aadharCopyFileUrl: s.aadharCopyFileUrl ?? undefined,
         passportPhotoFileUrl: s.passportPhotoFileUrl ?? undefined,
