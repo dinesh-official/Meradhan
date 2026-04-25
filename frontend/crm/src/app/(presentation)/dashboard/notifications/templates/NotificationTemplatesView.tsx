@@ -39,7 +39,10 @@ type Template = {
   name: string;
   templateId: string;
   medium: Medium;
-  message: string;
+  message: string | null;
+  rcsProjectId?: string | null;
+  rcsNamespace?: string | null;
+  rcsVariables?: string[] | null;
   createdAt: string;
   createdBy: { id: number; name: string };
 };
@@ -74,7 +77,15 @@ function extractVariables(message: string): string[] {
   return [...new Set(matches.map((m) => m[1]))];
 }
 
-const BLANK_FORM = { name: "", templateId: "", medium: "SMS" as Medium, message: "" };
+const BLANK_FORM = {
+  name: "",
+  templateId: "",
+  medium: "SMS" as Medium,
+  message: "",
+  rcsProjectId: "",
+  rcsNamespace: "",
+  rcsVariablesInput: "", // comma-separated string in the UI
+};
 
 /* ─── sub-component: message preview with highlights ───────── */
 
@@ -112,6 +123,8 @@ export default function NotificationTemplatesView() {
   const [editing, setEditing] = useState<Template | null>(null);
   const [form, setForm] = useState(BLANK_FORM);
   const [saving, setSaving] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
+  const [dialogSuccess, setDialogSuccess] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const api = new apiGateway.crm.notifications.CrmNotificationsApi(apiClientCaller);
@@ -140,46 +153,97 @@ export default function NotificationTemplatesView() {
     if (mounted) loadTemplates();
   }, [mounted, loadTemplates]);
 
+  const rcsVariablesArray = (input: string) =>
+    input.split(",").map((v) => v.trim()).filter(Boolean);
+
   const openCreate = () => {
     setEditing(null);
     setForm({ ...BLANK_FORM, medium: activeMedium !== "ALL" ? activeMedium : "SMS" });
+    setDialogError(null);
+    setDialogSuccess(null);
     setDialogOpen(true);
   };
 
   const openEdit = (t: Template) => {
     setEditing(t);
-    setForm({ name: t.name, templateId: t.templateId, medium: t.medium, message: t.message });
+    setForm({
+      name: t.name,
+      templateId: t.templateId,
+      medium: t.medium,
+      message: t.message,
+      rcsProjectId: t.rcsProjectId ?? "",
+      rcsNamespace: t.rcsNamespace ?? "",
+      rcsVariablesInput: (t.rcsVariables ?? []).join(", "),
+    });
+    setDialogError(null);
+    setDialogSuccess(null);
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.templateId.trim() || !form.message.trim()) {
-      await Swal.fire("Validation", "All fields are required.", "warning");
+    setDialogError(null);
+    setDialogSuccess(null);
+
+    const messageRequired = form.medium !== "RCS";
+    if (!form.name.trim() || !form.templateId.trim() || (messageRequired && !form.message.trim())) {
+      setDialogError(
+        messageRequired
+          ? "Name, Template ID, and Message are all required."
+          : "Name and Template ID are required."
+      );
       return;
     }
+    if (form.medium === "RCS" && !form.rcsProjectId.trim()) {
+      setDialogError("Project ID is required for RCS templates.");
+      return;
+    }
+
     setSaving(true);
     try {
+      const rcsPayload =
+        form.medium === "RCS"
+          ? {
+              rcsProjectId: form.rcsProjectId.trim() || undefined,
+              rcsNamespace: form.rcsNamespace.trim() || undefined,
+              rcsVariables: rcsVariablesArray(form.rcsVariablesInput),
+            }
+          : { rcsProjectId: null, rcsNamespace: null, rcsVariables: null };
+
+      const messageVal = form.message.trim() || null;
+
       if (editing) {
-        const res = await api.updateTemplate(editing.id, form);
+        const res = await api.updateTemplate(editing.id, {
+          name: form.name,
+          templateId: form.templateId,
+          medium: form.medium,
+          message: messageVal,
+          ...rcsPayload,
+        });
         const data = res.data as ApiResponse<Template>;
         const updated = data.responseData!;
         setTemplates((prev) =>
           prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t))
         );
-        await Swal.fire({ icon: "success", title: "Template updated", timer: 1200, showConfirmButton: false });
+        setDialogSuccess("Template updated successfully.");
+        setTimeout(() => setDialogOpen(false), 800);
       } else {
-        const res = await api.createTemplate(form);
+        const res = await api.createTemplate({
+          name: form.name,
+          templateId: form.templateId,
+          medium: form.medium,
+          message: messageVal,
+          ...rcsPayload,
+        });
         const data = res.data as ApiResponse<Template>;
         const created = data.responseData!;
-        // Only add to current list if it matches the active medium filter
         if (activeMedium === "ALL" || created.medium === activeMedium) {
           setTemplates((prev) => [...prev, created]);
         }
-        await Swal.fire({ icon: "success", title: "Template created", timer: 1200, showConfirmButton: false });
+        setDialogSuccess("Template created successfully.");
+        setTimeout(() => setDialogOpen(false), 800);
       }
-      setDialogOpen(false);
     } catch (e) {
-      await Swal.fire("Failed", extractMsg(e), "error");
+      setDialogError(extractMsg(e));
     } finally {
       setSaving(false);
     }
@@ -277,7 +341,7 @@ export default function NotificationTemplatesView() {
       ) : (
         <div className="space-y-3">
           {templates.map((t) => {
-            const tVars = extractVariables(t.message);
+            const tVars = extractVariables(t.message ?? "");
             const meta = mediumMeta(t.medium);
             return (
               <div
@@ -342,22 +406,41 @@ export default function NotificationTemplatesView() {
                 </div>
 
                 {/* Message preview */}
-                <div className="bg-muted/40 rounded-lg px-3 py-2">
-                  <MessagePreview message={t.message} />
-                </div>
+                {t.message ? (
+                  <div className="bg-muted/40 rounded-lg px-3 py-2">
+                    <MessagePreview message={t.message} />
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic px-1">
+                    No message — content managed in MSG91 dashboard.
+                  </p>
+                )}
 
                 {/* Variables pill list */}
                 {tVars.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {tVars.map((v) => (
-                      <Badge
-                        key={v}
-                        variant="secondary"
-                        className="font-mono text-xs px-2"
-                      >
+                      <Badge key={v} variant="secondary" className="font-mono text-xs px-2">
                         {v}
                       </Badge>
                     ))}
+                  </div>
+                )}
+
+                {/* RCS metadata */}
+                {t.medium === "RCS" && (
+                  <div className="text-xs text-muted-foreground space-y-0.5 font-mono">
+                    {t.rcsProjectId && <div>Project: {t.rcsProjectId}</div>}
+                    {t.rcsNamespace && <div>Namespace: {t.rcsNamespace}</div>}
+                    {(t.rcsVariables ?? []).length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(t.rcsVariables ?? []).map((v, i) => (
+                          <Badge key={i} variant="outline" className="font-mono text-xs px-2">
+                            [{i + 1}] {v}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -403,33 +486,88 @@ export default function NotificationTemplatesView() {
                   <SelectContent>
                     <SelectItem value="SMS">SMS</SelectItem>
                     <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
-                    <SelectItem value="RCS">RCS (coming soon)</SelectItem>
+                    <SelectItem value="RCS">RCS</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="tpl-id">Template ID / API ID</Label>
+              <Label htmlFor="tpl-id">
+                {form.medium === "SMS" ? "DLT Template ID" : "Template Name (API key)"}
+              </Label>
               <Input
                 id="tpl-id"
                 placeholder={
                   form.medium === "SMS"
-                    ? "e.g. 1707xxxxxxxxx (DLT ID)"
-                    : "e.g. MSG91 template key"
+                    ? "e.g. 1707xxxxxxxxx"
+                    : "e.g. meradhan_template1"
                 }
                 value={form.templateId}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, templateId: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, templateId: e.target.value }))}
               />
             </div>
+
+            {/* RCS-specific fields */}
+            {form.medium === "RCS" && (
+              <div className="rounded-lg border border-purple-200 bg-purple-50/50 p-4 space-y-3">
+                <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                  RCS Configuration
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tpl-rcs-project">Project ID <span className="text-destructive">*</span></Label>
+                    <Input
+                      id="tpl-rcs-project"
+                      placeholder="e.g. 69e72d0380cbf5061400022d"
+                      value={form.rcsProjectId}
+                      onChange={(e) => setForm((f) => ({ ...f, rcsProjectId: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tpl-rcs-ns">Namespace</Label>
+                    <Input
+                      id="tpl-rcs-ns"
+                      placeholder="e.g. meradhan_template1"
+                      value={form.rcsNamespace}
+                      onChange={(e) => setForm((f) => ({ ...f, rcsNamespace: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground">Leave blank to use template name.</p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="tpl-rcs-vars">
+                    Variable names{" "}
+                    <span className="text-muted-foreground font-normal text-xs">
+                      (comma-separated, in order — e.g. customer_name, amount)
+                    </span>
+                  </Label>
+                  <Input
+                    id="tpl-rcs-vars"
+                    placeholder="e.g. customer_name, amount, date"
+                    value={form.rcsVariablesInput}
+                    onChange={(e) => setForm((f) => ({ ...f, rcsVariablesInput: e.target.value }))}
+                  />
+                  {form.rcsVariablesInput.trim() && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {rcsVariablesArray(form.rcsVariablesInput).map((v, i) => (
+                        <Badge key={i} variant="outline" className="font-mono text-xs border-purple-400 text-purple-800">
+                          [{i + 1}] {v}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <Label htmlFor="tpl-msg">
                 Message template{" "}
                 <span className="text-muted-foreground font-normal text-xs">
-                  (use ##variable## for placeholders)
+                  {form.medium === "RCS"
+                    ? "(optional — content is managed in MSG91 dashboard)"
+                    : "(use ##variable## for placeholders)"}
                 </span>
               </Label>
               <Textarea
@@ -482,6 +620,18 @@ export default function NotificationTemplatesView() {
               </div>
             )}
           </div>
+
+          {/* Inline validation / error / success — no Swal inside a Dialog */}
+          {dialogError && (
+            <p className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2">
+              {dialogError}
+            </p>
+          )}
+          {dialogSuccess && (
+            <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+              {dialogSuccess}
+            </p>
+          )}
 
           <DialogFooter>
             <Button

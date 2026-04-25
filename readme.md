@@ -6,6 +6,7 @@
 
 ### Strapi Cms
 
+
 - DataBase: PostgreSQL
 - API: GraphQL
 - Storage : Local filesystem
@@ -25,6 +26,7 @@
 - Razorpay (Payment gateway).
 - Cheerio (Web scraping).
 - XLSX & Adm-zip (Data processing).
+- 
 
 ### Frontend (/frontend/crm & /frontend/meradhan)
 

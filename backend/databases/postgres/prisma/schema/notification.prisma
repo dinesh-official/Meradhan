@@ -25,16 +25,22 @@ enum NotificationRecipientDeliveryStatus {
 
 /// Templates managed through the CRM UI (one per medium type)
 model NotificationTemplateModel {
-    id           Int                  @id @default(autoincrement())
-    name         String
-    templateId   String
-    medium       NotificationMedium   @default(SMS)
-    message      String
-    isActive     Boolean              @default(true)
-    createdById  Int
-    createdBy    CRMUserDataModel     @relation("NotificationTemplateCreatedBy", fields: [createdById], references: [id])
-    createdAt    DateTime             @default(now())
-    updatedAt    DateTime             @updatedAt
+    id             Int                  @id @default(autoincrement())
+    name           String
+    templateId     String
+    medium         NotificationMedium   @default(SMS)
+    message        String?
+    /// RCS-only: MSG91 project ID
+    rcsProjectId   String?
+    /// RCS-only: MSG91 namespace (may differ from name)
+    rcsNamespace   String?
+    /// RCS-only: ordered variable names, e.g. ["customer_name","amount"]
+    rcsVariables   Json?
+    isActive       Boolean              @default(true)
+    createdById    Int
+    createdBy      CRMUserDataModel     @relation("NotificationTemplateCreatedBy", fields: [createdById], references: [id])
+    createdAt      DateTime             @default(now())
+    updatedAt      DateTime             @updatedAt
 
     @@unique([templateId, medium])
     @@map("notification_templates")

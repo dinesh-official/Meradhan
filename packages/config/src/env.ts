@@ -46,6 +46,8 @@ const EnvSchema = z.object(
     MSG91_DLT_FLOW_URL: z.string().url().optional(),
     /// Optional JSON array of { "templateId": string, "label": string } for Send UI
     MSG91_DLT_TEMPLATES_JSON: z.string().optional(),
+    /// Optional: MSG91 RCS bulk send endpoint (defaults to official URL)
+    MSG91_RCS_URL: z.string().url().optional(),
 
     // OpenAI (CRM NL → SQL for notifications)
     OPENAI_API_KEY: z.string().optional(),

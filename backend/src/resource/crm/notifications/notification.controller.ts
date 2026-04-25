@@ -169,8 +169,13 @@ export class NotificationController {
     const body = appSchema.crm.notifications.createTemplateSchema.parse(req.body);
     const userId = req.session!.id;
     const data = await this.service.createTemplate(userId, {
-      ...body,
+      name: body.name,
+      templateId: body.templateId,
       medium: body.medium as NotificationMedium,
+      message: body.message ?? null,
+      rcsProjectId: body.rcsProjectId,
+      rcsNamespace: body.rcsNamespace,
+      rcsVariables: body.rcsVariables,
     });
     res.sendResponse({ statusCode: HttpStatus.CREATED, responseData: data });
   };
@@ -179,8 +184,13 @@ export class NotificationController {
     const id = Number(req.params.id);
     const body = appSchema.crm.notifications.updateTemplateSchema.parse(req.body);
     const data = await this.service.updateTemplate(id, {
-      ...body,
+      ...(body.name ? { name: body.name } : {}),
+      ...(body.templateId ? { templateId: body.templateId } : {}),
       ...(body.medium ? { medium: body.medium as NotificationMedium } : {}),
+      message: body.message ?? null,
+      rcsProjectId: body.rcsProjectId,
+      rcsNamespace: body.rcsNamespace,
+      rcsVariables: body.rcsVariables,
     });
     res.sendResponse({ statusCode: HttpStatus.OK, responseData: data });
   };
