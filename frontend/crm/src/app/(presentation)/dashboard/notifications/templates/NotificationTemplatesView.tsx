@@ -89,7 +89,8 @@ const BLANK_FORM = {
 
 /* ─── sub-component: message preview with highlights ───────── */
 
-function MessagePreview({ message }: { message: string }) {
+function MessagePreview({ message }: { message: string | null }) {
+  if (!message) return null;
   const parts = message.split(/(##\w+##)/g);
   return (
     <p className="text-sm text-muted-foreground leading-relaxed break-words">

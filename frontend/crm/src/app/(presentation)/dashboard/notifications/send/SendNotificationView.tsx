@@ -37,7 +37,7 @@ type DltTemplate = {
   name: string;
   templateId: string;
   medium: Medium;
-  message: string;
+  message: string | null;
   rcsProjectId?: string | null;
   rcsNamespace?: string | null;
   rcsVariables?: string[] | null;
@@ -68,7 +68,8 @@ function extractMsg(e: unknown): string {
 }
 
 /** Extract ##variable## tokens and build a pre-filled JSON string */
-function buildVarsJson(message: string): string {
+function buildVarsJson(message: string | null): string {
+  if (!message) return "{}";
   const matches = [...message.matchAll(/##(\w+)##/g)];
   const unique = [...new Set(matches.map((m) => m[1]))];
   if (unique.length === 0) return "{}";
@@ -77,7 +78,8 @@ function buildVarsJson(message: string): string {
 }
 
 /** Highlight ##var## tokens in the message for readonly preview */
-function MessagePreview({ message }: { message: string }) {
+function MessagePreview({ message }: { message: string | null }) {
+  if (!message) return null;
   const parts = message.split(/(##\w+##)/g);
   return (
     <>
@@ -404,9 +406,15 @@ export default function SendNotificationView() {
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Message preview
                 </p>
-                <p className="text-sm leading-relaxed">
-                  <MessagePreview message={selectedTemplate.message} />
-                </p>
+                {selectedTemplate.message ? (
+                  <p className="text-sm leading-relaxed">
+                    <MessagePreview message={selectedTemplate.message} />
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    No message — content managed in MSG91 dashboard.
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground font-mono">
                   Template ID: {selectedTemplate.templateId}
                 </p>
