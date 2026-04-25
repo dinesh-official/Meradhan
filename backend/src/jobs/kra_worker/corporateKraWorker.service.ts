@@ -455,7 +455,7 @@ export class CorporateKraWorkerService {
             APP_MOB_NO: String(signatory?.mobile ?? ""),
             APP_FAX_NO: "",
             APP_EMAIL: String(signatory?.email ?? "").trim().toUpperCase(),
-            APP_COR_ADD_PROOF: "20",
+            APP_COR_ADD_PROOF: String(corporateKyc.correspondenceAddressProofType ?? "20"),
             APP_COR_ADD_REF: "",
             APP_COR_ADD_DT: formatKraDateTime(now),
 
@@ -466,7 +466,7 @@ export class CorporateKraWorkerService {
             APP_PER_PINCD: corporateKyc.registeredPinCode ?? corporateKyc.correspondencePinCode ?? "",
             APP_PER_STATE: state,
             APP_PER_CTRY: "101",
-            APP_PER_ADD_PROOF: "20",
+            APP_PER_ADD_PROOF: String(corporateKyc.registeredAddressProofType ?? "20"),
             APP_PER_ADD_REF: "",
             APP_PER_ADD_DT: formatKraDateTime(now),
 

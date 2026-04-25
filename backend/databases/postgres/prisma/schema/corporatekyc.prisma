@@ -33,6 +33,8 @@ model CorporateKycModel {
   correspondenceDistrict     String?
   correspondencePinCode     String?
   correspondenceState       String?
+  /// NDML proof-of-address type code (e.g. 01 Passport, 31 Aadhaar)
+  correspondenceAddressProofType String?
   correspondenceAddressProofCopyUrl String?
 
   // ---------- Registered address ----------
@@ -44,6 +46,8 @@ model CorporateKycModel {
   registeredDistrict     String?
   registeredPinCode     String?
   registeredState       String?
+  /// NDML proof-of-address type code (e.g. 01 Passport, 31 Aadhaar)
+  registeredAddressProofType String?
   registeredAddressProofCopyUrl String?
 
   // ---------- Documents (file paths or URLs) ----------

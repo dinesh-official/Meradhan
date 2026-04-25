@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { SelectField } from "@/global/elements/inputs/SelectField";
 import type { CorporateKycDirectorPayload } from "@root/schema";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, errors, setDirector, addDirector, removeDirector } = hook;
@@ -107,17 +106,21 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
               value={dir.mobile ?? ""}
               onChangeAction={(v) => setDirector(index, { mobile: v })}
             />
-            <div className="md:col-span-2 flex items-center gap-2 rounded-md border bg-muted/20 px-3 py-2">
-              <Checkbox
-                checked={(dir.pepDeclaration ?? "NO") !== "NO"}
-                onCheckedChange={(checked) =>
-                  setDirector(index, { pepDeclaration: checked ? "PEP" : "NO" })
-                }
-              />
-              <Label className="text-xs text-muted-foreground">
-                Politically Exposed Person (PEP)
-              </Label>
-            </div>
+            <SelectField
+              label="Whether Politically Exposed?"
+              className="md:col-span-2"
+              value={(dir.pepDeclaration as unknown as string | undefined) ?? "NA"}
+              onChangeAction={(v) =>
+                setDirector(index, {
+                  pepDeclaration: v as unknown as CorporateKycDirectorPayload["pepDeclaration"],
+                })
+              }
+              options={[
+                { label: "NA", value: "NA" },
+                { label: "PEP", value: "PEP" },
+                { label: "RPEP", value: "RPEP" },
+              ]}
+            />
           </div>
         ))}
       </CardContent>
