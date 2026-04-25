@@ -38,6 +38,9 @@ type DltTemplate = {
   templateId: string;
   medium: Medium;
   message: string;
+  rcsProjectId?: string | null;
+  rcsNamespace?: string | null;
+  rcsVariables?: string[] | null;
 };
 
 type ApiResponse<T> = { responseData?: T };
@@ -47,7 +50,7 @@ type ApiResponse<T> = { responseData?: T };
 const MEDIUMS: { value: Medium; label: string; comingSoon?: boolean }[] = [
   { value: "SMS", label: "SMS" },
   { value: "WHATSAPP", label: "WhatsApp", comingSoon: true },
-  { value: "RCS", label: "RCS", comingSoon: true },
+  { value: "RCS", label: "RCS" },
 ];
 
 /* ─── helpers ────────────────────────────────────────────────── */
@@ -110,6 +113,8 @@ export default function SendNotificationView() {
   const [templatesLoading, setTemplatesLoading] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [varsJson, setVarsJson] = useState("{}");
+  // RCS: ordered variable values keyed by variable name
+  const [rcsVarValues, setRcsVarValues] = useState<Record<string, string>>({});
   const [sendLoading, setSendLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -173,6 +178,7 @@ export default function SendNotificationView() {
     setMedium(val);
     setSelectedTemplateId("");
     setVarsJson("{}");
+    setRcsVarValues({});
     setSent(false);
   };
 
@@ -182,8 +188,12 @@ export default function SendNotificationView() {
     const tpl = dltTemplates.find((t) => String(t.id) === value);
     if (tpl) {
       setVarsJson(buildVarsJson(tpl.message));
+      // Pre-fill RCS variable inputs
+      const names = tpl.rcsVariables ?? [];
+      setRcsVarValues(Object.fromEntries(names.map((n) => [n, ""])));
     } else {
       setVarsJson("{}");
+      setRcsVarValues({});
     }
   };
 
@@ -208,15 +218,20 @@ export default function SendNotificationView() {
     }
 
     let templateVariables: Record<string, string>;
-    try {
-      const parsed = JSON.parse(varsJson) as unknown;
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error();
-      templateVariables = Object.fromEntries(
-        Object.entries(parsed as Record<string, unknown>).map(([k, v]) => [k, String(v ?? "")])
-      );
-    } catch {
-      await Swal.fire("Invalid variables", 'Use JSON object format, e.g. {"otp":"1234"}', "error");
-      return;
+    if (medium === "RCS") {
+      // For RCS use the ordered input values
+      templateVariables = { ...rcsVarValues };
+    } else {
+      try {
+        const parsed = JSON.parse(varsJson) as unknown;
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error();
+        templateVariables = Object.fromEntries(
+          Object.entries(parsed as Record<string, unknown>).map(([k, v]) => [k, String(v ?? "")])
+        );
+      } catch {
+        await Swal.fire("Invalid variables", 'Use JSON object format, e.g. {"otp":"1234"}', "error");
+        return;
+      }
     }
 
     const count = selectedList?._count?.members ?? "—";
@@ -400,20 +415,51 @@ export default function SendNotificationView() {
           </div>
 
           {/* ── Template variables ── */}
-          <div className="space-y-2">
-            <Label htmlFor="vars">Template variables</Label>
-            <Textarea
-              id="vars"
-              value={varsJson}
-              onChange={(e) => setVarsJson(e.target.value)}
-              rows={5}
-              className="font-mono text-sm"
-              placeholder='{"VAR1": "value1"}'
-            />
-            <p className="text-xs text-muted-foreground">
-              Variables are auto-extracted from the selected template. Fill in the values before sending.
-            </p>
-          </div>
+          {medium === "RCS" && selectedTemplate ? (
+            <div className="space-y-2">
+              <Label>Template variables</Label>
+              {(selectedTemplate.rcsVariables ?? []).length === 0 ? (
+                <p className="text-xs text-muted-foreground">This RCS template has no variables.</p>
+              ) : (
+                <div className="space-y-2">
+                  {(selectedTemplate.rcsVariables ?? []).map((varName, idx) => (
+                    <div key={varName} className="flex items-center gap-3">
+                      <span className="text-xs font-mono text-muted-foreground w-6 text-right shrink-0">
+                        [{idx + 1}]
+                      </span>
+                      <Label className="w-32 shrink-0 text-sm">{varName}</Label>
+                      <input
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        placeholder={`Value for ${varName}`}
+                        value={rcsVarValues[varName] ?? ""}
+                        onChange={(e) =>
+                          setRcsVarValues((prev) => ({ ...prev, [varName]: e.target.value }))
+                        }
+                      />
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground">
+                    Variables are sent as an ordered array to MSG91 RCS API.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="vars">Template variables</Label>
+              <Textarea
+                id="vars"
+                value={varsJson}
+                onChange={(e) => setVarsJson(e.target.value)}
+                rows={5}
+                className="font-mono text-sm"
+                placeholder='{"VAR1": "value1"}'
+              />
+              <p className="text-xs text-muted-foreground">
+                Variables are auto-extracted from the selected template. Fill in the values before sending.
+              </p>
+            </div>
+          )}
 
           <Button
             onClick={send}
