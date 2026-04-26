@@ -4,8 +4,9 @@ import * as React from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, X, File, Check } from "lucide-react";
+import { Upload, X, File, Check, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { genMediaUrl } from "@/global/utils/url.utils";
 
 interface FileUploadFieldProps {
   id?: string;
@@ -178,7 +179,21 @@ export function FileUploadField({
             ) : (
               <>
                 <Check className="h-4 w-4 text-green-600" />
-                <span className="text-muted-foreground truncate">{value}</span>
+                <span className="text-muted-foreground truncate flex-1 min-w-0">
+                  {value}
+                </span>
+                <a
+                  href={genMediaUrl(value)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn(
+                    "ml-auto inline-flex items-center gap-1 text-primary underline",
+                    disabled && "pointer-events-none opacity-60",
+                  )}
+                  title="Open file in new tab"
+                >
+                  Open <ExternalLink className="h-3.5 w-3.5" />
+                </a>
               </>
             )}
           </div>

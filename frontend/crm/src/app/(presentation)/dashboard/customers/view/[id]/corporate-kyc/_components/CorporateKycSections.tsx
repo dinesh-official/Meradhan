@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import type { CorporateKycResponse } from "@root/apiGateway";
+import { genMediaUrl } from "@/global/utils/url.utils";
 
 function formatOptional(value: string | undefined | null): string {
   return value != null && value !== "" ? String(value) : "—";
@@ -171,6 +172,27 @@ export function BankAccountsSection({ data }: { data: CorporateKycResponse }) {
             </LabelView>
             <LabelView title="Primary account">
               <p>{acc.isPrimaryAccount ? "Yes" : "No"}</p>
+            </LabelView>
+            <LabelView title="Bank proof files" className="md:col-span-2">
+              {(acc.bankProofFileUrls?.length ?? 0) === 0 ? (
+                <p>—</p>
+              ) : (
+                <ul className="space-y-1">
+                  {(acc.bankProofFileUrls ?? []).map((u, i) => (
+                    <li key={i}>
+                      <a
+                        href={genMediaUrl(u)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                        title={u}
+                      >
+                        {shortFileName(u, 36)}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </LabelView>
           </div>
         ))}
@@ -371,7 +393,7 @@ export function DocumentUrlsSection({
             return (
               <LabelView key={key} title={label}>
                 <a
-                  href={"/assets/media/files" + url}
+                  href={genMediaUrl(url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary underline"
