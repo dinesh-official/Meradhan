@@ -6,6 +6,7 @@ import { InputField } from "@/global/elements/inputs/InputField";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { FileText, ExternalLink } from "lucide-react";
+import { genMediaUrl } from "@/global/utils/url.utils";
 
 const DOCUMENT_FIELDS: {
   key: keyof NonNullable<CorporateKycFormHook["form"]>;
@@ -119,7 +120,7 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
                       {label}
                     </span>
                     <a
-                      href={"/assets/media/files" + url}
+                      href={genMediaUrl(url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="truncate text-primary hover:underline flex items-center gap-1 min-w-0"

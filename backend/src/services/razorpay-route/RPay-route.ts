@@ -35,6 +35,7 @@ const getExistingStockholder = async (userid: number, accountId: string) => {
             razorpayAccountId: accountId
         }
     });
+
     return record;
 }
 
@@ -407,8 +408,8 @@ export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes
                 notes: {
                     ...notes,
                     "userId": userId.toString(),
-                    "stockholder": stackHolder.record.razorpayStakeholderId,
-                    "accountId": stackHolder.record.razorpayAccountId,
+                    // "stockholder": stackHolder.record.razorpayStakeholderId,
+                    // "accountId": stackHolder.record.razorpayAccountId,
                 },
                 "on_hold": false
             }

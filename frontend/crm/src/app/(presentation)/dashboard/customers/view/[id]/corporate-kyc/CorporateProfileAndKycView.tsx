@@ -248,6 +248,70 @@ export default function CorporateProfileAndKycView({
     createAttachmentMutation.mutate({ label, fileUrl: url });
   };
 
+  const AttachmentsCard = () => {
+    if (!isCorporate) return null;
+    if (!corporateKyc) return null;
+    return (
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Paperclip className="h-4 w-4 text-muted-foreground" />
+            Attachments
+          </CardTitle>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setAttachmentsOpen(true)}
+          >
+            View / Upload
+            {Array.isArray(corporateAttachments) && corporateAttachments.length > 0 ? (
+              <span className="ml-1 text-xs text-muted-foreground">
+                ({corporateAttachments.length})
+              </span>
+            ) : null}
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {attachmentsLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading attachments…
+            </div>
+          ) : Array.isArray(corporateAttachments) && corporateAttachments.length > 0 ? (
+            <div className="space-y-2">
+              {corporateAttachments.map((a) => (
+                <div key={a.id} className="rounded-lg border bg-muted/20 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{a.label}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {getNiceFilename(a.fileUrl)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {a.createdAt ? new Date(a.createdAt).toLocaleString("en-IN") : ""}
+                      </div>
+                    </div>
+                    <a
+                      href={genMediaUrl(a.fileUrl)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-primary underline whitespace-nowrap"
+                    >
+                      Open
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No attachments yet.</div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const triggerCorporateKraMutation = useMutation({
     mutationFn: async () => {
       const res = await api.triggerCorporateKra(profileId);
@@ -633,6 +697,7 @@ export default function CorporateProfileAndKycView({
               {corporateKyc ? (
                 <>
                   <AddressSection data={corporateKyc} />
+                  <AttachmentsCard />
                   <DocumentUrlsSection data={corporateKyc} />
                   <BankAccountsSection data={corporateKyc} />
                   <DematAccountsSection data={corporateKyc} />

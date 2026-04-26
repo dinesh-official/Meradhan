@@ -10,6 +10,7 @@ import type { CorporateKycBankAccountPayload } from "@root/schema";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2, Upload, ExternalLink } from "lucide-react";
 import { useRef } from "react";
+import { genMediaUrl } from "@/global/utils/url.utils";
 
 export function BankAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, errors, setBankAccount, addBankAccount, removeBankAccount } = hook;
@@ -120,7 +121,7 @@ export function BankAccountsSection({ hook }: { hook: CorporateKycFormHook }) {
                       className="flex items-center justify-between gap-2 py-1.5 px-2 rounded bg-muted/60 text-sm"
                     >
                       <a
-                        href={url}
+                        href={genMediaUrl(url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="truncate text-primary hover:underline flex items-center gap-1 min-w-0"
