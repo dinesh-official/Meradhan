@@ -47,7 +47,6 @@ export const addressProofOptions: SelectOption[] = [
   { label: "NAREGA Job Card", value: "33" },
   // Radix Select doesn't allow empty-string values for items.
   // The spec we received doesn't provide a usable Webservice/OKRA code for NPR, so keep it disabled.
-  { label: "NPR (not supported)", value: "NPR", disabled: true },
   { label: "Others", value: "32" },
   { label: "Latest Demat Account Statement", value: "05" },
 ];
