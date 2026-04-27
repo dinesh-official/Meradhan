@@ -10,10 +10,10 @@ const nextConfig: NextConfig = {
   experimental: {
     // Increase request-body buffering limit (default 10mb) for large uploads proxied through Next.js.
     // Docs: https://nextjs.org/docs/15/pages/api-reference/config/next-config-js/middlewareClientMaxBodySize
-    middlewareClientMaxBodySize: "100mb",
+    middlewareClientMaxBodySize: "40mb",
     // If any uploads ever go through Server Actions, bump that limit too.
     serverActions: {
-      bodySizeLimit: "100mb",
+      bodySizeLimit: "40mb",
     },
   },
   // Skip lint and type-check during `next build` so build succeeds even with lint/type issues

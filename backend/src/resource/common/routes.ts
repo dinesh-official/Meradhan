@@ -285,7 +285,7 @@ commonApiRoutes.get(
 
 const uploadMemory = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB per file
+  limits: { fileSize: 40 * 1024 * 1024 }, // 40MB per file
 });
 commonApiRoutes.post("/api/files/upload", allowAccessMiddleware("ADMIN", "USER", "CRM"), uploadMemory.single("file"), (req, res) =>
   commonApiController.uploadFilesS3(req, res)
