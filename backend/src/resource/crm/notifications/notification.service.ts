@@ -238,17 +238,11 @@ export class NotificationService {
       templateVariables: Record<string, string>;
     }
   ) {
-    if (
-      input.medium === NotificationMedium.WHATSAPP ||
-      input.medium === NotificationMedium.RCS
-    ) {
-      throw new AppError(
-        `${input.medium === NotificationMedium.WHATSAPP ? "WhatsApp" : "RCS"} notifications are not enabled yet.`,
-        {
-          statusCode: HttpStatus.BAD_REQUEST,
-          code: "MEDIUM_NOT_SUPPORTED",
-        }
-      );
+    if (input.medium === NotificationMedium.WHATSAPP) {
+      throw new AppError("WhatsApp notifications are not enabled yet.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "MEDIUM_NOT_SUPPORTED",
+      });
     }
 
     // Use role-aware access check so ADMIN/SUPER_ADMIN can send to any list
@@ -325,10 +319,10 @@ export class NotificationService {
       },
     });
 
-    // Resolve the actual message text from the saved template and substitute ##var## placeholders
+    // Resolve template record for message preview and RCS metadata
     const tplRecord = await db.dataBase.notificationTemplateModel.findFirst({
       where: { templateId: input.dltTemplateId, medium: input.medium, isActive: true },
-      select: { message: true },
+      select: { message: true, rcsProjectId: true, rcsNamespace: true, rcsVariables: true },
     });
 
     let messagePreview: string | null = null;
@@ -339,7 +333,6 @@ export class NotificationService {
       );
       messagePreview = resolved.length > 500 ? `${resolved.slice(0, 497)}...` : resolved;
     } else {
-      // Fallback: store variables as key=value if template text is not found
       const fallback = Object.entries(input.templateVariables)
         .map(([k, v]) => `${k}=${v}`)
         .join(", ");
@@ -351,32 +344,95 @@ export class NotificationService {
       data: { messagePreview },
     });
 
-    for (const r of recipients) {
-      try {
-        const cleanPhone = r.phone.replace(/^\+/, "");
-        const out = await sms.sendBulkSmsDlt(
-          cleanPhone,
-          input.dltTemplateId,
-          input.templateVariables
-        );
-        await db.dataBase.notificationRecipientLogModel.update({
-          where: { id: r.id },
-          data: {
-            deliveryStatus: NotificationRecipientDeliveryStatus.SENT,
-            providerMessageId: out.request_id ?? null,
-          },
-        });
-        sent++;
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        await db.dataBase.notificationRecipientLogModel.update({
-          where: { id: r.id },
-          data: {
-            deliveryStatus: NotificationRecipientDeliveryStatus.FAILED,
-            errorMessage: msg.slice(0, 2000),
-          },
-        });
-        failed++;
+    if (input.medium === NotificationMedium.RCS) {
+      // ── RCS: one bulk API call for all valid recipients ──────────────
+      const validRecipients = recipients.filter((r) => r.phone.length > 0);
+      const phones = validRecipients.map((r) => r.phone.replace(/^\+/, ""));
+
+      // Build ordered variables array from templateVariables + rcsVariables definition
+      const rcsVarNames = Array.isArray(tplRecord?.rcsVariables)
+        ? (tplRecord.rcsVariables as string[])
+        : [];
+      const variablesArray = rcsVarNames.map((v) => input.templateVariables[v] ?? "");
+
+      const projectId = tplRecord?.rcsProjectId ?? "";
+      const namespace = tplRecord?.rcsNamespace ?? input.dltTemplateId;
+
+      if (!projectId) {
+        // Mark all as failed — template missing RCS config
+        for (const r of validRecipients) {
+          await db.dataBase.notificationRecipientLogModel.update({
+            where: { id: r.id },
+            data: {
+              deliveryStatus: NotificationRecipientDeliveryStatus.FAILED,
+              errorMessage: "RCS project ID not configured on template.",
+            },
+          });
+          failed++;
+        }
+      } else {
+        try {
+          const out = await sms.sendBulkRcs(
+            phones,
+            input.dltTemplateId,
+            namespace,
+            projectId,
+            variablesArray
+          );
+          const batchRef = out.request_id ?? null;
+          for (const r of validRecipients) {
+            await db.dataBase.notificationRecipientLogModel.update({
+              where: { id: r.id },
+              data: {
+                deliveryStatus: NotificationRecipientDeliveryStatus.SENT,
+                providerMessageId: batchRef,
+              },
+            });
+            sent++;
+          }
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          for (const r of validRecipients) {
+            await db.dataBase.notificationRecipientLogModel.update({
+              where: { id: r.id },
+              data: {
+                deliveryStatus: NotificationRecipientDeliveryStatus.FAILED,
+                errorMessage: msg.slice(0, 2000),
+              },
+            });
+            failed++;
+          }
+        }
+      }
+    } else {
+      // ── SMS: per-recipient loop ───────────────────────────────────────
+      for (const r of recipients) {
+        try {
+          const cleanPhone = r.phone.replace(/^\+/, "");
+          const out = await sms.sendBulkSmsDlt(
+            cleanPhone,
+            input.dltTemplateId,
+            input.templateVariables
+          );
+          await db.dataBase.notificationRecipientLogModel.update({
+            where: { id: r.id },
+            data: {
+              deliveryStatus: NotificationRecipientDeliveryStatus.SENT,
+              providerMessageId: out.request_id ?? null,
+            },
+          });
+          sent++;
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          await db.dataBase.notificationRecipientLogModel.update({
+            where: { id: r.id },
+            data: {
+              deliveryStatus: NotificationRecipientDeliveryStatus.FAILED,
+              errorMessage: msg.slice(0, 2000),
+            },
+          });
+          failed++;
+        }
       }
     }
 
@@ -470,6 +526,9 @@ export class NotificationService {
     templateId: true,
     medium: true,
     message: true,
+    rcsProjectId: true,
+    rcsNamespace: true,
+    rcsVariables: true,
     createdAt: true,
     createdBy: { select: { id: true, name: true } },
   } as const;
@@ -484,17 +543,37 @@ export class NotificationService {
 
   async createTemplate(
     userId: number,
-    data: { name: string; templateId: string; medium: NotificationMedium; message: string }
+    data: {
+      name: string;
+      templateId: string;
+      medium: NotificationMedium;
+      message?: string | null;
+      rcsProjectId?: string;
+      rcsNamespace?: string;
+      rcsVariables?: string[];
+    }
   ) {
     return db.dataBase.notificationTemplateModel.create({
-      data: { ...data, createdById: userId },
+      data: {
+        ...data,
+        rcsVariables: data.rcsVariables ?? undefined,
+        createdById: userId,
+      },
       select: this.TEMPLATE_SELECT,
     });
   }
 
   async updateTemplate(
     id: number,
-    data: { name?: string; templateId?: string; medium?: NotificationMedium; message?: string }
+    data: {
+      name?: string;
+      templateId?: string;
+      medium?: NotificationMedium;
+      message?: string | null;
+      rcsProjectId?: string | null;
+      rcsNamespace?: string | null;
+      rcsVariables?: string[] | null;
+    }
   ) {
     const existing = await db.dataBase.notificationTemplateModel.findFirst({
       where: { id, isActive: true },
@@ -507,7 +586,10 @@ export class NotificationService {
     }
     return db.dataBase.notificationTemplateModel.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        rcsVariables: data.rcsVariables ?? undefined,
+      },
       select: this.TEMPLATE_SELECT,
     });
   }

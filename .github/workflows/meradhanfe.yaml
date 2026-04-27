@@ -29,6 +29,9 @@ jobs:
           echo "RFQ_CBRICS_ENV=PROD" >> .env
           echo "CBRICS_ENV=PROD" >> .env
 
+          MSG91_RCS_URL="${{ secrets.MSG91_RCS_URL }}"
+          echo "MSG91_RCS_URL=$MSG91_RCS_URL" >> .env
+
           # Secrets
           NEXT_PUBLIC_GRAPHQL_KEY="${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
           echo "GRAPHQL_KEY=$NEXT_PUBLIC_GRAPHQL_KEY" >> .env

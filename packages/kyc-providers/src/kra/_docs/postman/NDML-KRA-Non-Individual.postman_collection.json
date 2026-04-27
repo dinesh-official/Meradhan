@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "NDML KRA SOAP (Non-Individual)",
+    "_postman_id": "f4a6d4a2-0fbb-4f0b-9eaf-bb6d4c7a9f3c",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Resolve base URLs based on env",
+          "const env = pm.environment.get('env') || 'UAT';",
+          "if (env.toUpperCase() === 'PROD') {",
+          "  pm.environment.set('okraServiceUrl_active', pm.environment.get('okraServiceUrl_prod'));",
+          "  pm.environment.set('panServiceUrl_active', pm.environment.get('panServiceUrl_prod'));",
+          "} else {",
+          "  pm.environment.set('okraServiceUrl_active', pm.environment.get('okraServiceUrl'));",
+          "  pm.environment.set('panServiceUrl_active', pm.environment.get('panServiceUrl'));",
+          "}",
+          "",
+          "// Helper: build <input> byte array tags from an XML string (UTF-8-ish for ASCII).",
+          "// NDML sample implementation in code uses Buffer.from(xml,'utf8') then Array.from(buffer).",
+          "function buildInputTags(xml) {",
+          "  if (!xml) return '';",
+          "  // Postman sandbox doesn't expose Node Buffer; we'll do a best-effort UTF-8 for common ASCII payloads.",
+          "  // For non-ASCII chars, ensure your XML values are ASCII/uppercase as per KRA note.",
+          "  const bytes = [];",
+          "  for (let i = 0; i < xml.length; i++) {",
+          "    const code = xml.charCodeAt(i);",
+          "    if (code <= 0x7F) {",
+          "      bytes.push(code);",
+          "    } else if (code <= 0x7FF) {",
+          "      bytes.push(0xC0 | (code >> 6));",
+          "      bytes.push(0x80 | (code & 0x3F));",
+          "    } else {",
+          "      bytes.push(0xE0 | (code >> 12));",
+          "      bytes.push(0x80 | ((code >> 6) & 0x3F));",
+          "      bytes.push(0x80 | (code & 0x3F));",
+          "    }",
+          "  }",
+          "  return bytes.map((b) => `<input>${b}</input>`).join('');",
+          "}",
+          "",
+          "// If a request sets inner_xml, precompute registration_inputs",
+          "const innerXml = pm.variables.get('inner_xml') || pm.environment.get('inner_xml') || pm.collectionVariables.get('inner_xml');",
+          "if (innerXml) {",
+          "  pm.variables.set('registration_inputs', buildInputTags(innerXml));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1) getPassword (encrypt password)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/xml; charset=utf-8" },
+          { "key": "SOAPAction", "value": "getPassword" }
+        ],
+        "url": "{{okraServiceUrl_active}}",
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:com=\"http://common.nsdl.com\">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <com:getPassword>\n      <password>{{password}}</password>\n      <key>{{passKey}}</key>\n    </com:getPassword>\n  </soapenv:Body>\n</soapenv:Envelope>\n"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Extract getPasswordReturn and store as encryptedPassword",
+              "const xml = pm.response.text();",
+              "const m = xml.match(/<getPasswordReturn>([^<]+)<\\/getPasswordReturn>/);",
+              "if (m && m[1]) {",
+              "  pm.environment.set('encryptedPassword', m[1]);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2) PAN Inquiry (Non-Individual) - panInquiryDetails",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/xml; charset=utf-8" },
+          { "key": "SOAPAction", "value": "panInquiryDetails" },
+          { "key": "Password", "value": "{{encryptedPassword}}" }
+        ],
+        "url": "{{panServiceUrl_active}}",
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service.webservice.pan.kra.ndml.com/\">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <ser:panInquiryDetails>\n      <arg0><![CDATA[\n<APP_REQ_ROOT>\n  <APP_PAN_INQ>\n    <APP_PAN_NO>{{PAN}}</APP_PAN_NO>\n    <APP_PAN_DOB>{{DOI_DDMMYYYY}}</APP_PAN_DOB>\n    <APP_MOBILE_NO>{{MOBILE}}</APP_MOBILE_NO>\n    <APP_REQ_NO>{{REQ_NO}}</APP_REQ_NO>\n  </APP_PAN_INQ>\n</APP_REQ_ROOT>\n]]></arg0>\n      <arg1>{{userName}}</arg1>\n      <arg2>{{encryptedPassword}}</arg2>\n      <arg3>{{passKey}}</arg3>\n    </ser:panInquiryDetails>\n  </soapenv:Body>\n</soapenv:Envelope>\n"
+        }
+      }
+    },
+    {
+      "name": "3) PAN Inquiry Two (Non-Individual) - panInquiryDetailsTwo",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/xml; charset=utf-8" },
+          { "key": "SOAPAction", "value": "panInquiryDetailsTwo" },
+          { "key": "Password", "value": "{{encryptedPassword}}" }
+        ],
+        "url": "{{panServiceUrl_active}}",
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service.webservice.pan.kra.ndml.com/\">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <ser:panInquiryDetailsTwo>\n      <arg0><![CDATA[\n<APP_REQ_ROOT>\n  <APP_PAN_INQ>\n    <APP_PAN_NO>{{PAN}}</APP_PAN_NO>\n    <APP_PAN_DOB>{{DOI_DDMMYYYY}}</APP_PAN_DOB>\n    <APP_MOBILE_NO>{{MOBILE}}</APP_MOBILE_NO>\n    <APP_REQ_NO>{{REQ_NO}}</APP_REQ_NO>\n  </APP_PAN_INQ>\n</APP_REQ_ROOT>\n]]></arg0>\n      <arg1>{{userName}}</arg1>\n      <arg2>{{encryptedPassword}}</arg2>\n      <arg3>{{passKey}}</arg3>\n    </ser:panInquiryDetailsTwo>\n  </soapenv:Body>\n</soapenv:Envelope>\n"
+        }
+      }
+    },
+    {
+      "name": "4) PAN Download (Non-Individual) - panDownloadDetailsComplete",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/xml; charset=utf-8" },
+          { "key": "SOAPAction", "value": "panDownloadDetailsComplete" },
+          { "key": "Password", "value": "{{encryptedPassword}}" }
+        ],
+        "url": "{{panServiceUrl_active}}",
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service.webservice.pan.kra.ndml.com/\">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <ser:panDownloadDetailsComplete>\n      <arg0><![CDATA[\n<APP_REQ_ROOT>\n  <APP_PAN_DOWN>\n    <APP_PAN_NO>{{PAN}}</APP_PAN_NO>\n    <APP_PAN_DOB>{{DOI_DDMMYYYY}}</APP_PAN_DOB>\n    <APP_MOBILE_NO>{{MOBILE}}</APP_MOBILE_NO>\n  </APP_PAN_DOWN>\n</APP_REQ_ROOT>\n]]></arg0>\n      <arg1>{{userName}}</arg1>\n      <arg2>{{encryptedPassword}}</arg2>\n      <arg3>{{passKey}}</arg3>\n    </ser:panDownloadDetailsComplete>\n  </soapenv:Body>\n</soapenv:Envelope>\n"
+        }
+      }
+    },
+    {
+      "name": "5) Registration (Non-Individual) - registration",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/xml; charset=utf-8" },
+          { "key": "SOAPAction", "value": "registration" },
+          { "key": "Password", "value": "{{encryptedPassword}}" }
+        ],
+        "url": "{{okraServiceUrl_active}}",
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:com=\"http://common.nsdl.com\">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <com:registration>\n      {{registration_inputs}}\n      <userId>{{userName}}</userId>\n      <userPassword>{{encryptedPassword}}</userPassword>\n      <passKey>{{passKey}}</passKey>\n      <okraCdOrMiId>{{okraCdOrMiId}}</okraCdOrMiId>\n    </com:registration>\n  </soapenv:Body>\n</soapenv:Envelope>\n"
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Set inner_xml for registration -> converted to <input> tags by collection prerequest script",
+              "pm.variables.set('inner_xml', `<APP_REQ_ROOT>\\n  <APP_PAN_INQ>\\n    <APP_IOP_FLG>II</APP_IOP_FLG>\\n    <APP_POS_CODE>{{okraCdOrMiId}}</APP_POS_CODE>\\n    <APP_TYPE>{{APP_TYPE}}</APP_TYPE>\\n    <APP_NO></APP_NO>\\n    <APP_DATE>01-01-2020 00:00:00</APP_DATE>\\n    <APP_PAN_NO>{{PAN}}</APP_PAN_NO>\\n    <APP_PANEX_NO></APP_PANEX_NO>\\n    <APP_PAN_COPY>Y</APP_PAN_COPY>\\n    <APP_EXMT>N</APP_EXMT>\\n    <APP_EXMT_CAT></APP_EXMT_CAT>\\n    <APP_KYC_MODE>4</APP_KYC_MODE>\\n    <APP_EXMT_ID_PROOF>01</APP_EXMT_ID_PROOF>\\n    <APP_IPV_FLAG>E</APP_IPV_FLAG>\\n    <APP_IPV_DATE>01-01-2020 00:00:00</APP_IPV_DATE>\\n    <APP_NAME>TEST COMPANY NAME</APP_NAME>\\n    <APP_REGNO></APP_REGNO>\\n    <APP_DOI_DT>01-01-2020 00:00:00</APP_DOI_DT>\\n    <APP_COMMENCE_DT></APP_COMMENCE_DT>\\n    <APP_NATIONALITY>01</APP_NATIONALITY>\\n    <APP_RES_STATUS>R</APP_RES_STATUS>\\n    <APP_COR_ADD1>TEST ADDRESS LINE 1</APP_COR_ADD1>\\n    <APP_COR_ADD2>TEST ADDRESS LINE 2</APP_COR_ADD2>\\n    <APP_COR_ADD3></APP_COR_ADD3>\\n    <APP_COR_CITY>MUMBAI</APP_COR_CITY>\\n    <APP_COR_PINCD>400001</APP_COR_PINCD>\\n    <APP_COR_STATE>027</APP_COR_STATE>\\n    <APP_COR_CTRY>101</APP_COR_CTRY>\\n    <APP_MOB_NO>{{MOBILE}}</APP_MOB_NO>\\n    <APP_EMAIL>TEST@EXAMPLE.COM</APP_EMAIL>\\n    <APP_SIGNATURE></APP_SIGNATURE>\\n    <APP_FATCA_APPLICABLE_FLAG>N</APP_FATCA_APPLICABLE_FLAG>\\n  </APP_PAN_INQ>\\n  <APP_SUMM_REC>\\n    <APP_REQ_DATE>01-01-2020 00:00:00</APP_REQ_DATE>\\n    <APP_OTHKRA_BATCH></APP_OTHKRA_BATCH>\\n    <APP_OTHKRA_CODE>{{okraCdOrMiId}}</APP_OTHKRA_CODE>\\n    <APP_TOTAL_REC>1</APP_TOTAL_REC>\\n    <NO_OF_FATCA_ADDL_DTLS_RECORDS>0</NO_OF_FATCA_ADDL_DTLS_RECORDS>\\n  </APP_SUMM_REC>\\n</APP_REQ_ROOT>`);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6) Modify (Non-Individual) - processModification",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/xml; charset=utf-8" },
+          { "key": "SOAPAction", "value": "processModification" },
+          { "key": "Password", "value": "{{encryptedPassword}}" }
+        ],
+        "url": "{{panServiceUrl_active}}",
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service.webservice.pan.kra.ndml.com/\">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <ser:processModification>\n      <arg0><![CDATA[\n<APP_REQ_ROOT>\n  <APP_PAN_INQ>\n    <APP_IOP_FLG>II</APP_IOP_FLG>\n    <APP_POS_CODE>{{okraCdOrMiId}}</APP_POS_CODE>\n    <APP_MOBILE_NO>{{MOBILE}}</APP_MOBILE_NO>\n    <APP_TYPE>{{APP_TYPE}}</APP_TYPE>\n    <APP_NO></APP_NO>\n    <APP_DATE>01-01-2020 00:00:00</APP_DATE>\n    <APP_PAN_NO>{{PAN}}</APP_PAN_NO>\n    <APP_PANEX_NO></APP_PANEX_NO>\n    <APP_PAN_COPY>Y</APP_PAN_COPY>\n    <APP_EXMT>N</APP_EXMT>\n    <APP_EXMT_CAT></APP_EXMT_CAT>\n    <APP_KYC_MODE>4</APP_KYC_MODE>\n    <APP_EXMT_ID_PROOF>01</APP_EXMT_ID_PROOF>\n    <APP_IPV_FLAG>E</APP_IPV_FLAG>\n    <APP_IPV_DATE>01-01-2020 00:00:00</APP_IPV_DATE>\n    <APP_NAME>TEST COMPANY NAME</APP_NAME>\n    <APP_REGNO></APP_REGNO>\n    <APP_DOI_DT>01-01-2020 00:00:00</APP_DOI_DT>\n    <APP_COMMENCE_DT></APP_COMMENCE_DT>\n    <APP_NATIONALITY>01</APP_NATIONALITY>\n    <APP_RES_STATUS>R</APP_RES_STATUS>\n    <APP_COR_ADD1>TEST ADDRESS LINE 1</APP_COR_ADD1>\n    <APP_COR_ADD2>TEST ADDRESS LINE 2</APP_COR_ADD2>\n    <APP_COR_ADD3></APP_COR_ADD3>\n    <APP_COR_CITY>MUMBAI</APP_COR_CITY>\n    <APP_COR_PINCD>400001</APP_COR_PINCD>\n    <APP_COR_STATE>027</APP_COR_STATE>\n    <APP_COR_CTRY>101</APP_COR_CTRY>\n    <APP_EMAIL>TEST@EXAMPLE.COM</APP_EMAIL>\n    <APP_SIGNATURE></APP_SIGNATURE>\n    <APP_FATCA_APPLICABLE_FLAG>N</APP_FATCA_APPLICABLE_FLAG>\n  </APP_PAN_INQ>\n  <APP_SUMM_REC>\n    <APP_REQ_DATE>01-01-2020 00:00:00</APP_REQ_DATE>\n    <APP_OTHKRA_BATCH></APP_OTHKRA_BATCH>\n    <APP_OTHKRA_CODE>{{okraCdOrMiId}}</APP_OTHKRA_CODE>\n    <APP_TOTAL_REC>1</APP_TOTAL_REC>\n    <NO_OF_FATCA_ADDL_DTLS_RECORDS>0</NO_OF_FATCA_ADDL_DTLS_RECORDS>\n  </APP_SUMM_REC>\n</APP_REQ_ROOT>\n]]></arg0>\n      <arg1>{{userName}}</arg1>\n      <arg2>{{encryptedPassword}}</arg2>\n      <arg3>{{passKey}}</arg3>\n    </ser:processModification>\n  </soapenv:Body>\n</soapenv:Envelope>\n"
+        }
+      }
+    }
+  ]
+}
+

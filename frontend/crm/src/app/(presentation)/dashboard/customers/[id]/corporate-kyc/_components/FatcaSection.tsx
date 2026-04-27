@@ -20,15 +20,15 @@ export function FatcaSection({ hook }: { hook: CorporateKycFormHook }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>FATCA</CardTitle>
+        <CardTitle className="text-sm">FATCA</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
+      <CardContent className="grid gap-3 md:grid-cols-2">
         <div className="flex items-center gap-2 md:col-span-2">
           <Switch
             checked={form.fatcaApplicable}
             onCheckedChange={(v) => setField("fatcaApplicable", v)}
           />
-          <Label>FATCA applicable</Label>
+          <Label className="text-xs">FATCA applicable</Label>
         </div>
         {form.fatcaApplicable && (
           <>

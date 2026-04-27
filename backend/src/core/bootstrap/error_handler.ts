@@ -17,11 +17,16 @@ const getSafeAxiosErrorMessage = (err: AxiosError): string => {
   }
 
   // In development, allow safe messages but filter out sensitive data
-  const upstreamMessage = (err.response?.data as { message?: string })?.message;
-  if (upstreamMessage && typeof upstreamMessage === "string") {
-    // Only return if it looks like a safe user-facing message
-    // Filter out technical details, stack traces, etc.
-    return upstreamMessage;
+  const data = err.response?.data as any;
+
+  // Common upstream shapes
+  const directMessage = data?.message;
+  if (directMessage && typeof directMessage === "string") return directMessage;
+
+  // Razorpay shape: { error: { description: string, code: string, ... } }
+  const razorpayDescription = data?.error?.description;
+  if (razorpayDescription && typeof razorpayDescription === "string") {
+    return razorpayDescription;
   }
 
   return err.message || "An external service error occurred";
