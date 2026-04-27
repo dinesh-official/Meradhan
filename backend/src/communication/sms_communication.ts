@@ -33,7 +33,6 @@ export class SMSCommunication {
     templateId: string,
     templateVariables: Record<string, string>
   ) {
-    
     const url = env.MSG91_DLT_FLOW_URL ?? "https://control.msg91.com/api/v5/flow/";
     const response = await axios.post<{
       type?: string;
@@ -50,6 +49,53 @@ export class SMSCommunication {
       ],
       authkey: env.MSG91_AUTH_KEY,
     });
+    return response.data;
+  }
+
+  /**
+   * MSG91 RCS bulk send — one API call for all recipients.
+   * @param phones  Clean phone numbers (no +, with country code if needed)
+   * @param templateName  MSG91 template `name`
+   * @param namespace     MSG91 template `namespace`
+   * @param projectId     MSG91 RCS `project_id`
+   * @param variables     Ordered variable values matching the template's rcsVariables definition
+   */
+  async sendBulkRcs(
+    phones: string[],
+    templateName: string,
+    namespace: string,
+    projectId: string,
+    variables: string[]
+  ) {
+    const url =
+      env.MSG91_RCS_URL ??
+      "https://api.msg91.com/api/v5/rcs/send-rcs-message/bulk/";
+
+    const response = await axios.post<{
+      type?: string;
+      message?: string;
+      request_id?: string;
+    }>(
+      url,
+      {
+        customer_number_variables: [
+          {
+            customer_number: phones,
+            variables,
+          },
+        ],
+        project_id: projectId,
+        function_name: "template",
+        name: templateName,
+        namespace,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          authkey: env.MSG91_AUTH_KEY,
+        },
+      }
+    );
     return response.data;
   }
 }

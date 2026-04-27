@@ -25,18 +25,35 @@ export const sendNotificationSchema = z.object({
   templateVariables: z.record(z.string(), z.string()),
 });
 
-export const createTemplateSchema = z.object({
-  name: z.string().min(1).max(200),
-  templateId: z.string().min(1).max(200),
-  medium: z.enum(NOTIFICATION_MEDIUMS),
-  message: z.string().min(1).max(5000),
-});
+export const createTemplateSchema = z
+  .object({
+    name: z.string().min(1).max(200),
+    templateId: z.string().min(1).max(200),
+    medium: z.enum(NOTIFICATION_MEDIUMS),
+    /// Required for SMS/WhatsApp; optional for RCS (content managed on MSG91 side)
+    message: z.string().max(5000).optional().nullable(),
+    rcsProjectId: z.string().max(200).optional(),
+    rcsNamespace: z.string().max(200).optional(),
+    rcsVariables: z.array(z.string().max(100)).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.medium !== "RCS" && !data.message?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Message is required for SMS and WhatsApp templates.",
+        path: ["message"],
+      });
+    }
+  });
 
 export const updateTemplateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   templateId: z.string().min(1).max(200).optional(),
   medium: z.enum(NOTIFICATION_MEDIUMS).optional(),
-  message: z.string().min(1).max(5000).optional(),
+  message: z.string().max(5000).optional().nullable(),
+  rcsProjectId: z.string().max(200).optional().nullable(),
+  rcsNamespace: z.string().max(200).optional().nullable(),
+  rcsVariables: z.array(z.string().max(100)).optional().nullable(),
 });
 
 export const listTemplatesQuerySchema = z.object({

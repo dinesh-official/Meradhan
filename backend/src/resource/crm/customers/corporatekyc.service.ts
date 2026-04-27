@@ -28,6 +28,9 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
     correspondenceDistrict: payload.correspondenceDistrict ?? undefined,
     correspondencePinCode: payload.correspondencePinCode ?? undefined,
     correspondenceState: payload.correspondenceState ?? undefined,
+    correspondenceAddressProofType:
+      (payload as unknown as { correspondenceAddressProofType?: string })
+        .correspondenceAddressProofType ?? undefined,
     correspondenceAddressProofCopyUrl:
       payload.correspondenceAddressProofCopyUrl ?? undefined,
 
@@ -39,6 +42,9 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
     registeredDistrict: payload.registeredDistrict ?? undefined,
     registeredPinCode: payload.registeredPinCode ?? undefined,
     registeredState: payload.registeredState ?? undefined,
+    registeredAddressProofType:
+      (payload as unknown as { registeredAddressProofType?: string })
+        .registeredAddressProofType ?? undefined,
     registeredAddressProofCopyUrl:
       payload.registeredAddressProofCopyUrl ?? undefined,
     balanceSheetCopyUrl: payload.balanceSheetCopyUrl ?? undefined,
@@ -121,6 +127,9 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
       create: (payload.authorisedSignatories ?? []).map((s) => ({
         fullName: s.fullName,
         pan: s.pan,
+        signatureFileUrl:
+          (s as unknown as { signatureFileUrl?: string }).signatureFileUrl ??
+          undefined,
         panCopyFileUrl:
           (s as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
         aadharCopyFileUrl:
@@ -175,6 +184,9 @@ export class CorporateKycService {
         correspondenceDistrict: payload.correspondenceDistrict ?? undefined,
         correspondencePinCode: payload.correspondencePinCode ?? undefined,
         correspondenceState: payload.correspondenceState ?? undefined,
+        correspondenceAddressProofType:
+          (payload as unknown as { correspondenceAddressProofType?: string })
+            .correspondenceAddressProofType ?? undefined,
         correspondenceAddressProofCopyUrl:
           payload.correspondenceAddressProofCopyUrl ?? undefined,
 
@@ -186,6 +198,9 @@ export class CorporateKycService {
         registeredDistrict: payload.registeredDistrict ?? undefined,
         registeredPinCode: payload.registeredPinCode ?? undefined,
         registeredState: payload.registeredState ?? undefined,
+        registeredAddressProofType:
+          (payload as unknown as { registeredAddressProofType?: string })
+            .registeredAddressProofType ?? undefined,
         registeredAddressProofCopyUrl:
           payload.registeredAddressProofCopyUrl ?? undefined,
         balanceSheetCopyUrl: payload.balanceSheetCopyUrl ?? undefined,
@@ -276,6 +291,9 @@ export class CorporateKycService {
           create: (payload.authorisedSignatories ?? []).map((s) => ({
             fullName: s.fullName,
             pan: s.pan,
+            signatureFileUrl:
+              (s as unknown as { signatureFileUrl?: string }).signatureFileUrl ??
+              undefined,
             panCopyFileUrl:
               (s as unknown as { panCopyFileUrl?: string }).panCopyFileUrl ?? undefined,
             aadharCopyFileUrl:
@@ -341,6 +359,8 @@ export class CorporateKycService {
       correspondenceDistrict: row.correspondenceDistrict ?? undefined,
       correspondencePinCode: row.correspondencePinCode ?? undefined,
       correspondenceState: row.correspondenceState ?? undefined,
+      correspondenceAddressProofType:
+        row.correspondenceAddressProofType ?? undefined,
       correspondenceAddressProofCopyUrl:
         row.correspondenceAddressProofCopyUrl ?? undefined,
       registeredFullAddress: row.registeredFullAddress ?? undefined,
@@ -351,6 +371,8 @@ export class CorporateKycService {
       registeredDistrict: row.registeredDistrict ?? undefined,
       registeredPinCode: row.registeredPinCode ?? undefined,
       registeredState: row.registeredState ?? undefined,
+      registeredAddressProofType:
+        row.registeredAddressProofType ?? undefined,
       registeredAddressProofCopyUrl:
         row.registeredAddressProofCopyUrl ?? undefined,
       balanceSheetCopyUrl: row.balanceSheetCopyUrl ?? undefined,
@@ -430,6 +452,7 @@ export class CorporateKycService {
         id: s.id,
         fullName: s.fullName,
         pan: s.pan,
+        signatureFileUrl: s.signatureFileUrl ?? undefined,
         panCopyFileUrl: s.panCopyFileUrl ?? undefined,
         aadharCopyFileUrl: s.aadharCopyFileUrl ?? undefined,
         passportPhotoFileUrl: s.passportPhotoFileUrl ?? undefined,

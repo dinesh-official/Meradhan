@@ -6,6 +6,7 @@ import { InputField } from "@/global/elements/inputs/InputField";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { FileText, ExternalLink } from "lucide-react";
+import { genMediaUrl } from "@/global/utils/url.utils";
 
 const DOCUMENT_FIELDS: {
   key: keyof NonNullable<CorporateKycFormHook["form"]>;
@@ -48,10 +49,10 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Documents</CardTitle>
+        <CardTitle className="text-sm">Documents</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2">
+      <CardContent className="space-y-5">
+        <div className="grid gap-3 md:grid-cols-2">
           {DOCUMENT_FIELDS.map(({ key, label }) => (
             <FileUploadField
               key={key}
@@ -66,8 +67,8 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
         </div>
 
         <div className="pt-2">
-          <h3 className="text-sm font-medium mb-3">Attachments</h3>
-          <div className="grid gap-4 md:grid-cols-2">
+          <h3 className="text-xs font-medium mb-2 text-muted-foreground">Attachments</h3>
+          <div className="grid gap-3 md:grid-cols-2">
             {ATTACHMENT_FIELDS.map(({ key, label }) => (
               <FileUploadField
                 key={key}
@@ -119,7 +120,7 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
                       {label}
                     </span>
                     <a
-                      href={"/assets/media/files" + url}
+                      href={genMediaUrl(url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="truncate text-primary hover:underline flex items-center gap-1 min-w-0"

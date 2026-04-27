@@ -58,6 +58,49 @@ export interface TCrmCustomerInterface {
     data: z.infer<(typeof appSchema.customer)["createCorporateKycSchema"]>,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<SaveCorporateKycResponse>>;
+
+  corporateKraStatus(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isRunning: boolean; kycDataStoreId: number | null }>>>;
+
+  triggerCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isTriggered: boolean }>>>;
+
+  listCorporateKycAttachments(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<Array<{
+    id: number;
+    corporateKycModelId: number;
+    label: string;
+    fileUrl: string;
+    createdByCrmUserId?: number | null;
+    createdAt: string;
+    updatedAt: string;
+  }>>>>;
+
+  createCorporateKycAttachment(
+    customerId: number,
+    data: { label: string; fileUrl: string },
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{
+    id: number;
+    corporateKycModelId: number;
+    label: string;
+    fileUrl: string;
+    createdByCrmUserId?: number | null;
+    createdAt: string;
+    updatedAt: string;
+  }>>>;
+
+  deleteCorporateKycAttachment(
+    customerId: number,
+    attachmentId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isDeleted: boolean }>>>;
 }
 
 export class CrmCustomerApi implements TCrmCustomerInterface {
@@ -180,6 +223,75 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     return this.apiClient.put<SaveCorporateKycResponse>(
       `/crm/customer/${customerId}/corporate-kyc`,
       data,
+      config,
+    );
+  }
+
+  async corporateKraStatus(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["corporateKraStatus"]> {
+    return this.apiClient.get<BaseResponseData<{ isRunning: boolean; kycDataStoreId: number | null }>>(
+      `/crm/customer/${customerId}/corporate-kyc/kra/status`,
+      config,
+    );
+  }
+
+  async triggerCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["triggerCorporateKra"]> {
+    return this.apiClient.post<BaseResponseData<{ isTriggered: boolean }>>(
+      `/crm/customer/${customerId}/corporate-kyc/kra/trigger`,
+      {},
+      config,
+    );
+  }
+
+  async listCorporateKycAttachments(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["listCorporateKycAttachments"]> {
+    return this.apiClient.get<
+      BaseResponseData<
+        Array<{
+          id: number;
+          corporateKycModelId: number;
+          label: string;
+          fileUrl: string;
+          createdByCrmUserId?: number | null;
+          createdAt: string;
+          updatedAt: string;
+        }>
+      >
+    >(`/crm/customer/${customerId}/corporate-kyc/attachments`, config);
+  }
+
+  async createCorporateKycAttachment(
+    customerId: number,
+    data: { label: string; fileUrl: string },
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["createCorporateKycAttachment"]> {
+    return this.apiClient.post<
+      BaseResponseData<{
+        id: number;
+        corporateKycModelId: number;
+        label: string;
+        fileUrl: string;
+        createdByCrmUserId?: number | null;
+        createdAt: string;
+        updatedAt: string;
+      }>
+    >(`/crm/customer/${customerId}/corporate-kyc/attachments`, data, config);
+  }
+
+  async deleteCorporateKycAttachment(
+    customerId: number,
+    attachmentId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["deleteCorporateKycAttachment"]> {
+    return this.apiClient.delete<BaseResponseData<{ isDeleted: boolean }>>(
+      `/crm/customer/${customerId}/corporate-kyc/attachments/${attachmentId}`,
       config,
     );
   }

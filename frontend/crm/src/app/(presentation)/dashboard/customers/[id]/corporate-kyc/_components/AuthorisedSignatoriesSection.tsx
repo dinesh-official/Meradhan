@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { SelectField } from "@/global/elements/inputs/SelectField";
 import type { CorporateKycAuthorisedSignatoryPayload } from "@root/schema";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
+import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 
 export function AuthorisedSignatoriesSection({
   hook,
@@ -19,6 +22,7 @@ export function AuthorisedSignatoriesSection({
     addAuthorisedSignatory,
     removeAuthorisedSignatory,
   } = hook;
+  const { uploadFile } = useCorporateKycFileUpload();
   const list = form.authorisedSignatories ?? [];
   const rowErrors = (i: number): Record<string, string[]> =>
     (errors.authorisedSignatories?.[i] ?? {}) as Record<string, string[]>;
@@ -26,7 +30,7 @@ export function AuthorisedSignatoriesSection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Authorised signatories</CardTitle>
+        <CardTitle className="text-sm">Authorised signatories</CardTitle>
         <Button
           type="button"
           variant="outline"
@@ -38,7 +42,7 @@ export function AuthorisedSignatoriesSection({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {list.length === 0 && (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-xs">
             No authorised signatories added.
           </p>
         )}
@@ -48,7 +52,7 @@ export function AuthorisedSignatoriesSection({
             className="rounded-lg border p-4 grid gap-3 md:grid-cols-2"
           >
             <div className="md:col-span-2 flex justify-between items-center">
-              <span className="text-sm font-medium">Signatory {index + 1}</span>
+              <span className="text-xs font-medium">Signatory {index + 1}</span>
               <Button
                 type="button"
                 variant="ghost"
@@ -73,6 +77,60 @@ export function AuthorisedSignatoriesSection({
               value={s.pan}
               onChangeAction={(v) => setAuthorisedSignatory(index, { pan: v })}
               error={rowErrors(index).pan?.[0]}
+            />
+            <FileUploadField
+              label="Signature (optional)"
+              className="md:col-span-2"
+              value={(s as unknown as { signatureFileUrl?: string }).signatureFileUrl ?? ""}
+              onChangeAction={(v) =>
+                setAuthorisedSignatory(index, {
+                  signatureFileUrl: v,
+                } as unknown as Partial<CorporateKycAuthorisedSignatoryPayload>)
+              }
+              onUpload={(file) =>
+                uploadFile(file, "corporate-kyc/authorised-signatories")
+              }
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
+            />
+            <FileUploadField
+              label="Passport size photo (optional)"
+              className="md:col-span-2"
+              value={s.passportPhotoFileUrl ?? ""}
+              onChangeAction={(v) =>
+                setAuthorisedSignatory(index, { passportPhotoFileUrl: v })
+              }
+              onUpload={(file) =>
+                uploadFile(file, "corporate-kyc/authorised-signatories")
+              }
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
+            />
+            <FileUploadField
+              label="Aadhaar copy (optional)"
+              className="md:col-span-2"
+              value={s.aadharCopyFileUrl ?? ""}
+              onChangeAction={(v) =>
+                setAuthorisedSignatory(index, { aadharCopyFileUrl: v })
+              }
+              onUpload={(file) =>
+                uploadFile(file, "corporate-kyc/authorised-signatories")
+              }
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
+            />
+            <FileUploadField
+              label="PAN copy (optional)"
+              className="md:col-span-2"
+              value={s.panCopyFileUrl ?? ""}
+              onChangeAction={(v) =>
+                setAuthorisedSignatory(index, { panCopyFileUrl: v })
+              }
+              onUpload={(file) =>
+                uploadFile(file, "corporate-kyc/authorised-signatories")
+              }
+              accept=".jpg,.jpeg,.png,.pdf"
+              placeholder="Select file or paste URL"
             />
             <InputField
               label="Designation"
@@ -104,6 +162,22 @@ export function AuthorisedSignatoriesSection({
               onChangeAction={(v) =>
                 setAuthorisedSignatory(index, { mobile: v })
               }
+            />
+            <SelectField
+              label="Whether Politically Exposed?"
+              className="md:col-span-2"
+              value={(s.pepDeclaration as unknown as string | undefined) ?? "NA"}
+              onChangeAction={(v) =>
+                setAuthorisedSignatory(index, {
+                  pepDeclaration:
+                    v as unknown as CorporateKycAuthorisedSignatoryPayload["pepDeclaration"],
+                })
+              }
+              options={[
+                { label: "NA", value: "NA" },
+                { label: "PEP", value: "PEP" },
+                { label: "RPEP", value: "RPEP" },
+              ]}
             />
           </div>
         ))}

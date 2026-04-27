@@ -61,4 +61,34 @@ crmCustomersRoutes.put(
   (req, res) => controller.saveCorporateKyc(req, res)
 );
 
+crmCustomersRoutes.get(
+  "/api/crm/customer/:customerId/corporate-kyc/kra/status",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.corporateKraStatus(req, res),
+);
+
+crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/corporate-kyc/kra/trigger",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.triggerCorporateKra(req, res),
+);
+
+crmCustomersRoutes.get(
+  "/api/crm/customer/:customerId/corporate-kyc/attachments",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.listCorporateKycAttachments(req, res),
+);
+
+crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/corporate-kyc/attachments",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.createCorporateKycAttachment(req, res),
+);
+
+crmCustomersRoutes.delete(
+  "/api/crm/customer/:customerId/corporate-kyc/attachments/:attachmentId",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.deleteCorporateKycAttachment(req, res),
+);
+
 export default crmCustomersRoutes;

@@ -3,8 +3,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { SelectField } from "@/global/elements/inputs/SelectField";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
+import { addressProofOptions } from "../_utils/addressProofOptions";
 
 export function CorrespondenceAddressSection({
   hook,
@@ -16,9 +18,9 @@ export function CorrespondenceAddressSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Correspondence address</CardTitle>
+        <CardTitle className="text-sm">Correspondence address</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
+      <CardContent className="grid gap-3 md:grid-cols-2">
         <InputField
           label="Full address"
           placeholder="Complete address"
@@ -62,6 +64,13 @@ export function CorrespondenceAddressSection({
           value={form.correspondencePinCode ?? ""}
           onChangeAction={(v) => setField("correspondencePinCode", v)}
           error={errors.correspondencePinCode?.[0]}
+        />
+        <SelectField
+          label="Address proof type"
+          placeholder="Select address proof type"
+          value={form.correspondenceAddressProofType ?? ""}
+          onChangeAction={(v) => setField("correspondenceAddressProofType", v)}
+          options={addressProofOptions}
         />
         <FileUploadField
           label="Address proof copy"

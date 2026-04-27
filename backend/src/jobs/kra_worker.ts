@@ -5,13 +5,20 @@ import {
   profileSubmitSettlementQueue,
 } from "./queue/worker_queues";
 import { KraWorkerService } from "./kra_worker/KraWorker.service";
+import { CorporateKraWorkerService } from "./kra_worker/corporateKraWorker.service";
 import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 
 startQueueWorker(
   kraWorkerQueue,
   async (job: Job) => {
-    const kraWorkerService = new KraWorkerService();
-    await kraWorkerService.processKra(job.data);
+    const kraType = (job.data as { kraType?: string } | undefined)?.kraType;
+    if (kraType === "CORPORATE") {
+      const corpWorker = new CorporateKraWorkerService();
+      await corpWorker.processCorporateKra(job.data);
+    } else {
+      const kraWorkerService = new KraWorkerService();
+      await kraWorkerService.processKra(job.data);
+    }
     console.log(job.data);
   },
   1,

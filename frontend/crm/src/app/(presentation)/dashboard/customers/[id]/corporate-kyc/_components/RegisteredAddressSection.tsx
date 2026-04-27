@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { SelectField } from "@/global/elements/inputs/SelectField";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { useState } from "react";
+import { addressProofOptions } from "../_utils/addressProofOptions";
 
 function copyCorrespondenceToRegistered(hook: CorporateKycFormHook) {
   const { form, setField } = hook;
@@ -18,6 +20,10 @@ function copyCorrespondenceToRegistered(hook: CorporateKycFormHook) {
   setField("registeredDistrict", form.correspondenceDistrict ?? "");
   setField("registeredState", form.correspondenceState ?? "");
   setField("registeredPinCode", form.correspondencePinCode ?? "");
+  setField(
+    "registeredAddressProofType",
+    form.correspondenceAddressProofType ?? "",
+  );
   setField(
     "registeredAddressProofCopyUrl",
     form.correspondenceAddressProofCopyUrl ?? "",
@@ -33,9 +39,9 @@ export function RegisteredAddressSection({ hook }: { hook: CorporateKycFormHook 
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-3">
         <div>
-          <CardTitle>Registered address</CardTitle>
+          <CardTitle className="text-sm">Registered address</CardTitle>
         </div>
-        <label className="flex items-center gap-2 text-sm text-muted-foreground select-none">
+        <label className="flex items-center gap-2 text-xs text-muted-foreground select-none">
           <Checkbox
             checked={sameAsCorrespondence}
             onCheckedChange={(checked) => {
@@ -47,7 +53,7 @@ export function RegisteredAddressSection({ hook }: { hook: CorporateKycFormHook 
           Same as correspondence address
         </label>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
+      <CardContent className="grid gap-3 md:grid-cols-2">
         <InputField
           label="Full address"
           placeholder="Complete address"
@@ -91,6 +97,13 @@ export function RegisteredAddressSection({ hook }: { hook: CorporateKycFormHook 
           value={form.registeredPinCode ?? ""}
           onChangeAction={(v) => setField("registeredPinCode", v)}
           error={(errors as { registeredPinCode?: string[] }).registeredPinCode?.[0]}
+        />
+        <SelectField
+          label="Address proof type"
+          placeholder="Select address proof type"
+          value={form.registeredAddressProofType ?? ""}
+          onChangeAction={(v) => setField("registeredAddressProofType", v)}
+          options={addressProofOptions}
         />
         <FileUploadField
           label="Address proof copy"

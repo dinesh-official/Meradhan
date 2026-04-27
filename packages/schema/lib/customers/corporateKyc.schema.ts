@@ -17,7 +17,9 @@ export const CorporateEntityTypeEnum = z.enum([
 ]);
 
 export const DepositoryNameEnum = z.enum(["NSDL", "CDSL"]);
-export const PepDeclarationEnum = z.enum(["PEP", "RPEP", "NO"]);
+// Keep "NO" for backward compatibility with older saved values.
+// New UI uses "NA" (Not applicable).
+export const PepDeclarationEnum = z.enum(["PEP", "RPEP", "NA", "NO"]);
 
 // Nested schemas for one-to-many relations
 export const corporateKycBankAccountSchema = z.object({
@@ -77,6 +79,7 @@ export const corporateKycAuthorisedSignatorySchema = z.object({
   id: z.number().optional(),
   fullName: z.string().min(1, "Full name is required"),
   pan: z.string().min(1, "PAN is required"),
+  signatureFileUrl: z.string().optional(),
   panCopyFileUrl: z.string().optional(),
   aadharCopyFileUrl: z.string().optional(),
   passportPhotoFileUrl: z.string().optional(),
@@ -114,6 +117,7 @@ export const createCorporateKycSchema = z.object({
   correspondenceDistrict: z.string().optional(),
   correspondencePinCode: z.string().optional(),
   correspondenceState: z.string().optional(),
+  correspondenceAddressProofType: z.string().optional(),
   correspondenceAddressProofCopyUrl: z.string().optional(),
 
   // Registered address
@@ -125,6 +129,7 @@ export const createCorporateKycSchema = z.object({
   registeredDistrict: z.string().optional(),
   registeredPinCode: z.string().optional(),
   registeredState: z.string().optional(),
+  registeredAddressProofType: z.string().optional(),
   registeredAddressProofCopyUrl: z.string().optional(),
 
   // Documents

@@ -18,6 +18,8 @@ import * as crmFollowUpLeads from "./src/core/api/crm/crmFollowUp.api";
 import * as crmLeads from "./src/core/api/crm/crmLeads.api";
 import * as crmPartnership from "./src/core/api/crm/crmPartnership.api";
 import { CrmOrdersApi } from "./src/core/api/crm/orders.api";
+import { CrmRazorpayRoutesApi } from "./src/core/api/crm/razorpayRoutes.api";
+import { CrmRazorpayStakeholdersApi } from "./src/core/api/crm/razorpayStakeholders.api";
 import { CrmDashboardApi } from "./src/core/api/crm/dashboard.api";
 import { CrmNotificationsApi } from "./src/core/api/crm/notifications.api";
 export * from "./src/core/api/crm/crmLeads.api";
@@ -25,6 +27,8 @@ export * from "./src/core/api/crm/crmPartnership.api";
 export * from "./src/core/api/crm/dashboard.api";
 export type { PartnershipPayload } from "./src/core/api/crm/crmPartnership.api";
 export type * from "./src/core/api/crm/orders.response";
+export type * from "./src/core/api/crm/razorpayRoutes.response";
+export type * from "./src/core/api/crm/razorpayStakeholders.response";
 
 import * as auditlogs from "./src/core/api/crm/auditlogs/auditlogs.api";
 
@@ -62,6 +66,8 @@ export default {
     crmPartnership: crmPartnership,
     crmFollowup: crmFollowUpLeads,
     crmOrdersApi: CrmOrdersApi,
+    crmRazorpayRoutesApi: CrmRazorpayRoutesApi,
+    crmRazorpayStakeholdersApi: CrmRazorpayStakeholdersApi,
     dashboard: {
       CrmDashboardApi,
     },
