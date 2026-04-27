@@ -76,7 +76,7 @@ jobs:
             CDSL_MODE="${{ secrets.CDSL_MODE }}"
             echo "CDSL_MODE=$CDSL_MODE" >> .env
 
-            MSG91_RCS_URL="${{ secrets.MSG91_RCS_URL }}"
+            MSG91_RCS_URL="${{ vars.MSG91_RCS_URL }}"
             echo "MSG91_RCS_URL=$MSG91_RCS_URL" >> .env
 
             NSDL_MODE="${{ secrets.NSDL_MODE }}"
