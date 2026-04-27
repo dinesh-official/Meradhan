@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   reactStrictMode: false,
   transpilePackages: ["@root/apiGateway", "@root/schema"],
+  experimental: {
+    // Increase request-body buffering limit (default 10mb) for large uploads proxied through Next.js.
+    // Docs: https://nextjs.org/docs/15/pages/api-reference/config/next-config-js/middlewareClientMaxBodySize
+    middlewareClientMaxBodySize: "40mb",
+    // If any uploads ever go through Server Actions, bump that limit too.
+    serverActions: {
+      bodySizeLimit: "40mb",
+    },
+  },
   // Skip lint and type-check during `next build` so build succeeds even with lint/type issues
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
