@@ -95,6 +95,12 @@ export interface TCrmCustomerInterface {
     createdAt: string;
     updatedAt: string;
   }>>>;
+
+  deleteCorporateKycAttachment(
+    customerId: number,
+    attachmentId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isDeleted: boolean }>>>;
 }
 
 export class CrmCustomerApi implements TCrmCustomerInterface {
@@ -277,5 +283,16 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
         updatedAt: string;
       }>
     >(`/crm/customer/${customerId}/corporate-kyc/attachments`, data, config);
+  }
+
+  async deleteCorporateKycAttachment(
+    customerId: number,
+    attachmentId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["deleteCorporateKycAttachment"]> {
+    return this.apiClient.delete<BaseResponseData<{ isDeleted: boolean }>>(
+      `/crm/customer/${customerId}/corporate-kyc/attachments/${attachmentId}`,
+      config,
+    );
   }
 }
