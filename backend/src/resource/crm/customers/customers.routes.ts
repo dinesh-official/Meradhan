@@ -85,4 +85,10 @@ crmCustomersRoutes.post(
   (req, res) => controller.createCorporateKycAttachment(req, res),
 );
 
+crmCustomersRoutes.delete(
+  "/api/crm/customer/:customerId/corporate-kyc/attachments/:attachmentId",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.deleteCorporateKycAttachment(req, res),
+);
+
 export default crmCustomersRoutes;
