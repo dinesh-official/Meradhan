@@ -10,7 +10,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { encodeId, genMediaUrl } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil } from "lucide-react";
+import { Building2, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -229,6 +229,23 @@ export default function CorporateProfileAndKycView({
     },
   });
 
+  const deleteAttachmentMutation = useMutation({
+    mutationFn: async (attachmentId: number) => {
+      const res = await api.deleteCorporateKycAttachment(profileId, attachmentId);
+      return res.data.responseData;
+    },
+    onSuccess: () => {
+      toast.success("Attachment deleted.");
+      queryClient.invalidateQueries({ queryKey: ["CorporateKycAttachments", profileId] });
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      const message =
+        err?.response?.data?.message ??
+        (err instanceof Error ? err.message : "Failed to delete attachment");
+      toast.error(message);
+    },
+  });
+
   const handleSaveAttachment = async () => {
     if (!corporateKyc) {
       toast.error("Corporate KYC data does not exist. Please save corporate KYC first.");
@@ -292,14 +309,31 @@ export default function CorporateProfileAndKycView({
                         {a.createdAt ? new Date(a.createdAt).toLocaleString("en-IN") : ""}
                       </div>
                     </div>
-                    <a
-                      href={genMediaUrl(a.fileUrl)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm text-primary underline whitespace-nowrap"
-                    >
-                      Open
-                    </a>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <a
+                        href={genMediaUrl(a.fileUrl)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm text-primary underline whitespace-nowrap"
+                      >
+                        Open
+                      </a>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        disabled={deleteAttachmentMutation.isPending}
+                        onClick={() => {
+                          const ok = window.confirm("Delete this attachment?");
+                          if (!ok) return;
+                          deleteAttachmentMutation.mutate(a.id);
+                        }}
+                        title="Delete attachment"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -491,14 +525,31 @@ export default function CorporateProfileAndKycView({
                                       {a.createdAt ? new Date(a.createdAt).toLocaleString("en-IN") : ""}
                                     </div>
                                   </div>
-                                  <a
-                                    href={genMediaUrl(a.fileUrl)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-sm text-primary underline whitespace-nowrap"
-                                  >
-                                    Open
-                                  </a>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <a
+                                      href={genMediaUrl(a.fileUrl)}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-sm text-primary underline whitespace-nowrap"
+                                    >
+                                      Open
+                                    </a>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      disabled={deleteAttachmentMutation.isPending}
+                                      onClick={() => {
+                                        const ok = window.confirm("Delete this attachment?");
+                                        if (!ok) return;
+                                        deleteAttachmentMutation.mutate(a.id);
+                                      }}
+                                      title="Delete attachment"
+                                    >
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             ))

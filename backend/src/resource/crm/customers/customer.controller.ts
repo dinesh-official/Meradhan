@@ -389,6 +389,45 @@ export class CustomerProfileController {
     });
   }
 
+  async deleteCorporateKycAttachment(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    const attachmentId = Number(req.params.attachmentId);
+    if (Number.isNaN(customerId) || Number.isNaN(attachmentId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id or attachment id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Corporate KYC data not found. Please save corporate KYC first.",
+      });
+      return;
+    }
+
+    const deleted = await this.corporateKycAttachmentsRepo.deleteById({
+      corporateKycModelId: corporateKyc.id,
+      attachmentId,
+    });
+    if (!deleted) {
+      res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Attachment not found",
+      });
+      return;
+    }
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { isDeleted: true },
+      message: "Attachment deleted successfully",
+    });
+  }
+
   async getCustomerByParticipantCode(req: Request, res: Response): Promise<void> {
     const participantCode = req.params.participantCode;
     if (!participantCode) {
