@@ -44,5 +44,5 @@ jobs:
 
           curl -X POST https://docs.meradhan.co/api/generate-release-notes \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.RELEASE_API_KEY }}" \
+            -H "Authorization: Bearer 4909e9a3e59032855ce0dd0b68e511e73eeffcda8eac6b4d134c7bca68209f3b" \
             -d "$payload"
