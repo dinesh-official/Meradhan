@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,12 @@ function formatNumber(value: number | string | null | undefined, digits = 2) {
   }).format(numeric);
 }
 
+function formatInteger(value: number | string | null | undefined) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "—";
+  return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(numeric);
+}
+
 function formatDisplayDate(value: string | null | undefined) {
   if (!value) return "—";
   const parsed = new Date(value);
@@ -77,6 +84,11 @@ function formatDisplayDate(value: string | null | undefined) {
 function toNumber(value: number | string | null | undefined) {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+function safeNumber(value: number | string | null | undefined) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 function getApiErrorMessage(error: unknown, fallback: string) {
@@ -99,6 +111,8 @@ type ProposalDraft = {
   notes: string;
   side: "BUY" | "SELL";
   settlementType: "T+0" | "T+1";
+  manualYieldEnabled: boolean;
+  manualYield: string;
   customer: CustomerProfile;
   fetched: ProposalFetchResult;
   createdAt: string;
@@ -135,6 +149,8 @@ function ProposalManagementView() {
   const [quantity, setQuantity] = useState("1");
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
   const [settlementType, setSettlementType] = useState<"T+0" | "T+1">("T+0");
+  const [manualYieldEnabled, setManualYieldEnabled] = useState(false);
+  const [manualYield, setManualYield] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -225,6 +241,8 @@ function ProposalManagementView() {
     setIsinSearch("");
     setSide("BUY");
     setSettlementType("T+0");
+    setManualYieldEnabled(false);
+    setManualYield("");
     setQuantity("1");
     setNotes("");
     setSelectedCustomer(null);
@@ -247,12 +265,22 @@ function ProposalManagementView() {
       return;
     }
 
+    const manualYieldNumber = manualYieldEnabled ? Number(manualYield) : null;
+    if (manualYieldEnabled) {
+      if (manualYieldNumber == null || !Number.isFinite(manualYieldNumber) || manualYieldNumber <= 0) {
+        toast.error("Enter a valid YTM (%) to use manual yield pricing");
+        return;
+      }
+    }
+
     try {
       const fetched = await fetchProposalMutation.mutateAsync({
         isin: normalizedIsin,
         quantity: quantityValue,
         side,
         settlementType,
+        pricingYield:
+          manualYieldEnabled ? manualYieldNumber! : null,
       });
 
       setProposalDraft({
@@ -262,6 +290,8 @@ function ProposalManagementView() {
         notes: notes.trim(),
         side,
         settlementType,
+        manualYieldEnabled,
+        manualYield,
         customer: selectedCustomer,
         fetched,
         createdAt: new Date().toISOString(),
@@ -289,6 +319,8 @@ function ProposalManagementView() {
     setQuantity(String(item.quantity));
     setSide(item.side);
     setSettlementType(item.settlementType ?? "T+0");
+    setManualYieldEnabled(Boolean(item.manualYieldEnabled));
+    setManualYield(item.manualYield ?? "");
     setNotes(item.notes);
     setSelectedCustomer(item.customer);
     setIsSheetOpen(true);
@@ -379,9 +411,9 @@ function ProposalManagementView() {
     const accruedInterest = toNumber(currentPricing?.accruedInterest ?? currentDealAutofill?.pricing.totalAccruedInterest);
     const totalConsideration = toNumber(
       currentDealAutofill?.pricing.totalConsideration ??
-        (principalAmount != null && accruedInterest != null
-          ? principalAmount + accruedInterest
-          : null)
+      (principalAmount != null && accruedInterest != null
+        ? principalAmount + accruedInterest
+        : null)
     );
     const stampDuty = toNumber(currentPricing?.stampDuty);
     const settlementAmount = toNumber(currentPricing?.settlementAmount ?? currentDealAutofill?.pricing.settlementAmount);
@@ -427,8 +459,8 @@ function ProposalManagementView() {
 
     const faceValue = toNumber(
       currentPricing?.faceValue ??
-        currentDealAutofill?.suggested.faceValue ??
-        currentBond?.faceValue
+      currentDealAutofill?.suggested.faceValue ??
+      currentBond?.faceValue
     );
     const principalAmount = toNumber(
       currentPricing?.principalAmount ?? currentDealAutofill?.pricing.principalAmount
@@ -438,9 +470,9 @@ function ProposalManagementView() {
     );
     const totalConsideration = toNumber(
       currentDealAutofill?.pricing.totalConsideration ??
-        (principalAmount != null && accruedInterest != null
-          ? principalAmount + accruedInterest
-          : null)
+      (principalAmount != null && accruedInterest != null
+        ? principalAmount + accruedInterest
+        : null)
     );
     const stampDuty = toNumber(currentPricing?.stampDuty);
     const settlementAmount = toNumber(
@@ -451,8 +483,8 @@ function ProposalManagementView() {
     );
     const ytmAnn = toNumber(
       currentDealAutofill?.pricing.finalYieldRaw ??
-        currentDealAutofill?.suggested.buyYield ??
-        currentBond?.buyYield
+      currentDealAutofill?.suggested.buyYield ??
+      currentBond?.buyYield
     );
     const noOfDays = toNumber(
       currentPricing?.noOfAccrualDays ?? currentDealAutofill?.pricing.calc.accrued_days
@@ -510,8 +542,8 @@ function ProposalManagementView() {
 
     const faceValue = toNumber(
       currentPricing?.faceValue ??
-        currentDealAutofill?.suggested.faceValue ??
-        currentBond?.faceValue
+      currentDealAutofill?.suggested.faceValue ??
+      currentBond?.faceValue
     );
     const quantum = faceValue != null ? faceValue * proposalDraft.quantity : null;
     const valueInCrores =
@@ -520,8 +552,8 @@ function ProposalManagementView() {
         : null;
     const yieldValue = toNumber(
       currentDealAutofill?.pricing.finalYieldRaw ??
-        currentDealAutofill?.suggested.buyYield ??
-        currentBond?.buyYield
+      currentDealAutofill?.suggested.buyYield ??
+      currentBond?.buyYield
     );
     const buySell = proposalDraft.side === "SELL" ? "S" : "B";
 
@@ -545,10 +577,34 @@ function ProposalManagementView() {
   const pricing = proposal?.pricing;
   const dealAutofill = proposal?.dealAutofill;
   const pricingError = proposal?.pricingError;
+  const calc = dealAutofill?.pricing?.calc as
+    | undefined
+    | {
+        settle_dt?: string;
+        accrued_days?: number;
+        final_price?: string;
+        final_yield?: string;
+        cf_rows?: Array<{
+          date: string;
+          interest: string;
+          principal: string;
+          total: string;
+        }>;
+      };
+
+  const calcAmounts = proposalDraft?.manualYieldEnabled
+    ? {
+        cleanPrice: safeNumber(dealAutofill?.pricing?.finalPrice),
+        principalAmount: safeNumber(dealAutofill?.pricing?.principalAmount),
+        accruedInterest: safeNumber(dealAutofill?.pricing?.totalAccruedInterest),
+        totalConsideration: safeNumber(dealAutofill?.pricing?.totalConsideration),
+        settlementAmount: safeNumber(dealAutofill?.pricing?.settlementAmount),
+      }
+    : null;
 
   return (
     <>
-      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
         <Card className="border-gray-200">
           <CardHeader>
             <CardTitle>Create Proposal</CardTitle>
@@ -557,7 +613,7 @@ function ProposalManagementView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">ISIN</label>
                 <Popover open={isinOpen} onOpenChange={setIsinOpen}>
@@ -635,35 +691,62 @@ function ProposalManagementView() {
                   placeholder="1"
                 />
               </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Proposal Side</label>
+                <Select value={side} onValueChange={(value) => setSide(value as "BUY" | "SELL")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select side" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BUY">BUY</SelectItem>
+                    <SelectItem value="SELL">SELL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Settlement Date</label>
+                <Select
+                  value={settlementType}
+                  onValueChange={(value) => setSettlementType(value as "T+0" | "T+1")}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select settlement" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="T+0">T+0</SelectItem>
+                    <SelectItem value="T+1">T+1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Proposal Side</label>
-              <Select value={side} onValueChange={(value) => setSide(value as "BUY" | "SELL")}>
-                <SelectTrigger className="w-full md:w-[240px]">
-                  <SelectValue placeholder="Select side" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="BUY">BUY</SelectItem>
-                  <SelectItem value="SELL">SELL</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Settlement Date</label>
-              <Select
-                value={settlementType}
-                onValueChange={(value) => setSettlementType(value as "T+0" | "T+1")}
-              >
-                <SelectTrigger className="w-full md:w-[240px]">
-                  <SelectValue placeholder="Select settlement" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="T+0">T+0</SelectItem>
-                  <SelectItem value="T+1">T+1</SelectItem>
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">Manual yield based pricing</label>
+              <div className="flex items-start gap-3 rounded-lg border border-gray-200 p-3">
+                <Checkbox
+                  checked={manualYieldEnabled}
+                  onCheckedChange={(value) => setManualYieldEnabled(Boolean(value))}
+                />
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-medium">Use manual YTM for calc</p>
+                  <p className="text-xs text-muted-foreground">
+                    Optional. If enabled and YTM is provided, pricing is calculated using this yield.
+                  </p>
+                </div>
+              </div>
+              {manualYieldEnabled ? (
+                <div className="flex flex-col gap-2 md:max-w-[240px]">
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    value={manualYield}
+                    onChange={(e) => setManualYield(e.target.value)}
+                    placeholder="Enter YTM % (e.g. 13.7500)"
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -710,51 +793,6 @@ function ProposalManagementView() {
                 <FileText className="h-4 w-4" />
                 Save Proposal
               </Button>
-              <Button
-                variant="outline"
-                onClick={handleSendProposalEmail}
-                disabled={!proposalDraft || fetchProposalMutation.isPending || sendProposalEmailMutation.isPending}
-              >
-                {sendProposalEmailMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Sending Email
-                  </>
-                ) : (
-                  <>
-                    <Mail className="h-4 w-4" />
-                    Send Email
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleCreateRfqFromProposal}
-                disabled={!proposalDraft || fetchProposalMutation.isPending}
-              >
-                Create RFQ
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleAutoCreateRfqAndGoDealbook}
-                disabled={
-                  !proposalDraft ||
-                  fetchProposalMutation.isPending ||
-                  autoCreateRfqMutation.isPending
-                }
-              >
-                {autoCreateRfqMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Creating RFQ
-                  </>
-                ) : (
-                  <>
-                    <Zap className="h-4 w-4" />
-                    Auto Create RFQ
-                  </>
-                )}
-              </Button>
               <Button variant="outline" onClick={handleReset} disabled={fetchProposalMutation.isPending}>
                 <RefreshCw className="h-4 w-4" />
                 Reset
@@ -793,8 +831,8 @@ function ProposalManagementView() {
                   value={
                     formatCurrency(
                       dealAutofill?.pricing.finalPrice ??
-                        pricing?.cleanPrice ??
-                        dealAutofill?.suggested.sellPrice,
+                      pricing?.cleanPrice ??
+                      dealAutofill?.suggested.sellPrice,
                     )
                   }
                 />
@@ -951,12 +989,29 @@ function ProposalManagementView() {
                   value={proposalDraft.settlementType}
                 />
                 <InfoRow
+                  label="Calc Input Type"
+                  value={proposalDraft.manualYieldEnabled ? "Calculate from Yield" : "Auto"}
+                />
+                <InfoRow
+                  label="Pricing Input (YTM %)"
+                  value={
+                    proposalDraft.manualYieldEnabled
+                      ? proposalDraft.manualYield || "—"
+                      : calc?.final_yield || "—"
+                  }
+                />
+                <InfoRow
                   label="Face Value"
                   value={formatCurrency(pricing?.faceValue ?? dealAutofill?.suggested.faceValue)}
                 />
                 <InfoRow
                   label="Clean Price"
-                  value={formatNumber(pricing?.cleanPrice ?? dealAutofill?.pricing.finalPrice, 4)}
+                  value={formatNumber(
+                    calcAmounts?.cleanPrice ??
+                      pricing?.cleanPrice ??
+                      dealAutofill?.pricing.finalPrice,
+                    4,
+                  )}
                 />
                 <InfoRow
                   label="YTM (Ann)"
@@ -972,15 +1027,25 @@ function ProposalManagementView() {
                 />
                 <InfoRow
                   label="Principal Amount"
-                  value={formatCurrency(pricing?.principalAmount ?? dealAutofill?.pricing.principalAmount)}
+                  value={formatCurrency(
+                    calcAmounts?.principalAmount ??
+                      pricing?.principalAmount ??
+                      dealAutofill?.pricing.principalAmount,
+                  )}
                 />
                 <InfoRow
                   label="Accrued Interest"
-                  value={formatCurrency(pricing?.accruedInterest ?? dealAutofill?.pricing.totalAccruedInterest)}
+                  value={formatCurrency(
+                    calcAmounts?.accruedInterest ??
+                      pricing?.accruedInterest ??
+                      dealAutofill?.pricing.totalAccruedInterest,
+                  )}
                 />
                 <InfoRow
                   label="Total Consideration"
-                  value={formatCurrency(dealAutofill?.pricing.totalConsideration)}
+                  value={formatCurrency(
+                    calcAmounts?.totalConsideration ?? dealAutofill?.pricing.totalConsideration,
+                  )}
                 />
                 <InfoRow
                   label="Stamp Duty"
@@ -988,16 +1053,71 @@ function ProposalManagementView() {
                 />
                 <InfoRow
                   label="Settlement Amount"
-                  value={formatCurrency(pricing?.settlementAmount ?? dealAutofill?.pricing.settlementAmount)}
+                  value={formatCurrency(
+                    calcAmounts?.settlementAmount ??
+                      dealAutofill?.pricing.settlementAmount ??
+                      pricing?.settlementAmount,
+                  )}
                 />
               </div>
 
+              {calc ? (
+                <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+                  <h4 className="font-semibold">YTM Calc</h4>
+                  <InfoRow label="Settle dt (calc)" value={formatDisplayDate(calc.settle_dt)} />
+                  <InfoRow label="Accrued days (calc)" value={formatInteger(calc.accrued_days)} />
+                  <InfoRow label="Final price (calc)" value={formatNumber(calc.final_price, 4)} />
+                  <InfoRow
+                    label="Final yield (calc)"
+                    value={calc.final_yield ? `${calc.final_yield}%` : "—"}
+                  />
+
+                  <div className="rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="grid grid-cols-4 bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+                      <div>Date</div>
+                      <div className="text-right">Interest</div>
+                      <div className="text-right">Principal</div>
+                      <div className="text-right">Total</div>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {(calc.cf_rows ?? []).map((row, idx) => (
+                        <div
+                          key={`${row.date}-${idx}`}
+                          className="grid grid-cols-4 gap-2 px-3 py-2 text-xs border-t border-gray-100"
+                        >
+                          <div className="truncate">{row.date}</div>
+                          <div className="text-right">{formatNumber(row.interest, 2)}</div>
+                          <div className="text-right">{formatNumber(row.principal, 2)}</div>
+                          <div className="text-right">{formatNumber(row.total, 2)}</div>
+                        </div>
+                      ))}
+                      {(calc.cf_rows ?? []).length === 0 ? (
+                        <div className="px-3 py-3 text-xs text-muted-foreground">
+                          No cashflow rows returned by calc service.
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
               <div className="rounded-xl border border-gray-200 p-4 space-y-3">
                 <h4 className="font-semibold">Deal Timeline</h4>
-                <InfoRow label="Deal Date" value={formatDisplayDate(pricing?.dealDate)} />
+                <InfoRow
+                  label="Deal Date"
+                  value={formatDisplayDate(
+                    proposalDraft.manualYieldEnabled
+                      ? calc?.settle_dt
+                      : pricing?.dealDate,
+                  )}
+                />
                 <InfoRow
                   label="Settlement Date"
-                  value={formatDisplayDate(pricing?.settlementDate ?? dealAutofill?.pricing.calc.settle_dt)}
+                  value={formatDisplayDate(
+                    proposalDraft.manualYieldEnabled
+                      ? calc?.settle_dt
+                      : pricing?.settlementDate ?? dealAutofill?.pricing.calc.settle_dt,
+                  )}
                 />
                 <InfoRow
                   label="Last Coupon Date"
@@ -1005,7 +1125,10 @@ function ProposalManagementView() {
                 />
                 <InfoRow
                   label="Next Coupon Date"
-                  value={formatDisplayDate(dealAutofill?.suggested.nextCouponDate ?? bond.nextCouponDate)}
+                  value={formatDisplayDate(
+                    dealAutofill?.suggested.nextCouponDate ??
+                    (bond.nextCouponDate != null ? String(bond.nextCouponDate) : null),
+                  )}
                 />
                 <InfoRow
                   label="Record Date"
@@ -1013,7 +1136,11 @@ function ProposalManagementView() {
                 />
                 <InfoRow
                   label="Accrual Days"
-                  value={String(pricing?.noOfAccrualDays ?? dealAutofill?.pricing.calc.accrued_days ?? "—")}
+                  value={String(
+                    proposalDraft.manualYieldEnabled
+                      ? calc?.accrued_days ?? "—"
+                      : pricing?.noOfAccrualDays ?? calc?.accrued_days ?? "—",
+                  )}
                 />
                 <InfoRow label="Trade Window" value={pricing?.allowTrade ? "Open" : "—"} />
               </div>
