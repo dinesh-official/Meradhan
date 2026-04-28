@@ -58,6 +58,8 @@ export type GetRazorpayRouteAccountByIdResponse = BaseResponseData<{
 }>;
 
 export type CreateRazorpayRouteAccountPayload = {
+  /** DB-only create: must be provided by user. */
+  razorpayAccountId?: string;
   email: string;
   phone: string;
   reference_id?: string;

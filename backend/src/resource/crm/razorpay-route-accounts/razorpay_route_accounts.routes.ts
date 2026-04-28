@@ -24,10 +24,24 @@ router.post(
   controller.createLinkedAccount
 );
 
+// DB-only create (no Razorpay API call)
+router.post(
+  "/api/rezorpay/route/accounts/db",
+  allowAccessMiddleware("CRM"),
+  controller.createLinkedAccountDbOnly
+);
+
 router.patch(
   "/api/rezorpay/route/accounts/:id",
   allowAccessMiddleware("CRM"),
   controller.updateLinkedAccount
+);
+
+// DB-only update (no Razorpay API call)
+router.patch(
+  "/api/rezorpay/route/accounts/:id/db",
+  allowAccessMiddleware("CRM"),
+  controller.updateLinkedAccountDbOnly
 );
 
 export default router;

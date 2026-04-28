@@ -3,6 +3,8 @@
    TYPES
 ========================= */
 
+import { db } from "@core/database/database";
+
 type BondSettlementResult = {
     dealDate: string;
     settlementDate: string;
@@ -331,8 +333,206 @@ export const computeBondOrderPricingData = (
 };
 
 
-// console.log(computeBondOrderPricingData({
+/**
+ * Returns coupon due dates (as `YYYY-MM-DD`) from settlement → maturity (or next 1 year).
+ *
+ * Shut-period rule:
+ * - If settlement is within shut period for the *next* coupon (recordDate ≤ settlement < dueDate),
+ *   skip that next coupon from the returned list.
+ * - Else include it.
+ */
+export const getPayoutDates = async (isin: string, settlement: Date) => {
+    const settlementDt = new Date(settlement);
+    if (Number.isNaN(settlementDt.getTime())) return [];
 
+    const [meta, rows] = await Promise.all([
+        db.dataBase.bondReferenceMetadata.findUnique({ where: { isin } }),
+        db.dataBase.bondReferenceCouponPaymentDate.findMany({
+            where: { isin },
+            orderBy: { dueDate: "asc" },
+        }),
+    ]);
+
+    const maturityDate =
+        meta?.maturityDate instanceof Date && !Number.isNaN(meta.maturityDate.getTime())
+            ? meta.maturityDate
+            : null;
+
+    const oneYearLater = new Date(
+        Date.UTC(
+            settlementDt.getUTCFullYear() + 1,
+            settlementDt.getUTCMonth(),
+            settlementDt.getUTCDate(),
+            12,
+        ),
+    );
+    const endLimit = maturityDate ? maturityDate : oneYearLater;
+
+    const dueDates = rows
+        .map((r) => (r.dueDate instanceof Date ? r.dueDate : null))
+        .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
+        .filter((d) => d.getTime() >= settlementDt.getTime() && d.getTime() <= endLimit.getTime());
+
+    if (dueDates.length === 0) return [];
+
+    // Next coupon row (first dueDate >= settlement).
+    const nextRow = rows.find(
+        (r) =>
+            r.dueDate instanceof Date &&
+            !Number.isNaN(r.dueDate.getTime()) &&
+            r.dueDate.getTime() >= settlementDt.getTime(),
+    );
+
+    let skipNext = false;
+    if (nextRow?.dueDate instanceof Date) {
+        const due = nextRow.dueDate;
+        const recordDaysRaw = nextRow.recordDays;
+        const recordDays =
+            typeof recordDaysRaw === "number" && Number.isFinite(recordDaysRaw)
+                ? Math.floor(recordDaysRaw)
+                : null;
+
+        const recordDate =
+            nextRow.recordDate instanceof Date && !Number.isNaN(nextRow.recordDate.getTime())
+                ? nextRow.recordDate
+                : recordDays != null
+                    ? utcMidnightForISODate(
+                        addUTCCalendarDays(toUTCISODate(due), -recordDays),
+                    )
+                    : null;
+
+        if (recordDate) {
+            const shut = isUnderShutPeriod(settlementDt, due, recordDays ?? 0);
+            // More strict: use actual recordDate from data if available.
+            skipNext = settlementDt.getTime() >= recordDate.getTime() && settlementDt.getTime() < due.getTime();
+            // If recordDays missing, rely on computed shut (will be false when recordDays=0).
+            if (recordDays == null) skipNext = shut.isUnderShutPeriod;
+        }
+    }
+
+    const out = skipNext ? dueDates.slice(1) : dueDates;
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+    return out.map((d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`);
+};
+
+
+export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, settlement: Date) => {
+    const settlementDt = new Date(settlement);
+    if (Number.isNaN(settlementDt.getTime())) {
+        return {
+            lastCouponDate: null,
+            nextCouponDate: null,
+            recordDate: null,
+            isUnderShutPeriod: false,
+            recordDays: null,
+        };
+    }
+
+    const rows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
+        where: { isin },
+        orderBy: { dueDate: "asc" },
+    });
+
+    const couponRows = rows
+        .map((row) => {
+            const dueDate =
+                row.dueDate instanceof Date && !Number.isNaN(row.dueDate.getTime())
+                    ? row.dueDate
+                    : null;
+            if (!dueDate) return null;
+
+            const recordDays =
+                typeof row.recordDays === "number" && Number.isFinite(row.recordDays)
+                    ? Math.floor(row.recordDays)
+                    : null;
+
+            const recordDate =
+                row.recordDate instanceof Date && !Number.isNaN(row.recordDate.getTime())
+                    ? row.recordDate
+                    : recordDays != null
+                        ? utcMidnightForISODate(
+                            addUTCCalendarDays(toUTCISODate(dueDate), -recordDays),
+                        )
+                        : null;
+
+            return {
+                dueDate,
+                recordDate,
+                recordDays,
+            };
+        })
+        .filter(
+            (
+                row,
+            ): row is {
+                dueDate: Date;
+                recordDate: Date | null;
+                recordDays: number | null;
+            } => row !== null,
+        )
+        .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+
+    if (couponRows.length === 0) {
+        return {
+            lastCouponDate: null,
+            nextCouponDate: null,
+            recordDate: null,
+            isUnderShutPeriod: false,
+            recordDays: null,
+        };
+    }
+
+    let lastCouponDate: Date | null = null;
+    let nextCouponRow:
+        | {
+            dueDate: Date;
+            recordDate: Date | null;
+            recordDays: number | null;
+        }
+        | null = null;
+
+    for (const row of couponRows) {
+        if (row.dueDate.getTime() < settlementDt.getTime()) {
+            lastCouponDate = row.dueDate;
+            continue;
+        }
+        nextCouponRow = row;
+        break;
+    }
+
+    if (!lastCouponDate && nextCouponRow) {
+        const nextIdx = couponRows.findIndex((row) => row.dueDate.getTime() === nextCouponRow?.dueDate.getTime());
+        if (nextIdx > 0) {
+            lastCouponDate = couponRows[nextIdx - 1]?.dueDate ?? null;
+        }
+    }
+
+    const nextCouponDate = nextCouponRow?.dueDate ?? null;
+    const recordDate = nextCouponRow?.recordDate ?? null;
+    const recordDays = nextCouponRow?.recordDays ?? null;
+
+    let underShutPeriod = false;
+    if (nextCouponDate && recordDate) {
+        underShutPeriod =
+            settlementDt.getTime() >= recordDate.getTime() &&
+            settlementDt.getTime() < nextCouponDate.getTime();
+    } else if (nextCouponDate && recordDays != null) {
+        underShutPeriod = isUnderShutPeriod(settlementDt, nextCouponDate, recordDays).isUnderShutPeriod;
+    }
+
+    return {
+        lastCouponDate: lastCouponDate ? toUTCISODate(lastCouponDate) : null,
+        nextCouponDate: nextCouponDate ? toUTCISODate(nextCouponDate) : null,
+        recordDate: recordDate ? toUTCISODate(recordDate) : null,
+        isUnderShutPeriod: underShutPeriod,
+        recordDays,
+    };
+};
+
+
+
+
+// console.log(computeBondOrderPricingData({
 //     faceValue: 100000,
 //     quantity: 1,
 //     cleanPrice: 98.1368,
@@ -341,4 +541,7 @@ export const computeBondOrderPricingData = (
 //     recordDays: 15,
 //     nextCouponDate: "2026-04-08",
 // }));
+// const dates = (await getPayoutDates("INE0NES07279", new Date("2026-04-11")));
+// console.log(new Set(dates));
+
 // console.log(new Date().toISOString());

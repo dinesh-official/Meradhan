@@ -17,6 +17,73 @@ import { getDpName } from "dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 import { env } from "@packages/config/src/env";
+import { computeBondOrderPricingData, getLastNextCouponDateBasedOnSettlementDate, getPayoutDates } from "@services/order/order-pricing-helper";
+
+function toYyyyMmDd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function formatDateWithDayNameForPdfOption(d: Date): string {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return `${String(d.getDate()).padStart(2, "0")}-${months[d.getMonth()]}-${d.getFullYear()} (${dayNames[d.getDay()]})`;
+}
+
+function parseLooseDate(input: string): Date | null {
+  const s = String(input ?? "").trim();
+  if (!s) return null;
+
+  // YYYY-MM-DD
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (iso) {
+    const y = Number(iso[1]);
+    const m = Number(iso[2]);
+    const d = Number(iso[3]);
+    const dt = new Date(y, m - 1, d, 12, 0, 0, 0);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }
+
+  // DD-MMM-YYYY (03-Apr-2026)
+  const ddMmmYyyy = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(s);
+  if (ddMmmYyyy) {
+    const day = Number(ddMmmYyyy[1]);
+    const monKey = (ddMmmYyyy[2] ?? "").slice(0, 3).toLowerCase();
+    const year = Number(ddMmmYyyy[3] ?? NaN);
+    const MONTH: Record<string, number> = {
+      jan: 0,
+      feb: 1,
+      mar: 2,
+      apr: 3,
+      may: 4,
+      jun: 5,
+      jul: 6,
+      aug: 7,
+      sep: 8,
+      oct: 9,
+      nov: 10,
+      dec: 11,
+    };
+    const month = MONTH[monKey];
+    if (month !== undefined) {
+      const dt = new Date(year, month, day, 12, 0, 0, 0);
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+  }
+
+  // Fallback (e.g. ISO timestamps)
+  const dt = new Date(s);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
+function diffDays(start: Date, end: Date): number {
+  const s = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0);
+  const e = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0, 0);
+  const ms = e.getTime() - s.getTime();
+  return Math.round(ms / 86_400_000);
+}
 
 /**
  * RFQ master stores `date` as DD-MMM-YYYY (e.g. 03-Apr-2026) and `quoteTime` as HH:MM or HH:MM:SS.
@@ -273,6 +340,116 @@ export class CrmOrdersService {
     return db.dataBase.crmOrderReceiptPdfOptions.findUnique({
       where: { orderNumber },
     });
+  }
+
+  async autofillReceiptPdfOptions(
+    orderNumber: string,
+    input: { settlementDate: string },
+  ): Promise<{
+    accruedInterestDays: number;
+    settlementNumber: string | null;
+    lastInterestPaymentDateRaw: string | null;
+    lastInterestPaymentDate: string | null;
+    interestPaymentDates: string[];
+  }> {
+    const order = await this.getCustomerByOrderNumber(orderNumber);
+    if (!order) {
+      throw new AppError("No order found for this settlement. Assign a customer first.", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "ORDER_NOT_FOUND",
+      });
+    }
+
+    const bondService = new BondService();
+    const bond = await bondService.getBondDetails(order.isin);
+    if (!bond) {
+      throw new AppError(`Bond not found for ISIN: ${order.isin}`, {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "BOND_NOT_FOUND",
+      });
+    }
+
+    const recordDays =
+      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
+        ? bond.recordDays
+        : 7;
+    const couponDates = await getLastNextCouponDateBasedOnSettlementDate(bond.isin, bond.maturityDate!)
+    const pricingData = computeBondOrderPricingData({
+      faceValue: bond.faceValue,
+      quantity: order.quantity,
+      cleanPrice: Number(order.unitPrice),
+      couponRate: bond.couponRate,
+      lastCouponDate: couponDates?.lastCouponDate?.split("T")?.[0] || "",
+      recordDays: recordDays,
+      nextCouponDate: couponDates?.nextCouponDate?.split("T")?.[0] || "",
+    })
+
+    const settlementDt = parseLooseDate(input.settlementDate);
+    if (!settlementDt) {
+      throw new AppError("Invalid settlementDate. Expected YYYY-MM-DD.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+    const negotiation = settleOrder?.orderNumber
+      ? await db.dataBase.rFQNegotiation.findFirst({
+        where: { tradeNumber: settleOrder.orderNumber },
+      })
+      : null;
+    const rfqDetails = negotiation?.rfqNumber
+      ? await db.dataBase.rFQMasterISIN.findFirst({
+        where: { number: negotiation.rfqNumber },
+      })
+      : null;
+
+    const fallbackOrderDate =
+      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
+    const orderDateForPdf = parseRfqMasterDateTime(
+      rfqDetails?.date,
+      rfqDetails?.quoteTime,
+      fallbackOrderDate,
+    );
+
+    const interestSchedule = getInterestPaymentSchedule({
+      orderDate: orderDateForPdf,
+      maturityDate: bond.maturityDate ?? null,
+      interestPaymentFrequency: bond.interestPaymentFrequency,
+      paymentDayOfMonth: 20,
+      nextCouponDate:
+        bond.nextCouponDate != null && String(bond.nextCouponDate).trim() !== ""
+          ? new Date(bond.nextCouponDate)
+          : undefined,
+    });
+
+    const scheduleDatesParsed = (interestSchedule?.dates ?? [])
+      .map((d) => parseLooseDate(d))
+      .filter((d): d is Date => Boolean(d))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    // Latest coupon date on/before settlement date.
+    let lastPayment: Date | null = null;
+    for (const d of scheduleDatesParsed) {
+      if (d.getTime() <= settlementDt.getTime()) lastPayment = d;
+      else break;
+    }
+    if (!lastPayment) lastPayment = orderDateForPdf;
+    console.log("DATE", (input.settlementDate));
+
+    const interestPaymentDates = await getPayoutDates(bond.isin, new Date(input.settlementDate));
+    console.log(interestPaymentDates);
+
+    return {
+      accruedInterestDays: pricingData.recordDays,
+      settlementNumber:
+        (settleOrder as { settlementNo?: string | number | null } | undefined)?.settlementNo != null
+          ? String((settleOrder as { settlementNo?: string | number }).settlementNo)
+          : null,
+      lastInterestPaymentDateRaw: lastPayment ? toYyyyMmDd(lastPayment) : null,
+      lastInterestPaymentDate: lastPayment ? formatDateWithDayNameForPdfOption(lastPayment) : null,
+      interestPaymentDates: interestPaymentDates || null,
+    };
   }
 
   async upsertReceiptPdfOptions(

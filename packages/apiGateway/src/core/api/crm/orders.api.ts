@@ -226,6 +226,37 @@ export class CrmOrdersApi {
     return data;
   }
 
+  async sendProposalEmail(
+    payload: {
+      toEmail: string;
+      customerName: string;
+      side: "BUY" | "SELL";
+      bondName: string;
+      isin: string;
+      dealDate?: string;
+      settlementDate?: string;
+      quantum?: number;
+      quantity: number;
+      rate?: number;
+      ytmAnn?: number | null;
+      lastIpDate?: string | null;
+      noOfDays?: number | null;
+      principalAmount?: number | null;
+      accruedInterest?: number | null;
+      totalConsideration?: number | null;
+      stampDuty?: number | null;
+      settlementAmount?: number | null;
+    },
+    config?: AxiosRequestConfig
+  ): Promise<SendOrderPdfEmailResponse> {
+    const { data } = await this.apiClient.post<SendOrderPdfEmailResponse>(
+      "/crm/orders/send-proposal-email",
+      payload,
+      config
+    );
+    return data;
+  }
+
   async getReceiptPdfOptions(
     orderNumber: string,
     config?: AxiosRequestConfig

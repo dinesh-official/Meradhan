@@ -18,6 +18,8 @@ model CRMUserDataModel {
     notificationLogsSent     NotificationLogModel[]           @relation("NotificationSentBy")
     notificationTemplates    NotificationTemplateModel[]      @relation("NotificationTemplateCreatedBy")
 
+    savedProposals           CrmSavedProposal[]
+
     @@index([email])
     @@map("crm_users")
 }

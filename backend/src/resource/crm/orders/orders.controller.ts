@@ -14,6 +14,205 @@ import {
 import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 
+function formatProposalDate(value: string | number | Date | null | undefined) {
+  if (value == null || value === "") return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = months[date.getMonth()] ?? "—";
+  const year = String(date.getFullYear()).slice(-2);
+  return `${day}-${month}-${year}`;
+}
+
+function formatProposalCurrency(value: number | string | null | undefined) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "—";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numeric);
+}
+
+function formatProposalNumber(value: number | string | null | undefined, digits = 2) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "—";
+  return new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(numeric);
+}
+
+function formatProposalInteger(value: number | string | null | undefined) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "—";
+  return new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 0,
+  }).format(numeric);
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function proposalNumberToWords(amount: number): string {
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+  const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+  function convertHundreds(num: number): string {
+    if (num === 0) return "";
+    let result = "";
+    if (num >= 100) {
+      result += `${ones[Math.floor(num / 100)]} Hundred `;
+      num %= 100;
+    }
+    if (num >= 20) {
+      result += `${tens[Math.floor(num / 10)]} `;
+      num %= 10;
+    } else if (num >= 10) {
+      return `${result}${teens[num - 10]}`.trim();
+    }
+    if (num > 0) result += ones[num];
+    return result.trim();
+  }
+
+  const absAmount = Math.abs(amount);
+  if (absAmount === 0) return "Rs. Zero Only";
+
+  let rupees = Math.floor(absAmount);
+  const paise = Math.round((absAmount - rupees) * 100);
+  const parts: string[] = [];
+
+  if (rupees >= 10000000) {
+    const crore = Math.floor(rupees / 10000000);
+    const word = convertHundreds(crore);
+    if (word) parts.push(`${word} Crore`);
+    rupees %= 10000000;
+  }
+  if (rupees >= 100000) {
+    const lakh = Math.floor(rupees / 100000);
+    const word = convertHundreds(lakh);
+    if (word) parts.push(`${word} Lakh`);
+    rupees %= 100000;
+  }
+  if (rupees >= 1000) {
+    const thousand = Math.floor(rupees / 1000);
+    const word = convertHundreds(thousand);
+    if (word) parts.push(`${word} Thousand`);
+    rupees %= 1000;
+  }
+  if (rupees > 0) {
+    const word = convertHundreds(rupees);
+    if (word) parts.push(word);
+  }
+
+  const rupeesText = parts.join(" ").replace(/\s+/g, " ").trim();
+  if (paise > 0) {
+    return `Rs. ${rupeesText} And ${convertHundreds(paise)} Paise Only`;
+  }
+  return `Rs. ${rupeesText} Only`;
+}
+
+function buildProposalEmailTemplate(payload: {
+  customerName: string;
+  side: "BUY" | "SELL";
+  bondName: string;
+  isin: string;
+  dealDate: string;
+  settlementDate: string;
+  quantum: number;
+  quantity: number;
+  rate: number;
+  ytmAnn: number | null;
+  lastIpDate: string | null;
+  noOfDays: number | null;
+  principalAmount: number | null;
+  accruedInterest: number | null;
+  totalConsideration: number | null;
+  stampDuty: number | null;
+  settlementAmount: number | null;
+}) {
+  const sideText = payload.side.toLowerCase();
+  const settlementAmount = Number(payload.settlementAmount ?? 0);
+  const amountInWords = proposalNumberToWords(settlementAmount);
+
+  const rows = [
+    ["Name of Security", payload.bondName || "—"],
+    ["ISIN", payload.isin || "—"],
+    ["Deal Date", formatProposalDate(payload.dealDate)],
+    ["Settlement Date", formatProposalDate(payload.settlementDate)],
+    ["Quantum", formatProposalInteger(payload.quantum)],
+    ["Quantity", formatProposalInteger(payload.quantity)],
+    ["Rate", formatProposalNumber(payload.rate, 4)],
+    ["YTM Ann", payload.ytmAnn != null ? formatProposalNumber(payload.ytmAnn, 2) : "—"],
+    ["Last IP Date", formatProposalDate(payload.lastIpDate)],
+    ["No of Days", payload.noOfDays != null ? String(payload.noOfDays) : "—"],
+    ["Principal Amount", formatProposalCurrency(payload.principalAmount)],
+    ["Accrued Interest", formatProposalCurrency(payload.accruedInterest)],
+    ["Total Consideration", formatProposalCurrency(payload.totalConsideration)],
+    ["Stamp Duty", formatProposalCurrency(payload.stampDuty)],
+    ["Settlement Amount", formatProposalCurrency(payload.settlementAmount)],
+    ["Amount in Words", amountInWords],
+  ];
+
+  const subject = `RFQ Order Confirmation Required – ${payload.isin} Deal Date ${formatProposalDate(payload.dealDate)}`;
+  const html = `
+    <p>Dear ${escapeHtml(payload.customerName)},</p>
+    <p>Thank you for placing your ${escapeHtml(sideText)} order through BondNest Capital India Securities Private Limited. Based on your authorization, we propose to initiate a non-negotiable order (One-to-One Mode) on the RFQ Platform of the Stock Exchanges.</p>
+    <p>The proposed order details are provided below for your reference and confirmation. Kindly confirm the same to enable us to proceed with placing the order. You are also requested to arrange the pay-in obligation (funds) within the stipulated timeline today.</p>
+    <table style="border-collapse:collapse;width:100%;margin:16px 0;">
+      <tbody>
+        ${rows
+      .map(
+        ([label, value]) => `
+              <tr>
+                <td style="border:1px solid #e5e7eb;padding:8px;font-weight:600;vertical-align:top;">${escapeHtml(String(label))}</td>
+                <td style="border:1px solid #e5e7eb;padding:8px;vertical-align:top;">${escapeHtml(String(value))}</td>
+              </tr>`
+      )
+      .join("")}
+      </tbody>
+    </table>
+    <p>Please note that the Order Receipt will be generated post placement of the order on the RFQ Platform and merely indicates the intention of the parties to enter into a transaction. It should not be construed as a Deal Confirmation. The Deal Sheet will be issued upon successful settlement of the transaction.</p>
+    <p>Please ensure that the payment is made only from the bank account that you have registered and verified on the MeraDhan platform. Payments made from any other bank account may result in trade settlement failure.</p>
+    <p>Kindly ensure that the funds are transferred via RTGS to the NSCCL Account maintained with HDFC Bank or RBI, as applicable.</p>
+    <p>Note: Kindly ensure that the Demat Account verified on our platform is active for the receipt of Bonds/Securities. The same account details will be captured in the Order Receipt upon placement of the order.</p>
+    <p>Best regards,<br/><br/>MeraDhan Team</p>
+  `;
+
+  const text = [
+    `Dear ${payload.customerName},`,
+    "",
+    `Thank you for placing your ${sideText} order through BondNest Capital India Securities Private Limited. Based on your authorization, we propose to initiate a non-negotiable order (One-to-One Mode) on the RFQ Platform of the Stock Exchanges.`,
+    "",
+    "The proposed order details are provided below for your reference and confirmation. Kindly confirm the same to enable us to proceed with placing the order. You are also requested to arrange the pay-in obligation (funds) within the stipulated timeline today.",
+    "",
+    ...rows.map(([label, value]) => `${label}: ${value}`),
+    "",
+    "Please note that the Order Receipt will be generated post placement of the order on the RFQ Platform and merely indicates the intention of the parties to enter into a transaction. It should not be construed as a Deal Confirmation. The Deal Sheet will be issued upon successful settlement of the transaction.",
+    "",
+    "Please ensure that the payment is made only from the bank account that you have registered and verified on the MeraDhan platform. Payments made from any other bank account may result in trade settlement failure.",
+    "",
+    "Kindly ensure that the funds are transferred via RTGS to the NSCCL Account maintained with HDFC Bank or RBI, as applicable.",
+    "",
+    "Note: Kindly ensure that the Demat Account verified on our platform is active for the receipt of Bonds/Securities. The same account details will be captured in the Order Receipt upon placement of the order.",
+    "",
+    "Best regards,",
+    "",
+    "MeraDhan Team",
+  ].join("\n");
+
+  return { subject, html, text };
+}
+
 export class CrmOrdersController {
   private ordersService = new CrmOrdersService();
   private appConfigService = new AppConfigService();
@@ -283,6 +482,46 @@ export class CrmOrdersController {
     }
   };
 
+  /** Computes “Receipt PDF options” fields from settlement date for one-click auto-fill. */
+  autofillReceiptPdfOptions = async (req: Request, res: Response) => {
+    const orderNumber = req.params.orderNumber;
+    if (!orderNumber || typeof orderNumber !== "string") {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order number is required",
+      });
+    }
+    const settlementDate = (req.body as { settlementDate?: unknown })?.settlementDate;
+    const settlementDateStr = typeof settlementDate === "string" ? settlementDate.trim() : "";
+    if (!settlementDateStr) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "settlementDate is required (YYYY-MM-DD)",
+      });
+    }
+    try {
+      const data = await this.ordersService.autofillReceiptPdfOptions(orderNumber, {
+        settlementDate: settlementDateStr,
+      });
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error ? err.message : "Failed to auto-fill receipt PDF options",
+      });
+    }
+  };
+
   getOrderReceiptPdf = async (req: Request, res: Response) => {
     const orderNumber = req.params.orderNumber as string;
     if (!orderNumber) {
@@ -524,6 +763,108 @@ export class CrmOrdersController {
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: err instanceof Error ? err.message : "Failed to send email",
+      });
+    }
+  };
+
+  sendProposalEmailToClient = async (req: Request, res: Response) => {
+    const body = req.body as {
+      toEmail?: string;
+      customerName?: string;
+      side?: "BUY" | "SELL";
+      bondName?: string;
+      isin?: string;
+      dealDate?: string;
+      settlementDate?: string;
+      quantum?: number | string;
+      quantity?: number | string;
+      rate?: number | string;
+      ytmAnn?: number | string | null;
+      lastIpDate?: string | null;
+      noOfDays?: number | string | null;
+      principalAmount?: number | string | null;
+      accruedInterest?: number | string | null;
+      totalConsideration?: number | string | null;
+      stampDuty?: number | string | null;
+      settlementAmount?: number | string | null;
+    };
+
+    const recipientEmail = String(body.toEmail ?? "").trim();
+    const customerName = String(body.customerName ?? "").trim();
+    const side = body.side === "SELL" ? "SELL" : "BUY";
+    const bondName = String(body.bondName ?? "").trim();
+    const isin = String(body.isin ?? "").trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!recipientEmail || !emailPattern.test(recipientEmail)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Recipient email is missing or invalid",
+      });
+    }
+    if (!customerName || !bondName || !isin) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Customer name, bond name, and ISIN are required",
+      });
+    }
+
+    const template = buildProposalEmailTemplate({
+      customerName,
+      side,
+      bondName,
+      isin,
+      dealDate: String(body.dealDate ?? ""),
+      settlementDate: String(body.settlementDate ?? ""),
+      quantum: Number(body.quantum ?? 0),
+      quantity: Number(body.quantity ?? 0),
+      rate: Number(body.rate ?? 0),
+      ytmAnn:
+        body.ytmAnn == null || body.ytmAnn === "" ? null : Number(body.ytmAnn),
+      lastIpDate:
+        typeof body.lastIpDate === "string" && body.lastIpDate.trim() !== ""
+          ? body.lastIpDate
+          : null,
+      noOfDays:
+        body.noOfDays == null || body.noOfDays === "" ? null : Number(body.noOfDays),
+      principalAmount:
+        body.principalAmount == null || body.principalAmount === ""
+          ? null
+          : Number(body.principalAmount),
+      accruedInterest:
+        body.accruedInterest == null || body.accruedInterest === ""
+          ? null
+          : Number(body.accruedInterest),
+      totalConsideration:
+        body.totalConsideration == null || body.totalConsideration === ""
+          ? null
+          : Number(body.totalConsideration),
+      stampDuty:
+        body.stampDuty == null || body.stampDuty === "" ? null : Number(body.stampDuty),
+      settlementAmount:
+        body.settlementAmount == null || body.settlementAmount === ""
+          ? null
+          : Number(body.settlementAmount),
+    });
+
+    try {
+      const messageId = await sendBackOfficeEmail({
+        to: recipientEmail,
+        from: "backoffice@meradhan.co",
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
+      });
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message: "Proposal email sent successfully",
+        responseData: { messageId },
+      });
+    } catch (err) {
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: err instanceof Error ? err.message : "Failed to send proposal email",
       });
     }
   };

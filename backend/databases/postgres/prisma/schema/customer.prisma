@@ -103,6 +103,8 @@ model CustomerProfileDataModel {
     orders        Order[]
     customerBonds CustomerBonds[]
 
+    crmSavedProposals CrmSavedProposal[]
+
     notificationSavedListMembers CrmNotificationSavedListMemberModel[]
     notificationRecipientLogs    NotificationRecipientLogModel[]
 
