@@ -316,6 +316,7 @@ const updateProductConfig = async (accountId: string, input: {
         settlements: input.settlements,
         tnc_accepted: true,
     };
+    console.log(payload);
 
     const { data } = await axios.patch<RazorpayRouteProductConfigResponse>(
         `https://api.razorpay.com/v2/accounts/${encodeURIComponent(accountId)}/products/${encodeURIComponent(input.productId)}`,
@@ -386,7 +387,7 @@ const getSettlementBackAccount = async () => {
 
 export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes }: { payId: string, userId: number, amount: number, notes?: Record<string, any> }) => {
     const account = await getDefaultRpAccount();
-    const stackHolder = await initializeStackHolder(account.razorpayAccountId, userId);
+    // const stackHolder = await initializeStackHolder(account.razorpayAccountId, userId);
     const initProduct = await initProductConfig(account.razorpayAccountId);
     const settlementAccount = await getSettlementBackAccount();
     const product = await updateProductConfig(account.razorpayAccountId, {
