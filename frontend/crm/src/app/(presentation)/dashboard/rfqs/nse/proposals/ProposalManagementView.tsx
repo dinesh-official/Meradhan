@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Check, ChevronsUpDown, FileText, Loader2, Mail, RefreshCw, Trash2, UserRound, Zap } from "lucide-react";
 import type { AxiosError } from "axios";
 import apiGateway, { type BondDetailsResponse, type CustomerProfile } from "@root/apiGateway";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,14 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -39,6 +48,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
 import { cn } from "@/lib/utils";
@@ -104,6 +114,68 @@ function customerFullName(customer: CustomerProfile | null) {
     .trim();
 }
 
+type SendProposalEmailPayload = {
+  toEmail: string;
+  customerName: string;
+  side: "BUY" | "SELL";
+  bondName: string;
+  isin: string;
+  dealDate?: string;
+  settlementDate?: string;
+  quantum?: number;
+  quantity: number;
+  rate?: number;
+  ytmAnn?: number | null;
+  lastIpDate?: string | null;
+  noOfDays?: number | null;
+  principalAmount?: number | null;
+  accruedInterest?: number | null;
+  totalConsideration?: number | null;
+  stampDuty?: number | null;
+  settlementAmount?: number | null;
+};
+
+function formatEmailSubject(isin: string, dealDate: string | undefined) {
+  const formatted = dealDate ? formatDisplayDate(dealDate) : "—";
+  return `RFQ Order Confirmation Required – ${isin} Deal Date ${formatted}`;
+}
+
+function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
+  const sideText = params.side.toLowerCase();
+  const rows: Array<[string, string]> = [
+    ["Name of Security", params.bondName],
+    ["ISIN", params.isin],
+    ["Deal Date", formatDisplayDate(params.dealDate)],
+    ["Settlement Date", formatDisplayDate(params.settlementDate)],
+    ["Quantum", formatCurrency(params.quantum)],
+    ["Quantity", formatInteger(params.quantity)],
+    ["Rate", params.rate != null ? formatNumber(params.rate, 4) : "—"],
+    ["YTM Ann", params.ytmAnn != null ? `${formatNumber(params.ytmAnn, 4)}%` : "—"],
+    ["Last IP Date", formatDisplayDate(params.lastIpDate ?? undefined)],
+    ["No of Days", params.noOfDays != null ? formatInteger(params.noOfDays) : "—"],
+    ["Principal Amount", formatCurrency(params.principalAmount)],
+    ["Accrued Interest", formatCurrency(params.accruedInterest)],
+    ["Total Consideration", formatCurrency(params.totalConsideration)],
+    ["Stamp Duty", formatCurrency(params.stampDuty)],
+    ["Settlement Amount", formatCurrency(params.settlementAmount)],
+  ];
+
+  const tableRows = rows
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:6px 8px;border:1px solid #e5e7eb;"><strong>${k}</strong></td><td style="padding:6px 8px;border:1px solid #e5e7eb;text-align:right;">${v}</td></tr>`,
+    )
+    .join("");
+
+  return `
+    <p>Dear ${params.customerName},</p>
+    <p>Thank you for placing your ${sideText} order through BondNest Capital India Securities Private Limited. Based on your authorization, we propose to initiate a non-negotiable order (One-to-One Mode) on the RFQ Platform of the Stock Exchanges.</p>
+    <p>The proposed order details are provided below for your reference and confirmation. Kindly confirm the same to enable us to proceed with placing the order.</p>
+    <table style="border-collapse:collapse;width:100%;margin:12px 0;">${tableRows}</table>
+    <p style="margin-top:12px;">Best regards,<br/>MeraDhan Team</p>
+  `;
+}
+
 type ProposalDraft = {
   id: string;
   isin: string;
@@ -132,7 +204,7 @@ function InfoRow({
   return (
     <div className="flex items-start justify-between gap-4 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value}</span>
+      <span className="text-right font-medium tabular-nums">{value}</span>
     </div>
   );
 }
@@ -155,29 +227,31 @@ function ProposalManagementView() {
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [proposalDraft, setProposalDraft] = useState<ProposalDraft | null>(null);
+  const [isEmailPreviewOpen, setIsEmailPreviewOpen] = useState(false);
+  const [emailPreview, setEmailPreview] = useState<{
+    toEmail: string;
+    subject: string;
+    html: string;
+    payload: SendProposalEmailPayload;
+  } | null>(null);
+  const [savedSearch, setSavedSearch] = useState("");
+  const [savedCustomerFilter, setSavedCustomerFilter] = useState<CustomerProfile | null>(null);
   const [savedProposals, setSavedProposals] = useState<ProposalDraft[]>([]);
   const { fetchProposalMutation } = useProposalFetcher();
+
+  const Pill = ({
+    label,
+    variant = "secondary",
+  }: {
+    label: string;
+    variant?: "default" | "secondary" | "outline" | "destructive";
+  }) => (
+    <Badge variant={variant} className="rounded-full px-2 py-0.5 text-xs">
+      {label}
+    </Badge>
+  );
   const sendProposalEmailMutation = useMutation({
-    mutationFn: async (payload: {
-      toEmail: string;
-      customerName: string;
-      side: "BUY" | "SELL";
-      bondName: string;
-      isin: string;
-      dealDate?: string;
-      settlementDate?: string;
-      quantum?: number;
-      quantity: number;
-      rate?: number;
-      ytmAnn?: number | null;
-      lastIpDate?: string | null;
-      noOfDays?: number | null;
-      principalAmount?: number | null;
-      accruedInterest?: number | null;
-      totalConsideration?: number | null;
-      stampDuty?: number | null;
-      settlementAmount?: number | null;
-    }) => ordersApi.sendProposalEmail(payload),
+    mutationFn: async (payload: SendProposalEmailPayload) => ordersApi.sendProposalEmail(payload),
     onSuccess: () => {
       toast.success("Proposal email sent successfully");
     },
@@ -234,7 +308,28 @@ function ProposalManagementView() {
       })
       .filter((x): x is ProposalDraft => Boolean(x));
   }, [savedFromDb]);
-  const savedProposalsToRender = savedDrafts;
+  const savedProposalsToRender = useMemo(() => {
+    const q = savedSearch.trim().toLowerCase();
+    const customerId = savedCustomerFilter?.id ?? null;
+
+    return savedDrafts.filter((item) => {
+      if (customerId != null && item.customer?.id !== customerId) return false;
+      if (!q) return true;
+
+      const bondName =
+        item.fetched?.bond?.bondName || item.fetched?.bond?.instrumentName || "";
+      const customerName = customerFullName(item.customer).toLowerCase();
+      const email = (item.customer?.emailAddress || "").toLowerCase();
+      const isin = (item.isin || "").toLowerCase();
+
+      return (
+        isin.includes(q) ||
+        bondName.toLowerCase().includes(q) ||
+        customerName.includes(q) ||
+        email.includes(q)
+      );
+    });
+  }, [savedCustomerFilter?.id, savedDrafts, savedSearch]);
 
   const handleReset = () => {
     setIsin("");
@@ -391,67 +486,12 @@ function ProposalManagementView() {
     router.push(redirectTo);
   };
 
-  const handleSendProposalEmail = async () => {
-    if (!proposalDraft) {
-      toast.error("Create a proposal first");
-      return;
-    }
-    if (!proposalDraft.customer.emailAddress) {
-      toast.error("Selected customer does not have an email address");
-      return;
-    }
-
-    const currentProposal = proposalDraft.fetched;
-    const currentBond = currentProposal.bond;
-    const currentPricing = currentProposal.pricing;
-    const currentDealAutofill = currentProposal.dealAutofill;
-
-    const faceValue = toNumber(currentPricing?.faceValue ?? currentDealAutofill?.suggested.faceValue ?? currentBond?.faceValue);
-    const principalAmount = toNumber(currentPricing?.principalAmount ?? currentDealAutofill?.pricing.principalAmount);
-    const accruedInterest = toNumber(currentPricing?.accruedInterest ?? currentDealAutofill?.pricing.totalAccruedInterest);
-    const totalConsideration = toNumber(
-      currentDealAutofill?.pricing.totalConsideration ??
-      (principalAmount != null && accruedInterest != null
-        ? principalAmount + accruedInterest
-        : null)
-    );
-    const stampDuty = toNumber(currentPricing?.stampDuty);
-    const settlementAmount = toNumber(currentPricing?.settlementAmount ?? currentDealAutofill?.pricing.settlementAmount);
-    const rate = toNumber(currentPricing?.cleanPrice ?? currentDealAutofill?.pricing.finalPrice ?? currentBond?.sellPrice);
-    const ytmAnn = toNumber(currentDealAutofill?.pricing.finalYieldRaw ?? currentDealAutofill?.suggested.buyYield ?? currentBond?.buyYield);
-    const noOfDays = toNumber(currentPricing?.noOfAccrualDays ?? currentDealAutofill?.pricing.calc.accrued_days);
-    const dealDate = currentPricing?.dealDate ?? proposalDraft.createdAt;
-    const settlementDate = currentPricing?.settlementDate ?? currentDealAutofill?.pricing.calc.settle_dt ?? proposalDraft.createdAt;
-    const lastIpDate = currentPricing?.lastCouponDate ?? currentDealAutofill?.suggested.lastCouponDate ?? null;
-    const quantum = faceValue != null ? faceValue * proposalDraft.quantity : undefined;
-
-    await sendProposalEmailMutation.mutateAsync({
-      toEmail: proposalDraft.customer.emailAddress,
-      customerName: customerFullName(proposalDraft.customer),
-      side: proposalDraft.side,
-      bondName: currentBond?.bondName || currentBond?.instrumentName || "Bond",
-      isin: proposalDraft.isin,
-      dealDate,
-      settlementDate,
-      quantum,
-      quantity: proposalDraft.quantity,
-      rate: rate ?? undefined,
-      ytmAnn,
-      lastIpDate,
-      noOfDays,
-      principalAmount,
-      accruedInterest,
-      totalConsideration,
-      stampDuty,
-      settlementAmount,
-    });
-  };
-
-  const sendEmailForDraft = async (draft: ProposalDraft) => {
+  const openEmailPreviewForDraft = (draft: ProposalDraft) => {
     if (!draft.customer.emailAddress) {
       toast.error("Selected customer does not have an email address");
       return;
     }
+
     const currentProposal = draft.fetched;
     const currentBond = currentProposal.bond;
     const currentPricing = currentProposal.pricing;
@@ -476,10 +516,12 @@ function ProposalManagementView() {
     );
     const stampDuty = toNumber(currentPricing?.stampDuty);
     const settlementAmount = toNumber(
-      currentPricing?.settlementAmount ?? currentDealAutofill?.pricing.settlementAmount
+      currentDealAutofill?.pricing.settlementAmount ?? currentPricing?.settlementAmount
     );
     const rate = toNumber(
-      currentPricing?.cleanPrice ?? currentDealAutofill?.pricing.finalPrice ?? currentBond?.sellPrice
+      currentDealAutofill?.pricing.finalPrice ??
+      currentPricing?.cleanPrice ??
+      currentBond?.sellPrice
     );
     const ytmAnn = toNumber(
       currentDealAutofill?.pricing.finalYieldRaw ??
@@ -487,16 +529,22 @@ function ProposalManagementView() {
       currentBond?.buyYield
     );
     const noOfDays = toNumber(
-      currentPricing?.noOfAccrualDays ?? currentDealAutofill?.pricing.calc.accrued_days
+      currentDealAutofill?.pricing.calc?.accrued_days ?? currentPricing?.noOfAccrualDays
     );
-    const dealDate = currentPricing?.dealDate ?? draft.createdAt;
+
+    const dealDate =
+      currentDealAutofill?.pricing.calc?.settle_dt ??
+      currentPricing?.dealDate ??
+      draft.createdAt;
     const settlementDate =
-      currentPricing?.settlementDate ?? currentDealAutofill?.pricing.calc.settle_dt ?? draft.createdAt;
+      currentDealAutofill?.pricing.calc?.settle_dt ??
+      currentPricing?.settlementDate ??
+      draft.createdAt;
     const lastIpDate =
       currentPricing?.lastCouponDate ?? currentDealAutofill?.suggested.lastCouponDate ?? null;
     const quantum = faceValue != null ? faceValue * draft.quantity : undefined;
 
-    await sendProposalEmailMutation.mutateAsync({
+    const payload: SendProposalEmailPayload = {
       toEmail: draft.customer.emailAddress,
       customerName: customerFullName(draft.customer),
       side: draft.side,
@@ -515,7 +563,27 @@ function ProposalManagementView() {
       totalConsideration,
       stampDuty,
       settlementAmount,
+    };
+
+    setEmailPreview({
+      toEmail: payload.toEmail,
+      subject: formatEmailSubject(payload.isin, payload.dealDate),
+      html: buildEmailPreviewHtml(payload),
+      payload,
     });
+    setIsEmailPreviewOpen(true);
+  };
+
+  const handleSendProposalEmail = async () => {
+    if (!proposalDraft) {
+      toast.error("Create a proposal first");
+      return;
+    }
+    openEmailPreviewForDraft(proposalDraft);
+  };
+
+  const sendEmailForDraft = async (draft: ProposalDraft) => {
+    openEmailPreviewForDraft(draft);
   };
 
   const handleAutoCreateRfqFromSaved = async (draft: ProposalDraft) => {
@@ -580,26 +648,26 @@ function ProposalManagementView() {
   const calc = dealAutofill?.pricing?.calc as
     | undefined
     | {
-        settle_dt?: string;
-        accrued_days?: number;
-        final_price?: string;
-        final_yield?: string;
-        cf_rows?: Array<{
-          date: string;
-          interest: string;
-          principal: string;
-          total: string;
-        }>;
-      };
+      settle_dt?: string;
+      accrued_days?: number;
+      final_price?: string;
+      final_yield?: string;
+      cf_rows?: Array<{
+        date: string;
+        interest: string;
+        principal: string;
+        total: string;
+      }>;
+    };
 
   const calcAmounts = proposalDraft?.manualYieldEnabled
     ? {
-        cleanPrice: safeNumber(dealAutofill?.pricing?.finalPrice),
-        principalAmount: safeNumber(dealAutofill?.pricing?.principalAmount),
-        accruedInterest: safeNumber(dealAutofill?.pricing?.totalAccruedInterest),
-        totalConsideration: safeNumber(dealAutofill?.pricing?.totalConsideration),
-        settlementAmount: safeNumber(dealAutofill?.pricing?.settlementAmount),
-      }
+      cleanPrice: safeNumber(dealAutofill?.pricing?.finalPrice),
+      principalAmount: safeNumber(dealAutofill?.pricing?.principalAmount),
+      accruedInterest: safeNumber(dealAutofill?.pricing?.totalAccruedInterest),
+      totalConsideration: safeNumber(dealAutofill?.pricing?.totalConsideration),
+      settlementAmount: safeNumber(dealAutofill?.pricing?.settlementAmount),
+    }
     : null;
 
   return (
@@ -868,6 +936,38 @@ function ProposalManagementView() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Search</label>
+              <Input
+                value={savedSearch}
+                onChange={(e) => setSavedSearch(e.target.value)}
+                placeholder="Search by ISIN, bond, customer, email..."
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Customer</label>
+              <SelectCustomerUser
+                value={savedCustomerFilter ?? undefined}
+                onSelect={setSavedCustomerFilter}
+                placeholder="Filter by customer (optional)..."
+              />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSavedSearch("");
+                setSavedCustomerFilter(null);
+              }}
+              disabled={!savedSearch && !savedCustomerFilter}
+            >
+              Clear filters
+            </Button>
+          </div>
+
           {savedQuery.isLoading ? (
             <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-muted-foreground">
               Loading saved proposals...
@@ -877,59 +977,125 @@ function ProposalManagementView() {
               No saved proposals yet.
             </div>
           ) : (
-            savedProposalsToRender.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 md:flex-row md:items-center md:justify-between"
-              >
-                <div className="min-w-0 space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{item.isin}</span>
-                    <span className="text-xs text-muted-foreground">{item.side}</span>
-                    <span className="text-xs text-muted-foreground">
-                      Qty {item.quantity}
-                    </span>
+            <div className="grid gap-3 md:grid-cols-3">
+              {savedProposalsToRender.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex h-full flex-col rounded-xl border border-gray-200 bg-background p-4"
+                >
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium">{item.isin}</span>
+                      <Pill
+                        label={item.side}
+                        variant={item.side === "SELL" ? "destructive" : "secondary"}
+                      />
+                      <Pill label={`Qty ${item.quantity}`} variant="outline" />
+                      <Pill label={item.settlementType ?? "T+0"} variant="outline" />
+                      {item.manualYieldEnabled ? (
+                        <Pill label={`Manual YTM ${item.manualYield || "—"}%`} />
+                      ) : null}
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <p className="truncate text-sm">
+                        {item.fetched?.bond?.bondName ||
+                          item.fetched?.bond?.instrumentName ||
+                          "—"}
+                      </p>
+                      <p className="truncate text-sm text-muted-foreground">
+                        {customerFullName(item.customer)}
+                        {item.customer?.emailAddress ? ` • ${item.customer.emailAddress}` : ""}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <span>
+                        Calc Px{" "}
+                        {formatNumber(
+                          item.fetched?.dealAutofill?.pricing?.finalPrice ??
+                            item.fetched?.pricing?.cleanPrice,
+                          4,
+                        )}
+                      </span>
+                      <span>
+                        Settle{" "}
+                        {formatCurrency(
+                          item.fetched?.dealAutofill?.pricing?.settlementAmount ??
+                            item.fetched?.pricing?.settlementAmount,
+                        )}
+                      </span>
+                      <span>
+                        YTM{" "}
+                        {(() => {
+                          const deal = item.fetched?.dealAutofill;
+                          const manual =
+                            item.manualYieldEnabled && item.manualYield?.trim()
+                              ? Number(item.manualYield)
+                              : null;
+                          const calcYtm = deal?.pricing?.finalYieldRaw;
+                          const fallbackYtm =
+                            deal?.suggested?.yield ??
+                            deal?.suggested?.buyYield ??
+                            (item.fetched?.bond?.buyYield as unknown as number | null | undefined);
+                          const ytm =
+                            manual != null && Number.isFinite(manual) && manual > 0
+                              ? manual
+                              : calcYtm != null && Number.isFinite(Number(calcYtm)) && Number(calcYtm) > 0
+                                ? Number(calcYtm)
+                                : fallbackYtm != null && Number.isFinite(Number(fallbackYtm)) && Number(fallbackYtm) > 0
+                                  ? Number(fallbackYtm)
+                                  : null;
+                          return ytm != null ? `${formatNumber(ytm, 4)}%` : "—";
+                        })()}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">
+                      Saved {formatDisplayDate(item.createdAt)}
+                    </p>
                   </div>
-                  <p className="truncate text-sm text-muted-foreground">
-                    {customerFullName(item.customer)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Saved {formatDisplayDate(item.createdAt)}
-                  </p>
+
+                  <div className="mt-3 border-t border-gray-100 pt-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleOpenSavedProposal(item)}
+                      >
+                        Open
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => void sendEmailForDraft(item)}
+                        disabled={sendProposalEmailMutation.isPending}
+                      >
+                        <Mail className="h-4 w-4" />
+                        Send Email
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => void handleAutoCreateRfqFromSaved(item)}
+                        disabled={autoCreateRfqMutation.isPending}
+                      >
+                        <Zap className="h-4 w-4" />
+                        Auto RFQ
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteSavedProposal(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleOpenSavedProposal(item)}>
-                    Open
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void sendEmailForDraft(item)}
-                    disabled={sendProposalEmailMutation.isPending}
-                  >
-                    <Mail className="h-4 w-4" />
-                    Send Email
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void handleAutoCreateRfqFromSaved(item)}
-                    disabled={autoCreateRfqMutation.isPending}
-                  >
-                    <Zap className="h-4 w-4" />
-                    Auto RFQ
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteSavedProposal(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
@@ -1008,8 +1174,8 @@ function ProposalManagementView() {
                   label="Clean Price"
                   value={formatNumber(
                     calcAmounts?.cleanPrice ??
-                      pricing?.cleanPrice ??
-                      dealAutofill?.pricing.finalPrice,
+                    pricing?.cleanPrice ??
+                    dealAutofill?.pricing.finalPrice,
                     4,
                   )}
                 />
@@ -1029,16 +1195,16 @@ function ProposalManagementView() {
                   label="Principal Amount"
                   value={formatCurrency(
                     calcAmounts?.principalAmount ??
-                      pricing?.principalAmount ??
-                      dealAutofill?.pricing.principalAmount,
+                    pricing?.principalAmount ??
+                    dealAutofill?.pricing.principalAmount,
                   )}
                 />
                 <InfoRow
                   label="Accrued Interest"
                   value={formatCurrency(
                     calcAmounts?.accruedInterest ??
-                      pricing?.accruedInterest ??
-                      dealAutofill?.pricing.totalAccruedInterest,
+                    pricing?.accruedInterest ??
+                    dealAutofill?.pricing.totalAccruedInterest,
                   )}
                 />
                 <InfoRow
@@ -1055,8 +1221,8 @@ function ProposalManagementView() {
                   label="Settlement Amount"
                   value={formatCurrency(
                     calcAmounts?.settlementAmount ??
-                      dealAutofill?.pricing.settlementAmount ??
-                      pricing?.settlementAmount,
+                    dealAutofill?.pricing.settlementAmount ??
+                    pricing?.settlementAmount,
                   )}
                 />
               </div>
@@ -1106,17 +1272,15 @@ function ProposalManagementView() {
                 <InfoRow
                   label="Deal Date"
                   value={formatDisplayDate(
-                    proposalDraft.manualYieldEnabled
-                      ? calc?.settle_dt
-                      : pricing?.dealDate,
+                    calc?.settle_dt ?? pricing?.dealDate,
                   )}
                 />
                 <InfoRow
                   label="Settlement Date"
                   value={formatDisplayDate(
-                    proposalDraft.manualYieldEnabled
-                      ? calc?.settle_dt
-                      : pricing?.settlementDate ?? dealAutofill?.pricing.calc.settle_dt,
+                    calc?.settle_dt ??
+                    pricing?.settlementDate ??
+                    dealAutofill?.pricing.calc.settle_dt,
                   )}
                 />
                 <InfoRow
@@ -1137,11 +1301,15 @@ function ProposalManagementView() {
                 <InfoRow
                   label="Accrual Days"
                   value={String(
-                    proposalDraft.manualYieldEnabled
-                      ? calc?.accrued_days ?? "—"
-                      : pricing?.noOfAccrualDays ?? calc?.accrued_days ?? "—",
+                    calc?.accrued_days ?? pricing?.noOfAccrualDays ?? "—",
                   )}
                 />
+                {pricing?.noOfAccrualDays != null && calc?.accrued_days != null ? (
+                  <InfoRow
+                    label="Accrual Days (Order Pricing)"
+                    value={String(pricing.noOfAccrualDays)}
+                  />
+                ) : null}
                 <InfoRow label="Trade Window" value={pricing?.allowTrade ? "Open" : "—"} />
               </div>
 
@@ -1171,6 +1339,70 @@ function ProposalManagementView() {
           )}
         </SheetContent>
       </Sheet>
+
+      <Dialog open={isEmailPreviewOpen} onOpenChange={setIsEmailPreviewOpen}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Email Preview</DialogTitle>
+            <DialogDescription>
+              Review the email content before sending it to the customer.
+            </DialogDescription>
+          </DialogHeader>
+
+          {emailPreview ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-gray-200 p-3 text-sm">
+                <div className="flex flex-col gap-1">
+                  <div>
+                    <span className="text-muted-foreground">To:</span>{" "}
+                    <span className="font-medium">{emailPreview.toEmail}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Subject:</span>{" "}
+                    <span className="font-medium">{emailPreview.subject}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="max-h-[55vh] overflow-y-auto rounded-lg border border-gray-200 p-4">
+                <div
+                  className="prose prose-xs max-w-none text-xs"
+                  dangerouslySetInnerHTML={{ __html: emailPreview.html }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No email preview available.</div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setIsEmailPreviewOpen(false)}
+              disabled={sendProposalEmailMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!emailPreview) return;
+                await sendProposalEmailMutation.mutateAsync(emailPreview.payload);
+                setIsEmailPreviewOpen(false);
+              }}
+              disabled={!emailPreview || sendProposalEmailMutation.isPending}
+            >
+              {sendProposalEmailMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending
+                </>
+              ) : (
+                "Send Email"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
