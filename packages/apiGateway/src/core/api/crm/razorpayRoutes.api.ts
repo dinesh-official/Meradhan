@@ -51,6 +51,19 @@ export class CrmRazorpayRoutesApi {
     return data;
   }
 
+  /** CRM: DB-only create. Does NOT call Razorpay. */
+  async createRouteAccountDbOnly(
+    payload: CreateRazorpayRouteAccountPayload & { razorpayAccountId: string },
+    config?: AxiosRequestConfig
+  ): Promise<CreateRazorpayRouteAccountResponse> {
+    const { data } = await this.apiClient.post<CreateRazorpayRouteAccountResponse>(
+      "/rezorpay/route/accounts/db",
+      payload,
+      config
+    );
+    return data;
+  }
+
   async updateRouteAccount(
     razorpayAccountId: string,
     payload: UpdateRazorpayRouteAccountPayload,
@@ -58,6 +71,20 @@ export class CrmRazorpayRoutesApi {
   ): Promise<UpdateRazorpayRouteAccountResponse> {
     const { data } = await this.apiClient.patch<UpdateRazorpayRouteAccountResponse>(
       `/rezorpay/route/accounts/${encodeURIComponent(razorpayAccountId)}`,
+      payload,
+      config
+    );
+    return data;
+  }
+
+  /** CRM: DB-only update. Does NOT call Razorpay. */
+  async updateRouteAccountDbOnly(
+    razorpayAccountId: string,
+    payload: UpdateRazorpayRouteAccountPayload,
+    config?: AxiosRequestConfig
+  ): Promise<UpdateRazorpayRouteAccountResponse> {
+    const { data } = await this.apiClient.patch<UpdateRazorpayRouteAccountResponse>(
+      `/rezorpay/route/accounts/${encodeURIComponent(razorpayAccountId)}/db`,
       payload,
       config
     );

@@ -96,7 +96,7 @@ function NewRfqForm({
 }: {
   onSubmit?: (data: SchemaType) => void;
   isLoading: boolean;
-  initData?: SchemaType;
+  initData?: Partial<SchemaType>;
 }) {
   const {
     handleSubmit,

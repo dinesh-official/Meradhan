@@ -390,15 +390,15 @@ export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes
     // const stackHolder = await initializeStackHolder(account.razorpayAccountId, userId);
     const initProduct = await initProductConfig(account.razorpayAccountId);
     const settlementAccount = await getSettlementBackAccount();
-    const product = await updateProductConfig(account.razorpayAccountId, {
-        productId: initProduct.id,
-        settlements: {
-            account_number: settlementAccount.accountNumber,
-            beneficiary_name: settlementAccount.beneficiaryName,
-            ifsc_code: settlementAccount.ifscCode
-        },
-    });
-    console.log("Product Config Updated", product.id);
+    // const product = await updateProductConfig(account.razorpayAccountId, {
+    //     productId: initProduct.id,
+    //     settlements: {
+    //         account_number: settlementAccount.accountNumber,
+    //         beneficiary_name: settlementAccount.beneficiaryName,
+    //         ifsc_code: settlementAccount.ifscCode
+    //     },
+    // });
+    // console.log("Product Config Updated", product.id);
     const transfer = await createTransfer({
         paymentId: payId,
         transfers: [

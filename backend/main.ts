@@ -18,6 +18,7 @@ import crmBondMarginRoutes from "@resource/crm/bonds/bond_margin.routes";
 import followUpRouter from "@resource/crm/leads/followup/leads_follow_up.routes";
 import leadsRoutes from "@resource/crm/leads/leads.routes";
 import crmOrdersRoutes from "@resource/crm/orders/orders.routes";
+import crmSavedProposalsRoutes from "@resource/crm/proposals/crm_saved_proposals.routes";
 import partnershipFollowUpRouter from "@resource/crm/partnership/followup/partnership_follow_up.routes";
 import partnershipRoutes from "@resource/crm/partnership/partnership.routes";
 import participantsRouter from "@resource/crm/refq/nse/cbrics/cbrics.routes";
@@ -74,6 +75,7 @@ server.addRoutes([
   partnershipFollowUpRouter,
   crmAuditlogsRoutes,
   crmOrdersRoutes,
+  crmSavedProposalsRoutes,
   notificationRoutes,
   razorpayRouteAccountsRoutes,
   razorpayRouteStakeholdersRoutes,

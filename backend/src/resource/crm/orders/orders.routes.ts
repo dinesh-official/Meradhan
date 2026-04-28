@@ -65,6 +65,12 @@ router.put(
   crmOrdersController.upsertReceiptPdfOptions
 );
 
+router.post(
+  "/api/crm/orders/receipt-pdf-options/:orderNumber/autofill",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.autofillReceiptPdfOptions
+);
+
 router.get(
   "/api/crm/orders/receipt-pdf/:orderNumber",
   allowAccessMiddleware("CRM"),
@@ -81,6 +87,12 @@ router.post(
   "/api/crm/orders/send-pdf-email/:orderNumber",
   allowAccessMiddleware("CRM"),
   crmOrdersController.sendPdfEmailToClient
+);
+
+router.post(
+  "/api/crm/orders/send-proposal-email",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.sendProposalEmailToClient
 );
 
 export default router;
