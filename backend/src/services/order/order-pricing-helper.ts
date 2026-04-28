@@ -290,11 +290,18 @@ const accruedInterest = (params: {
 ========================= */
 
 export const computeBondOrderPricingData = (
-    params: BondOrderPricingData
+    params: BondOrderPricingData,
+    options?: {
+        executionDateTime?: Date;
+        settlementType?: "T+0" | "T+1";
+    },
 ) => {
-    console.log(params);
-
-    const settlement = computeBondSettlement(new Date());
+    const settlement = computeBondSettlement(options?.executionDateTime ?? new Date());
+    if (options?.settlementType === "T+0") {
+        settlement.settlementDate = settlement.dealDate;
+        settlement.settlementDay = settlement.dealDay;
+        settlement.settlementOrder = "T+0";
+    }
 
     const principal = principalAmount(
         params.faceValue,
@@ -315,9 +322,6 @@ export const computeBondOrderPricingData = (
     const stampDuty = calculateStampDuty(principal);
 
     const total = principal + accrued.accruedInterest + stampDuty;
-
-    console.log(total);
-
 
     return {
         ...params,

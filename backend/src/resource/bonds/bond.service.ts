@@ -30,6 +30,7 @@ export class BondService {
   async getBondOrderPricing(
     isin: string,
     quantityInput?: number,
+    settlementType?: "T+0" | "T+1",
   ): Promise<GetBondOrderPricingResult> {
     const bond = await this.getBondDetails(isin);
     if (!bond) {
@@ -65,15 +66,18 @@ export class BondService {
     const quantity =
       Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
 
-    const pricing = computeBondOrderPricingData({
-      faceValue: bond.faceValue,
-      quantity,
-      cleanPrice: cleanPrice ?? 0,
-      couponRate: Number(bond.couponRate),
-      lastCouponDate: lastCouponDateStr,
-      recordDays,
-      nextCouponDate: nextCouponDateStr,
-    });
+    const pricing = computeBondOrderPricingData(
+      {
+        faceValue: bond.faceValue,
+        quantity,
+        cleanPrice: cleanPrice ?? 0,
+        couponRate: Number(bond.couponRate),
+        lastCouponDate: lastCouponDateStr,
+        recordDays,
+        nextCouponDate: nextCouponDateStr,
+      },
+      { settlementType },
+    );
 
     return { ok: true, pricing };
   }

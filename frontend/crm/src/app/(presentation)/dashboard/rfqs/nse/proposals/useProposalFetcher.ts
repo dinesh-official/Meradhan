@@ -13,6 +13,7 @@ export type ProposalPayload = {
   isin: string;
   quantity: number;
   side: "BUY" | "SELL";
+  settlementType: "T+0" | "T+1";
 };
 
 export type ProposalFetchResult = {
@@ -24,6 +25,13 @@ export type ProposalFetchResult = {
 
 export function useProposalFetcher() {
   const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+
+  const toIsoDate = (d: Date) => d.toISOString().slice(0, 10);
+  const addUtcDays = (isoDate: string, days: number) => {
+    const [y, m, d] = isoDate.split("-").map(Number);
+    const dt = new Date(Date.UTC(y!, (m ?? 1) - 1, (d ?? 1) + days, 12, 0, 0));
+    return toIsoDate(dt);
+  };
 
   const extractApiMessage = (error: unknown) => {
     const axiosError = error as AxiosError<{ message?: string }>;
@@ -39,18 +47,24 @@ export function useProposalFetcher() {
       isin,
       quantity,
       side,
+      settlementType,
     }: ProposalPayload): Promise<ProposalFetchResult> => {
       const normalizedIsin = isin.trim().toUpperCase();
+      const settlementDate =
+        settlementType === "T+0"
+          ? toIsoDate(new Date())
+          : addUtcDays(toIsoDate(new Date()), 1);
 
       const [bondResponse, pricingResponse, dealAutofillResponse] = await Promise.all([
         bondsApi.getBondDetailsByIsin(normalizedIsin),
         bondsApi
-          .getBondOrderPricing(normalizedIsin, quantity)
+          .getBondOrderPricing(normalizedIsin, quantity, {
+            params: { settlementType },
+          })
           .then((response) => ({ response, error: null }))
           .catch((error: unknown) => ({ response: null, error })),
-        side === "SELL"
-          ? bondsApi.getBondDealAutofill(normalizedIsin, { quantity })
-          : Promise.resolve(null),
+        // Fetch calc/YTM pricing for both BUY & SELL so proposal has complete pricing fields.
+        bondsApi.getBondDealAutofill(normalizedIsin, { quantity, settlementDate }),
       ]);
 
       const pricingError = pricingResponse.error
