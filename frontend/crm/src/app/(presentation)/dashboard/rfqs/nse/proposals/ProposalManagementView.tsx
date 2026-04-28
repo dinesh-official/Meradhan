@@ -98,6 +98,7 @@ type ProposalDraft = {
   quantity: number;
   notes: string;
   side: "BUY" | "SELL";
+  settlementType: "T+0" | "T+1";
   customer: CustomerProfile;
   fetched: ProposalFetchResult;
   createdAt: string;
@@ -133,6 +134,7 @@ function ProposalManagementView() {
   const [isinSearch, setIsinSearch] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
+  const [settlementType, setSettlementType] = useState<"T+0" | "T+1">("T+0");
   const [notes, setNotes] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -222,6 +224,7 @@ function ProposalManagementView() {
     setIsin("");
     setIsinSearch("");
     setSide("BUY");
+    setSettlementType("T+0");
     setQuantity("1");
     setNotes("");
     setSelectedCustomer(null);
@@ -249,6 +252,7 @@ function ProposalManagementView() {
         isin: normalizedIsin,
         quantity: quantityValue,
         side,
+        settlementType,
       });
 
       setProposalDraft({
@@ -257,6 +261,7 @@ function ProposalManagementView() {
         quantity: quantityValue,
         notes: notes.trim(),
         side,
+        settlementType,
         customer: selectedCustomer,
         fetched,
         createdAt: new Date().toISOString(),
@@ -283,6 +288,7 @@ function ProposalManagementView() {
     setIsinSearch(item.isin);
     setQuantity(String(item.quantity));
     setSide(item.side);
+    setSettlementType(item.settlementType ?? "T+0");
     setNotes(item.notes);
     setSelectedCustomer(item.customer);
     setIsSheetOpen(true);
@@ -645,6 +651,22 @@ function ProposalManagementView() {
             </div>
 
             <div className="space-y-2">
+              <label className="text-sm font-medium">Settlement Date</label>
+              <Select
+                value={settlementType}
+                onValueChange={(value) => setSettlementType(value as "T+0" | "T+1")}
+              >
+                <SelectTrigger className="w-full md:w-[240px]">
+                  <SelectValue placeholder="Select settlement" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="T+0">T+0</SelectItem>
+                  <SelectItem value="T+1">T+1</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <label className="text-sm font-medium">Customer</label>
               <SelectCustomerUser
                 value={selectedCustomer ?? undefined}
@@ -763,15 +785,22 @@ function ProposalManagementView() {
 
                 <InfoRow label="ISIN" value={proposalDraft.isin} />
                 <InfoRow label="Side" value={proposalDraft.side} />
+                <InfoRow label="Settlement" value={proposalDraft.settlementType} />
                 <InfoRow label="Bond" value={bond?.bondName || "—"} />
                 <InfoRow label="Quantity" value={String(proposalDraft.quantity)} />
                 <InfoRow
-                  label={proposalDraft.side === "SELL" ? "Auto Sell Price" : "Settlement Amount"}
+                  label="Calc Price"
                   value={
-                    proposalDraft.side === "SELL"
-                      ? formatCurrency(dealAutofill?.suggested.sellPrice)
-                      : formatCurrency(pricing?.settlementAmount)
+                    formatCurrency(
+                      dealAutofill?.pricing.finalPrice ??
+                        pricing?.cleanPrice ??
+                        dealAutofill?.suggested.sellPrice,
+                    )
                   }
+                />
+                <InfoRow
+                  label="Calc Settlement Amount"
+                  value={formatCurrency(dealAutofill?.pricing.settlementAmount ?? pricing?.settlementAmount)}
                 />
                 {pricingError ? (
                   <p className="text-xs text-amber-600">
@@ -918,12 +947,24 @@ function ProposalManagementView() {
                   </p>
                 ) : null}
                 <InfoRow
+                  label="Settlement Type"
+                  value={proposalDraft.settlementType}
+                />
+                <InfoRow
                   label="Face Value"
                   value={formatCurrency(pricing?.faceValue ?? dealAutofill?.suggested.faceValue)}
                 />
                 <InfoRow
                   label="Clean Price"
                   value={formatNumber(pricing?.cleanPrice ?? dealAutofill?.pricing.finalPrice, 4)}
+                />
+                <InfoRow
+                  label="YTM (Ann)"
+                  value={
+                    dealAutofill?.pricing.finalYieldRaw != null
+                      ? `${formatNumber(dealAutofill.pricing.finalYieldRaw, 4)}%`
+                      : "—"
+                  }
                 />
                 <InfoRow
                   label="Coupon Rate"
@@ -938,6 +979,10 @@ function ProposalManagementView() {
                   value={formatCurrency(pricing?.accruedInterest ?? dealAutofill?.pricing.totalAccruedInterest)}
                 />
                 <InfoRow
+                  label="Total Consideration"
+                  value={formatCurrency(dealAutofill?.pricing.totalConsideration)}
+                />
+                <InfoRow
                   label="Stamp Duty"
                   value={formatCurrency(pricing?.stampDuty)}
                 />
@@ -945,31 +990,6 @@ function ProposalManagementView() {
                   label="Settlement Amount"
                   value={formatCurrency(pricing?.settlementAmount ?? dealAutofill?.pricing.settlementAmount)}
                 />
-                {proposalDraft.side === "SELL" ? (
-                  <>
-                    <Separator />
-                    <InfoRow
-                      label="Auto Sell Price"
-                      value={formatCurrency(dealAutofill?.suggested.sellPrice)}
-                    />
-                    <InfoRow
-                      label="Auto Buy Yield"
-                      value={
-                        dealAutofill?.suggested.buyYield != null
-                          ? `${formatNumber(dealAutofill.suggested.buyYield, 4)}%`
-                          : "—"
-                      }
-                    />
-                    <InfoRow
-                      label="Auto Final Price"
-                      value={formatCurrency(dealAutofill?.pricing.finalPrice)}
-                    />
-                    <InfoRow
-                      label="Auto Total Consideration"
-                      value={formatCurrency(dealAutofill?.pricing.totalConsideration)}
-                    />
-                  </>
-                ) : null}
               </div>
 
               <div className="rounded-xl border border-gray-200 p-4 space-y-3">

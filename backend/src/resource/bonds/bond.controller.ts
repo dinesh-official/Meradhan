@@ -21,7 +21,12 @@ export class BondController {
   async getBondOrderPricing(req: Request, res: Response) {
     const isin = req.params.isin!.toString();
     const quantity = req.query.quantity ? Number(req.query.quantity) : 1;
-    const result = await this.bondService.getBondOrderPricing(isin, quantity);
+    const settlementTypeRaw = req.query.settlementType?.toString();
+    const settlementType =
+      settlementTypeRaw === "T+0" || settlementTypeRaw === "T+1"
+        ? (settlementTypeRaw as "T+0" | "T+1")
+        : undefined;
+    const result = await this.bondService.getBondOrderPricing(isin, quantity, settlementType);
 
     if (!result.ok) {
       if (result.reason === "not_found") {
