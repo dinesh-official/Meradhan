@@ -89,7 +89,7 @@ jobs:
           BACKOFFICE_SMTP_HOST: ${{ vars.BACKOFFICE_SMTP_HOST }}
           BACKOFFICE_SMTP_PORT: ${{ vars.BACKOFFICE_SMTP_PORT }}
           BACKOFFICE_SMTP_EMAIL: ${{ vars.BACKOFFICE_SMTP_EMAIL }}
-          BACKOFFICE_SMTP_PASS: ${{ secrets.BACKOFFICE_SMTP_PASS }}
+          BACKOFFICE_SMTP_PASS: ${{ vars.BACKOFFICE_SMTP_PASS }}
           
 
         run: |
