@@ -206,6 +206,8 @@ function GeneratePdfContent() {
   const [downloadingDealPdf, setDownloadingDealPdf] = useState(false);
   const [sendEmailOpen, setSendEmailOpen] = useState(false);
   const [sendingPdfEmail, setSendingPdfEmail] = useState(false);
+  const [proposalEmailOpen, setProposalEmailOpen] = useState(false);
+  const [sendingProposalEmail, setSendingProposalEmail] = useState(false);
   const [emailPdfType, setEmailPdfType] = useState<"order" | "deal">("order");
   const [emailTo, setEmailTo] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
@@ -645,6 +647,90 @@ BSE Member ID: 6963`
     }
   };
 
+  const sendProposalEmail = async () => {
+    if (!orderNumber) return;
+    if (!emailTo.trim()) {
+      toast.error("Client email is not available.");
+      return;
+    }
+    if (!rfq) {
+      toast.error("Settlement details not loaded.");
+      return;
+    }
+
+    const quantity =
+      (customerOrder as unknown as { quantity?: number | string | null })?.quantity ??
+      (rfq as unknown as { modQuantity?: number | string | null })?.modQuantity ??
+      null;
+    const faceValue =
+      (customerOrder as unknown as { faceValue?: number | string | null })?.faceValue ?? null;
+    const quantum =
+      Number(faceValue ?? 0) && Number(quantity ?? 0)
+        ? Number(faceValue) * Number(quantity)
+        : undefined;
+
+    const rate =
+      (rfq as unknown as { price?: number | string | null })?.price ??
+      (customerOrder as unknown as { unitPrice?: number | string | null })?.unitPrice ??
+      null;
+
+    const accruedInterest =
+      (rfq as unknown as { modAccrInt?: number | string | null })?.modAccrInt ?? null;
+
+    const totalConsideration =
+      (rfq as unknown as { modConsideration?: number | string | null })?.modConsideration ??
+      (customerOrder as unknown as { totalAmount?: number | string | null })?.totalAmount ??
+      null;
+
+    const stampDuty =
+      (rfq as unknown as { stampDutyAmount?: number | string | null })?.stampDutyAmount ??
+      (customerOrder as unknown as { stampDuty?: number | string | null })?.stampDuty ??
+      null;
+
+    const settlementAmount =
+      Number(totalConsideration ?? NaN) && Number(stampDuty ?? NaN)
+        ? Number(totalConsideration) + Number(stampDuty)
+        : undefined;
+
+    const payload = {
+      toEmail: emailTo.trim(),
+      customerName:
+        `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`.trim() ||
+        clientFullName ||
+        "Customer",
+      side: effectiveOrderSide,
+      bondName: securityName,
+      isin: String((rfq as unknown as { symbol?: string | null })?.symbol ?? ""),
+      dealDate: String((rfq as unknown as { createdAt?: string | null })?.createdAt ?? ""),
+      settlementDate: String((rfq as unknown as { modSettleDate?: string | null })?.modSettleDate ?? ""),
+      quantum: quantum ?? Number(quantum ?? 0),
+      quantity: quantity != null ? Number(quantity) : 0,
+      rate: rate != null ? Number(rate) : 0,
+      ytmAnn:
+        (rfq as unknown as { yield?: number | string | null })?.yield != null
+          ? Number((rfq as unknown as { yield?: number | string | null }).yield)
+          : null,
+      lastIpDate: null,
+      noOfDays: null,
+      principalAmount: null,
+      accruedInterest: accruedInterest != null ? Number(accruedInterest) : null,
+      totalConsideration: totalConsideration != null ? Number(totalConsideration) : null,
+      stampDuty: stampDuty != null ? Number(stampDuty) : null,
+      settlementAmount: settlementAmount != null ? Number(settlementAmount) : null,
+    };
+
+    setSendingProposalEmail(true);
+    try {
+      await ordersApi.sendProposalEmail(payload);
+      toast.success("Proposal email sent to client.");
+      setProposalEmailOpen(false);
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to send proposal email"));
+    } finally {
+      setSendingProposalEmail(false);
+    }
+  };
+
 
 
   if (!orderNumber) {
@@ -756,6 +842,14 @@ BSE Member ID: 6963`
                 }}
               >
                 Email deal sheet
+              </Button>
+              <Button
+                size="sm"
+                variant="default"
+                disabled={downloadingOrderPdf || downloadingDealPdf}
+                onClick={() => setProposalEmailOpen(true)}
+              >
+                Email proposal
               </Button>
             </>
           )}
@@ -1240,6 +1334,48 @@ BSE Member ID: 6963`
             </Button>
             <Button onClick={() => void sendPdfByEmail()} disabled={sendingPdfEmail}>
               {sendingPdfEmail ? "Sending..." : "Send email"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={proposalEmailOpen} onOpenChange={setProposalEmailOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Send proposal email</DialogTitle>
+            <DialogDescription>
+              Sends the RFQ order confirmation-required proposal email to the client (from {senderEmail}).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label>Client email</Label>
+              <Input
+                type="email"
+                value={emailTo}
+                placeholder="client@email.com"
+                onChange={(e) => setEmailTo(e.target.value)}
+              />
+            </div>
+            <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+              <div><span className="font-medium text-foreground">ISIN:</span> {rfq?.symbol ?? "—"}</div>
+              <div><span className="font-medium text-foreground">Bond:</span> {securityName}</div>
+              <div><span className="font-medium text-foreground">Side:</span> {effectiveOrderSide}</div>
+              <div><span className="font-medium text-foreground">Settlement date:</span> {rfq?.modSettleDate ?? "—"}</div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setProposalEmailOpen(false)}
+              disabled={sendingProposalEmail}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => void sendProposalEmail()} disabled={sendingProposalEmail}>
+              {sendingProposalEmail ? "Sending..." : "Send proposal"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -32,6 +32,12 @@ export const CrmSavedProposalsRepo = {
     });
   },
 
+  listAll() {
+    return db.dataBase.crmSavedProposal.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
   findById(id: number, createdById: number) {
     return db.dataBase.crmSavedProposal.findFirst({
       where: { id, createdById },

@@ -57,14 +57,12 @@ export function useProposalFetcher() {
           ? toIstYmd(new Date())
           : addUtcDays(toIstYmd(new Date()), 1);
 
-      const [bondResponse, pricingResponse, dealAutofillResponse] = await Promise.all([
+      const [bondResponse, previewResponse, dealAutofillResponse] = await Promise.all([
         bondsApi.getBondDetailsByIsin(normalizedIsin),
-        bondsApi
-          .getBondOrderPricing(normalizedIsin, quantity, {
-            params: { settlementType },
-          })
-          .then((response) => ({ response, error: null }))
-          .catch((error: unknown) => ({ response: null, error })),
+        apiClientCaller
+          .post("/customer/order/preview", { isin: normalizedIsin, quantity })
+          .then((r) => ({ data: r.data as { responseData?: { pricing?: BondOrderPricingData | null } }, error: null as unknown }))
+          .catch((error: unknown) => ({ data: null as null, error })),
         // Fetch calc/YTM pricing for both BUY & SELL so proposal has complete pricing fields.
         bondsApi.getBondDealAutofill(normalizedIsin, {
           quantity,
@@ -73,13 +71,13 @@ export function useProposalFetcher() {
         }),
       ]);
 
-      const pricingError = pricingResponse.error
-        ? extractApiMessage(pricingResponse.error)
+      const pricingError = previewResponse.error
+        ? extractApiMessage(previewResponse.error)
         : null;
 
       return {
         bond: bondResponse.responseData,
-        pricing: pricingResponse.response?.responseData ?? null,
+        pricing: previewResponse.data?.responseData?.pricing ?? null,
         dealAutofill: dealAutofillResponse?.responseData ?? null,
         pricingError,
       };

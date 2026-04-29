@@ -19,6 +19,14 @@ export class CrmSavedProposalsApi {
     return data;
   }
 
+  async listAll(config?: AxiosRequestConfig): Promise<ListCrmSavedProposalsResponse> {
+    const { data } = await this.apiClient.get<ListCrmSavedProposalsResponse>(
+      "/crm/proposals/all",
+      config
+    );
+    return data;
+  }
+
   async create(
     payload: {
       customerProfileId: number;

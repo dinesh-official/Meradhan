@@ -13,7 +13,7 @@ orderRoutes.get(
 
 orderRoutes.post(
   "/api/customer/order/preview",
-  allowAccessMiddleware("USER"),
+  allowAccessMiddleware("USER", "CRM"),
   orderController.previewOrder
 );
 

@@ -59,6 +59,11 @@ const EnvSchema = z.object(
     SMTP_PORT: z.string().regex(/^\d+$/, { message: "SMTP_PORT must be a number" }),
     SMTP_USER: z.string().min(1, { message: "SMTP_USER is required" }),
     SMTP_PASS: z.string().min(1, { message: "SMTP_PASS is required" }),
+    // BACKOFFICE EMAIL (used by `sendBackOfficeEmail`)
+    BACKOFFICE_SMTP_HOST: z.string().min(1, { message: "BACKOFFICE_SMTP_HOST is required" }),
+    BACKOFFICE_SMTP_PORT: z.string().regex(/^\d+$/, { message: "BACKOFFICE_SMTP_PORT must be a number" }),
+    BACKOFFICE_SMTP_EMAIL: z.email({ message: "BACKOFFICE_SMTP_EMAIL must be a valid email" }),
+    BACKOFFICE_SMTP_PASS: z.string().min(1, { message: "BACKOFFICE_SMTP_PASS is required" }),
 
     // CBRICS
     CBRICS_DOMAIN: z.string().min(1, { message: "CBRICS_DOMAIN is required" }),
