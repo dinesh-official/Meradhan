@@ -193,17 +193,10 @@ jobs:
           RAZORPAY_ROUTE_ACCOUNT_ID="${{ vars.RAZORPAY_ROUTE_ACCOUNT_ID }}"
           echo "RAZORPAY_ROUTE_ACCOUNT_ID=$RAZORPAY_ROUTE_ACCOUNT_ID" >> .env
 
-          BACKOFFICE_SMTP_HOST: ${{ vars.BACKOFFICE_SMTP_HOST }}
-          echo "BACKOFFICE_SMTP_HOST=${BACKOFFICE_SMTP_HOST}" >> .env
-          
-          BACKOFFICE_SMTP_PORT: ${{ vars.BACKOFFICE_SMTP_PORT }}
-          echo "BACKOFFICE_SMTP_PORT=${BACKOFFICE_SMTP_PORT}" >> .env
-
-          BACKOFFICE_SMTP_EMAIL: ${{ vars.BACKOFFICE_SMTP_EMAIL }}
-          echo "BACKOFFICE_SMTP_EMAIL=${BACKOFFICE_SMTP_EMAIL}" >> .env
-          
-          BACKOFFICE_SMTP_PASS: ${{ vars.BACKOFFICE_SMTP_PASS }}
-          echo "BACKOFFICE_SMTP_PASS=${BACKOFFICE_SMTP_PASS}" >> .env
+          echo "BACKOFFICE_SMTP_HOST=${{ vars.BACKOFFICE_SMTP_HOST }}" >> .env
+          echo "BACKOFFICE_SMTP_PORT=${{ vars.BACKOFFICE_SMTP_PORT }}" >> .env
+          echo "BACKOFFICE_SMTP_EMAIL=${{ vars.BACKOFFICE_SMTP_EMAIL }}" >> .env
+          echo "BACKOFFICE_SMTP_PASS=${{ vars.BACKOFFICE_SMTP_PASS }}" >> .env
 
 
       - name: Configure AWS Credentials
