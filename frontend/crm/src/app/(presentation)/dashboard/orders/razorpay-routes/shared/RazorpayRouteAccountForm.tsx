@@ -105,6 +105,7 @@ const SUBCATEGORIES_BY_CATEGORY: Partial<Record<(typeof CATEGORIES)[number], str
 };
 
 const schema = z.object({
+  razorpayAccountId: z.string().optional(),
   isDefault: z.boolean().optional(),
   email: z.string().email(),
   phone: z.string().min(8).max(15),
@@ -147,6 +148,7 @@ function mapRecordToForm(record: RazorpayRouteAccountRecord): Partial<FormValues
       : String(reg.postal_code).replace(/\D/g, "").slice(0, 6);
 
   return {
+    razorpayAccountId: record.razorpayAccountId,
     isDefault: record.isDefault ?? false,
     email: d.email ?? "",
     phone: typeof d.phone === "string" ? d.phone.replace(/^\+?91/, "") : "",
@@ -188,6 +190,7 @@ export default function RazorpayRouteAccountForm(props: {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      razorpayAccountId: "",
       isDefault: false,
       email: "",
       phone: "",
@@ -222,7 +225,7 @@ export default function RazorpayRouteAccountForm(props: {
 
   const createMutation = useMutation({
     mutationFn: async (payload: CreateRazorpayRouteAccountPayload) =>
-      routesApi.createRouteAccount(payload),
+      routesApi.createRouteAccountDbOnly(payload as CreateRazorpayRouteAccountPayload & { razorpayAccountId: string }),
     onSuccess: async () => {
       toast.success("Linked account created");
       await queryClient.invalidateQueries({ queryKey: ["crmRazorpayRouteAccounts"] });
@@ -235,7 +238,7 @@ export default function RazorpayRouteAccountForm(props: {
 
   const updateMutation = useMutation({
     mutationFn: async (payload: UpdateValues) =>
-      routesApi.updateRouteAccount(props.razorpayAccountId!, payload),
+      routesApi.updateRouteAccountDbOnly(props.razorpayAccountId!, payload),
     onSuccess: async () => {
       toast.success("Linked account updated");
       await queryClient.invalidateQueries({ queryKey: ["crmRazorpayRouteAccounts"] });
@@ -267,20 +270,52 @@ export default function RazorpayRouteAccountForm(props: {
         <CardTitle>{isUpdate ? "Update linked account" : "Create linked account"}</CardTitle>
         <CardDescription>
           {isUpdate
-            ? "Update flow will be enabled later. For now this page shows the stored data."
-            : "This will create a linked account on Razorpay and store it in your database."}
+            ? "Updates the stored linked account payload in DB (no Razorpay call)."
+            : "Stores a linked account record in DB only (no Razorpay call)."}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form
             className="space-y-6"
-            onSubmit={form.handleSubmit((values) =>
-              isUpdate
-                ? updateMutation.mutate(toUpdatePayload(values))
-                : createMutation.mutate(values)
-            )}
+            onSubmit={form.handleSubmit((values) => {
+              if (!isUpdate) {
+                const id = String(values.razorpayAccountId ?? "").trim();
+                if (!id) {
+                  toast.error("Razorpay account id is required");
+                  return;
+                }
+                createMutation.mutate({ ...values, razorpayAccountId: id });
+                return;
+              }
+              updateMutation.mutate(toUpdatePayload(values));
+            })}
           >
+            {!isUpdate && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="razorpayAccountId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Razorpay account id</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isBusy} placeholder="acc_XXXXXXXXXXXX" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {isUpdate && (
+              <div className="rounded-lg border p-4 text-sm">
+                <span className="text-muted-foreground">Account id: </span>
+                <span className="font-mono">{props.razorpayAccountId}</span>
+              </div>
+            )}
+
             <div className="flex items-start gap-3 rounded-lg border p-4">
               <FormField
                 control={form.control}

@@ -39,6 +39,31 @@ export interface OrderLog {
   updatedAt: string;
 }
 
+export interface OrderSettlementAutomationLog {
+  id: number;
+  orderId: number | null;
+  paymentId: string;
+  batchId: string;
+  step: string;
+  status: string;
+  message: string | null;
+  inputData: Record<string, unknown> | null;
+  outputData: Record<string, unknown> | null;
+  errorData: Record<string, unknown> | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentProcessLogGroup {
+  paymentId: string;
+  totalLogs: number;
+  latestStatus: string;
+  latestCreatedAt: string | null;
+  logs: OrderSettlementAutomationLog[];
+}
+
 export interface CrmOrderDetails {
   id: number;
   orderNumber: string;
@@ -69,6 +94,7 @@ export interface CrmOrderDetails {
     phoneNo: string | null;
   };
   orderLogs: OrderLog[];
+  settlementAutomationLogs: OrderSettlementAutomationLog[];
   customerBonds: {
     id: number;
     customerProfileId: number;
@@ -87,6 +113,12 @@ export interface CrmOrderDetails {
 
 export interface GetCrmOrderDetailsResponse {
   responseData: CrmOrderDetails;
+}
+
+export interface GetPaymentProcessLogsResponse {
+  responseData: {
+    groups: PaymentProcessLogGroup[];
+  };
 }
 
 /** Settle order (RFQ) record returned by GET /crm/orders/rfq/:orderNumber */

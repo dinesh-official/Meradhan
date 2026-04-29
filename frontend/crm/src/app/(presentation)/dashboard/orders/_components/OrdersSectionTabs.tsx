@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 export default function OrdersSectionTabs() {
   const pathname = usePathname();
   const isPg = pathname?.includes("/pg-management");
+  const isLogs = pathname?.includes("/payment-process-logs");
 
   return (
     <div className="flex gap-6 border-b border-border mb-5">
@@ -14,7 +15,7 @@ export default function OrdersSectionTabs() {
         href="/dashboard/orders"
         className={cn(
           "pb-3 text-sm font-medium transition-colors border-b-2 -mb-px",
-          !isPg
+          !isPg && !isLogs
             ? "border-primary text-foreground"
             : "border-transparent text-muted-foreground hover:text-foreground"
         )}
@@ -31,6 +32,17 @@ export default function OrdersSectionTabs() {
         )}
       >
         PG Management
+      </Link>
+      <Link
+        href="/dashboard/orders/payment-process-logs"
+        className={cn(
+          "pb-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+          isLogs
+            ? "border-primary text-foreground"
+            : "border-transparent text-muted-foreground hover:text-foreground"
+        )}
+      >
+        Payment Process Logs
       </Link>
     </div>
   );

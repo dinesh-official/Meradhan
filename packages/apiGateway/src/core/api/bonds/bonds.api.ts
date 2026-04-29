@@ -42,10 +42,14 @@ export class BondsApi {
     return response.data;
   }
 
-  public async getBondOrderPricing(isin: string, quantity: number, config?: AxiosRequestConfig) {
+  public async getBondOrderPricing(
+    isin: string,
+    quantity: number,
+    config?: AxiosRequestConfig,
+  ) {
     const response = await this.apiClient.get<BondOrderPricingResponse>(
       `/bonds/${isin}/order-pricing`,
-      { ...config, params: { quantity } },
+      { ...config, params: { ...(config?.params ?? {}), quantity } },
       
     );
     return response.data;

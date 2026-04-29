@@ -116,6 +116,53 @@ function formatDateWithDayNameFromPicker(value?: string): string {
   return `${String(d.getDate()).padStart(2, "0")}-${months[d.getMonth()]}-${d.getFullYear()} (${dayNames[d.getDay()]})`;
 }
 
+function ddMmmYyyyToPickerValue(input?: string | null): string {
+  const s = String(input ?? "").trim();
+  if (!s) return "";
+  const m = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(s);
+  if (!m) return "";
+  const dd = Number(m[1]);
+  const monKey = (m[2] ?? "").slice(0, 3).toLowerCase();
+  const yyyy = Number(m[3]);
+  const MONTH: Record<string, number> = {
+    jan: 1,
+    feb: 2,
+    mar: 3,
+    apr: 4,
+    may: 5,
+    jun: 6,
+    jul: 7,
+    aug: 8,
+    sep: 9,
+    oct: 10,
+    nov: 11,
+    dec: 12,
+  };
+  const mm = MONTH[monKey];
+  if (!mm) return "";
+  return `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+}
+
+function payinDateTimeToPickerValue(input?: string | null): string {
+  const s = String(input ?? "").trim();
+  if (!s) return "";
+
+  // If already ISO-like, Date() will parse.
+  const parsed = new Date(s);
+  if (!Number.isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, "0");
+    const d = String(parsed.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  // Formats like: "23-Feb-2026 17:30:00" or "23-Feb-2026"
+  const ddMmmYyyy = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})(?:\s+.*)?$/.exec(s);
+  if (ddMmmYyyy) return ddMmmYyyyToPickerValue(`${ddMmmYyyy[1]}-${ddMmmYyyy[2]}-${ddMmmYyyy[3]}`);
+
+  return "";
+}
+
 function InfoRow({
   label,
   value,
@@ -159,10 +206,14 @@ function GeneratePdfContent() {
   const [downloadingDealPdf, setDownloadingDealPdf] = useState(false);
   const [sendEmailOpen, setSendEmailOpen] = useState(false);
   const [sendingPdfEmail, setSendingPdfEmail] = useState(false);
+  const [proposalEmailOpen, setProposalEmailOpen] = useState(false);
+  const [sendingProposalEmail, setSendingProposalEmail] = useState(false);
   const [emailPdfType, setEmailPdfType] = useState<"order" | "deal">("order");
   const [emailTo, setEmailTo] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+  const [pdfAutofillSettlementDate, setPdfAutofillSettlementDate] = useState("");
+  const [autofillingPdfOptions, setAutofillingPdfOptions] = useState(false);
   const [pdfAccruedInterestDays, setPdfAccruedInterestDays] = useState("");
   const [pdfSettlementNumber, setPdfSettlementNumber] = useState("");
   const [pdfSettlementDateTime, setPdfSettlementDateTime] = useState("");
@@ -294,6 +345,8 @@ function GeneratePdfContent() {
 
   useEffect(() => {
     if (!orderNumber) return;
+    setPdfAutofillSettlementDate("");
+    setAutofillingPdfOptions(false);
     setPdfAccruedInterestDays("");
     setPdfSettlementNumber("");
     setPdfSettlementDateTime("");
@@ -325,6 +378,17 @@ function GeneratePdfContent() {
     if (rfq?.settlementNo == null || pdfSettlementNumber !== "") return;
     setPdfSettlementNumber(String(rfq.settlementNo));
   }, [rfq?.settlementNo, pdfSettlementNumber, pdfOptionsQuery?.responseData]);
+
+  useEffect(() => {
+    if (!rfq || pdfAutofillSettlementDate) return;
+    const guess =
+      payinDateTimeToPickerValue(rfq.fundsPayinTime ?? null) ||
+      payinDateTimeToPickerValue(rfq.secPayinTime ?? null) ||
+      payinDateTimeToPickerValue(rfq.payoutTime ?? null) ||
+      ddMmmYyyyToPickerValue(rfq.modSettleDate ?? null) ||
+      ddMmmYyyyToPickerValue(rfq.createdAt ?? null);
+    if (guess) setPdfAutofillSettlementDate(guess);
+  }, [rfq, pdfAutofillSettlementDate]);
 
   useEffect(() => {
     if (!emailTo && customerOrder?.customerProfile?.emailAddress) {
@@ -470,6 +534,50 @@ BSE Member ID: 6963`
     }
   };
 
+  const autofillReceiptPdfOptions = async () => {
+    if (!orderNumber) return;
+    if (!pdfAutofillSettlementDate) {
+      toast.error("Settlement date is required for auto-fill.");
+      return;
+    }
+    setAutofillingPdfOptions(true);
+    try {
+      const resp = await apiClientCaller.post<{
+        responseData?: {
+          accruedInterestDays: number;
+          settlementNumber: string | null;
+          lastInterestPaymentDateRaw: string | null;
+          lastInterestPaymentDate: string | null;
+          interestPaymentDates: string | null;
+        };
+        message?: string;
+      }>(
+        `/crm/orders/receipt-pdf-options/${orderNumber}/autofill`,
+        { settlementDate: pdfAutofillSettlementDate },
+      );
+
+      const d = resp.data?.responseData;
+      if (!d) {
+        toast.error(resp.data?.message || "Auto-fill failed.");
+        return;
+      }
+      setPdfAccruedInterestDays(String(d.accruedInterestDays ?? ""));
+      if (d.settlementNumber != null) setPdfSettlementNumber(String(d.settlementNumber));
+      if (d.lastInterestPaymentDateRaw != null) {
+        setPdfLastInterestPaymentDateRaw(d.lastInterestPaymentDateRaw);
+        setPdfLastInterestPaymentDate(
+          d.lastInterestPaymentDate || formatDateWithDayNameFromPicker(d.lastInterestPaymentDateRaw)
+        );
+      }
+      if (d.interestPaymentDates != null) setPdfInterestPaymentDates(d.interestPaymentDates);
+      toast.success("Receipt PDF options auto-filled.");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Auto-fill failed"));
+    } finally {
+      setAutofillingPdfOptions(false);
+    }
+  };
+
   const downloadPdf = async (type: "order" | "deal") => {
     if (!orderNumber) return;
     const accruedInterestDaysNum = getValidatedAccruedInterestDays();
@@ -536,6 +644,90 @@ BSE Member ID: 6963`
       toast.error(getApiErrorMessage(err, "Failed to send email"));
     } finally {
       setSendingPdfEmail(false);
+    }
+  };
+
+  const sendProposalEmail = async () => {
+    if (!orderNumber) return;
+    if (!emailTo.trim()) {
+      toast.error("Client email is not available.");
+      return;
+    }
+    if (!rfq) {
+      toast.error("Settlement details not loaded.");
+      return;
+    }
+
+    const quantity =
+      (customerOrder as unknown as { quantity?: number | string | null })?.quantity ??
+      (rfq as unknown as { modQuantity?: number | string | null })?.modQuantity ??
+      null;
+    const faceValue =
+      (customerOrder as unknown as { faceValue?: number | string | null })?.faceValue ?? null;
+    const quantum =
+      Number(faceValue ?? 0) && Number(quantity ?? 0)
+        ? Number(faceValue) * Number(quantity)
+        : undefined;
+
+    const rate =
+      (rfq as unknown as { price?: number | string | null })?.price ??
+      (customerOrder as unknown as { unitPrice?: number | string | null })?.unitPrice ??
+      null;
+
+    const accruedInterest =
+      (rfq as unknown as { modAccrInt?: number | string | null })?.modAccrInt ?? null;
+
+    const totalConsideration =
+      (rfq as unknown as { modConsideration?: number | string | null })?.modConsideration ??
+      (customerOrder as unknown as { totalAmount?: number | string | null })?.totalAmount ??
+      null;
+
+    const stampDuty =
+      (rfq as unknown as { stampDutyAmount?: number | string | null })?.stampDutyAmount ??
+      (customerOrder as unknown as { stampDuty?: number | string | null })?.stampDuty ??
+      null;
+
+    const settlementAmount =
+      Number(totalConsideration ?? NaN) && Number(stampDuty ?? NaN)
+        ? Number(totalConsideration) + Number(stampDuty)
+        : undefined;
+
+    const payload = {
+      toEmail: emailTo.trim(),
+      customerName:
+        `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`.trim() ||
+        clientFullName ||
+        "Customer",
+      side: effectiveOrderSide,
+      bondName: securityName,
+      isin: String((rfq as unknown as { symbol?: string | null })?.symbol ?? ""),
+      dealDate: String((rfq as unknown as { createdAt?: string | null })?.createdAt ?? ""),
+      settlementDate: String((rfq as unknown as { modSettleDate?: string | null })?.modSettleDate ?? ""),
+      quantum: quantum ?? Number(quantum ?? 0),
+      quantity: quantity != null ? Number(quantity) : 0,
+      rate: rate != null ? Number(rate) : 0,
+      ytmAnn:
+        (rfq as unknown as { yield?: number | string | null })?.yield != null
+          ? Number((rfq as unknown as { yield?: number | string | null }).yield)
+          : null,
+      lastIpDate: null,
+      noOfDays: null,
+      principalAmount: null,
+      accruedInterest: accruedInterest != null ? Number(accruedInterest) : null,
+      totalConsideration: totalConsideration != null ? Number(totalConsideration) : null,
+      stampDuty: stampDuty != null ? Number(stampDuty) : null,
+      settlementAmount: settlementAmount != null ? Number(settlementAmount) : null,
+    };
+
+    setSendingProposalEmail(true);
+    try {
+      await ordersApi.sendProposalEmail(payload);
+      toast.success("Proposal email sent to client.");
+      setProposalEmailOpen(false);
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to send proposal email"));
+    } finally {
+      setSendingProposalEmail(false);
     }
   };
 
@@ -651,6 +843,14 @@ BSE Member ID: 6963`
               >
                 Email deal sheet
               </Button>
+              <Button
+                size="sm"
+                variant="default"
+                disabled={downloadingOrderPdf || downloadingDealPdf}
+                onClick={() => setProposalEmailOpen(true)}
+              >
+                Email proposal
+              </Button>
             </>
           )}
         </div>
@@ -661,6 +861,28 @@ BSE Member ID: 6963`
               Accrued / Ex Interest is taken from settlement (negotiations) data. Values you use are saved for this order number when you download or email a PDF, and will auto-fill next time.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="pdf-autofill-settlement-date">Settlement date (for auto-fill)</Label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input
+                    id="pdf-autofill-settlement-date"
+                    type="date"
+                    value={pdfAutofillSettlementDate}
+                    onChange={(e) => setPdfAutofillSettlementDate(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={autofillingPdfOptions || downloadingOrderPdf || downloadingDealPdf || !pdfAutofillSettlementDate}
+                    onClick={() => void autofillReceiptPdfOptions()}
+                  >
+                    {autofillingPdfOptions ? "Auto-filling..." : "Auto-fill"}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Pick the settlement date, then click Auto-fill to populate No. of Days, Settlement No., Last payment date, and Interest Payment Dates.
+                </p>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="pdf-accrued-days">No. of Days *</Label>
                 <Input
@@ -1112,6 +1334,48 @@ BSE Member ID: 6963`
             </Button>
             <Button onClick={() => void sendPdfByEmail()} disabled={sendingPdfEmail}>
               {sendingPdfEmail ? "Sending..." : "Send email"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={proposalEmailOpen} onOpenChange={setProposalEmailOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Send proposal email</DialogTitle>
+            <DialogDescription>
+              Sends the RFQ order confirmation-required proposal email to the client (from {senderEmail}).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label>Client email</Label>
+              <Input
+                type="email"
+                value={emailTo}
+                placeholder="client@email.com"
+                onChange={(e) => setEmailTo(e.target.value)}
+              />
+            </div>
+            <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+              <div><span className="font-medium text-foreground">ISIN:</span> {rfq?.symbol ?? "—"}</div>
+              <div><span className="font-medium text-foreground">Bond:</span> {securityName}</div>
+              <div><span className="font-medium text-foreground">Side:</span> {effectiveOrderSide}</div>
+              <div><span className="font-medium text-foreground">Settlement date:</span> {rfq?.modSettleDate ?? "—"}</div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setProposalEmailOpen(false)}
+              disabled={sendingProposalEmail}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => void sendProposalEmail()} disabled={sendingProposalEmail}>
+              {sendingProposalEmail ? "Sending..." : "Send proposal"}
             </Button>
           </DialogFooter>
         </DialogContent>

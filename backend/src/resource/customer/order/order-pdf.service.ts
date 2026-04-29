@@ -3,7 +3,10 @@ import { formatDate } from "@packages/kyc-providers/pdf/helper";
 import { BondService } from "@resource/bonds/bond.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
-import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
+import {
+  computeBondOrderPricingData,
+  getLastNextCouponDateBasedOnSettlementDate,
+} from "@services/order/order-pricing-helper";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 
 export type GenerateOrderPdfParams = {
@@ -56,8 +59,24 @@ export class OrderPdfService {
       });
     }
 
-    const lastCouponDateStr = bond.lastCouponDate;
-    const nextCouponDateStr = bond.nextCouponDate;
+    let lastCouponDateStr = bond.lastCouponDate?.toISOString() ?? null;
+    let nextCouponDateStr = bond.nextCouponDate?.toISOString() ?? null;
+    let recordDays =
+      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
+        ? bond.recordDays
+        : 7;
+
+    if (!lastCouponDateStr || !nextCouponDateStr) {
+      const couponDates = await getLastNextCouponDateBasedOnSettlementDate(
+        isin,
+        new Date(),
+      );
+      lastCouponDateStr = couponDates.lastCouponDate;
+      nextCouponDateStr = couponDates.nextCouponDate;
+      if (couponDates.recordDays != null && Number.isFinite(couponDates.recordDays)) {
+        recordDays = couponDates.recordDays;
+      }
+    }
 
     if (!lastCouponDateStr || !nextCouponDateStr) {
       throw new AppError(
@@ -68,19 +87,14 @@ export class OrderPdfService {
 
     const cleanPrice = bond.sellPrice;
 
-    const recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-
     const pricing = computeBondOrderPricingData({
       faceValue: bond.faceValue,
       quantity,
       cleanPrice: cleanPrice ?? 0,
       couponRate: Number(bond.couponRate),
-      lastCouponDate: (lastCouponDateStr.toISOString()),
+      lastCouponDate: lastCouponDateStr,
       recordDays,
-      nextCouponDate: nextCouponDateStr.toISOString(),
+      nextCouponDate: nextCouponDateStr,
     });
     let settlementNumber = "--";
 
@@ -100,7 +114,7 @@ export class OrderPdfService {
       totalAmount: pricing.principalAmount + pricing.accruedInterest,
       createdAt: new Date(pricing.dealDate).toISOString(),
       metadata: {
-        lastInterestPaymentDate: formatDate(lastCouponDateStr.toISOString(), "DD-MMM-YYYY"),
+        lastInterestPaymentDate: formatDate(lastCouponDateStr, "DD-MMM-YYYY"),
         valueDate: pricing.dealDate,
         accruedInterest: pricing.accruedInterest,
         accruedInterestDays: pricing.noOfAccrualDays,

@@ -149,6 +149,12 @@ export const NAV_ITEMS: NavItem[] = [
             allowOnly: ["view:rfq"],
           },
           {
+            label: "Proposal Management",
+            path: "/dashboard/rfqs/nse/proposals",
+            module: "rfq",
+            allowOnly: ["view:rfq"],
+          },
+          {
             label: "Settlement Dates",
             path: "/dashboard/rfqs/nse/settlement-dates",
             module: "rfq",
@@ -192,6 +198,12 @@ export const NAV_ITEMS: NavItem[] = [
       {
         label: "PG Management",
         path: "/dashboard/orders/pg-management",
+        module: "orders",
+        allowOnly: ["view:orders"],
+      },
+      {
+        label: "Payment Process Logs",
+        path: "/dashboard/orders/payment-process-logs",
         module: "orders",
         allowOnly: ["view:orders"],
       },

@@ -1,4 +1,4 @@
-## Core Stack
+## Core Stack test for the merdhan docs
 
 - Monorepo: Modular structure with shared packages (packages/) for schema, API gateway, and configuration.
 - Languages: TypeScript (Primary), Shell Scripting
