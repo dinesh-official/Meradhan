@@ -190,6 +190,10 @@ jobs:
           S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}"
           echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env
 
+          RAZORPAY_ROUTE_ACCOUNT_ID: ${{ vars.RAZORPAY_ROUTE_ACCOUNT_ID }}
+          echo "RAZORPAY_ROUTE_ACCOUNT_ID=${RAZORPAY_ROUTE_ACCOUNT_ID}" >> .env
+
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
