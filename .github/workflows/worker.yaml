@@ -105,7 +105,12 @@ jobs:
             echo "S3_REGION=${{ secrets.S3_REGION }}"
             echo "S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}"
             echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}"
-            echo "RAZORPAY_ROUTE_ACCOUNT_ID=${{ secrets.RAZORPAY_ROUTE_ACCOUNT_ID}}" >> .env
+            echo "RAZORPAY_ROUTE_ACCOUNT_ID=${{ vars.RAZORPAY_ROUTE_ACCOUNT_ID}}"
+
+            echo "BACKOFFICE_SMTP_HOST=${{vars.BACKOFFICE_SMTP_HOST}}"
+            echo "BACKOFFICE_SMTP_PORT=${{vars.BACKOFFICE_SMTP_PORT}}" 
+            echo "BACKOFFICE_SMTP_EMAIL=${{vars.BACKOFFICE_SMTP_EMAIL}}"
+            echo "BACKOFFICE_SMTP_PASS=${{vars.BACKOFFICE_SMTP_PASS}}"
           } >> .env
 
       - name: Configure AWS Credentials
