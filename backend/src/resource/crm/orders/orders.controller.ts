@@ -263,6 +263,18 @@ export class CrmOrdersController {
     });
   };
 
+  getPaymentProcessLogs = async (req: Request, res: Response) => {
+    const search =
+      typeof req.query.search === "string" ? req.query.search : undefined;
+    const result = await this.ordersService.getSettlementAutomationLogGroups(search);
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: {
+        groups: result,
+      },
+    });
+  };
+
   getOrderById = async (req: Request, res: Response) => {
     try {
       const orderId = Number(req.params.id);

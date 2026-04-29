@@ -11,6 +11,7 @@ import type {
   GetReceiptPdfOptionsResponse,
   UpsertReceiptPdfOptionsResponse,
   GetPaymentGatewaySettingsResponse,
+  GetPaymentProcessLogsResponse,
   PaymentGatewayMode,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
@@ -54,6 +55,20 @@ export class CrmOrdersApi {
     const { data } = await this.apiClient.get<GetCrmOrdersResponse>(
       "/crm/orders/all",
       mergedConfig
+    );
+    return data;
+  }
+
+  async getPaymentProcessLogs(
+    search?: string,
+    config?: AxiosRequestConfig
+  ): Promise<GetPaymentProcessLogsResponse> {
+    const { data } = await this.apiClient.get<GetPaymentProcessLogsResponse>(
+      "/crm/orders/payment-process-logs",
+      {
+        ...config,
+        params: { ...(config?.params ?? {}), ...(search ? { search } : {}) },
+      }
     );
     return data;
   }
