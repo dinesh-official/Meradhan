@@ -3,13 +3,25 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, FileText, Loader2, Mail, RefreshCw, Trash2, UserRound, Zap } from "lucide-react";
+import {
+  Check,
+  ChevronsUpDown,
+  FileText,
+  History,
+  Loader2,
+  Mail,
+  Pencil,
+  RefreshCw,
+  UserRound,
+  Zap,
+} from "lucide-react";
 import type { AxiosError } from "axios";
 import apiGateway, { type BondDetailsResponse, type CustomerProfile } from "@root/apiGateway";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Command,
   CommandEmpty,
@@ -178,6 +190,8 @@ function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
 
 type ProposalDraft = {
   id: string;
+  /** When this draft was created by editing an earlier saved proposal. */
+  editOfId?: string | null;
   isin: string;
   quantity: number;
   notes: string;
@@ -236,7 +250,11 @@ function ProposalManagementView() {
   } | null>(null);
   const [savedSearch, setSavedSearch] = useState("");
   const [savedCustomerFilter, setSavedCustomerFilter] = useState<CustomerProfile | null>(null);
+  const [savedScope, setSavedScope] = useState<"MINE" | "ALL">("MINE");
   const [savedProposals, setSavedProposals] = useState<ProposalDraft[]>([]);
+  const [editSourceId, setEditSourceId] = useState<string | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyRootId, setHistoryRootId] = useState<string | null>(null);
   const { fetchProposalMutation } = useProposalFetcher();
 
   const Pill = ({
@@ -287,9 +305,11 @@ function ProposalManagementView() {
   }, [isin, isinOptions]);
 
   const savedQuery = useQuery({
-    queryKey: ["crm-saved-proposals"],
+    queryKey: ["crm-saved-proposals", savedScope],
     queryFn: async () => {
-      const res = await savedProposalsApi.listMine();
+      const res = savedScope === "ALL"
+        ? await savedProposalsApi.listAll()
+        : await savedProposalsApi.listMine();
       return res.responseData.proposals ?? [];
     },
   });
@@ -308,6 +328,45 @@ function ProposalManagementView() {
       })
       .filter((x): x is ProposalDraft => Boolean(x));
   }, [savedFromDb]);
+
+  const savedDraftById = useMemo(() => {
+    const m = new Map<string, ProposalDraft>();
+    for (const d of savedDrafts) m.set(String(d.id), d);
+    return m;
+  }, [savedDrafts]);
+
+  const getHistoryRootId = (startId: string): string => {
+    let current = String(startId);
+    const seen = new Set<string>();
+    while (!seen.has(current)) {
+      seen.add(current);
+      const row = savedDraftById.get(current);
+      const parent = row?.editOfId ?? null;
+      if (!parent) return current;
+      current = String(parent);
+    }
+    return String(startId);
+  };
+
+  const getHistoryItems = (rootId: string): ProposalDraft[] => {
+    const memo = new Map<string, string>();
+    const rootOf = (id: string) => {
+      const cached = memo.get(id);
+      if (cached) return cached;
+      const r = getHistoryRootId(id);
+      memo.set(id, r);
+      return r;
+    };
+    return savedDrafts
+      .filter((d) => rootOf(String(d.id)) === String(rootId))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  };
+
+  const openHistory = (item: ProposalDraft) => {
+    const root = getHistoryRootId(String(item.id));
+    setHistoryRootId(root);
+    setHistoryOpen(true);
+  };
   const savedProposalsToRender = useMemo(() => {
     const q = savedSearch.trim().toLowerCase();
     const customerId = savedCustomerFilter?.id ?? null;
@@ -342,6 +401,7 @@ function ProposalManagementView() {
     setNotes("");
     setSelectedCustomer(null);
     setProposalDraft(null);
+    setEditSourceId(null);
     setIsSheetOpen(false);
   };
 
@@ -418,11 +478,31 @@ function ProposalManagementView() {
     setManualYield(item.manualYield ?? "");
     setNotes(item.notes);
     setSelectedCustomer(item.customer);
+    setEditSourceId(null);
     setIsSheetOpen(true);
   };
 
-  const handleDeleteSavedProposal = (proposalId: string) => {
-    void deleteMutation.mutateAsync(Number(proposalId));
+  const handleEditSavedProposal = (item: ProposalDraft) => {
+    // Load the proposal into the form, but do NOT overwrite the existing saved row.
+    // Next "Save Proposal" will create a new version linked via `editOfId`.
+    setProposalDraft({
+      ...item,
+      id: crypto.randomUUID(),
+      editOfId: item.id,
+      createdAt: new Date().toISOString(),
+    });
+    setIsin(item.isin);
+    setIsinSearch(item.isin);
+    setQuantity(String(item.quantity));
+    setSide(item.side);
+    setSettlementType(item.settlementType ?? "T+0");
+    setManualYieldEnabled(Boolean(item.manualYieldEnabled));
+    setManualYield(item.manualYield ?? "");
+    setNotes(item.notes);
+    setSelectedCustomer(item.customer);
+    setEditSourceId(item.id);
+    setIsSheetOpen(true);
+    toast.success(`Editing proposal (will save as new version)`);
   };
 
   const saveMutation = useMutation({
@@ -435,7 +515,10 @@ function ProposalManagementView() {
         side: draft.side,
         quantity: draft.quantity,
         notes: draft.notes || null,
-        data: draft,
+        data: {
+          ...draft,
+          editOfId: editSourceId,
+        },
       });
       return res.responseData.proposal;
     },
@@ -444,23 +527,11 @@ function ProposalManagementView() {
       if (proposalDraft) {
         setProposalDraft((prev) => (prev ? { ...prev, id: String(row.id) } : prev));
       }
+      setEditSourceId(null);
       await queryClient.invalidateQueries({ queryKey: ["crm-saved-proposals"] });
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "Failed to save proposal"));
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await savedProposalsApi.deleteById(id);
-    },
-    onSuccess: async () => {
-      toast.success("Saved proposal removed");
-      await queryClient.invalidateQueries({ queryKey: ["crm-saved-proposals"] });
-    },
-    onError: (error: unknown) => {
-      toast.error(getApiErrorMessage(error, "Failed to delete proposal"));
     },
   });
 
@@ -936,7 +1007,7 @@ function ProposalManagementView() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-3">
             <div className="space-y-2">
               <label className="text-sm font-medium">Search</label>
               <Input
@@ -952,6 +1023,18 @@ function ProposalManagementView() {
                 onSelect={setSavedCustomerFilter}
                 placeholder="Filter by customer (optional)..."
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Scope</label>
+              <Select value={savedScope} onValueChange={(v) => setSavedScope(v as "MINE" | "ALL")}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MINE">My proposals</SelectItem>
+                  <SelectItem value="ALL">All proposals</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex justify-end">
@@ -977,124 +1060,174 @@ function ProposalManagementView() {
               No saved proposals yet.
             </div>
           ) : (
-            <div className="grid gap-3 md:grid-cols-3">
-              {savedProposalsToRender.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex h-full flex-col rounded-xl border border-gray-200 bg-background p-4"
-                >
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{item.isin}</span>
-                      <Pill
-                        label={item.side}
-                        variant={item.side === "SELL" ? "destructive" : "secondary"}
-                      />
-                      <Pill label={`Qty ${item.quantity}`} variant="outline" />
-                      <Pill label={item.settlementType ?? "T+0"} variant="outline" />
-                      {item.manualYieldEnabled ? (
-                        <Pill label={`Manual YTM ${item.manualYield || "—"}%`} />
-                      ) : null}
-                    </div>
+            <div className="rounded-xl border border-gray-200">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ISIN</TableHead>
+                    <TableHead>Bond</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Side</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead>Settle</TableHead>
+                    <TableHead className="text-right">Calc Px</TableHead>
+                    <TableHead className="text-right">Settle Amt</TableHead>
+                    <TableHead className="text-right">YTM</TableHead>
+                    <TableHead>Version</TableHead>
+                    <TableHead>Saved</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {savedProposalsToRender.map((item) => {
+                    const deal = item.fetched?.dealAutofill;
+                    const manual =
+                      item.manualYieldEnabled && item.manualYield?.trim()
+                        ? Number(item.manualYield)
+                        : null;
+                    const calcYtm = deal?.pricing?.finalYieldRaw;
+                    const fallbackYtm =
+                      deal?.suggested?.yield ??
+                      deal?.suggested?.buyYield ??
+                      (item.fetched?.bond?.buyYield as unknown as number | null | undefined);
+                    const ytm =
+                      manual != null && Number.isFinite(manual) && manual > 0
+                        ? manual
+                        : calcYtm != null && Number.isFinite(Number(calcYtm)) && Number(calcYtm) > 0
+                          ? Number(calcYtm)
+                          : fallbackYtm != null && Number.isFinite(Number(fallbackYtm)) && Number(fallbackYtm) > 0
+                            ? Number(fallbackYtm)
+                            : null;
 
-                    <div className="space-y-0.5">
-                      <p className="truncate text-sm">
-                        {item.fetched?.bond?.bondName ||
-                          item.fetched?.bond?.instrumentName ||
-                          "—"}
-                      </p>
-                      <p className="truncate text-sm text-muted-foreground">
-                        {customerFullName(item.customer)}
-                        {item.customer?.emailAddress ? ` • ${item.customer.emailAddress}` : ""}
-                      </p>
-                    </div>
+                    const bondName =
+                      item.fetched?.bond?.bondName ||
+                      item.fetched?.bond?.instrumentName ||
+                      "—";
 
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                      <span>
-                        Calc Px{" "}
-                        {formatNumber(
-                          item.fetched?.dealAutofill?.pricing?.finalPrice ??
-                            item.fetched?.pricing?.cleanPrice,
-                          4,
-                        )}
-                      </span>
-                      <span>
-                        Settle{" "}
-                        {formatCurrency(
-                          item.fetched?.dealAutofill?.pricing?.settlementAmount ??
-                            item.fetched?.pricing?.settlementAmount,
-                        )}
-                      </span>
-                      <span>
-                        YTM{" "}
-                        {(() => {
-                          const deal = item.fetched?.dealAutofill;
-                          const manual =
-                            item.manualYieldEnabled && item.manualYield?.trim()
-                              ? Number(item.manualYield)
-                              : null;
-                          const calcYtm = deal?.pricing?.finalYieldRaw;
-                          const fallbackYtm =
-                            deal?.suggested?.yield ??
-                            deal?.suggested?.buyYield ??
-                            (item.fetched?.bond?.buyYield as unknown as number | null | undefined);
-                          const ytm =
-                            manual != null && Number.isFinite(manual) && manual > 0
-                              ? manual
-                              : calcYtm != null && Number.isFinite(Number(calcYtm)) && Number(calcYtm) > 0
-                                ? Number(calcYtm)
-                                : fallbackYtm != null && Number.isFinite(Number(fallbackYtm)) && Number(fallbackYtm) > 0
-                                  ? Number(fallbackYtm)
-                                  : null;
-                          return ytm != null ? `${formatNumber(ytm, 4)}%` : "—";
-                        })()}
-                      </span>
-                    </div>
+                    const settleAmt =
+                      item.fetched?.dealAutofill?.pricing?.settlementAmount ??
+                      item.fetched?.pricing?.settlementAmount;
 
-                    <p className="text-xs text-muted-foreground">
-                      Saved {formatDisplayDate(item.createdAt)}
-                    </p>
-                  </div>
+                    const calcPx =
+                      item.fetched?.dealAutofill?.pricing?.finalPrice ??
+                      item.fetched?.pricing?.cleanPrice;
 
-                  <div className="mt-3 border-t border-gray-100 pt-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
+                    return (
+                      <TableRow
+                        key={item.id}
+                        className="cursor-pointer"
                         onClick={() => handleOpenSavedProposal(item)}
                       >
-                        Open
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => void sendEmailForDraft(item)}
-                        disabled={sendProposalEmailMutation.isPending}
-                      >
-                        <Mail className="h-4 w-4" />
-                        Send Email
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => void handleAutoCreateRfqFromSaved(item)}
-                        disabled={autoCreateRfqMutation.isPending}
-                      >
-                        <Zap className="h-4 w-4" />
-                        Auto RFQ
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteSavedProposal(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                        <TableCell className="font-mono text-xs">{item.isin}</TableCell>
+                        <TableCell className="max-w-[260px] truncate">{bondName}</TableCell>
+                        <TableCell className="max-w-[220px] truncate">
+                          <div className="min-w-0">
+                            <div className="truncate">{customerFullName(item.customer)}</div>
+                            {item.customer?.emailAddress ? (
+                              <div className="truncate text-xs text-muted-foreground">
+                                {item.customer.emailAddress}
+                              </div>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Pill
+                              label={item.side}
+                              variant={item.side === "SELL" ? "destructive" : "secondary"}
+                            />
+                            <Pill label={item.settlementType ?? "T+0"} variant="outline" />
+                            {item.manualYieldEnabled ? (
+                              <Pill label={`Manual ${item.manualYield || "—"}%`} />
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatInteger(item.quantity)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="rounded-full">
+                            {item.settlementType ?? "T+0"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatNumber(calcPx, 4)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatCurrency(settleAmt)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {ytm != null ? `${formatNumber(ytm, 4)}%` : "—"}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {(item as ProposalDraft).editOfId ? (
+                            <span className="font-mono">edit of #{(item as ProposalDraft).editOfId}</span>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+                        <TableCell className="tabular-nums">{formatDisplayDate(item.createdAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenSavedProposal(item);
+                              }}
+                            >
+                              Open
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditSavedProposal(item);
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openHistory(item);
+                              }}
+                            >
+                              <History className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void sendEmailForDraft(item);
+                              }}
+                              disabled={sendProposalEmailMutation.isPending}
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void handleAutoCreateRfqFromSaved(item);
+                              }}
+                              disabled={autoCreateRfqMutation.isPending}
+                            >
+                              <Zap className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>
@@ -1111,6 +1244,78 @@ function ProposalManagementView() {
 
           {proposalDraft && bond ? (
             <div className="px-4 pb-6 space-y-6">
+              <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-background/95 backdrop-blur border-b border-gray-200">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">
+                      {proposalDraft.isin} • {proposalDraft.side} • {proposalDraft.settlementType}
+                    </p>
+                    <p className="text-sm font-semibold truncate">
+                      {bond.bondName || bond.instrumentName || "—"}
+                    </p>
+                    {editSourceId ? (
+                      <p className="text-xs text-muted-foreground font-mono truncate">
+                        Editing saved #{editSourceId} (saving creates a new version)
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const source =
+                          Number.isFinite(Number(proposalDraft.id))
+                            ? proposalDraft.id
+                            : editSourceId ?? proposalDraft.editOfId ?? null;
+                        if (!source) {
+                          toast.error("No history found (save proposal first).");
+                          return;
+                        }
+                        const row = savedDraftById.get(String(source));
+                        if (!row) {
+                          toast.error("History source not found in list.");
+                          return;
+                        }
+                        openHistory(row);
+                      }}
+                    >
+                      <History className="h-4 w-4" />
+                      View history
+                    </Button>
+                    {editSourceId ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditSourceId(null);
+                          toast.message("Edit mode cleared");
+                        }}
+                      >
+                        Clear edit
+                      </Button>
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => void sendEmailForDraft(proposalDraft)}
+                      disabled={sendProposalEmailMutation.isPending}
+                    >
+                      <Mail className="h-4 w-4" />
+                      Send Email
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => void handleAutoCreateRfqFromSaved(proposalDraft)}
+                      disabled={autoCreateRfqMutation.isPending || !Number.isFinite(Number(proposalDraft.id))}
+                    >
+                      <Zap className="h-4 w-4" />
+                      Auto RFQ
+                    </Button>
+                  </div>
+                </div>
+              </div>
               <div className="rounded-xl border border-gray-200 p-4 space-y-4">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -1399,6 +1604,97 @@ function ProposalManagementView() {
               ) : (
                 "Send Email"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+        <DialogContent className="sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Proposal history</DialogTitle>
+            <DialogDescription>
+              All versions for this proposal chain (latest first).
+            </DialogDescription>
+          </DialogHeader>
+
+          {historyRootId ? (
+            <div className="rounded-xl border border-gray-200">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>ISIN</TableHead>
+                    <TableHead>Side</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead>Settlement</TableHead>
+                    <TableHead>Manual YTM</TableHead>
+                    <TableHead>Saved</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {getHistoryItems(historyRootId).map((v) => (
+                    <TableRow key={`hist-${v.id}`}>
+                      <TableCell className="font-mono text-xs">#{v.id}</TableCell>
+                      <TableCell className="font-mono text-xs">{v.isin}</TableCell>
+                      <TableCell>
+                        <Pill
+                          label={v.side}
+                          variant={v.side === "SELL" ? "destructive" : "secondary"}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatInteger(v.quantity)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="rounded-full">
+                          {v.settlementType ?? "T+0"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {v.manualYieldEnabled ? `${v.manualYield || "—"}%` : "—"}
+                      </TableCell>
+                      <TableCell className="tabular-nums">{formatDisplayDate(v.createdAt)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                              handleOpenSavedProposal(v);
+                              setHistoryOpen(false);
+                            }}
+                          >
+                            Open
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              handleEditSavedProposal(v);
+                              setHistoryOpen(false);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                            Edit
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-muted-foreground">
+              No history found.
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setHistoryOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -37,6 +37,10 @@ export class CrmSavedProposalsService {
     return CrmSavedProposalsRepo.listByCreatedBy(createdById);
   }
 
+  async listAllProposals() {
+    return CrmSavedProposalsRepo.listAll();
+  }
+
   async getMyProposalById(createdById: number, id: number) {
     const row = await CrmSavedProposalsRepo.findById(id, createdById);
     if (!row) {

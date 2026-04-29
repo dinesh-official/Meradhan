@@ -11,6 +11,12 @@ router.get(
   controller.listMine
 );
 
+router.get(
+  "/api/crm/proposals/all",
+  allowAccessMiddleware("CRM"),
+  controller.listAll
+);
+
 router.post(
   "/api/crm/proposals",
   allowAccessMiddleware("CRM"),

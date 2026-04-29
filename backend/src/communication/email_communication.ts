@@ -45,14 +45,17 @@ export const sendBackOfficeEmail = async (data: {
   attachments?: nodemailer.SendMailOptions["attachments"];
 }) => {
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
+    host: env.BACKOFFICE_SMTP_HOST,
+    port: Number(env.BACKOFFICE_SMTP_PORT),
     secure: false,
     auth: {
-      user: "backoffice@meradhan.co",
-      pass: "lapr aafh ehgm ukri",
+      user: env.BACKOFFICE_SMTP_EMAIL,
+      pass: env.BACKOFFICE_SMTP_PASS,
     },
   });
-  const info = await transporter.sendMail(data);
+  const info = await transporter.sendMail({
+    ...data,
+    from: data.from || env.BACKOFFICE_SMTP_EMAIL,
+  });
   return info.messageId;
 };

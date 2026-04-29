@@ -20,6 +20,14 @@ import { db } from "@core/database/database";
 import type { BondDetailsResponse } from "@packages/apiGateway";
 import { env } from "@packages/config/src/env";
 import { makeRazorpayRouteTransition } from "@services/razorpay-route/RPay-route";
+import { CrmOrdersService } from "@resource/crm/orders/orders.service";
+import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
+import { sendBackOfficeEmail } from "@communication/email_communication";
+import {
+  dateOfBirthToPdfPassword,
+  getCustomerDobRawForPdf,
+} from "@utils/dobPdfPassword";
+import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import crypto from "crypto";
 
 // Type definitions for settlement service
@@ -37,11 +45,13 @@ export class OrderSettlementService {
   nseCbrics: NseCBRICS;
   orderService: OrderService;
   rfqMasterDbSyncManager: RfqMasterDbSyncManager;
+  crmOrdersService: CrmOrdersService;
   constructor() {
     this.nseRfq = new NseRfq();
     this.nseCbrics = new NseCBRICS();
     this.orderService = new OrderService();
     this.rfqMasterDbSyncManager = new RfqMasterDbSyncManager();
+    this.crmOrdersService = new CrmOrdersService();
   }
 
   private buildBatchId(paymentId: string, orderId: number) {
@@ -226,7 +236,7 @@ export class OrderSettlementService {
 
       console.log("accepted negotiation");
       // Step 2: Accept negotiation quote
-      await this.runWithAutomationLog({
+      const acceptNegotiationResponse = await this.runWithAutomationLog({
         orderId: order.id,
         paymentId,
         batchId,
@@ -239,7 +249,7 @@ export class OrderSettlementService {
 
       console.log("propose deal");
       // Step 3: Propose deal
-      await this.runWithAutomationLog({
+      const proposeDealResponse = await this.runWithAutomationLog({
         orderId: order.id,
         paymentId,
         batchId,
@@ -252,7 +262,7 @@ export class OrderSettlementService {
 
       console.log("accept or reject deal");
       // Step 4: Accept/Reject deal
-      await this.runWithAutomationLog({
+      const acceptOrRejectDealResponse = await this.runWithAutomationLog({
         orderId: order.id,
         paymentId,
         batchId,
@@ -263,7 +273,7 @@ export class OrderSettlementService {
       });
 
       console.log("update order status");
-      await this.runWithAutomationLog({
+      const updateStatusResponse = await this.runWithAutomationLog({
         orderId: order.id,
         paymentId,
         batchId,
@@ -322,6 +332,21 @@ export class OrderSettlementService {
           status: "SUCCESS",
           message: "Auto-marked success after batch completion",
           completedAt: new Date(),
+        },
+      });
+
+      await this.trySendOrderReceiptPdfEmail({
+        order,
+        paymentId,
+        batchId,
+        inputData: {
+          rfqNumber: addIsinResponse.rfqNumber,
+          addIsinResponse,
+          acceptNegotiationResponse,
+          proposeDealResponse,
+          acceptOrRejectDealResponse,
+          updateStatusResponse,
+          isNetBanking,
         },
       });
     } catch (error) {
@@ -416,7 +441,7 @@ export class OrderSettlementService {
         access: 2,
         participantList: [env.CBRICS_DOMAIN],
         valueNegotiable: "Y",
-        remarks: `PG Reference Number : ${paymentId}`
+        remarks: `${paymentId}`
       });
 
       console.log("rfqResponse", rfqResponse);
@@ -468,7 +493,7 @@ export class OrderSettlementService {
     order: OrderWithNSEData,
     inCrores: number
     // participant: NseCbricsParticipantModel
-  ): Promise<void> {
+  ): Promise<{ rfqNumber: string; negotiationId: string | number | null }> {
     let rfqNumber: string | undefined;
     try {
       logger.logInfo(`Accepting negotiation for order ${order.id}`);
@@ -502,6 +527,10 @@ export class OrderSettlementService {
       );
 
       logger.logInfo(`Negotiation accepted successfully for order ${order.id}`);
+      return {
+        rfqNumber,
+        negotiationId: (negotiationResponse as { id?: string | number | null }).id ?? null,
+      };
     } catch (error) {
       logger.logError(
         `Failed to accept negotiation for order ${order.id}, RFQ: ${rfqNumber || "unknown"}:`,
@@ -520,7 +549,14 @@ export class OrderSettlementService {
   private async proposeDeal(
     order: OrderWithNSEData
     // participant: NseCbricsParticipantModel
-  ): Promise<void> {
+  ): Promise<{
+    rfqNumber: string;
+    negotiationId: string;
+    consideration: number;
+    accruedInterest: number;
+    cleanPrice: number;
+    principalAmount: number;
+  }> {
     try {
       logger.logInfo(`Proposing deal for order ${order.id}`);
 
@@ -569,6 +605,14 @@ export class OrderSettlementService {
 
 
       logger.logInfo(`Deal proposed successfully for order ${order.id}`);
+      return {
+        rfqNumber,
+        negotiationId,
+        consideration,
+        accruedInterest,
+        cleanPrice,
+        principalAmount,
+      };
     } catch (error) {
       logger.logError(`Failed to propose deal for order ${order.id}:`, error);
       throw new AppError("Failed to propose deal", {
@@ -580,7 +624,13 @@ export class OrderSettlementService {
   /**
    * Step 4: Accept or reject deal (POST /rest/v1/deal/acceptreject)
    */
-  private async acceptOrRejectDeal(order: OrderWithNSEData): Promise<void> {
+  private async acceptOrRejectDeal(order: OrderWithNSEData): Promise<{
+    rfqNumber: string;
+    negotiationId: string;
+    acceptedConsideration: number;
+    acceptedAccruedInterest: number;
+    cleanPrice: number;
+  }> {
     try {
       logger.logInfo(`Accepting deal for order ${order.id}`);
 
@@ -631,6 +681,13 @@ export class OrderSettlementService {
       );
 
       logger.logInfo(`Deal accepted successfully for order ${order.id}`);
+      return {
+        rfqNumber,
+        negotiationId,
+        acceptedConsideration,
+        acceptedAccruedInterest,
+        cleanPrice,
+      };
     } catch (error) {
       logger.logError(`Failed to accept deal for order ${order.id}:`, error);
       throw new AppError("Failed to accept deal", {
@@ -642,24 +699,187 @@ export class OrderSettlementService {
   /**
    * Update order status to settled
    */
-  private async updateOrderStatus(orderId: number): Promise<void> {
+  private async updateOrderStatus(
+    orderId: number,
+  ): Promise<{ status: OrderStatus; settledAt: string }> {
     try {
       await this.orderService.updateOrderStatus(orderId, OrderStatus.SETTLED);
+      const settledAt = new Date().toISOString();
 
       // Log final settlement completion
       await this.orderService.addOrderLog(
         orderId,
         SettlementStep.UPDATE_ORDER_STATUS,
         SettlementStatus.SUCCESS,
-        { settledAt: new Date().toISOString() },
+        { settledAt },
         { settlementStatus: "COMPLETED" }
       );
 
       logger.logInfo(`Order ${orderId} status updated to SETTLED`);
+      return { status: OrderStatus.SETTLED, settledAt };
     } catch (error) {
       logger.logError(`Failed to update order status:`, error);
       throw new AppError("Failed to update order status", {
         code: "ORDER_UPDATE_FAILED",
+      });
+    }
+  }
+
+  private async trySendOrderReceiptPdfEmail(params: {
+    order: OrderWithNSEData;
+    paymentId: string;
+    batchId: string;
+    inputData?: Record<string, unknown>;
+  }): Promise<void> {
+    const { order, paymentId, batchId, inputData } = params;
+    const step = "SEND_ORDER_RECEIPT_PDF_EMAIL";
+
+    await this.addAutomationLog({
+      orderId: order.id,
+      paymentId,
+      batchId,
+      step,
+      status: "STARTED",
+      message: "Sending order receipt PDF to customer",
+      inputData,
+      startedAt: new Date(),
+    });
+
+    try {
+      const recipientEmail = (order as unknown as { customerProfile?: { emailAddress?: string | null } | null })
+        ?.customerProfile?.emailAddress;
+      if (!recipientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
+        throw new AppError("Customer email is missing or invalid", {
+          code: "CUSTOMER_EMAIL_MISSING",
+        });
+      }
+
+      const orderNumber = (order as unknown as { orderNumber?: string | null }).orderNumber ?? null;
+      if (!orderNumber) {
+        throw new AppError("Order number is missing; cannot generate order receipt PDF", {
+          code: "ORDER_NUMBER_MISSING",
+        });
+      }
+
+      const { buffer: rawBuffer, filename } =
+        await this.crmOrdersService.generateOrderReceiptPdfBuffer(orderNumber, {});
+
+      let buffer = rawBuffer;
+      const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
+      const customerName =
+        [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() ||
+        "CUSTOMER";
+      const gender = String((user as unknown as { gender?: string | null }).gender ?? "")
+        .trim()
+        .toUpperCase();
+      const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+
+      try {
+        const dobRaw = getCustomerDobRawForPdf(user);
+        const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
+        if (pdfPassword) {
+          buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
+        }
+      } catch (encErr) {
+        logger.logError(`Order receipt PDF encryption failed for order ${orderNumber}:`, encErr);
+      }
+
+      const metadata = (order as unknown as { metadata?: Record<string, unknown> | null }).metadata ?? null;
+      const dealId = metadata && typeof metadata === "object" ? (metadata.dealId as string | undefined) : undefined;
+      const clientOrderSide =
+        metadata && typeof metadata === "object"
+          ? (metadata.clientOrderSide as "BUY" | "SELL" | undefined)
+          : undefined;
+      const side = clientOrderSide === "BUY" || clientOrderSide === "SELL" ? clientOrderSide : undefined;
+      const buySellLower = side === "SELL" ? "sell" : "buy";
+      const buySellYour = side === "SELL" ? "Sell" : "Buy";
+
+      const subject = `Order Confirmation & Receipt – Order ID ${orderNumber}`;
+      const text = `Dear ${salutation} ${customerName},
+
+Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
+
+Bond Name: ${(order as unknown as { bondName?: string | null }).bondName ?? "—"}
+
+ISIN: ${order.isin}
+
+Deal ID: ${dealId ?? "—"}
+
+Order Type: Your ${buySellYour}
+
+Please find the Order Receipt attached for your reference. The order receipt is password protected. You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.
+
+To proceed with settlement, please transfer the required amount from your bank account verified on MeraDhan to the designated NCL account, maintained with HDFC Bank or RBI as applicable, via NEFT / RTGS, in accordance with the instructions provided at the time of placing your order.
+
+Kindly ensure that the payment is completed within the stipulated time to avoid cancellation of the order.
+
+Important Notes:
+
+This Order Receipt indicates the intention to transact and is not a Deal Confirmation.
+
+A Deal Sheet will be shared with you once the transaction is settled.
+
+Please ensure that the Demat Account listed in the receipt is active and ready to receive the bonds/securities.
+
+If you require any assistance, please contact us at backoffice@meradhan.co.
+
+Warm regards,
+
+MeraDhan Team
+
+Disclaimer: Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully.
+
+BondNest Capital India Securities Private Limited operates the MeraDhan platform as an Online Bond Platform Provider (OBPP).
+
+SEBI Registration No.: INZ000330234
+
+NSE Member ID: 90480
+
+BSE Member ID: 6963`;
+
+      const html = text
+        .split("\n")
+        .map((line) => line.trim())
+        .join("<br/>");
+
+      const messageId = await sendBackOfficeEmail({
+        to: recipientEmail,
+        from: "backoffice@meradhan.co",
+        subject,
+        html,
+        text,
+        attachments: [
+          {
+            filename,
+            content: buffer,
+            contentType: "application/pdf",
+          },
+        ],
+      });
+
+      await this.addAutomationLog({
+        orderId: order.id,
+        paymentId,
+        batchId,
+        step,
+        status: "SUCCESS",
+        message: "Order receipt PDF email sent",
+        outputData: { to: recipientEmail, orderNumber, messageId, subject },
+        completedAt: new Date(),
+      });
+    } catch (err) {
+      await this.addAutomationLog({
+        orderId: order.id,
+        paymentId,
+        batchId,
+        step,
+        status: "FAILED",
+        message: "Failed to send order receipt PDF email",
+        errorData: {
+          error: err instanceof Error ? err.message : "Unknown error",
+          stack: err instanceof Error ? err.stack : undefined,
+        },
+        completedAt: new Date(),
       });
     }
   }

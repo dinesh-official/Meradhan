@@ -10,6 +10,14 @@ export class CrmSavedProposalsController {
   private service = new CrmSavedProposalsService();
   private rfqMasterService = new RfqMasterService();
 
+  listAll = async (_req: Request, res: Response) => {
+    const rows = await this.service.listAllProposals();
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { proposals: rows },
+    });
+  };
+
   listMine = async (req: Request, res: Response) => {
     const userId = Number(req.session?.id);
     const rows = await this.service.listMyProposals(userId);
