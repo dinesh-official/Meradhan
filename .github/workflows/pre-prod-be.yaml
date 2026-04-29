@@ -86,7 +86,7 @@ jobs:
           DEV_S3_ENDPOINT: https://staging-meradhan-storage.s3.ap-south-1.amazonaws.com
           DEV_S3_BUCKET_NAME: staging-meradhan-storage
           MSG91_RCS_URL: ${{ vars.MSG91_RCS_URL }}
-          RAZORPAY_ROUTE_ACCOUNT_ID: ${{ vars.RAZORPAY_ROUTE_ACCOUNT_ID }}
+          RAZORPAY_ROUTE_ACCOUNT_ID: ${{ vars.DEV_RAZORPAY_ROUTE_ACCOUNT_ID }}
 
           BACKOFFICE_SMTP_HOST: ${{ vars.BACKOFFICE_SMTP_HOST }}
           BACKOFFICE_SMTP_PORT: ${{ vars.BACKOFFICE_SMTP_PORT }}
