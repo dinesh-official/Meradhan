@@ -16,36 +16,44 @@ jobs:
       - name: Create .env from GitHub Variables & Secrets
         shell: bash
         env:
-          
-          # 🔐 Secrets (sensitive)
+
+          # 🔐 Secrets
           DEV_STRAPI_API_TOKEN: ${{ secrets.DEV_STRAPI_API_TOKEN }}
           DEV_JWT_SECRET: ${{ secrets.DEV_JWT_SECRET }}
           DEV_PASSWORD_PEPPER: ${{ secrets.DEV_PASSWORD_PEPPER }}
           DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
           DEV_DIRECT_URL: ${{ secrets.DEV_DIRECT_URL }}
+
           DEV_KRA_PASSWORD: ${{ secrets.DEV_KRA_PASSWORD }}
           DEV_KRA_PASS_KEY: ${{ secrets.DEV_KRA_PASS_KEY }}
+
           DEV_MSG91_AUTH_KEY: ${{ secrets.DEV_MSG91_AUTH_KEY }}
+
           DEV_SMTP_PASS: ${{ secrets.SMTP_PASS }}
+
           DEV_CBRICS_PASSWORD: ${{ secrets.DEV_CBRICS_PASSWORD }}
           DEV_RFQ_CBRICS_PASSWORD: ${{ secrets.DEV_RFQ_CBRICS_PASSWORD }}
+
           DEV_DIGIO_USERNAME_PASS: ${{ secrets.DEV_DIGIO_USERNAME_PASS }}
+
           DEV_NSDL_SECRET_KEY: ${{ secrets.DEV_NSDL_SECRET_KEY }}
           DEV_CDSL_AES_KEY: ${{ secrets.DEV_CDSL_AES_KEY }}
+
           DEV_AUTH_SECRET: ${{ secrets.DEV_AUTH_SECRET }}
           DEV_AUTH_GOOGLE_SECRET: ${{ secrets.DEV_AUTH_GOOGLE_SECRET }}
           DEV_AUTH_FACEBOOK_SECRET: ${{ secrets.DEV_AUTH_FACEBOOK_SECRET }}
           DEV_AUTH_MICROSOFT_ENTRA_ID_SECRET: ${{ secrets.DEV_AUTH_MICROSOFT_ENTRA_ID_SECRET }}
+
           DEV_RAZORPAY_KEY_SECRET: ${{ secrets.DEV_RAZORPAY_KEY_SECRET }}
           DEV_RAZORPAY_WEBHOOK_SECRET: ${{ secrets.DEV_RAZORPAY_WEBHOOK_SECRET }}
+
           DEV_S3_ACCESS_KEY_ID: ${{ secrets.DEV_S3_ACCESS_KEY_ID }}
           DEV_S3_SECRET_ACCESS_KEY: ${{ secrets.DEV_S3_SECRET_ACCESS_KEY }}
+
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DEV_NEXT_PUBLIC_GRAPHQL_KEY: ${{ secrets.DEV_NEXT_PUBLIC_GRAPHQL_KEY }}
 
-        
-          # Variables (non-sensitive)
-          # DEV_NEXT_PUBLIC_GRAPHQL_KEY: ${{ vars.DEV_NEXT_PUBLIC_GRAPHQL_KEY }}
+          # ⚙️ Vars
           DEV_PORT: ${{ vars.DEV_PORT }}
           DEV_REDIS_HOST: ${{ vars.DEV_REDIS_HOST }}
           DEV_REDIS_PORT: ${{ vars.DEV_REDIS_PORT }}
@@ -66,6 +74,7 @@ jobs:
 
           DEV_CBRICS_DOMAIN: ${{ vars.DEV_CBRICS_DOMAIN }}
           DEV_RFQ_CBRICS_DOMAIN: ${{ vars.DEV_RFQ_CBRICS_DOMAIN }}
+          DEV_RFQ_CBRICS_LOGIN: ${{ vars.DEV_RFQ_CBRICS_LOGIN }}
 
           DEV_NDSL_REQUESTOR_ID: ${{ vars.DEV_NDSL_REQUESTOR_ID }}
           DEV_NSDL_MODE: ${{ vars.DEV_NSDL_MODE }}
@@ -79,51 +88,92 @@ jobs:
           DEV_AUTH_MICROSOFT_ENTRA_ID_ISSUER: ${{ vars.DEV_AUTH_MICROSOFT_ENTRA_ID_ISSUER }}
 
           DEV_RAZORPAY_KEY_ID: ${{ vars.DEV_RAZORPAY_KEY_ID }}
-          DEV_RFQ_CBRICS_LOGIN: ${{ vars.DEV_RFQ_CBRICS_LOGIN }}
 
           MSG91_RCS_URL: ${{ vars.MSG91_RCS_URL }}
 
         run: |
-          echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
-          echo "NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000" >> .env
+          cat <<EOF > .env
 
-          echo "GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}" >> .env
-          echo "STRAPI_API_TOKEN=${DEV_STRAPI_API_TOKEN}" >> .env
+          NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co
+          NEXT_PUBLIC_BACKEND_IP_URL=http://stage-be.stage:4000
 
-          echo "JWT_SECRET=${DEV_JWT_SECRET}" >> .env
-          echo "PASSWORD_PEPPER=${DEV_PASSWORD_PEPPER}" >> .env
+          GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}
+          STRAPI_API_TOKEN=${DEV_STRAPI_API_TOKEN}
 
-          echo "DATABASE_URL=${DEV_DATABASE_URL}" >> .env
-          echo "DIRECT_URL=${DEV_DIRECT_URL}" >> .env
+          JWT_SECRET=${DEV_JWT_SECRET}
+          PASSWORD_PEPPER=${DEV_PASSWORD_PEPPER}
 
-          echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
-          echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
+          DATABASE_URL=${DEV_DATABASE_URL}
+          DIRECT_URL=${DEV_DIRECT_URL}
 
-          echo "OPENAI_API_KEY=${OPENAI_API_KEY}" >> .env
+          REDIS_HOST=${DEV_REDIS_HOST}
+          REDIS_PORT=${DEV_REDIS_PORT}
 
-          echo "KRA_USERNAME=${DEV_KRA_USERNAME}" >> .env
-          echo "KRA_PASSWORD=${DEV_KRA_PASSWORD}" >> .env
+          OPENAI_API_KEY=${OPENAI_API_KEY}
 
-          echo "MSG91_AUTH_KEY=${DEV_MSG91_AUTH_KEY}" >> .env
-          echo "MSG91_LOGIN_TEMPLATE=${DEV_MSG91_LOGIN_TEMPLATE}" >> .env
+          # KRA
+          KRA_USERNAME=${DEV_KRA_USERNAME}
+          KRA_PASSWORD=${DEV_KRA_PASSWORD}
+          KRA_PASS_KEY=${DEV_KRA_PASS_KEY}
+          KRA_OKRA_CD_MI_ID=${DEV_KRA_OKRA_CD_MI_ID}
+          KRA_MOB_NO=${DEV_KRA_MOB_NO}
+          KRA_ENV=${DEV_KRA_ENV}
 
-          echo "SMTP_HOST=${DEV_SMTP_HOST}" >> .env
-          echo "SMTP_PASS=${DEV_SMTP_PASS}" >> .env
+          # CBRICS (FIXED ENUM)
+          CBRICS_DOMAIN=${DEV_CBRICS_DOMAIN}
+          CBRICS_PASSWORD=${DEV_CBRICS_PASSWORD}
+          CBRICS_ENV=UAT
 
-          echo "CBRICS_DOMAIN=${DEV_CBRICS_DOMAIN}" >> .env
-          echo "CBRICS_PASSWORD=${DEV_CBRICS_PASSWORD}" >> .env
+          RFQ_CBRICS_DOMAIN=${DEV_RFQ_CBRICS_DOMAIN}
+          RFQ_CBRICS_LOGIN=${DEV_RFQ_CBRICS_LOGIN}
+          RFQ_CBRICS_PASSWORD=${DEV_RFQ_CBRICS_PASSWORD}
+          RFQ_CBRICS_ENV=UAT
 
-          echo "AUTH_GOOGLE_ID=${DEV_AUTH_GOOGLE_ID}" >> .env
-          echo "AUTH_GOOGLE_SECRET=${DEV_AUTH_GOOGLE_SECRET}" >> .env
+          # MSG91
+          MSG91_AUTH_KEY=${DEV_MSG91_AUTH_KEY}
+          MSG91_LOGIN_TEMPLATE=${DEV_MSG91_LOGIN_TEMPLATE}
+          MSG91_SIGNUP_TEMPLATE=${DEV_MSG91_SIGNUP_TEMPLATE}
+          MSG91_VERIFY_TEMPLATE=${DEV_MSG91_VERIFY_TEMPLATE}
+          MSG91_RCS_URL=${MSG91_RCS_URL}
 
-          echo "RAZORPAY_KEY_ID=${DEV_RAZORPAY_KEY_ID}" >> .env
-          echo "RAZORPAY_KEY_SECRET=${DEV_RAZORPAY_KEY_SECRET}" >> .env
+          # SMTP
+          SMTP_SENDER=${DEV_SMTP_SENDER}
+          SMTP_HOST=${DEV_SMTP_HOST}
+          SMTP_PORT=${DEV_SMTP_PORT}
+          SMTP_USER=${DEV_SMTP_USER}
+          SMTP_PASS=${DEV_SMTP_PASS}
 
-          echo "S3_ACCESS_KEY_ID=${DEV_S3_ACCESS_KEY_ID}" >> .env
-          echo "S3_SECRET_ACCESS_KEY=${DEV_S3_SECRET_ACCESS_KEY}" >> .env
+          # DIGIO
+          DIGIO_USERNAME_PASS=${DEV_DIGIO_USERNAME_PASS}
 
-          echo "MSG91_RCS_URL=${MSG91_RCS_URL}" >> .env
-          echo "KRA_PASS_KEY=${DEV_KRA_PASS_KEY}" >> .env
+          # NSDL/CDSL
+          NDSL_REQUESTOR_ID=${DEV_NDSL_REQUESTOR_ID}
+          NSDL_SECRET_KEY=${DEV_NSDL_SECRET_KEY}
+          NSDL_MODE=${DEV_NSDL_MODE}
+          CDSL_AES_KEY=${DEV_CDSL_AES_KEY}
+          ENTITY_ID=${DEV_ENTITY_ID}
+          CDSL_MODE=${DEV_CDSL_MODE}
+
+          # AUTH
+          AUTH_SECRET=${DEV_AUTH_SECRET}
+          AUTH_GOOGLE_ID=${DEV_AUTH_GOOGLE_ID}
+          AUTH_GOOGLE_SECRET=${DEV_AUTH_GOOGLE_SECRET}
+          AUTH_FACEBOOK_ID=${DEV_AUTH_FACEBOOK_ID}
+          AUTH_FACEBOOK_SECRET=${DEV_AUTH_FACEBOOK_SECRET}
+          AUTH_MICROSOFT_ENTRA_ID_ID=${DEV_AUTH_MICROSOFT_ENTRA_ID_ID}
+          AUTH_MICROSOFT_ENTRA_ID_SECRET=${DEV_AUTH_MICROSOFT_ENTRA_ID_SECRET}
+          AUTH_MICROSOFT_ENTRA_ID_ISSUER=${DEV_AUTH_MICROSOFT_ENTRA_ID_ISSUER}
+
+          # PAYMENTS
+          RAZORPAY_KEY_ID=${DEV_RAZORPAY_KEY_ID}
+          RAZORPAY_KEY_SECRET=${DEV_RAZORPAY_KEY_SECRET}
+          RAZORPAY_WEBHOOK_SECRET=${DEV_RAZORPAY_WEBHOOK_SECRET}
+
+          # STORAGE
+          S3_ACCESS_KEY_ID=${DEV_S3_ACCESS_KEY_ID}
+          S3_SECRET_ACCESS_KEY=${DEV_S3_SECRET_ACCESS_KEY}
+
+          EOF
 
           echo "------ FINAL ENV ------"
           cat .env
@@ -138,20 +188,14 @@ jobs:
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ vars.AWS_REGION }} \
-          | docker login \
-            --username AWS \
-            --password-stdin 450321244603.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
+          | docker login --username AWS --password-stdin 450321244603.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com
 
-      - name: Build, Tag & Push Docker Image
-        env:
-          REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
-          REPOSITORY: stage-meradhan-be
-          IMAGE_TAG: latest
+      - name: Build & Push Docker Image
         run: |
-          docker build --no-cache -f backenddocker -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker build -f backenddocker -t 450321244603.dkr.ecr.ap-south-1.amazonaws.com/stage-meradhan-be:latest .
+          docker push 450321244603.dkr.ecr.ap-south-1.amazonaws.com/stage-meradhan-be:latest
 
-      - name: Deploy to Amazon ECS
+      - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: stage-meradhan-be-revision.json
