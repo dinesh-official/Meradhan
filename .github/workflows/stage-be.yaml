@@ -123,6 +123,7 @@ jobs:
           echo "S3_SECRET_ACCESS_KEY=${DEV_S3_SECRET_ACCESS_KEY}" >> .env
 
           echo "MSG91_RCS_URL=${MSG91_RCS_URL}" >> .env
+          echo "KRA_PASS_KEY=${DEV_KRA_PASS_KEY}" >> .env
 
           echo "------ FINAL ENV ------"
           cat .env
