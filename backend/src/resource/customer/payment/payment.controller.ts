@@ -87,6 +87,7 @@ export class PaymentController {
     if (body.event === "payment.captured") {
       try {
         const paymentEntity = body.payload?.payment?.entity;
+        const isNetBanking = body.payload?.payment?.entity.method == "netbanking";
 
         if (!paymentEntity) {
           logger.logError("Payment entity missing in webhook payload");
@@ -143,6 +144,8 @@ export class PaymentController {
               paymentOrderId,
               paymentId,
               paymentEntity,
+              isNetBanking,
+
             }
           );
           console.log(job);

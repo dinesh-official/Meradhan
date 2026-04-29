@@ -1,3 +1,4 @@
+import { db } from "@core/database/database";
 import { env } from "@packages/config/src/env";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
@@ -57,7 +58,8 @@ export class PaymentService {
     amount: number,
     currency: string = "INR",
     receipt: string,
-    bank?: Orders.RazorpayOrderCreateRequestBody["bank_account"]
+    userId: number,
+    bank?: Orders.RazorpayOrderCreateRequestBody["bank_account"],
   ): Promise<PaymentOrderResponse> {
     if (amount <= 0) {
       throw new AppError("Invalid payment amount", {
@@ -73,12 +75,31 @@ export class PaymentService {
       });
     }
 
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: {
+        id: userId
+      },
+      include: {
+        panCard: true
+      }
+    })
+
     const options: Orders.RazorpayOrderCreateRequestBody = {
       amount: Math.round(amount * 100), // amount in paisa
       currency,
       receipt,
       // method: "netbanking",
       bank_account: bank,
+      notes: {
+        "Member_ID": env.CBRICS_DOMAIN, //Member_ID 
+        "Client_ID": customer?.panCard?.panCardNo || "", //Client_PAN 
+        "Client_IFSC": bank?.ifsc || "", //Client_Bank_IFSC_Number 
+        "Client_Name": bank?.name || "", //Client_Name 
+        "Client_Account": bank?.account_number || "", //Client_Bank_Account_Number
+        "Transaction_Type": "L", //Type_of_Transaction (Lumpsum/SIP)
+        "CC_Name": "NCL", //Name_of_Clearing_Corporation 
+        "Brokerage_Amt": "", //leave blank if not applicable, but to be passed } 
+      }
     };
     console.log(options);
 

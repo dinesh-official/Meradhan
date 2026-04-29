@@ -5,7 +5,7 @@ import { OrderSettlementService } from "@services/order/order_settlement.service
 import logger from "@utils/logger/logger";
 startQueueWorker(orderSettlementQueue, async (job: Job) => {
   const settlementService = new OrderSettlementService();
-  await settlementService.initiateOrderSettlement(job.data.id);
+  await settlementService.initiateOrderSettlement(job.data.id, job.data.isNetBanking);
 }, 1, {
   onCompleted(job) {
     logger.logInfo(`Order settlement job ${job.id} completed`);

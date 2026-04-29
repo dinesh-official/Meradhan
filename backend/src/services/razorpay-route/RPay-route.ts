@@ -386,31 +386,16 @@ const getSettlementBackAccount = async () => {
 }
 
 export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes }: { payId: string, userId: number, amount: number, notes?: Record<string, any> }) => {
-    const account = await getDefaultRpAccount();
-    // const stackHolder = await initializeStackHolder(account.razorpayAccountId, userId);
-    const initProduct = await initProductConfig(account.razorpayAccountId);
-    const settlementAccount = await getSettlementBackAccount();
-    // const product = await updateProductConfig(account.razorpayAccountId, {
-    //     productId: initProduct.id,
-    //     settlements: {
-    //         account_number: settlementAccount.accountNumber,
-    //         beneficiary_name: settlementAccount.beneficiaryName,
-    //         ifsc_code: settlementAccount.ifscCode
-    //     },
-    // });
-    // console.log("Product Config Updated", product.id);
     const transfer = await createTransfer({
         paymentId: payId,
         transfers: [
             {
-                account: account.razorpayAccountId,
-                amount: amount,
+                account: env.RAZORPAY_ROUTE_ACCOUNT_ID,
+                amount: amount * 100,
                 currency: "INR",
                 notes: {
                     ...notes,
                     "userId": userId.toString(),
-                    // "stockholder": stackHolder.record.razorpayStakeholderId,
-                    // "accountId": stackHolder.record.razorpayAccountId,
                 },
                 "on_hold": false
             }

@@ -151,6 +151,46 @@ function parseRfqMasterDateTime(
 }
 
 export class CrmOrdersService {
+  async getSettlementAutomationLogGroups(search?: string) {
+    const where = search?.trim()
+      ? {
+          OR: [
+            { paymentId: { contains: search, mode: "insensitive" as const } },
+            { batchId: { contains: search, mode: "insensitive" as const } },
+            { step: { contains: search, mode: "insensitive" as const } },
+            { message: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+
+    const rows = await db.dataBase.orderSettlementAutomationLog.findMany({
+      where,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    });
+
+    const grouped = rows.reduce<Record<string, typeof rows>>((acc, row) => {
+      if (!acc[row.paymentId]) acc[row.paymentId] = [];
+      acc[row.paymentId]!.push(row);
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([paymentId, logs]) => ({
+      paymentId,
+      totalLogs: logs.length,
+      latestStatus: logs[0]?.status ?? "UNKNOWN",
+      latestCreatedAt: logs[0]?.createdAt ?? null,
+      logs,
+    }));
+  }
+
+  async getSettlementAutomationLogs(paymentId?: string | null) {
+    if (!paymentId) return [];
+    return db.dataBase.orderSettlementAutomationLog.findMany({
+      where: { paymentId },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    });
+  }
+
   async getAllOrders(
     page: number = 1,
     limit: number = 10,
@@ -287,7 +327,12 @@ export class CrmOrdersService {
       throw new Error(`Order with ID ${orderId} not found`);
     }
 
-    return order;
+    const settlementAutomationLogs = await this.getSettlementAutomationLogs(order.paymentId);
+
+    return {
+      ...order,
+      settlementAutomationLogs,
+    };
   }
 
   async updateOrderStatus(orderId: number, status: OrderStatus) {

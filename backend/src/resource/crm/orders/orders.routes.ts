@@ -12,6 +12,12 @@ router.get(
 );
 
 router.get(
+  "/api/crm/orders/payment-process-logs",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.getPaymentProcessLogs
+);
+
+router.get(
   "/api/crm/orders/payment-gateway-settings",
   allowAccessMiddleware("CRM"),
   crmOrdersController.getPaymentGatewaySettings

@@ -1135,6 +1135,144 @@ function OrderDetailsView() {
             </CardContent>
           </Card>
 
+          {/* Payment Process Logs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Process Logs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {order.settlementAutomationLogs &&
+              order.settlementAutomationLogs.length > 0 ? (
+                <div className="space-y-4">
+                  {Object.entries(
+                    order.settlementAutomationLogs.reduce(
+                      (acc, log) => {
+                        const key = log.paymentId || "unknown-payment";
+                        if (!acc[key]) acc[key] = [];
+                        acc[key].push(log);
+                        return acc;
+                      },
+                      {} as Record<string, typeof order.settlementAutomationLogs>
+                    )
+                  ).map(([paymentId, logs]) => (
+                    <div key={paymentId} className="rounded-lg border border-border p-4">
+                      <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Payment ID</p>
+                          <p className="font-medium font-mono text-sm">{paymentId}</p>
+                        </div>
+                        <Badge variant="outline">{logs.length} logs</Badge>
+                      </div>
+
+                      <div className="space-y-3">
+                        {logs.map((log) => {
+                          const statusColor =
+                            log.status === "SUCCESS"
+                              ? "text-green-600"
+                              : log.status === "FAILED"
+                                ? "text-red-600"
+                                : "text-yellow-600";
+
+                          return (
+                            <div
+                              key={log.id}
+                              className="rounded-md border border-border/70 bg-muted/30 p-3"
+                            >
+                              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                                <div className="space-y-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-medium">
+                                      {log.step.replace(/_/g, " ")}
+                                    </span>
+                                    <Badge
+                                      variant={
+                                        log.status === "SUCCESS"
+                                          ? "secondary"
+                                          : log.status === "FAILED"
+                                            ? "destructive"
+                                            : "outline"
+                                      }
+                                    >
+                                      {log.status}
+                                    </Badge>
+                                    <Badge variant="outline">{log.batchId}</Badge>
+                                  </div>
+                                  {log.message ? (
+                                    <p className="text-sm text-muted-foreground">{log.message}</p>
+                                  ) : null}
+                                  <p className="text-xs text-muted-foreground">
+                                    {dateTimeUtils.formatDateTime(
+                                      log.createdAt,
+                                      "DD MMM YYYY hh:mm:ss AA"
+                                    )}
+                                  </p>
+                                </div>
+                                <div className={statusColor}>
+                                  {log.status === "SUCCESS" ? (
+                                    <CheckCircle2 className="h-5 w-5" />
+                                  ) : log.status === "FAILED" ? (
+                                    <XCircle className="h-5 w-5" />
+                                  ) : (
+                                    <Clock className="h-5 w-5" />
+                                  )}
+                                </div>
+                              </div>
+
+                              {(log.inputData || log.outputData || log.errorData) && (
+                                <Collapsible className="mt-3">
+                                  <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                                    <span>View payload</span>
+                                    <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
+                                  </CollapsibleTrigger>
+                                  <CollapsibleContent className="mt-2 space-y-2">
+                                    {log.inputData ? (
+                                      <div className="rounded-md bg-muted/50 p-3">
+                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                          Input Data
+                                        </p>
+                                        <pre className="overflow-auto text-xs">
+                                          {JSON.stringify(log.inputData, null, 2)}
+                                        </pre>
+                                      </div>
+                                    ) : null}
+                                    {log.outputData ? (
+                                      <div className="rounded-md bg-muted/50 p-3">
+                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                          Output Data
+                                        </p>
+                                        <pre className="overflow-auto text-xs">
+                                          {JSON.stringify(log.outputData, null, 2)}
+                                        </pre>
+                                      </div>
+                                    ) : null}
+                                    {log.errorData ? (
+                                      <div className="rounded-md bg-muted/50 p-3">
+                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                          Error Data
+                                        </p>
+                                        <pre className="overflow-auto text-xs">
+                                          {JSON.stringify(log.errorData, null, 2)}
+                                        </pre>
+                                      </div>
+                                    ) : null}
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No payment process logs found for this order.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Order Metadata */}
           <Card>
             <CardHeader>

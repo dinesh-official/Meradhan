@@ -96,7 +96,39 @@ model OrderLogs {
     @@map("order_logs")
 }
 
-/** CRM settle-order PDF generator form fields (keyed by NSE settle / req order number). */
+/// Separate settlement automation logs keyed by paymentId/batchId.
+/// Kept standalone intentionally so existing order relations/flows remain untouched.
+model OrderSettlementAutomationLog {
+    id Int @id @default(autoincrement())
+
+    orderId   Int?
+    paymentId String
+    batchId   String
+
+    step   String
+    status String
+
+    message    String?
+    inputData  Json?
+    outputData Json?
+    errorData  Json?
+
+    startedAt   DateTime?
+    completedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([paymentId])
+    @@index([batchId])
+    @@index([paymentId, batchId])
+    @@index([orderId])
+    @@map("order_settlement_automation_logs")
+}
+
+/**
+ * CRM settle-order PDF generator form fields (keyed by NSE settle / req order number).
+ */
 model CrmOrderReceiptPdfOptions {
     id Int @id @default(autoincrement())
 

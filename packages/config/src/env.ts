@@ -77,7 +77,7 @@ const EnvSchema = z.object(
     RAZORPAY_KEY_ID: z.string().min(1, { message: "RAZORPAY_KEY_ID is required" }),
     RAZORPAY_KEY_SECRET: z.string().min(1, { message: "RAZORPAY_KEY_SECRET is required" }),
     RAZORPAY_WEBHOOK_SECRET: z.string().min(1, { message: "RAZORPAY_WEBHOOK_SECRET is required" }),
-
+    RAZORPAY_ROUTE_ACCOUNT_ID: z.string().min(1, { message: "RAZORPAY_WEBHOOK_SECRET is required" }),
     // CHECKOUT CONFIG
     STAMP_DUTY_RATE: z.string().regex(/^\d+(\.\d{1,2})?$/, { message: "STAMP_DUTY_RATE must be a decimal number", }).default("0.1"),
 

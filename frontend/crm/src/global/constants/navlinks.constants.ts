@@ -201,6 +201,12 @@ export const NAV_ITEMS: NavItem[] = [
         module: "orders",
         allowOnly: ["view:orders"],
       },
+      {
+        label: "Payment Process Logs",
+        path: "/dashboard/orders/payment-process-logs",
+        module: "orders",
+        allowOnly: ["view:orders"],
+      },
     ],
   },
 
