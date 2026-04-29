@@ -11,6 +11,7 @@ import type {
   GetReceiptPdfOptionsResponse,
   UpsertReceiptPdfOptionsResponse,
   GetPaymentGatewaySettingsResponse,
+  GetPaymentProcessLogsResponse,
   PaymentGatewayMode,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
@@ -54,6 +55,20 @@ export class CrmOrdersApi {
     const { data } = await this.apiClient.get<GetCrmOrdersResponse>(
       "/crm/orders/all",
       mergedConfig
+    );
+    return data;
+  }
+
+  async getPaymentProcessLogs(
+    search?: string,
+    config?: AxiosRequestConfig
+  ): Promise<GetPaymentProcessLogsResponse> {
+    const { data } = await this.apiClient.get<GetPaymentProcessLogsResponse>(
+      "/crm/orders/payment-process-logs",
+      {
+        ...config,
+        params: { ...(config?.params ?? {}), ...(search ? { search } : {}) },
+      }
     );
     return data;
   }
@@ -220,6 +235,37 @@ export class CrmOrdersApi {
   ): Promise<SendOrderPdfEmailResponse> {
     const { data } = await this.apiClient.post<SendOrderPdfEmailResponse>(
       `/crm/orders/send-pdf-email/${encodeURIComponent(orderNumber)}`,
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async sendProposalEmail(
+    payload: {
+      toEmail: string;
+      customerName: string;
+      side: "BUY" | "SELL";
+      bondName: string;
+      isin: string;
+      dealDate?: string;
+      settlementDate?: string;
+      quantum?: number;
+      quantity: number;
+      rate?: number;
+      ytmAnn?: number | null;
+      lastIpDate?: string | null;
+      noOfDays?: number | null;
+      principalAmount?: number | null;
+      accruedInterest?: number | null;
+      totalConsideration?: number | null;
+      stampDuty?: number | null;
+      settlementAmount?: number | null;
+    },
+    config?: AxiosRequestConfig
+  ): Promise<SendOrderPdfEmailResponse> {
+    const { data } = await this.apiClient.post<SendOrderPdfEmailResponse>(
+      "/crm/orders/send-proposal-email",
       payload,
       config
     );

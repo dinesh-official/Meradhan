@@ -3,7 +3,10 @@ import type { appSchema } from "@root/schema";
 import type z from "zod";
 import { BondQueryBuilder } from "./bond_query_builder";
 import { isISIN } from "@utils/filters/convert";
-import { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
+import {
+  computeBondOrderPricingData,
+  getLastNextCouponDateBasedOnSettlementDate,
+} from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { placeOrderEmailCustomer, sendPlaceOrderEmail } from "./place-order-email";
 import { AppConfigService } from "@resource/app-config/app-config.service";
@@ -27,6 +30,7 @@ export class BondService {
   async getBondOrderPricing(
     isin: string,
     quantityInput?: number,
+    settlementType?: "T+0" | "T+1",
   ): Promise<GetBondOrderPricingResult> {
     const bond = await this.getBondDetails(isin);
     if (!bond) {
@@ -35,31 +39,45 @@ export class BondService {
 
     const cleanPrice = bond.sellPrice;
 
-    const lastCouponDateStr = bond.lastCouponDate;
-    const nextCouponDateStr = bond.nextCouponDate;
+    let lastCouponDateStr = bond.lastCouponDate?.toISOString() ?? null;
+    let nextCouponDateStr = bond.nextCouponDate?.toISOString() ?? null;
+    let recordDays =
+      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
+        ? bond.recordDays
+        : 7;
+
+    if (!lastCouponDateStr || !nextCouponDateStr) {
+      const couponDates = await getLastNextCouponDateBasedOnSettlementDate(
+        isin,
+        new Date(),
+      );
+      lastCouponDateStr = couponDates.lastCouponDate;
+      nextCouponDateStr = couponDates.nextCouponDate;
+      if (couponDates.recordDays != null && Number.isFinite(couponDates.recordDays)) {
+        recordDays = couponDates.recordDays;
+      }
+    }
 
     if (!lastCouponDateStr || !nextCouponDateStr) {
       return { ok: false, reason: "missing_coupon_dates" };
     }
 
-    const recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-
     const rawQuantity = quantityInput ?? 1;
     const quantity =
       Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
 
-    const pricing = computeBondOrderPricingData({
-      faceValue: bond.faceValue,
-      quantity,
-      cleanPrice: cleanPrice ?? 0,
-      couponRate: Number(bond.couponRate),
-      lastCouponDate: lastCouponDateStr?.toISOString() ?? "",
-      recordDays,
-      nextCouponDate: nextCouponDateStr?.toISOString() ?? "",
-    });
+    const pricing = computeBondOrderPricingData(
+      {
+        faceValue: bond.faceValue,
+        quantity,
+        cleanPrice: cleanPrice ?? 0,
+        couponRate: Number(bond.couponRate),
+        lastCouponDate: lastCouponDateStr,
+        recordDays,
+        nextCouponDate: nextCouponDateStr,
+      },
+      { settlementType },
+    );
 
     return { ok: true, pricing };
   }

@@ -139,6 +139,31 @@ export class RazorpayRouteAccountsService {
     return { record, razorpay: created };
   }
 
+  async createLinkedAccountDbOnly(input: CreateRazorpayLinkedAccountInput & { razorpayAccountId: string }) {
+    const makeDefault = !!input.isDefault;
+    const record = await db.dataBase.$transaction(async (tx) => {
+      if (makeDefault) {
+        await tx.razorpayRouteAccount.updateMany({
+          where: { isDefault: true },
+          data: { isDefault: false },
+        });
+      }
+      return tx.razorpayRouteAccount.upsert({
+        where: { razorpayAccountId: input.razorpayAccountId },
+        update: {
+          data: input as unknown as object,
+          ...(typeof input.isDefault === "boolean" ? { isDefault: input.isDefault } : {}),
+        },
+        create: {
+          razorpayAccountId: input.razorpayAccountId,
+          data: input as unknown as object,
+          isDefault: makeDefault,
+        },
+      });
+    });
+    return { record, razorpay: null as unknown };
+  }
+
   async updateLinkedAccount(
     razorpayAccountId: string,
     payload: {
@@ -225,6 +250,54 @@ export class RazorpayRouteAccountsService {
     });
 
     return { record, razorpay: updated };
+  }
+
+  async updateLinkedAccountDbOnly(
+    razorpayAccountId: string,
+    payload: {
+      legal_business_name: string;
+      contact_name: string;
+      isDefault?: boolean;
+      profile: {
+        category: string;
+        subcategory: string;
+        addresses: {
+          registered: {
+            street1?: string;
+            street2?: string;
+            city?: string;
+            state?: string;
+            postal_code?: string;
+            country?: string;
+          };
+        };
+      };
+      legal_info: { pan?: string; gst?: string };
+    }
+  ) {
+    const makeDefault = payload.isDefault;
+    const record = await db.dataBase.$transaction(async (tx) => {
+      if (makeDefault === true) {
+        await tx.razorpayRouteAccount.updateMany({
+          where: { isDefault: true },
+          data: { isDefault: false },
+        });
+      }
+
+      return tx.razorpayRouteAccount.upsert({
+        where: { razorpayAccountId },
+        update: {
+          data: payload as unknown as object,
+          ...(typeof makeDefault === "boolean" ? { isDefault: makeDefault } : {}),
+        },
+        create: {
+          razorpayAccountId,
+          data: payload as unknown as object,
+          isDefault: makeDefault ?? false,
+        },
+      });
+    });
+    return { record, razorpay: null as unknown };
   }
 }
 

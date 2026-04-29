@@ -172,6 +172,7 @@ export class OrderService {
       preview.totalAmount,
       "INR",
       orderNumber,
+      customerId,
       {
         account_number: customerBank.accountNumber,
         ifsc: customerBank.ifscCode,

@@ -473,6 +473,8 @@ export class NseRfq {
     payload: AcceptNegotiationQuoteRequest
   ): Promise<AcceptNegotiationQuoteResponse> {
     return this.withReLoginRetry(async (loginKey) => {
+      console.log(payload);
+
       const { data } = await this.client.post<AcceptNegotiationQuoteResponse>(
         "/negotiation/accept",
         payload,

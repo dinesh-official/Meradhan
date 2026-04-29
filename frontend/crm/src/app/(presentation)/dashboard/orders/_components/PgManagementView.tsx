@@ -11,7 +11,6 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import OrdersSectionTabs from "./OrdersSectionTabs";
-import RazorpayRoutesSection from "./RazorpayRoutesSection";
 import { getErrorMessage } from "@/core/utils/getErrorMessage";
 
 export default function PgManagementView() {
@@ -82,7 +81,6 @@ export default function PgManagementView() {
         </CardContent>
       </Card>
 
-      <RazorpayRoutesSection />
     </div>
   );
 }

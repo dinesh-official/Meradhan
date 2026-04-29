@@ -78,6 +78,48 @@ export class RazorpayRouteAccountsController {
     });
   };
 
+  createLinkedAccountDbOnly = async (req: Request, res: Response) => {
+    const schema = z.object({
+      razorpayAccountId: z.string().min(3).max(64),
+      email: z.string().email(),
+      phone: z.string().min(8).max(15),
+      reference_id: z.string().min(1).max(512).optional(),
+      legal_business_name: z.string().min(4).max(200),
+      business_type: z.string().min(1),
+      contact_name: z.string().min(2).max(255),
+      isDefault: z.boolean().optional(),
+      profile: z.object({
+        category: z.string().min(1),
+        subcategory: z.string().min(1),
+        addresses: z.object({
+          registered: z.object({
+            street1: z.string().max(250).optional(),
+            street2: z.string().max(250).optional(),
+            city: z.string().max(250).optional(),
+            state: z.string().min(2).max(250).optional(),
+            postal_code: z.string().min(1).optional(),
+            country: z.string().min(2).max(250).optional(),
+          }),
+        }),
+      }),
+      legal_info: z.object({
+        pan: z.string().optional(),
+        gst: z.string().optional(),
+      }),
+    });
+
+    const body = schema.parse(req.body) as CreateRazorpayLinkedAccountInput & { razorpayAccountId: string };
+    const result = await this.service.createLinkedAccountDbOnly(body);
+
+    return res.sendResponse({
+      statusCode: HttpStatus.CREATED,
+      responseData: {
+        account: null,
+        record: result.record,
+      },
+    });
+  };
+
   updateLinkedAccount = async (req: Request, res: Response) => {
     const paramsSchema = z.object({ id: z.string().min(1) });
     const { id } = paramsSchema.parse(req.params);
@@ -113,6 +155,46 @@ export class RazorpayRouteAccountsController {
       statusCode: HttpStatus.OK,
       responseData: {
         account: result.razorpay,
+        record: result.record,
+      },
+    });
+  };
+
+  updateLinkedAccountDbOnly = async (req: Request, res: Response) => {
+    const paramsSchema = z.object({ id: z.string().min(1) });
+    const { id } = paramsSchema.parse(req.params);
+
+    const bodySchema = z.object({
+      legal_business_name: z.string().min(4).max(200),
+      contact_name: z.string().min(2).max(255),
+      isDefault: z.boolean().optional(),
+      profile: z.object({
+        category: z.string().min(1),
+        subcategory: z.string().min(1),
+        addresses: z.object({
+          registered: z.object({
+            street1: z.string().max(100).optional(),
+            street2: z.string().max(100).optional(),
+            city: z.string().max(100).optional(),
+            state: z.string().min(2).max(32).optional(),
+            postal_code: z.string().length(6).optional(),
+            country: z.string().min(2).max(64).optional(),
+          }),
+        }),
+      }),
+      legal_info: z.object({
+        pan: z.string().optional(),
+        gst: z.string().optional(),
+      }),
+    });
+
+    const payload = bodySchema.parse(req.body);
+    const result = await this.service.updateLinkedAccountDbOnly(id, payload);
+
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: {
+        account: null,
         record: result.record,
       },
     });
