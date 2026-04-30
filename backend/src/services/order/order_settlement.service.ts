@@ -29,6 +29,7 @@ import {
 } from "@utils/dobPdfPassword";
 import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import crypto from "crypto";
+import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
 
 // Type definitions for settlement service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -56,6 +57,100 @@ export class OrderSettlementService {
 
   private buildBatchId(paymentId: string, orderId: number) {
     return `${paymentId || `order-${orderId}`}-${crypto.randomUUID().slice(0, 8)}`;
+  }
+
+  /**
+   * NSE negotiation/deal APIs return a wide payload (sometimes with extra keys).
+   * Prisma `RFQNegotiation` only accepts a known set of fields; whitelist + normalize here.
+   */
+  private mapNegotiationToDbData(raw: unknown) {
+    const r = (raw ?? {}) as Record<string, unknown>;
+    const rawTradeSplits = r.tradeSplits;
+
+    // Required fields in Prisma model.
+    const id = String(r.id ?? "");
+    const rfqNumber = String(r.rfqNumber ?? "");
+    const date = String(r.date ?? "");
+
+    if (!id || !rfqNumber || !date) {
+      throw new AppError("Negotiation response missing required fields", {
+        code: "NEGOTIATION_SYNC_INVALID",
+      });
+    }
+
+    return {
+      rfqNumber,
+      id,
+      date,
+      isin: (r.isin as string | null | undefined) ?? null,
+      buySell: (r.buySell as any) ?? undefined,
+
+      initSettlementType: (r.initSettlementType as number | null | undefined) ?? null,
+      initSettlementDate: (r.initSettlementDate as string | null | undefined) ?? null,
+      initAeCode: (r.initAeCode as string | null | undefined) ?? null,
+      initDealType: (r.initDealType as any) ?? undefined,
+      initClientCode: (r.initClientCode as string | null | undefined) ?? null,
+      initClientRegType: (r.initClientRegType as any) ?? undefined,
+      initValue: (r.initValue as number | null | undefined) ?? null,
+      initQuantity: (r.initQuantity as number | null | undefined) ?? null,
+      initYieldType: (r.initYieldType as any) ?? undefined,
+      initYield: (r.initYield as number | null | undefined) ?? null,
+      initCalcMethod: (r.initCalcMethod as any) ?? undefined,
+      initPrice: (r.initPrice as number | null | undefined) ?? null,
+      initAccruedInterest: (r.initAccruedInterest as number | null | undefined) ?? null,
+      initConsideration: (r.initConsideration as number | null | undefined) ?? null,
+      initQuoteTime: (r.initQuoteTime as string | null | undefined) ?? null,
+      initGtdFlag: (r.initGtdFlag as any) ?? undefined,
+      initEndTime: (r.initEndTime as string | null | undefined) ?? null,
+      initRemarks: (r.initRemarks as string | null | undefined) ?? null,
+      initLoginId: (r.initLoginId as string | null | undefined) ?? null,
+
+      respSettlementType: (r.respSettlementType as number | null | undefined) ?? null,
+      respSettlementDate: (r.respSettlementDate as string | null | undefined) ?? null,
+      respAeCode: (r.respAeCode as string | null | undefined) ?? null,
+      respDealType: (r.respDealType as any) ?? undefined,
+      respClientCode: (r.respClientCode as string | null | undefined) ?? null,
+      respClientRegType: (r.respClientRegType as any) ?? undefined,
+      respValue: (r.respValue as number | null | undefined) ?? null,
+      respQuantity: (r.respQuantity as number | null | undefined) ?? null,
+      respYieldType: (r.respYieldType as any) ?? undefined,
+      respYield: (r.respYield as number | null | undefined) ?? null,
+      respCalcMethod: (r.respCalcMethod as any) ?? undefined,
+      respPrice: (r.respPrice as number | null | undefined) ?? null,
+      respAccruedInterest: (r.respAccruedInterest as number | null | undefined) ?? null,
+      respConsideration: (r.respConsideration as number | null | undefined) ?? null,
+      respQuoteTime: (r.respQuoteTime as string | null | undefined) ?? null,
+      respGtdFlag: (r.respGtdFlag as any) ?? undefined,
+      respEndTime: (r.respEndTime as string | null | undefined) ?? null,
+      respRemarks: (r.respRemarks as string | null | undefined) ?? null,
+      respLoginId: (r.respLoginId as string | null | undefined) ?? null,
+
+      status: (r.status as any) ?? undefined,
+      tradeNumber: (r.tradeNumber as string | null | undefined) ?? null,
+
+      acceptedSettlementType: (r.acceptedSettlementType as number | null | undefined) ?? null,
+      acceptedSettlementDate: (r.acceptedSettlementDate as string | null | undefined) ?? null,
+      acceptedValue: (r.acceptedValue as number | null | undefined) ?? null,
+      acceptedQuantity: (r.acceptedQuantity as number | null | undefined) ?? null,
+      acceptedYieldType: (r.acceptedYieldType as any) ?? undefined,
+      acceptedYield: (r.acceptedYield as number | null | undefined) ?? null,
+      acceptedCalcMethod: (r.acceptedCalcMethod as any) ?? undefined,
+      acceptedPrice: (r.acceptedPrice as number | null | undefined) ?? null,
+      acceptedPutCallDate: (r.acceptedPutCallDate as string | null | undefined) ?? null,
+      acceptedAccruedInterest: (r.acceptedAccruedInterest as number | null | undefined) ?? null,
+      acceptedConsideration: (r.acceptedConsideration as number | null | undefined) ?? null,
+      acceptedQuoteTime: (r.acceptedQuoteTime as string | null | undefined) ?? null,
+      acceptedBySide: (r.acceptedBySide as any) ?? undefined,
+      acceptedByLoginId: (r.acceptedByLoginId as string | null | undefined) ?? null,
+
+      confirmStatus: (r.confirmStatus as any) ?? undefined,
+      proposedBySide: (r.proposedBySide as any) ?? undefined,
+      proposedTime: (r.proposedTime as string | null | undefined) ?? null,
+      confirmedPriceQuoteTime: (r.confirmedPriceQuoteTime as string | null | undefined) ?? null,
+      lastActivityTimestamp: (r.lastActivityTimestamp as string | null | undefined) ?? null,
+
+      tradeSplits: (Array.isArray(rawTradeSplits) ? rawTradeSplits : []) as Prisma.InputJsonValue[],
+    };
   }
 
   private async addAutomationLog(params: {
@@ -335,6 +430,20 @@ export class OrderSettlementService {
         },
       });
 
+      // wait 30 sec
+      const rfqMasterService = new RfqMasterService();
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+      const todayDate = new Date().toISOString().split("T")[0]?.split("-").reverse().join("-");
+      const d = new Date();
+      const istYmd = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // yyyy-mm-dd
+      const [y, m, day] = istYmd.split("-").map(Number);
+      const tomorrowIst = new Date(Date.UTC(y!, (m ?? 1) - 1, (day ?? 1) + 1, 12));
+      const nextDate = tomorrowIst
+        .toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" })
+        .replaceAll("/", "-");
+
+      await rfqMasterService.getAllSettledOrders({ filtFromModSettleDate: todayDate || "", filtToModSettleDate: nextDate })
+
       await this.trySendOrderReceiptPdfEmail({
         order,
         paymentId,
@@ -428,7 +537,7 @@ export class OrderSettlementService {
         participantCode: env.CBRICS_DOMAIN,
         dealType: "D",
         clientCode: env.CBRICS_DOMAIN,
-        buySell: "B",
+        buySell: "S",// S/B
         quoteType: "Y",
         settlementType: 1,
         value: inCrores,
@@ -441,7 +550,7 @@ export class OrderSettlementService {
         access: 2,
         participantList: [env.CBRICS_DOMAIN],
         valueNegotiable: "Y",
-        remarks: `${paymentId}`
+        remarks: `${paymentId}`,
       });
 
       console.log("rfqResponse", rfqResponse);
@@ -462,13 +571,67 @@ export class OrderSettlementService {
         { rfqResponse: rfqDetails }
       );
 
+      // Save on DB (sync). RFQ number is unique; upsert avoids duplicate crashes on retries.
+      // NSE API payload doesn't perfectly match Prisma types (e.g. `access` can be string),
+      // and may include extra fields not present in the model (e.g. `partRefId`).
+      // Map + coerce to the Prisma model shape.
+      const rfqDbData = {
+        number: rfqDetails.number,
+        segment: rfqDetails.segment,
+        isin: rfqDetails.isin,
+        participantCode: rfqDetails.participantCode,
+        dealType: rfqDetails.dealType,
+        clientCode: rfqDetails.clientCode,
+        clientRegType: rfqDetails.clientRegType,
+        buySell: rfqDetails.buySell,
+        quoteType: rfqDetails.quoteType,
+        settlementType: Number(rfqDetails.settlementType),
+        value: Number(rfqDetails.value),
+        quantity: rfqDetails.quantity != null ? Number(rfqDetails.quantity) : null,
+        yieldType: rfqDetails.yieldType,
+        yield: rfqDetails.yield != null ? Number(rfqDetails.yield) : null,
+        calcMethod: rfqDetails.calcMethod,
+        price: rfqDetails.price != null ? Number(rfqDetails.price) : null,
+        valueSell: (rfqDetails as { valueSell?: unknown }).valueSell != null ? Number((rfqDetails as { valueSell?: unknown }).valueSell) : null,
+        quantitySell: (rfqDetails as { quantitySell?: unknown }).quantitySell != null ? Number((rfqDetails as { quantitySell?: unknown }).quantitySell) : null,
+        yieldTypeSell: (rfqDetails as { yieldTypeSell?: unknown }).yieldTypeSell as any,
+        yieldSell: (rfqDetails as { yieldSell?: unknown }).yieldSell != null ? Number((rfqDetails as { yieldSell?: unknown }).yieldSell) : null,
+        calcMethodSell: (rfqDetails as { calcMethodSell?: unknown }).calcMethodSell as any,
+        priceSell: (rfqDetails as { priceSell?: unknown }).priceSell != null ? Number((rfqDetails as { priceSell?: unknown }).priceSell) : null,
+        gtdFlag: rfqDetails.gtdFlag,
+        endTime: (rfqDetails as { endTime?: string | null | undefined }).endTime ?? null,
+        quoteNegotiable: rfqDetails.quoteNegotiable,
+        valueNegotiable: rfqDetails.valueNegotiable,
+        minFillValue: rfqDetails.minFillValue != null ? Number(rfqDetails.minFillValue) : null,
+        valueStepSize: rfqDetails.valueStepSize != null ? Number(rfqDetails.valueStepSize) : null,
+        anonymous: rfqDetails.anonymous,
+        access: Number(rfqDetails.access),
+        groupList: rfqDetails.groupList ?? [],
+        participantList: rfqDetails.participantList ?? [],
+        category: rfqDetails.category ?? null,
+        rating: rfqDetails.rating ?? null,
+        remarks: rfqDetails.remarks ?? null,
+        date: rfqDetails.date ?? null,
+        quoteTime: rfqDetails.quoteTime ?? null,
+        settlementDate: rfqDetails.settlementDate ?? null,
+        status: rfqDetails.status ?? undefined,
+        userLogin: rfqDetails.userLogin ?? null,
+        tradedValue: rfqDetails.tradedValue != null ? Number(rfqDetails.tradedValue) : null,
+        confirmedValue: rfqDetails.confirmedValue != null ? Number(rfqDetails.confirmedValue) : null,
+      };
+      await db.dataBase.rFQMasterISIN.upsert({
+        where: { number: rfqDbData.number },
+        create: rfqDbData,
+        update: rfqDbData,
+      });
+
       logger.logInfo(
         `RFQ created successfully for ISIN ${order.isin} with RFQ number: ${rfqDetails.number}`
       );
       return {
         inCrores,
         rfqNumber: rfqDetails.number,
-        participant: order.customerProfile?.nseDataSet?.participant,
+        // participant: order.customerProfile?.nseDataSet?.participant,
         isin: order.isin,
         quantity: order.quantity,
         unitPrice: order.unitPrice,
@@ -517,6 +680,14 @@ export class OrderSettlementService {
         respClientCode: order.customerProfile?.nseDataSet?.participant?.loginId,
       });
 
+      // Sync negotiation on DB. `id` is unique; upsert avoids duplicate crashes on retries.
+      const negotiationDbData = this.mapNegotiationToDbData(negotiationResponse);
+      await db.dataBase.rFQNegotiation.upsert({
+        where: { id: negotiationDbData.id },
+        create: negotiationDbData,
+        update: negotiationDbData,
+      });
+
       // Store negotiation ID in logs
       await this.orderService.addOrderLog(
         order.id,
@@ -532,6 +703,8 @@ export class OrderSettlementService {
         negotiationId: (negotiationResponse as { id?: string | number | null }).id ?? null,
       };
     } catch (error) {
+      console.log(error);
+
       logger.logError(
         `Failed to accept negotiation for order ${order.id}, RFQ: ${rfqNumber || "unknown"}:`,
         error
@@ -580,18 +753,27 @@ export class OrderSettlementService {
       const consideration = principalAmount + accruedInterest;
 
 
-      await this.nseRfq.proposeDeal({
+      const proposeResponse = await this.nseRfq.proposeDeal({
         ngRfqNumber: rfqNumber,
         ngId: negotiationId,
-        participantCode: "BCISPL",
+        participantCode: env.CBRICS_DOMAIN,
+        // participantCode: order.customerProfile?.nseDataSet?.participant?.loginId ?? "",
         dealType: "D",
-        clientCode: "BCISPL",
+        clientCode: env.CBRICS_DOMAIN,
         price: cleanPrice,
         accruedInterest: Number(accruedInterest.toFixed(2)),
         consideration: Number(consideration.toFixed(2)),
         calcMethod: "O",
         role: "I",
-        remarks: `Auto-proposed deal for order ${order.id}`,
+        remarks: `${order.paymentId}`,
+      });
+
+      // Sync proposed deal response into negotiation table (same response shape).
+      const proposeDbData = this.mapNegotiationToDbData(proposeResponse);
+      await db.dataBase.rFQNegotiation.upsert({
+        where: { id: proposeDbData.id },
+        create: proposeDbData,
+        update: proposeDbData,
       });
 
       // Log deal proposal
@@ -657,13 +839,21 @@ export class OrderSettlementService {
       const acceptedConsideration = principalAmount + acceptedAccruedInterest;
       const cleanPrice = (order.bondDetails as any)?.pricing?.cleanPrice ?? 0;
 
-      await this.nseRfq.acceptOrRejectDeal({
+      const acceptResponse = await this.nseRfq.acceptOrRejectDeal({
         rfqNumber: rfqNumber,
         id: negotiationId,
         acceptedPrice: cleanPrice,
         acceptedAccruedInterest: Number(acceptedAccruedInterest.toFixed(2)),
         acceptedConsideration: Number(acceptedConsideration.toFixed(2)),
         confirmStatus: "PC",
+      });
+
+      // Sync accepted deal response into negotiation table.
+      const acceptDbData = this.mapNegotiationToDbData(acceptResponse);
+      await db.dataBase.rFQNegotiation.upsert({
+        where: { id: acceptDbData.id },
+        create: acceptDbData,
+        update: acceptDbData,
       });
 
       // Log deal acceptance
@@ -724,6 +914,8 @@ export class OrderSettlementService {
       });
     }
   }
+
+  // wait 30 sec 
 
   private async trySendOrderReceiptPdfEmail(params: {
     order: OrderWithNSEData;

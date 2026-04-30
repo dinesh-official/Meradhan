@@ -31,13 +31,14 @@ export class BondService {
     isin: string,
     quantityInput?: number,
     settlementType?: "T+0" | "T+1",
+    sellPrice?: number,
   ): Promise<GetBondOrderPricingResult> {
     const bond = await this.getBondDetails(isin);
     if (!bond) {
       return { ok: false, reason: "not_found" };
     }
 
-    const cleanPrice = bond.sellPrice;
+    const cleanPrice = sellPrice || bond.sellPrice;
 
     let lastCouponDateStr = bond.lastCouponDate?.toISOString() ?? null;
     let nextCouponDateStr = bond.nextCouponDate?.toISOString() ?? null;

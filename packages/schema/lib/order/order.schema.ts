@@ -3,6 +3,7 @@ import { z } from "zod";
 export const OrderPreviewItemSchema = z.object({
   isin: z.string(),
   quantity: z.number().int().positive(),
+  sellPrice: z.number().optional()
 });
 
 export const OrderPreviewResponseSchema = z.object({
