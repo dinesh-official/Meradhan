@@ -36,13 +36,18 @@ export type DateFormatToken =
 
 export const dateTimeUtils = {
   formatDateTime: (
-    dateInput: DateInput,
+    dateInput: DateInput | null | undefined,
     format: DateFormatToken,
     locale: string = "en-US"
   ): string => {
-    if (!dateInput) return "";
+    if (dateInput === null || dateInput === undefined || dateInput === "")
+      return "";
 
-    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    let date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (isNaN(date.getTime()) && typeof dateInput === "string") {
+      const parsed = dateTimeUtils.parseDate(dateInput);
+      if (parsed) date = parsed;
+    }
     if (isNaN(date.getTime())) return "Invalid Date";
 
     const day = date.getDate();
@@ -55,8 +60,7 @@ export const dateTimeUtils = {
     const hours12 = hours24 % 12 || 12;
 
     // Intl for localized month names
-    const monthNamesShort = new Intl.DateTimeFormat(locale, { month: "short" })
-      .format;
+    const monthNamesShort = new Intl.DateTimeFormat(locale, { month: "short" }).format;
     const monthNamesLong = new Intl.DateTimeFormat(locale, { month: "long" })
       .format;
 
@@ -74,9 +78,10 @@ export const dateTimeUtils = {
       .replace(/hh/g, String(hours12).padStart(2, "0"))
       .replace(/mm/g, String(minutes).padStart(2, "0"))
       .replace(/ss/g, String(seconds).padStart(2, "0"))
-      .replace(/AA/g, ampm)
-      .replace(/A/g, ampm.charAt(0))
-      .replace(/aa/g, ampm.toLowerCase());
+      // Only replace standalone AM/PM tokens (avoid changing "Apr", "Aug", etc.)
+      .replace(/\bAA\b/g, ampm)
+      .replace(/\bA\b/g, ampm.charAt(0))
+      .replace(/\baa\b/g, ampm.toLowerCase());
 
     return formatted;
   },
