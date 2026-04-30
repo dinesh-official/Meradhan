@@ -57,6 +57,7 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
           label: "Value",
           type: "currency",
           currency: "INR",
+          currencyFractionDigits: 4,
         },
         {
           key: "createdAt",
