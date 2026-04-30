@@ -12,6 +12,7 @@ function Payment({
   customer: CustomerByIdPayload;
   orderId: string;
   settlementDate: string;
+  isPaymentMode?: boolean
 }) {
   const { trackButtonClick } = useOrderActivityTracking();
 
