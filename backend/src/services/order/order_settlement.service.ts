@@ -335,6 +335,9 @@ export class OrderSettlementService {
         },
       });
 
+      // wait 30 sec
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+
       await this.trySendOrderReceiptPdfEmail({
         order,
         paymentId,
@@ -428,7 +431,7 @@ export class OrderSettlementService {
         participantCode: env.CBRICS_DOMAIN,
         dealType: "D",
         clientCode: env.CBRICS_DOMAIN,
-        buySell: "B",
+        buySell: "S",// S/B
         quoteType: "Y",
         settlementType: 1,
         value: inCrores,
@@ -441,7 +444,7 @@ export class OrderSettlementService {
         access: 2,
         participantList: [env.CBRICS_DOMAIN],
         valueNegotiable: "Y",
-        remarks: `${paymentId}`
+        remarks: `${paymentId}`,
       });
 
       console.log("rfqResponse", rfqResponse);
@@ -462,13 +465,26 @@ export class OrderSettlementService {
         { rfqResponse: rfqDetails }
       );
 
+      // Save on DB (sync). RFQ number is unique; upsert avoids duplicate crashes on retries.
+      // Prisma list fields can't be null, so normalize list-y fields from API payload.
+      const rfqDbData = {
+        ...rfqDetails,
+        groupList: rfqDetails.groupList ?? [],
+        participantList: rfqDetails.participantList ?? [],
+      };
+      await db.dataBase.rFQMasterISIN.upsert({
+        where: { number: rfqDbData.number },
+        create: rfqDbData,
+        update: rfqDbData,
+      });
+
       logger.logInfo(
         `RFQ created successfully for ISIN ${order.isin} with RFQ number: ${rfqDetails.number}`
       );
       return {
         inCrores,
         rfqNumber: rfqDetails.number,
-        participant: order.customerProfile?.nseDataSet?.participant,
+        // participant: order.customerProfile?.nseDataSet?.participant,
         isin: order.isin,
         quantity: order.quantity,
         unitPrice: order.unitPrice,
@@ -515,6 +531,19 @@ export class OrderSettlementService {
         role: NSE_CONSTANTS.ROLE.INITIATOR,
         respDealType: "B",
         respClientCode: order.customerProfile?.nseDataSet?.participant?.loginId,
+      });
+
+      // Sync negotiation on DB. `id` is unique; upsert avoids duplicate crashes on retries.
+      // Prisma requires `tradeSplits` (Json[]) to be non-null.
+      const rawTradeSplits = (negotiationResponse as { tradeSplits?: unknown[] | null }).tradeSplits;
+      const negotiationDbData = {
+        ...negotiationResponse,
+        tradeSplits: (Array.isArray(rawTradeSplits) ? rawTradeSplits : []) as Prisma.InputJsonValue[],
+      };
+      await db.dataBase.rFQNegotiation.upsert({
+        where: { id: String((negotiationDbData as { id: string | number }).id) },
+        create: negotiationDbData,
+        update: negotiationDbData,
       });
 
       // Store negotiation ID in logs
@@ -580,18 +609,30 @@ export class OrderSettlementService {
       const consideration = principalAmount + accruedInterest;
 
 
-      await this.nseRfq.proposeDeal({
+      const proposeResponse = await this.nseRfq.proposeDeal({
         ngRfqNumber: rfqNumber,
         ngId: negotiationId,
         participantCode: "BCISPL",
-        dealType: "D",
-        clientCode: "BCISPL",
+        dealType: "B",
+        clientCode: order.customerProfile?.nseDataSet?.participant?.loginId || "",
         price: cleanPrice,
         accruedInterest: Number(accruedInterest.toFixed(2)),
         consideration: Number(consideration.toFixed(2)),
         calcMethod: "O",
         role: "I",
-        remarks: `Auto-proposed deal for order ${order.id}`,
+        remarks: `${order.paymentId}`,
+      });
+
+      // Sync proposed deal response into negotiation table (same response shape).
+      const rawTradeSplits = (proposeResponse as { tradeSplits?: unknown[] | null }).tradeSplits;
+      const proposeDbData = {
+        ...proposeResponse,
+        tradeSplits: (Array.isArray(rawTradeSplits) ? rawTradeSplits : []) as Prisma.InputJsonValue[],
+      };
+      await db.dataBase.rFQNegotiation.upsert({
+        where: { id: String((proposeDbData as { id: string | number }).id) },
+        create: proposeDbData,
+        update: proposeDbData,
       });
 
       // Log deal proposal
@@ -657,13 +698,25 @@ export class OrderSettlementService {
       const acceptedConsideration = principalAmount + acceptedAccruedInterest;
       const cleanPrice = (order.bondDetails as any)?.pricing?.cleanPrice ?? 0;
 
-      await this.nseRfq.acceptOrRejectDeal({
+      const acceptResponse = await this.nseRfq.acceptOrRejectDeal({
         rfqNumber: rfqNumber,
         id: negotiationId,
         acceptedPrice: cleanPrice,
         acceptedAccruedInterest: Number(acceptedAccruedInterest.toFixed(2)),
         acceptedConsideration: Number(acceptedConsideration.toFixed(2)),
         confirmStatus: "PC",
+      });
+
+      // Sync accepted deal response into negotiation table.
+      const rawTradeSplits = (acceptResponse as { tradeSplits?: unknown[] | null }).tradeSplits;
+      const acceptDbData = {
+        ...acceptResponse,
+        tradeSplits: (Array.isArray(rawTradeSplits) ? rawTradeSplits : []) as Prisma.InputJsonValue[],
+      };
+      await db.dataBase.rFQNegotiation.upsert({
+        where: { id: String((acceptDbData as { id: string | number }).id) },
+        create: acceptDbData,
+        update: acceptDbData,
       });
 
       // Log deal acceptance
@@ -724,6 +777,8 @@ export class OrderSettlementService {
       });
     }
   }
+
+  // wait 30 sec 
 
   private async trySendOrderReceiptPdfEmail(params: {
     order: OrderWithNSEData;

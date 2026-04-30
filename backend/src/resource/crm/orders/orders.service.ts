@@ -542,9 +542,10 @@ export class CrmOrdersService {
   async getCustomerByOrderNumber(orderNumber: string) {
     const order = await db.dataBase.order.findFirst({
       where: {
-        reqOrderNumber: {
-          equals: orderNumber,
-        },
+        OR: [
+          { reqOrderNumber: { equals: orderNumber } },
+          { orderNumber: { equals: orderNumber } },
+        ],
       },
       include: {
         customerProfile: {

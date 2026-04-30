@@ -12,6 +12,7 @@ export type FieldSpec<T> = {
   label?: string;
   type?: ColumnType;
   currency?: string;
+  currencyFractionDigits?: number;
   cell?: (row: T) => React.ReactNode;
   sortable?: boolean;
   hidden?: boolean;
@@ -37,13 +38,19 @@ function toTitle(key: string): string {
 }
 
 // Format value based on column type
-function formatByType(value: unknown, type?: ColumnType, currency = "INR") {
+function formatByType(
+  value: unknown,
+  type?: ColumnType,
+  currency = "INR",
+  currencyFractionDigits = 2
+) {
   if (type === "currency") {
     const numberValue = Number(value ?? 0);
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: currencyFractionDigits,
+      maximumFractionDigits: currencyFractionDigits,
     }).format(numberValue);
   }
 
@@ -140,7 +147,12 @@ export function UniversalTable<T>({
             }
 
             const value = getValue();
-            const formatted = formatByType(value, field.type, field.currency);
+            const formatted = formatByType(
+              value,
+              field.type,
+              field.currency,
+              field.currencyFractionDigits
+            );
             return <div className={stickyClass}>{formatted}</div>;
           },
         };
