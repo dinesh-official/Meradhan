@@ -396,7 +396,8 @@ export class OrderSettlementService {
               payId: order.paymentId || "",
               userId: order.customerProfileId,
               notes: {
-                rfqNumber: addIsinResponse.rfqNumber,
+                RFQ_NUMBER: addIsinResponse.rfqNumber,
+                UCC: order?.customerProfile?.nseDataSet?.participant?.loginId
               }
             }),
         });
