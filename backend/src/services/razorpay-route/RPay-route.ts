@@ -395,7 +395,7 @@ export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes
                 currency: "INR",
                 notes: {
                     ...notes,
-                    "userId": userId.toString(),
+                    "USER_ID": userId.toString(),
                 },
                 "on_hold": false
             }

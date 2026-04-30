@@ -98,7 +98,6 @@ export class PaymentService {
         "Client_Account": bank?.account_number || "", //Client_Bank_Account_Number
         "Transaction_Type": "L", //Type_of_Transaction (Lumpsum/SIP)
         "CC_Name": "NCL", //Name_of_Clearing_Corporation 
-        "Brokerage_Amt": "", //leave blank if not applicable, but to be passed } 
       }
     };
     console.log(options);

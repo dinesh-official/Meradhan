@@ -100,7 +100,7 @@ function OrderStep({
               customer={customer}
               orderId={orderId}
               key={"Payment"}
-              settlementDate={orderPricing?.settlementDate ?? ""}
+              settlementDateValue={orderPricing?.settlementDate ?? ""}
             />,
           ]?.[step - 1]
         }
