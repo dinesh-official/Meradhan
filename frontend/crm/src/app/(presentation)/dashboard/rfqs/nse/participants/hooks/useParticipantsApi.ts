@@ -1,24 +1,48 @@
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import apiGateway from "@root/apiGateway";
+import apiGateway, { type ParticipantData } from "@root/apiGateway";
+import {
+  CBRICS_UNREG_WORKFLOW_STATUS_OPTIONS,
+  type CbricsUnregisteredWorkflowStatus,
+} from "@root/schema";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export const useParticipantsApi = () => {
   const [search, setSearch] = useState("");
-  const [workflowStatus, setWorkflowStatus] = useState<string | undefined>("1");
-  const [page, setPage] = useState(1);
+  const [workflowStatus, setWorkflowStatus] = useState<string>("ALL");
 
-  const participantsApi =
-    new apiGateway.crm.rfq.participants.RfqParticipantsApi(apiClientCaller);
+  const participantsApi = useMemo(
+    () => new apiGateway.crm.rfq.participants.RfqParticipantsApi(apiClientCaller),
+    []
+  );
 
   const fetchParticipantsQuery = useQuery({
-    queryKey: ["fetchParticipantsQuery", search, workflowStatus, page],
-    queryFn: async () => {
-      return await participantsApi.getAllParticipants({
-        page: page.toString(),
-        search: search,
-        workflowStatus: workflowStatus != "ALL" ? workflowStatus : undefined,
-      });
+    queryKey: ["fetchParticipantsQuery", search.trim(), workflowStatus],
+    queryFn: async (): Promise<ParticipantData[]> => {
+      const q = { search: search.trim() || undefined };
+
+      if (workflowStatus === "ALL") {
+        const results = await Promise.all(
+          CBRICS_UNREG_WORKFLOW_STATUS_OPTIONS.map((o) =>
+            participantsApi.getCbricsParticipantsByWorkflow(o.code, q)
+          )
+        );
+        const byId = new Map<number, ParticipantData>();
+        for (const res of results) {
+          for (const row of res.data.responseData?.participants ?? []) {
+            byId.set(row.id, row);
+          }
+        }
+        return Array.from(byId.values()).sort((a, b) => {
+          const ta = new Date(String(a.updatedAt)).getTime();
+          const tb = new Date(String(b.updatedAt)).getTime();
+          return (Number.isFinite(tb) ? tb : 0) - (Number.isFinite(ta) ? ta : 0);
+        });
+      }
+
+      const wf = Number(workflowStatus) as CbricsUnregisteredWorkflowStatus;
+      const res = await participantsApi.getCbricsParticipantsByWorkflow(wf, q);
+      return res.data.responseData?.participants ?? [];
     },
   });
 
@@ -29,8 +53,6 @@ export const useParticipantsApi = () => {
       setSearch,
       workflowStatus,
       setWorkflowStatus,
-      page,
-      setPage,
     },
   };
 };

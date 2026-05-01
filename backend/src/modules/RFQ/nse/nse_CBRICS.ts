@@ -373,9 +373,7 @@ export class NseCBRICS {
     });
   }
 
-  public async getAllUnregisteredDpAccounts(
-    payload?: GetUnregisteredDpAccountsRequest
-  ) {
+  public async getAllUnregisteredDpAccounts(payload: GetUnregisteredDpAccountsRequest) {
     return this.withReLoginRetry(async (loginKey) => {
       const { data } =
         await this.client.post<GetUnregisteredDpAccountsResponse>(
