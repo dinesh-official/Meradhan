@@ -15,10 +15,13 @@ function ParticipantsView() {
           statusChange={state.setWorkflowStatus}
           statusValue={state.workflowStatus}
         />
-        <CardContent>
+        <CardContent className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Click a row to open CBRICS manager with that participant&apos;s NSE id prefilled.
+          </p>
           <ParticipantsTableList
-            data={fetchParticipantsQuery.data?.data.responseData || []}
-            isLoading={fetchParticipantsQuery.isLoading}
+            data={fetchParticipantsQuery.data ?? []}
+            isLoading={fetchParticipantsQuery.isFetching}
           />
         </CardContent>
         {/* {isShowPagination() && (
