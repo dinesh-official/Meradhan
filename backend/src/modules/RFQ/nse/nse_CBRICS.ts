@@ -3,6 +3,7 @@ import axios, { Axios, AxiosError } from "axios";
 import { env } from "@packages/config/env";
 import { cacheStorage } from "@store/redis_store";
 import { AppError } from "@utils/error/AppError";
+import logger from "@utils/logger/logger";
 import type {
   ActiveIssuesRequest,
   ActiveIssuesResponse,
@@ -160,7 +161,16 @@ export class NseCBRICS {
       }
 
       if (error instanceof AxiosError) {
-        console.log("withReLoginRetry-error", error.response?.data);
+        const st = error.response?.status ?? "?";
+        const data = error.response?.data as
+          | { messages?: unknown[]; message?: unknown; error?: unknown }
+          | undefined;
+        const summarize =
+          (Array.isArray(data?.messages) && typeof data.messages[0] === "string"
+            ? data.messages.join("; ")
+            : null) ??
+          String(data?.message ?? data?.error ?? error.message);
+        logger.logError(`CBRICS HTTP ${st} before retry limit / rethrow`, summarize);
         if (error.response?.data.message) {
           throw new Error(
             error.response?.data.message?.toString() ||
@@ -186,8 +196,7 @@ export class NseCBRICS {
         }
       }
 
-      // Log final error for debugging
-      console.error("API call failed after max retries:");
+      logger.logError("CBRICS API call failed after max retries");
       throw error;
     }
   }

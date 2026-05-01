@@ -4,7 +4,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import {
-  SettlementStatusBadge,
   SettlementYieldTypeBadge,
   SourceBadge,
 } from "../_components/bages/NseRfqBadges";
@@ -18,6 +17,36 @@ const isManualOrder = (source?: 1 | 4 | 5) => source === 5;
 interface ExtendedSettleOrderData extends SettleOrderData {
   createdAt?: string | Date;
   updatedAt?: string | Date;
+}
+
+const settlementStatusLabel: Record<number, string> = {
+  0: "Settlement Pending",
+  1: "Securities Payin Done",
+  2: "Funds Payin Done",
+  3: "Payin Completed",
+  4: "Payout Done Successfully",
+  5: "Payin Reversed",
+  6: "Settle Order Expired",
+  7: "Order Not Settleable",
+  8: "Settlement Cancelled",
+  9: "Document Not Received for Unregistered Participant",
+};
+
+function settlementStatusTextClass(statusCode?: number) {
+  switch (statusCode) {
+    case 6:
+      return "text-red-700 dark:text-red-300";
+    case 5:
+      return "text-emerald-700 dark:text-emerald-300";
+    case 0:
+      return "text-amber-700 dark:text-amber-300";
+    case 1:
+      return "text-blue-700 dark:text-blue-300";
+    case 2:
+      return "text-red-700 dark:text-red-300";
+    default:
+      return "text-muted-foreground";
+  }
 }
 
 interface SettleOrdersTableProps {
@@ -38,7 +67,7 @@ function SettleOrdersTable({
   return (
     <div>
       <UniversalTable<ExtendedSettleOrderData>
-        initialPageSize={1000}
+        initialPageSize={10}
         isLoading={isLoading}
         data={data}
         onRowClickAction={onRowClick}
@@ -73,18 +102,58 @@ function SettleOrdersTable({
           },
           {
             key: "orderNumber",
-            label: "Order Number",
+            label: "Order Number · Settlement Status",
             sortable: true,
             cell(row) {
+              const code = row.settleStatus;
+              const label = settlementStatusLabel[code] ?? "Unknown";
               return (
-                <span className="font-mono text-sm">{row.orderNumber}</span>
+                <div className="flex flex-col">
+                  <span className="font-mono text-sm">{row.orderNumber}</span>
+                  <span className={`text-xs font-medium ${settlementStatusTextClass(code)}`}>
+                    {label}
+                  </span>
+                </div>
               );
             },
           },
           {
             key: "symbol",
-            label: "Symbol",
+            label: "Symbol · Yield · Qty",
             sortable: true,
+            cell(row) {
+              const symbol = String(row.symbol ?? "--");
+              const y = Number(row.yield);
+              const yieldStr = Number.isFinite(y) ? `${y.toFixed(4)}%` : "--";
+              const qtyStr = row.modQuantity != null ? row.modQuantity.toLocaleString() : "--";
+              return (
+                <div className="flex flex-col">
+                  <span className="font-mono text-sm">{symbol}</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    Yield: {yieldStr} · Qty: {qtyStr}
+                  </span>
+                </div>
+              );
+            },
+          },
+          {
+            key: "modSettleDate",
+            label: "Settlement No · Date",
+            sortable: true,
+            cell(row) {
+              const dateStr = row.modSettleDate
+                ? dateTimeUtils.formatDateTime(row.modSettleDate, "DD MMM YYYY")
+                : "--";
+              const noStr = row.settlementNo || "--";
+              return (
+                <div className="flex flex-col">
+                  <span className="font-mono text-sm">{noStr}</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    Date: {dateStr}
+                  </span>
+                </div>
+              );
+            },
           },
           {
             key: "buyParticipantLoginId",
@@ -112,24 +181,10 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return (
-                <span className="font-mono text-sm">{Number(row.price).toFixed(4) || "--"}</span>
+                <div className="text-right">
+                  <span className="font-mono text-sm">{Number(row.price).toFixed(4) || "--"}</span>
+                </div>
               );
-            },
-          },
-          {
-            key: "yieldType",
-            label: "Yield Type",
-            cell(row) {
-              return <SettlementYieldTypeBadge type={row.yieldType} />;
-              // return <span className="font-mono text-sm">{row.yieldType || "--"}</span>;
-            },
-          },
-          {
-            key: "yield",
-            label: "Yield (%)",
-            sortable: true,
-            cell(row) {
-              return <span className="font-mono text-sm">{Number(row.yield).toFixed(4)}%</span>;
             },
           },
           {
@@ -138,46 +193,10 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return (
-                <span className="font-mono text-sm">
-                  ₹ {formatNumberTS(row.value)}
-                </span>
+                <div className="text-right">
+                  <span className="font-mono text-sm">₹ {formatNumberTS(row.value)}</span>
+                </div>
               );
-            },
-          },
-          {
-            key: "modQuantity",
-            label: "Quantity",
-            sortable: true,
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">
-                  {row.modQuantity?.toLocaleString() || "--"}
-                </span>
-              );
-            },
-          },
-          {
-            key: "source",
-            label: "Source",
-            cell(row) {
-              return <SourceBadge source={row.source} />;
-            },
-          },
-          {
-            key: "modSettleDate",
-            label: "Settlement Date",
-            sortable: true,
-            cell(row) {
-              return row.modSettleDate
-                ? dateTimeUtils.formatDateTime(row.modSettleDate, "DD MMM YYYY")
-                : "--";
-            },
-          },
-          {
-            key: "settleStatus",
-            label: "Settlement Status",
-            cell(row) {
-              return <SettlementStatusBadge status={row.settleStatus} />;
             },
           },
           {
@@ -186,9 +205,21 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return (
-                <span className="font-mono text-sm">
-                  ₹ {formatNumberTS(row.modAccrInt || 0)}
-                </span>
+                <div className="text-right">
+                  <span className="font-mono text-sm">₹ {formatNumberTS(row.modAccrInt || 0)}</span>
+                </div>
+              );
+            },
+          },
+          {
+            key: "stampDutyAmount",
+            label: "Stamp Duty",
+            sortable: true,
+            cell(row) {
+              return (
+                <div className="text-right">
+                  <span className="font-mono text-sm">₹ {(row.stampDutyAmount || 0)}</span>
+                </div>
               );
             },
           },
@@ -198,25 +229,113 @@ function SettleOrdersTable({
             sortable: true,
             cell(row) {
               return (
+                <div className="text-right">
+                  <span className="font-mono text-sm">
+                    {row.modConsideration
+                      ? `₹ ${formatNumberTS(row.modConsideration)}`
+                      : "--"}
+                  </span>
+                </div>
+              );
+            },
+          },
+          {
+            key: "yieldType",
+            label: "Yield Type · Source",
+            cell(row) {
+              return (
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <SettlementYieldTypeBadge type={row.yieldType} />
+                  <SourceBadge source={row.source} />
+                </div>
+              );
+            },
+          },
+          {
+            key: "payoutTime",
+            label: "Payout Time",
+            sortable: true,
+            cell(row) {
+              return row.payoutTime || "--";
+            },
+          },
+          {
+            key: "ifscCode",
+            label: "Bank (IFSC · A/C)",
+            cell(row) {
+              const ifsc = row.ifscCode || "--";
+              const acct = row.accountNo || "--";
+              return (
+                <div className="flex flex-col">
+                  <span className="font-mono text-sm">{ifsc}</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    A/C: {acct}
+                  </span>
+                </div>
+              );
+            },
+          },
+          {
+            key: "accountNo",
+            label: "Account Number",
+            hidden: true,
+          },
+          {
+            key: "utrNumber",
+            label: "UTR Number",
+            cell(row) {
+              return (
                 <span className="font-mono text-sm">
-                  {row.modConsideration
-                    ? `₹ ${formatNumberTS(row.modConsideration)}`
-                    : "--"}
+                  {row.utrNumber || "--"}
                 </span>
               );
             },
           },
           {
-            key: "settlementNo",
-            label: "Settlement No",
-            sortable: true,
+            key: "dpId",
+            label: "DP (DP ID · Ben ID)",
             cell(row) {
+              const dp = row.dpId || "--";
+              const ben = row.benId || "--";
               return (
-                <span className="font-mono text-sm">
-                  {row.settlementNo || "--"}
-                </span>
+                <div className="flex flex-col">
+                  <span className="font-mono text-sm">{dp}</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    Ben: {ben}
+                  </span>
+                </div>
               );
             },
+          },
+          {
+            key: "benId",
+            label: "Ben ID",
+            hidden: true,
+          },
+          {
+            key: "yield",
+            label: "Yield (%)",
+            hidden: true,
+          },
+          {
+            key: "modQuantity",
+            label: "Quantity",
+            hidden: true,
+          },
+          {
+            key: "source",
+            label: "Source",
+            hidden: true,
+          },
+          {
+            key: "settleStatus",
+            label: "Settlement Status",
+            hidden: true,
+          },
+          {
+            key: "settlementNo",
+            label: "Settlement No",
+            hidden: true,
           },
           {
             key: "buyerRefNo",
@@ -257,80 +376,34 @@ function SettleOrdersTable({
           {
             key: "buyBrokerLoginId",
             label: "Buy Broker",
-            cell(row) {
-              return (
-                <span className="text-sm">{row.buyBrokerLoginId || "--"}</span>
-              );
-            },
+            hidden: true,
           },
           {
             key: "sellBrokerLoginId",
             label: "Sell Broker",
-            cell(row) {
-              return (
-                <span className="text-sm">{row.sellBrokerLoginId || "--"}</span>
-              );
-            },
-          },
-          {
-            key: "stampDutyAmount",
-            label: "Stamp Duty",
-            sortable: true,
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">
-                  ₹ {(row.stampDutyAmount || 0)}
-                </span>
-              );
-            },
+            hidden: true,
           },
           {
             key: "stampDutyBearer",
             label: "Stamp Duty Bearer",
-            cell(row) {
-              return (
-                <span className="text-sm">{row.stampDutyBearer || "--"}</span>
-              );
-            },
+            hidden: true,
           },
           {
             key: "buyerFundPayinObligation",
             label: "Buyer Fund Obligation",
             sortable: true,
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">
-                  {row.buyerFundPayinObligation
-                    ? `₹ ${formatNumberTS(row.buyerFundPayinObligation)}`
-                    : "--"}
-                </span>
-              );
-            },
+            hidden: true,
           },
           {
             key: "sellerFundPayoutObligation",
             label: "Seller Fund Obligation",
             sortable: true,
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">
-                  {row.sellerFundPayoutObligation
-                    ? `₹ ${formatNumberTS(row.sellerFundPayoutObligation)}`
-                    : "--"}
-                </span>
-              );
-            },
+            hidden: true,
           },
           {
             key: "fundPayinRefId",
             label: "Fund Payin Ref ID",
-            cell(row) {
-              return (
-                <span className="font-mono text-xs">
-                  {row.fundPayinRefId || "--"}
-                </span>
-              );
-            },
+            hidden: true,
           },
           {
             key: "secPayinQuantity",
@@ -407,81 +480,33 @@ function SettleOrdersTable({
           {
             key: "payoutTime",
             label: "Payout Time",
-            sortable: true,
-            cell(row) {
-              return row.payoutTime || "--";
-            },
-          },
-          {
-            key: "ifscCode",
-            label: "IFSC Code",
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">
-                  {row.ifscCode || "--"}
-                </span>
-              );
-            },
-          },
-          {
-            key: "accountNo",
-            label: "Account Number",
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">
-                  {row.accountNo || "--"}
-                </span>
-              );
-            },
-          },
-          {
-            key: "utrNumber",
-            label: "UTR Number",
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">
-                  {row.utrNumber || "--"}
-                </span>
-              );
-            },
-          },
-          {
-            key: "dpId",
-            label: "DP ID",
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">{row.dpId || "--"}</span>
-              );
-            },
-          },
-          {
-            key: "benId",
-            label: "Ben ID",
-            cell(row) {
-              return (
-                <span className="font-mono text-sm">{row.benId || "--"}</span>
-              );
-            },
+            hidden: true,
           },
           {
             key: "createdAt",
-            label: "Created At",
+            label: "Created · Updated",
             sortable: true,
             cell(row) {
-              return row.createdAt
+              const c = row.createdAt
                 ? dateTimeUtils.formatDateTime(row.createdAt, "DD MMM YYYY hh:mm AA")
                 : "--";
+              const u = row.updatedAt
+                ? dateTimeUtils.formatDateTime(row.updatedAt, "DD MMM YYYY hh:mm AA")
+                : "--";
+              return (
+                <div className="flex flex-col">
+                  <span className="font-mono text-xs">{c}</span>
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    Updated: {u}
+                  </span>
+                </div>
+              );
             },
           },
           {
             key: "updatedAt",
             label: "Updated At",
-            sortable: true,
-            cell(row) {
-              return row.updatedAt
-                ? dateTimeUtils.formatDateTime(row.updatedAt, "DD MMM YYYY hh:mm AA")
-                : "--";
-            },
+            hidden: true,
           },
         ]}
       />

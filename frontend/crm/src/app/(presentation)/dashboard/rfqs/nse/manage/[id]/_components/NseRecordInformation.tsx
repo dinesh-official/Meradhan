@@ -13,10 +13,10 @@ const NseRecordInformation = (
   return (
     <Card>
       <CardHeader>
-        <CardTitle> Record Information</CardTitle>
+        <CardTitle>Record Information</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid gap-5 md:grid-cols-2">
           <LabelView title="Created">
             <p className="font-medium text-sm">
               {RecordInformationData.created}

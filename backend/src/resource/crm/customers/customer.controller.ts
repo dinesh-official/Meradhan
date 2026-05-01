@@ -10,16 +10,19 @@ import { cacheStorage } from "@store/redis_store";
 import { kraWorkerQueue } from "@jobs/queue/worker_queues";
 import { CorporateKycAttachmentsRepo } from "./corporatekyc_attachments.repo";
 import z from "zod";
+import { CustomerManageAccountsService } from "@resource/customer/profile/customer.manage_accounts.service";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;
   private corporateKycService: CorporateKycService;
   private corporateKycAttachmentsRepo: CorporateKycAttachmentsRepo;
+  private manageAccountsService: CustomerManageAccountsService;
   constructor() {
     const repo = new CustomerProfileRepo();
     this.profileService = new CustomerProfileService(repo);
     this.corporateKycService = new CorporateKycService(new CorporateKycRepo());
     this.corporateKycAttachmentsRepo = new CorporateKycAttachmentsRepo();
+    this.manageAccountsService = new CustomerManageAccountsService();
   }
 
   async createCustomer(req: Request, res: Response): Promise<void> {
@@ -425,6 +428,84 @@ export class CustomerProfileController {
       statusCode: HttpStatus.OK,
       responseData: { isDeleted: true },
       message: "Attachment deleted successfully",
+    });
+  }
+
+  async crmSetPrimaryBankAccount(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    const bankAccountId = Number(req.params.bankAccountId);
+    if (Number.isNaN(customerId) || Number.isNaN(bankAccountId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id or bank account id",
+      });
+      return;
+    }
+
+    const customer = await this.profileService.getCustomerProfile(customerId);
+    if (String(customer?.kraStatus ?? "").trim().toUpperCase() !== "VERIFIED") {
+      res.sendResponse({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: "KRA is not completed for this customer. Complete KRA first, then set default accounts.",
+      });
+      return;
+    }
+
+    await this.manageAccountsService.setPrimaryBankAccount(customerId, bankAccountId);
+    await createCrmActivityLog(req, {
+      action: "update",
+      details: {
+        Reason: "CRM_SET_PRIMARY_BANK_ACCOUNT",
+        customerId,
+        bankAccountId,
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { success: true },
+      message: "Primary bank account set successfully.",
+    });
+  }
+
+  async crmSetPrimaryDematAccount(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    const dematAccountId = Number(req.params.dematAccountId);
+    if (Number.isNaN(customerId) || Number.isNaN(dematAccountId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id or demat account id",
+      });
+      return;
+    }
+
+    const customer = await this.profileService.getCustomerProfile(customerId);
+    if (String(customer?.kraStatus ?? "").trim().toUpperCase() !== "VERIFIED") {
+      res.sendResponse({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: "KRA is not completed for this customer. Complete KRA first, then set default accounts.",
+      });
+      return;
+    }
+
+    await this.manageAccountsService.setPrimaryDematAccount(customerId, dematAccountId);
+    await createCrmActivityLog(req, {
+      action: "update",
+      details: {
+        Reason: "CRM_SET_PRIMARY_DEMAT_ACCOUNT",
+        customerId,
+        dematAccountId,
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { success: true },
+      message: "Primary demat account set successfully.",
     });
   }
 

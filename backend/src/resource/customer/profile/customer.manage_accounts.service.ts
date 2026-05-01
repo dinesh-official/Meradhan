@@ -2,13 +2,24 @@
 import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
-import { AppError } from "@utils/error/AppError";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import { sendBankAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
 import type z from "zod";
 import { meraDhanDematAccountSubmissionReceivedEmailText } from "@emails/text/meraDhanDematAccountSubmissionReceivedEmailText";
 import { meraDhanDefaultBankAccountUpdatedEmailText } from "@emails/text/meraDhanDefaultBankAccountUpdatedEmailText";
 import { meraDhanDefaultDematAccountUpdatedEmailText } from "@emails/text/meraDhanDefaultDematAccountUpdatedEmailText";
 import { EmailCommunication } from "../../../communication/email_communication";
+import logger from "@utils/logger/logger";
+
+function formatCaughtError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+}
 
 const KYC_VERIFIED_REQUIRED_MSG =
   "You cannot add, update, or delete bank or demat accounts until your KYC is verified.";
@@ -182,6 +193,21 @@ export class CustomerManageAccountsService {
       throw new AppError("Bank Account Numbert found.");
     }
 
+    // Must update NSE CBRICS first; if it fails, don't change CRM primary flags.
+    try {
+      await this.cbricsManager.setDefaultBankAccount(customerId, bankAccount);
+    } catch (error) {
+      const msg = formatCaughtError(error) || "CBRICS Request Failed";
+      logger.logError("CBRICS set default bank failed", msg, {
+        customerId,
+        bankAccountId,
+      });
+      throw new AppError(msg, {
+        statusCode: HttpStatus.BAD_GATEWAY,
+        code: "CBRICS_SET_DEFAULT_BANK_FAILED",
+      });
+    }
+
     // Unset existing primary account
     await db.dataBase.customersBankAccountModel.updateMany({
       where: {
@@ -192,11 +218,7 @@ export class CustomerManageAccountsService {
         isPrimary: false,
       },
     });
-    try {
-      await this.cbricsManager.setDefaultBankAccount(customerId, bankAccount);
-    } catch (error) {
-      console.log(error);
-    }
+
     // Set new primary account
     await db.dataBase.customersBankAccountModel.update({
       where: {
@@ -244,7 +266,11 @@ export class CustomerManageAccountsService {
         });
       }
     } catch (e) {
-      console.log(e);
+      logger.logError(
+        "Failed sending default bank account email after CRM update",
+        formatCaughtError(e),
+        { customerId },
+      );
     }
 
     return true;
@@ -407,11 +433,22 @@ export class CustomerManageAccountsService {
         "Cannot set the primary demat account as primary again."
       );
     }
+
+    // Must update NSE CBRICS first; if it fails, don't change CRM primary flags.
     try {
       await this.cbricsManager.setDefaultDpAccount(customerId, dematAccount);
     } catch (error) {
-      console.log(error);
+      const msg = formatCaughtError(error) || "CBRICS Request Failed";
+      logger.logError("CBRICS set default demat failed", msg, {
+        customerId,
+        dematAccountId,
+      });
+      throw new AppError(msg, {
+        statusCode: HttpStatus.BAD_GATEWAY,
+        code: "CBRICS_SET_DEFAULT_DEMAT_FAILED",
+      });
     }
+
     // Unset existing primary account
     await db.dataBase.customersDematAccountModel.updateMany({
       where: {
@@ -470,7 +507,11 @@ export class CustomerManageAccountsService {
         });
       }
     } catch (e) {
-      console.log(e);
+      logger.logError(
+        "Failed sending default demat account email after CRM update",
+        formatCaughtError(e),
+        { customerId },
+      );
     }
 
     return true;

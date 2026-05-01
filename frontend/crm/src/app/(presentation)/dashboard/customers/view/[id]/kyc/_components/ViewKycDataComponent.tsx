@@ -5,8 +5,12 @@ import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { areNamesMatched } from "@/lib/utils";
 import apiGateway, { CustomerByIdPayload } from "@root/apiGateway";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useAppCookie from "@/hooks/useAppCookie.hook";
+import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import StickyHeader from "./StickyHeader";
 import AadhaarCardInfo from "./cards/AadhaarCardInfo";
 import AdharaCard from "./cards/AdharaCard";
@@ -81,6 +85,48 @@ function formatStateName(value: string | null | undefined): string {
 }
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   const { cookies } = useAppCookie();
+  const queryClient = useQueryClient();
+  const isSuperAdmin = cookies.role === "SUPER_ADMIN";
+  const isKraDone = String(data.kraStatus ?? "").trim().toUpperCase() === "VERIFIED";
+
+  const crmCustomerApi = useMemo(
+    () => new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller),
+    [],
+  );
+
+  const setPrimaryBankMutation = useMutation({
+    mutationFn: (bankAccountId: number) =>
+      crmCustomerApi.setPrimaryBankAccountAsCrm(data.id, bankAccountId),
+    onSuccess: (res) => {
+      toast.success(
+        (res.data as { message?: string }).message ?? "Primary bank account set.",
+      );
+      void queryClient.invalidateQueries({ queryKey: ["KycView", data.id] });
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      toast.error(
+        err?.response?.data?.message ??
+          (err instanceof Error ? err.message : "Failed to set primary bank"),
+      );
+    },
+  });
+
+  const setPrimaryDematMutation = useMutation({
+    mutationFn: (dematAccountId: number) =>
+      crmCustomerApi.setPrimaryDematAccountAsCrm(data.id, dematAccountId),
+    onSuccess: (res) => {
+      toast.success(
+        (res.data as { message?: string }).message ?? "Primary demat account set.",
+      );
+      void queryClient.invalidateQueries({ queryKey: ["KycView", data.id] });
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      toast.error(
+        err?.response?.data?.message ??
+          (err instanceof Error ? err.message : "Failed to set primary demat"),
+      );
+    },
+  });
 
   const api = new apiGateway.meradhan.customerKycApi.CustomerKycApi(
     apiClientCaller,
@@ -446,6 +492,27 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                         `${data.firstName} ${data.middleName ? data.middleName + " " : ""}${data.lastName}`.toLowerCase()
                       }
                     />
+                    {isSuperAdmin && isKraDone && !e.isPrimary ? (
+                      <div className="flex justify-center mt-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={
+                            setPrimaryBankMutation.isPending &&
+                            setPrimaryBankMutation.variables === e.id
+                          }
+                          onClick={() => setPrimaryBankMutation.mutate(e.id)}
+                          className="h-8"
+                        >
+                          {setPrimaryBankMutation.isPending &&
+                          setPrimaryBankMutation.variables === e.id ? (
+                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                          ) : null}
+                          Set as default bank
+                        </Button>
+                      </div>
+                    ) : null}
                     {e.confirmTimeStamp && (
                       <p className="text-center text-xs mt-4">
                         Confirmed At:{" "}
@@ -470,7 +537,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <CardTitle className="text-sm">Demat Accounts Details</CardTitle>
           </CardHeader>
           <CardContent>
-            {data.bankAccounts.length === 0 && (
+            {data.dematAccounts.length === 0 && (
               <p className="text-left text-sm">No demat account added yet.</p>
             )}
             <div className="gap-5 grid lg:grid-cols-3">
@@ -501,6 +568,27 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                           : "--/--/----"
                       }
                     />
+                    {isSuperAdmin && isKraDone && !e.isPrimary ? (
+                      <div className="flex justify-center mt-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={
+                            setPrimaryDematMutation.isPending &&
+                            setPrimaryDematMutation.variables === e.id
+                          }
+                          onClick={() => setPrimaryDematMutation.mutate(e.id)}
+                          className="h-8"
+                        >
+                          {setPrimaryDematMutation.isPending &&
+                          setPrimaryDematMutation.variables === e.id ? (
+                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                          ) : null}
+                          Set as default demat
+                        </Button>
+                      </div>
+                    ) : null}
                     {e.confirmTimeStamp && (
                       <p className="text-center text-xs mt-4">
                         Confirmed At:{" "}
