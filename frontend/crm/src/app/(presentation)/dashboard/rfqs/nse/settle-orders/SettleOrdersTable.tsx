@@ -38,7 +38,7 @@ function SettleOrdersTable({
   return (
     <div>
       <UniversalTable<ExtendedSettleOrderData>
-        initialPageSize={20}
+        initialPageSize={1000}
         isLoading={isLoading}
         data={data}
         onRowClickAction={onRowClick}

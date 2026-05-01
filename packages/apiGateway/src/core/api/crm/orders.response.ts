@@ -1,7 +1,11 @@
 export interface CrmOrder {
   id: number;
   orderNumber: string;
+  isin: string;
   bondName: string;
+  paymentOrderId?: string | null;
+  paymentId?: string | null;
+  reqOrderNumber?: string | null;
   quantity: number;
   faceValue: string;
   totalAmount: string;

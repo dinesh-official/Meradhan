@@ -6,6 +6,8 @@ import { AppError } from "@utils/error/AppError";
 import { sendBankAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
 import type z from "zod";
 import { meraDhanDematAccountSubmissionReceivedEmailText } from "@emails/text/meraDhanDematAccountSubmissionReceivedEmailText";
+import { meraDhanDefaultBankAccountUpdatedEmailText } from "@emails/text/meraDhanDefaultBankAccountUpdatedEmailText";
+import { meraDhanDefaultDematAccountUpdatedEmailText } from "@emails/text/meraDhanDefaultDematAccountUpdatedEmailText";
 import { EmailCommunication } from "../../../communication/email_communication";
 
 const KYC_VERIFIED_REQUIRED_MSG =
@@ -205,6 +207,46 @@ export class CustomerManageAccountsService {
       },
     });
 
+    // Send confirmation email immediately when default bank account changes
+    try {
+      const customer = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id: customerId },
+        select: {
+          emailAddress: true,
+          firstName: true,
+          lastName: true,
+          gender: true,
+        },
+      });
+      if (customer?.emailAddress) {
+        const customerName =
+          `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
+          "Customer";
+        const title =
+          customer.gender === "MALE"
+            ? ("Mr." as const)
+            : customer.gender === "FEMALE"
+              ? ("Ms." as const)
+              : undefined;
+        const last4Digits = String(bankAccount.accountNumber ?? "")
+          .replace(/\s+/g, "")
+          .slice(-4);
+
+        const emailSend = new EmailCommunication();
+        await emailSend.sendEmail({
+          to: customer.emailAddress,
+          subject: "Default Bank Account Updated Successfully",
+          html: meraDhanDefaultBankAccountUpdatedEmailText({
+            customerName,
+            title,
+            last4Digits: last4Digits || "----",
+          }),
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
     return true;
   }
 
@@ -390,6 +432,46 @@ export class CustomerManageAccountsService {
         isPrimary: true,
       },
     });
+
+    // Send confirmation email immediately when default demat account changes
+    try {
+      const customer = await db.dataBase.customerProfileDataModel.findUnique({
+        where: { id: customerId },
+        select: {
+          emailAddress: true,
+          firstName: true,
+          lastName: true,
+          gender: true,
+        },
+      });
+      if (customer?.emailAddress) {
+        const customerName =
+          `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
+          "Customer";
+        const title =
+          customer.gender === "MALE"
+            ? ("Mr." as const)
+            : customer.gender === "FEMALE"
+              ? ("Ms." as const)
+              : undefined;
+        const last4Digits = String(dematAccount.clientId ?? "")
+          .replace(/\s+/g, "")
+          .slice(-4);
+
+        const emailSend = new EmailCommunication();
+        await emailSend.sendEmail({
+          to: customer.emailAddress,
+          subject: "Default Demat Account Updated Successfully",
+          html: meraDhanDefaultDematAccountUpdatedEmailText({
+            customerName,
+            title,
+            last4Digits: last4Digits || "----",
+          }),
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
 
     return true;
   }

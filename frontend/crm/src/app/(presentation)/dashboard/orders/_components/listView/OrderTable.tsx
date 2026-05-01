@@ -3,7 +3,7 @@
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { CrmOrder } from "@root/apiGateway";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import { getBondType } from "../../utils/orderUtils";
+import { getBondRating, getBondType } from "../../utils/orderUtils";
 import { FaEye } from "react-icons/fa6";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,27 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
         {
           key: "orderNumber",
           label: "Order ID",
+          cell: (row) => {
+            const isin = row.isin || "-";
+            const rating = getBondRating(row.bondDetails) || "-";
+            const paymentId = row.paymentId || row.paymentOrderId || "";
+            const rfq = row.reqOrderNumber || "";
+            return (
+              <div className="flex flex-col">
+                <span className="font-medium">{row.orderNumber}</span>
+                <span className="text-muted-foreground text-xs font-mono">
+                  {isin} · {rating}
+                </span>
+                {(paymentId || rfq) && (
+                  <span className="text-muted-foreground text-[11px] font-mono">
+                    {paymentId ? `pay: ${paymentId}` : ""}
+                    {paymentId && rfq ? " · " : ""}
+                    {rfq ? `rfq: ${rfq}` : ""}
+                  </span>
+                )}
+              </div>
+            );
+          },
         },
         {
           key: "customerProfile",
