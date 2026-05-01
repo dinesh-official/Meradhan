@@ -2,6 +2,7 @@ import type { UnregisteredParticipantResponse } from "@modules/RFQ/nse/cbrics.ty
 import { db, type DataBaseSchema } from "@core/database/database";
 import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import { fetchRazorpayIfscDetails, isLikelyValidIfsc } from "@utils/razorpayIfsc";
 import type z from "zod";
 
 export type CbricsLinkedCustomerRow = {
@@ -32,6 +33,30 @@ const WORKFLOW_STATUS_LABELS: Record<number, string> = {
   5: "Rejected",
   6: "Returned",
 };
+
+/** Prefer CRM profile identity for account-holder / beneficiary-style name when syncing from CBRICS. */
+function crmHolderNameFromProfile(
+  profile: {
+    firstName: string;
+    middleName: string;
+    lastName: string;
+    legalEntityName: string | null;
+  },
+  cbricsFallback: string,
+): string {
+  const entity = profile.legalEntityName?.trim();
+  if (entity) return entity;
+
+  const parts = [profile.firstName, profile.middleName, profile.lastName]
+    .map((x) => (x ?? "").trim())
+    .filter(Boolean);
+  if (parts.length > 0) return parts.join(" ");
+
+  const first = profile.firstName?.trim();
+  if (first) return first;
+
+  return cbricsFallback.trim() || "Customer";
+}
 
 export class CbricsManagerDbService {
   private linkedCbricsCustomerWhere(filters: {
@@ -452,7 +477,13 @@ export class CbricsManagerDbService {
 
     const profile = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: profileId, isDeleted: false },
-      select: { id: true },
+      select: {
+        id: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        legalEntityName: true,
+      },
     });
     if (!profile) {
       throw new AppError("Customer profile for this participant was not found or is deleted.", {
@@ -463,7 +494,9 @@ export class CbricsManagerDbService {
 
     const holderFallback =
       [live.firstName, live.contactPerson].find((x) => (x ?? "").trim().length > 0)?.trim() ?? "Customer";
+    const accountHolderNameForCrm = crmHolderNameFromProfile(profile, holderFallback);
     const panForDemat = (live.panNo ?? "").trim() || "PAN_EXEMPT";
+    const syncedAt = new Date();
 
     const [existingBanks, existingDemats] = await Promise.all([
       db.dataBase.customersBankAccountModel.findMany({
@@ -488,7 +521,13 @@ export class CbricsManagerDbService {
     type BankCreate = DataBaseSchema.CustomersBankAccountModelCreateWithoutCustomerProfileDataModelInput;
     type DematCreate = DataBaseSchema.CustomersDematAccountModelCreateWithoutCustomerProfileDataModelInput;
 
-    const banksToAdd: BankCreate[] = [];
+    type BankDraft = {
+      bankCreate: Omit<BankCreate, "bankName" | "branch">;
+      liveBankName: string;
+      ifscForLookup: string;
+    };
+
+    const bankDrafts: BankDraft[] = [];
     let skippedExistingBankLines = 0;
     let skippedBankMissingAccountNumber = 0;
 
@@ -505,18 +544,54 @@ export class CbricsManagerDbService {
         continue;
       }
       bankKeySet.add(key);
-      banksToAdd.push({
-        accountHolderName: holderFallback,
-        bankAccountType: "SAVING",
-        accountNumber: acct,
-        ifscCode: ifsc || "--------",
-        bankName: String(b.bankName ?? "").trim() || "--------",
-        branch: "Synced from CBRICS",
-        isPrimary: b.isDefault === "Y",
-        isVerified: false,
-        allowTerms: false,
+      const ifscStored = ifsc || "--------";
+      bankDrafts.push({
+        bankCreate: {
+          accountHolderName: accountHolderNameForCrm,
+          bankAccountType: "SAVING",
+          accountNumber: acct,
+          ifscCode: ifscStored,
+          isPrimary: b.isDefault === "Y",
+          isVerified: true,
+          verifyDate: syncedAt,
+          confirmTimeStamp: syncedAt,
+          allowTerms: false,
+        },
+        liveBankName: String(b.bankName ?? "").trim(),
+        ifscForLookup: ifsc,
       });
     }
+
+    const ifscCodesToResolve = Array.from(
+      new Set(
+        bankDrafts
+          .map((d) => String(d.ifscForLookup ?? "").trim().toUpperCase())
+          .filter((code) => isLikelyValidIfsc(code)),
+      ),
+    );
+
+    const razorpayByIfsc = new Map<string, Awaited<ReturnType<typeof fetchRazorpayIfscDetails>>>();
+    await Promise.all(
+      ifscCodesToResolve.map(async (code) => {
+        const detail = await fetchRazorpayIfscDetails(code);
+        razorpayByIfsc.set(code, detail);
+      }),
+    );
+
+    const banksToAdd: BankCreate[] = bankDrafts.map((draft) => {
+      const lookupKey = String(draft.ifscForLookup ?? "").trim().toUpperCase();
+      const rz =
+        lookupKey && isLikelyValidIfsc(lookupKey) ? razorpayByIfsc.get(lookupKey) : undefined;
+      const bankName =
+        draft.liveBankName || rz?.bankName?.trim() || "--------";
+      const branch = rz?.branch?.trim() || "Synced from CBRICS";
+
+      return {
+        ...draft.bankCreate,
+        bankName,
+        branch,
+      };
+    });
 
     const dematsToAdd: DematCreate[] = [];
     let skippedExistingDematLines = 0;
@@ -550,9 +625,11 @@ export class CbricsManagerDbService {
         primaryPanNumber: panForDemat,
         sndPanNumber: null,
         trdPanNumber: null,
-        accountHolderName: holderFallback,
+        accountHolderName: accountHolderNameForCrm,
         isPrimary: d.isDefault === "Y",
-        isVerified: false,
+        isVerified: true,
+        verifyDate: syncedAt,
+        confirmTimeStamp: syncedAt,
         allowTerms: false,
       });
     }

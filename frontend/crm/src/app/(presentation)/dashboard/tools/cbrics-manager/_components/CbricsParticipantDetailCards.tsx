@@ -154,20 +154,52 @@ export function CbricsParticipantDetailCards({ participant }: { participant: Rec
       return res.data.responseData!;
     },
     onSuccess: (d) => {
-      const created = `${d.createdBanks} bank row(s), ${d.createdDemats} demat row(s) created`;
-      const skippedExisting = [];
-      if (d.skippedExistingBankLines || d.skippedExistingDematLines) {
-        skippedExisting.push(
-          `${d.skippedExistingBankLines} bank / ${d.skippedExistingDematLines} demat skipped (already on profile)`,
+      const hasCreated = d.createdBanks > 0 || d.createdDemats > 0;
+      const skippedExisting =
+        (d.skippedExistingBankLines ?? 0) > 0 || (d.skippedExistingDematLines ?? 0) > 0;
+      const otherSkips =
+        (d.skippedBankMissingAccountNumber ?? 0) > 0 || (d.skippedDematInvalid ?? 0) > 0;
+
+      if (!hasCreated && skippedExisting && !otherSkips) {
+        toast.info(
+          "Already synced with your database: live CBRICS bank and DP lines already match this customer's CRM profile, so no new rows were added.",
         );
+      } else if (!hasCreated && skippedExisting && otherSkips) {
+        const extra: string[] = [];
+        if (d.skippedBankMissingAccountNumber) {
+          extra.push(`${d.skippedBankMissingAccountNumber} CBRICS bank line(s) had no account number`);
+        }
+        if (d.skippedDematInvalid) {
+          extra.push(`${d.skippedDematInvalid} DP line(s) skipped (missing ids)`);
+        }
+        toast.info(
+          `CRM profile already had matching bank / demat records. ${extra.join(" · ")}`,
+        );
+      } else if (!hasCreated && !skippedExisting && otherSkips) {
+        const parts: string[] = [];
+        if (d.skippedBankMissingAccountNumber) {
+          parts.push(`${d.skippedBankMissingAccountNumber} bank line(s): no account number`);
+        }
+        if (d.skippedDematInvalid) {
+          parts.push(`${d.skippedDematInvalid} DP line(s): missing ids`);
+        }
+        toast.warning(`Nothing added. ${parts.join(" · ")}`);
+      } else {
+        const created = `${d.createdBanks} bank row(s), ${d.createdDemats} demat row(s) created`;
+        const details: string[] = [];
+        if (d.skippedExistingBankLines || d.skippedExistingDematLines) {
+          details.push(
+            `${d.skippedExistingBankLines} bank / ${d.skippedExistingDematLines} already on profile (unchanged)`,
+          );
+        }
+        if (d.skippedBankMissingAccountNumber) {
+          details.push(`${d.skippedBankMissingAccountNumber} CBRICS bank line(s) skipped (no account number)`);
+        }
+        if (d.skippedDematInvalid) {
+          details.push(`${d.skippedDematInvalid} DP line(s) skipped (missing ids)`);
+        }
+        toast.success([created, ...details].filter(Boolean).join(" · "));
       }
-      if (d.skippedBankMissingAccountNumber) {
-        skippedExisting.push(`${d.skippedBankMissingAccountNumber} CBRICS bank line(s) skipped (no account number)`);
-      }
-      if (d.skippedDematInvalid) {
-        skippedExisting.push(`${d.skippedDematInvalid} DP line(s) skipped (missing ids)`);
-      }
-      toast.success([created, ...skippedExisting].join(" · "));
       void queryClient.invalidateQueries({
         queryKey: ["cbrics-customer-profile-match-keys", cbricsParticipantId],
       });

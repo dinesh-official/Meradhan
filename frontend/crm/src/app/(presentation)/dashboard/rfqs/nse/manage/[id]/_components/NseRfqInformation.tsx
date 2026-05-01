@@ -6,7 +6,7 @@ import {
   PriceYieldTypeBadge,
   RfqStatusBadge,
   TradeTypeBadge,
-  YieldTypeBadge
+  YieldTypeBadge,
 } from "../../../_components/bages/NseRfqBadges";
 import RefqRegType from "../../../participants/_components/RefqRegType";
 
@@ -39,7 +39,7 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
               <p className="font-medium text-sm">{RfqInformationData.isin}</p>
             </LabelView>
 
-            <LabelView title="segment">
+            <LabelView title="Segment">
               <NseRfqSegmentBadge type={`${RfqInformationData.segment}`} />
             </LabelView>
             <LabelView title="Buy/Sell">
