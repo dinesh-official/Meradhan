@@ -9,8 +9,6 @@ export const meraDhanDefaultBankAccountUpdatedEmailText = (data: {
 
   return `
   <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #111;">
-    <p><strong>Subject:</strong> Default Bank Account Updated Successfully</p>
-
     <p>Dear ${title}${name},</p>
 
     <p>
