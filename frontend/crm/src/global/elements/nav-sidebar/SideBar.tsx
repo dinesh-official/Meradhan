@@ -74,7 +74,7 @@ function SideBar({
           role={role}
           key={item.label + i}
           item={item}
-          activePath={activePath}
+          activePath={activePath || undefined}
         />
       ))}
     </aside>

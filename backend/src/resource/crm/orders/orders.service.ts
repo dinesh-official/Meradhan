@@ -228,23 +228,47 @@ export class CrmOrdersService {
       }
     }
 
-    if (search) {
+    const searchTrimmed = search?.trim();
+    if (searchTrimmed) {
+      const q = searchTrimmed;
+      const numericId = /^\d+$/.test(q) ? Number(q) : null;
+
       whereClause.OR = [
         {
           customerProfile: {
             OR: [
-              { firstName: { contains: search, mode: "insensitive" } },
-              { lastName: { contains: search, mode: "insensitive" } },
-              { emailAddress: { contains: search, mode: "insensitive" } },
+              { firstName: { contains: q, mode: "insensitive" } },
+              { lastName: { contains: q, mode: "insensitive" } },
+              { emailAddress: { contains: q, mode: "insensitive" } },
             ],
           },
         },
-        { bondName: { contains: search, mode: "insensitive" } },
-        { orderNumber: { contains: search, mode: "insensitive" } },
+        { bondName: { contains: q, mode: "insensitive" } },
+        { orderNumber: { contains: q, mode: "insensitive" } },
+        { isin: { contains: q, mode: "insensitive" } },
+        ...(numericId != null ? [{ id: numericId }] : []),
         {
           bondDetails: {
             path: ["issuerCode"],
-            string_contains: search,
+            string_contains: q,
+          },
+        },
+        {
+          bondDetails: {
+            path: ["rating"],
+            string_contains: q,
+          },
+        },
+        {
+          bondDetails: {
+            path: ["creditRating"],
+            string_contains: q,
+          },
+        },
+        {
+          bondDetails: {
+            path: ["bondRating"],
+            string_contains: q,
           },
         },
       ];

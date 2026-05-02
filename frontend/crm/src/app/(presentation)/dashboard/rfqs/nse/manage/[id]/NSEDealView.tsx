@@ -13,6 +13,7 @@ import NseRfqInformation from "./_components/NseRfqInformation";
 import NseTradingOptions from "./_components/NseTradingOptions";
 import { mapRfqToComponents } from "./_utils/mapRfqData";
 import AcceptQuate from "./_components/actions/AcceptQuate";
+import { RfqStatusBadge } from "../../_components/bages/NseRfqBadges";
 
 function LoadingSkeleton() {
   return (
@@ -151,23 +152,37 @@ function NSEDealView({ id, date }: { id: string; date?: string }) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Header with RFQ Status and Refresh */}
-      <div className="flex justify-between items-center">
-        <div></div>
-        <div className="flex justify-center items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </Button>
-          <AcceptQuate data={data} />
-          {/* <RejectQuate data={data} /> */}
-        </div>
-      </div>
+      <Card>
+        <CardHeader className="py-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-mono text-sm font-semibold">{id}</p>
+                <RfqStatusBadge status={`${data.status}`} />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                ISIN: <span className="font-mono">{data.isin}</span>
+                {data.participantCode ? (
+                  <>
+                    {" "}
+                    · P: <span className="font-mono">{data.participantCode}</span>
+                  </>
+                ) : null}
+                {date ? <> · Date: {date}</> : null}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => refetch()} className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+              <AcceptQuate data={data} />
+              {/* <RejectQuate data={data} /> */}
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
       {/* RFQ Information Card */}
       <div>
@@ -175,11 +190,9 @@ function NSEDealView({ id, date }: { id: string; date?: string }) {
       </div>
 
       {/* Trading Options and Additional Info */}
-      <div className="flex flex-row gap-5 w-full">
-        <div className="flex-1">
-          <NseTradingOptions {...componentData.tradingOptions} />
-        </div>
-        <div className="flex flex-col gap-5 min-w-[300px]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
+        <NseTradingOptions {...componentData.tradingOptions} />
+        <div className="flex flex-col gap-5">
           <NseAdditionalInformation {...componentData.additionalInformation} />
           <NseRecordInformation {...componentData.recordInformation} />
         </div>

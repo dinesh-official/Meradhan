@@ -22,6 +22,7 @@ import crmSavedProposalsRoutes from "@resource/crm/proposals/crm_saved_proposals
 import partnershipFollowUpRouter from "@resource/crm/partnership/followup/partnership_follow_up.routes";
 import partnershipRoutes from "@resource/crm/partnership/partnership.routes";
 import participantsRouter from "@resource/crm/refq/nse/cbrics/cbrics.routes";
+import cbricsManagerRoutes from "@resource/crm/cbrics_manager/cbrics_manager.routes";
 import nseNotificationsRoutes from "@resource/crm/refq/nse/notifications/nse_notifications.routes";
 import nseIsinRoute from "@resource/crm/refq/nse/isin/nseisin.routes";
 import localDataRfqRoutes from "@resource/crm/refq/nse/local/localdata_rfq.routes";
@@ -81,6 +82,7 @@ server.addRoutes([
   razorpayRouteStakeholdersRoutes,
   razorpayRouteSettlementAccountsRoutes,
   participantsRouter,
+  cbricsManagerRoutes,
   nseNotificationsRoutes,
   commonApiRoutes,
   dashboardRoutes,

@@ -436,7 +436,7 @@ export interface GetUnregisteredDpAccountsRequest {
   participantCode?: string;
 
   /**
-   * Workflow status of approval
+   * Workflow status of approval (required by CBRICS for /unreg/dpacc/all).
    * - 100: Pending With Checker
    * - 16: Returned by Checker
    * - 15: Rejected by Checker
@@ -446,7 +446,7 @@ export interface GetUnregisteredDpAccountsRequest {
    * - 5: Rejected
    * - 6: Returned
    */
-  workflowStatus?: number;
+  workflowStatus: number;
 }
 
 /**

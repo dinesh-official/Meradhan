@@ -15,9 +15,9 @@ function CrmOrdersView() {
   const isShowPagination = () => {
     return (
       (filterApiManager.fetchOrderQuery.data?.responseData.data.length || 0) >
-        0 &&
+      0 &&
       filterApiManager.fetchOrderQuery.data?.responseData.meta.totalPages !=
-        1 &&
+      1 &&
       !filterApiManager.fetchOrderQuery.isPending
     );
   };

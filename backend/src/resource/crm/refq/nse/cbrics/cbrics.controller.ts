@@ -4,6 +4,13 @@ import type { Request, Response } from "express";
 import { CbricsParticipantService } from "./cbrics.service";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
+
+const workflowLabelLookup = Object.fromEntries(
+  appSchema.crm.rfq.nse.getParticipants.CBRICS_UNREG_WORKFLOW_STATUS_OPTIONS.map(
+    (row) => [row.code, row.label] as const
+  )
+);
+
 export class CbricsParticipantController {
   private participantService = new CbricsParticipantService();
   private nseCbrics = new NseCBRICS();
@@ -41,6 +48,47 @@ export class CbricsParticipantController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,
+    });
+  }
+
+  /** Catalog of `/unreg/all` workflow codes and labels — for CRM filters. */
+  async handleGetCbricsWorkflowStatuses(_req: Request, res: Response) {
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData:
+        appSchema.crm.rfq.nse.getParticipants.CBRICS_UNREG_WORKFLOW_STATUS_OPTIONS,
+    });
+  }
+
+  /**
+   * Live NSE `/unreg/all` for exactly one workflow code (separate URL per status).
+   * Example: GET .../workflow/16 → status 16 only.
+   */
+  async handleGetParticipantsCbricsByWorkflow(req: Request, res: Response) {
+    const { workflowStatus } =
+      appSchema.crm.rfq.nse.getParticipants.CbricsWorkflowStatusPathParamsZ.parse(
+        req.params
+      );
+    const query = appSchema.crm.rfq.nse.getParticipants.CbricsUnregAllQueryZ.parse(
+      req.query
+    );
+
+    const searchTrimmed = query.search?.trim();
+
+    const data = await this.nseCbrics.getAllUnregisteredParticipants({
+      workflowStatus,
+      ...(searchTrimmed ? { firstName: searchTrimmed } : {}),
+      ...(query.loginId?.trim() ? { loginId: query.loginId.trim() } : {}),
+      ...(query.panNo?.trim() ? { panNo: query.panNo.trim() } : {}),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: {
+        workflowStatus,
+        workflowLabel: workflowLabelLookup[workflowStatus] ?? `Workflow ${workflowStatus}`,
+        participants: data,
+      },
     });
   }
 

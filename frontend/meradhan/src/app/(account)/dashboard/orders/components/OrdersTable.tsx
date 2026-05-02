@@ -85,6 +85,10 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                   order.createdAt,
                   "DD MMM YYYY"
                 );
+                const requestDate =
+                  !formattedDate || formattedDate === "Invalid Date"
+                    ? "-"
+                    : formattedDate;
                 const faceValue = formatAmount(parseFloat(order.faceValue));
                 const totalValue = formatAmount(parseFloat(order.totalAmount));
 
@@ -116,7 +120,7 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                         <PiCurrencyInrBold /> {totalValue}
                       </div>
                     </TableCell>
-                    <TableCell className="py-4 px-6">{formattedDate}</TableCell>
+                    <TableCell className="py-4 px-6">{requestDate}</TableCell>
                     <TableCell className={`py-4 px-6 ${statusDisplay.className}`}>
                       {statusDisplay.text}
                     </TableCell>

@@ -5,6 +5,16 @@ const participantsRouter = Router();
 
 const controller = new CbricsParticipantController();
 participantsRouter.get(
+  "/api/crm/rfq/nse/cbrics/workflow-statuses",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.handleGetCbricsWorkflowStatuses(req, res)
+);
+participantsRouter.get(
+  "/api/crm/rfq/nse/cbrics/participants/workflow/:workflowStatus",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.handleGetParticipantsCbricsByWorkflow(req, res)
+);
+participantsRouter.get(
   "/api/crm/rfq/nse/db/participants",
   allowAccessMiddleware("CRM"),
   (req, res) => controller.handleGetParticipants(req, res)

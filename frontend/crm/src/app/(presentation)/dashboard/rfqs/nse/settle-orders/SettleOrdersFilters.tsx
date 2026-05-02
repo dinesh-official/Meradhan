@@ -1,7 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Filter, RefreshCw, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { TSettleOrdersFilterHook } from "./hooks/useSettleOrdersFilterHook";
 
 interface SettleOrdersFiltersProps {
@@ -16,6 +24,13 @@ function SettleOrdersFilters({
   isLoading = false,
 }: SettleOrdersFiltersProps) {
   const { state } = filterManager;
+  const [searchBy, setSearchBy] = useState<"id" | "orderNumber">(
+    state.id ? "id" : "orderNumber"
+  );
+
+  const searchValue = useMemo(() => {
+    return searchBy === "id" ? state.id : state.orderNumber;
+  }, [searchBy, state.id, state.orderNumber]);
 
   const hasActiveFilters = () => {
     return (
@@ -32,33 +47,44 @@ function SettleOrdersFilters({
       <div className="flex flex-wrap justify-between items-center gap-4">
         {/* All Filters in Single Row */}
         <div className={`flex flex-wrap items-center gap-3 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-          {/* Order ID Filter */}
+          {/* Order search (single input + select) */}
           <div className="flex flex-col">
-            <label className="mb-1 text-muted-foreground text-xs">
-              Order ID
-            </label>
-            <Input
-              className="bg-secondary border-0 w-32"
-              placeholder="Order ID"
-              type="number"
-              value={state.id}
-              onChange={(e) => state.setId(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
+            <label className="mb-1 text-muted-foreground text-xs">Search</label>
+            <div className="flex items-center gap-2">
+              <Select
+                value={searchBy}
+                onValueChange={(v) => {
+                  const next = v === "id" ? "id" : "orderNumber";
+                  setSearchBy(next);
+                }}
+              >
+                <SelectTrigger className="bg-secondary border-0 h-9 w-[140px]">
+                  <SelectValue placeholder="Search by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="id">Order ID</SelectItem>
+                  <SelectItem value="orderNumber">Order Number</SelectItem>
+                </SelectContent>
+              </Select>
 
-          {/* Order Number Filter */}
-          <div className="flex flex-col">
-            <label className="mb-1 text-muted-foreground text-xs">
-              Order Number
-            </label>
-            <Input
-              className="bg-secondary border-0 w-40"
-              placeholder="Order Number"
-              value={state.orderNumber}
-              onChange={(e) => state.setOrderNumber(e.target.value)}
-              disabled={isLoading}
-            />
+              <Input
+                className="bg-secondary border-0 w-44"
+                placeholder={searchBy === "id" ? "Enter Order ID" : "Enter Order Number"}
+                type={searchBy === "id" ? "number" : "text"}
+                value={searchValue}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (searchBy === "id") {
+                    state.setId(v);
+                    if (state.orderNumber) state.setOrderNumber("");
+                  } else {
+                    state.setOrderNumber(v);
+                    if (state.id) state.setId("");
+                  }
+                }}
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
           {/* Counter Party Filter */}

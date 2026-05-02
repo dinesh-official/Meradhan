@@ -48,7 +48,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Leads",
     icon: Users,
     allowOnly: ["view:leads"],
-    path: "/dashboard/leads",
+    // path: "/dashboard/leads",
     children: [
       {
         label: "All Leads",
@@ -239,7 +239,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "Bonds",
-    path: "/dashboard/bonds",
+    // path: "/dashboard/bonds",
     icon: FaMoneyBill,
     module: "bonds",
     allowOnly: ["view:bonds"],

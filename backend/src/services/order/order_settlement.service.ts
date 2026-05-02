@@ -396,7 +396,8 @@ export class OrderSettlementService {
               payId: order.paymentId || "",
               userId: order.customerProfileId,
               notes: {
-                rfqNumber: addIsinResponse.rfqNumber,
+                RFQ_NUMBER: addIsinResponse.rfqNumber,
+                UCC: order?.customerProfile?.nseDataSet?.participant?.loginId
               }
             }),
         });
@@ -415,6 +416,7 @@ export class OrderSettlementService {
         },
         completedAt: new Date(),
       });
+
 
       // Ensure no stale IN_PROGRESS/STARTED entries remain after a successful batch.
       await db.dataBase.orderSettlementAutomationLog.updateMany({
@@ -775,6 +777,16 @@ export class OrderSettlementService {
         create: proposeDbData,
         update: proposeDbData,
       });
+
+
+      await db.dataBase.order.update({
+        where: {
+          id: order.id,
+        },
+        data: {
+          reqOrderNumber: proposeResponse.tradeNumber,
+        }
+      })
 
       // Log deal proposal
       await this.orderService.addOrderLog(
