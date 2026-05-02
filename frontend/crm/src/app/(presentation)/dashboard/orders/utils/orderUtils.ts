@@ -67,3 +67,14 @@ export function getIssuerCode(bondDetails: Order["bondDetails"]): string {
   }
   return "";
 }
+
+export function getBondRating(bondDetails: Order["bondDetails"]): string {
+  if (bondDetails && typeof bondDetails === "object") {
+    const rating =
+      getBondDetailString(bondDetails, "rating") ||
+      getBondDetailString(bondDetails, "creditRating") ||
+      getBondDetailString(bondDetails, "bondRating");
+    if (rating) return rating;
+  }
+  return "";
+}

@@ -101,6 +101,20 @@ export interface TCrmCustomerInterface {
     attachmentId: number,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isDeleted: boolean }>>>;
+
+  /** SUPER_ADMIN — same backend flow as customer profile default bank. */
+  setPrimaryBankAccountAsCrm(
+    customerId: number,
+    bankAccountId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ success: boolean }>>>;
+
+  /** SUPER_ADMIN — same backend flow as customer profile default demat. */
+  setPrimaryDematAccountAsCrm(
+    customerId: number,
+    dematAccountId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ success: boolean }>>>;
 }
 
 export class CrmCustomerApi implements TCrmCustomerInterface {
@@ -292,6 +306,30 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
   ): ReturnType<TCrmCustomerInterface["deleteCorporateKycAttachment"]> {
     return this.apiClient.delete<BaseResponseData<{ isDeleted: boolean }>>(
       `/crm/customer/${customerId}/corporate-kyc/attachments/${attachmentId}`,
+      config,
+    );
+  }
+
+  async setPrimaryBankAccountAsCrm(
+    customerId: number,
+    bankAccountId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["setPrimaryBankAccountAsCrm"]> {
+    return this.apiClient.post<BaseResponseData<{ success: boolean }>>(
+      `/crm/customer/${customerId}/bank-account/primary/${bankAccountId}`,
+      {},
+      config,
+    );
+  }
+
+  async setPrimaryDematAccountAsCrm(
+    customerId: number,
+    dematAccountId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["setPrimaryDematAccountAsCrm"]> {
+    return this.apiClient.post<BaseResponseData<{ success: boolean }>>(
+      `/crm/customer/${customerId}/demat-account/primary/${dematAccountId}`,
+      {},
       config,
     );
   }

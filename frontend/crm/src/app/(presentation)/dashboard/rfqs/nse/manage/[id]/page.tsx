@@ -16,7 +16,7 @@ const page = async ({
       <div className="flex flex-col gap-5">
         <PageInfoBar
           title="RFQ Details"
-          description="a small detachment of troops or police."
+          description="Review RFQ information, trading options, and actions."
           showBack
         />
         <NSEDealView id={id} date={date} />

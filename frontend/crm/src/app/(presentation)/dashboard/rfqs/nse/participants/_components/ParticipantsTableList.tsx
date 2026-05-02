@@ -3,6 +3,9 @@ import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import WorkflowStatusBadge from "@/global/elements/wrapper/badges/WrokflowStatusBadge";
 import { ParticipantData } from "@root/apiGateway";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
+import { ParticipantRowActions } from "./ParticipantRowActions";
 
 function ParticipantsTableList({
   data,
@@ -11,11 +14,18 @@ function ParticipantsTableList({
   data: ParticipantData[];
   isLoading?: boolean;
 }) {
+  const router = useRouter();
+
   return (
     <UniversalTable<ParticipantData>
       initialPageSize={100}
       data={data}
       isLoading={isLoading}
+      getRowIdAction={(row) => String(row.id)}
+      onRowClickAction={(row) => {
+        const href = `/dashboard/tools/cbrics-manager?participantId=${row.id}` as Route;
+        router.push(href);
+      }}
       fields={[
         {
           key: "loginId",
@@ -107,9 +117,9 @@ function ParticipantsTableList({
         {
           key: "actions",
           label: "Action",
-          stickyRight: true, // UniversalTable will add the sticky wrapper
+          stickyRight: true,
           sortable: false,
-          cell: () => <></>,
+          cell: (row) => <ParticipantRowActions row={row} />,
         },
       ]}
     />

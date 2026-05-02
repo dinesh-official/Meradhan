@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User } from "lucide-react";
 import { ReactNode } from "react";
+import Link from "next/link";
 import { useLogoutActionHook } from "./useLogoutActionHook";
 function ProfileToggleAction({
   children,
@@ -26,8 +27,10 @@ function ProfileToggleAction({
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex justify-start items-center group gap-3">
-          <User className="group hover:text-primary" /> Profile
+        <DropdownMenuItem asChild className="flex justify-start items-center group gap-3">
+          <Link href="/dashboard/profile">
+            <User className="group hover:text-primary" /> My Account
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={mutateLogout.isPending}

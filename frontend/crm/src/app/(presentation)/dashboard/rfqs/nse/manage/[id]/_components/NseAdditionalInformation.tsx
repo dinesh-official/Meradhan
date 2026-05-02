@@ -13,10 +13,10 @@ const NseAdditionalInformation = (
   return (
     <Card>
       <CardHeader>
-        <CardTitle> Additional Information</CardTitle>
+        <CardTitle>Additional Information</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid gap-5 md:grid-cols-2">
           <LabelView title="Sector">
             <p className="font-medium text-sm">
               {additionalInformationData.sector}
@@ -27,12 +27,12 @@ const NseAdditionalInformation = (
               {additionalInformationData.rating}
             </p>
           </LabelView>
-          <div className="col-span-2" >
+          <div className="col-span-2">
             <LabelView title="Remarks">
-            <p className="font-medium text-sm">
-              {additionalInformationData.remarks}
-            </p>
-          </LabelView>
+              <p className="font-medium text-sm">
+                {additionalInformationData.remarks}
+              </p>
+            </LabelView>
           </div>
         </div>
       </CardContent>

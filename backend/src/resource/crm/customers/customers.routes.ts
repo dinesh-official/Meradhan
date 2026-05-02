@@ -43,6 +43,19 @@ crmCustomersRoutes.delete(
   (req, res) => controller.deleteCustomer(req, res)
 );
 
+/** Same bank/demat default flow as customer self-serve profile APIs; SUPER_ADMIN only. */
+crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/bank-account/primary/:bankAccountId",
+  allowAccessMiddleware("SUPER_ADMIN"),
+  (req, res) => controller.crmSetPrimaryBankAccount(req, res),
+);
+
+crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/demat-account/primary/:dematAccountId",
+  allowAccessMiddleware("SUPER_ADMIN"),
+  (req, res) => controller.crmSetPrimaryDematAccount(req, res),
+);
+
 crmCustomersRoutes.get(
   "/api/crm/customer/:customerId/corporate-kyc/pdf",
   allowAccessMiddleware("ADMIN", "USER"),
