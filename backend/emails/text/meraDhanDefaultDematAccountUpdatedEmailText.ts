@@ -9,8 +9,6 @@ export const meraDhanDefaultDematAccountUpdatedEmailText = (data: {
 
   return `
   <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #111;">
-    <p><strong>Subject:</strong> Default Demat Account Updated Successfully</p>
-
     <p>Dear ${title}${name},</p>
 
     <p>
