@@ -417,6 +417,7 @@ export class OrderSettlementService {
         completedAt: new Date(),
       });
 
+
       // Ensure no stale IN_PROGRESS/STARTED entries remain after a successful batch.
       await db.dataBase.orderSettlementAutomationLog.updateMany({
         where: {
@@ -776,6 +777,16 @@ export class OrderSettlementService {
         create: proposeDbData,
         update: proposeDbData,
       });
+
+
+      await db.dataBase.order.update({
+        where: {
+          id: order.id,
+        },
+        data: {
+          reqOrderNumber: proposeResponse.tradeNumber,
+        }
+      })
 
       // Log deal proposal
       await this.orderService.addOrderLog(

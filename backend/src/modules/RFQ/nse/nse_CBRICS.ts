@@ -340,6 +340,8 @@ export class NseCBRICS {
   public async markDefaultUnregisteredBankAccount(
     payload: MarkDefaultUnregisteredBankAccountRequest
   ) {
+    console.log(payload);
+
     return this.withReLoginRetry(async (loginKey) => {
       const { data } =
         await this.client.post<UnregisteredParticipantBankAccountResponse>(

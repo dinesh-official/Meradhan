@@ -87,7 +87,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   const { cookies } = useAppCookie();
   const queryClient = useQueryClient();
   const isSuperAdmin = cookies.role === "SUPER_ADMIN";
-  const isKraDone = String(data.kraStatus ?? "").trim().toUpperCase() === "VERIFIED";
+  /** Must match backend `CustomerManageAccountsService.assertKycVerified` (kycStatus, not kraStatus). */
+  const canManageDefaultAccounts =
+    String(data.kycStatus ?? "").trim().toUpperCase() === "VERIFIED";
 
   const crmCustomerApi = useMemo(
     () => new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller),
@@ -492,7 +494,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                         `${data.firstName} ${data.middleName ? data.middleName + " " : ""}${data.lastName}`.toLowerCase()
                       }
                     />
-                    {isSuperAdmin && isKraDone && !e.isPrimary ? (
+                    {isSuperAdmin && canManageDefaultAccounts && !e.isPrimary ? (
                       <div className="flex justify-center mt-3">
                         <Button
                           type="button"
@@ -568,7 +570,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                           : "--/--/----"
                       }
                     />
-                    {isSuperAdmin && isKraDone && !e.isPrimary ? (
+                    {isSuperAdmin && canManageDefaultAccounts && !e.isPrimary ? (
                       <div className="flex justify-center mt-3">
                         <Button
                           type="button"
