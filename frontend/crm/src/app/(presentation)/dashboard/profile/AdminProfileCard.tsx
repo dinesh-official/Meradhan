@@ -206,14 +206,6 @@ export default function AdminProfileCard() {
               <CardAction>
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="font-medium"
-                    onClick={handleEditProfile}
-                  >
-                    Edit Profile
-                  </Button>
-                  <Button
                     variant="ghost"
                     size="sm"
                     className="font-medium"
