@@ -232,20 +232,59 @@ export class CrmOrdersService {
     if (searchTrimmed) {
       const q = searchTrimmed;
       const numericId = /^\d+$/.test(q) ? Number(q) : null;
+      /** e.g. "sourav bapari" → each token must match some name field (first / middle / last). */
+      const nameTokens = q.split(/\s+/).filter((t) => t.length > 0);
+
+      const customerMatchesToken = (token: string) =>
+        ({
+          OR: [
+            { firstName: { contains: token, mode: "insensitive" as const } },
+            { middleName: { contains: token, mode: "insensitive" as const } },
+            { lastName: { contains: token, mode: "insensitive" as const } },
+          ],
+        }) satisfies Prisma.CustomerProfileDataModelWhereInput;
+
+      const customerSearchConditions: Prisma.OrderWhereInput[] =
+        nameTokens.length >= 2
+          ? [
+              {
+                customerProfile: {
+                  AND: nameTokens.map((token) => customerMatchesToken(token)),
+                },
+              },
+              {
+                customerProfile: {
+                  emailAddress: { contains: q, mode: "insensitive" },
+                },
+              },
+            ]
+          : [
+              {
+                customerProfile: {
+                  OR: [
+                    { firstName: { contains: q, mode: "insensitive" } },
+                    { middleName: { contains: q, mode: "insensitive" } },
+                    { lastName: { contains: q, mode: "insensitive" } },
+                    { emailAddress: { contains: q, mode: "insensitive" } },
+                  ],
+                },
+              },
+            ];
 
       whereClause.OR = [
-        {
-          customerProfile: {
-            OR: [
-              { firstName: { contains: q, mode: "insensitive" } },
-              { lastName: { contains: q, mode: "insensitive" } },
-              { emailAddress: { contains: q, mode: "insensitive" } },
-            ],
-          },
-        },
+        ...customerSearchConditions,
         { bondName: { contains: q, mode: "insensitive" } },
         { orderNumber: { contains: q, mode: "insensitive" } },
         { isin: { contains: q, mode: "insensitive" } },
+        { paymentId: { contains: q, mode: "insensitive" } },
+        { paymentOrderId: { contains: q, mode: "insensitive" } },
+        { reqOrderNumber: { contains: q, mode: "insensitive" } },
+        {
+          metadata: {
+            path: ["rfqNumber"],
+            string_contains: q,
+          },
+        },
         ...(numericId != null ? [{ id: numericId }] : []),
         {
           bondDetails: {

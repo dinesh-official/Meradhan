@@ -16,7 +16,7 @@ import BondAddToWatchList from "./BondAddToWatchList";
 import { BondInfoLabel } from "./BondInfoLabel";
 import CreditRatingBadge from "./CreaditRatingBadge";
 import { useCompareSelectStore } from "@/app/(bonds)/_hooks/useCompareSelectStore";
-import { getBondPurchaseEligibility } from "@/global/utils/bondPurchaseEligibility";
+import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
 
 export function BondListCard({
   gridMode,
@@ -30,7 +30,7 @@ export function BondListCard({
   odd?: boolean;
 }) {
   const { addItem, removeItem, selectedItems } = useCompareSelectStore();
-  const purchase = getBondPurchaseEligibility(data);
+  const showBuy = canShowBuyNow(data);
 
   return (
     <Card
@@ -56,7 +56,7 @@ export function BondListCard({
                       View Details
                     </Button>
                   </Link>
-                  {purchase.eligible && (
+                  {showBuy && (
                     <Link href={`/place-order/${data.isin}`}>
                       <Button title="Place order for this bond">Buy Now</Button>
                     </Link>
@@ -141,7 +141,7 @@ export function BondListCard({
               <div
                 className={cn(
                   "gap-3 grid col-span-2 mt-2",
-                  purchase.eligible ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1",
+                  showBuy ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1",
                   !gridMode && "lg:hidden grid"
                 )}
               >
@@ -153,7 +153,7 @@ export function BondListCard({
                     View Details
                   </Button>
                 </Link>
-                {purchase.eligible && (
+                {showBuy && (
                   <Link href={`/place-order/${data.isin}`} className="block w-full">
                     <Button className="w-full" title="Place order for this bond">
                       Buy Now

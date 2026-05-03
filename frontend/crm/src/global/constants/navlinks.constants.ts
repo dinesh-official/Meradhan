@@ -207,6 +207,12 @@ export const NAV_ITEMS: NavItem[] = [
         module: "orders",
         allowOnly: ["view:orders"],
       },
+      {
+        label: "Inventory stock",
+        path: "/dashboard/orders/inventory-stock",
+        module: "orders",
+        allowOnly: ["view:orders"],
+      },
     ],
   },
 

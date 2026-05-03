@@ -21,7 +21,7 @@ import { Check, Loader2, RefreshCw } from "lucide-react";
 import React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-function CustomerKycView({ id }: { id: number}) {
+function CustomerKycView({ id }: { id: number }) {
   const profileApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiClientCaller,
   );
@@ -123,7 +123,7 @@ function CustomerKycView({ id }: { id: number}) {
       toast.error("No KYC flow found for this customer.");
       return;
     }
-   
+
     if (kraRunning) {
       toast.error("KRA process is already running for this customer.");
       return;
@@ -211,9 +211,9 @@ function CustomerKycView({ id }: { id: number}) {
                   ? "KRA process is already running"
                   : kycDataStoreId == null
                     ? "No KYC flow found"
-                  : !canRetriggerKra && data?.kycStatus === "PENDING"
-                    ? "KYC is still pending"
-                    : undefined
+                    : !canRetriggerKra && data?.kycStatus === "PENDING"
+                      ? "KYC is still pending"
+                      : undefined
             }
           >
             {rescheduleMutation.isPending ? (
