@@ -10,7 +10,11 @@ import OrderStep from "../_components/OrderStep";
 import { generateDraftPlaceOrderLabel } from "../_utils/calcAmount";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import { redirect } from "next/navigation";
-import { getBondPurchaseEligibility } from "@/global/utils/bondPurchaseEligibility";
+import {
+  getBondPurchaseEligibility,
+  hasCrmInventoryAvailable,
+} from "@/global/utils/bondPurchaseEligibility";
+import { getMaxOrderQuantityFromBond } from "../_utils/quantity";
 export const revalidate = 0;
 
 export const generateMetadata = async ({
@@ -49,9 +53,14 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
   let orderPricing: BondOrderPricingData | null = null;
   if (responseData) {
     try {
+      const requested = Number(quantity ?? 1);
+      const safeRequested =
+        Number.isFinite(requested) && requested >= 1 ? Math.floor(requested) : 1;
+      const maxQ = getMaxOrderQuantityFromBond(responseData);
+      const pricingQty = Math.min(safeRequested, maxQ);
       const pricingEnvelope = await apiCaller.getBondOrderPricing(
         isin,
-        Number(quantity ?? 1),
+        pricingQty,
       );
       if (pricingEnvelope.responseData) {
         orderPricing = pricingEnvelope.responseData;
@@ -60,8 +69,6 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
       orderPricing = null;
     }
   }
-
-  console.log(orderPricing);
 
   const session = await getSession();
   if (!session?.id) {
@@ -199,6 +206,38 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <Link href="/bonds" className="mt-6 inline-block">
                 <Button>Back to Bonds</Button>
               </Link>
+            </div>
+          </SectionWrapper>
+        </div>
+      </ViewPort>
+    );
+  }
+
+  if (!hasCrmInventoryAvailable(responseData)) {
+    return (
+      <ViewPort>
+        <div className="container">
+          <SectionWrapper>
+            <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
+              <Image
+                src="/images/icons/sad-emoji.svg"
+                alt="Bond out of stock"
+                width={60}
+                height={60}
+              />
+              <h2 className="text-2xl font-semibold mt-4">Bond out of stock</h2>
+              <p className="text-gray-600 max-w-md">
+                This bond has no sellable inventory right now. Try another listing or check back
+                after availability is updated.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Button variant="outlineSecondary" asChild>
+                  <Link href={`/bonds/detail/${isin}`}>View bond details</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/bonds">Back to Bonds</Link>
+                </Button>
+              </div>
             </div>
           </SectionWrapper>
         </div>

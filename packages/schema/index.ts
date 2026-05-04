@@ -3,6 +3,7 @@ import * as userSchema from "./lib/crm/users.schema";
 import * as leadSchema from "./lib/crm/leads.schema";
 import * as partnershipSchema from "./lib/crm/partnership.schema";
 import * as crmOrdersSchema from "./lib/crm/orders.schema";
+import * as orderReportsSchema from "./lib/crm/order_reports.schema";
 
 import * as customerSchema from "./lib/customers/customers.schema";
 import * as customerKycSchema from "./lib/customers/kyc.schema";
@@ -47,6 +48,7 @@ export const appSchema = {
     leads: leadSchema,
     partnership: partnershipSchema,
     orders: crmOrdersSchema,
+    orderReports: orderReportsSchema,
     auditlogs,
     notifications: notificationsSchema,
     rfq: {

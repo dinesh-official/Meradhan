@@ -13,6 +13,16 @@ import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { queryClient } from "@/core/config/service-clients";
 import Swal from "sweetalert2";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function DematAccounts({
   profile,
@@ -22,6 +32,9 @@ function DematAccounts({
   allowAddNew?: boolean;
 }) {
   const [showNew, setShowNew] = useState(false);
+  const [confirmDefaultDematId, setConfirmDefaultDematId] = useState<
+    number | null
+  >(null);
   const readOnly = profile.kycStatus !== "VERIFIED";
 
   const apiModel = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
@@ -58,16 +71,16 @@ function DematAccounts({
       return await apiModel.setPrimaryDematAccount(id);
     },
     onSuccess: (data) => {
-      console.log("Default bank account set successfully", data);
-      toast.success("Default bank account set successfully");
+      console.log("Default demat account set successfully", data);
+      toast.success("Default demat account set successfully");
       queryClient.invalidateQueries({ queryKey: ["profile-page"] });
     },
     onError: (error: unknown) => {
-      console.error("Error setting default bank account", error);
+      console.error("Error setting default demat account", error);
       if (error instanceof ApiError) {
         toast.error(
           `${error.response?.data.message ||
-          "An error occurred while setting the default bank account."
+          "An error occurred while setting the default demat account."
           } `
         );
       } else {
@@ -83,7 +96,11 @@ function DematAccounts({
           readOnly={readOnly}
           hideBorder={index === profile.dematAccounts.length - 1 && !allowAddNew}
           setDefault={() => {
-            setDefaultDematAccountMutation.mutate(dematAccount.id!);
+            if (dematAccount.isPrimary) {
+              toast.error("This demat account is already the default account.");
+              return;
+            }
+            setConfirmDefaultDematId(dematAccount.id!);
           }}
           onDelete={() => {
             if (dematAccount.isPrimary) {
@@ -151,6 +168,38 @@ function DematAccounts({
           )}
         </>
       )}
+
+      <AlertDialog
+        open={confirmDefaultDematId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDefaultDematId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Set default demat account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Set this account as default demat account for making future
+              investments on MeraDhan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              onClick={(ev) => {
+                ev.preventDefault();
+                if (confirmDefaultDematId == null) return;
+                const id = confirmDefaultDematId;
+                setConfirmDefaultDematId(null);
+                setDefaultDematAccountMutation.mutate(id);
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
