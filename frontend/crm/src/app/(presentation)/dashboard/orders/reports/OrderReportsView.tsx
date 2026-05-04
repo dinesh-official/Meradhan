@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -47,7 +47,7 @@ const PIE_COLORS = ["#2563eb", "#16a34a", "#ca8a04", "#dc2626", "#7c3aed"];
 
 function SummaryBadge({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-md border border-border bg-muted/30 px-2.5 py-1.5 text-xs">
+    <div className="rounded-md border bg-white border-border px-2.5 py-1.5 text-xs">
       <div className="text-muted-foreground">{label}</div>
       <div className="font-semibold tabular-nums leading-tight">{value}</div>
     </div>
@@ -520,7 +520,7 @@ export default function OrderReportsView() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 text-2xl font-semibold">
-                  {formatNumberTS(kpis.orderCount)}
+                  {(kpis.orderCount)}
                 </CardContent>
               </Card>
               <Card>
@@ -530,7 +530,7 @@ export default function OrderReportsView() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 text-2xl font-semibold">
-                  {formatNumberTS(kpis.distinctCustomers)}
+                  {(kpis.distinctCustomers)}
                 </CardContent>
               </Card>
               <Card>
@@ -550,7 +550,7 @@ export default function OrderReportsView() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 text-2xl font-semibold">
-                  {formatNumberTS(kpis.sumQuantity)}
+                  {(kpis.sumQuantity)}
                 </CardContent>
               </Card>
             </div>
@@ -648,18 +648,17 @@ export default function OrderReportsView() {
         <TabsContent value="register" className="space-y-3">
           <TabSummaryRow>
             <SummaryBadge
-              label="Matching orders"
-              value={formatNumberTS(registerQuery.data?.meta.total ?? 0)}
+              label="Total orders"
+              value={(registerQuery.data?.meta.total ?? 0)}
             />
-            <SummaryBadge label="Rows on page" value={registerPageStats.rowCount} />
             <SummaryBadge
               label="Page GMV (sample)"
               value={`₹${formatNumberTS(registerPageStats.pageGmv)}`}
             />
-            <SummaryBadge label="Qty on page" value={formatNumberTS(registerPageStats.qty)} />
+            <SummaryBadge label="Qty" value={(registerPageStats.qty)} />
             <SummaryBadge
               label="Customers on page"
-              value={formatNumberTS(registerPageStats.distinctCustomersOnPage)}
+              value={(registerPageStats.distinctCustomersOnPage)}
             />
           </TabSummaryRow>
           <div className="grid gap-3 lg:grid-cols-2">
@@ -753,8 +752,8 @@ export default function OrderReportsView() {
         <TabsContent value="by-isin" className="space-y-3">
           <TabSummaryRow>
             <SummaryBadge label="ISINs in result" value={byIsinQuery.data?.data.length ?? 0} />
-            <SummaryBadge label="Total orders" value={formatNumberTS(bondTotals.orders)} />
-            <SummaryBadge label="Total units" value={formatNumberTS(bondTotals.units)} />
+            <SummaryBadge label="Total orders" value={(bondTotals.orders)} />
+            <SummaryBadge label="Total units" value={(bondTotals.units)} />
             <SummaryBadge
               label="Total revenue"
               value={`₹${formatNumberTS(bondTotals.revenue)}`}
@@ -812,14 +811,14 @@ export default function OrderReportsView() {
           <TabSummaryRow>
             <SummaryBadge
               label="Customers (total)"
-              value={formatNumberTS(byCustomerQuery.data?.meta.total ?? 0)}
+              value={(byCustomerQuery.data?.meta.total ?? 0)}
             />
             <SummaryBadge label="Rows on page" value={byCustomerQuery.data?.data.length ?? 0} />
             <SummaryBadge
               label="Page LTV sum"
               value={`₹${formatNumberTS(customerPageTotals.ltv)}`}
             />
-            <SummaryBadge label="Page orders sum" value={formatNumberTS(customerPageTotals.orders)} />
+            <SummaryBadge label="Page orders sum" value={(customerPageTotals.orders)} />
           </TabSummaryRow>
           <TabChartCard
             title="Top customers by LTV (this page)"
@@ -875,10 +874,10 @@ export default function OrderReportsView() {
 
         <TabsContent value="funnel" className="space-y-3">
           <TabSummaryRow>
-            <SummaryBadge label="Orders in funnel" value={formatNumberTS(funnelTotal)} />
+            <SummaryBadge label="Orders in funnel" value={(funnelTotal)} />
             <SummaryBadge
               label="Combinations"
-              value={formatNumberTS(funnelQuery.data?.cells.length ?? 0)}
+              value={(funnelQuery.data?.cells.length ?? 0)}
             />
           </TabSummaryRow>
           <TabChartCard
@@ -926,12 +925,12 @@ export default function OrderReportsView() {
         <TabsContent value="holdings" className="space-y-3">
           <TabSummaryRow>
             <SummaryBadge label="ISIN rows" value={holdingsTotals.rows} />
-            <SummaryBadge label="Total units" value={formatNumberTS(holdingsTotals.units)} />
-            <SummaryBadge label="Position rows" value={formatNumberTS(holdingsTotals.positions)} />
+            <SummaryBadge label="Total units" value={(holdingsTotals.units)} />
+            <SummaryBadge label="Position rows" value={(holdingsTotals.positions)} />
           </TabSummaryRow>
           <TabChartCard
             title="Units by ISIN (top 12)"
-            subtitle="Sorted by units in the holdings aggregate."
+            subtitle="Same data as the table: positions with purchase date in range, grouped by ISIN."
             height={260}
           >
             <ResponsiveContainer width="100%" height="100%">
@@ -945,8 +944,28 @@ export default function OrderReportsView() {
             </ResponsiveContainer>
           </TabChartCard>
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">New holdings (CustomerBonds) in range</CardTitle>
+            <CardHeader className="space-y-2">
+              <CardTitle className="text-sm">Holdings — customer bond positions in range</CardTitle>
+              <CardDescription className="text-xs leading-relaxed space-y-2 text-muted-foreground">
+                <p>
+                  <span className="font-medium text-foreground">What it is:</span> Each row in the
+                  CustomerBonds table is one customer&apos;s position in a bond (ISIN, quantity, etc.).
+                  This report includes only positions whose{" "}
+                  <span className="font-medium text-foreground">purchase date</span> falls in your
+                  selected IST date range, then groups by ISIN.
+                </p>
+                <p>
+                  <span className="font-medium text-foreground">When to use it:</span> See which
+                  bonds actually accumulated on customer books after orders and settlement; compare
+                  to the Register / By bond tabs when order counts and inventory do not line up
+                  (partial fills, timing, or cancelled orders).
+                </p>
+                <p>
+                  <span className="font-medium text-foreground">Columns:</span>{" "}
+                  <em>Positions</em> = how many CustomerBonds rows matched for that ISIN in the range;{" "}
+                  <em>Units</em> = sum of quantities across those rows.
+                </p>
+              </CardDescription>
             </CardHeader>
             <CardContent className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -1036,7 +1055,7 @@ export default function OrderReportsView() {
             <SummaryBadge label="Step/status rows" value={settlementQuery.data?.byStep.length ?? 0} />
             <SummaryBadge
               label="Runs (sum of counts)"
-              value={formatNumberTS(settlementStepTotals)}
+              value={(settlementStepTotals)}
             />
             <SummaryBadge label="Recent log rows" value={settlementQuery.data?.recent.length ?? 0} />
           </TabSummaryRow>
@@ -1115,12 +1134,12 @@ export default function OrderReportsView() {
           <TabSummaryRow>
             <SummaryBadge
               label="Orders (total)"
-              value={formatNumberTS(lifecycleQuery.data?.meta.total ?? 0)}
+              value={(lifecycleQuery.data?.meta.total ?? 0)}
             />
             <SummaryBadge label="Rows on page" value={lifecycleLatencyBuckets.pageRows} />
             <SummaryBadge
               label="With latency"
-              value={formatNumberTS(lifecycleLatencyBuckets.withLatency)}
+              value={(lifecycleLatencyBuckets.withLatency)}
             />
             <SummaryBadge
               label="Avg Δ ms (page)"
