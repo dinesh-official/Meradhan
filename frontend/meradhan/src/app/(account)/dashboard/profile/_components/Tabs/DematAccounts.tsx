@@ -177,10 +177,9 @@ function DematAccounts({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Set default demat account?</AlertDialogTitle>
+            <AlertDialogTitle>Set as Default Demat Account?</AlertDialogTitle>
             <AlertDialogDescription>
-              Set this account as default demat account for making future
-              investments on MeraDhan.
+              This account will be used to receive securities for your future investments via MeraDhan. You can update it anytime.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

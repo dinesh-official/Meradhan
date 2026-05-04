@@ -176,10 +176,10 @@ function BankAccounts({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Set default bank account?</AlertDialogTitle>
+            <AlertDialogTitle>Set as Default Bank Account?</AlertDialogTitle>
             <AlertDialogDescription>
-              Set this account as default bank account for making future
-              investments on MeraDhan.
+              Are you sure you want to set this bank account as your default for future investments via MeraDhan?
+              Payments will be made directly to the clearing corporation using this account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
