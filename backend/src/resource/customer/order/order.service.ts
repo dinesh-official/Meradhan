@@ -168,7 +168,9 @@ export class OrderService {
           ...preview.bondDetails,
           pricing: preview.pricing,
         },
-        metadata: {} as Prisma.InputJsonValue,
+        metadata: {
+
+        } as Prisma.InputJsonValue,
       },
     });
 
@@ -210,6 +212,7 @@ export class OrderService {
       where: { id: order.id },
       data: {
         paymentOrderId: razorpayOrder.id,
+
       },
     });
 
@@ -281,7 +284,10 @@ export class OrderService {
           faceValue: order.faceValue,
           quantity: order.quantity,
           purchasePrice: order.unitPrice,
-          metadata: order.bondDetails as Prisma.InputJsonValue,
+          metadata: {
+            ...(order.metadata as any),
+            ...(order.bondDetails as any),
+          },
         },
       });
 
@@ -325,10 +331,14 @@ export class OrderService {
     orderId: number,
     metadata: Record<string, any>,
   ): Promise<void> {
+    const existong = await db.dataBase.order.findUnique({ where: { id: orderId } })
     await db.dataBase.order.update({
       where: { id: orderId },
       data: {
-        metadata: metadata,
+        metadata: {
+          ...(existong?.metadata as any),
+          ...metadata,
+        },
       },
     });
   }

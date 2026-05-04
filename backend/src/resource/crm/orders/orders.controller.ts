@@ -4,14 +4,7 @@ import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { OrderStatus } from "@databases/generated/prisma/postgres";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
-import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { sendBackOfficeEmail } from "@communication/email_communication";
-import { env } from "@packages/config/src/env";
-import {
-  dateOfBirthToPdfPassword,
-  getCustomerDobRawForPdf,
-} from "@utils/dobPdfPassword";
-import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 
 function formatProposalDate(value: string | number | Date | null | undefined) {
@@ -627,7 +620,6 @@ export class CrmOrdersController {
 
     const subject = String(body.subject ?? "").trim();
     const messageBody = String(body.messageBody ?? "").trim();
-    const fromEmail = env.SMTP_SENDER;
 
     if (!subject) {
       return res.sendResponse({
@@ -641,134 +633,32 @@ export class CrmOrdersController {
         message: "Message body is required",
       });
     }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    const accruedInterestDaysParam =
-      body.accruedInterestDays != null ? Number(body.accruedInterestDays) : undefined;
-
-    const settlementNumberParam =
-      typeof body.settlementNumber === "string" && body.settlementNumber.trim() !== ""
-        ? body.settlementNumber.trim()
-        : undefined;
-    const settlementDateTimeParam =
-      typeof body.settlementDateTime === "string" && body.settlementDateTime.trim() !== ""
-        ? body.settlementDateTime.trim()
-        : undefined;
-    const lastInterestPaymentDateParam =
-      typeof body.lastInterestPaymentDate === "string" &&
-        body.lastInterestPaymentDate.trim() !== ""
-        ? body.lastInterestPaymentDate.trim()
-        : undefined;
-
-    const pdfQuery: Record<string, string | undefined> = {
-      accruedInterestDays: String(accruedInterestDaysParam),
-    };
-    if (settlementNumberParam) pdfQuery.settlementNumber = settlementNumberParam;
-    if (settlementDateTimeParam) pdfQuery.settlementDateTime = settlementDateTimeParam;
-    if (lastInterestPaymentDateParam) {
-      pdfQuery.lastInterestPaymentDate = lastInterestPaymentDateParam;
-    }
-    if (typeof body.interestPaymentDates === "string" && body.interestPaymentDates.trim() !== "") {
-      pdfQuery.interestPaymentDates = body.interestPaymentDates.trim();
-    }
-    pdfQuery.nonAmortizedBond = body.nonAmortizedBond === false ? "false" : "true";
-    if (
-      typeof body.amortizedPrincipalPaymentDates === "string" &&
-      body.amortizedPrincipalPaymentDates.trim() !== ""
-    ) {
-      pdfQuery.amortizedPrincipalPaymentDates = body.amortizedPrincipalPaymentDates.trim();
-    }
 
     try {
-      const order = await this.ordersService.getCustomerByOrderNumber(orderNumber);
-      if (!order) {
-        return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: "No order found for this settlement. Assign a customer first.",
-        });
-      }
-      const customerRepo = new CustomerProfileRepo();
-      const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
-
-      let buffer: Buffer;
-      let filename: string;
-      try {
-        const generated =
-          pdfType === "deal"
-            ? await this.ordersService.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
-            : await this.ordersService.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
-        buffer = generated.buffer;
-        filename = generated.filename;
-      } catch (pdfErr) {
-        if (pdfErr instanceof AppError && pdfErr.statusCode === HttpStatus.NOT_FOUND) {
-          return res.sendResponse({
-            statusCode: HttpStatus.NOT_FOUND,
-            message: pdfErr.message,
-          });
-        }
-        throw pdfErr;
-      }
-
-      const recipientEmail =
-        String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
-      if (!recipientEmail || !emailPattern.test(recipientEmail)) {
-        return res.sendResponse({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: "Recipient email is missing or invalid",
-        });
-      }
-
-      const dobRaw = getCustomerDobRawForPdf(user);
-      const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
-      if (!pdfPassword) {
-        return res.sendResponse({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message:
-            "Customer date of birth is required to password-protect the PDF. Ensure PAN/Aadhaar or personal info DOB is on file.",
-        });
-      }
-      try {
-        buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
-      } catch (encErr) {
-        console.error("PDF encryption failed:", encErr);
-        return res.sendResponse({
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message:
-            encErr instanceof Error
-              ? encErr.message
-              : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
-        });
-      }
-
-
-      const htmlBody = messageBody
-        .split("\n")
-        .map((line) => line.trim())
-        .join("<br/>");
-      const messageId = await sendBackOfficeEmail({
-        to: recipientEmail,
-        from: fromEmail,
+      const result = await this.ordersService.sendPdfEmailToClient(orderNumber, {
+        pdfType,
         subject,
-        html: htmlBody,
-        attachments: [
-          {
-            filename,
-            content: buffer,
-            contentType: "application/pdf",
-          },
-        ],
+        messageBody,
+        toEmail: body.toEmail,
+        accruedInterestDays: body.accruedInterestDays,
+        settlementNumber: body.settlementNumber,
+        settlementDateTime: body.settlementDateTime,
+        lastInterestPaymentDate: body.lastInterestPaymentDate,
+        interestPaymentDates: body.interestPaymentDates,
+        nonAmortizedBond: body.nonAmortizedBond,
+        amortizedPrincipalPaymentDates: body.amortizedPrincipalPaymentDates,
       });
 
       return res.sendResponse({
         statusCode: HttpStatus.OK,
         message: "Email sent successfully",
-        responseData: { messageId },
+        responseData: result,
       });
     } catch (err) {
       console.error("Send PDF email failed:", err);
-      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+      if (err instanceof AppError) {
         return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
+          statusCode: err.statusCode,
           message: err.message,
         });
       }
