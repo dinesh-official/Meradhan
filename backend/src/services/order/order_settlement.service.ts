@@ -22,12 +22,6 @@ import { env } from "@packages/config/src/env";
 import { makeRazorpayRouteTransition } from "@services/razorpay-route/RPay-route";
 import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
-import { sendBackOfficeEmail } from "@communication/email_communication";
-import {
-  dateOfBirthToPdfPassword,
-  getCustomerDobRawForPdf,
-} from "@utils/dobPdfPassword";
-import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import crypto from "crypto";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
 
@@ -446,20 +440,24 @@ export class OrderSettlementService {
 
       await rfqMasterService.getAllSettledOrders({ filtFromModSettleDate: todayDate || "", filtToModSettleDate: nextDate })
 
-      await this.trySendOrderReceiptPdfEmail({
-        order,
-        paymentId,
-        batchId,
-        inputData: {
-          rfqNumber: addIsinResponse.rfqNumber,
-          addIsinResponse,
-          acceptNegotiationResponse,
-          proposeDealResponse,
-          acceptOrRejectDealResponse,
-          updateStatusResponse,
-          isNetBanking,
-        },
-      });
+      const updatedOrder = await getOrderData();
+      if (updatedOrder) {
+        await this.trySendOrderReceiptPdfEmail({
+          order: updatedOrder,
+          paymentId,
+          batchId,
+          settlementDate: addIsinResponse.rfqDbData.settlementDate,
+          inputData: {
+            rfqNumber: addIsinResponse.rfqNumber,
+            addIsinResponse,
+            acceptNegotiationResponse,
+            proposeDealResponse,
+            acceptOrRejectDealResponse,
+            updateStatusResponse,
+            isNetBanking,
+          },
+        });
+      }
     } catch (error) {
       logger.logError(`Settlement process failed for order ${orderId}:`, error);
 
@@ -638,6 +636,7 @@ export class OrderSettlementService {
         quantity: order.quantity,
         unitPrice: order.unitPrice,
         value: value,
+        rfqDbData
       };
     } catch (error) {
       console.log(error);
@@ -927,16 +926,71 @@ export class OrderSettlementService {
     }
   }
 
-  // wait 30 sec 
+  /**
+   * Normalize settle_order.modSettleDate (often DD-MM-YYYY) to YYYY-MM-DD for autofill.
+   */
+  private normalizeSettlementDateForReceiptAutofill(raw: string): string {
+    const t = raw.trim();
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+    if (iso) return t;
+    const dmy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(t);
+    if (dmy) {
+      const dd = dmy[1];
+      const mm = dmy[2];
+      const yyyy = dmy[3];
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    return t;
+  }
+
+  /** e.g. 02-Feb-2026 12:17:26 (IST), matches CRM send-pdf-email payload style */
+  private formatNowIstDdMmmYyyyHms(): string {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ] as const;
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = fmt.formatToParts(new Date());
+    const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+    const day = get("day").padStart(2, "0");
+    const monthNum = Number(get("month"));
+    const monthName = months[monthNum - 1] ?? "Jan";
+    const year = get("year");
+    const hour = get("hour").padStart(2, "0");
+    const minute = get("minute").padStart(2, "0");
+    const second = get("second").padStart(2, "0");
+    return `${day}-${monthName}-${year} ${hour}:${minute}:${second}`;
+  }
 
   private async trySendOrderReceiptPdfEmail(params: {
     order: OrderWithNSEData;
     paymentId: string;
     batchId: string;
+    settlementDate: string,
     inputData?: Record<string, unknown>;
   }): Promise<void> {
     const { order, paymentId, batchId, inputData } = params;
     const step = "SEND_ORDER_RECEIPT_PDF_EMAIL";
+    console.log(JSON.stringify(params));
 
     await this.addAutomationLog({
       orderId: order.id,
@@ -965,10 +1019,6 @@ export class OrderSettlementService {
         });
       }
 
-      const { buffer: rawBuffer, filename } =
-        await this.crmOrdersService.generateOrderReceiptPdfBuffer(orderNumber, {});
-
-      let buffer = rawBuffer;
       const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
       const customerName =
         [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() ||
@@ -977,16 +1027,6 @@ export class OrderSettlementService {
         .trim()
         .toUpperCase();
       const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
-
-      try {
-        const dobRaw = getCustomerDobRawForPdf(user);
-        const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
-        if (pdfPassword) {
-          buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
-        }
-      } catch (encErr) {
-        logger.logError(`Order receipt PDF encryption failed for order ${orderNumber}:`, encErr);
-      }
 
       const metadata = (order as unknown as { metadata?: Record<string, unknown> | null }).metadata ?? null;
       const dealId = metadata && typeof metadata === "object" ? (metadata.dealId as string | undefined) : undefined;
@@ -999,7 +1039,7 @@ export class OrderSettlementService {
       const buySellYour = side === "SELL" ? "Sell" : "Buy";
 
       const subject = `Order Confirmation & Receipt – Order ID ${orderNumber}`;
-      const text = `Dear ${salutation} ${customerName},
+      const messageBody = `Dear ${salutation} ${customerName},
 
 Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
 
@@ -1009,7 +1049,7 @@ ISIN: ${order.isin}
 
 Deal ID: ${dealId ?? "—"}
 
-Order Type: Your ${buySellYour}
+Order Type:  ${buySellYour}
 
 Please find the Order Receipt attached for your reference. The order receipt is password protected. You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.
 
@@ -1041,24 +1081,49 @@ NSE Member ID: 90480
 
 BSE Member ID: 6963`;
 
-      const html = text
-        .split("\n")
-        .map((line) => line.trim())
-        .join("<br/>");
+      const settleRow = await this.crmOrdersService.getRfqByOrderNumber(orderNumber);
+      let settlementDateInput =
+        typeof settleRow?.modSettleDate === "string" && settleRow.modSettleDate.trim() !== ""
+          ? this.normalizeSettlementDateForReceiptAutofill(settleRow.modSettleDate.trim())
+          : new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 
-      const messageId = await sendBackOfficeEmail({
-        to: recipientEmail,
-        from: "backoffice@meradhan.co",
+
+
+
+      let accruedInterestDays = await this.getAccruedInterest(order);
+      let settlementNumber: string | undefined;
+      let lastInterestPaymentDate: string | undefined;
+      let interestPaymentDates: string | undefined;
+      try {
+        const autofill = await this.crmOrdersService.autofillReceiptPdfOptions(orderNumber, {
+          settlementDate: settlementDateInput,
+        });
+        accruedInterestDays = autofill.accruedInterestDays;
+        if (autofill.settlementNumber) settlementNumber = autofill.settlementNumber;
+        if (autofill.lastInterestPaymentDate) lastInterestPaymentDate = autofill.lastInterestPaymentDate;
+        if (autofill.interestPaymentDates?.length) {
+          interestPaymentDates = autofill.interestPaymentDates.join(", ");
+        }
+      } catch (autoErr) {
+        logger.logError(
+          `Receipt PDF autofill failed for ${orderNumber}; sending with accrued days from deal log only`,
+          autoErr,
+        );
+      }
+
+      const settlementDateTime = this.formatNowIstDdMmmYyyyHms();
+
+      const { messageId } = await this.crmOrdersService.sendPdfEmailToClient(orderNumber, {
+        pdfType: "order",
         subject,
-        html,
-        text,
-        attachments: [
-          {
-            filename,
-            content: buffer,
-            contentType: "application/pdf",
-          },
-        ],
+        messageBody,
+        toEmail: recipientEmail,
+        accruedInterestDays,
+        settlementNumber: settleRow?.settlementNo || undefined,
+        settlementDateTime: params.settlementDate,
+        lastInterestPaymentDate,
+        interestPaymentDates,
+        nonAmortizedBond: true,
       });
 
       await this.addAutomationLog({
@@ -1067,8 +1132,15 @@ BSE Member ID: 6963`;
         batchId,
         step,
         status: "SUCCESS",
-        message: "Order receipt PDF email sent",
-        outputData: { to: recipientEmail, orderNumber, messageId, subject },
+        message: "Order receipt PDF email sent (CRM send-pdf-email pipeline)",
+        outputData: {
+          to: recipientEmail,
+          orderNumber,
+          messageId,
+          subject,
+          settlementDateTime,
+          settlementNumber,
+        },
         completedAt: new Date(),
       });
     } catch (err) {

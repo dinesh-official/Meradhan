@@ -18,6 +18,12 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 import { env } from "@packages/config/src/env";
 import { computeBondOrderPricingData, getLastNextCouponDateBasedOnSettlementDate, getPayoutDates } from "@services/order/order-pricing-helper";
+import { sendBackOfficeEmail } from "@communication/email_communication";
+import {
+  dateOfBirthToPdfPassword,
+  getCustomerDobRawForPdf,
+} from "@utils/dobPdfPassword";
+import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 
 function toYyyyMmDd(d: Date): string {
   const y = d.getFullYear();
@@ -154,13 +160,13 @@ export class CrmOrdersService {
   async getSettlementAutomationLogGroups(search?: string) {
     const where = search?.trim()
       ? {
-          OR: [
-            { paymentId: { contains: search, mode: "insensitive" as const } },
-            { batchId: { contains: search, mode: "insensitive" as const } },
-            { step: { contains: search, mode: "insensitive" as const } },
-            { message: { contains: search, mode: "insensitive" as const } },
-          ],
-        }
+        OR: [
+          { paymentId: { contains: search, mode: "insensitive" as const } },
+          { batchId: { contains: search, mode: "insensitive" as const } },
+          { step: { contains: search, mode: "insensitive" as const } },
+          { message: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
       : {};
 
     const rows = await db.dataBase.orderSettlementAutomationLog.findMany({
@@ -247,29 +253,29 @@ export class CrmOrdersService {
       const customerSearchConditions: Prisma.OrderWhereInput[] =
         nameTokens.length >= 2
           ? [
-              {
-                customerProfile: {
-                  AND: nameTokens.map((token) => customerMatchesToken(token)),
-                },
+            {
+              customerProfile: {
+                AND: nameTokens.map((token) => customerMatchesToken(token)),
               },
-              {
-                customerProfile: {
-                  emailAddress: { contains: q, mode: "insensitive" },
-                },
+            },
+            {
+              customerProfile: {
+                emailAddress: { contains: q, mode: "insensitive" },
               },
-            ]
+            },
+          ]
           : [
-              {
-                customerProfile: {
-                  OR: [
-                    { firstName: { contains: q, mode: "insensitive" } },
-                    { middleName: { contains: q, mode: "insensitive" } },
-                    { lastName: { contains: q, mode: "insensitive" } },
-                    { emailAddress: { contains: q, mode: "insensitive" } },
-                  ],
-                },
+            {
+              customerProfile: {
+                OR: [
+                  { firstName: { contains: q, mode: "insensitive" } },
+                  { middleName: { contains: q, mode: "insensitive" } },
+                  { lastName: { contains: q, mode: "insensitive" } },
+                  { emailAddress: { contains: q, mode: "insensitive" } },
+                ],
               },
-            ];
+            },
+          ];
 
       whereClause.OR = [
         ...customerSearchConditions,
@@ -458,7 +464,7 @@ export class CrmOrdersService {
     settlementNumber: string | null;
     lastInterestPaymentDateRaw: string | null;
     lastInterestPaymentDate: string | null;
-    interestPaymentDates: string[];
+    interestPaymentDates: string[] | null;
   }> {
     const order = await this.getCustomerByOrderNumber(orderNumber);
     if (!order) {
@@ -1256,6 +1262,166 @@ export class CrmOrdersService {
       buffer,
       filename: `deal-sheet-${order.orderNumber}.pdf`,
     };
+  }
+
+  /**
+   * Same behavior as POST /api/crm/orders/send-pdf-email/:orderNumber (CRM + automation).
+   * @throws AppError for validation / NOT_FOUND / encryption failures
+   */
+  async sendPdfEmailToClient(
+    orderNumber: string,
+    body: {
+      pdfType: "order" | "deal";
+      subject: string;
+      messageBody: string;
+      toEmail?: string;
+      accruedInterestDays?: number | string;
+      settlementNumber?: string;
+      settlementDateTime?: string;
+      lastInterestPaymentDate?: string;
+      interestPaymentDates?: string;
+      nonAmortizedBond?: boolean;
+      amortizedPrincipalPaymentDates?: string;
+    },
+  ): Promise<{ messageId: string }> {
+    const pdfType = body.pdfType;
+    if (pdfType !== "order" && pdfType !== "deal") {
+      throw new AppError("pdfType must be either 'order' or 'deal'", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const subject = String(body.subject ?? "").trim();
+    const messageBody = String(body.messageBody ?? "").trim();
+    const fromEmail = env.SMTP_SENDER;
+
+    if (!subject) {
+      throw new AppError("Subject is required", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+    if (!messageBody) {
+      throw new AppError("Message body is required", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const accruedInterestDaysParam =
+      body.accruedInterestDays != null ? Number(body.accruedInterestDays) : undefined;
+
+    const settlementNumberParam =
+      typeof body.settlementNumber === "string" && body.settlementNumber.trim() !== ""
+        ? body.settlementNumber.trim()
+        : undefined;
+    const settlementDateTimeParam =
+      typeof body.settlementDateTime === "string" && body.settlementDateTime.trim() !== ""
+        ? body.settlementDateTime.trim()
+        : undefined;
+    const lastInterestPaymentDateParam =
+      typeof body.lastInterestPaymentDate === "string" &&
+        body.lastInterestPaymentDate.trim() !== ""
+        ? body.lastInterestPaymentDate.trim()
+        : undefined;
+
+    const pdfQuery: Record<string, string | undefined> = {
+      accruedInterestDays: String(accruedInterestDaysParam),
+    };
+    if (settlementNumberParam) pdfQuery.settlementNumber = settlementNumberParam;
+    if (settlementDateTimeParam) pdfQuery.settlementDateTime = settlementDateTimeParam;
+    if (lastInterestPaymentDateParam) {
+      pdfQuery.lastInterestPaymentDate = lastInterestPaymentDateParam;
+    }
+    if (typeof body.interestPaymentDates === "string" && body.interestPaymentDates.trim() !== "") {
+      pdfQuery.interestPaymentDates = body.interestPaymentDates.trim();
+    }
+    pdfQuery.nonAmortizedBond = body.nonAmortizedBond === false ? "false" : "true";
+    if (
+      typeof body.amortizedPrincipalPaymentDates === "string" &&
+      body.amortizedPrincipalPaymentDates.trim() !== ""
+    ) {
+      pdfQuery.amortizedPrincipalPaymentDates = body.amortizedPrincipalPaymentDates.trim();
+    }
+
+    const order = await this.getCustomerByOrderNumber(orderNumber);
+    if (!order) {
+      throw new AppError("No order found for this settlement. Assign a customer first.", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "ORDER_NOT_FOUND",
+      });
+    }
+    pdfQuery.orderData = order.createdAt.toISOString();
+    pdfQuery.price = order.unitPrice.toFixed(2);
+    const customerRepo = new CustomerProfileRepo();
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+
+    let buffer: Buffer;
+    let filename: string;
+    const generated =
+      pdfType === "deal"
+        ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
+        : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
+    buffer = generated.buffer;
+    filename = generated.filename;
+
+    const recipientEmail =
+      String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
+    if (!recipientEmail || !emailPattern.test(recipientEmail)) {
+      throw new AppError("Recipient email is missing or invalid", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const dobRaw = getCustomerDobRawForPdf(user);
+    const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
+    if (!pdfPassword) {
+      throw new AppError(
+        "Customer date of birth is required to password-protect the PDF. Ensure PAN/Aadhaar or personal info DOB is on file.",
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "BAD_REQUEST",
+        },
+      );
+    }
+    try {
+      buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
+    } catch (encErr) {
+      console.error("PDF encryption failed:", encErr);
+      throw new AppError(
+        encErr instanceof Error
+          ? encErr.message
+          : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          code: "PDF_ENCRYPT_FAILED",
+        },
+      );
+    }
+
+    const htmlBody = messageBody
+      .split("\n")
+      .map((line) => line.trim())
+      .join("<br/>");
+    const messageId = await sendBackOfficeEmail({
+      to: recipientEmail,
+      from: fromEmail,
+      subject,
+      html: htmlBody,
+      text: messageBody,
+      attachments: [
+        {
+          filename,
+          content: buffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    return { messageId };
   }
 
 }
