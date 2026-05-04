@@ -33,14 +33,16 @@ class ApiServerCaller {
       (response) => response,
       (error) => {
         if (axios.isAxiosError(error)) {
+          // ApiError / AxiosError typings come from @root/apiGateway's axios;
+          // interceptor error is typed with meradhan's axios — duplicate install.
           return Promise.reject(
             new ApiError(
               error.message,
               error.code,
-              error.config,
+              error.config as never,
               error.request,
-              error.response
-            )
+              error.response as never,
+            ),
           );
         }
         return Promise.reject(error);
