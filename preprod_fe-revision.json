@@ -1,16 +1,16 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/preprod_fe:24",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/pre-prod-crm:63",
     "containerDefinitions": [
         {
-            "name": "preprod_fe",
-            "image": "450321244603.dkr.ecr.ap-south-1.amazonaws.com/pre-prod-meradhan-ui:latest",
+            "name": "pre-prod-crm-cont",
+            "image": "450321244603.dkr.ecr.ap-south-1.amazonaws.com/pre-prod-crm:latest",
             "cpu": 0,
             "portMappings": [
                 {
-                    "name": "preprod_fe",
-                    "containerPort": 4002,
-                    "hostPort": 4002,
-                    "protocol": "tcp"
+                    "containerPort": 4001,
+                    "hostPort": 4001,
+                    "protocol": "tcp",
+                    "name": "pre-prod-crm-cont-4001-tcp"
                 }
             ],
             "essential": true,
@@ -20,20 +20,21 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/preprod_fe",
+                    "awslogs-group": "/ecs/pre-prod-crm",
                     "awslogs-create-group": "true",
                     "awslogs-region": "ap-south-1",
                     "awslogs-stream-prefix": "ecs"
-                }
+                },
+                "secretOptions": []
             },
             "systemControls": []
         }
     ],
-    "family": "preprod_fe",
+    "family": "pre-prod-crm",
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 24,
+    "revision": 63,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -68,20 +69,20 @@
     "placementConstraints": [],
     "compatibilities": [
         "EC2",
-        "MANAGED_INSTANCES",
-        "FARGATE"
+        "FARGATE",
+        "MANAGED_INSTANCES"
     ],
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
-    "cpu": "512",
-    "memory": "2048",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2026-04-01T05:31:51.732Z",
-    "registeredBy": "arn:aws:iam::450321244603:user/github",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "registeredAt": "2026-05-05T10:42:40.063Z",
+    "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []
 }
