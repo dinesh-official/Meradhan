@@ -361,7 +361,7 @@ export class OrderSettlementService {
         fn: () => this.acceptOrRejectDeal(order),
       });
 
-      console.log("update order status");
+      console.log("--------- update order status --------");
       const updateStatusResponse = await this.runWithAutomationLog({
         orderId: order.id,
         paymentId,
@@ -981,7 +981,7 @@ export class OrderSettlementService {
     return `${day}-${monthName}-${year} ${hour}:${minute}:${second}`;
   }
 
-  private async trySendOrderReceiptPdfEmail(params: {
+  async trySendOrderReceiptPdfEmail(params: {
     order: OrderWithNSEData;
     paymentId: string;
     batchId: string;
@@ -1112,8 +1112,7 @@ BSE Member ID: 6963`;
       }
 
       const settlementDateTime = this.formatNowIstDdMmmYyyyHms();
-
-      const { messageId } = await this.crmOrdersService.sendPdfEmailToClient(orderNumber, {
+      console.log({
         pdfType: "order",
         subject,
         messageBody,
@@ -1124,6 +1123,25 @@ BSE Member ID: 6963`;
         lastInterestPaymentDate,
         interestPaymentDates,
         nonAmortizedBond: true,
+
+      });
+
+      console.log(orderNumber);
+
+
+
+      const { messageId } = await this.crmOrdersService.sendPdfEmailToClient(order.reqOrderNumber ?? "", {
+        pdfType: "order",
+        subject,
+        messageBody,
+        toEmail: recipientEmail,
+        accruedInterestDays,
+        settlementNumber: settleRow?.settlementNo || undefined,
+        settlementDateTime: params.settlementDate,
+        lastInterestPaymentDate,
+        interestPaymentDates,
+        nonAmortizedBond: true,
+
       });
 
       await this.addAutomationLog({

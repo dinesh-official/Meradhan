@@ -1353,10 +1353,10 @@ export class CrmOrdersService {
         code: "ORDER_NOT_FOUND",
       });
     }
-    pdfQuery.orderData = order.createdAt.toISOString();
-    pdfQuery.price = order.unitPrice.toFixed(2);
+
     const customerRepo = new CustomerProfileRepo();
     const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    console.log(pdfQuery);
 
     let buffer: Buffer;
     let filename: string;
