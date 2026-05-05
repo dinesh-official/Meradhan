@@ -104,8 +104,14 @@ export class OrderPdfService {
       );
       settlementNumber = st.settlementNo;
     } catch (error) {
+      //2026-05-06 -> 2605006 create this formrated 
+      const [yyyy, mm, dd] = pricing.settlementDate.trim().split("-");
+      if (!yyyy || !mm || !dd) return "";
+      const yy = yyyy.slice(-2);
+      settlementNumber = `${yy}${mm.padStart(2, "0")}0${dd.padStart(2, "0")}`;
       console.log("SETTLEMENT NUMBER ERROR", error);
     }
+    console.log(pricing.settlementDate);
 
     const orderData = {
       price: pricing.cleanPrice,
