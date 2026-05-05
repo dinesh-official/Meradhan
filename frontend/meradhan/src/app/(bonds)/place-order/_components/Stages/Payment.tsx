@@ -53,13 +53,13 @@ function Payment({
               new Date(settlementDateValue),
               "DD MMMM YYYY"
             )}{" "}
-            ({settlementDate == "1" ? "T+1" : "T+0"}) after ICCL receives your
-            payment through the payment gateway.
+            ({settlementDate == "1" ? "T+1" : "T+0"}), subject to receipt of your
+            payment by the clearing corporation through the payment gateway.
           </p>
           <p>
-            We have emailed the order receipt to{" "}
-            {maskEmail(customer.emailAddress)}. Please check your inbox or spam
-            folder (mark it as safe).
+            The order receipt has been sent to your registered email address (
+            {maskEmail(customer.emailAddress)}). Please check your inbox; if you
+            do not find it, kindly check your spam folder and mark it as safe.
           </p>
         </div>
       </div>
