@@ -730,8 +730,7 @@ export class CrmOrdersService {
       },
     });
 
-    const issuerName =
-      bondDetails.bondName || bondDetails.instrumentName || "";
+    const issuerName = bondDetails.bondName || bondDetails.instrumentName || "";
 
     const finalOrderNumber = generateOrderId({
       channel: "ASSIST",

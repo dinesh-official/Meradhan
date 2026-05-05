@@ -144,9 +144,7 @@ export class OrderService {
       throw new AppError("No Default Bank Account Found");
     }
 
-    const issuerName =
-      (preview.bondDetails as { instrumentName?: string }).instrumentName ||
-      preview.bondName;
+    const issuerName = preview.bondName || (preview.bondDetails as { instrumentName?: string }).instrumentName || "";
     const tempOrderNumber = `MD-DIR-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
 
     const order = await db.dataBase.order.create({
@@ -266,7 +264,7 @@ export class OrderService {
         where: { id: order.id },
         data: {
           paymentStatus: PaymentStatus.COMPLETED,
-          status: "SETTLED",
+          status: "APPLIED",
           paymentId,
           paymentMetadata: {
             signature: signature || null,

@@ -20,7 +20,32 @@ export function formatDateDdMmYyyy(date: Date): string {
   const yyyy = date.getFullYear();
   return `${dd}${mm}${yyyy}`;
 }
+export function formatDateIstDdMmmYyyy(date: Date): string {
+  const fmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "short", // directly gives "Jan", "Feb", etc.
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
 
+  const parts = fmt.formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+
+  const dd = get("day");
+  const mmm = get("month"); // already short format
+  const yyyy = get("year");
+  const hh = get("hour");
+  const mm = get("minute");
+  const ss = get("second");
+
+  return `${dd}-${mmm}-${yyyy}`;
+}
 /**
  * Issuer segment for Deal ID: first word full caps, second word full caps,
  * remaining words first letter only (e.g. KOSAMATTAM FINANCE LIMITED → KOSAMATTAMFINANCEL).
