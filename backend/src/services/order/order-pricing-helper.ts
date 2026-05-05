@@ -426,7 +426,7 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
         const ymd = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
         const [, mm, dd] = ymd.split("-");
         const monthName = MONTHS[(Number(mm) || 1) - 1] ?? "Jan";
-        return `${Number(dd)} ${monthName}`;
+        return `${Number(dd)}-${monthName}`;
     });
 };
 
