@@ -347,8 +347,13 @@ export const computeBondOrderPricingData = (
  * - Else include it.
  */
 export const getPayoutDates = async (isin: string, settlement: Date) => {
-    const settlementDt = new Date(settlement);
-    if (Number.isNaN(settlementDt.getTime())) return [];
+    const settlementDtRaw = new Date(settlement);
+    if (Number.isNaN(settlementDtRaw.getTime())) return [];
+
+    // Normalize to an IST calendar moment to avoid UTC date shifting.
+    // We anchor at 12:00 IST for stable day/month/year comparisons.
+    const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
+    const settlementDt = new Date(`${istYmd}T12:00:00+05:30`);
 
     const [meta, rows] = await Promise.all([
         db.dataBase.bondReferenceMetadata.findUnique({ where: { isin } }),
@@ -417,7 +422,12 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
 
     const out = skipNext ? dueDates.slice(1) : dueDates;
     const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
-    return out.map((d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`);
+    return out.map((d) => {
+        const ymd = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
+        const [, mm, dd] = ymd.split("-");
+        const monthName = MONTHS[(Number(mm) || 1) - 1] ?? "Jan";
+        return `${Number(dd)} ${monthName}`;
+    });
 };
 
 
@@ -532,6 +542,39 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
         isUnderShutPeriod: underShutPeriod,
         recordDays,
     };
+};
+
+/**
+ * Returns the last coupon due date (YYYY-MM-DD) on/before the settlement date.
+ * Uses IST calendar date for the settlement anchor to avoid timezone shifting.
+ */
+export const getLastCouponDate = async (isin: string, settlement: Date): Promise<string | null> => {
+    const settlementDtRaw = new Date(settlement);
+    if (Number.isNaN(settlementDtRaw.getTime())) return null;
+
+    // Anchor settlement at 12:00 IST on the same IST calendar day.
+    const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
+    const settlementDt = new Date(`${istYmd}T12:00:00+05:30`);
+
+    const rows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
+        where: { isin },
+        orderBy: { dueDate: "asc" },
+    });
+
+    const dueDates = rows
+        .map((r) => (r.dueDate instanceof Date ? r.dueDate : null))
+        .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
+        .sort((a, b) => a.getTime() - b.getTime());
+
+    let last: Date | null = null;
+    for (const d of dueDates) {
+        if (d.getTime() <= settlementDt.getTime()) last = d;
+        else break;
+    }
+    if (!last) return null;
+
+    // Return as YYYY-MM-DD in IST (stable calendar date).
+    return last.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 };
 
 

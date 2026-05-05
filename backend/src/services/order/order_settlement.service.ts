@@ -24,6 +24,9 @@ import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import crypto from "crypto";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
+import { formatDate } from "@packages/kyc-providers/pdf/helper";
+import { formatDateDdMmYyyy, formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
+import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate } from "./order-pricing-helper";
 
 // Type definitions for settlement service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -1090,7 +1093,7 @@ BSE Member ID: 6963`;
 
 
 
-      let accruedInterestDays = await this.getAccruedInterest(order);
+      let accruedInterestDays = (order.bondDetails as any).pricing.noOfAccrualDays;
       let settlementNumber: string | undefined;
       let lastInterestPaymentDate: string | undefined;
       let interestPaymentDates: string | undefined;
@@ -1098,9 +1101,10 @@ BSE Member ID: 6963`;
         const autofill = await this.crmOrdersService.autofillReceiptPdfOptions(orderNumber, {
           settlementDate: settlementDateInput,
         });
-        accruedInterestDays = autofill.accruedInterestDays;
+        // accruedInterestDays = autofill.accruedInterestDays;
         if (autofill.settlementNumber) settlementNumber = autofill.settlementNumber;
-        if (autofill.lastInterestPaymentDate) lastInterestPaymentDate = autofill.lastInterestPaymentDate;
+        const setData = await getLastCouponDate(order.isin, new Date())
+        if (setData) lastInterestPaymentDate = formatDate(setData, "DD-MMM-YYYY");
         if (autofill.interestPaymentDates?.length) {
           interestPaymentDates = autofill.interestPaymentDates.join(", ");
         }
