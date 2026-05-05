@@ -245,7 +245,7 @@ export default function OrdersPage({
     ],
     [
       "Interest Payment Dates",
-      `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
+      bond.couponRate == 0 ? "NA (Zero Coupon Bond)" : `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
 ${getInterestPaymentDatesDisplay()}`,
     ],
     [

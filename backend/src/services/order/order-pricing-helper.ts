@@ -573,8 +573,21 @@ export const getLastCouponDate = async (isin: string, settlement: Date): Promise
     }
     if (!last) return null;
 
-    // Return as YYYY-MM-DD in IST (stable calendar date).
-    return last.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    // Return as DD-MMM-YYYY (DayName) in IST (stable calendar date).
+    const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        weekday: "long",
+    }).formatToParts(last);
+    const get = (type: Intl.DateTimeFormatPartTypes) =>
+        parts.find((p) => p.type === type)?.value ?? "";
+    const dd = get("day").padStart(2, "0");
+    const mmm = get("month") || "Jan";
+    const yyyy = get("year");
+    const weekday = get("weekday");
+    return `${dd}-${mmm}-${yyyy}${weekday ? ` (${weekday})` : ""}`;
 };
 
 
