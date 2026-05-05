@@ -586,8 +586,10 @@ export const getLastCouponDate = async (isin: string, settlement: Date): Promise
     const dd = get("day").padStart(2, "0");
     const mmm = get("month") || "Jan";
     const yyyy = get("year");
-    const weekday = get("weekday");
-    return `${dd}-${mmm}-${yyyy}${weekday ? ` (${weekday})` : ""}`;
+    const weekday = get("weekday").toString();
+    console.log(weekday);
+
+    return `${dd}-${mmm}-${yyyy}${` (${weekday})`}`;
 };
 
 

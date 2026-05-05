@@ -1104,7 +1104,7 @@ BSE Member ID: 6963`;
         // accruedInterestDays = autofill.accruedInterestDays;
         if (autofill.settlementNumber) settlementNumber = autofill.settlementNumber;
         const setData = await getLastCouponDate(order.isin, new Date())
-        if (setData) lastInterestPaymentDate = formatDate(setData, "DD-MMM-YYYY");
+        if (setData) lastInterestPaymentDate = setData;
         if (autofill.interestPaymentDates?.length) {
           interestPaymentDates = autofill.interestPaymentDates.join(", ");
         }
