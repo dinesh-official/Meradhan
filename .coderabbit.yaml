@@ -1,0 +1,18 @@
+reviews:
+  profile: chill
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: false
+  poem: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+
+base_branches:
+  - master
+  - preprod
+  - staging
+
+chat:
+  auto_reply: true
