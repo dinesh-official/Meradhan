@@ -63,7 +63,15 @@ function pad2(n: number) {
 }
 
 function toUTCISODate(date: Date): string {
+
     return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
+}
+
+export function toISTISODate(date: Date): string {
+    // Convert instant → IST calendar date, then format as YYYY-MM-DD.
+    // We shift by +05:30 and then read UTC parts to avoid local timezone effects.
+    const ist = new Date(date.getTime() + 330 * 60 * 1000);
+    return `${ist.getUTCFullYear()}-${pad2(ist.getUTCMonth() + 1)}-${pad2(ist.getUTCDate())}`;
 }
 
 function utcMinutesSinceMidnight(date: Date): number {
