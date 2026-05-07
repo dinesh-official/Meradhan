@@ -99,6 +99,54 @@ function normalizeSheetName(name: string): string {
   return name.trim().toLowerCase();
 }
 
+const MONTH_MAP: Record<string, string> = {
+  jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
+  jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
+};
+
+/** Tries to parse a string that looks like a date into "YYYY-MM-DD".
+ *  Handles: DD/MMM/YYYY, DD-MMM-YYYY, DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD.
+ *  Returns null if the string doesn't match a known date pattern.
+ */
+function tryParseExcelDateString(s: string): string | null {
+  // DD/MMM/YYYY or DD-MMM-YYYY  e.g. "20/Feb/2026", "20-Feb-2026"
+  const mAlpha = /^(\d{1,2})[\/\-]([A-Za-z]{3})[\/\-](\d{4})$/.exec(s);
+  if (mAlpha) {
+    const mo = MONTH_MAP[mAlpha[2].toLowerCase()];
+    if (mo) return `${mAlpha[3]}-${mo}-${mAlpha[1].padStart(2, "0")}`;
+  }
+  // DD/MM/YYYY or DD-MM-YYYY  e.g. "20/02/2026", "20-02-2026"
+  const mNumeric = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/.exec(s);
+  if (mNumeric) {
+    return `${mNumeric[3]}-${mNumeric[2].padStart(2, "0")}-${mNumeric[1].padStart(2, "0")}`;
+  }
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return null;
+}
+
+/** Normalises every value in an XLSX row to a clean type suitable for the API:
+ *  - Date objects (safety net if cellDates slips through) → "YYYY-MM-DD"
+ *  - Date-like strings from sheet_to_json raw:false       → "YYYY-MM-DD"
+ *  - Everything else passes through unchanged.
+ */
+function normalizeXlsxRow(row: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(row)) {
+    if (v instanceof Date && !Number.isNaN(v.getTime())) {
+      const y = v.getFullYear();
+      const mo = String(v.getMonth() + 1).padStart(2, "0");
+      const d = String(v.getDate()).padStart(2, "0");
+      out[k] = `${y}-${mo}-${d}`;
+    } else if (typeof v === "string") {
+      out[k] = tryParseExcelDateString(v) ?? v;
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
 function isXlsxFile(file: File): boolean {
   const n = file.name.toLowerCase();
   return (
@@ -175,14 +223,16 @@ export default function BondReferenceDataView() {
 
       const adRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(adWs, {
         defval: "",
-      });
+        raw: false,
+      }).map(normalizeXlsxRow);
       const couponRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(couponWs, {
         defval: "",
-      });
+        raw: false,
+      }).map(normalizeXlsxRow);
       const redemptionRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(
         redemptionWs,
-        { defval: "" }
-      );
+        { defval: "", raw: false }
+      ).map(normalizeXlsxRow);
 
       const adRowsClean = (adRows || []).filter((r) => r && Object.keys(r).length > 0);
       if (adRowsClean.length === 0) return { responseData: { processed: 0 } };
