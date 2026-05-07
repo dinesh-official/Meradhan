@@ -84,7 +84,7 @@ function parseApiUtcTimestampToIstNextDayMidnight(value: unknown): Date | null {
   const m = moment(s, moment.ISO_8601, true);
   if (!m.isValid()) return null;
 
-  const ymdPlus2 = m.utcOffset(330).add(2, "day").format("YYYY-MM-DD");
+  const ymdPlus2 = m.utcOffset(330).add(1, "day").format("YYYY-MM-DD");
   return new Date(`${ymdPlus2}T00:00:00+05:30`);
 }
 
@@ -324,13 +324,13 @@ export class BondReferenceDataService {
     const where =
       search && search.length > 0
         ? {
-            OR: [
-              { isin: { contains: search, mode: "insensitive" as const } },
-              {
-                issuerName: { contains: search, mode: "insensitive" as const },
-              },
-            ],
-          }
+          OR: [
+            { isin: { contains: search, mode: "insensitive" as const } },
+            {
+              issuerName: { contains: search, mode: "insensitive" as const },
+            },
+          ],
+        }
         : {};
 
     const [total, items] = await Promise.all([
