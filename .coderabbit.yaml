@@ -8,11 +8,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-
-base_branches:
-  - master
-  - preprod
-  - staging
+    base_branches:
+      - master
+      - preprod
+      - staging
 
 chat:
   auto_reply: true
