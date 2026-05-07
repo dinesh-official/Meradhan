@@ -159,32 +159,35 @@ export class BondReferenceDataService {
       previousCouponDate: parseDate((ad as any)["Previous Coupon Date"], [
         "YYYY-MM-DDTHH:mm:ss.SSSZ",
         "DD-MMM-YYYY",
+        "DD/MMM/YYYY",
         "DD-MM-YYYY",
         "YYYY-MM-DD",
       ]),
       previousCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
         (ad as any)["Previous Coupon Date"],
-        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
+        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD/MMM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
       ),
       lastCouponDate: parseDate((ad as any)["Last Coupon Date"], [
         "YYYY-MM-DDTHH:mm:ss.SSSZ",
         "DD-MMM-YYYY",
+        "DD/MMM/YYYY",
         "DD-MM-YYYY",
         "YYYY-MM-DD",
       ]),
       lastCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
         (ad as any)["Last Coupon Date"],
-        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
+        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD/MMM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
       ),
       nextCouponDate: parseDate((ad as any)["Next Coupon Date"], [
         "YYYY-MM-DDTHH:mm:ss.SSSZ",
         "DD-MMM-YYYY",
+        "DD/MMM/YYYY",
         "DD-MM-YYYY",
         "YYYY-MM-DD",
       ]),
       nextCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
         (ad as any)["Next Coupon Date"],
-        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
+        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD/MMM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
       ),
       isListed: toBoolean((ad as any)["Is Listed"]),
       exchangeName: toNullableString((ad as any)["Exchange Name"]),
@@ -214,24 +217,28 @@ export class BondReferenceDataService {
         recordDate: parseDate((r as any)["Record Date"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
         recordDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["Record Date"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
         dueDate: parseDate((r as any)["Due Date"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
         dueDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["Due Date"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
@@ -247,24 +254,28 @@ export class BondReferenceDataService {
         startDate: parseDate((r as any)["StartDate"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
         startDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["StartDate"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
         endDate: parseDate((r as any)["EndDate"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
         endDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["EndDate"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
+          "DD/MMM/YYYY",
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),

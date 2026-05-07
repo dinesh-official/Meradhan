@@ -99,6 +99,26 @@ function normalizeSheetName(name: string): string {
   return name.trim().toLowerCase();
 }
 
+/** Converts any Date values in an XLSX row to ISO date-only strings (YYYY-MM-DD).
+ *  XLSX with cellDates:true constructs JS Date objects using LOCAL time
+ *  (e.g. new Date(2026, 0, 16) for "16/Jan/2026"), so we must read local
+ *  components — not UTC — to get the original calendar date back.
+ */
+function normalizeXlsxRow(row: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(row)) {
+    if (v instanceof Date && !Number.isNaN(v.getTime())) {
+      const y = v.getFullYear();
+      const mo = String(v.getMonth() + 1).padStart(2, "0");
+      const d = String(v.getDate()).padStart(2, "0");
+      out[k] = `${y}-${mo}-${d}`;
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
 function isXlsxFile(file: File): boolean {
   const n = file.name.toLowerCase();
   return (
@@ -175,14 +195,16 @@ export default function BondReferenceDataView() {
 
       const adRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(adWs, {
         defval: "",
-      });
+        raw: false,
+      }).map(normalizeXlsxRow);
       const couponRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(couponWs, {
         defval: "",
-      });
+        raw: false,
+      }).map(normalizeXlsxRow);
       const redemptionRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(
         redemptionWs,
-        { defval: "" }
-      );
+        { defval: "", raw: false }
+      ).map(normalizeXlsxRow);
 
       const adRowsClean = (adRows || []).filter((r) => r && Object.keys(r).length > 0);
       if (adRowsClean.length === 0) return { responseData: { processed: 0 } };
