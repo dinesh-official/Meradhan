@@ -99,10 +99,36 @@ function normalizeSheetName(name: string): string {
   return name.trim().toLowerCase();
 }
 
-/** Converts any Date values in an XLSX row to ISO date-only strings (YYYY-MM-DD).
- *  XLSX with cellDates:true constructs JS Date objects using LOCAL time
- *  (e.g. new Date(2026, 0, 16) for "16/Jan/2026"), so we must read local
- *  components — not UTC — to get the original calendar date back.
+const MONTH_MAP: Record<string, string> = {
+  jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
+  jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
+};
+
+/** Tries to parse a string that looks like a date into "YYYY-MM-DD".
+ *  Handles: DD/MMM/YYYY, DD-MMM-YYYY, DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD.
+ *  Returns null if the string doesn't match a known date pattern.
+ */
+function tryParseExcelDateString(s: string): string | null {
+  // DD/MMM/YYYY or DD-MMM-YYYY  e.g. "20/Feb/2026", "20-Feb-2026"
+  const mAlpha = /^(\d{1,2})[\/\-]([A-Za-z]{3})[\/\-](\d{4})$/.exec(s);
+  if (mAlpha) {
+    const mo = MONTH_MAP[mAlpha[2].toLowerCase()];
+    if (mo) return `${mAlpha[3]}-${mo}-${mAlpha[1].padStart(2, "0")}`;
+  }
+  // DD/MM/YYYY or DD-MM-YYYY  e.g. "20/02/2026", "20-02-2026"
+  const mNumeric = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/.exec(s);
+  if (mNumeric) {
+    return `${mNumeric[3]}-${mNumeric[2].padStart(2, "0")}-${mNumeric[1].padStart(2, "0")}`;
+  }
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return null;
+}
+
+/** Normalises every value in an XLSX row to a clean type suitable for the API:
+ *  - Date objects (safety net if cellDates slips through) → "YYYY-MM-DD"
+ *  - Date-like strings from sheet_to_json raw:false       → "YYYY-MM-DD"
+ *  - Everything else passes through unchanged.
  */
 function normalizeXlsxRow(row: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -112,6 +138,8 @@ function normalizeXlsxRow(row: Record<string, unknown>): Record<string, unknown>
       const mo = String(v.getMonth() + 1).padStart(2, "0");
       const d = String(v.getDate()).padStart(2, "0");
       out[k] = `${y}-${mo}-${d}`;
+    } else if (typeof v === "string") {
+      out[k] = tryParseExcelDateString(v) ?? v;
     } else {
       out[k] = v;
     }
