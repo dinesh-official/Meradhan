@@ -296,6 +296,9 @@ const accruedInterest = (params: {
 
 /* =========================
    MAIN
+
+   UTC 30-dec2026 18:30:00
+   IST 30-dec2026
 ========================= */
 
 export const computeBondOrderPricingData = (
@@ -372,8 +375,8 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     ]);
 
     const maturityDate =
-        meta?.maturityDate instanceof Date && !Number.isNaN(meta.maturityDate.getTime())
-            ? meta.maturityDate
+        meta?.maturityDateIst instanceof Date && !Number.isNaN(meta.maturityDateIst.getTime())
+            ? meta.maturityDateIst
             : null;
 
     const oneYearLater = new Date(
@@ -387,7 +390,7 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     const endLimit = maturityDate ? maturityDate : oneYearLater;
 
     const dueDates = rows
-        .map((r) => (r.dueDate instanceof Date ? r.dueDate : null))
+        .map((r) => (r.dueDateIst instanceof Date ? r.dueDateIst : null))
         .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
         .filter((d) => d.getTime() >= settlementDt.getTime() && d.getTime() <= endLimit.getTime());
 
@@ -396,14 +399,14 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     // Next coupon row (first dueDate >= settlement).
     const nextRow = rows.find(
         (r) =>
-            r.dueDate instanceof Date &&
-            !Number.isNaN(r.dueDate.getTime()) &&
-            r.dueDate.getTime() >= settlementDt.getTime(),
+            r.dueDateIst instanceof Date &&
+            !Number.isNaN(r.dueDateIst.getTime()) &&
+            r.dueDateIst.getTime() >= settlementDt.getTime(),
     );
 
     let skipNext = false;
-    if (nextRow?.dueDate instanceof Date) {
-        const due = nextRow.dueDate;
+    if (nextRow?.dueDateIst instanceof Date) {
+        const due = nextRow.dueDateIst;
         const recordDaysRaw = nextRow.recordDays;
         const recordDays =
             typeof recordDaysRaw === "number" && Number.isFinite(recordDaysRaw)
@@ -411,8 +414,8 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
                 : null;
 
         const recordDate =
-            nextRow.recordDate instanceof Date && !Number.isNaN(nextRow.recordDate.getTime())
-                ? nextRow.recordDate
+            nextRow.recordDateIst instanceof Date && !Number.isNaN(nextRow.recordDateIst.getTime())
+                ? nextRow.recordDateIst
                 : recordDays != null
                     ? utcMidnightForISODate(
                         addUTCCalendarDays(toUTCISODate(due), -recordDays),
@@ -570,7 +573,7 @@ export const getLastCouponDate = async (isin: string, settlement: Date): Promise
     });
 
     const dueDates = rows
-        .map((r) => (r.dueDate instanceof Date ? r.dueDate : null))
+        .map((r) => (r.dueDateIst instanceof Date ? r.dueDateIst : null))
         .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
         .sort((a, b) => a.getTime() - b.getTime());
 

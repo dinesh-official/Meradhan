@@ -813,13 +813,12 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    console.log(rfqDetails?.date,
-      rfqDetails?.quoteTime,);
+    console.log(rfqDetails?.date, rfqDetails?.quoteTime,);
 
 
     const fallbackOrderDate =
       order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const orderDateForPdf = parseRfqMasterDateTime(
+    const orderDateForPdf = pdfQuery.dealDate ? new Date(pdfQuery.dealDate) : parseRfqMasterDateTime(
       rfqDetails?.date,
       rfqDetails?.quoteTime,
       fallbackOrderDate,
@@ -916,7 +915,7 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: (rfqDetails?.settlementDate || settleOrder?.modSettleDate) ?? undefined as string | undefined,
+          settlementDate: (pdfQuery?.settlementDate || rfqDetails?.settlementDate || settleOrder?.modSettleDate) ?? undefined as string | undefined,
           payoutTime: (settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate) ?? undefined as string | undefined,
           settlementType: rfqDetails?.settlementType ?? 0,
           valueDate: bond.maturityDate
@@ -1277,6 +1276,8 @@ export class CrmOrdersService {
       accruedInterestDays?: number | string;
       settlementNumber?: string;
       settlementDateTime?: string;
+      settlementDate?: Date;
+      dealDate?: Date,
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
@@ -1290,6 +1291,9 @@ export class CrmOrdersService {
         code: "BAD_REQUEST",
       });
     }
+
+    console.log(body);
+
 
     const subject = String(body.subject ?? "").trim();
     const messageBody = String(body.messageBody ?? "").trim();
@@ -1318,7 +1322,7 @@ export class CrmOrdersService {
         : undefined;
     const settlementDateTimeParam =
       typeof body.settlementDateTime === "string" && body.settlementDateTime.trim() !== ""
-        ? body.settlementDateTime.trim()
+        ? body.settlementDateTime?.toString().trim()
         : undefined;
     const lastInterestPaymentDateParam =
       typeof body.lastInterestPaymentDate === "string" &&
@@ -1344,6 +1348,14 @@ export class CrmOrdersService {
     ) {
       pdfQuery.amortizedPrincipalPaymentDates = body.amortizedPrincipalPaymentDates.trim();
     }
+    if (body.settlementDate) {
+      pdfQuery.settlementDate = body.settlementDate.toISOString();
+    }
+    if (body.dealDate) {
+      pdfQuery.dealDate = body.dealDate.toISOString();
+    }
+
+
 
     const order = await this.getCustomerByOrderNumber(orderNumber);
     if (!order) {

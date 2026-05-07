@@ -7,6 +7,21 @@ import fs from "fs";
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) { }
 
+  private toIstDateOnly(isoDateTime?: string | null): string | null {
+    if (!isoDateTime) return null;
+    const dt = new Date(isoDateTime);
+    if (Number.isNaN(dt.getTime())) return null;
+
+    // Convert the instant to IST, then format as YYYY-MM-DD.
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const ist = new Date(dt.getTime() + IST_OFFSET_MS);
+
+    const y = ist.getUTCFullYear();
+    const m = String(ist.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(ist.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
   /**
    * NSDL XLS sometimes contains placeholder maturity like 31-12-9999, but during parsing
    * it can get truncated/normalized to a 2-digit year (e.g. 31-12-99). JavaScript then
@@ -572,6 +587,8 @@ export class NsdlBondProcessor {
     const redemptionDate = this.getRedemptionDate(true);
     console.log(this.bond.ISIN, redemptionDate);
 
+    const dateOfAllotment = this.getDateOfAllotment();
+
     return {
       isin: this.formatString(this.bond.ISIN),
       bondName: this.formatString(this.bond.COMPANY),
@@ -606,8 +623,13 @@ export class NsdlBondProcessor {
       ratingDate: this.extractRatingCompanyAndDate()?.date,
       categories: this.getBondCategories(),
       sectorName: this.getBondCorporateName(this.bond.COMPANY),
-      dateOfAllotment: this.getDateOfAllotment(),
+      dateOfAllotment,
+      dateOfAllotmentIst: this.toIstDateOnly(dateOfAllotment),
       maturityDate: redemptionDate,
+      maturityDateIst: this.toIstDateOnly(redemptionDate),
+      maturityDateOnly: this.toIstDateOnly(redemptionDate),
+      redemptionDateIst: this.toIstDateOnly(redemptionDate),
+      ratingDateIst: this.extractRatingCompanyAndDate()?.date ? this.toIstDateOnly(this.extractRatingCompanyAndDate()!.date?.toISOString()) : undefined,
     };
   }
 }

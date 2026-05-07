@@ -15,6 +15,9 @@ export class BondReferenceDataController {
       });
     }
 
+    console.log(payload);
+
+
     const result = await this.service.upsertReferenceByIsin(payload as any);
     return res.sendResponse({
       statusCode: HttpStatus.OK,
