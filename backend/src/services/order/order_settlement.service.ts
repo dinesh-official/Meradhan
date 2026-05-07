@@ -1140,11 +1140,13 @@ BSE Member ID: 6963`;
         messageBody,
         toEmail: recipientEmail,
         accruedInterestDays,
-        settlementNumber: settleRow?.settlementNo || undefined,
-        settlementDateTime: params.settlementDate,
+        settlementNumber: settlementNumber,
+        settlementDateTime: new Date((order.bondDetails as any).pricing.settlementDate).toISOString(),
         lastInterestPaymentDate,
         interestPaymentDates,
         nonAmortizedBond: true,
+        dealDate: (new Date((order.bondDetails as any).pricing.dealDate)),
+        settlementDate: (new Date((order.bondDetails as any).pricing.settlementDate))
 
       });
 

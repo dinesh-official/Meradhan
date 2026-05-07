@@ -1,4 +1,5 @@
 import { db } from "@core/database/database";
+import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate, toISTISODate } from "@services/order/order-pricing-helper";
 import moment from "moment";
 
 type BondMaturityRange = "0-1" | "1-3" | "3-5" | "5-7" | "7-10" | "10-15" | "15+";
@@ -682,6 +683,9 @@ export async function getBondDealAutofill(opts: {
             ? opts.settlementDate.trim()
             : formatYmdAsiaKolkata(new Date());
 
+    const dates = await getLastNextCouponDateBasedOnSettlementDate(opts.isin, new Date())
+    console.log(dates);
+
     const pricingYield =
         opts.pricingYield != null && Number.isFinite(opts.pricingYield)
             ? opts.pricingYield
@@ -694,8 +698,8 @@ export async function getBondDealAutofill(opts: {
             interestPaymentFrequency: bond.interestPaymentFrequency,
             faceValue: bond.faceValue,
             couponRate: bond.couponRate,
-            lastCouponDate: bond.lastCouponDate,
-            nextCouponDate: bond.nextCouponDate,
+            lastCouponDate: (new Date(toISTISODate(new Date(dates.lastCouponDate || "")))),
+            nextCouponDate: new Date(toISTISODate(new Date(dates.nextCouponDate || ""))),
             maturityDate: bond.maturityDate,
             dateOfAllotment: bond.dateOfAllotment,
         },
