@@ -6,7 +6,7 @@ model BondPricedListConsolidated {
   dateRaw      String?
   timeRaw      String?
   timestamp    DateTime
-  timestampIst DateTime @db.Date
+  timestampIst DateTime? @db.Date
 
   /// Identifiers — upsert key = `isin` + `timestamp` (full quote instant)
   isin       String
