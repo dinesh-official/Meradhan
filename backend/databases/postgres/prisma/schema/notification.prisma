@@ -25,29 +25,29 @@ enum NotificationRecipientDeliveryStatus {
 
 /// Templates managed through the CRM UI (one per medium type)
 model NotificationTemplateModel {
-    id             Int                  @id @default(autoincrement())
-    name           String
-    templateId     String
-    medium         NotificationMedium   @default(SMS)
-    message        String?
+    id           Int                @id @default(autoincrement())
+    name         String
+    templateId   String
+    medium       NotificationMedium @default(SMS)
+    message      String?
     /// RCS-only: MSG91 project ID
-    rcsProjectId   String?
+    rcsProjectId String?
     /// RCS-only: MSG91 namespace (may differ from name)
-    rcsNamespace   String?
+    rcsNamespace String?
     /// RCS-only: ordered variable names, e.g. ["customer_name","amount"]
-    rcsVariables   Json?
-    isActive       Boolean              @default(true)
-    createdById    Int
-    createdBy      CRMUserDataModel     @relation("NotificationTemplateCreatedBy", fields: [createdById], references: [id])
-    createdAt      DateTime             @default(now())
-    updatedAt      DateTime             @updatedAt
+    rcsVariables Json?
+    isActive     Boolean            @default(true)
+    createdById  Int
+    createdBy    CRMUserDataModel   @relation("NotificationTemplateCreatedBy", fields: [createdById], references: [id])
+    createdAt    DateTime           @default(now())
+    updatedAt    DateTime           @updatedAt
 
     @@unique([templateId, medium])
     @@map("notification_templates")
 }
 
 model CrmNotificationSavedListModel {
-    id           Int     @id @default(autoincrement())
+    id           Int              @id @default(autoincrement())
     name         String
     createdById  Int
     createdBy    CRMUserDataModel @relation(fields: [createdById], references: [id])
@@ -64,7 +64,7 @@ model CrmNotificationSavedListModel {
 }
 
 model CrmNotificationSavedListMemberModel {
-    id                Int @id @default(autoincrement())
+    id                Int                           @id @default(autoincrement())
     savedListId       Int
     savedList         CrmNotificationSavedListModel @relation(fields: [savedListId], references: [id], onDelete: Cascade)
     customerProfileId Int
@@ -77,16 +77,16 @@ model CrmNotificationSavedListMemberModel {
 }
 
 model NotificationLogModel {
-    id                Int     @id @default(autoincrement())
+    id                Int                             @id @default(autoincrement())
     savedListId       Int?
-    savedList         CrmNotificationSavedListModel? @relation(fields: [savedListId], references: [id], onDelete: SetNull)
+    savedList         CrmNotificationSavedListModel?  @relation(fields: [savedListId], references: [id], onDelete: SetNull)
     medium            NotificationMedium
     dltTemplateId     String
     templateVariables Json
     messagePreview    String?
     sentById          Int
-    sentBy            CRMUserDataModel @relation("NotificationSentBy", fields: [sentById], references: [id])
-    sentAt            DateTime         @default(now())
+    sentBy            CRMUserDataModel                @relation("NotificationSentBy", fields: [sentById], references: [id])
+    sentAt            DateTime                        @default(now())
     deliveryStatus    NotificationBatchDeliveryStatus
     providerBatchId   String?
     meta              Json?
@@ -98,17 +98,17 @@ model NotificationLogModel {
 }
 
 model NotificationRecipientLogModel {
-    id                  Int                               @id @default(autoincrement())
-    notificationLogId   Int
-    notificationLog     NotificationLogModel              @relation(fields: [notificationLogId], references: [id], onDelete: Cascade)
-    customerProfileId   Int
-    customerProfile     CustomerProfileDataModel          @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
-    phone               String
-    deliveryStatus      NotificationRecipientDeliveryStatus
-    providerMessageId   String?
-    errorCode           String?
-    errorMessage        String?
-    updatedAt           DateTime                          @updatedAt
+    id                Int                                 @id @default(autoincrement())
+    notificationLogId Int
+    notificationLog   NotificationLogModel                @relation(fields: [notificationLogId], references: [id], onDelete: Cascade)
+    customerProfileId Int
+    customerProfile   CustomerProfileDataModel            @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+    phone             String
+    deliveryStatus    NotificationRecipientDeliveryStatus
+    providerMessageId String?
+    errorCode         String?
+    errorMessage      String?
+    updatedAt         DateTime                            @updatedAt
 
     @@index([customerProfileId])
     @@index([notificationLogId])
