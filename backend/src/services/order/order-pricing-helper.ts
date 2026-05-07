@@ -363,7 +363,7 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     // Normalize to an IST calendar moment to avoid UTC date shifting.
     // We anchor at 12:00 IST for stable day/month/year comparisons.
     const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
-    const settlementDt = new Date(`${istYmd}T12:00:00+05:30`);
+    const settlementDt = new Date(`${istYmd}`);
 
     const [meta, rows] = await Promise.all([
         db.dataBase.bondReferenceMetadata.findUnique({ where: { isin } }),
@@ -433,10 +433,12 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     const out = skipNext ? dueDates.slice(1) : dueDates;
     const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
     return out.map((d) => {
-        const ymd = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
-        const [, mm, dd] = ymd.split("-");
-        const monthName = MONTHS[(Number(mm) || 1) - 1] ?? "Jan";
-        return `${Number(dd)}-${monthName}`;
+        // ✅ FIX: Use UTC date parts directly to match the date stored in DB.
+        // Do NOT convert to IST here — that adds +5:30 and can roll the date forward by 1 day
+        // if the underlying timestamp is at/after 18:30 UTC.
+        const dd = d.getUTCDate();
+        const monthName = MONTHS[d.getUTCMonth()] ?? "Jan";
+        return `${dd}-${monthName}`;
     });
 };
 
@@ -564,7 +566,7 @@ export const getLastCouponDate = async (isin: string, settlement: Date): Promise
 
     // Anchor settlement at 12:00 IST on the same IST calendar day.
     const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
-    const settlementDt = new Date(`${istYmd}T12:00:00+05:30`);
+    const settlementDt = new Date(`${istYmd}`);
 
     const rows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
         where: { isin },
@@ -583,20 +585,16 @@ export const getLastCouponDate = async (isin: string, settlement: Date): Promise
     }
     if (!last) return null;
 
-    // Return as DD-MMM-YYYY (DayName) in IST (stable calendar date).
-    const parts = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Asia/Kolkata",
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        weekday: "long",
-    }).formatToParts(last);
-    const get = (type: Intl.DateTimeFormatPartTypes) =>
-        parts.find((p) => p.type === type)?.value ?? "";
-    const dd = get("day").padStart(2, "0");
-    const mmm = get("month") || "Jan";
-    const yyyy = get("year");
-    const weekday = get("weekday").toString();
+    // ✅ FIX: Use UTC date parts (not IST timezone) so the displayed date matches DB.
+    // IST conversion adds +5:30 and can shift the day if the timestamp has a time component
+    // past 18:30 UTC.
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+    const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
+
+    const dd = pad2(last.getUTCDate());
+    const mmm = MONTHS[last.getUTCMonth()] ?? "Jan";
+    const yyyy = String(last.getUTCFullYear());
+    const weekday = DAYS[last.getUTCDay()] ?? "";
     console.log(weekday);
 
     return `${dd}-${mmm}-${yyyy}${` (${weekday})`}`;
