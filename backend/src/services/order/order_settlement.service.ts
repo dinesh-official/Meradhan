@@ -1145,9 +1145,8 @@ BSE Member ID: 6963`;
         lastInterestPaymentDate,
         interestPaymentDates,
         nonAmortizedBond: true,
-        dealDate: (new Date((order.bondDetails as any).pricing.dealDate)),
-        settlementDate: (new Date((order.bondDetails as any).pricing.settlementDate))
-
+        // dealDate: (new Date((order.bondDetails as any).pricing.dealDate)),
+        // settlementDate: (new Date((order.bondDetails as any).pricing.settlementDate))
       });
 
       await this.addAutomationLog({
