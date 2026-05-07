@@ -40,6 +40,15 @@ function parseDate(value: unknown, formats: string[]): Date | null {
   return m.isValid() ? m.toDate() : null;
 }
 
+/**
+ * Parses a date value (string or Date) and stores it as UTC midnight of the
+ * intended calendar date — no day-shifting, no timezone gymnastics.
+ *
+ * This round-trips cleanly:
+ *  - DB tool shows the same date you put in
+ *  - getUTCDate() / getUTCMonth() read the same date
+ *  - IST formatting (5:30 AM IST) stays on the same calendar day
+ */
 function parseDateToIstDateOnlyUtcMidnight(
   value: unknown,
   formats: string[]
@@ -49,33 +58,18 @@ function parseDateToIstDateOnlyUtcMidnight(
   const s = isDate(value) ? value.toISOString() : String(value).trim();
   if (!s) return null;
 
-  // If the input doesn't include an explicit timezone, treat it as an IST date/time.
-  // Also, if it's a date-only string, keep the calendar date as-is (don't shift).
-  const hasExplicitTz =
-    /([zZ]|[+\-]\d{2}:?\d{2})$/.test(s) || /\bGMT\b/i.test(s);
-
-  // NOTE: We intentionally add +1 day for IST-date-only storage
-  // because upstream sources often provide the previous day in UTC.
-  const isDateOnlyString =
-    /^\d{4}-\d{2}-\d{2}$/.test(s) ||
-    /^\d{2}-\d{2}-\d{4}$/.test(s) ||
-    /^\d{2}\/\d{2}\/\d{4}$/.test(s);
-
-  let m = moment(s, formats, true);
+  const m = moment(s, formats, true);
   if (!m.isValid()) return null;
 
-  // Interpret/convert to IST (+05:30), then store as DATE-only.
-  // We return a Date at IST midnight (+05:30) so Prisma accepts it and the ISO shows +5:30 offset.
-  if (!hasExplicitTz && isDateOnlyString) {
-    const ymdPlus2 = m.add(2, "day").format("YYYY-MM-DD");
-    return new Date(`${ymdPlus2}T00:00:00+05:30`);
-  }
-
-  m = hasExplicitTz ? m.utcOffset(330) : m.utcOffset(330, true);
-  const ymdPlus2 = m.add(2, "day").format("YYYY-MM-DD");
-  return new Date(`${ymdPlus2}T00:00:00+05:30`);
+  // Store the calendar date as UTC midnight. No +1/+2 day shifts.
+  const ymd = m.format("YYYY-MM-DD");
+  return new Date(`${ymd}T00:00:00.000Z`);
 }
 
+/**
+ * Parses an API ISO 8601 UTC timestamp and returns the IST calendar date
+ * stored as UTC midnight (no day-shifting).
+ */
 function parseApiUtcTimestampToIstNextDayMidnight(value: unknown): Date | null {
   if (value == null) return null;
   const s = isDate(value) ? value.toISOString() : String(value).trim();
@@ -84,8 +78,9 @@ function parseApiUtcTimestampToIstNextDayMidnight(value: unknown): Date | null {
   const m = moment(s, moment.ISO_8601, true);
   if (!m.isValid()) return null;
 
-  const ymdPlus2 = m.utcOffset(330).add(1, "day").format("YYYY-MM-DD");
-  return new Date(`${ymdPlus2}T00:00:00+05:30`);
+  // Convert to IST calendar date, then store as UTC midnight of that date.
+  const ymd = m.utcOffset(330).format("YYYY-MM-DD");
+  return new Date(`${ymd}T00:00:00.000Z`);
 }
 
 function sanitizeJsonValue(value: unknown): any {
