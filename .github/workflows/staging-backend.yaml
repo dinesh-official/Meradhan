@@ -1,0 +1,61 @@
+name: stage backend deploy
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
+      REPOSITORY: stage-meradhan-be
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+          | docker login \
+            --username AWS \
+            --password-stdin $REGISTRY
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -f backenddocker \
+            -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+            .
+
+      - name: Push Docker Image
+        run: |
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Render ECS Task Definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: stage-meradhan-be-revision.json
+          container-name: stage-meradhan-be
+          image: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          cluster: stage-cluster
+          service: meradhan-be
+          wait-for-service-stability: true
+          force-new-deployment: true
