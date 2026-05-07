@@ -37,8 +37,7 @@ type BondOrderPricingData = {
 ========================= */
 
 // ✅ UPDATED MARKET WINDOW (UTC)
-const DEFAULT_TRADING_START = 3 * 60 + 30; // 03:30 UTC
-// 16:45 IST == 11:15 UTC
+const DEFAULT_TRADING_START = 3 * 60 + 45;// 16:45 IST == 11:15 UTC
 const DEFAULT_TRADING_CUTOFF = 11 * 60 + 15; // 11:15 UTC
 
 const DEFAULT_BOND_MARKET_HOLIDAYS: readonly string[] = [
