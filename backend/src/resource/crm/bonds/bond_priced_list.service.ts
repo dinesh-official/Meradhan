@@ -57,6 +57,12 @@ function parseDate(value: unknown, formats: string[]): Date | null {
   return m.isValid() ? m.toDate() : null;
 }
 
+function toIstDateOnlyUtcMidnight(dt: Date | null) {
+  if (!dt) return null;
+  const ymd = moment(dt).utcOffset(330).format("YYYY-MM-DD");
+  return new Date(`${ymd}T00:00:00.000Z`);
+}
+
 function sanitizeJsonValue(value: unknown): any {
   if (value == null) return value;
   if (isDate(value)) return value.toISOString();
@@ -109,10 +115,12 @@ type ConsolidatedRowPayload = {
   dateRaw: string | null;
   timeRaw: string | null;
   timestamp: Date;
+  timestampIst: Date;
   isin: string;
   issuerName: string | null;
   couponRate: number | null;
   maturityDate: Date | null;
+  maturityDateIst: Date | null;
   yield: number | null;
   currency: string | null;
   faceValue: number | null;
@@ -192,10 +200,12 @@ export class BondPricedListService {
       dateRaw,
       timeRaw,
       timestamp: timestampResolved,
+      timestampIst: toIstDateOnlyUtcMidnight(timestampResolved)!,
       isin,
       issuerName,
       couponRate: toFloat(row["COUPON"]),
       maturityDate,
+      maturityDateIst: toIstDateOnlyUtcMidnight(maturityDate),
       yield: toFloat(row["YIELD"]),
       currency: row["CURRENCY"] || null,
       faceValue: toFloat(row["FACE_VALUE"]),
@@ -225,9 +235,11 @@ export class BondPricedListService {
         dateRaw: record.dateRaw,
         timeRaw: record.timeRaw,
         timestamp: record.timestamp,
+        timestampIst: record.timestampIst,
         issuerName: record.issuerName,
         couponRate: record.couponRate,
         maturityDate: record.maturityDate,
+        maturityDateIst: record.maturityDateIst,
         yield: record.yield,
         currency: record.currency,
         faceValue: record.faceValue,
@@ -305,10 +317,12 @@ export class BondPricedListService {
           dateRaw,
           timeRaw,
           timestamp: timestampResolved,
+          timestampIst: toIstDateOnlyUtcMidnight(timestampResolved)!,
           isin,
           issuerName,
           couponRate: toFloat(row["COUPON"]),
           maturityDate,
+          maturityDateIst: toIstDateOnlyUtcMidnight(maturityDate),
           yield: toFloat(row["YIELD"]),
           currency: row["CURRENCY"] || null,
           faceValue: toFloat(row["FACE_VALUE"]),
@@ -355,9 +369,11 @@ export class BondPricedListService {
             dateRaw: row.dateRaw,
             timeRaw: row.timeRaw,
             timestamp: row.timestamp,
+            timestampIst: row.timestampIst,
             issuerName: row.issuerName,
             couponRate: row.couponRate,
             maturityDate: row.maturityDate,
+            maturityDateIst: row.maturityDateIst,
             yield: row.yield,
             currency: row.currency,
             faceValue: row.faceValue,

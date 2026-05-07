@@ -37,8 +37,7 @@ type BondOrderPricingData = {
 ========================= */
 
 // ✅ UPDATED MARKET WINDOW (UTC)
-const DEFAULT_TRADING_START = 3 * 60 + 30; // 03:30 UTC
-// 16:45 IST == 11:15 UTC
+const DEFAULT_TRADING_START = 3 * 60 + 45;// 16:45 IST == 11:15 UTC
 const DEFAULT_TRADING_CUTOFF = 11 * 60 + 15; // 11:15 UTC
 
 const DEFAULT_BOND_MARKET_HOLIDAYS: readonly string[] = [
@@ -63,7 +62,15 @@ function pad2(n: number) {
 }
 
 function toUTCISODate(date: Date): string {
+
     return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
+}
+
+export function toISTISODate(date: Date): string {
+    // Convert instant → IST calendar date, then format as YYYY-MM-DD.
+    // We shift by +05:30 and then read UTC parts to avoid local timezone effects.
+    const ist = new Date(date.getTime() + 330 * 60 * 1000);
+    return `${ist.getUTCFullYear()}-${pad2(ist.getUTCMonth() + 1)}-${pad2(ist.getUTCDate())}`;
 }
 
 function utcMinutesSinceMidnight(date: Date): number {
@@ -288,6 +295,9 @@ const accruedInterest = (params: {
 
 /* =========================
    MAIN
+
+   UTC 30-dec2026 18:30:00
+   IST 30-dec2026
 ========================= */
 
 export const computeBondOrderPricingData = (
@@ -347,8 +357,13 @@ export const computeBondOrderPricingData = (
  * - Else include it.
  */
 export const getPayoutDates = async (isin: string, settlement: Date) => {
-    const settlementDt = new Date(settlement);
-    if (Number.isNaN(settlementDt.getTime())) return [];
+    const settlementDtRaw = new Date(settlement);
+    if (Number.isNaN(settlementDtRaw.getTime())) return [];
+
+    // Normalize to an IST calendar moment to avoid UTC date shifting.
+    // We anchor at 12:00 IST for stable day/month/year comparisons.
+    const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
+    const settlementDt = new Date(`${istYmd}T12:00:00+05:30`);
 
     const [meta, rows] = await Promise.all([
         db.dataBase.bondReferenceMetadata.findUnique({ where: { isin } }),
@@ -359,8 +374,8 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     ]);
 
     const maturityDate =
-        meta?.maturityDate instanceof Date && !Number.isNaN(meta.maturityDate.getTime())
-            ? meta.maturityDate
+        meta?.maturityDateIst instanceof Date && !Number.isNaN(meta.maturityDateIst.getTime())
+            ? meta.maturityDateIst
             : null;
 
     const oneYearLater = new Date(
@@ -374,7 +389,7 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     const endLimit = maturityDate ? maturityDate : oneYearLater;
 
     const dueDates = rows
-        .map((r) => (r.dueDate instanceof Date ? r.dueDate : null))
+        .map((r) => (r.dueDateIst instanceof Date ? r.dueDateIst : null))
         .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
         .filter((d) => d.getTime() >= settlementDt.getTime() && d.getTime() <= endLimit.getTime());
 
@@ -383,14 +398,14 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
     // Next coupon row (first dueDate >= settlement).
     const nextRow = rows.find(
         (r) =>
-            r.dueDate instanceof Date &&
-            !Number.isNaN(r.dueDate.getTime()) &&
-            r.dueDate.getTime() >= settlementDt.getTime(),
+            r.dueDateIst instanceof Date &&
+            !Number.isNaN(r.dueDateIst.getTime()) &&
+            r.dueDateIst.getTime() >= settlementDt.getTime(),
     );
 
     let skipNext = false;
-    if (nextRow?.dueDate instanceof Date) {
-        const due = nextRow.dueDate;
+    if (nextRow?.dueDateIst instanceof Date) {
+        const due = nextRow.dueDateIst;
         const recordDaysRaw = nextRow.recordDays;
         const recordDays =
             typeof recordDaysRaw === "number" && Number.isFinite(recordDaysRaw)
@@ -398,8 +413,8 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
                 : null;
 
         const recordDate =
-            nextRow.recordDate instanceof Date && !Number.isNaN(nextRow.recordDate.getTime())
-                ? nextRow.recordDate
+            nextRow.recordDateIst instanceof Date && !Number.isNaN(nextRow.recordDateIst.getTime())
+                ? nextRow.recordDateIst
                 : recordDays != null
                     ? utcMidnightForISODate(
                         addUTCCalendarDays(toUTCISODate(due), -recordDays),
@@ -417,7 +432,12 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
 
     const out = skipNext ? dueDates.slice(1) : dueDates;
     const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
-    return out.map((d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`);
+    return out.map((d) => {
+        const ymd = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
+        const [, mm, dd] = ymd.split("-");
+        const monthName = MONTHS[(Number(mm) || 1) - 1] ?? "Jan";
+        return `${Number(dd)}-${monthName}`;
+    });
 };
 
 
@@ -532,6 +552,54 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
         isUnderShutPeriod: underShutPeriod,
         recordDays,
     };
+};
+
+/**
+ * Returns the last coupon due date (YYYY-MM-DD) on/before the settlement date.
+ * Uses IST calendar date for the settlement anchor to avoid timezone shifting.
+ */
+export const getLastCouponDate = async (isin: string, settlement: Date): Promise<string | null> => {
+    const settlementDtRaw = new Date(settlement);
+    if (Number.isNaN(settlementDtRaw.getTime())) return null;
+
+    // Anchor settlement at 12:00 IST on the same IST calendar day.
+    const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
+    const settlementDt = new Date(`${istYmd}T12:00:00+05:30`);
+
+    const rows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
+        where: { isin },
+        orderBy: { dueDate: "asc" },
+    });
+
+    const dueDates = rows
+        .map((r) => (r.dueDateIst instanceof Date ? r.dueDateIst : null))
+        .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
+        .sort((a, b) => a.getTime() - b.getTime());
+
+    let last: Date | null = null;
+    for (const d of dueDates) {
+        if (d.getTime() <= settlementDt.getTime()) last = d;
+        else break;
+    }
+    if (!last) return null;
+
+    // Return as DD-MMM-YYYY (DayName) in IST (stable calendar date).
+    const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        weekday: "long",
+    }).formatToParts(last);
+    const get = (type: Intl.DateTimeFormatPartTypes) =>
+        parts.find((p) => p.type === type)?.value ?? "";
+    const dd = get("day").padStart(2, "0");
+    const mmm = get("month") || "Jan";
+    const yyyy = get("year");
+    const weekday = get("weekday").toString();
+    console.log(weekday);
+
+    return `${dd}-${mmm}-${yyyy}${` (${weekday})`}`;
 };
 
 

@@ -5,7 +5,9 @@ import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
 import {
   computeBondOrderPricingData,
+  getLastCouponDate,
   getLastNextCouponDateBasedOnSettlementDate,
+  getPayoutDates,
 } from "@services/order/order-pricing-helper";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 
@@ -104,8 +106,17 @@ export class OrderPdfService {
       );
       settlementNumber = st.settlementNo;
     } catch (error) {
+      //2026-05-06 -> 2605006 create this formrated 
+      const [yyyy, mm, dd] = pricing.settlementDate.trim().split("-");
+      if (!yyyy || !mm || !dd) return "";
+      const yy = yyyy.slice(-2);
+      settlementNumber = `${yy}${mm.padStart(2, "0")}0${dd.padStart(2, "0")}`;
       console.log("SETTLEMENT NUMBER ERROR", error);
     }
+    console.log(pricing.settlementDate);
+
+    const interestPaymentDates = await getPayoutDates(bond.isin, new Date(pricing.settlementDate ?? ""));
+    const lastPaymentDate = await getLastCouponDate(bond.isin, new Date());
 
     const orderData = {
       price: pricing.cleanPrice,
@@ -114,7 +125,7 @@ export class OrderPdfService {
       totalAmount: pricing.principalAmount + pricing.accruedInterest,
       createdAt: new Date(pricing.dealDate).toISOString(),
       metadata: {
-        lastInterestPaymentDate: formatDate(lastCouponDateStr, "DD-MMM-YYYY"),
+        lastInterestPaymentDate: lastPaymentDate,
         valueDate: pricing.dealDate,
         accruedInterest: pricing.accruedInterest,
         accruedInterestDays: pricing.noOfAccrualDays,
@@ -123,6 +134,7 @@ export class OrderPdfService {
         orderType: "One to One (OTO) on RFQ Platform of the Exchange",
         // Required by PDF generator typing
         settlementType: 1,
+        interestPaymentDates: interestPaymentDates,
         settlementDateTime: new Date(requestDate || new Date()).toLocaleString("en-GB", {
           day: "2-digit",
           month: "2-digit",

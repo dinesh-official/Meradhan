@@ -7,8 +7,18 @@ import { areNamesMatched } from "@/lib/utils";
 import apiGateway, { CustomerByIdPayload } from "@root/apiGateway";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useAppCookie from "@/hooks/useAppCookie.hook";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import StickyHeader from "./StickyHeader";
@@ -83,9 +93,15 @@ function formatStateName(value: string | null | undefined): string {
   }
   return v;
 }
+type DefaultAccountConfirm =
+  | { type: "bank"; id: number }
+  | { type: "demat"; id: number };
+
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   const { cookies } = useAppCookie();
   const queryClient = useQueryClient();
+  const [defaultAccountConfirm, setDefaultAccountConfirm] =
+    useState<DefaultAccountConfirm | null>(null);
   const isSuperAdmin = cookies.role === "SUPER_ADMIN";
   /** Must match backend `CustomerManageAccountsService.assertKycVerified` (kycStatus, not kraStatus). */
   const canManageDefaultAccounts =
@@ -156,6 +172,26 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
   /** KRA path: no DigiLocker Aadhaar — hide placeholder Aadhaar cards */
   const hideAadhaarSection =
     kycStore.isSuccess && Boolean(kycStore.data?.step_1?.usedExistingKra);
+
+  const pendingBankRow =
+    defaultAccountConfirm?.type === "bank"
+      ? data.bankAccounts.find((b) => b.id === defaultAccountConfirm.id)
+      : undefined;
+  const pendingDematRow =
+    defaultAccountConfirm?.type === "demat"
+      ? data.dematAccounts.find((d) => d.id === defaultAccountConfirm.id)
+      : undefined;
+
+  const confirmDefaultAccount = () => {
+    if (!defaultAccountConfirm) return;
+    const payload = defaultAccountConfirm;
+    setDefaultAccountConfirm(null);
+    if (payload.type === "bank") {
+      setPrimaryBankMutation.mutate(payload.id);
+    } else {
+      setPrimaryDematMutation.mutate(payload.id);
+    }
+  };
 
   return (
     <div className="relative flex flex-col gap-5 mt-5">
@@ -504,7 +540,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                             setPrimaryBankMutation.isPending &&
                             setPrimaryBankMutation.variables === e.id
                           }
-                          onClick={() => setPrimaryBankMutation.mutate(e.id)}
+                          onClick={() =>
+                            setDefaultAccountConfirm({ type: "bank", id: e.id })
+                          }
                           className="h-8"
                         >
                           {setPrimaryBankMutation.isPending &&
@@ -580,7 +618,9 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                             setPrimaryDematMutation.isPending &&
                             setPrimaryDematMutation.variables === e.id
                           }
-                          onClick={() => setPrimaryDematMutation.mutate(e.id)}
+                          onClick={() =>
+                            setDefaultAccountConfirm({ type: "demat", id: e.id })
+                          }
                           className="h-8"
                         >
                           {setPrimaryDematMutation.isPending &&
@@ -636,6 +676,62 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
       {/* Compliance */}
       <CheckedCompances data={kycStore.data} />
       <KraLogsView id={data.id} />
+
+      <AlertDialog
+        open={defaultAccountConfirm !== null}
+        onOpenChange={(open) => {
+          if (!open) setDefaultAccountConfirm(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {defaultAccountConfirm?.type === "bank"
+                ? "Set default bank account?"
+                : "Set default demat account?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {defaultAccountConfirm?.type === "bank" && pendingBankRow ? (
+                <>
+                  This account will be used as the customer&apos;s primary bank for
+                  payouts and orders:{" "}
+                  <strong>
+                    {pendingBankRow.bankName} · {pendingBankRow.accountNumber}
+                  </strong>
+                  . Another bank is primary today; it will no longer be default.
+                </>
+              ) : null}
+              {defaultAccountConfirm?.type === "demat" && pendingDematRow ? (
+                <>
+                  This demat will be the customer&apos;s primary account:{" "}
+                  <strong>
+                    {pendingDematRow.depositoryName} · DP {pendingDematRow.dpId}{" "}
+                    / Client {pendingDematRow.clientId}
+                  </strong>
+                  . The current primary demat will be unset.
+                </>
+              ) : null}
+              {defaultAccountConfirm &&
+              !pendingBankRow &&
+              !pendingDematRow ? (
+                <>Confirm to set this account as the new default.</>
+              ) : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              onClick={(ev) => {
+                ev.preventDefault();
+                confirmDefaultAccount();
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

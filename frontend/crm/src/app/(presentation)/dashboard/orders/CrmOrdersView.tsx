@@ -31,7 +31,7 @@ function CrmOrdersView() {
       />
       <Card className="mt-5">
         <OrderSearchFilterBar
-          placeholder="Search by customer name, email, bond name, ISIN..."
+          placeholder="Search by customer name, email, ISIN, order no., payment id, RFQ / req order ref..."
           searchValue={filterManager.state.search}
           onSearchChange={filterManager.state.setSearch}
           statusValue={filterManager.state.statusFilter}

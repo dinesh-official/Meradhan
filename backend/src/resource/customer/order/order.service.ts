@@ -18,6 +18,7 @@ import { AppError } from "@utils/error/AppError";
 import type z from "zod";
 import { BondService } from "@resource/bonds/bond.service";
 import { AppConfigService } from "@resource/app-config/app-config.service";
+import { CrmInventoryStockService } from "@resource/crm/orders/inventory_stock.service";
 
 // PaymentStatus enum values (matches Prisma schema orders.prisma)
 const PaymentStatus = {
@@ -43,6 +44,7 @@ type OrderPreviewItem = z.infer<typeof appSchema.order.OrderPreviewItemSchema>;
 export class OrderService {
   private payment = new PaymentService();
   private appConfig = new AppConfigService();
+  private crmInventoryStock = new CrmInventoryStockService();
 
   private async getBondDetails(isin: string) {
     const bond = await db.dataBase.bonds.findFirst({
@@ -67,6 +69,7 @@ export class OrderService {
   async previewOrder(item: OrderPreviewItem) {
     const bondService = new BondService();
     const bondDetails = await bondService.getBondDetails(item.isin);
+    await this.assertCrmInventoryForOrder(bondService, item.isin, item.quantity);
     const bond = await bondService.getBondOrderPricing(item.isin, item.quantity);
 
     if (!bond.ok) {
@@ -90,6 +93,30 @@ export class OrderService {
       interestPaymentFrequency: bondDetails?.interestPaymentFrequency ?? "",
       pricing: bond.ok ? bond.pricing : null,
     };
+  }
+
+  private async assertCrmInventoryForOrder(
+    bondService: BondService,
+    isin: string,
+    quantity: number,
+  ) {
+    const available = await bondService.getLatestCrmInventoryWholeUnitsForIsin(isin);
+    const qty = Math.floor(Number(quantity));
+    if (!Number.isFinite(qty) || qty < 1) {
+      throw new AppError("Invalid quantity", { code: "INVALID_QUANTITY" });
+    }
+    if (available < 1) {
+      throw new AppError(
+        "This bond is not available for purchase right now (no inventory).",
+        { code: "NO_INVENTORY" },
+      );
+    }
+    if (qty > available) {
+      throw new AppError(
+        `Only ${available} unit(s) in stock; you requested ${qty}. Reduce quantity and try again.`,
+        { code: "INSUFFICIENT_INVENTORY" },
+      );
+    }
   }
 
   async createOrder(
@@ -117,9 +144,7 @@ export class OrderService {
       throw new AppError("No Default Bank Account Found");
     }
 
-    const issuerName =
-      (preview.bondDetails as { instrumentName?: string }).instrumentName ||
-      preview.bondName;
+    const issuerName = preview.bondName || (preview.bondDetails as { instrumentName?: string }).instrumentName || "";
     const tempOrderNumber = `MD-DIR-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
 
     const order = await db.dataBase.order.create({
@@ -141,7 +166,9 @@ export class OrderService {
           ...preview.bondDetails,
           pricing: preview.pricing,
         },
-        metadata: {} as Prisma.InputJsonValue,
+        metadata: {
+
+        } as Prisma.InputJsonValue,
       },
     });
 
@@ -183,6 +210,7 @@ export class OrderService {
       where: { id: order.id },
       data: {
         paymentOrderId: razorpayOrder.id,
+
       },
     });
 
@@ -236,7 +264,7 @@ export class OrderService {
         where: { id: order.id },
         data: {
           paymentStatus: PaymentStatus.COMPLETED,
-          status: "SETTLED",
+          status: "APPLIED",
           paymentId,
           paymentMetadata: {
             signature: signature || null,
@@ -254,8 +282,16 @@ export class OrderService {
           faceValue: order.faceValue,
           quantity: order.quantity,
           purchasePrice: order.unitPrice,
-          metadata: order.bondDetails as Prisma.InputJsonValue,
+          metadata: {
+            ...(order.metadata as any),
+            ...(order.bondDetails as any),
+          },
         },
+      });
+
+      await this.crmInventoryStock.applyPaidOrderInventoryDecrement(tx, {
+        isin: order.isin,
+        quantity: order.quantity,
       });
     });
 
@@ -293,10 +329,14 @@ export class OrderService {
     orderId: number,
     metadata: Record<string, any>,
   ): Promise<void> {
+    const existong = await db.dataBase.order.findUnique({ where: { id: orderId } })
     await db.dataBase.order.update({
       where: { id: orderId },
       data: {
-        metadata: metadata,
+        metadata: {
+          ...(existong?.metadata as any),
+          ...metadata,
+        },
       },
     });
   }

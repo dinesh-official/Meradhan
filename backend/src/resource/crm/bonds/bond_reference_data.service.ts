@@ -40,6 +40,54 @@ function parseDate(value: unknown, formats: string[]): Date | null {
   return m.isValid() ? m.toDate() : null;
 }
 
+function parseDateToIstDateOnlyUtcMidnight(
+  value: unknown,
+  formats: string[]
+): Date | null {
+  if (value == null) return null;
+
+  const s = isDate(value) ? value.toISOString() : String(value).trim();
+  if (!s) return null;
+
+  // If the input doesn't include an explicit timezone, treat it as an IST date/time.
+  // Also, if it's a date-only string, keep the calendar date as-is (don't shift).
+  const hasExplicitTz =
+    /([zZ]|[+\-]\d{2}:?\d{2})$/.test(s) || /\bGMT\b/i.test(s);
+
+  // NOTE: We intentionally add +1 day for IST-date-only storage
+  // because upstream sources often provide the previous day in UTC.
+  const isDateOnlyString =
+    /^\d{4}-\d{2}-\d{2}$/.test(s) ||
+    /^\d{2}-\d{2}-\d{4}$/.test(s) ||
+    /^\d{2}\/\d{2}\/\d{4}$/.test(s);
+
+  let m = moment(s, formats, true);
+  if (!m.isValid()) return null;
+
+  // Interpret/convert to IST (+05:30), then store as DATE-only.
+  // We return a Date at IST midnight (+05:30) so Prisma accepts it and the ISO shows +5:30 offset.
+  if (!hasExplicitTz && isDateOnlyString) {
+    const ymdPlus2 = m.add(2, "day").format("YYYY-MM-DD");
+    return new Date(`${ymdPlus2}T00:00:00+05:30`);
+  }
+
+  m = hasExplicitTz ? m.utcOffset(330) : m.utcOffset(330, true);
+  const ymdPlus2 = m.add(2, "day").format("YYYY-MM-DD");
+  return new Date(`${ymdPlus2}T00:00:00+05:30`);
+}
+
+function parseApiUtcTimestampToIstNextDayMidnight(value: unknown): Date | null {
+  if (value == null) return null;
+  const s = isDate(value) ? value.toISOString() : String(value).trim();
+  if (!s) return null;
+
+  const m = moment(s, moment.ISO_8601, true);
+  if (!m.isValid()) return null;
+
+  const ymdPlus2 = m.utcOffset(330).add(1, "day").format("YYYY-MM-DD");
+  return new Date(`${ymdPlus2}T00:00:00+05:30`);
+}
+
 function sanitizeJsonValue(value: unknown): any {
   if (value == null) return value;
   if (isDate(value)) return value.toISOString();
@@ -78,7 +126,21 @@ export class BondReferenceDataService {
         "DD-MM-YYYY",
         "YYYY-MM-DD",
       ]),
+      issueDateIst: parseDateToIstDateOnlyUtcMidnight((ad as any)["IssueDate"], [
+        "YYYY-MM-DDTHH:mm:ss.SSSZ",
+        "DD-MMM-YYYY",
+        "DD/MMM/YYYY",
+        "DD-MM-YYYY",
+        "YYYY-MM-DD",
+      ]),
       maturityDate: parseDate((ad as any)["MaturityDate"], [
+        "YYYY-MM-DDTHH:mm:ss.SSSZ",
+        "DD-MMM-YYYY",
+        "DD/MMM/YYYY",
+        "DD-MM-YYYY",
+        "YYYY-MM-DD",
+      ]),
+      maturityDateIst: parseDateToIstDateOnlyUtcMidnight((ad as any)["MaturityDate"], [
         "YYYY-MM-DDTHH:mm:ss.SSSZ",
         "DD-MMM-YYYY",
         "DD/MMM/YYYY",
@@ -105,18 +167,30 @@ export class BondReferenceDataService {
         "DD-MM-YYYY",
         "YYYY-MM-DD",
       ]),
+      previousCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
+        (ad as any)["Previous Coupon Date"],
+        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
+      ),
       lastCouponDate: parseDate((ad as any)["Last Coupon Date"], [
         "YYYY-MM-DDTHH:mm:ss.SSSZ",
         "DD-MMM-YYYY",
         "DD-MM-YYYY",
         "YYYY-MM-DD",
       ]),
+      lastCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
+        (ad as any)["Last Coupon Date"],
+        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
+      ),
       nextCouponDate: parseDate((ad as any)["Next Coupon Date"], [
         "YYYY-MM-DDTHH:mm:ss.SSSZ",
         "DD-MMM-YYYY",
         "DD-MM-YYYY",
         "YYYY-MM-DD",
       ]),
+      nextCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
+        (ad as any)["Next Coupon Date"],
+        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
+      ),
       isListed: toBoolean((ad as any)["Is Listed"]),
       exchangeName: toNullableString((ad as any)["Exchange Name"]),
       exchangeCode: toNullableString((ad as any)["Exchange Code"]),
@@ -148,7 +222,19 @@ export class BondReferenceDataService {
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
+        recordDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["Record Date"], [
+          "YYYY-MM-DDTHH:mm:ss.SSSZ",
+          "DD-MMM-YYYY",
+          "DD-MM-YYYY",
+          "YYYY-MM-DD",
+        ]),
         dueDate: parseDate((r as any)["Due Date"], [
+          "YYYY-MM-DDTHH:mm:ss.SSSZ",
+          "DD-MMM-YYYY",
+          "DD-MM-YYYY",
+          "YYYY-MM-DD",
+        ]),
+        dueDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["Due Date"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
           "DD-MM-YYYY",
@@ -169,7 +255,19 @@ export class BondReferenceDataService {
           "DD-MM-YYYY",
           "YYYY-MM-DD",
         ]),
+        startDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["StartDate"], [
+          "YYYY-MM-DDTHH:mm:ss.SSSZ",
+          "DD-MMM-YYYY",
+          "DD-MM-YYYY",
+          "YYYY-MM-DD",
+        ]),
         endDate: parseDate((r as any)["EndDate"], [
+          "YYYY-MM-DDTHH:mm:ss.SSSZ",
+          "DD-MMM-YYYY",
+          "DD-MM-YYYY",
+          "YYYY-MM-DD",
+        ]),
+        endDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["EndDate"], [
           "YYYY-MM-DDTHH:mm:ss.SSSZ",
           "DD-MMM-YYYY",
           "DD-MM-YYYY",
@@ -226,13 +324,13 @@ export class BondReferenceDataService {
     const where =
       search && search.length > 0
         ? {
-            OR: [
-              { isin: { contains: search, mode: "insensitive" as const } },
-              {
-                issuerName: { contains: search, mode: "insensitive" as const },
-              },
-            ],
-          }
+          OR: [
+            { isin: { contains: search, mode: "insensitive" as const } },
+            {
+              issuerName: { contains: search, mode: "insensitive" as const },
+            },
+          ],
+        }
         : {};
 
     const [total, items] = await Promise.all([

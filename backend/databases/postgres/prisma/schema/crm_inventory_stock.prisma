@@ -1,0 +1,28 @@
+/// Daily inventory uploads: each file import is one batch; `dayKey` groups batches by calendar day (Asia/Kolkata).
+model CrmInventoryStockBatch {
+  id               Int                     @id @default(autoincrement())
+  /// `YYYY-MM-DD` in Asia/Kolkata at upload time
+  dayKey           String                  @db.VarChar(10)
+  uploadedAt       DateTime                @default(now())
+  sourceFileName   String?
+  lineCount        Int                     @default(0)
+  uploadedByUserId Int?
+  uploadedByEmail  String?
+  lines            CrmInventoryStockLine[]
+
+  @@index([dayKey])
+  @@index([uploadedAt])
+  @@map("crm_inventory_stock_batch")
+}
+
+model CrmInventoryStockLine {
+  id       Int                   @id @default(autoincrement())
+  batchId  Int
+  batch    CrmInventoryStockBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  isin     String
+  quantity Float
+
+  @@index([batchId])
+  @@index([isin])
+  @@map("crm_inventory_stock_line")
+}

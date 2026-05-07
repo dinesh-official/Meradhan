@@ -20,6 +20,63 @@ export type GetBondOrderPricingResult =
   | { ok: false; reason: "missing_coupon_dates" };
 
 export class BondService {
+  /**
+   * Latest CRM inventory batch: quantity per ISIN (uppercase key). Missing ISIN → 0.
+   */
+  private async getLatestCrmInventoryQuantityMap(isins: string[]): Promise<Map<string, number>> {
+    const map = new Map<string, number>();
+    const normalized = [
+      ...new Set(
+        isins
+          .map((i) => String(i).trim().toUpperCase())
+          .filter((i) => i.length > 0),
+      ),
+    ];
+    for (const i of normalized) map.set(i, 0);
+    if (normalized.length === 0) return map;
+
+    try {
+      const batch = await db.dataBase.crmInventoryStockBatch.findFirst({
+        orderBy: { uploadedAt: "desc" },
+        select: { id: true },
+      });
+      if (!batch) return map;
+
+      const lines = await db.dataBase.crmInventoryStockLine.findMany({
+        where: {
+          batchId: batch.id,
+          isin: { in: normalized },
+        },
+        select: { isin: true, quantity: true },
+      });
+      for (const line of lines) {
+        const k = line.isin.trim().toUpperCase();
+        map.set(k, Math.max(0, Number(line.quantity)));
+      }
+    } catch {
+      // e.g. migrations not applied — treat as no stock
+    }
+    return map;
+  }
+
+  /** Whole-bond units available from the latest CRM inventory upload (floored). */
+  async getLatestCrmInventoryWholeUnitsForIsin(isin: string): Promise<number> {
+    const map = await this.getLatestCrmInventoryQuantityMap([isin]);
+    const q = map.get(isin.trim().toUpperCase()) ?? 0;
+    return Math.max(0, Math.floor(Number(q)));
+  }
+
+  async enrichBondsWithCrmInventory<T extends { isin: string }>(
+    rows: T[],
+  ): Promise<Array<T & { crmAvailableQuantity: number }>> {
+    if (rows.length === 0) return [];
+    const qtyMap = await this.getLatestCrmInventoryQuantityMap(rows.map((r) => r.isin));
+    return rows.map((r) => ({
+      ...r,
+      crmAvailableQuantity: qtyMap.get(r.isin.trim().toUpperCase()) ?? 0,
+    }));
+  }
+
   async getBondDetails(isin: string) {
     const data = await db.dataBase.bonds.findUnique({
       where: { isin },
@@ -169,8 +226,10 @@ export class BondService {
       }),
     ]);
 
+    const enriched = await this.enrichBondsWithCrmInventory(data);
+
     return {
-      data,
+      data: enriched,
       meta: {
         total,
         page: pageNum,
@@ -201,7 +260,7 @@ export class BondService {
       take: 10,
     });
 
-    return data;
+    return this.enrichBondsWithCrmInventory(data);
   }
 
   async getLatestBonds(limit: number = 3) {
@@ -240,7 +299,7 @@ export class BondService {
       take: limit,
     });
 
-    return data;
+    return this.enrichBondsWithCrmInventory(data);
   }
 
   async getLatestBondsTop3(limit: number = 3) {
@@ -274,7 +333,7 @@ export class BondService {
       take: limit,
     });
 
-    return data;
+    return this.enrichBondsWithCrmInventory(data);
   }
 
   async getUpcomingBonds(limit: number = 6) {
@@ -313,7 +372,7 @@ export class BondService {
       take: limit,
     });
 
-    return data;
+    return this.enrichBondsWithCrmInventory(data);
   }
 
   async createBond(
@@ -474,7 +533,7 @@ export class BondService {
     const data = await db.dataBase.bonds.findMany({
       where: { isOngoingDeal: true },
     });
-    return data;
+    return this.enrichBondsWithCrmInventory(data);
   }
 
   async placeOrder(orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>) {

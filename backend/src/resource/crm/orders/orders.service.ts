@@ -18,6 +18,12 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 import { env } from "@packages/config/src/env";
 import { computeBondOrderPricingData, getLastNextCouponDateBasedOnSettlementDate, getPayoutDates } from "@services/order/order-pricing-helper";
+import { sendBackOfficeEmail } from "@communication/email_communication";
+import {
+  dateOfBirthToPdfPassword,
+  getCustomerDobRawForPdf,
+} from "@utils/dobPdfPassword";
+import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 
 function toYyyyMmDd(d: Date): string {
   const y = d.getFullYear();
@@ -154,13 +160,13 @@ export class CrmOrdersService {
   async getSettlementAutomationLogGroups(search?: string) {
     const where = search?.trim()
       ? {
-          OR: [
-            { paymentId: { contains: search, mode: "insensitive" as const } },
-            { batchId: { contains: search, mode: "insensitive" as const } },
-            { step: { contains: search, mode: "insensitive" as const } },
-            { message: { contains: search, mode: "insensitive" as const } },
-          ],
-        }
+        OR: [
+          { paymentId: { contains: search, mode: "insensitive" as const } },
+          { batchId: { contains: search, mode: "insensitive" as const } },
+          { step: { contains: search, mode: "insensitive" as const } },
+          { message: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
       : {};
 
     const rows = await db.dataBase.orderSettlementAutomationLog.findMany({
@@ -232,20 +238,59 @@ export class CrmOrdersService {
     if (searchTrimmed) {
       const q = searchTrimmed;
       const numericId = /^\d+$/.test(q) ? Number(q) : null;
+      /** e.g. "sourav bapari" → each token must match some name field (first / middle / last). */
+      const nameTokens = q.split(/\s+/).filter((t) => t.length > 0);
+
+      const customerMatchesToken = (token: string) =>
+        ({
+          OR: [
+            { firstName: { contains: token, mode: "insensitive" as const } },
+            { middleName: { contains: token, mode: "insensitive" as const } },
+            { lastName: { contains: token, mode: "insensitive" as const } },
+          ],
+        }) satisfies Prisma.CustomerProfileDataModelWhereInput;
+
+      const customerSearchConditions: Prisma.OrderWhereInput[] =
+        nameTokens.length >= 2
+          ? [
+            {
+              customerProfile: {
+                AND: nameTokens.map((token) => customerMatchesToken(token)),
+              },
+            },
+            {
+              customerProfile: {
+                emailAddress: { contains: q, mode: "insensitive" },
+              },
+            },
+          ]
+          : [
+            {
+              customerProfile: {
+                OR: [
+                  { firstName: { contains: q, mode: "insensitive" } },
+                  { middleName: { contains: q, mode: "insensitive" } },
+                  { lastName: { contains: q, mode: "insensitive" } },
+                  { emailAddress: { contains: q, mode: "insensitive" } },
+                ],
+              },
+            },
+          ];
 
       whereClause.OR = [
-        {
-          customerProfile: {
-            OR: [
-              { firstName: { contains: q, mode: "insensitive" } },
-              { lastName: { contains: q, mode: "insensitive" } },
-              { emailAddress: { contains: q, mode: "insensitive" } },
-            ],
-          },
-        },
+        ...customerSearchConditions,
         { bondName: { contains: q, mode: "insensitive" } },
         { orderNumber: { contains: q, mode: "insensitive" } },
         { isin: { contains: q, mode: "insensitive" } },
+        { paymentId: { contains: q, mode: "insensitive" } },
+        { paymentOrderId: { contains: q, mode: "insensitive" } },
+        { reqOrderNumber: { contains: q, mode: "insensitive" } },
+        {
+          metadata: {
+            path: ["rfqNumber"],
+            string_contains: q,
+          },
+        },
         ...(numericId != null ? [{ id: numericId }] : []),
         {
           bondDetails: {
@@ -419,7 +464,7 @@ export class CrmOrdersService {
     settlementNumber: string | null;
     lastInterestPaymentDateRaw: string | null;
     lastInterestPaymentDate: string | null;
-    interestPaymentDates: string[];
+    interestPaymentDates: string[] | null;
   }> {
     const order = await this.getCustomerByOrderNumber(orderNumber);
     if (!order) {
@@ -685,8 +730,7 @@ export class CrmOrdersService {
       },
     });
 
-    const issuerName =
-      bondDetails.bondName || bondDetails.instrumentName || "";
+    const issuerName = bondDetails.bondName || bondDetails.instrumentName || "";
 
     const finalOrderNumber = generateOrderId({
       channel: "ASSIST",
@@ -769,13 +813,12 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    console.log(rfqDetails?.date,
-      rfqDetails?.quoteTime,);
+    console.log(rfqDetails?.date, rfqDetails?.quoteTime,);
 
 
     const fallbackOrderDate =
       order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const orderDateForPdf = parseRfqMasterDateTime(
+    const orderDateForPdf = pdfQuery.dealDate ? new Date(pdfQuery.dealDate) : parseRfqMasterDateTime(
       rfqDetails?.date,
       rfqDetails?.quoteTime,
       fallbackOrderDate,
@@ -872,7 +915,7 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: (rfqDetails?.settlementDate || settleOrder?.modSettleDate) ?? undefined as string | undefined,
+          settlementDate: (pdfQuery?.settlementDate || rfqDetails?.settlementDate || settleOrder?.modSettleDate) ?? undefined as string | undefined,
           payoutTime: (settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate) ?? undefined as string | undefined,
           settlementType: rfqDetails?.settlementType ?? 0,
           valueDate: bond.maturityDate
@@ -1217,6 +1260,179 @@ export class CrmOrdersService {
       buffer,
       filename: `deal-sheet-${order.orderNumber}.pdf`,
     };
+  }
+
+  /**
+   * Same behavior as POST /api/crm/orders/send-pdf-email/:orderNumber (CRM + automation).
+   * @throws AppError for validation / NOT_FOUND / encryption failures
+   */
+  async sendPdfEmailToClient(
+    orderNumber: string,
+    body: {
+      pdfType: "order" | "deal";
+      subject: string;
+      messageBody: string;
+      toEmail?: string;
+      accruedInterestDays?: number | string;
+      settlementNumber?: string;
+      settlementDateTime?: string;
+      settlementDate?: Date;
+      dealDate?: Date,
+      lastInterestPaymentDate?: string;
+      interestPaymentDates?: string;
+      nonAmortizedBond?: boolean;
+      amortizedPrincipalPaymentDates?: string;
+    },
+  ): Promise<{ messageId: string }> {
+    const pdfType = body.pdfType;
+    if (pdfType !== "order" && pdfType !== "deal") {
+      throw new AppError("pdfType must be either 'order' or 'deal'", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    console.log(body);
+
+
+    const subject = String(body.subject ?? "").trim();
+    const messageBody = String(body.messageBody ?? "").trim();
+    const fromEmail = env.SMTP_SENDER;
+
+    if (!subject) {
+      throw new AppError("Subject is required", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+    if (!messageBody) {
+      throw new AppError("Message body is required", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const accruedInterestDaysParam =
+      body.accruedInterestDays != null ? Number(body.accruedInterestDays) : undefined;
+
+    const settlementNumberParam =
+      typeof body.settlementNumber === "string" && body.settlementNumber.trim() !== ""
+        ? body.settlementNumber.trim()
+        : undefined;
+    const settlementDateTimeParam =
+      typeof body.settlementDateTime === "string" && body.settlementDateTime.trim() !== ""
+        ? body.settlementDateTime?.toString().trim()
+        : undefined;
+    const lastInterestPaymentDateParam =
+      typeof body.lastInterestPaymentDate === "string" &&
+        body.lastInterestPaymentDate.trim() !== ""
+        ? body.lastInterestPaymentDate.trim()
+        : undefined;
+
+    const pdfQuery: Record<string, string | undefined> = {
+      accruedInterestDays: String(accruedInterestDaysParam),
+    };
+    if (settlementNumberParam) pdfQuery.settlementNumber = settlementNumberParam;
+    if (settlementDateTimeParam) pdfQuery.settlementDateTime = settlementDateTimeParam;
+    if (lastInterestPaymentDateParam) {
+      pdfQuery.lastInterestPaymentDate = lastInterestPaymentDateParam;
+    }
+    if (typeof body.interestPaymentDates === "string" && body.interestPaymentDates.trim() !== "") {
+      pdfQuery.interestPaymentDates = body.interestPaymentDates.trim();
+    }
+    pdfQuery.nonAmortizedBond = body.nonAmortizedBond === false ? "false" : "true";
+    if (
+      typeof body.amortizedPrincipalPaymentDates === "string" &&
+      body.amortizedPrincipalPaymentDates.trim() !== ""
+    ) {
+      pdfQuery.amortizedPrincipalPaymentDates = body.amortizedPrincipalPaymentDates.trim();
+    }
+    if (body.settlementDate) {
+      pdfQuery.settlementDate = body.settlementDate.toISOString();
+    }
+    if (body.dealDate) {
+      pdfQuery.dealDate = body.dealDate.toISOString();
+    }
+
+
+
+    const order = await this.getCustomerByOrderNumber(orderNumber);
+    if (!order) {
+      throw new AppError("No order found for this settlement. Assign a customer first.", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "ORDER_NOT_FOUND",
+      });
+    }
+
+    const customerRepo = new CustomerProfileRepo();
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    console.log(pdfQuery);
+
+    let buffer: Buffer;
+    let filename: string;
+    const generated =
+      pdfType === "deal"
+        ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
+        : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
+    buffer = generated.buffer;
+    filename = generated.filename;
+
+    const recipientEmail =
+      String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
+    if (!recipientEmail || !emailPattern.test(recipientEmail)) {
+      throw new AppError("Recipient email is missing or invalid", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const dobRaw = getCustomerDobRawForPdf(user);
+    const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
+    if (!pdfPassword) {
+      throw new AppError(
+        "Customer date of birth is required to password-protect the PDF. Ensure PAN/Aadhaar or personal info DOB is on file.",
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "BAD_REQUEST",
+        },
+      );
+    }
+    try {
+      buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
+    } catch (encErr) {
+      console.error("PDF encryption failed:", encErr);
+      throw new AppError(
+        encErr instanceof Error
+          ? encErr.message
+          : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          code: "PDF_ENCRYPT_FAILED",
+        },
+      );
+    }
+
+    const htmlBody = messageBody
+      .split("\n")
+      .map((line) => line.trim())
+      .join("<br/>");
+    const messageId = await sendBackOfficeEmail({
+      to: recipientEmail,
+      from: fromEmail,
+      subject,
+      html: htmlBody,
+      text: messageBody,
+      attachments: [
+        {
+          filename,
+          content: buffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    return { messageId };
   }
 
 }

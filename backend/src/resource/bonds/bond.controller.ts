@@ -12,9 +12,16 @@ export class BondController {
   async getBondDetails(req: Request, res: Response) {
     const isin = req.params.isin!.toString();
     const data = await this.bondService.getBondDetails(isin);
+    if (!data) {
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: null,
+      });
+    }
+    const [enriched] = await this.bondService.enrichBondsWithCrmInventory([data]);
     return res.sendResponse({
       statusCode: HttpStatus.OK,
-      responseData: data,
+      responseData: enriched,
     });
   }
 

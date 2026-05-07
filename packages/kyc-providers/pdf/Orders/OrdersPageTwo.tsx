@@ -223,12 +223,12 @@ Bank Account Number: ${bank?.accountNumber}`}</Text>
       </View>
       <Text style={tw(`text-[6.5px] mt-3 font-semibold`)}>Confirmation:</Text>
       <View style={tw(`mt-1 flex flex-col`)}>
-        <View style={tw(`flex flex-row items-center gap-2`)}>
+        {/* <View style={tw(`flex flex-row items-center gap-2`)}>
           <CheckOnlyIcon size={8} />
           <Text style={tw(`text-[6.5px] leading-5`)}>
             I hereby confirm (Date: {confirmationDateTime} IST):
           </Text>
-        </View>
+        </View> */}
         <Text style={tw(`text-[6.5px] mt-1 leading-5 ml-2`)}>a) I have read, understood, and accepted all terms & conditions provided on <Link src="https://www.meradhan.co" style={tw(`text-[6.5px] underline text-[#1D4ED8]`)}>https://www.meradhan.co</Link></Text>
         <Text style={tw(`text-[6.5px] leading-5 ml-2 mt-1`)}>b) I have reviewed the details in the Order Receipt and wish to proceed with the payment.</Text>
       </View>

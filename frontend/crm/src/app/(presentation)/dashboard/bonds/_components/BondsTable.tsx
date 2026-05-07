@@ -7,11 +7,57 @@ import { formatNumberTS } from "@/global/utils/formate";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { Edit } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import CreditRatingBadge from "./CreaditRatingBadge";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import { AllowPurchaseCheckbox } from "./AllowPurchaseCheckbox";
 import { calculateTimeUntilMaturity } from "../_utils/maturityUtils";
+import { cn } from "@/lib/utils";
+
+/** Whole units from 1 through this value (inclusive) show as low stock. */
+const LOW_STOCK_MAX_UNITS = 10;
+
+function AvailableStockCell({ units }: { units: number | null }) {
+  if (units == null) {
+    return <span className="text-sm tabular-nums text-muted-foreground">--</span>;
+  }
+
+  const out = units === 0;
+  const low = units > 0 && units <= LOW_STOCK_MAX_UNITS;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span
+        className={cn(
+          "text-sm tabular-nums",
+          out && "font-medium text-destructive",
+          low && "font-medium text-amber-700 dark:text-amber-400",
+        )}
+      >
+        {formatNumberTS(units)}
+      </span>
+      {out && (
+        <Badge
+          variant="destructive"
+          className="h-5 px-1.5 text-[10px] font-normal leading-none"
+          title="Out of stock"
+        >
+          Out
+        </Badge>
+      )}
+      {low && (
+        <Badge
+          variant="outline"
+          className="h-5 border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] font-normal leading-none text-amber-900 dark:border-amber-500/35 dark:bg-amber-500/12 dark:text-amber-100"
+          title={`Low stock (${LOW_STOCK_MAX_UNITS} units or fewer)`}
+        >
+          Low
+        </Badge>
+      )}
+    </div>
+  );
+}
 
 interface BondsTableProps {
   data: BondDetailsResponse[];
@@ -52,6 +98,17 @@ function BondsTable({ data, pageSize = 100, isLoading }: BondsTableProps) {
                 : "--"}
             </p>
           ),
+        },
+        {
+          key: "crmAvailableQuantity",
+          label: "Available qty",
+          cell: (row) => {
+            const raw = row.crmAvailableQuantity;
+            const n = raw == null ? NaN : Number(raw);
+            const units =
+              Number.isFinite(n) ? Math.max(0, Math.floor(n)) : null;
+            return <AvailableStockCell units={units} />;
+          },
         },
         {
           key: "yield",

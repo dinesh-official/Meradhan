@@ -65,6 +65,8 @@ export interface BondDetailsResponse {
   redemptionType?: string | null
   startDate?: string | null
   endDate?: string | null
+  /** Units available from the latest CRM inventory upload (0 if none / not in file). */
+  crmAvailableQuantity?: number
 }
 export type ListedBondsResponse = BaseResponseData<{
   data: BondDetailsResponse[];

@@ -29,6 +29,8 @@ import { IoMdArrowDropright } from "react-icons/io";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { calculateSettlementAmount } from "../../_utils/calcAmount";
 import { getPlaceOrderBusinessDates } from "../../_utils/businessDates";
+import { getMaxOrderQuantityFromBond } from "../../_utils/quantity";
+import { hasCrmInventoryAvailable } from "@/global/utils/bondPurchaseEligibility";
 import { useOrderState } from "../../store/useOrderState";
 import BondInfoData from "../BondInfoData";
 import { RatingOrDelete } from "../RatingOrDelete";
@@ -71,10 +73,27 @@ function ReviewOrder({
     setQuantity(paramsQuantity);
   }, [paramsQuantity, setQuantity]);
 
+  const maxOrderQuantity = useMemo(() => getMaxOrderQuantityFromBond(bond), [bond]);
+  const outOfStock = !hasCrmInventoryAvailable(bond);
+
+  const suppressQuantityReloadRef = useRef(false);
+  useEffect(() => {
+    if (maxOrderQuantity < 1) return;
+    const clamped = Math.min(maxOrderQuantity, Math.max(1, paramsQuantity));
+    if (clamped !== paramsQuantity) {
+      suppressQuantityReloadRef.current = true;
+      void setParamsQuantity(clamped);
+    }
+  }, [maxOrderQuantity, paramsQuantity, setParamsQuantity]);
+
   const [isFirstRender, setIsFirstRender] = useState(true);
   useEffect(() => {
     if (isFirstRender) {
       setIsFirstRender(false);
+      return;
+    }
+    if (suppressQuantityReloadRef.current) {
+      suppressQuantityReloadRef.current = false;
       return;
     }
     const timmer = setTimeout(() => {
@@ -88,7 +107,6 @@ function ReviewOrder({
     trackCheckboxInteraction,
     trackButtonClick,
   } = useOrderActivityTracking();
-  const maxQuantity = 120;
 
   const previousQuantity = useRef(quantity);
   const { dealDate, settlementDate: computedSettlementDate } = useMemo(
@@ -142,6 +160,17 @@ function ReviewOrder({
       <div className="md:hidden mt-5">
         <BondInfoData bondData={bond} />
       </div>
+      {outOfStock && (
+        <div
+          className="mt-5 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          <p className="font-semibold">Bond out of stock</p>
+          <p className="mt-1 text-destructive/90">
+            There is no sellable inventory for this bond. You cannot proceed with this order.
+          </p>
+        </div>
+      )}
       <div className="mt-5 border-t md:border md:p-8 pt-5 border-gray-200 md:rounded-[10px]">
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2  md:gap-y-10 gap-y-5 gap-x-6">
           <BondInfoLabel title="Yield to Maturity">
@@ -208,7 +237,9 @@ function ReviewOrder({
 
 
 
-          <BondInfoLabel title={`Quantity of Bonds (Max. ${maxQuantity} Qty.)`}>
+          <BondInfoLabel
+            title={`Quantity of Bonds (max. ${maxOrderQuantity} available)`}
+          >
             <div className="flex items-center w-full border border-[#E1E6E8] rounded-md ">
               <Button
                 className="bg-[#E1E6E8] text-black font-semibold  text-lg  rounded-r-none"
@@ -217,8 +248,9 @@ function ReviewOrder({
                     previousQuantity: quantity,
                     newQuantity: quantity - 1,
                   });
-                  setParamsQuantity(quantity - 1);
+                  setParamsQuantity(Math.max(1, quantity - 1));
                 }}
+                disabled={quantity <= 1}
               >
                 -
               </Button>
@@ -227,10 +259,10 @@ function ReviewOrder({
                 className="w-full text-center border-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={quantity}
                 min={1}
-                max={maxQuantity}
+                max={maxOrderQuantity}
                 onChange={(e) =>
                   setParamsQuantity(
-                    Math.min(maxQuantity, Math.max(1, Number(e.target.value) || 1))
+                    Math.min(maxOrderQuantity, Math.max(1, Number(e.target.value) || 1))
                   )
                 }
               />
@@ -241,9 +273,9 @@ function ReviewOrder({
                     previousQuantity: quantity,
                     newQuantity: quantity + 1,
                   });
-                  setParamsQuantity(Math.min(maxQuantity, quantity + 1));
+                  setParamsQuantity(Math.min(maxOrderQuantity, quantity + 1));
                 }}
-                disabled={quantity >= maxQuantity}
+                disabled={quantity >= maxOrderQuantity}
               >
                 +
               </Button>
@@ -424,7 +456,7 @@ function ReviewOrder({
           !orderPricing?.allowTrade && <p className="text-sm text-red-500 mt-8">Trading is currently unavailable as the market is closed. Please try again during market hours or contact support for assistance.</p>
         }
         {
-          (orderPricing?.allowTrade || allowTrade) && <>
+          !outOfStock && (orderPricing?.allowTrade || allowTrade) && <>
             <label className="flex justify-start mt-5 gap-3">
               <Checkbox
                 className="mt-[2px]"

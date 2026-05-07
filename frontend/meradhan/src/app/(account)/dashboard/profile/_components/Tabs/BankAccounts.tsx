@@ -11,6 +11,16 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { FaPlusSquare } from "react-icons/fa";
 import Swal from "sweetalert2";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import BankViewCard from "../../../kyc/_steps/3_BankAccount/_elements/BankViewCard";
 import AddNewBankAccount from "./accounts/bank/AddNewBankAccount";
 
@@ -23,6 +33,9 @@ function BankAccounts({
 }) {
   const readOnly = profile.kycStatus !== "VERIFIED";
   const [showAddNew, setShowAddNew] = useState(false);
+  const [confirmDefaultBankId, setConfirmDefaultBankId] = useState<
+    number | null
+  >(null);
 
   const apiModel = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
     apiClientCaller
@@ -102,7 +115,7 @@ function BankAccounts({
           }}
           setDefault={() => {
             if (!bankAccount.isPrimary) {
-              setDefaultBankAccountMutation.mutate(bankAccount.id);
+              setConfirmDefaultBankId(bankAccount.id);
             } else {
               toast.error("This bank account is already the default account.");
             }
@@ -154,6 +167,38 @@ function BankAccounts({
           </>
         )
       }
+
+      <AlertDialog
+        open={confirmDefaultBankId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDefaultBankId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Set as Default Bank Account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to set this bank account as your default for future investments via MeraDhan?
+              Payments will be made directly to the clearing corporation using this account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              onClick={(ev) => {
+                ev.preventDefault();
+                if (confirmDefaultBankId == null) return;
+                const id = confirmDefaultBankId;
+                setConfirmDefaultBankId(null);
+                setDefaultBankAccountMutation.mutate(id);
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
