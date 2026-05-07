@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@core/database/database";
-import moment from "moment";
 
 function isDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
@@ -31,56 +30,16 @@ function toNullableString(value: unknown): string | null {
   return s ? s : null;
 }
 
-function parseDate(value: unknown, formats: string[]): Date | null {
+/**
+ * Frontend sends dates as exact `YYYY-MM-DD` strings — no parsing, no shifting.
+ * We just turn that into a Date so Prisma accepts it.
+ */
+function ymdToDate(value: unknown): Date | null {
   if (value == null) return null;
   if (isDate(value)) return value;
   const s = String(value).trim();
-  if (!s) return null;
-  const m = moment(s, formats, true);
-  return m.isValid() ? m.toDate() : null;
-}
-
-/**
- * Parses a date value (string or Date) and stores it as UTC midnight of the
- * intended calendar date — no day-shifting, no timezone gymnastics.
- *
- * This round-trips cleanly:
- *  - DB tool shows the same date you put in
- *  - getUTCDate() / getUTCMonth() read the same date
- *  - IST formatting (5:30 AM IST) stays on the same calendar day
- */
-function parseDateToIstDateOnlyUtcMidnight(
-  value: unknown,
-  formats: string[]
-): Date | null {
-  if (value == null) return null;
-
-  const s = isDate(value) ? value.toISOString() : String(value).trim();
-  if (!s) return null;
-
-  const m = moment(s, formats, true);
-  if (!m.isValid()) return null;
-
-  // Store the calendar date as UTC midnight. No +1/+2 day shifts.
-  const ymd = m.format("YYYY-MM-DD");
-  return new Date(`${ymd}T00:00:00.000Z`);
-}
-
-/**
- * Parses an API ISO 8601 UTC timestamp and returns the IST calendar date
- * stored as UTC midnight (no day-shifting).
- */
-function parseApiUtcTimestampToIstNextDayMidnight(value: unknown): Date | null {
-  if (value == null) return null;
-  const s = isDate(value) ? value.toISOString() : String(value).trim();
-  if (!s) return null;
-
-  const m = moment(s, moment.ISO_8601, true);
-  if (!m.isValid()) return null;
-
-  // Convert to IST calendar date, then store as UTC midnight of that date.
-  const ymd = m.utcOffset(330).format("YYYY-MM-DD");
-  return new Date(`${ymd}T00:00:00.000Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  return new Date(`${s}T00:00:00.000Z`);
 }
 
 function sanitizeJsonValue(value: unknown): any {
@@ -111,37 +70,19 @@ export class BondReferenceDataService {
 
     const now = new Date();
 
+    const issueDate = ymdToDate((ad as any)["IssueDate"]);
+    const maturityDate = ymdToDate((ad as any)["MaturityDate"]);
+    const previousCouponDate = ymdToDate((ad as any)["Previous Coupon Date"]);
+    const lastCouponDate = ymdToDate((ad as any)["Last Coupon Date"]);
+    const nextCouponDate = ymdToDate((ad as any)["Next Coupon Date"]);
+
     const record = {
       isin,
       issuerName: toNullableString((ad as any)["IssuerName"]),
-      issueDate: parseDate((ad as any)["IssueDate"], [
-        "YYYY-MM-DDTHH:mm:ss.SSSZ",
-        "DD-MMM-YYYY",
-        "DD/MMM/YYYY",
-        "DD-MM-YYYY",
-        "YYYY-MM-DD",
-      ]),
-      issueDateIst: parseDateToIstDateOnlyUtcMidnight((ad as any)["IssueDate"], [
-        "YYYY-MM-DDTHH:mm:ss.SSSZ",
-        "DD-MMM-YYYY",
-        "DD/MMM/YYYY",
-        "DD-MM-YYYY",
-        "YYYY-MM-DD",
-      ]),
-      maturityDate: parseDate((ad as any)["MaturityDate"], [
-        "YYYY-MM-DDTHH:mm:ss.SSSZ",
-        "DD-MMM-YYYY",
-        "DD/MMM/YYYY",
-        "DD-MM-YYYY",
-        "YYYY-MM-DD",
-      ]),
-      maturityDateIst: parseDateToIstDateOnlyUtcMidnight((ad as any)["MaturityDate"], [
-        "YYYY-MM-DDTHH:mm:ss.SSSZ",
-        "DD-MMM-YYYY",
-        "DD/MMM/YYYY",
-        "DD-MM-YYYY",
-        "YYYY-MM-DD",
-      ]),
+      issueDate,
+      issueDateIst: issueDate,
+      maturityDate,
+      maturityDateIst: maturityDate,
       isPerpetual: toBoolean((ad as any)["Is Perpetual"]),
       issueCurrency: toNullableString((ad as any)["IssueCurrency"]),
       originalAmountIssued: toNullableString((ad as any)["OriginalAmountIssued"]),
@@ -156,39 +97,12 @@ export class BondReferenceDataService {
       callableFlag: toNullableString((ad as any)["CallableFlag"]),
       puttableFlag: toNullableString((ad as any)["PuttableFlag"]),
       dayConvention: toNullableString((ad as any)["Day Convention"]),
-      previousCouponDate: parseDate((ad as any)["Previous Coupon Date"], [
-        "YYYY-MM-DDTHH:mm:ss.SSSZ",
-        "DD-MMM-YYYY",
-        "DD/MMM/YYYY",
-        "DD-MM-YYYY",
-        "YYYY-MM-DD",
-      ]),
-      previousCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
-        (ad as any)["Previous Coupon Date"],
-        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD/MMM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
-      ),
-      lastCouponDate: parseDate((ad as any)["Last Coupon Date"], [
-        "YYYY-MM-DDTHH:mm:ss.SSSZ",
-        "DD-MMM-YYYY",
-        "DD/MMM/YYYY",
-        "DD-MM-YYYY",
-        "YYYY-MM-DD",
-      ]),
-      lastCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
-        (ad as any)["Last Coupon Date"],
-        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD/MMM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
-      ),
-      nextCouponDate: parseDate((ad as any)["Next Coupon Date"], [
-        "YYYY-MM-DDTHH:mm:ss.SSSZ",
-        "DD-MMM-YYYY",
-        "DD/MMM/YYYY",
-        "DD-MM-YYYY",
-        "YYYY-MM-DD",
-      ]),
-      nextCouponDateIst: parseDateToIstDateOnlyUtcMidnight(
-        (ad as any)["Next Coupon Date"],
-        ["YYYY-MM-DDTHH:mm:ss.SSSZ", "DD-MMM-YYYY", "DD/MMM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]
-      ),
+      previousCouponDate,
+      previousCouponDateIst: previousCouponDate,
+      lastCouponDate,
+      lastCouponDateIst: lastCouponDate,
+      nextCouponDate,
+      nextCouponDateIst: nextCouponDate,
       isListed: toBoolean((ad as any)["Is Listed"]),
       exchangeName: toNullableString((ad as any)["Exchange Name"]),
       exchangeCode: toNullableString((ad as any)["Exchange Code"]),
@@ -210,82 +124,42 @@ export class BondReferenceDataService {
 
     const couponRows = (payload.couponPaymentRows ?? [])
       .filter(Boolean)
-      .map((r) => ({
-        isin,
-        interestPaymentDates: toNullableString((r as any)["Interest Payment Dates"]),
-        recordDays: toFloat((r as any)["Record Days"]),
-        recordDate: parseDate((r as any)["Record Date"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        recordDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["Record Date"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        dueDate: parseDate((r as any)["Due Date"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        dueDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["Due Date"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        raw: sanitizeJsonValue(r),
-        updatedAt: now,
-      }));
+      .map((r) => {
+        const recordDate = ymdToDate((r as any)["Record Date"]);
+        const dueDate = ymdToDate((r as any)["Due Date"]);
+        return {
+          isin,
+          interestPaymentDates: toNullableString((r as any)["Interest Payment Dates"]),
+          recordDays: toFloat((r as any)["Record Days"]),
+          recordDate,
+          recordDateIst: recordDate,
+          dueDate,
+          dueDateIst: dueDate,
+          raw: sanitizeJsonValue(r),
+          updatedAt: now,
+        };
+      });
 
     const redemptionRows = (payload.redemptionScheduleRows ?? [])
       .filter(Boolean)
-      .map((r) => ({
-        isin,
-        redemptionType: toNullableString((r as any)["RedemptionType"]),
-        startDate: parseDate((r as any)["StartDate"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        startDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["StartDate"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        endDate: parseDate((r as any)["EndDate"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        endDateIst: parseDateToIstDateOnlyUtcMidnight((r as any)["EndDate"], [
-          "YYYY-MM-DDTHH:mm:ss.SSSZ",
-          "DD-MMM-YYYY",
-          "DD/MMM/YYYY",
-          "DD-MM-YYYY",
-          "YYYY-MM-DD",
-        ]),
-        price: toFloat((r as any)["Price"]),
-        amount: toFloat((r as any)["Amount"]),
-        optionType: toNullableString((r as any)["Option Type"]),
-        optionFrequency: toNullableString((r as any)["Option Frequency"]),
-        raw: sanitizeJsonValue(r),
-        updatedAt: now,
-      }));
+      .map((r) => {
+        const startDate = ymdToDate((r as any)["StartDate"]);
+        const endDate = ymdToDate((r as any)["EndDate"]);
+        return {
+          isin,
+          redemptionType: toNullableString((r as any)["RedemptionType"]),
+          startDate,
+          startDateIst: startDate,
+          endDate,
+          endDateIst: endDate,
+          price: toFloat((r as any)["Price"]),
+          amount: toFloat((r as any)["Amount"]),
+          optionType: toNullableString((r as any)["Option Type"]),
+          optionFrequency: toNullableString((r as any)["Option Frequency"]),
+          raw: sanitizeJsonValue(r),
+          updatedAt: now,
+        };
+      });
 
     await db.dataBase.$transaction(async (tx) => {
       await tx.bondReferenceMetadata.upsert({
@@ -406,4 +280,3 @@ export class BondReferenceDataService {
     return { isin: normalized, coupon, redemption };
   }
 }
-
