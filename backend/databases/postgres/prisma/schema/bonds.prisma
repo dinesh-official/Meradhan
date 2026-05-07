@@ -31,43 +31,57 @@ model Bonds {
 
     ratingAgencyName String?
     ratingDate       DateTime?
+    ratingDateIst    DateTime? @db.Date
 
     categories String[]
     sectorName String?
 
     // Additional fields for bond details
-    yield                Float?
-    lastTradePrice       Float?
-    lastTradeYield       Float?
-    nextCouponDate       DateTime?
-    modeOfIssuance       String?
-    couponType           String?
-    buyYield             Float?
-    providerName         String?
-    providerInterestDate DateTime?
-    providerQuantity     Int?
-    isOngoingDeal        Boolean?  @default(false)
-    providerPrice        Float?
-    ignoreAutoUpdate     Boolean?  @default(false)
+    yield             Float?
+    lastTradePrice    Float?
+    lastTradeYield    Float?
+    nextCouponDate    DateTime?
+    nextCouponDateIst DateTime? @db.Date
+
+    modeOfIssuance          String?
+    couponType              String?
+    buyYield                Float?
+    providerName            String?
+    providerInterestDate    DateTime?
+    providerInterestDateIst DateTime? @db.Date
+
+    providerQuantity Int?
+    isOngoingDeal    Boolean? @default(false)
+    providerPrice    Float?
+    ignoreAutoUpdate Boolean? @default(false)
 
     /// Timestamps
-    dateOfAllotment DateTime?
-    redemptionDate  DateTime?
-    maturityDate    DateTime?
-    createdAt       DateTime  @default(now())
-    updatedAt       DateTime  @updatedAt
+    dateOfAllotment    DateTime?
+    dateOfAllotmentIst DateTime? @db.Date
+
+    redemptionDate    DateTime?
+    redemptionDateIst DateTime? @db.Date
+    maturityDate      DateTime?
+    maturityDateIst   DateTime? @db.Date
+    maturityDateOnly  DateTime? @db.Date
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     sortedAt Int @default(0)
 
     isConvertedDeal Boolean?
 
     /// All scheduled coupon payment dates for this ISIN
-    allCouponDates DateTime[]
+    allCouponDates    DateTime[]
+    allCouponDatesIst DateTime[] @db.Date
 
     dayConvention String?
 
     /// Record date (shut period)
-    recordDate DateTime?
+    recordDate    DateTime?
+    recordDateIst DateTime? @db.Date
+
     /// Business days before record date for shut period (e.g. 7, 15, 20)
     recordDays Int?
 
@@ -75,7 +89,8 @@ model Bonds {
 
     exchangeListedOn STOCK_EXCHANGE?
 
-    lastCouponDate DateTime?
+    lastCouponDate    DateTime?
+    lastCouponDateIst DateTime? @db.Date
 
     isPerpetual Boolean?
 
@@ -90,8 +105,11 @@ model Bonds {
 
     redemptionType String?
 
-    startDate DateTime?
-    endDate   DateTime?
+    startDate    DateTime?
+    startDateIst DateTime? @db.Date
+
+    endDate    DateTime?
+    endDateIst DateTime? @db.Date
 
     @@index([isin])
     @@index([sortedAt])

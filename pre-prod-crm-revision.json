@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/pre-prod-crm:1",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/pre-prod-crm:63",
     "containerDefinitions": [
         {
             "name": "pre-prod-crm-cont",
@@ -7,18 +7,16 @@
             "cpu": 0,
             "portMappings": [
                 {
-                    "name": "pre-prod-crm-cont-4001-tcp",
                     "containerPort": 4001,
                     "hostPort": 4001,
-                    "protocol": "tcp"
+                    "protocol": "tcp",
+                    "name": "pre-prod-crm-cont-4001-tcp"
                 }
             ],
             "essential": true,
             "environment": [],
-            "environmentFiles": [],
             "mountPoints": [],
             "volumesFrom": [],
-            "ulimits": [],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
@@ -36,7 +34,7 @@
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 1,
+    "revision": 63,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -74,16 +72,16 @@
         "FARGATE",
         "MANAGED_INSTANCES"
     ],
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
-    "cpu": "512",
-    "memory": "2048",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2026-03-28T18:57:29.138Z",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "registeredAt": "2026-05-05T10:42:40.063Z",
     "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []

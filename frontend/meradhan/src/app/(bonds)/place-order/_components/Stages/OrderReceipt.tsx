@@ -11,6 +11,8 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useState } from "react";
+import { getMaxOrderQuantityFromBond } from "../../_utils/quantity";
+import { hasCrmInventoryAvailable } from "@/global/utils/bondPurchaseEligibility";
 import { useQuery } from "@tanstack/react-query";
 import { IoMdArrowDropright } from "react-icons/io";
 import { useRazorpay } from "../../_hooks/useRazorpay";
@@ -38,6 +40,7 @@ function OrderReceipt({
   const { quantity, setStep } = useOrderState();
   const { toast } = useToast();
   const [isPlacing, setIsPlacing] = useState(false);
+  const [isVerifyingStock, setIsVerifyingStock] = useState(false);
   const { makePayment, cancelPayment, isLoading, meradhanOrderNumber } = useRazorpay();
   const [checkTaC, setCheckTaC] = useState(false);
   const [checkOrderCerTaC, setCheckOrderCerTaC] = useState(false);
@@ -54,6 +57,8 @@ function OrderReceipt({
   });
   const isPaymentMode =
     pgModeResponse?.responseData.paymentGatewayMode === "PAYMENT";
+
+  const outOfStock = !hasCrmInventoryAvailable(bond);
 
   const validateBeforeSubmit = (): boolean => {
     if (!orderPricing) {
@@ -76,6 +81,47 @@ function OrderReceipt({
       return false;
     }
     return true;
+  };
+
+  const verifyFreshInventory = async (): Promise<boolean> => {
+    try {
+      const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+      const envelope = await bondsApi.getBondDetailsByIsin(bond.isin);
+      const fresh = envelope.responseData;
+      if (!fresh) {
+        toast({
+          title: "Could not verify stock",
+          description: "Please refresh the page and try again.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      if (!hasCrmInventoryAvailable(fresh)) {
+        toast({
+          title: "Bond out of stock",
+          description: "This bond is no longer available. Please go back to bonds.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      const max = getMaxOrderQuantityFromBond(fresh);
+      if (quantity > max) {
+        toast({
+          title: "Not enough stock",
+          description: `Only ${max} unit(s) available now. Go back to review and lower quantity.`,
+          variant: "destructive",
+        });
+        return false;
+      }
+      return true;
+    } catch {
+      toast({
+        title: "Could not verify stock",
+        description: "Check your connection and try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   return (
@@ -148,111 +194,140 @@ function OrderReceipt({
         height={500}
         className="rounded-md overflow-hidden mt-8"
       />
+      {outOfStock && (
+        <div
+          className="mt-8 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive"
+          role="alert"
+        >
+          <p className="font-semibold">Bond out of stock</p>
+          <p className="mt-1 text-destructive/90">
+            This bond is no longer available to purchase. Go back to bonds or refresh after
+            inventory is updated.
+          </p>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10">
-        {!isPaymentMode && (
+        {!outOfStock && !isPaymentMode && (
           <Button
             className="md:w-auto w-full"
             variant="default"
             disabled={
               !(checkTaC && checkOrderCerTaC) ||
               !orderPricing ||
-              isPlacing
+              isPlacing ||
+              isVerifyingStock
             }
             onClick={async () => {
               if (!validateBeforeSubmit()) return;
               if (!(checkTaC && checkOrderCerTaC)) return;
-              const yieldVal = Number(bond.buyYield ?? bond.yield);
-              trackButtonClick(orderId, "PLACE_ORDER", {
-                step: 2,
-                isin: bond.isin,
-                quantity,
-                bondName: bond.bondName,
-              });
-              setIsPlacing(true);
+              setIsVerifyingStock(true);
               try {
-                const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
-                await bondsApi.placeOrder({
-                  customerProfileId: customer.id,
-                  bondName: bond.bondName,
+                const okStock = await verifyFreshInventory();
+                if (!okStock) return;
+                const yieldVal = Number(bond.buyYield ?? bond.yield);
+                trackButtonClick(orderId, "PLACE_ORDER", {
+                  step: 2,
                   isin: bond.isin,
-                  couponRate: orderPricing!.couponRate,
-                  yield: yieldVal,
-                  faceValue: orderPricing!.faceValue,
                   quantity,
-                  settlementAmount: orderPricing!.settlementAmount,
-                  dealDate: orderPricing!.dealDate,
-                  settlementType: orderPricing!.settlementOrder,
-                  requestDate: new Date().toISOString(),
+                  bondName: bond.bondName,
                 });
-                setStep(3);
-              } catch (err: unknown) {
-                const message =
-                  err &&
-                    typeof err === "object" &&
-                    "response" in err &&
-                    (err as { response?: { data?: { message?: string } } })
-                      .response?.data?.message
-                    ? String(
-                      (err as { response: { data: { message?: string } } })
-                        .response.data.message
-                    )
-                    : err instanceof Error
-                      ? err.message
-                      : "Could not place order. Please try again.";
-                toast({
-                  title: "Could not place order",
-                  description: message,
-                  variant: "destructive",
-                });
+                setIsPlacing(true);
+                try {
+                  const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+                  await bondsApi.placeOrder({
+                    customerProfileId: customer.id,
+                    bondName: bond.bondName,
+                    isin: bond.isin,
+                    couponRate: orderPricing!.couponRate,
+                    yield: yieldVal,
+                    faceValue: orderPricing!.faceValue,
+                    quantity,
+                    settlementAmount: orderPricing!.settlementAmount,
+                    dealDate: orderPricing!.dealDate,
+                    settlementType: orderPricing!.settlementOrder,
+                    requestDate: new Date().toISOString(),
+                  });
+                  setStep(3);
+                } catch (err: unknown) {
+                  const message =
+                    err &&
+                      typeof err === "object" &&
+                      "response" in err &&
+                      (err as { response?: { data?: { message?: string } } })
+                        .response?.data?.message
+                      ? String(
+                        (err as { response: { data: { message?: string } } })
+                          .response.data.message
+                      )
+                      : err instanceof Error
+                        ? err.message
+                        : "Could not place order. Please try again.";
+                  toast({
+                    title: "Could not place order",
+                    description: message,
+                    variant: "destructive",
+                  });
+                } finally {
+                  setIsPlacing(false);
+                }
               } finally {
-                setIsPlacing(false);
+                setIsVerifyingStock(false);
               }
             }}
           >
-            {isPlacing ? "Placing…" : "Place Order"}{" "}
+            {isVerifyingStock ? "Checking stock…" : isPlacing ? "Placing…" : "Place Order"}{" "}
             <IoMdArrowDropright />
           </Button>
         )}
-        {isPaymentMode && (
+        {!outOfStock && isPaymentMode && (
           <Button
             className="md:w-auto w-full"
             variant="default"
             disabled={
               !(checkTaC && checkOrderCerTaC) ||
               !orderPricing ||
-              isLoading
+              isLoading ||
+              isVerifyingStock
             }
-            onClick={() => {
+            onClick={async () => {
               if (!validateBeforeSubmit()) return;
               if (!(checkTaC && checkOrderCerTaC)) return;
-              trackButtonClick(orderId, "PROCEED_TO_PAY", {
-                step: 2,
-                isin: bond.isin,
-                quantity,
-                bondName: bond.bondName,
-              });
-              trackPaymentAttempt(orderId, {
-                isin: bond.isin,
-                quantity,
-                bondName: bond.bondName,
-              });
-              makePayment({
-                isin: bond.isin,
-                bondData: {
+              setIsVerifyingStock(true);
+              try {
+                const okStock = await verifyFreshInventory();
+                if (!okStock) return;
+                trackButtonClick(orderId, "PROCEED_TO_PAY", {
+                  step: 2,
+                  isin: bond.isin,
+                  quantity,
                   bondName: bond.bondName,
-                },
-                quantity: quantity,
-                session: {
-                  firstName: customer.firstName,
-                  lastName: customer.lastName,
-                  emailAddress: customer.emailAddress,
-                  contact: customer.phoneNo,
-                },
-                orderId: orderId,
-              });
+                });
+                trackPaymentAttempt(orderId, {
+                  isin: bond.isin,
+                  quantity,
+                  bondName: bond.bondName,
+                });
+                makePayment({
+                  isin: bond.isin,
+                  bondData: {
+                    bondName: bond.bondName,
+                  },
+                  quantity: quantity,
+                  session: {
+                    firstName: customer.firstName,
+                    lastName: customer.lastName,
+                    emailAddress: customer.emailAddress,
+                    contact: customer.phoneNo,
+                  },
+                  orderId: orderId,
+                });
+              } finally {
+                setIsVerifyingStock(false);
+              }
             }}
           >
-            Proceed to Pay <IoMdArrowDropright />
+            {isVerifyingStock ? "Checking stock…" : "Proceed to Pay"}{" "}
+            <IoMdArrowDropright />
           </Button>
         )}
         <Button

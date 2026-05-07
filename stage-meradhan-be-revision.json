@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-meradhan-be:148",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/stage-meradhan-be:272",
     "containerDefinitions": [
         {
             "name": "stage-meradhan-be",
@@ -7,10 +7,10 @@
             "cpu": 0,
             "portMappings": [
                 {
-                    "name": "be",
                     "containerPort": 4000,
                     "hostPort": 4000,
-                    "protocol": "tcp"
+                    "protocol": "tcp",
+                    "name": "be"
                 }
             ],
             "essential": true,
@@ -34,7 +34,7 @@
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 148,
+    "revision": 272,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -72,16 +72,16 @@
         "FARGATE",
         "MANAGED_INSTANCES"
     ],
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
     "requiresCompatibilities": [
         "FARGATE"
     ],
     "cpu": "512",
     "memory": "1024",
-    "runtimePlatform": {
-        "cpuArchitecture": "X86_64",
-        "operatingSystemFamily": "LINUX"
-    },
-    "registeredAt": "2026-04-04T07:39:48.697Z",
+    "registeredAt": "2026-05-07T07:09:04.530Z",
     "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []

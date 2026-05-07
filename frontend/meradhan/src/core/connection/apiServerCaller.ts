@@ -1,5 +1,5 @@
 import { API_SERVER_URL_IP } from "@/global/constants/domains";
-import { ApiError, IApiCaller } from "@root/apiGateway";
+import { ApiError, type IApiCaller } from "@root/apiGateway";
 import axios, {
   AxiosInstance,
   AxiosRequestConfig,
@@ -14,8 +14,13 @@ import "server-only";
  * - Automatically forwards incoming request headers (cookies, etc.)
  * - Allows full axios-like usage (get, post, put, patch, delete)
  * - Designed for Next.js Server Components / Route Handlers
+ *
+ * Not declared as `implements IApiCaller`: meradhan and @root/apiGateway can
+ * resolve different `axios` copies, so `AxiosRequestConfig` is structurally
+ * incompatible at compile time. The singleton is asserted at export; runtime
+ * matches IApiCaller.
  */
-class ApiServerCaller implements IApiCaller {
+class ApiServerCaller {
   private instance: AxiosInstance;
 
   constructor(baseURL: string = API_SERVER_URL_IP) {
@@ -28,14 +33,16 @@ class ApiServerCaller implements IApiCaller {
       (response) => response,
       (error) => {
         if (axios.isAxiosError(error)) {
+          // ApiError / AxiosError typings come from @root/apiGateway's axios;
+          // interceptor error is typed with meradhan's axios — duplicate install.
           return Promise.reject(
             new ApiError(
               error.message,
               error.code,
-              error.config,
+              error.config as never,
               error.request,
-              error.response
-            )
+              error.response as never,
+            ),
           );
         }
         return Promise.reject(error);
@@ -142,6 +149,6 @@ class ApiServerCaller implements IApiCaller {
   }
 }
 
-// Export a default singleton instance
-const apiServerCaller = new ApiServerCaller();
+// Export a default singleton instance (see class note re: IApiCaller + axios)
+const apiServerCaller = new ApiServerCaller() as unknown as IApiCaller;
 export default apiServerCaller;

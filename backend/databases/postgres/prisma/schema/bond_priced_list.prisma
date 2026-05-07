@@ -2,19 +2,21 @@ model BondPricedListConsolidated {
   id Int @id @default(autoincrement())
 
   /// Source file metadata
-  provider  String?
-  dateRaw   String?
-  timeRaw   String?
-  timestamp DateTime
+  provider     String?
+  dateRaw      String?
+  timeRaw      String?
+  timestamp    DateTime
+  timestampIst DateTime? @db.Date
 
   /// Identifiers — upsert key = `isin` + `timestamp` (full quote instant)
   isin       String
   issuerName String?
 
   /// Frequently queried fields (normalized where possible)
-  couponRate   Float?
-  maturityDate DateTime?
-  yield        Float?
+  couponRate      Float?
+  maturityDate    DateTime?
+  maturityDateIst DateTime? @db.Date
+  yield           Float?
 
   currency  String?
   faceValue Float?
@@ -50,9 +52,11 @@ model BondReferenceMetadata {
   isin       String  @unique
   issuerName String?
 
-  issueDate    DateTime?
-  maturityDate DateTime?
-  isPerpetual  Boolean?
+  issueDate       DateTime?
+  issueDateIst    DateTime? @db.Date
+  maturityDate    DateTime?
+  maturityDateIst DateTime? @db.Date
+  isPerpetual     Boolean?
 
   issueCurrency        String?
   originalAmountIssued String?
@@ -68,9 +72,12 @@ model BondReferenceMetadata {
   puttableFlag  String?
   dayConvention String?
 
-  previousCouponDate DateTime?
-  lastCouponDate     DateTime?
-  nextCouponDate     DateTime?
+  previousCouponDate    DateTime?
+  previousCouponDateIst DateTime? @db.Date
+  lastCouponDate        DateTime?
+  lastCouponDateIst     DateTime? @db.Date
+  nextCouponDate        DateTime?
+  nextCouponDateIst     DateTime? @db.Date
 
   isListed     Boolean?
   exchangeName String?
@@ -109,7 +116,9 @@ model BondReferenceCouponPaymentDate {
   interestPaymentDates String?
   recordDays           Float?
   recordDate           DateTime?
+  recordDateIst        DateTime? @db.Date
   dueDate              DateTime?
+  dueDateIst           DateTime? @db.Date
 
   raw Json?
 
@@ -128,7 +137,9 @@ model BondReferenceRedemptionSchedule {
   isin            String
   redemptionType  String?
   startDate       DateTime?
+  startDateIst    DateTime? @db.Date
   endDate         DateTime?
+  endDateIst      DateTime? @db.Date
   price           Float?
   amount          Float?
   optionType      String?

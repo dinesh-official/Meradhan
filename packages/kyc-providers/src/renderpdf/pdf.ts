@@ -73,6 +73,7 @@ export async function generateTempOrderPdf({
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
+    console.log(orderData);
 
     // Generate PDF and save to file
     await renderToFile(

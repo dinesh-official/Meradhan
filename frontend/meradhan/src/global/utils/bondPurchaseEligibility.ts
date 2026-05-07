@@ -106,3 +106,16 @@ export function getBondPurchaseEligibility(
 export function isBondEligibleForPurchase(bond: BondDetailsResponse): boolean {
   return getBondPurchaseEligibility(bond).eligible;
 }
+
+/** True when latest CRM inventory batch lists this ISIN with quantity > 0. */
+export function hasCrmInventoryAvailable(bond: BondDetailsResponse): boolean {
+  const q = bond.crmAvailableQuantity;
+  if (q == null) return false;
+  const n = Number(q);
+  return Number.isFinite(n) && n > 0;
+}
+
+/** Buy / place-order CTA: listing rules satisfied and CRM shows stock. */
+export function canShowBuyNow(bond: BondDetailsResponse): boolean {
+  return isBondEligibleForPurchase(bond) && hasCrmInventoryAvailable(bond);
+}
