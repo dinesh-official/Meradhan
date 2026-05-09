@@ -5,7 +5,7 @@ import BottomButton from "./BottomButton";
 import { useQuery } from "@tanstack/react-query";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { Loader2 } from "lucide-react";
+import { CashflowTimelineTabShimmer } from "./PortfolioTabShimmers";
 import TimelineFilters from "./TimelineFilters";
 import { useState, useEffect } from "react";
 
@@ -58,11 +58,7 @@ export default function CashflowTimelinePage() {
   const timeline = data?.responseData;
 
   if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center text-gray-500">
-        <Loader2 className="h-8 w-8 animate-spin text-[#0C4580]" />
-      </div>
-    );
+    return <CashflowTimelineTabShimmer />;
   }
 
   if (isError || !timeline || !timeline.years || timeline.years.length === 0) {

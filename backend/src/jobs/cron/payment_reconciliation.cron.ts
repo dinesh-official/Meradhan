@@ -4,20 +4,20 @@ import { PaymentReconciliationService } from "@services/payment/payment_reconcil
 
 // Hourly reconciliation of pending Razorpay payments.
 // Scheduled slightly off the hour to avoid overlapping with other top-of-hour jobs.
-cron.schedule(
-  "5 * * * *",
-  async () => {
-    const svc = new PaymentReconciliationService();
-    try {
-      const result = await svc.reconcilePendingRazorpayOrders({
-        lookbackHours: 72,
-        maxOrders: 75,
-      });
-      logger.logInfo("Payment reconciliation cron completed", result as any);
-    } catch (error) {
-      logger.logError("Payment reconciliation cron failed", error);
-    }
-  },
-  { timezone: "Asia/Kolkata" },
-);
+// cron.schedule(
+//   "5 * * * *",
+//   async () => {
+//     const svc = new PaymentReconciliationService();
+//     try {
+//       const result = await svc.reconcilePendingRazorpayOrders({
+//         lookbackHours: 72,
+//         maxOrders: 75,
+//       });
+//       logger.logInfo("Payment reconciliation cron completed", result as any);
+//     } catch (error) {
+//       logger.logError("Payment reconciliation cron failed", error);
+//     }
+//   },
+//   { timezone: "Asia/Kolkata" },
+// );
 

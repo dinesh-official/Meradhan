@@ -11,7 +11,7 @@ import ChartCard from "./ChartCard";
 import { useQuery } from "@tanstack/react-query";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { Loader2 } from "lucide-react";
+import { PortfolioPieChartCardShimmer } from "./PortfolioTabShimmers";
 
 const DEFAULT_DATA = [
   {
@@ -72,13 +72,7 @@ export default function InvestmentByMaturityCard() {
     : [];
 
   if (isLoading) {
-    return (
-      <ChartCard title="Investment by Maturity (Duration)">
-        <div className="flex min-h-[260px] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-[#0C4580]" />
-        </div>
-      </ChartCard>
-    );
+    return <PortfolioPieChartCardShimmer title="Investment by Maturity (Duration)" />;
   }
 
   if (!hasData) {

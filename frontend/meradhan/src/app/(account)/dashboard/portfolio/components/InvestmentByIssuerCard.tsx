@@ -12,7 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { Loader2 } from "lucide-react";
+import { PortfolioPieChartCardShimmer } from "./PortfolioTabShimmers";
 
 const DEFAULT_DATA = [
   { name: "Government", value: 5000000, count: 4 },
@@ -140,13 +140,7 @@ export default function InvestmentByIssuerCard() {
   };
 
   if (isLoading) {
-    return (
-      <ChartCard title="Investment by Issuer Type">
-        <div className="flex min-h-[260px] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-[#0C4580]" />
-        </div>
-      </ChartCard>
-    );
+    return <PortfolioPieChartCardShimmer title="Investment by Issuer Type" />;
   }
 
   if (!hasData) {
