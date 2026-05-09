@@ -68,6 +68,7 @@ export class BondsApi {
     },
     config?: AxiosRequestConfig,
   ) {
+    const safeIsin = encodeURIComponent(isin);
     const quantity = params?.quantity ?? 1;
     const settlementDate = params?.settlementDate;
     const pricingYield = params?.pricingYield;
@@ -76,7 +77,7 @@ export class BondsApi {
       const response = await this.apiClient.post<
         BaseResponseData<BondDealAutofillResponse>
       >(
-        `/bonds/${isin}/deal-autofill`,
+        `/bonds/${safeIsin}/deal-autofill`,
         {
           quantity,
           ...(settlementDate != null && settlementDate !== ""
@@ -90,7 +91,7 @@ export class BondsApi {
     }
 
     const response = await this.apiClient.get<BaseResponseData<BondDealAutofillResponse>>(
-      `/bonds/${isin}/deal-autofill`,
+      `/bonds/${safeIsin}/deal-autofill`,
       {
         ...config,
         params: {
@@ -99,6 +100,46 @@ export class BondsApi {
             ? { settlementDate }
             : {}),
         },
+      },
+    );
+    return response.data;
+  }
+
+  /**
+   * CRM bond auto-update: calc-based autofill (new API).
+   * Same response type as `getBondDealAutofill`, but backed by `/deal-autofill-calc`.
+   */
+  public async getBondDealAutofillCalc(
+    isin: string,
+    params?: {
+      quantity?: number;
+      pricingYield?: number;
+    },
+    config?: AxiosRequestConfig,
+  ) {
+    const safeIsin = encodeURIComponent(isin);
+    const quantity = params?.quantity ?? 1;
+    const pricingYield = params?.pricingYield;
+
+    if (pricingYield != null && Number.isFinite(pricingYield)) {
+      const response = await this.apiClient.post<
+        BaseResponseData<BondDealAutofillResponse>
+      >(
+        `/bonds/${safeIsin}/deal-autofill-calc`,
+        {
+          quantity,
+          pricingYield,
+        },
+        config,
+      );
+      return response.data;
+    }
+
+    const response = await this.apiClient.get<BaseResponseData<BondDealAutofillResponse>>(
+      `/bonds/${safeIsin}/deal-autofill-calc`,
+      {
+        ...config,
+        params: { quantity },
       },
     );
     return response.data;

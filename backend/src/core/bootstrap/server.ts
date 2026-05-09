@@ -12,6 +12,7 @@ import { errorHandler } from "./error_handler";
 import { responseHandler } from "./response_handler";
 import type { IExpressRoute, IServer } from "./server_interface";
 import { proxyRoutes } from "@config/proxy";
+import s3logger from "../../../log/s3logger";
 
 type TMonitor = {
   serverMonitor?: ServerMonitorInterface;
@@ -201,6 +202,7 @@ export class ExpressServer implements IServer, IExpressRoute {
 
     // start server  -
     this.server.listen(this.port, () => {
+      s3logger.info(`✅ Server is running in ${process.env.MODE || "DEVELOPMENT"} mode at http://localhost:${this.port}`)
       logger.logInfo(
         `✅ Server is running in ${process.env.MODE || "DEVELOPMENT"} mode at http://localhost:${this.port}`
       );

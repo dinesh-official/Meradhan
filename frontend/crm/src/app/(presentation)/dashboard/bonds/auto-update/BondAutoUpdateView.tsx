@@ -191,7 +191,7 @@ export default function BondAutoUpdateView() {
   const autofillMutation = useMutation({
     mutationFn: async (args: { isin: string; pricingYield?: number }) => {
       const { isin, pricingYield } = args;
-      const res = await api.getBondDealAutofill(isin, {
+      const res = await api.getBondDealAutofillCalc(isin, {
         quantity: 1,
         ...(pricingYield != null && Number.isFinite(pricingYield)
           ? { pricingYield }
@@ -336,7 +336,7 @@ export default function BondAutoUpdateView() {
           });
           continue;
         }
-        const res = await api.getBondDealAutofill(b.isin, parsed.params);
+        const res = await api.getBondDealAutofillCalc(b.isin, parsed.params);
         if (!res.responseData) {
           fail++;
           setRows((prev) => {

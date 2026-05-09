@@ -5,6 +5,8 @@ import logger from "@utils/logger/logger";
 import crypto from "crypto";
 import Razorpay from "razorpay";
 import type { Orders } from "razorpay/dist/types/orders";
+import s3logger from "../../../../log/s3logger";
+import { AxiosError } from "axios";
 
 // Type definitions for payment responses
 export interface PaymentOrderResponse {
@@ -90,6 +92,7 @@ export class PaymentService {
       receipt,
       method: "netbanking",
       bank_account: bank,
+
       notes: {
         "Member_ID": env.CBRICS_DOMAIN, //Member_ID 
         "Client_ID": customer?.panCard?.panCardNo || "", //Client_PAN 
@@ -100,7 +103,7 @@ export class PaymentService {
         "CC_Name": "NCL", //Name_of_Clearing_Corporation 
       }
     };
-    console.log(options);
+    s3logger.info(JSON.stringify(options));
 
     try {
       logger.logInfo(
@@ -119,6 +122,9 @@ export class PaymentService {
         stack: (error as Error)?.stack,
       });
 
+      if (error instanceof AxiosError) {
+        s3logger.error(JSON.stringify(options));
+      }
       throw error;
     }
   }
