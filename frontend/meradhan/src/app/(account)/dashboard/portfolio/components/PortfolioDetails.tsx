@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
@@ -15,6 +15,7 @@ import {
   MultiSelectTrigger,
   MultiSelectValue,
 } from "@/components/ui/multi-select";
+import { PortfolioDetailsTabShimmer } from "./PortfolioTabShimmers";
 
 interface PortfolioFilterOptions {
   bondTypes: string[];
@@ -191,11 +192,7 @@ export default function PortfolioDetails() {
         </MultiSelect>
       </div>
 
-      {isLoading && (
-        <div className="flex justify-center items-center py-12">
-          <Loader className="w-8 h-8 text-blue-500 animate-spin" />
-        </div>
-      )}
+      {isLoading && <PortfolioDetailsTabShimmer />}
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">

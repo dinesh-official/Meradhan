@@ -402,5 +402,17 @@ export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes
         ]
     })
     console.log("transfers task completed | Count - ", transfer?.count)
+    try {
+        await db.dataBase.order.updateMany({
+            where: {
+                paymentId: payId
+            },
+            data: {
+                transferId: transfer?.items?.[0]?.id
+            }
+        })
+    } catch (error) {
+
+    }
     return transfer;
 }

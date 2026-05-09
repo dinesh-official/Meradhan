@@ -308,3 +308,28 @@
   
   }
 }
+
+@layer utilities {
+  @keyframes portfolio-shimmer-slide {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /** Moving highlight skeleton (portfolio / dashboard loaders) */
+  .portfolio-shimmer {
+    background: linear-gradient(
+      105deg,
+      rgb(229 231 235) 0%,
+      rgb(243 244 246) 35%,
+      rgb(249 250 251) 50%,
+      rgb(243 244 246) 65%,
+      rgb(229 231 235) 100%
+    );
+    background-size: 200% 100%;
+    animation: portfolio-shimmer-slide 1.35s ease-in-out infinite;
+  }
+}
