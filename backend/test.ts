@@ -1,5 +1,10 @@
-// import { getBondInfo } from "@resource/bonds/fill-bonds-auto";
+import { PaymentReconciliationService } from "@services/payment/payment_reconciliation.service";
 
-// const data = await getBondInfo("INE076I07020")
+const svc = new PaymentReconciliationService();
 
-// console.log(JSON.stringify(data));
+const result = await svc.reconcilePendingRazorpayOrders({
+    lookbackHours: 72,
+    maxOrders: 75,
+});
+
+console.log(result);

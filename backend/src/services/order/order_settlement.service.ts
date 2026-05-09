@@ -485,7 +485,9 @@ export class OrderSettlementService {
 
       await rfqMasterService.getAllSettledOrders({ filtFromModSettleDate: todayDate || "", filtToModSettleDate: nextDate })
 
+
       const updatedOrder = await getOrderData();
+
       if (updatedOrder) {
         await this.trySendOrderReceiptPdfEmail({
           order: updatedOrder,

@@ -10,6 +10,7 @@ model Order {
     paymentProvider String? // e.g., "RAZORPAY"
     paymentOrderId  String? @unique // Provider's Order ID (e.g., order_123)
     paymentId       String? @unique // Provider's Payment ID (e.g., pay_123)
+    transferId      String? // Provider's Payment ID (e.g., pay_123)
     paymentMetadata Json? // Store signature, method, vpa, etc. here
 
     paymentStatus PaymentStatus @default(PENDING)

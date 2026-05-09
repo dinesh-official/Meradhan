@@ -1,6 +1,7 @@
 // cron Jobs
 import "./cron/nseIsin_cron";
 import "./cron/kyc_reports.cron";
+import "./cron/payment_reconciliation.cron";
 
 // Queue Worker - queues are initialized at startup in main.ts
 import "./sms_worker";
