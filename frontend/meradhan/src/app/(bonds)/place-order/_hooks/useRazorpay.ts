@@ -80,7 +80,7 @@ interface PaymentParams {
 ----------------------------------------------------- */
 
 export function useRazorpay() {
-  const { setStep, setMeradhanOrderNumber, meradhanOrderNumber } = useOrderState();
+  const { setStep, setMeradhanOrderNumber, meradhanOrderNumber } = useOrderState();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [orderReqData, setOrderReqData] = useState<PayApiResponse | undefined>(
@@ -115,12 +115,12 @@ export function useRazorpay() {
       const response = orderReqData
         ? { data: orderReqData }
         : await apiClientCaller.post<PayApiResponse>(
-            "/customer/order/pay",
-            { isin, quantity, orderId },
-            {
-              params: { orderId },
-            }
-          );
+          "/customer/order/pay",
+          { isin, quantity, orderId },
+          {
+            params: { orderId },
+          }
+        );
       setOrderReqData(response.data);
       const {
         paymentOrderId,
@@ -154,7 +154,7 @@ export function useRazorpay() {
       if (typeof window === "undefined" || !window.Razorpay) {
         toast({
           title: "Error",
-          description: "Razorpay SDK not loaded",
+          description: "Payment Gateway not loaded. Please reload and try again",
           variant: "destructive",
         });
         return;
@@ -229,9 +229,15 @@ export function useRazorpay() {
         error instanceof Error ? error.message : "Could not initiate payment",
         { isin, quantity }
       );
+      // toast({
+      //   title: "Payment Failed",
+      //   description: "Could not initiate payment",
+      //   variant: "destructive",
+      // });
       toast({
-        title: "Payment Failed",
-        description: "Could not initiate payment",
+        title: "Bank Not Supported",
+        description:
+          "The requested bank is currently not enabled for payments. Please select a different bank or contact support for assistance.",
         variant: "destructive",
       });
     } finally {
@@ -243,7 +249,7 @@ export function useRazorpay() {
     if (!orderReqData) {
       toast({ title: "Order Cancelled Successfully" });
       if (allowRedirect) {
-      window.location.reload();
+        window.location.reload();
       }
       return;
     }
@@ -265,5 +271,5 @@ export function useRazorpay() {
     }
   };
 
-  return { makePayment, cancelPayment, isLoading ,meradhanOrderNumber};
+  return { makePayment, cancelPayment, isLoading, meradhanOrderNumber };
 }

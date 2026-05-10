@@ -3,6 +3,7 @@ import { HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import { type Request, type Response } from "express";
 import { sendKycApprovedEmail } from "@jobs/helper/send_emails";
+import { sendDealSheetPdfByOrderId } from "@services/notifications/send_deal_sheet_nyOrderId";
 
 export class NseWebhookController {
   /**
@@ -102,8 +103,43 @@ export class NseWebhookController {
           }
         }
       }
+
+
+
     } catch (e) {
       logger.logError("CBRICS webhook: KYC approved hook failed", { error: e });
+    }
+    console.log(payload?.settleOrderList?.[0]?.orderNumber);
+
+    try {
+      if (payload?.settleOrderList?.[0]?.orderNumber) {
+        if (payload?.settleOrderList?.[0]?.settleStatus == 4) {
+          const orderNumber = Number(payload?.settleOrderList?.[0].orderNumber);
+          const order = await db.dataBase.order.findFirst({
+            where: {
+              reqOrderNumber: orderNumber.toString()
+            }
+          })
+          if (!order) {
+            console.warn("No Order from our system " + orderNumber);
+            return;
+          }
+          await db.dataBase.order.updateMany({
+            where: {
+              reqOrderNumber: orderNumber.toString()
+            },
+            data: {
+              status: "SETTLED"
+            }
+          })
+
+          await sendDealSheetPdfByOrderId({ orderId: orderNumber })
+
+          console.log("Deal Sheet Send Successfully");
+        }
+      }
+    } catch (error) {
+      console.error((error as Error)?.message);
     }
 
     res.sendResponse({

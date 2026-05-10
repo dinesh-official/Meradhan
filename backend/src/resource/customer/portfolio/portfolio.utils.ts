@@ -58,6 +58,187 @@ export const monthStepForMode = (mode: string): number => {
   return 1;
 };
 
+/**
+ * Schedule logic requires a concrete INTEREST_MODE. DB rows often leave
+ * `interestPaymentMode` as UNKNOWN while `interestPaymentFrequency` is populated.
+ */
+export function resolveEffectiveCouponMode(
+  mode: string | null | undefined,
+  frequency: string | null | undefined,
+): string {
+  const m = String(mode ?? "").trim();
+  /** Keep sentinel for bullet-style bonds; callers branch before stepping Yearly-periods logic. */
+  if (m === "ON_MATURITY") return "ON_MATURITY";
+  if (m && m !== "UNKNOWN") return m;
+
+  const v = String(frequency ?? "").trim().toLowerCase();
+  if (!v) return "HALF_YEARLY";
+
+  if (v.includes("month")) return "MONTHLY";
+  if (v.includes("quarter")) return "QUARTERLY";
+  if (v.includes("semi")) return "HALF_YEARLY";
+  if (v.includes("annual") || v.includes("year") || v === "yearly") return "YEARLY";
+  if (v.includes("maturity") || v.includes("cumulative")) return "ON_MATURITY";
+
+  return "HALF_YEARLY";
+}
+
+export function isBulletCouponSchedule(
+  interestPaymentMode: string | null | undefined,
+  interestPaymentFrequency: string | null | undefined,
+): boolean {
+  const mode = resolveEffectiveCouponMode(
+    interestPaymentMode,
+    interestPaymentFrequency,
+  );
+  return mode === "ON_MATURITY";
+}
+
+export type BondPortfolioCfEvent = {
+  type: "INTEREST" | "MATURITY";
+  date: Date;
+  amount: number;
+};
+
+const cfAmountEps = 1e-4;
+
+function uniqSortedUtcDays(dates: Iterable<Date>): Date[] {
+  const seen = new Set<number>();
+  const out: Date[] = [];
+  for (const raw of dates) {
+    const d = new Date(raw);
+    d.setUTCHours(0, 0, 0, 0);
+    const t = d.getTime();
+    if (seen.has(t)) continue;
+    seen.add(t);
+    out.push(d);
+  }
+  out.sort((a, b) => a.getTime() - b.getTime());
+  return out;
+}
+
+/** When strict calendar checks fail against master maturity vs allotment, still build a plausible schedule from allotment anchors. */
+export function resolveSyntheticScheduleEom(allotment: Date, maturity: Date, syntheticMode: string): boolean {
+  const { valid, isEOM } = validateAlignment(allotment, maturity, syntheticMode);
+  if (valid) return isEOM;
+  return isEndOfMonth(allotment);
+}
+
+/**
+ * Per-holding projected cashflows: uses `allCouponDates` when populated, bullet accrual for ON_MATURITY,
+ * otherwise allotment-based synthetic periods with relaxed alignment.
+ */
+export function enumerateBondPortfolioCashflows(p: {
+  allotment: Date;
+  maturity: Date;
+  settleDate: Date;
+  faceValuePerUnit: number;
+  quantity: number;
+  couponRatePercent: number;
+  interestPaymentMode: string | null | undefined;
+  interestPaymentFrequency: string | null | undefined;
+  allCouponDates?: Date[] | null;
+}): BondPortfolioCfEvent[] {
+  const events: BondPortfolioCfEvent[] = [];
+
+  const allotment = new Date(p.allotment);
+  allotment.setUTCHours(0, 0, 0, 0);
+  const maturity = new Date(p.maturity);
+  maturity.setUTCHours(0, 0, 0, 0);
+  const settleDate = new Date(p.settleDate);
+  settleDate.setUTCHours(0, 0, 0, 0);
+
+  if (settleDate.getTime() > maturity.getTime()) return events;
+
+  const qty = Number(p.quantity ?? 0);
+  if (!Number.isFinite(qty) || qty <= 0) return events;
+
+  const fvPerUnit = Number(p.faceValuePerUnit ?? 0);
+  const couponPct = Number(p.couponRatePercent ?? 0);
+  const fvTotal = fvPerUnit * qty;
+  const annualCoupon = fvTotal * (couponPct / 100);
+
+  const bullet = isBulletCouponSchedule(p.interestPaymentMode, p.interestPaymentFrequency);
+  const masterCouponDates =
+    bullet ? [] : uniqSortedUtcDays(p.allCouponDates ?? []);
+
+  if (bullet) {
+    const hasCouponIncome = couponPct > cfAmountEps && settleDate.getTime() < maturity.getTime();
+    if (hasCouponIncome) {
+      const amt = parseFloat(calcInterest(annualCoupon, settleDate, maturity).toFixed(2));
+      if (amt > cfAmountEps) {
+        events.push({ type: "INTEREST", date: new Date(maturity), amount: amt });
+      }
+    }
+    events.push({ type: "MATURITY", date: new Date(maturity), amount: fvTotal });
+    return events;
+  }
+
+  if (masterCouponDates.length > 0) {
+    let milestones = masterCouponDates.filter(
+      (d) => d.getTime() > allotment.getTime() && d.getTime() <= maturity.getTime(),
+    );
+
+    const lastTs = milestones.length ? milestones[milestones.length - 1]!.getTime() : -1;
+    if (lastTs !== maturity.getTime()) {
+      milestones = [...milestones, new Date(maturity)];
+      milestones.sort((a, b) => a.getTime() - b.getTime());
+    }
+
+    let prev = allotment;
+    for (const dt of milestones) {
+      const d = new Date(dt);
+      d.setUTCHours(0, 0, 0, 0);
+      if (d.getTime() <= settleDate.getTime()) {
+        prev = d;
+        continue;
+      }
+
+      const amt = parseFloat(calcInterest(annualCoupon, prev, d).toFixed(2));
+      if (amt > cfAmountEps) {
+        events.push({ type: "INTEREST", date: new Date(d), amount: amt });
+      }
+      prev = d;
+    }
+
+    events.push({ type: "MATURITY", date: new Date(maturity), amount: fvTotal });
+    return events;
+  }
+
+  let syntheticMode = resolveEffectiveCouponMode(
+    p.interestPaymentMode,
+    p.interestPaymentFrequency,
+  );
+  if (syntheticMode === "ON_MATURITY") syntheticMode = "HALF_YEARLY";
+  const isEOM = resolveSyntheticScheduleEom(allotment, maturity, syntheticMode);
+  const step = monthStepForMode(syntheticMode);
+  const adjustedStart = getAdjustedStartDate(settleDate, allotment, maturity, step, isEOM);
+
+  let cursor = new Date(allotment);
+  let lastPayoutDate = new Date(adjustedStart);
+
+  while (cursor.getTime() <= maturity.getTime()) {
+    const next = addMonths(cursor, step, isEOM);
+    cursor = next.getTime() > maturity.getTime() ? new Date(maturity) : new Date(next);
+
+    if (cursor.getTime() > adjustedStart.getTime()) {
+      const amt = parseFloat(calcInterest(annualCoupon, lastPayoutDate, cursor).toFixed(2));
+      if (amt > cfAmountEps) {
+        events.push({ type: "INTEREST", date: new Date(cursor), amount: amt });
+      }
+      lastPayoutDate = new Date(cursor);
+    }
+
+    if (cursor.getTime() === maturity.getTime()) break;
+  }
+
+  if (settleDate.getTime() <= maturity.getTime()) {
+    events.push({ type: "MATURITY", date: new Date(maturity), amount: fvTotal });
+  }
+
+  return events;
+}
+
 export const validateAlignment = (
   allotment: Date,
   maturity: Date,

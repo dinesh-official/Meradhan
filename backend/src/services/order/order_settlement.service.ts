@@ -27,6 +27,7 @@ import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.s
 import { formatDate } from "@packages/kyc-providers/pdf/helper";
 import { formatDateDdMmYyyy, formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
 import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate } from "./order-pricing-helper";
+import { AxiosError } from "axios";
 
 // Type definitions for settlement service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -305,11 +306,20 @@ export class OrderSettlementService {
         batchId,
         step: "SETTLEMENT_BATCH",
         status: "STARTED",
-        message: "Settlement batch initiated",
+        message: "Settlement processing batch initiated",
         inputData: {
+          timestamp: new Date().toLocaleString(),
           orderId: order.id,
           isNetBanking,
           paymentId: order.paymentId,
+          ucc: order.customerProfile.nseDataSet.participant.loginId,
+          name: order.customerProfile.nseDataSet.participant.firstName,
+          perAccStatus: order.customerProfile.nseDataSet.participant.actualStatus,
+          perWorkflowStatus: order.customerProfile.nseDataSet.participant.workflowStatus,
+          totalAmount: order.totalAmount,
+          isin: order.isin,
+          quantity: order.quantity,
+          userStartPaymentProcessAt: order.createdAt,
         },
         startedAt: new Date(),
       });
@@ -320,8 +330,12 @@ export class OrderSettlementService {
         paymentId,
         batchId,
         step: SettlementStep.ADD_ISIN,
-        message: "Add ISIN to settlement",
-        inputData: { isin: order.isin, quantity: order.quantity },
+        message: "Trigger RFQ Add ISIN to settlement",
+        inputData: {
+          isin: order.isin,
+          quantity: order.quantity,
+          totalAmount: order.totalAmount,
+        },
         fn: () => this.addIsinToSettlement(order, { paymentId }),
       });
       await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -333,8 +347,16 @@ export class OrderSettlementService {
         paymentId,
         batchId,
         step: SettlementStep.ACCEPT_NEGOTIATION,
-        message: "Accept negotiation",
-        inputData: { inCrores: addIsinResponse.inCrores, rfqNumber: addIsinResponse.rfqNumber },
+        message: "Rfq Accept negotiation",
+        inputData: {
+          ucc: order.customerProfile.nseDataSet.participant.loginId,
+          name: order.customerProfile.nseDataSet.participant.firstName,
+          isin: order.isin,
+          quantity: order.quantity,
+          totalAmount: order.totalAmount,
+          inCrores: addIsinResponse.inCrores,
+          rfqNumber: addIsinResponse.rfqNumber
+        },
         fn: () => this.acceptNegotiation(order, addIsinResponse.inCrores),
       });
       await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -346,8 +368,11 @@ export class OrderSettlementService {
         paymentId,
         batchId,
         step: SettlementStep.PROPOSE_DEAL,
-        message: "Propose deal",
-        inputData: { orderId: order.id },
+        message: "Rfq Propose deal",
+        inputData: {
+
+          orderId: order.id
+        },
         fn: () => this.proposeDeal(order),
       });
       await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -359,8 +384,15 @@ export class OrderSettlementService {
         paymentId,
         batchId,
         step: SettlementStep.ACCEPT_OR_REJECT_DEAL,
-        message: "Accept or reject deal",
-        inputData: { orderId: order.id },
+        message: "RFQ Accept deal",
+        inputData: {
+          ucc: order.customerProfile.nseDataSet.participant.loginId,
+          name: order.customerProfile.nseDataSet.participant.firstName,
+          isin: order.isin,
+          quantity: order.quantity,
+          orderId: order.id,
+          unitPrice: order.unitPrice,
+        },
         fn: () => this.acceptOrRejectDeal(order),
       });
 
@@ -371,7 +403,15 @@ export class OrderSettlementService {
         batchId,
         step: SettlementStep.UPDATE_ORDER_STATUS,
         message: "Update order status",
-        inputData: { status: OrderStatus.SETTLED },
+        inputData: {
+          name: order.customerProfile.nseDataSet.participant.firstName,
+          isin: order.isin,
+          quantity: order.quantity,
+          orderId: order.id,
+          unitPrice: order.unitPrice,
+          paymentId,
+          status: OrderStatus.SETTLED
+        },
         fn: () => this.updateOrderStatus(orderId),
       });
       if (isNetBanking) {
@@ -386,10 +426,11 @@ export class OrderSettlementService {
             payId: order.paymentId || "",
             userId: order.customerProfileId,
             rfqNumber: addIsinResponse.rfqNumber,
+            isin: addIsinResponse.isin,
           },
           fn: () =>
             makeRazorpayRouteTransition({
-              amount: Number(order.totalAmount),
+              amount: Number(order.totalAmount.toFixed(4)),
               payId: order.paymentId || "",
               userId: order.customerProfileId,
               notes: {
@@ -410,6 +451,7 @@ export class OrderSettlementService {
         outputData: {
           rfqNumber: addIsinResponse.rfqNumber,
           isNetBanking,
+
         },
         completedAt: new Date(),
       });
@@ -443,7 +485,9 @@ export class OrderSettlementService {
 
       await rfqMasterService.getAllSettledOrders({ filtFromModSettleDate: todayDate || "", filtToModSettleDate: nextDate })
 
+
       const updatedOrder = await getOrderData();
+
       if (updatedOrder) {
         await this.trySendOrderReceiptPdfEmail({
           order: updatedOrder,
@@ -462,8 +506,12 @@ export class OrderSettlementService {
         });
       }
     } catch (error) {
-      logger.logError(`Settlement process failed for order ${orderId}:`, error);
-
+      if (error instanceof AxiosError) {
+        console.log("OrderId:", orderId);
+        console.log(error?.response?.data);
+      } else {
+        logger.logError(`Settlement process failed for order ${orderId}:`, error);
+      }
       const order = await this.orderService.getOrderWithNSEData(orderId).catch(() => null);
       const paymentId = order?.paymentId ?? paymentIdForBatch;
       const finalBatchId = batchId ?? this.buildBatchId(paymentId, orderId);
@@ -480,6 +528,7 @@ export class OrderSettlementService {
         {
           error: error instanceof Error ? error.message : "Unknown error",
           errorStack: error instanceof Error ? error.stack : undefined,
+          data: JSON.stringify((error as AxiosError)?.response?.data),
         }
       );
 
@@ -647,7 +696,7 @@ export class OrderSettlementService {
         `Failed to create RFQ for ISIN ${order.isin} for order ${order.id}:`,
         error
       );
-      throw new AppError("Failed to add ISIN to settlement", {
+      throw new AppError(`Failed to create RFQ for ISIN ${order.isin} for order ${order.id}: ${JSON.stringify((error as AxiosError).response?.data || {})}`, {
         code: "ADD_ISIN_FAILED",
       });
     }
@@ -714,7 +763,7 @@ export class OrderSettlementService {
         error
       );
 
-      throw new AppError("Failed to accept negotiation", {
+      throw new AppError(`Failed to accept negotiation for order ${order.id}, RFQ: ${rfqNumber || "unknown"}: ${JSON.stringify((error as AxiosError)?.response?.data)}`, {
         code: "NEGOTIATION_ACCEPT_FAILED",
       });
     }
@@ -811,7 +860,7 @@ export class OrderSettlementService {
       };
     } catch (error) {
       logger.logError(`Failed to propose deal for order ${order.id}:`, error);
-      throw new AppError("Failed to propose deal", {
+      throw new AppError(`Failed to propose deal for order ${order.id}: ${JSON.stringify((error as AxiosError)?.response?.data)}`, {
         code: "DEAL_PROPOSE_FAILED",
       });
     }
@@ -894,7 +943,7 @@ export class OrderSettlementService {
       };
     } catch (error) {
       logger.logError(`Failed to accept deal for order ${order.id}:`, error);
-      throw new AppError("Failed to accept deal", {
+      throw new AppError(`Failed to accept deal for order ${order.id}: ${JSON.stringify((error as AxiosError)?.response?.data)}`, {
         code: "DEAL_ACCEPT_FAILED",
       });
     }
