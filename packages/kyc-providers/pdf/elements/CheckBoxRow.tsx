@@ -4,14 +4,16 @@ import CheckIcon from "../elements/CheckIcon";
 export const CheckBoxRow = ({
   label = "No",
   checked = false,
-  fontSize
+  fontSize,
 }: {
   label: string;
   checked?: boolean;
-  fontSize?: number
+  fontSize?: number;
 }) => (
   <View style={tw("flex flex-row items-center")}>
     <CheckIcon checked={checked} size={10} />
-    <Text style={[tw("ml-2 text-xs mt-[-3px]"), { fontSize }]}>{label}</Text>
+    <Text style={[tw("ml-2 text-xs mt-[-3px]"), fontSize != null ? { fontSize } : {}]}>
+      {label}
+    </Text>
   </View>
 );

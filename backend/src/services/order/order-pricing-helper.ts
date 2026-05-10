@@ -255,7 +255,7 @@ function isUnderShutPeriod(
    ACCRUED INTEREST
 ========================= */
 
-const accruedInterest = (params: {
+export const accruedInterest = (params: {
     faceValue: number;
     quantity: number;
     couponRate: number;
@@ -519,7 +519,8 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
         | null = null;
 
     for (const row of couponRows) {
-        if (row.dueDate.getTime() < settlementDt.getTime()) {
+        // Treat a coupon date equal to settlement as "already paid" for last payment date.
+        if (row.dueDate.getTime() <= settlementDt.getTime()) {
             lastCouponDate = row.dueDate;
             continue;
         }

@@ -451,7 +451,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
 
   const dealAutofillMutation = useMutation({
     mutationFn: async (opts?: { pricingYield?: number }) => {
-      const res = await apiCaller.getBondDealAutofill(isin!, {
+      const res = await apiCaller.getBondDealAutofillCalc(isin!, {
         quantity: 1,
         ...(opts?.pricingYield != null && Number.isFinite(opts.pricingYield)
           ? { pricingYield: opts.pricingYield }
@@ -471,7 +471,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
       form.setValue("buyYield", buyYield);
       await queryClient.invalidateQueries({ queryKey: ["bond", isin] });
       await queryClient.invalidateQueries({ queryKey: ["bonds"] });
-      const res = await apiCaller.getBondDealAutofill(isin!, { quantity: 1 });
+      const res = await apiCaller.getBondDealAutofillCalc(isin!, { quantity: 1 });
       return res.responseData;
     },
     onSuccess: (data) => {

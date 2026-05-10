@@ -11,9 +11,9 @@ import InvestmentByMaturityCard from "./components/InvestmentByMaturityCard";
 import PortfolioDetails from "./components/PortfolioDetails";
 import { ProfileTabs } from "../profile/_components/ProfileTab";
 import CashflowTimeline from "./components/CashflowTimeline";
+import { ActivePortfolioSummaryTabShimmer } from "./components/PortfolioTabShimmers";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { Loader2 } from "lucide-react";
 
 function formatInrAmount(currency: string, amount: unknown): string {
   const n =
@@ -84,13 +84,6 @@ export default function PortfolioPageClient() {
     <div className="space-y-8">
       <h1 className="text-2xl mb-4">My <span className="font-bold">Portfolio</span></h1>
 
-      {summaryLoading && (
-        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-          <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden />
-          Loading portfolio summary…
-        </div>
-      )}
-
       {summaryFailed && (
         <div
           className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
@@ -113,15 +106,21 @@ export default function PortfolioPageClient() {
 
       {activeTab === "Active Portfolio Summary" && (
         <>
-          <PortfolioSummaryCards data={summaryData} />
-          <CashflowChartCard />
+          {summaryLoading ? (
+            <ActivePortfolioSummaryTabShimmer />
+          ) : (
+            <>
+              <PortfolioSummaryCards data={summaryData} />
+              <CashflowChartCard />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <InvestmentByIssuerCard />
-            <InvestmentByRatingCard />
-            <InvestmentAllocationCard />
-            <InvestmentByMaturityCard />
-          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <InvestmentByIssuerCard />
+                <InvestmentByRatingCard />
+                <InvestmentAllocationCard />
+                <InvestmentByMaturityCard />
+              </div>
+            </>
+          )}
         </>
       )}
 

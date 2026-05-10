@@ -38,6 +38,14 @@ bondRoute.post("/api/bonds/:isin/deal-autofill", (req, res) =>
   bondController.getBondDealAutofill(req, res),
 );
 
+/** CRM bond auto-update: calc-based autofill (new API). */
+bondRoute.get("/api/bonds/:isin/deal-autofill-calc", (req, res) =>
+  bondController.getBondDealAutofillCalc(req, res),
+);
+bondRoute.post("/api/bonds/:isin/deal-autofill-calc", (req, res) =>
+  bondController.getBondDealAutofillCalc(req, res),
+);
+
 bondRoute.get("/api/bonds/:isin", (req, res) =>
   bondController.getBondDetails(req, res)
 );

@@ -5,58 +5,194 @@ import {
   parseSettleDate,
   getMaturityBucketLabel,
   getCouponBucket,
-  validateAlignment,
-  getAdjustedStartDate,
-  calcInterest,
-  monthStepForMode,
-  addMonths,
+  enumerateBondPortfolioCashflows,
 } from "./portfolio.utils";
 
+/** Paid lifecycle after successful payment — portfolio may exist before RFQ settles. */
+const PAID_PORTFOLIO_ORDER_STATUSES = ["APPLIED", "SETTLED"] as const;
+
 export class PortfolioService {
-  private async getSettledOrdersWithAmount(customerId: number) {
+  private rfqFromMetadata(metadata: unknown): string | undefined {
+    const v = (metadata as { rfqNumber?: unknown } | null)?.rfqNumber;
+    return typeof v === "string" && v.trim().length > 0 ? v.trim() : undefined;
+  }
+
+  private async loadSettlementRollups(rfqNumbers: string[]) {
+    const considerationByRfq = new Map<string, number>();
+    const marketValueByRfq = new Map<string, number>();
+    const yieldWeightedByRfq = new Map<string, { weightedYield: number; marketValue: number }>();
+    const lastSettleDateByRfqEmpty = new Map<string, Date>();
+
+    if (!rfqNumbers.length) {
+      return {
+        considerationByRfq,
+        marketValueByRfq,
+        yieldWeightedByRfq,
+        lastSettleDateByRfq: lastSettleDateByRfqEmpty,
+      };
+    }
+
+    const settled = await db.dataBase.settleOrderModel.findMany({
+      where: { orderNumber: { in: rfqNumbers } },
+      select: {
+        orderNumber: true,
+        modConsideration: true,
+        stampDutyAmount: true,
+        price: true,
+        value: true,
+        modQuantity: true,
+        yield: true,
+        modSettleDate: true,
+      },
+    });
+
+    const lastSettleDateByRfq = lastSettleDateByRfqEmpty;
+
+    for (const s of settled) {
+      const consideration =
+        Number(s.modConsideration ?? 0) + Number(s.stampDutyAmount ?? 0);
+      if (consideration > 0) {
+        considerationByRfq.set(
+          s.orderNumber,
+          (considerationByRfq.get(s.orderNumber) ?? 0) + consideration,
+        );
+      }
+
+      if (s.modSettleDate) {
+        const d = parseSettleDate(s.modSettleDate);
+        if (d) {
+          const prev = lastSettleDateByRfq.get(s.orderNumber);
+          if (!prev || d.getTime() > prev.getTime()) {
+            lastSettleDateByRfq.set(s.orderNumber, d);
+          }
+        }
+      }
+
+      const mv =
+        (Number(s.price ?? 0) / 100) *
+        Number(s.value ?? 0) *
+        Number(s.modQuantity ?? 0);
+      const ytm = Number(s.yield ?? 0);
+      if (!(mv > 0)) continue;
+
+      marketValueByRfq.set(
+        s.orderNumber,
+        (marketValueByRfq.get(s.orderNumber) ?? 0) + mv,
+      );
+
+      const prev = yieldWeightedByRfq.get(s.orderNumber);
+      if (prev) {
+        const nextMv = prev.marketValue + mv;
+        const nextYtm =
+          nextMv > 0
+            ? (prev.weightedYield * prev.marketValue + mv * ytm) / nextMv
+            : prev.weightedYield;
+        yieldWeightedByRfq.set(s.orderNumber, {
+          weightedYield: nextYtm,
+          marketValue: nextMv,
+        });
+      } else {
+        yieldWeightedByRfq.set(s.orderNumber, { weightedYield: ytm, marketValue: mv });
+      }
+    }
+
+    return { considerationByRfq, marketValueByRfq, yieldWeightedByRfq, lastSettleDateByRfq };
+  }
+
+  /**
+   * One row per paid order with a positive invested amount.
+   * Invested amount: NSE settle (consideration + stamp) when linked; otherwise
+   * `order.totalAmount` when `CustomerBonds` exists for that order.
+   */
+  private async paidOrderPortfolioRows(customerId: number) {
     const orders = await db.dataBase.order.findMany({
       where: {
         customerProfileId: customerId,
         paymentStatus: "COMPLETED",
-        status: "SETTLED",
+        status: { in: [...PAID_PORTFOLIO_ORDER_STATUSES] },
       },
-      select: { isin: true, metadata: true },
+      select: {
+        id: true,
+        isin: true,
+        quantity: true,
+        totalAmount: true,
+        metadata: true,
+        createdAt: true,
+      },
     });
 
     if (!orders.length) return [];
 
-    const rfqNumbers = orders
-      .map((o) => (o.metadata as any)?.rfqNumber as string | undefined)
-      .filter((v): v is string => !!v);
-
-    if (!rfqNumbers.length) return [];
-
-    const settled = await db.dataBase.settleOrderModel.findMany({
-      where: { orderNumber: { in: rfqNumbers } },
-      select: { orderNumber: true, modConsideration: true, stampDutyAmount: true },
+    const bondPurchases = await db.dataBase.customerBonds.findMany({
+      where: { customerProfileId: customerId },
+      select: { orderId: true, purchaseDate: true },
     });
+    const bondOrderIds = new Set(bondPurchases.map((b) => b.orderId));
+    const bondPurchaseByOrderId = new Map(bondPurchases.map((b) => [b.orderId, b.purchaseDate]));
 
-    if (!settled.length) return [];
+    const rfqNumbers = [
+      ...new Set(
+        orders
+          .map((o) => this.rfqFromMetadata(o.metadata))
+          .filter((v): v is string => !!v),
+      ),
+    ];
 
-    const amountByRfq = new Map<string, number>();
-    for (const s of settled) {
-      const amount = Number(s.modConsideration ?? 0) + Number(s.stampDutyAmount ?? 0);
-      if (amount <= 0) continue;
-      amountByRfq.set(s.orderNumber, (amountByRfq.get(s.orderNumber) ?? 0) + amount);
+    const { considerationByRfq, marketValueByRfq, yieldWeightedByRfq, lastSettleDateByRfq } =
+      await this.loadSettlementRollups(rfqNumbers);
+
+    const rows: Array<{
+      orderId: number;
+      isin: string;
+      quantity: number;
+      rfq: string | null;
+      investedAmount: number;
+      maturityWeight: number;
+      settleYtm?: number | undefined;
+      settleMv?: number | undefined;
+      cashflowAnchorDate: Date | null;
+    }> = [];
+
+    for (const o of orders) {
+      const rfq = this.rfqFromMetadata(o.metadata) ?? null;
+      let invested = rfq ? (considerationByRfq.get(rfq) ?? 0) : 0;
+      if (invested <= 0 && bondOrderIds.has(o.id)) {
+        invested = Number(o.totalAmount ?? 0);
+      }
+      if (invested <= 0 || !o.isin) continue;
+
+      const mv = rfq ? (marketValueByRfq.get(rfq) ?? 0) : 0;
+      const maturityWeight = mv > 0 ? mv : invested;
+      const yw = rfq ? yieldWeightedByRfq.get(rfq) : undefined;
+
+      const settleDate = rfq ? lastSettleDateByRfq.get(rfq) : undefined;
+      const purchase = bondPurchaseByOrderId.get(o.id);
+      const cashflowAnchorDate =
+        settleDate ?? purchase ?? o.createdAt ?? null;
+
+      rows.push({
+        orderId: o.id,
+        isin: o.isin,
+        quantity: Number(o.quantity ?? 0),
+        rfq,
+        investedAmount: invested,
+        maturityWeight,
+        settleYtm: yw?.weightedYield,
+        settleMv: mv > 0 ? mv : undefined,
+        cashflowAnchorDate,
+      });
     }
 
-    return orders
-      .map((o) => {
-        const rfq = (o.metadata as any)?.rfqNumber as string | undefined;
-        return {
-          isin: o.isin,
-          rfqNumber: rfq,
-          investedAmount: rfq ? (amountByRfq.get(rfq) ?? 0) : 0,
-        };
-      })
-      .filter((o): o is { isin: string; rfqNumber: string; investedAmount: number } =>
-        !!(o.isin && o.rfqNumber && o.investedAmount > 0)
-      );
+    return rows;
+  }
+
+  private async getSettledOrdersWithAmount(customerId: number) {
+    const rows = await this.paidOrderPortfolioRows(customerId);
+    return rows.map((r) => ({
+      isin: r.isin,
+      rfqNumber: r.rfq ?? "",
+      investedAmount: r.investedAmount,
+    }));
   }
 
   private uniqueIsins(orders: { isin: string }[]): string[] {
@@ -71,28 +207,10 @@ export class PortfolioService {
       totalInvestments: 0,
     };
 
-    const orders = await db.dataBase.order.findMany({
-      where: { customerProfileId: customerId, paymentStatus: "COMPLETED", status: "SETTLED" },
-      select: { metadata: true },
-    });
-    if (!orders.length) return empty;
+    const rows = await this.paidOrderPortfolioRows(customerId);
+    if (!rows.length) return empty;
 
-    const rfqNumbers = orders
-      .map((o) => (o.metadata as any)?.rfqNumber as string | undefined)
-      .filter((v): v is string => !!v);
-    if (!rfqNumbers.length) return empty;
-
-    const settled = await db.dataBase.settleOrderModel.findMany({
-      where: { orderNumber: { in: rfqNumbers } },
-      select: { modConsideration: true, stampDutyAmount: true },
-    });
-    if (!settled.length) return empty;
-
-    const total = settled.reduce(
-      (sum, s) => sum + Number(s.modConsideration ?? 0) + Number(s.stampDutyAmount ?? 0),
-      0
-    );
-
+    const total = rows.reduce((sum, r) => sum + r.investedAmount, 0);
     const rounded = Number(total.toFixed(2));
     const formatted = rounded.toLocaleString("en-IN", {
       minimumFractionDigits: 2,
@@ -103,7 +221,7 @@ export class PortfolioService {
       totalInvested: rounded,
       formattedTotalInvested: formatted,
       currency: "₹",
-      totalInvestments: settled.length,
+      totalInvestments: rows.length,
     };
   }
 
@@ -116,40 +234,11 @@ export class PortfolioService {
       totalHoldingsConsidered: 0,
     };
 
-    const orders = await db.dataBase.order.findMany({
-      where: { customerProfileId: customerId, paymentStatus: "COMPLETED", status: "SETTLED" },
-      select: { isin: true, metadata: true },
-    });
-    if (!orders.length) return empty;
-
-    const rfqNumbers = orders
-      .map((o) => (o.metadata as any)?.rfqNumber as string | undefined)
-      .filter((v): v is string => !!v);
-    if (!rfqNumbers.length) return empty;
-
-    const settled = await db.dataBase.settleOrderModel.findMany({
-      where: { orderNumber: { in: rfqNumbers } },
-      select: { orderNumber: true, price: true, value: true, modQuantity: true },
-    });
-    if (!settled.length) return empty;
-
-    const amountByRfq = new Map<string, number>();
-    for (const s of settled) {
-      const mv = (Number(s.price ?? 0) / 100) * Number(s.value ?? 0) * Number(s.modQuantity ?? 0);
-      if (mv <= 0) continue;
-      amountByRfq.set(s.orderNumber, (amountByRfq.get(s.orderNumber) ?? 0) + mv);
-    }
-
-    const ordersWithAmount = orders
-      .map((o) => {
-        const rfq = (o.metadata as any)?.rfqNumber as string | undefined;
-        return { isin: o.isin, investedAmount: rfq ? (amountByRfq.get(rfq) ?? 0) : 0 };
-      })
-      .filter((o) => o.investedAmount > 0);
-    if (!ordersWithAmount.length) return empty;
+    const rows = await this.paidOrderPortfolioRows(customerId);
+    if (!rows.length) return empty;
 
     const bonds = await db.dataBase.bonds.findMany({
-      where: { isin: { in: this.uniqueIsins(ordersWithAmount) } },
+      where: { isin: { in: this.uniqueIsins(rows) } },
       select: { isin: true, maturityDate: true },
     });
 
@@ -159,10 +248,10 @@ export class PortfolioService {
     today.setHours(0, 0, 0, 0);
 
     let weightedTTM = 0;
-    let totalInvested = 0;
+    let totalWeight = 0;
     let count = 0;
 
-    for (const order of ordersWithAmount) {
+    for (const order of rows) {
       const matRaw = maturityByIsin.get(order.isin);
       if (!matRaw) continue;
 
@@ -173,14 +262,14 @@ export class PortfolioService {
       const ttmYears = (maturity.getTime() - today.getTime()) / (365 * 24 * 60 * 60 * 1000);
       if (ttmYears <= 0) continue;
 
-      weightedTTM += order.investedAmount * ttmYears;
-      totalInvested += order.investedAmount;
+      weightedTTM += order.maturityWeight * ttmYears;
+      totalWeight += order.maturityWeight;
       count += 1;
     }
 
-    if (totalInvested === 0) return empty;
+    if (totalWeight === 0) return empty;
 
-    const avgYears = weightedTTM / totalInvested;
+    const avgYears = weightedTTM / totalWeight;
     const years = Math.floor(avgYears);
     let months = Math.round((avgYears - years) * 12);
     const finalYears = months === 12 ? years + 1 : years;
@@ -198,58 +287,35 @@ export class PortfolioService {
   async getAveragePortfolioYield(customerId: number) {
     const empty = { averageYield: 0, formatted: "0.0000%", totalHoldingsConsidered: 0 };
 
-    const orders = await db.dataBase.order.findMany({
-      where: { customerProfileId: customerId, paymentStatus: "COMPLETED", status: "SETTLED" },
-      select: { isin: true, metadata: true },
+    const rows = await this.paidOrderPortfolioRows(customerId);
+    if (!rows.length) return empty;
+
+    const bonds = await db.dataBase.bonds.findMany({
+      where: { isin: { in: this.uniqueIsins(rows) } },
+      select: { isin: true, yield: true },
     });
-    if (!orders.length) return empty;
-
-    const rfqNumbers = orders
-      .map((o) => (o.metadata as any)?.rfqNumber as string | undefined)
-      .filter((v): v is string => !!v);
-    if (!rfqNumbers.length) return empty;
-
-    const settled = await db.dataBase.settleOrderModel.findMany({
-      where: { orderNumber: { in: rfqNumbers } },
-      select: { orderNumber: true, price: true, value: true, modQuantity: true, yield: true },
-    });
-    if (!settled.length) return empty;
-
-    const dataByRfq = new Map<string, { marketValue: number; ytm: number }>();
-    for (const s of settled) {
-      const mv = (Number(s.price ?? 0) / 100) * Number(s.value ?? 0) * Number(s.modQuantity ?? 0);
-      const ytm = Number(s.yield ?? 0);
-      if (mv <= 0) continue;
-
-      const existing = dataByRfq.get(s.orderNumber);
-      if (existing) {
-        const combinedMV = existing.marketValue + mv;
-        const combinedYTM = combinedMV > 0
-          ? (existing.marketValue * existing.ytm + mv * ytm) / combinedMV
-          : existing.ytm;
-        dataByRfq.set(s.orderNumber, { marketValue: combinedMV, ytm: combinedYTM });
-      } else {
-        dataByRfq.set(s.orderNumber, { marketValue: mv, ytm });
-      }
-    }
+    const bondYieldByIsin = new Map(bonds.map((b) => [b.isin, Number(b.yield ?? 0)]));
 
     let weightedYield = 0;
-    let totalMarketValue = 0;
+    let totalWeight = 0;
     let count = 0;
 
-    for (const order of orders) {
-      const rfq = (order.metadata as any)?.rfqNumber as string | undefined;
-      const data = rfq ? dataByRfq.get(rfq) : null;
-      if (!data) continue;
+    for (const order of rows) {
+      const ytm =
+        typeof order.settleYtm === "number" && Number.isFinite(order.settleYtm)
+          ? order.settleYtm
+          : (bondYieldByIsin.get(order.isin) ?? 0);
+      const w = order.maturityWeight > 0 ? order.maturityWeight : order.investedAmount;
+      if (w <= 0) continue;
 
-      weightedYield += data.marketValue * data.ytm;
-      totalMarketValue += data.marketValue;
+      weightedYield += w * ytm;
+      totalWeight += w;
       count += 1;
     }
 
-    if (totalMarketValue === 0) return empty;
+    if (totalWeight === 0) return empty;
 
-    const avgYield = weightedYield / totalMarketValue;
+    const avgYield = weightedYield / totalWeight;
     const truncated = Math.trunc(avgYield * 10000) / 10000;
 
     return {
@@ -407,36 +473,31 @@ export class PortfolioService {
     const skip = (page - 1) * limit;
     const empty = { data: [], meta: { total: 0, page, limit, totalPages: 0 } };
 
+    const holdings = await this.paidOrderPortfolioRows(customerId);
+    if (!holdings.length) return empty;
+
+    const investByOrderId = new Map(holdings.map((h) => [h.orderId, h.investedAmount]));
+
     const orders = await db.dataBase.order.findMany({
-      where: { customerProfileId: customerId, paymentStatus: "COMPLETED", status: "SETTLED" },
-      select: { id: true, isin: true, bondName: true, quantity: true, faceValue: true, metadata: true, createdAt: true },
+      where: { id: { in: holdings.map((h) => h.orderId) } },
+      select: {
+        id: true,
+        isin: true,
+        bondName: true,
+        quantity: true,
+        faceValue: true,
+        metadata: true,
+        createdAt: true,
+      },
     });
-    if (!orders.length) return empty;
-
-    const rfqNumbers = orders
-      .map((o) => (o.metadata as any)?.rfqNumber as string | undefined)
-      .filter((v): v is string => !!v);
-    if (!rfqNumbers.length) return empty;
-
-    const settled = await db.dataBase.settleOrderModel.findMany({
-      where: { orderNumber: { in: rfqNumbers } },
-      select: { orderNumber: true, modConsideration: true, stampDutyAmount: true },
-    });
-    if (!settled.length) return empty;
-
-    const amountByRfq = new Map<string, number>();
-    for (const s of settled) {
-      const amount = Number(s.modConsideration ?? 0) + Number(s.stampDutyAmount ?? 0);
-      if (amount <= 0) continue;
-      amountByRfq.set(s.orderNumber, (amountByRfq.get(s.orderNumber) ?? 0) + amount);
-    }
 
     const ordersWithAmount = orders
       .map((o) => {
-        const rfq = (o.metadata as any)?.rfqNumber as string | undefined;
-        return { ...o, rfqNumber: rfq, investedAmount: rfq ? (amountByRfq.get(rfq) ?? 0) : 0 };
+        const investedAmount = investByOrderId.get(o.id) ?? 0;
+        return { ...o, investedAmount };
       })
-      .filter((o) => o.isin && o.rfqNumber && o.investedAmount > 0);
+      .filter((o) => o.isin && o.investedAmount > 0);
+
     if (!ordersWithAmount.length) return empty;
 
     const bonds = await db.dataBase.bonds.findMany({
@@ -554,60 +615,45 @@ export class PortfolioService {
   }
 
   async getTotalNumberOfBonds(customerId: number) {
-    const ordersWithAmount = await this.getSettledOrdersWithAmount(customerId);
-    if (!ordersWithAmount.length) return 0;
+    const holdings = await this.paidOrderPortfolioRows(customerId);
+    if (!holdings.length) return 0;
 
-    const validRfqs = new Set(ordersWithAmount.map((o) => o.rfqNumber));
-
-    const orders = await db.dataBase.order.findMany({
-      where: { customerProfileId: customerId, paymentStatus: "COMPLETED", status: "SETTLED" },
-      select: { quantity: true, metadata: true },
-    });
-
-    return orders.reduce((total, o) => {
-      const rfq = (o.metadata as any)?.rfqNumber as string | undefined;
-      return rfq && validRfqs.has(rfq) ? total + Number(o.quantity ?? 0) : total;
-    }, 0);
+    return holdings.reduce((total, h) => total + Number(h.quantity ?? 0), 0);
   }
 
   async getCashflowTimeline(customerId: number,  startDate?: Date,
   endDate?: Date,  bondTypes?: string[]) {
-    const orders = await db.dataBase.order.findMany({
-      where: { customerProfileId: customerId, paymentStatus: "COMPLETED", status: "SETTLED" },
-      select: { isin: true, quantity: true, metadata: true },
-    });
-    if (!orders.length) return { years: [] };
+    const holdings = await this.paidOrderPortfolioRows(customerId);
+    if (!holdings.length) return { years: [] };
 
-    const rfqNumbers = orders
-      .map((o) => (o.metadata as any)?.rfqNumber as string | undefined)
-      .filter((v): v is string => !!v);
-    if (!rfqNumbers.length) return { years: [] };
-
-    const settled = await db.dataBase.settleOrderModel.findMany({
-      where: { orderNumber: { in: rfqNumbers } },
-      select: { orderNumber: true, modSettleDate: true, modConsideration: true, stampDutyAmount: true },
-    });
-    if (!settled.length) return { years: [] };
-
-    const settleDataByRfq = new Map<string, { settledDate: Date | null; invested: number }>();
-    for (const s of settled) {
-      const amount = Number(s.modConsideration ?? 0) + Number(s.stampDutyAmount ?? 0);
-      const date = s.modSettleDate ? parseSettleDate(s.modSettleDate) : null;
-      settleDataByRfq.set(s.orderNumber, { settledDate: date, invested: amount });
-    }
-
-    const validOrders = orders
-      .map((o) => {
-        const rfq = (o.metadata as any)?.rfqNumber as string | undefined;
-        const data = rfq ? settleDataByRfq.get(rfq) : null;
-        return { isin: o.isin, quantity: o.quantity, settledDate: data?.settledDate ?? null, invested: data?.invested ?? 0 };
-      })
-      .filter((o) => o.invested > 0 && o.settledDate);
+    const validOrders = holdings
+      .filter(
+        (h): h is (typeof h & { cashflowAnchorDate: NonNullable<(typeof h)["cashflowAnchorDate"]> }) =>
+          h.investedAmount > 0 && h.cashflowAnchorDate != null,
+      )
+      .map((h) => ({
+        isin: h.isin,
+        quantity: h.quantity,
+        settledDate:
+          h.cashflowAnchorDate instanceof Date ? h.cashflowAnchorDate : new Date(h.cashflowAnchorDate),
+        invested: h.investedAmount,
+      }));
     if (!validOrders.length) return { years: [] };
 
     const bonds = await db.dataBase.bonds.findMany({
       where: { isin: { in: Array.from(new Set(validOrders.map((o) => o.isin))) } },
-      select: { isin: true, bondName: true, faceValue: true, couponRate: true, interestPaymentMode: true, dateOfAllotment: true, maturityDate: true,sectorName: true, },
+      select: {
+        isin: true,
+        bondName: true,
+        faceValue: true,
+        couponRate: true,
+        interestPaymentMode: true,
+        interestPaymentFrequency: true,
+        dateOfAllotment: true,
+        maturityDate: true,
+        sectorName: true,
+        allCouponDates: true,
+      },
     });
 
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
@@ -631,48 +677,33 @@ const filteredByType = bondTypes?.length
 
     for (const order of filteredByType) {
       const bond = bondByIsin.get(order.isin);
-      if (!bond?.maturityDate || !bond?.dateOfAllotment || !bond?.interestPaymentMode) continue;
+      if (!bond?.maturityDate || !bond?.dateOfAllotment) continue;
 
       const allotment = new Date(bond.dateOfAllotment);
       const maturity = new Date(bond.maturityDate);
       const settleDate = order.settledDate!;
 
-      const { valid, isEOM } = validateAlignment(allotment, maturity, bond.interestPaymentMode);
-      if (!valid) {
-        console.log(`Skipping bond ${bond.isin} — misaligned dates for mode ${bond.interestPaymentMode}`);
-        continue;
-      }
+      const schedule = enumerateBondPortfolioCashflows({
+        allotment,
+        maturity,
+        settleDate,
+        faceValuePerUnit: bond.faceValue,
+        quantity: order.quantity,
+        couponRatePercent: bond.couponRate,
+        interestPaymentMode: bond.interestPaymentMode as unknown as string,
+        interestPaymentFrequency: bond.interestPaymentFrequency,
+        allCouponDates: bond.allCouponDates ?? undefined,
+      });
 
-      const step = monthStepForMode(bond.interestPaymentMode);
-      const adjustedStart = getAdjustedStartDate(settleDate, allotment, maturity, step, isEOM);
-      const annualInterest = bond.faceValue * order.quantity * (bond.couponRate / 100);
       const maturityDateStr = formatDateStr(maturity);
-
-      let cursor = new Date(allotment);
-      let lastPayoutDate = new Date(adjustedStart);
-
-      while (cursor <= maturity) {
-        const next = addMonths(cursor, step, isEOM);
-        cursor = next > maturity ? new Date(maturity) : next;
-
-        if (cursor > adjustedStart) {
-          const amount = parseFloat(calcInterest(annualInterest, lastPayoutDate, cursor).toFixed(2));
-          if (amount > 0) {
-            events.push({ type: "INTEREST", bondName: bond.bondName, maturityDateStr, amount, date: new Date(cursor) });
-          }
-          lastPayoutDate = new Date(cursor);
-        }
-
-        if (cursor.getTime() === maturity.getTime()) break;
-      }
-
-      if (settleDate <= maturity) {
+      const bondName = bond.bondName;
+      for (const ev of schedule) {
         events.push({
-          type: "MATURITY",
-          bondName: bond.bondName,
+          type: ev.type,
+          bondName,
           maturityDateStr,
-          amount: bond.faceValue * order.quantity,
-          date: new Date(maturity),
+          amount: ev.amount,
+          date: ev.date,
         });
       }
     }
@@ -747,42 +778,21 @@ const filteredEvents = events.filter((ev) => {
 
   async getCashflowToMaturity(customerId: number) {
     const empty = { "1yr": [], "2yrs": [], "5yrs": [] };
-    const orders = await db.dataBase.order.findMany({
-      where: { customerProfileId: customerId, paymentStatus: "COMPLETED", status: "SETTLED" },
-      select: { isin: true, quantity: true, metadata: true },
-    });
-    if (!orders.length) return empty;
+    const holdings = await this.paidOrderPortfolioRows(customerId);
+    if (!holdings.length) return empty;
 
-    const rfqNumbers = orders
-      .map((o) => (o.metadata as any)?.rfqNumber as string | undefined)
-      .filter((v): v is string => !!v);
-    if (!rfqNumbers.length) return empty;
-
-    const settled = await db.dataBase.settleOrderModel.findMany({
-      where: { orderNumber: { in: rfqNumbers } },
-      select: { orderNumber: true, modSettleDate: true, modConsideration: true, stampDutyAmount: true },
-    });
-    if (!settled.length) return empty;
-
-    const settleDataByRfq = new Map<string, { settledDate: Date | null; invested: number }>();
-    for (const s of settled) {
-      const amount = Number(s.modConsideration ?? 0) + Number(s.stampDutyAmount ?? 0);
-      const date = s.modSettleDate ? parseSettleDate(s.modSettleDate) : null;
-      settleDataByRfq.set(s.orderNumber, { settledDate: date, invested: amount });
-    }
-
-    const validOrders = orders
-      .map((o) => {
-        const rfq = (o.metadata as any)?.rfqNumber as string | undefined;
-        const data = rfq ? settleDataByRfq.get(rfq) : null;
-        return {
-          isin: o.isin,
-          quantity: o.quantity,
-          settledDate: data?.settledDate ?? null,
-          invested: data?.invested ?? 0,
-        };
-      })
-      .filter((o) => o.invested > 0 && o.settledDate);
+    const validOrders = holdings
+      .filter(
+        (h): h is (typeof h & { cashflowAnchorDate: NonNullable<(typeof h)["cashflowAnchorDate"]> }) =>
+          h.investedAmount > 0 && h.cashflowAnchorDate != null,
+      )
+      .map((h) => ({
+        isin: h.isin,
+        quantity: h.quantity,
+        settledDate:
+          h.cashflowAnchorDate instanceof Date ? h.cashflowAnchorDate : new Date(h.cashflowAnchorDate),
+        invested: h.investedAmount,
+      }));
     if (!validOrders.length) return empty;
 
     const bonds = await db.dataBase.bonds.findMany({
@@ -793,8 +803,10 @@ const filteredEvents = events.filter((ev) => {
         faceValue: true,
         couponRate: true,
         interestPaymentMode: true,
+        interestPaymentFrequency: true,
         dateOfAllotment: true,
         maturityDate: true,
+        allCouponDates: true,
       },
     });
 
@@ -817,53 +829,32 @@ const filteredEvents = events.filter((ev) => {
 
     for (const order of validOrders) {
       const bond = bondByIsin.get(order.isin);
-      if (!bond?.maturityDate || !bond?.dateOfAllotment || !bond?.interestPaymentMode) continue;
+      if (!bond?.maturityDate || !bond?.dateOfAllotment) continue;
 
       const allotment = new Date(bond.dateOfAllotment);
       const maturity = new Date(bond.maturityDate);
       const settleDate = order.settledDate!;
 
-      if (maturity <= today) continue;
+      if (maturity.getTime() <= today.getTime()) continue;
 
-      const { valid, isEOM } = validateAlignment(allotment, maturity, bond.interestPaymentMode);
-      if (!valid) {
-        console.log(`Skipping bond ${bond.isin} — misaligned dates for mode ${bond.interestPaymentMode}`);
-        continue;
-      }
+      const schedule = enumerateBondPortfolioCashflows({
+        allotment,
+        maturity,
+        settleDate,
+        faceValuePerUnit: bond.faceValue,
+        quantity: order.quantity,
+        couponRatePercent: bond.couponRate,
+        interestPaymentMode: bond.interestPaymentMode as unknown as string,
+        interestPaymentFrequency: bond.interestPaymentFrequency,
+        allCouponDates: bond.allCouponDates ?? undefined,
+      });
 
-      const step = monthStepForMode(bond.interestPaymentMode);
-      const adjustedStart = getAdjustedStartDate(settleDate, allotment, maturity, step, isEOM);
-      const annualInterest = bond.faceValue * order.quantity * (bond.couponRate / 100);
-
-      let cursor = new Date(allotment);
-      let lastPayoutDate = new Date(adjustedStart);
-
-      while (cursor <= maturity) {
-        const next = addMonths(cursor, step, isEOM);
-        cursor = next > maturity ? new Date(maturity) : next;
-
-        if (cursor > adjustedStart) {
-          const amount = parseFloat(calcInterest(annualInterest, lastPayoutDate, cursor).toFixed(2));
-          if (amount > 0) {
-            events.push({
-              type: "INTEREST",
-              month: toMonthKey(cursor),
-              amount,
-              date: new Date(cursor),
-            });
-          }
-          lastPayoutDate = new Date(cursor);
-        }
-
-        if (cursor.getTime() === maturity.getTime()) break;
-      }
-
-      if (settleDate <= maturity) {
+      for (const ev of schedule) {
         events.push({
-          type: "MATURITY",
-          month: toMonthKey(maturity),
-          amount: bond.faceValue * order.quantity,
-          date: new Date(maturity),
+          type: ev.type,
+          month: toMonthKey(ev.date),
+          amount: ev.amount,
+          date: new Date(ev.date),
         });
       }
     }
@@ -892,8 +883,6 @@ const filteredEvents = events.filter((ev) => {
       }));
 
     if (!sortedMonths.length) return empty;
-    const todayKey = toMonthKey(today);
-    const currentMonthKey = toMonthKey(today);
 
     const startIdx = sortedMonths.findIndex((m) => {
       const entry = monthData.get(m.month)!;

@@ -5,6 +5,7 @@ import { HttpStatus } from "@utils/error/AppError";
 import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { getBondDealAutofill } from "./bond_clac";
+import { getBondInfoCalcData } from "./fill-bonds-auto";
 
 export class BondController {
   private bondService = new BondService();
@@ -125,6 +126,116 @@ export class BondController {
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to build deal autofill";
+      if (msg.includes("not found")) {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          success: false,
+          message: msg,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: msg,
+      });
+    }
+  }
+
+  /**
+   * CRM bond auto-update (sale-ready): simpler calc-based autofill.
+   * Uses `getBondInfoCalcData` and returns a `BondDealAutofillResponse`-compatible payload.
+   *
+   * GET query: quantity, pricingYield (optional).
+   * POST JSON body: { quantity?, pricingYield? } — preferred when sending custom yield.
+   */
+  async getBondDealAutofillCalc(req: Request, res: Response) {
+    const isin = req.params.isin?.toString() ?? "";
+    if (!isin) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: "Missing ISIN",
+      });
+    }
+
+    const fromBody =
+      req.method === "POST" &&
+      req.body != null &&
+      typeof req.body === "object" &&
+      !Array.isArray(req.body);
+
+    let quantity = 1;
+    let pricingYield: number | undefined;
+
+    if (fromBody) {
+      const b = req.body as Record<string, unknown>;
+      const qRaw = b.quantity;
+      const q = qRaw != null && String(qRaw).trim() !== "" ? Number(qRaw) : 1;
+      quantity = Number.isFinite(q) && q > 0 ? q : 1;
+      const pyRaw = b.pricingYield;
+      if (pyRaw != null && String(pyRaw).trim() !== "") {
+        const n = Number(pyRaw);
+        pricingYield = Number.isFinite(n) ? n : undefined;
+      }
+    } else {
+      const q = req.query.quantity ? Number(req.query.quantity) : 1;
+      quantity = Number.isFinite(q) && q > 0 ? q : 1;
+      const pyRaw = req.query.pricingYield;
+      pricingYield =
+        pyRaw != null && String(pyRaw).trim() !== ""
+          ? Number(pyRaw)
+          : undefined;
+      pricingYield =
+        pricingYield != null && Number.isFinite(pricingYield)
+          ? pricingYield
+          : undefined;
+    }
+
+    try {
+      const calcRes = await getBondInfoCalcData(isin, {
+        yeild:
+          pricingYield != null && Number.isFinite(pricingYield)
+            ? String(pricingYield)
+            : undefined,
+      });
+
+      const suggested = calcRes.suggested;
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: {
+          isin,
+          quantity,
+          sources: {
+            usedReferenceMetadata: true,
+            usedCouponSchedule: true,
+            yieldSource:
+              pricingYield != null && Number.isFinite(pricingYield)
+                ? "override"
+                : "bonds",
+          },
+          suggested,
+          pricing: {
+            finalPrice:
+              suggested.sellPrice != null && Number.isFinite(suggested.sellPrice)
+                ? suggested.sellPrice
+                : null,
+            finalYieldRaw:
+              suggested.yield != null && Number.isFinite(suggested.yield)
+                ? suggested.yield
+                : 0,
+            settlementAmount: null,
+            totalAccruedInterest: null,
+            principalAmount: null,
+            totalConsideration: null,
+            calc: calcRes.calc,
+          },
+          margin: {},
+        },
+      });
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to build calc autofill";
       if (msg.includes("not found")) {
         return res.sendResponse({
           statusCode: HttpStatus.NOT_FOUND,
