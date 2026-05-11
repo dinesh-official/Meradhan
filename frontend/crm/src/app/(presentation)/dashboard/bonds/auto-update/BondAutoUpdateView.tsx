@@ -23,7 +23,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { DecimalInput } from "@/components/ui/decimal-input";
+import {
+  DecimalInput,
+  formatDecimalWithMinFractionDigits,
+} from "@/components/ui/decimal-input";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -303,8 +306,8 @@ export default function BondAutoUpdateView() {
       }
       toast.error(
         (err?.response?.data as { message?: string })?.message ||
-          err?.message ||
-          "Update failed",
+        err?.message ||
+        "Update failed",
       );
     },
   });
@@ -667,11 +670,11 @@ export default function BondAutoUpdateView() {
                 className={cn(
                   "rounded-lg border transition-colors",
                   (model.outcome ?? "idle") === "success" &&
-                    "border-emerald-500/50 bg-emerald-50 dark:border-emerald-600/40 dark:bg-emerald-950/35",
+                  "border-emerald-500/50 bg-emerald-50 dark:border-emerald-600/40 dark:bg-emerald-950/35",
                   (model.outcome ?? "idle") === "error" &&
-                    "border-red-500/50 bg-red-50 dark:border-red-600/40 dark:bg-red-950/35",
+                  "border-red-500/50 bg-red-50 dark:border-red-600/40 dark:bg-red-950/35",
                   (model.outcome ?? "idle") === "rejected" &&
-                    "border-amber-500/50 bg-amber-50 dark:border-amber-600/40 dark:bg-amber-950/35",
+                  "border-amber-500/50 bg-amber-50 dark:border-amber-600/40 dark:bg-amber-950/35",
                   (model.outcome ?? "idle") === "idle" && "bg-card",
                 )}
               >
@@ -753,7 +756,7 @@ export default function BondAutoUpdateView() {
                       </p>
                     ) : (
                       <>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline">Yield: {model.autofill.sources.yieldSource}</Badge>
                           <Badge variant={model.autofill.sources.usedReferenceMetadata ? "default" : "secondary"}>
                             Reference metadata {model.autofill.sources.usedReferenceMetadata ? "on" : "off"}
@@ -761,6 +764,28 @@ export default function BondAutoUpdateView() {
                           <Badge variant={model.autofill.sources.usedCouponSchedule ? "default" : "secondary"}>
                             Coupon schedule {model.autofill.sources.usedCouponSchedule ? "on" : "off"}
                           </Badge>
+                          {typeof model.autofill.suggested.isUnderShutPeriod === "boolean" ? (
+                            <div
+                              className="flex flex-wrap items-center gap-1.5"
+                              role="status"
+                              aria-label={`Under shut period: ${model.autofill.suggested.isUnderShutPeriod ? "yes" : "no"}`}
+                            >
+                              <span className="text-muted-foreground text-xs whitespace-nowrap">
+                                Under shut period
+                              </span>
+                              <Badge
+                                variant="default"
+                                className={cn(
+                                  "h-6 px-2 text-xs font-medium",
+                                  model.autofill.suggested.isUnderShutPeriod
+                                    ? "bg-amber-600 text-white hover:bg-amber-600 dark:bg-amber-600"
+                                    : "bg-emerald-600 text-white hover:bg-emerald-600 dark:bg-emerald-600",
+                                )}
+                              >
+                                {model.autofill.suggested.isUnderShutPeriod ? "Yes" : "No"}
+                              </Badge>
+                            </div>
+                          ) : null}
                         </div>
                         {model.autofill.sources.yieldSource !== "consolidated" ? (
                           <div
@@ -830,7 +855,7 @@ export default function BondAutoUpdateView() {
                                     key={key}
                                     className={cn(
                                       yieldSourceAffected &&
-                                        "bg-amber-50/90 dark:bg-amber-950/25 border-l-4 border-l-amber-500/80",
+                                      "bg-amber-50/90 dark:bg-amber-950/25 border-l-4 border-l-amber-500/80",
                                     )}
                                   >
                                     <TableCell>
@@ -856,7 +881,11 @@ export default function BondAutoUpdateView() {
                                       </span>
                                     </TableCell>
                                     <TableCell className="text-muted-foreground text-sm max-w-[180px] break-all">
-                                      {formatDisplayValue(curVal)}
+                                      {key === "sellPrice" &&
+                                        typeof curVal === "number" &&
+                                        Number.isFinite(curVal)
+                                        ? formatDecimalWithMinFractionDigits(curVal, 4)
+                                        : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell>
                                       {key === "recordDays" ? (
@@ -875,27 +904,51 @@ export default function BondAutoUpdateView() {
                                       ) : key === "faceValue" ||
                                         key === "couponRate" ||
                                         key === "buyYield" ||
-                                        key === "yield" ||
-                                        key === "sellPrice" ? (
+                                        key === "yield" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
                                           value={
                                             sug == null
                                               ? undefined
                                               : (() => {
-                                                  const n =
-                                                    typeof sug === "number"
-                                                      ? sug
-                                                      : Number(sug);
-                                                  return Number.isFinite(n)
-                                                    ? n
-                                                    : undefined;
-                                                })()
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
                                           }
                                           onChange={(n) =>
                                             updateDraft(b.isin, {
                                               [key]: n ?? null,
                                             } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "sellPrice" ? (
+                                        <DecimalInput
+                                          title="Clean price: at most 4 decimal places (calc rounding). Text field; blur applies."
+                                          className="h-9 font-mono text-sm"
+                                          minFractionDigits={4}
+                                          maxFractionDigits={4}
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
+                                            updateDraft(b.isin, {
+                                              sellPrice: n ?? null,
+                                            })
                                           }
                                         />
                                       ) : key === "dayConvention" ||
@@ -916,8 +969,8 @@ export default function BondAutoUpdateView() {
                                           className="h-9 font-mono text-sm"
                                           value={
                                             sug != null &&
-                                            typeof sug === "string" &&
-                                            /^\d{4}-\d{2}-\d{2}$/.test(sug)
+                                              typeof sug === "string" &&
+                                              /^\d{4}-\d{2}-\d{2}$/.test(sug)
                                               ? sug
                                               : ""
                                           }

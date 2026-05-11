@@ -49,8 +49,7 @@ export async function middleware(request: NextRequest) {
 
   // ✅ 1. Protect /dashboard routes
   if (
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/place-order")
+    pathname.startsWith("/dashboard")
   ) {
     const cookieStore = await cookies();
 

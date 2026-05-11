@@ -3,18 +3,18 @@ import { getSession } from "@/core/auth/_server/getSession";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import ViewPort from "@/global/components/wrapper/ViewPort";
+import {
+  getBondPurchaseEligibility,
+  hasCrmInventoryAvailable,
+} from "@/global/utils/bondPurchaseEligibility";
+import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import apiGateway, { BondOrderPricingData } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
 import OrderStep from "../_components/OrderStep";
 import { generateDraftPlaceOrderLabel } from "../_utils/calcAmount";
-import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
-import { redirect } from "next/navigation";
-import {
-  getBondPurchaseEligibility,
-  hasCrmInventoryAvailable,
-} from "@/global/utils/bondPurchaseEligibility";
 import { getMaxOrderQuantityFromBond } from "../_utils/quantity";
+import { redirect } from "next/navigation";
 export const revalidate = 0;
 
 export const generateMetadata = async ({
@@ -29,7 +29,12 @@ export const generateMetadata = async ({
 };
 
 async function page({ params, searchParams }: { params: Promise<{ isin: string }>, searchParams: Promise<{ quantity?: string, allowTrade?: string }> }) {
+  const session = await getSession();
   const { isin } = await params;
+  if (!session?.id) {
+    redirect("/logout?redirect=/place-order/" + isin);
+  }
+
   const { quantity, allowTrade } = await searchParams;
 
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
@@ -70,10 +75,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     }
   }
 
-  const session = await getSession();
-  if (!session?.id) {
-    redirect("/logout");
-  }
+
 
   let customerPayload: Awaited<
     ReturnType<typeof customerApi.customerInfoById>

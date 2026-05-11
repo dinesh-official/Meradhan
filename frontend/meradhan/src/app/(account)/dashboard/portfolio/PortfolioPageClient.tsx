@@ -81,8 +81,10 @@ export default function PortfolioPageClient() {
   const summaryFailed = summaryError && !summaryLoading;
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl mb-4">My <span className="font-bold">Portfolio</span></h1>
+    <div className="space-y-8 w-full min-w-0 max-w-full">
+      <h1 className="text-2xl mb-4 wrap-break-word">
+        My <span className="font-bold">Portfolio</span>
+      </h1>
 
       {summaryFailed && (
         <div

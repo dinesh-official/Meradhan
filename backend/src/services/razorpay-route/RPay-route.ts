@@ -352,25 +352,27 @@ export const createTransfer = async (input: {
         throw new ApiError("Razorpay credentials not configured");
     }
 
-
-
     const authHeader = Buffer.from(
         `${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`
     ).toString("base64");
 
-    const { data } = await axios.post(
-        `https://api.razorpay.com/v1/payments/${encodeURIComponent(input.paymentId)}/transfers`,
-        { transfers: input.transfers },
-        {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Basic ${authHeader}`,
-            },
-            timeout: 60_000,
-        }
-    );
-
-    return data;
+    try {
+        const { data } = await axios.post(
+            `https://api.razorpay.com/v1/payments/${encodeURIComponent(input.paymentId)}/transfers`,
+            { transfers: input.transfers },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Basic ${authHeader}`,
+                },
+                timeout: 60_000,
+            }
+        );
+        return data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 };
 
 const getSettlementBackAccount = async () => {
@@ -412,7 +414,7 @@ export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes
             }
         })
     } catch (error) {
-
+        console.log(error);
     }
     return transfer;
 }
