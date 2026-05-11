@@ -72,27 +72,28 @@ export default function CashflowTimelinePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#ffffff] text-sm">
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[100%] px-0">
-          <TimelineFilters
-            timelineData={timeline}
-            activeFilters={activeFilters}
-            onFilterChange={setActiveFilters}
-          />
-          <div className="min-w-[1350px] md:min-w-auto md:max-w-[900px] mx-auto">
-            {timeline.years.length > 0 ? (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              timeline.years.map((year: any, idx: number) => (
-                <YearSection key={idx} yearData={year} />
-              ))
-            ) : (
-              <div className="py-20 text-center text-gray-500">
-                No timeline events found matching your selected filters.
-              </div>
-            )}
-            <BottomButton />
-          </div>
+    <div className="flex flex-col bg-[#ffffff] text-sm w-full min-w-0">
+      <div className="w-full min-w-0">
+        <TimelineFilters
+          timelineData={timeline}
+          activeFilters={activeFilters}
+          onFilterChange={setActiveFilters}
+        />
+      </div>
+      {/* Wide two-sided timeline: scroll horizontally on narrow viewports instead of overflowing the page */}
+      <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain">
+        <div className="min-w-[920px] w-full max-w-[1200px] mx-auto pb-8">
+          {timeline.years.length > 0 ? (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            timeline.years.map((year: any, idx: number) => (
+              <YearSection key={idx} yearData={year} />
+            ))
+          ) : (
+            <div className="py-20 text-center text-gray-500">
+              No timeline events found matching your selected filters.
+            </div>
+          )}
+          <BottomButton />
         </div>
       </div>
     </div>

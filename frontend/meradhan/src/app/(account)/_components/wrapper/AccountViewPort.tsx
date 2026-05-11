@@ -22,12 +22,12 @@ async function AccountViewPort({
   return (
     <div className="account-viewport">
       <AccountNavBar session={session} />
-      <div className="flex">
+      <div className="flex min-w-0">
         {/* Sidebar */}
         <ActionSideBar showSideBar={showSideBar} />
-        {/* Main Content */}
-        <div className="mb-12 sm:mb-0 w-full transition-all duration-300">
-          <div className="p-[15px] sm:p-[24px] min-h-[50vh]">
+        {/* Main Content — min-w-0 so wide charts/tables scroll inside the column instead of expanding the viewport */}
+        <div className="mb-12 sm:mb-0 w-full min-w-0 transition-all duration-300">
+          <div className="p-[15px] sm:p-[24px] min-h-[50vh] min-w-0">
             {title && (
               <h3 className="mb-5 font-medium text-xl sm:text-2xl">{title}</h3>
             )}

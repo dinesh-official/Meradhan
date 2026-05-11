@@ -114,7 +114,7 @@ export default function PortfolioDetails() {
   };
 
   return (
-    <div className="p-0 bg-white rounded-xl">
+    <div className="p-0 bg-white rounded-xl w-full min-w-0">
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-8">
         <MultiSelect
@@ -349,8 +349,8 @@ export default function PortfolioDetails() {
             </table>
           </div>
 
-          <div className="flex items-center justify-between mt-6">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-6 min-w-0">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
@@ -367,7 +367,7 @@ export default function PortfolioDetails() {
                 <ChevronRight className="w-5 h-5 text-gray-600" />
               </button>
             </div>
-            <div className="text-sm text-black">
+            <div className="text-sm text-black min-w-0 sm:text-right">
               Showing{" "}
               {portfolioData?.meta.total === 0
                 ? 0
