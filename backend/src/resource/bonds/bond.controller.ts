@@ -209,21 +209,12 @@ export class BondController {
           sources: {
             usedReferenceMetadata: true,
             usedCouponSchedule: true,
-            yieldSource:
-              pricingYield != null && Number.isFinite(pricingYield)
-                ? "override"
-                : "bonds",
+            yieldSource: pricingYield != null && Number.isFinite(pricingYield) ? "override" : "bonds",
           },
           suggested,
           pricing: {
-            finalPrice:
-              suggested.sellPrice != null && Number.isFinite(suggested.sellPrice)
-                ? suggested.sellPrice
-                : null,
-            finalYieldRaw:
-              suggested.yield != null && Number.isFinite(suggested.yield)
-                ? suggested.yield
-                : 0,
+            finalPrice: suggested.sellPrice != null && Number(suggested.sellPrice) ? suggested.sellPrice : null,
+            finalYieldRaw: suggested.yield != null && Number(suggested.yield) ? suggested.yield : 0,
             settlementAmount: null,
             totalAccruedInterest: null,
             principalAmount: null,

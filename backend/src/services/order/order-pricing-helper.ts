@@ -40,7 +40,7 @@ type BondOrderPricingData = {
 const DEFAULT_TRADING_START = 3 * 60 + 45;// 16:45 IST == 11:15 UTC
 const DEFAULT_TRADING_CUTOFF = 11 * 60 + 15; // 11:15 UTC
 
-const DEFAULT_BOND_MARKET_HOLIDAYS: readonly string[] = [
+export const DEFAULT_BOND_MARKET_HOLIDAYS: readonly string[] = [
     "2026-01-15", "2026-01-26", "2026-02-19", "2026-03-03", "2026-03-19",
     "2026-03-26", "2026-03-31", "2026-04-01", "2026-04-03", "2026-04-14",
     "2026-05-01", "2026-05-28", "2026-06-26", "2026-08-26", "2026-09-14",
@@ -123,7 +123,7 @@ function firstWorkingDayOnOrAfter(from: Date, holidays: Set<string>) {
     return utcMidnightForISODate(iso);
 }
 
-function firstWorkingDayAfter(from: Date, holidays: Set<string>) {
+export function firstWorkingDayAfter(from: Date, holidays: Set<string>) {
     const next = addUTCCalendarDays(toUTCISODate(from), 1);
     return firstWorkingDayOnOrAfter(utcMidnightForISODate(next), holidays);
 }

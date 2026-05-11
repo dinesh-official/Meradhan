@@ -132,6 +132,8 @@ export interface BondDealAutofillSuggestions {
   buyYield: number | null;
   yield: number;
   sellPrice: number | null;
+  /** Set by deal-autofill-calc (`getBondInfoCalcData`); omitted by legacy deal-autofill. */
+  isUnderShutPeriod?: boolean;
 }
 
 export interface BondDealAutofillResponse {

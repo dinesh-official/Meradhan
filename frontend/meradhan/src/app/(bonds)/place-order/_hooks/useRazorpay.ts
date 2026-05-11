@@ -226,7 +226,7 @@ export function useRazorpay() {
         (orderReqData ? String(orderReqData.responseData.orderId) : "unknown");
       trackPaymentFailure(
         orderIdForError,
-        error instanceof Error ? error.message : "Could not initiate payment",
+        error instanceof Error ? error.message : "The requested bank is currently not enabled for payments.",
         { isin, quantity }
       );
       // toast({
