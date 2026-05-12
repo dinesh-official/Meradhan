@@ -1,0 +1,81 @@
+name: staging backend deploy
+
+on:
+  push:
+    branches:
+      - stage-fix
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    env:
+      REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
+      REPOSITORY: stage-meradhan-be
+      IMAGE_TAG: latest
+
+    steps:
+      # Checkout Repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Load ALL GitHub Environment Variables + Secrets
+      - name: Export GitHub Variables & Secrets
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          echo "$ALL_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo "$ALL_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+
+      # Generate .env Automatically
+      - name: Generate .env
+        run: |
+          printenv \
+          | grep -v '^GITHUB_' \
+          | grep -v '^RUNNER_' \
+          | grep -v '^CI=' \
+          | grep -v '^HOME=' \
+          | grep -v '^PATH=' \
+          > .env
+
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Login to Amazon ECR
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build Docker Image
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -f backenddocker \
+            -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+            .
+
+      # Push Docker Image
+      - name: Push Docker Image
+        run: |
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      # Deploy to ECS
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: stage-meradhan-be-revision.json
+          cluster: stage-cluster
+          service: meradhan-be
+          force-new-deployment: true
+
+      # Cleanup
+      - name: Cleanup .env
+        if: always()
+        run: rm -f .env
