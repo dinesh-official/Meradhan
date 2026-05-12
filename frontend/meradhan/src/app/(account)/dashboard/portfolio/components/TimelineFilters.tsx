@@ -23,7 +23,7 @@ import {
   type CashflowPeriodPreset,
 } from "./cashflowPeriodPresets";
 
-interface ActiveFilters {
+export interface ActiveFilters {
   types: string[];
   period: CashflowPeriodPreset;
   fromDate: string;
