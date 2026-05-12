@@ -1,0 +1,91 @@
+name: stage frontend deploy
+
+on:
+  push:
+    branches:
+      - stage-fix
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    env:
+      REGISTRY: ${{ secrets.ECR_REGISTRY }}
+      REPOSITORY: stage-meradhan-fe
+      IMAGE_TAG: latest
+
+    steps:
+      # Checkout Repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Load ALL GitHub Environment Variables + Secrets
+      - name: Export GitHub Variables & Secrets
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          echo "$ALL_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo "$ALL_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+
+      # Generate .env Automatically
+      - name: Generate .env
+        run: |
+          printenv \
+          | grep -v '^GITHUB_' \
+          | grep -v '^RUNNER_' \
+          | grep -v '^CI=' \
+          | grep -v '^HOME=' \
+          | grep -v '^PATH=' \
+          > .env
+
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Login to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build Docker Image
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -f frontendDockerfile \
+            -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+            .
+
+      # Push Docker Image
+      - name: Push Docker Image
+        run: |
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      # Render ECS Task Definition
+      - name: Render ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: stage-fe-revision.json
+          container-name: stage-fe
+          image: ${{ secrets.ECR_REGISTRY }}/stage-meradhan-fe:latest
+
+      # Deploy to ECS
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          cluster: stage-cluster
+          service: meradhan-fe
+          force-new-deployment: true
+
+      # Cleanup
+      - name: Cleanup .env
+        if: always()
+        run: rm -f .env
