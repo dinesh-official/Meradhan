@@ -1,0 +1,88 @@
+name: staging_worker_deploy
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    env:
+      REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
+      REPOSITORY: stage-meradhan-worker
+      IMAGE_TAG: latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Export GitHub Environment
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+
+        run: |
+
+          echo "$ALL_VARS" \
+          | jq -r 'to_entries[] | "APP_\(.key)=\(.value)"' \
+          >> $GITHUB_ENV
+
+          echo "$ALL_SECRETS" \
+          | jq -r 'to_entries[] | "APP_\(.key)=\(.value)"' \
+          >> $GITHUB_ENV
+
+      - name: Generate .env
+        shell: bash
+
+        run: |
+
+          printenv \
+          | grep '^APP_' \
+          | sed 's/^APP_//' \
+          > .env
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+
+          docker build \
+            -f workerDocker \
+            -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+            .
+
+      - name: Push Docker Image
+        run: |
+
+          docker push \
+            $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+
+        with:
+          task-definition: stage-worker.json
+          cluster: stage-cluster
+          service: meradhan-worker
+          force-new-deployment: true
+
+      - name: Cleanup
+        if: always()
+
+        run: |
+
+          rm -f .env
