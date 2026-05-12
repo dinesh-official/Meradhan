@@ -8,6 +8,11 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { CashflowTimelineTabShimmer } from "./PortfolioTabShimmers";
 import TimelineFilters from "./TimelineFilters";
 import { useState, useEffect } from "react";
+import {
+  DEFAULT_CASHFLOW_PERIOD,
+  getCashflowPeriodRange,
+  type CashflowPeriodPreset,
+} from "./cashflowPeriodPresets";
 
 const DEBOUNCE_MS = 500;
 
@@ -27,12 +32,12 @@ export default function CashflowTimelinePage() {
 
   const [activeFilters, setActiveFilters] = useState<{
     types: string[];
+    period: CashflowPeriodPreset;
     fromDate: string;
     toDate: string;
-  }>({
-    types: [],
-    fromDate: "",
-    toDate: "",
+  }>(() => {
+    const { fromDate, toDate } = getCashflowPeriodRange(DEFAULT_CASHFLOW_PERIOD);
+    return { types: [], period: DEFAULT_CASHFLOW_PERIOD, fromDate, toDate };
   });
 
   const debouncedFromDate = useDebounced(activeFilters.fromDate, DEBOUNCE_MS);
@@ -56,20 +61,8 @@ export default function CashflowTimelinePage() {
   });
 
   const timeline = data?.responseData;
-
-  if (isLoading) {
-    return <CashflowTimelineTabShimmer />;
-  }
-
-  if (isError || !timeline || !timeline.years || timeline.years.length === 0) {
-    return (
-      <div className="h-screen flex items-center justify-center text-gray-500">
-        {isError && error instanceof Error
-          ? error.message
-          : "No cashflow data available."}
-      </div>
-    );
-  }
+  const years = timeline?.years ?? [];
+  const hasEvents = years.length > 0;
 
   return (
     <div className="flex flex-col bg-[#ffffff] text-sm w-full min-w-0">
@@ -80,22 +73,34 @@ export default function CashflowTimelinePage() {
           onFilterChange={setActiveFilters}
         />
       </div>
-      {/* Wide two-sided timeline: scroll horizontally on narrow viewports instead of overflowing the page */}
-      <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain">
-        <div className="min-w-[920px] w-full max-w-[1200px] mx-auto pb-8">
-          {timeline.years.length > 0 ? (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            timeline.years.map((year: any, idx: number) => (
-              <YearSection key={idx} yearData={year} />
-            ))
-          ) : (
-            <div className="py-20 text-center text-gray-500">
-              No timeline events found matching your selected filters.
-            </div>
-          )}
-          <BottomButton />
+
+      {isLoading ? (
+        <CashflowTimelineTabShimmer />
+      ) : (
+        <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain">
+          <div className="min-w-[920px] w-full max-w-[1200px] mx-auto pb-8">
+            {isError ? (
+              <div className="py-20 text-center text-gray-500">
+                {error instanceof Error
+                  ? error.message
+                  : "Could not load cashflow timeline."}
+              </div>
+            ) : hasEvents ? (
+              <>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {years.map((year: any, idx: number) => (
+                  <YearSection key={idx} yearData={year} />
+                ))}
+                <BottomButton />
+              </>
+            ) : (
+              <div className="py-20 text-center text-gray-500">
+                No cashflow events in the selected period.
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

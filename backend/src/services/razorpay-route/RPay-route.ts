@@ -393,7 +393,7 @@ export const makeRazorpayRouteTransition = async ({ payId, userId, amount, notes
         transfers: [
             {
                 account: env.RAZORPAY_ROUTE_ACCOUNT_ID,
-                amount: amount * 100,
+                amount: Math.round(amount * 100),
                 currency: "INR",
                 notes: {
                     ...notes,
