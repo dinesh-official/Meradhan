@@ -94,3 +94,13 @@ export const profileSubmitSettlementQueue = new Bull(
   QueueNames.submitProfileCompleat,
   sharedRedisOpts,
 );
+
+export const maturityReminderEmailQueue = new Bull(
+  QueueNames.maturityReminderEmail,
+  sharedRedisOpts,
+);
+
+export const couponReminderEmailQueue = new Bull(
+  QueueNames.couponReminderEmail,
+  sharedRedisOpts,
+);
