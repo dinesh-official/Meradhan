@@ -3,7 +3,7 @@ name: stage frontend deploy
 on:
   push:
     branches:
-      - stage-fix
+      - staging
 
 jobs:
   deploy:
