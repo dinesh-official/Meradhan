@@ -53,6 +53,19 @@ export class PortfolioService {
     return typeof v === "string" && v.trim().length > 0 ? v.trim() : undefined;
   }
 
+  /** Same as customer order history: `settle_order.orderNumber` ← metadata.rfqNumber or reqOrderNumber. */
+  private settleOrderLinkKey(o: {
+    metadata: unknown;
+    reqOrderNumber: string | null;
+  }): string | undefined {
+    const fromMeta = this.rfqFromMetadata(o.metadata);
+    if (fromMeta) return fromMeta;
+    if (typeof o.reqOrderNumber === "string" && o.reqOrderNumber.trim().length > 0) {
+      return o.reqOrderNumber.trim();
+    }
+    return undefined;
+  }
+
   /**
    * Yields stored on `Order.bondDetails` (snapshot of the bond row at checkout).
    * Prefer buy/trade notion over stale listing `yield` when present.
@@ -162,7 +175,6 @@ export class PortfolioService {
     const orders = await db.dataBase.order.findMany({
       where: {
         customerProfileId: customerId,
-        paymentStatus: "COMPLETED",
         status: PORTFOLIO_ORDER_STATUS,
       },
       select: {
@@ -171,6 +183,7 @@ export class PortfolioService {
         quantity: true,
         totalAmount: true,
         metadata: true,
+        reqOrderNumber: true,
         bondDetails: true,
         createdAt: true,
       },
@@ -188,7 +201,7 @@ export class PortfolioService {
     const rfqNumbers = [
       ...new Set(
         orders
-          .map((o) => this.rfqFromMetadata(o.metadata))
+          .map((o) => this.settleOrderLinkKey(o))
           .filter((v): v is string => !!v),
       ),
     ];
@@ -211,7 +224,7 @@ export class PortfolioService {
     }> = [];
 
     for (const o of orders) {
-      const rfq = this.rfqFromMetadata(o.metadata) ?? null;
+      const rfq = this.settleOrderLinkKey(o) ?? null;
       const snapshotYield = this.snapshotYieldFromBondDetails(o.bondDetails);
       let invested = rfq ? (considerationByRfq.get(rfq) ?? 0) : 0;
       if (invested <= 0 && bondOrderIds.has(o.id)) {
@@ -378,8 +391,8 @@ export class PortfolioService {
           : undefined;
       const snap =
         typeof order.snapshotYield === "number" &&
-        Number.isFinite(order.snapshotYield) &&
-        order.snapshotYield > 0
+          Number.isFinite(order.snapshotYield) &&
+          order.snapshotYield > 0
           ? order.snapshotYield
           : undefined;
       const live = bondFallbackYieldByIsin.get(order.isin);
@@ -665,7 +678,13 @@ export class PortfolioService {
   }
 
   async getPortfolioFilterOptions(customerId: number) {
-    const empty = { bondTypes: [] as string[], bondRatings: [] as string[], couponRanges: [] as string[], paymentFrequencies: [] as string[] };
+    const empty = {
+      bondTypes: [] as string[],
+      bondRatings: [] as string[],
+      couponRanges: [] as string[],
+      paymentFrequencies: [] as string[],
+      isins: [] as { isin: string; bondName: string }[],
+    };
 
     const rows = await this.paidOrderPortfolioRows(customerId);
     const ordersWithAmount = rows.map((r) => ({
@@ -698,11 +717,28 @@ export class PortfolioService {
       if (bond.interestPaymentMode) paymentFrequencies.add(bond.interestPaymentMode);
     }
 
+    const uniqueIsins = [
+      ...new Set(
+        ordersWithAmount.map((o) => o.isin).filter((x): x is string => typeof x === "string" && x.length > 0),
+      ),
+    ];
+    const bondsForIsinLabels = await db.dataBase.bonds.findMany({
+      where: { isin: { in: uniqueIsins } },
+      select: { isin: true, bondName: true },
+    });
+    const bondNameByIsin = new Map(
+      bondsForIsinLabels.map((b) => [b.isin, ((b.bondName ?? "").trim() || b.isin) as string]),
+    );
+    const isins = uniqueIsins
+      .map((isin) => ({ isin, bondName: bondNameByIsin.get(isin) ?? isin }))
+      .sort((a, b) => a.bondName.localeCompare(b.bondName, undefined, { sensitivity: "base" }));
+
     return {
       bondTypes: Array.from(bondTypes),
       bondRatings: Array.from(bondRatings),
       couponRanges: Array.from(couponRanges),
       paymentFrequencies: Array.from(paymentFrequencies),
+      isins,
     };
   }
 
@@ -713,8 +749,13 @@ export class PortfolioService {
     return holdings.reduce((total, h) => total + Number(h.quantity ?? 0), 0);
   }
 
-  async getCashflowTimeline(customerId: number, startDate?: Date,
-    endDate?: Date, bondTypes?: string[]) {
+  async getCashflowTimeline(
+    customerId: number,
+    startDate?: Date,
+    endDate?: Date,
+    bondTypes?: string[],
+    isins?: string[],
+  ) {
     const holdings = await this.paidOrderPortfolioRows(customerId);
     if (!holdings.length) return { years: [] };
 
@@ -732,8 +773,15 @@ export class PortfolioService {
       }));
     if (!validOrders.length) return { years: [] };
 
+    const isinFilter =
+      isins?.length ? new Set(isins.map((i) => i.trim()).filter(Boolean)) : null;
+    const ordersInScope = isinFilter
+      ? validOrders.filter((o) => isinFilter!.has(o.isin))
+      : validOrders;
+    if (!ordersInScope.length) return { years: [] };
+
     const bonds = await db.dataBase.bonds.findMany({
-      where: { isin: { in: Array.from(new Set(validOrders.map((o) => o.isin))) } },
+      where: { isin: { in: Array.from(new Set(ordersInScope.map((o) => o.isin))) } },
       select: {
         isin: true,
         bondName: true,
@@ -751,11 +799,11 @@ export class PortfolioService {
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
 
     const filteredByType = bondTypes?.length
-      ? validOrders.filter((o) => {
+      ? ordersInScope.filter((o) => {
         const bond = bondByIsin.get(o.isin);
         return bondTypes.includes((bond?.sectorName ?? "").trim());
       })
-      : validOrders;
+      : ordersInScope;
 
     type TimelineEvent = {
       type: "INTEREST" | "MATURITY";

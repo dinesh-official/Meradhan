@@ -164,4 +164,8 @@ enum OrderStatus {
     SETTLED
     APPLIED
     REJECTED
+    // new added - 13 May 2026
+    EXPIRED
+    CANCELLED
+    IN_PROGRESS
 }
