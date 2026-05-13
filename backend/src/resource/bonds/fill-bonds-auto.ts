@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { accruedInterest, getLastNextCouponDateBasedOnSettlementDate } from "@services/order/order-pricing-helper";
+import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getLastNextCouponDateBasedOnSettlementDate } from "@services/order/order-pricing-helper";
 import axios from "axios";
 // Matches `enum INTEREST_MODE` in `bonds.prisma`
 export type InterestMode =
@@ -33,12 +33,28 @@ function toYyyyMmDd(input: string | number | Date | null | undefined): string | 
     return d.toISOString().slice(0, 10);
 }
 
+/** Calc `final_price` strings may include commas; `Number("1,234.56")` is NaN. */
+function parseCalcMoneyString(s: string | null | undefined): number | null {
+    if (s == null || !String(s).trim()) return null;
+    const n = Number(String(s).replace(/,/g, "").trim());
+    return Number.isFinite(n) ? n : null;
+}
+
 export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: string } = {}) => {
 
     const bond = await db.dataBase.bondReferenceMetadata.findFirst({ where: { isin: isin } });
     const bondData = await db.dataBase.bonds.findFirst({ where: { isin: isin } });
+    const couponPayRow = await db.dataBase.bondReferenceCouponPaymentDate.findFirst({
+        where: { isin },
+        orderBy: { id: "asc" },
+    });
+    const dueDateYmd =
+        couponPayRow?.dueDateIst instanceof Date && !Number.isNaN(couponPayRow.dueDateIst.getTime())
+            ? toYyyyMmDd(couponPayRow.dueDateIst)
+            : null;
 
     const couponDate = await getLastNextCouponDateBasedOnSettlementDate(isin, new Date())
+    const settlementDateObj = firstWorkingDayAfter(new Date(), new Set(DEFAULT_BOND_MARKET_HOLIDAYS));
 
     const pricing = accruedInterest({
         couponRate: bond?.couponRate || 0,
@@ -47,7 +63,7 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
         nextCouponDate: new Date(couponDate!.nextCouponDate!),
         quantity: 1,
         recordDays: couponDate.recordDays || 0,
-        settlementDate: new Date(),
+        settlementDate: settlementDateObj,
     })
 
     const payload = {
@@ -55,7 +71,7 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
         "Coupon_Rate_Pct": bond?.couponRate?.toString(),
         "Payment_Frequency": bond?.interestPaymentFrequency,
         "Quantity": "1",
-        "Settlement_Date": toYyyyMmDd(new Date()),
+        "Settlement_Date": toYyyyMmDd(settlementDateObj),
         "Dated_Date": toYyyyMmDd(bond?.issueDateIst),
         "Last_IP_Date": (couponDate?.lastCouponDate),
         "Next_IP_Date": (couponDate?.nextCouponDate),
@@ -94,16 +110,18 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
         total_consideration: string
     }
     >("https://calc.meradhan.co/api/calculate", payload);
+    console.log(response.data);
 
     return {
+        payload,
         suggested: {
             maturityDate: toYyyyMmDd(bond?.maturityDate),
             dateOfAllotment: toYyyyMmDd(bond?.issueDateIst),
             lastCouponDate: String(payload.Last_IP_Date ?? ""),
             nextCouponDate: String(payload.Next_IP_Date ?? ""),
             recordDate: toYyyyMmDd(pricing.recordDate),
-            recordDays: pricing.noOfAccrualDays,
-            dueDate: null,
+            recordDays: response.data.accrued_days,
+            dueDate: dueDateYmd ?? null,
             dayConvention: bond?.dayConvention ?? null,
             interestPaymentFrequency: paymentFrequencyToDbEnum(payload.Payment_Frequency),
             interestPaymentMode: paymentFrequencyToDbEnum(payload.Payment_Frequency),
@@ -111,7 +129,11 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
             couponRate: Number(bond?.couponRate ?? 0),
             buyYield: bondData?.buyYield ?? bondData?.yield ?? (Number(response.data.final_yield) || null),
             yield: Number(response.data.final_yield_raw ?? 0),
-            sellPrice: Number(response.data.final_price) || null,
+            sellPrice: (() => {
+                const sp = parseCalcMoneyString(response.data.final_price);
+                return sp != null && Number.isFinite(sp) ? Number(sp.toFixed(4)) : null;
+            })(),
+            isUnderShutPeriod: pricing.isUnderShutPeriod
         },
         calc: response.data,
     }

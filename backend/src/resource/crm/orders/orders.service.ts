@@ -24,6 +24,7 @@ import {
   getCustomerDobRawForPdf,
 } from "@utils/dobPdfPassword";
 import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
+import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
 
 function toYyyyMmDd(d: Date): string {
   const y = d.getFullYear();
@@ -487,16 +488,25 @@ export class CrmOrdersService {
       typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
         ? bond.recordDays
         : 7;
+    console.log(bond.maturityDate);
+
     const couponDates = await getLastNextCouponDateBasedOnSettlementDate(bond.isin, bond.maturityDate!)
+    console.log(couponDates);
+
     const pricingData = computeBondOrderPricingData({
       faceValue: bond.faceValue,
       quantity: order.quantity,
       cleanPrice: Number(order.unitPrice),
       couponRate: bond.couponRate,
-      lastCouponDate: couponDates?.lastCouponDate?.split("T")?.[0] || "",
+      lastCouponDate: (couponDates?.lastCouponDate || "").toString(),
       recordDays: recordDays,
-      nextCouponDate: couponDates?.nextCouponDate?.split("T")?.[0] || "",
+      nextCouponDate: couponDates?.nextCouponDate || "",
     })
+
+    const bondData = await getBondInfoCalcData(order.isin);
+
+    console.log(pricingData);
+
 
     const settlementDt = parseLooseDate(input.settlementDate);
     if (!settlementDt) {
@@ -526,28 +536,10 @@ export class CrmOrdersService {
       fallbackOrderDate,
     );
 
-    const interestSchedule = getInterestPaymentSchedule({
-      orderDate: orderDateForPdf,
-      maturityDate: bond.maturityDate ?? null,
-      interestPaymentFrequency: bond.interestPaymentFrequency,
-      paymentDayOfMonth: 20,
-      nextCouponDate:
-        bond.nextCouponDate != null && String(bond.nextCouponDate).trim() !== ""
-          ? new Date(bond.nextCouponDate)
-          : undefined,
-    });
 
-    const scheduleDatesParsed = (interestSchedule?.dates ?? [])
-      .map((d) => parseLooseDate(d))
-      .filter((d): d is Date => Boolean(d))
-      .sort((a, b) => a.getTime() - b.getTime());
 
     // Latest coupon date on/before settlement date.
-    let lastPayment: Date | null = null;
-    for (const d of scheduleDatesParsed) {
-      if (d.getTime() <= settlementDt.getTime()) lastPayment = d;
-      else break;
-    }
+    let lastPayment = couponDates.lastCouponDate ? new Date(couponDates.lastCouponDate || '') : undefined;
     if (!lastPayment) lastPayment = orderDateForPdf;
     console.log("DATE", (input.settlementDate));
 
@@ -556,12 +548,9 @@ export class CrmOrdersService {
 
     return {
       accruedInterestDays: pricingData.recordDays,
-      settlementNumber:
-        (settleOrder as { settlementNo?: string | number | null } | undefined)?.settlementNo != null
-          ? String((settleOrder as { settlementNo?: string | number }).settlementNo)
-          : null,
-      lastInterestPaymentDateRaw: lastPayment ? toYyyyMmDd(lastPayment) : null,
-      lastInterestPaymentDate: lastPayment ? formatDateWithDayNameForPdfOption(lastPayment) : null,
+      settlementNumber: settleOrder?.settlementNo || "",
+      lastInterestPaymentDateRaw: bondData.payload.Last_IP_Date,
+      lastInterestPaymentDate: bondData.payload.Last_IP_Date,
       interestPaymentDates: interestPaymentDates || null,
     };
   }
@@ -835,6 +824,7 @@ export class CrmOrdersService {
       "2": `One to One (OTO) on RFQ Platform of the Exchange`,
       "3": `Inter Scheme Transfer (IST) on RFQ Platform of the Exchange`,
     };
+
     const accessKey = rfqDetails?.access != null ? String(rfqDetails.access) : undefined;
     const accessTypeText = accessKey ? accessType[accessKey] : undefined;
 

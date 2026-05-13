@@ -24,26 +24,23 @@
 
 
 
-import TimelineFilters from "./TimelineFilters";
+import TimelineFilters, { type ActiveFilters } from "./TimelineFilters";
 import YearSection from "./YearSection";
 import { CashflowYear } from "./type";
 import { useState } from "react";
-
-interface ActiveFilters {
-  types: string[];
-  fromDate: string;
-  toDate: string;
-}
+import {
+  DEFAULT_CASHFLOW_PERIOD,
+  getCashflowPeriodRange,
+} from "./cashflowPeriodPresets";
 
 interface Props {
   data: CashflowYear[];
 }
 
 const TimelinePage = ({ data }: Props) => {
-  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
-    types: [],
-    fromDate: "",
-    toDate: "",
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>(() => {
+    const { fromDate, toDate } = getCashflowPeriodRange(DEFAULT_CASHFLOW_PERIOD);
+    return { types: [], period: DEFAULT_CASHFLOW_PERIOD, fromDate, toDate };
   });
 
   return (
