@@ -40,7 +40,7 @@ interface Props {
 const TimelinePage = ({ data }: Props) => {
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>(() => {
     const { fromDate, toDate } = getCashflowPeriodRange(DEFAULT_CASHFLOW_PERIOD);
-    return { types: [], period: DEFAULT_CASHFLOW_PERIOD, fromDate, toDate };
+    return { types: [], period: DEFAULT_CASHFLOW_PERIOD, fromDate, toDate, isin: "" };
   });
 
   return (

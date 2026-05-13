@@ -32,6 +32,27 @@ const settlementStatusLabel: Record<number, string> = {
   9: "Document Not Received for Unregistered Participant",
 };
 
+/** NSE often sends `modSettleDate` as DD-MM-YYYY; avoid `new Date("")` when parsing fails. */
+function formatModSettleDateForList(raw: unknown): string {
+  if (raw == null) return "--";
+  const s = typeof raw === "string" ? raw.trim() : String(raw).trim();
+  if (!s) return "--";
+
+  const parsed = dateTimeUtils.parseDate(s);
+  if (parsed && !Number.isNaN(parsed.getTime())) {
+    const formatted = dateTimeUtils.formatDateTime(parsed, "DD MMM YYYY");
+    if (formatted && formatted !== "Invalid Date") return formatted;
+  }
+
+  const fallback = new Date(s);
+  if (!Number.isNaN(fallback.getTime())) {
+    const formatted = dateTimeUtils.formatDateTime(fallback, "DD MMM YYYY");
+    if (formatted && formatted !== "Invalid Date") return formatted;
+  }
+
+  return s;
+}
+
 function settlementStatusTextClass(statusCode?: number) {
   switch (statusCode) {
     case 6:
@@ -141,9 +162,7 @@ function SettleOrdersTable({
             label: "Settlement No · Date",
             sortable: true,
             cell(row) {
-              const dateStr = row.modSettleDate
-                ? dateTimeUtils.formatDateTime(row.modSettleDate, "DD MMM YYYY")
-                : "--";
+              const dateStr = formatModSettleDateForList(row.modSettleDate);
               const noStr = row.settlementNo || "--";
               return (
                 <div className="flex flex-col">

@@ -55,6 +55,7 @@ export type * from "./src/core/api/meradhan/kyc/Kyc.response";
 
 import { CustomerOrderApi } from "./src/core/api/meradhan/order/order.api";
 import { CustomerPortfolioApi } from "./src/core/api/meradhan/portfolio/portfolio.api";
+export type { CustomerOrderPdfQueryParams } from "./src/core/api/meradhan/order/order.api";
 export type * from "./src/core/api/meradhan/order/order.response";
 export type * from "./src/core/api/meradhan/portfolio/portfolio.response";
 

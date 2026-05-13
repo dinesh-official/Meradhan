@@ -1,4 +1,4 @@
-import { db } from "@core/database/database";
+import { $Enums, db } from "@core/database/database";
 import { HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import { type Request, type Response } from "express";
@@ -113,8 +113,9 @@ export class NseWebhookController {
 
     try {
       if (payload?.settleOrderList?.[0]?.orderNumber) {
-        if (payload?.settleOrderList?.[0]?.settleStatus == 4) {
-          const orderNumber = Number(payload?.settleOrderList?.[0].orderNumber);
+        const settleStatus = payload?.settleOrderList?.[0]?.settleStatus;
+        const orderNumber = Number(payload?.settleOrderList?.[0].orderNumber);
+        if (settleStatus == 4) {
           const order = await db.dataBase.order.findFirst({
             where: {
               reqOrderNumber: orderNumber.toString()
@@ -136,6 +137,48 @@ export class NseWebhookController {
           await sendDealSheetPdfByOrderId({ orderId: orderNumber })
 
           console.log("Deal Sheet Send Successfully");
+        } else {
+          /**
+           * NSE `settle_order.settleStatus` → Prisma `OrderStatus`.
+           * 0 Pending · 1–3 In progress · 4 Settled (handled above) · 5 Reversed · 6 Expired ·
+           * 7 Cannot settle · 8 Cancelled · 9 Contact us
+           */
+          const n = typeof settleStatus === "number" ? settleStatus : Number(settleStatus);
+          let nextStatus: $Enums.OrderStatus | null = null;
+          if (Number.isInteger(n)) {
+            switch (n) {
+              case 0:
+                nextStatus = $Enums.OrderStatus.PENDING;
+                break;
+              case 1:
+              case 2:
+              case 3:
+                nextStatus = $Enums.OrderStatus.IN_PROGRESS;
+                break;
+              case 5:
+              case 7:
+              case 9:
+                nextStatus = $Enums.OrderStatus.REJECTED;
+                break;
+              case 6:
+                nextStatus = $Enums.OrderStatus.EXPIRED;
+                break;
+              case 8:
+                nextStatus = $Enums.OrderStatus.CANCELLED;
+                break;
+              default:
+                nextStatus = null;
+            }
+          }
+
+          if (nextStatus != null) {
+            await db.dataBase.order.updateMany({
+              where: {
+                reqOrderNumber: orderNumber.toString(),
+              },
+              data: { status: nextStatus },
+            });
+          }
         }
       }
     } catch (error) {
