@@ -194,7 +194,7 @@ export default function CashflowChartCard() {
 
         <>
 
-          <div className="flex">
+          <div className="flex w-full min-w-0">
 
 
 
@@ -240,7 +240,7 @@ export default function CashflowChartCard() {
 
 
 
-            <div className="flex-1 overflow-x-auto w-full max-w-[1200px] cashflow-chart-container">
+            <div className="flex-1 min-w-0 overflow-x-auto w-full max-w-full sm:max-w-[1200px] cashflow-chart-container">
 
               <div style={{ width: chartWidth, height: 320 }}>
 

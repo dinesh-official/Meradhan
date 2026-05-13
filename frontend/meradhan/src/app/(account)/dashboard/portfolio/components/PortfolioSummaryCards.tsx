@@ -16,7 +16,7 @@ interface Props {
 
 export default function PortfolioSummaryCards({ data }: Props) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 md:gap-6 gap-3 four-card-wrapper">
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 md:gap-6 gap-3 four-card-wrapper min-w-0 w-full">
       {data.map((item, index) => (
         <Card key={index}>
           <CardHeader>
@@ -24,8 +24,10 @@ export default function PortfolioSummaryCards({ data }: Props) {
               {item.title}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-[18px] md:text-[24px] text-[#002C59] font-medium">{item.value}</p>
+          <CardContent className="min-w-0">
+            <p className="text-[18px] md:text-[24px] text-[#002C59] font-medium break-all sm:break-normal">
+              {item.value}
+            </p>
           </CardContent>
         </Card>
       ))}

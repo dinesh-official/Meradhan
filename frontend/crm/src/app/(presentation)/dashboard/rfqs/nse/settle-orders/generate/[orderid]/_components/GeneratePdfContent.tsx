@@ -89,6 +89,18 @@ function getPreferredValue(
   return undefined;
 }
 
+/** Autofill API returns `interestPaymentDates` as `string[]`; saved options use a single `string`. */
+function interestPaymentDatesToFormText(value: unknown): string {
+  if (value == null) return "";
+  if (Array.isArray(value)) {
+    return value
+      .map((x) => (x == null ? "" : String(x).trim()))
+      .filter(Boolean)
+      .join(", ");
+  }
+  return String(value).trim();
+}
+
 function formatDealDateForEmail(value?: string | null): string {
   if (!value) return "—";
   const s = String(value).trim();
@@ -161,6 +173,51 @@ function payinDateTimeToPickerValue(input?: string | null): string {
   if (ddMmmYyyy) return ddMmmYyyyToPickerValue(`${ddMmmYyyy[1]}-${ddMmmYyyy[2]}-${ddMmmYyyy[3]}`);
 
   return "";
+}
+
+function isValidCalendarYmd(iso: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return false;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const dt = new Date(y, mo - 1, d);
+  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d;
+}
+
+/**
+ * Parse last-coupon raw text into stored `YYYY-MM-DD` + receipt preview line.
+ * Accepts ISO, DD/MM/YYYY, DD-MM-YYYY, and other strings `payinDateTimeToPickerValue` understands.
+ */
+function normalizeLastCouponDateRawInput(raw: string): { iso: string; display: string } | null {
+  const t = raw.trim();
+  if (t === "") return { iso: "", display: "" };
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) {
+    if (!isValidCalendarYmd(t)) return null;
+    const display = formatDateWithDayNameFromPicker(t);
+    return display ? { iso: t, display } : null;
+  }
+
+  const dmy = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(t);
+  if (dmy) {
+    const dd = Number(dmy[1]);
+    const mm = Number(dmy[2]);
+    const yyyy = Number(dmy[3]);
+    if (dd < 1 || dd > 31 || mm < 1 || mm > 12) return null;
+    const iso = `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+    if (!isValidCalendarYmd(iso)) return null;
+    const display = formatDateWithDayNameFromPicker(iso);
+    return display ? { iso, display } : null;
+  }
+
+  const isoLoose = payinDateTimeToPickerValue(t) || ddMmmYyyyToPickerValue(t);
+  if (isoLoose && isValidCalendarYmd(isoLoose)) {
+    const display = formatDateWithDayNameFromPicker(isoLoose);
+    return display ? { iso: isoLoose, display } : null;
+  }
+
+  return null;
 }
 
 function InfoRow({
@@ -368,7 +425,7 @@ function GeneratePdfContent() {
     setPdfSettlementDateTime(row.settlementDateTime ?? "");
     setPdfLastInterestPaymentDateRaw(row.lastInterestPaymentDateRaw ?? "");
     setPdfLastInterestPaymentDate(row.lastInterestPaymentDate ?? "");
-    setPdfInterestPaymentDates(row.interestPaymentDates ?? "");
+    setPdfInterestPaymentDates(interestPaymentDatesToFormText(row.interestPaymentDates));
     setPdfNonAmortizedBond(row.nonAmortizedBond);
     setPdfAmortizedPrincipalPaymentDates(row.amortizedPrincipalPaymentDates ?? "");
   }, [orderNumber, pdfOptionsFetched, pdfOptionsQuery?.responseData]);
@@ -548,7 +605,7 @@ BSE Member ID: 6963`
           settlementNumber: string | null;
           lastInterestPaymentDateRaw: string | null;
           lastInterestPaymentDate: string | null;
-          interestPaymentDates: string | null;
+          interestPaymentDates: string | string[] | null;
         };
         message?: string;
       }>(
@@ -563,13 +620,23 @@ BSE Member ID: 6963`
       }
       setPdfAccruedInterestDays(String(d.accruedInterestDays ?? ""));
       if (d.settlementNumber != null) setPdfSettlementNumber(String(d.settlementNumber));
-      if (d.lastInterestPaymentDateRaw != null) {
-        setPdfLastInterestPaymentDateRaw(d.lastInterestPaymentDateRaw);
-        setPdfLastInterestPaymentDate(
-          d.lastInterestPaymentDate || formatDateWithDayNameFromPicker(d.lastInterestPaymentDateRaw)
-        );
+      const rawLast = d.lastInterestPaymentDateRaw;
+      const rawLastTrimmed =
+        rawLast != null && String(rawLast).trim() !== "" ? String(rawLast).trim() : "";
+      if (rawLastTrimmed !== "") {
+        setPdfLastInterestPaymentDateRaw(rawLastTrimmed);
+        const formatted =
+          d.lastInterestPaymentDate != null && String(d.lastInterestPaymentDate).trim() !== ""
+            ? String(d.lastInterestPaymentDate).trim()
+            : formatDateWithDayNameFromPicker(rawLastTrimmed);
+        setPdfLastInterestPaymentDate(formatted);
+      } else if (
+        d.lastInterestPaymentDate != null &&
+        String(d.lastInterestPaymentDate).trim() !== ""
+      ) {
+        setPdfLastInterestPaymentDate(String(d.lastInterestPaymentDate).trim());
       }
-      if (d.interestPaymentDates != null) setPdfInterestPaymentDates(d.interestPaymentDates);
+      setPdfInterestPaymentDates(interestPaymentDatesToFormText(d.interestPaymentDates));
       toast.success("Receipt PDF options auto-filled.");
     } catch (err) {
       toast.error(getApiErrorMessage(err, "Auto-fill failed"));
@@ -880,7 +947,7 @@ BSE Member ID: 6963`
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Pick the settlement date, then click Auto-fill to populate No. of Days, Settlement No., Last payment date, and Interest Payment Dates.
+                  Pick the settlement date, then click Auto-fill to populate No. of Days, Settlement No., Last coupon date, and Interest Payment Dates.
                 </p>
               </div>
               <div className="space-y-2">
@@ -905,19 +972,40 @@ BSE Member ID: 6963`
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pdf-last-interest-date">Last payment date</Label>
+                <Label htmlFor="pdf-last-coupon-date">Last coupon date</Label>
                 <Input
-                  id="pdf-last-interest-date"
-                  type="date"
+                  id="pdf-last-coupon-date"
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  placeholder="YYYY-MM-DD or DD/MM/YYYY"
+                  className="font-mono text-sm"
                   value={pdfLastInterestPaymentDateRaw}
                   onChange={(e) => {
-                    const raw = e.target.value;
-                    setPdfLastInterestPaymentDateRaw(raw);
-                    setPdfLastInterestPaymentDate(formatDateWithDayNameFromPicker(raw));
+                    const v = e.target.value;
+                    setPdfLastInterestPaymentDateRaw(v);
+                    const p = normalizeLastCouponDateRawInput(v);
+                    if (p?.display) setPdfLastInterestPaymentDate(p.display);
+                    else if (v.trim() === "") setPdfLastInterestPaymentDate("");
+                  }}
+                  onBlur={() => {
+                    const t = pdfLastInterestPaymentDateRaw.trim();
+                    if (t === "") {
+                      setPdfLastInterestPaymentDate("");
+                      return;
+                    }
+                    const parsed = normalizeLastCouponDateRawInput(t);
+                    if (!parsed) {
+                      toast.error("Invalid last coupon date. Use YYYY-MM-DD or DD/MM/YYYY.");
+                      setPdfLastInterestPaymentDate("");
+                      return;
+                    }
+                    setPdfLastInterestPaymentDateRaw(parsed.iso);
+                    setPdfLastInterestPaymentDate(parsed.display);
                   }}
                 />
                 {pdfLastInterestPaymentDate ? (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground" aria-live="polite">
                     {pdfLastInterestPaymentDate}
                   </p>
                 ) : null}
@@ -931,7 +1019,9 @@ BSE Member ID: 6963`
                   value={pdfInterestPaymentDates}
                   onChange={(e) => setPdfInterestPaymentDates(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground">Comma-separated (e.g. 16-Feb, 16-May, 16-Aug). Leave empty to derive from Last payment date.</p>
+                <p className="text-xs text-muted-foreground">
+                  Comma-separated (e.g. 16-Feb, 16-May, 16-Aug). Leave empty to derive from Last coupon date.
+                </p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">

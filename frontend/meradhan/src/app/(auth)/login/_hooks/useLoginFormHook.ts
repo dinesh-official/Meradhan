@@ -42,6 +42,36 @@ const validateIfEmailOrPhoneNo = (emailOrPhoneNo: string) => {
   };
 };
 
+/** Same-origin path only — avoids open redirects via `//evil.com` or `\` tricks */
+const getSafeInternalRedirectPath = (raw: string | null): string | null => {
+  if (!raw?.trim()) return null;
+  try {
+    const decoded = decodeURIComponent(raw.trim());
+    if (
+      decoded.startsWith("/") &&
+      !decoded.startsWith("//") &&
+      !decoded.includes("\\")
+    ) {
+      return decoded;
+    }
+  } catch {
+    /* malformed query */
+  }
+  return null;
+};
+
+/**
+ * After login: prefer `?redirect=` (e.g. from /logout?redirect=…), then localStorage.
+ */
+const resolvePostLoginRedirect = (): string | null => {
+  if (typeof window === "undefined") return null;
+  const fromSearch = getSafeInternalRedirectPath(
+    new URLSearchParams(window.location.search).get("redirect"),
+  );
+  if (fromSearch) return fromSearch;
+  return getSafeInternalRedirectPath(localStorage.getItem("redirect"));
+};
+
 /**
  * Custom Hook: useLoginFormHook
  * Handles all login form actions, including:
@@ -347,10 +377,10 @@ export const useLoginFormHook = () => {
       sessionId: sessionId,
       userId: parseInt(id),
     });
-    // redirect to dashboard
-    if (localStorage.getItem("redirect")) {
-      router.replace(localStorage.getItem("redirect") as string);
+    const redirectPath = resolvePostLoginRedirect();
+    if (redirectPath) {
       localStorage.removeItem("redirect");
+      router.replace(redirectPath);
     } else {
       router.replace("/dashboard");
     }

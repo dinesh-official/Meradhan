@@ -14,7 +14,7 @@ function Logout() {
   const logout = async () => {
     await apiClientCaller.post("/auth/logout").finally(() => {
       // In case of any failure, still redirect to login after cleanup
-      window.location.replace("/login");
+      window.location.replace(`/login${window.location.search}`);
     });
   };
 
@@ -52,31 +52,31 @@ function Logout() {
         // which are the same as those in cookieNames, so typescript error can be safely ignored
         removeCookie(
           name as
-            | "token"
-            | "userId"
-            | "name"
-            | "email"
-            | "meradhan_tracking_session",
+          | "token"
+          | "userId"
+          | "name"
+          | "email"
+          | "meradhan_tracking_session",
         );
         // Try with domain if hostname is available
         if (typeof window !== "undefined" && window.location.hostname) {
           removeCookie(
             name as
-              | "token"
-              | "userId"
-              | "name"
-              | "email"
-              | "meradhan_tracking_session",
+            | "token"
+            | "userId"
+            | "name"
+            | "email"
+            | "meradhan_tracking_session",
           );
           // Try with dot-prefixed domain for subdomain cookies
           if (window.location.hostname.includes(".")) {
             removeCookie(
               name as
-                | "token"
-                | "userId"
-                | "name"
-                | "email"
-                | "meradhan_tracking_session",
+              | "token"
+              | "userId"
+              | "name"
+              | "email"
+              | "meradhan_tracking_session",
             );
           }
         }
